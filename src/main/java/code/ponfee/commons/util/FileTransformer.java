@@ -272,7 +272,7 @@ public class FileTransformer {
         //System.out.println(detectBytesCharset(Streams.file2bytes("D:\\test\\2.png")));
         //System.out.println(detectBytesCharset(Streams.file2bytes("D:\\test\\lib\\cache\\Cache.java")));
 
-        FileTransformer transformer = new FileTransformer("D:\\test\\commons-lib", "d:\\test\\commons-code");
+        FileTransformer transformer = new FileTransformer("D:\\test\\origin", "d:\\test\\target");
         transformer.setReplaceEach(new String[] { "commons.lib." }, new String[] { "code.ponfee.commons." });
         transformer.transform();
         System.out.println(transformer.getTransformLog());
