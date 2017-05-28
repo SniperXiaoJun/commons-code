@@ -1,0 +1,202 @@
+package code.ponfee.commons.xml;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.dom4j.Attribute;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.SAXValidator;
+import org.dom4j.util.XMLErrorHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
+
+/**
+ * xml工具类
+ * @author fupf
+ */
+public class SimpleXmlHandler {
+    private static Logger logger = LoggerFactory.getLogger(SimpleXmlHandler.class);
+
+    /**
+     * <pre>
+     * 待解析XML文件 格式必须符合如下规范：
+     *   1.最多三级，每级的node名称自定义，一级节点为根节点，不能包含属性，如：encryptors； 
+     *   2.二级节点支持节点属性，属性将被视作子节点，二级节点如：encryptor；
+     *   3.三级节点不能包含属性，三级节点如：encryptorId；
+     *   4.CDATA必须包含在节点中，不能单独出现；
+     *
+     *  <span>xml文件</span>
+     *  <?xml version="1.0" encoding="UTF-8"?>
+     *  <encryptors xmlns="http://xxx.com.cn/encryptor" 
+     *      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+     *      xsi:schemaLocation="http://xxx.com.cn/encryptor encryptor.xsd">
+     *    <encryptor>
+     *      <!-- require -->
+     *      <encryptorId>1</encryptorId>
+     *      <!--元素：require；规则：以（classpath:或classpath*:或file:或context:开头，默认以classpath开头 ）-->
+     *      <keyStore><![CDATA[classpath:META-INF/encrypt/encryptors/1.pfx]]></keyStore>
+     *      <!-- require -->
+     *      <storePass>1234</storePass>
+     *      <!-- require -->
+     *      <keyPass>1234</keyPass>
+     *      <!-- optional[可选]，值：[pfx|jks] -->
+     *      <storeType>pfx</storeType>
+     *      <!-- implied[可选]，不填默认选第1个密钥对 -->
+     *      <alias>45e4ea70a3589e96cd670c8e5c8c7be5_28766470-a40c-4c9e-b312-d7a5618db23b</alias>
+     *    </encryptor>
+     *    ...
+     *    <encryptor>...</encryptor>
+     *  </encryptors>
+     *
+     *  <span>xsd文件</span>
+     *  <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+     *  <schema xmlns="http://www.w3.org/2001/XMLSchema" 
+     *      xmlns:tns="http://xxx.com.cn/encryptor" 
+     *      attributeFormDefault="unqualified" 
+     *      elementFormDefault="qualified" 
+     *      targetNamespace="http://xxx.com.cn/encryptor">
+     *    <element name="encryptors">
+     *      <complexType>
+     *        <sequence>
+     *          <element maxOccurs="unbounded" name="encryptor" type="tns:encryptorType"/>
+     *        </sequence>
+     *      </complexType>
+     *    </element>
+     *  
+     *    <complexType name="encryptorType">
+     *      <sequence>
+     *        <element name="encryptorId" type="string"/>
+     *        <element name="keyStore" type="tns:resourceType"/>
+     *        <element name="storePass" type="string"/>
+     *        <element name="keyPass" type="string"/>
+     *        <element minOccurs="0" name="storeType" type="tns:storeTypeType"/>
+     *        <element minOccurs="0" name="alias" type="string"/>
+     *      </sequence>
+     *    </complexType>
+     *  
+     *    <simpleType name="storeTypeType">
+     *      <restriction base="string">
+     *        <enumeration value="jks"/>
+     *        <enumeration value="pfx"/>
+     *      </restriction>
+     *    </simpleType>
+     *  
+     *    <simpleType name="resourceType">
+     *      <restriction base="string">
+     *        <pattern value="(classpath:|classpath\*:|file:(([c-zC-Z]:)(/|\\\\)){0,1}|context:){0,1}[^:\?\|\*]*" />
+     *      </restriction>
+     *    </simpleType>
+     *  </schema>
+     * 
+     * </pre>
+     */
+    @SuppressWarnings("unchecked")
+    public static List<Map<String, String>> parseXml(InputStream xml) {
+        try {
+            List<Map<String, String>> results = new ArrayList<>();
+            Element root = new SAXReader().read(xml).getRootElement();
+            Map<String, String> map;
+            for (Iterator<Element> seconds = root.elementIterator(); seconds.hasNext();) {
+                Element second = seconds.next();
+                map = new HashMap<>();
+                for (Attribute attr : (List<Attribute>) second.attributes()) {
+                    map.put(attr.getName(), attr.getValue()); // 添加二级节点属性
+                }
+                for (Iterator<Element> thirds = second.elementIterator(); thirds.hasNext();) {
+                    Element third = thirds.next(); // 添加三级节点
+                    map.put(third.getName().trim(), third.getText().trim());
+                }
+                results.add(map);
+            }
+            return results;
+        } catch (DocumentException e) {
+            throw new IllegalArgumentException("invalid xml data", e);
+        } finally {
+            if (xml != null) try {
+                xml.close();
+            } catch (IOException e) {
+                logger.error("关闭文件流异常", e);
+            }
+        }
+    }
+
+    public static List<Map<String, String>> parseXml(byte[] xml) {
+        return parseXml(new ByteArrayInputStream(xml));
+    }
+
+    /**
+     * 通过Schema验证xml文件
+     */
+    public static void validateXmlByXsd(InputStream xsd, InputStream xml) {
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setValidating(true);
+        factory.setNamespaceAware(true);
+        XMLErrorHandler errorHandler = new XMLErrorHandler();
+        try {
+            SAXParser parser = factory.newSAXParser();
+            parser.setProperty(JAXPConstants.JAXP_SCHEMA_LANGUAGE, JAXPConstants.W3C_XML_SCHEMA);
+            //parser.setProperty(JAXPConstants.JAXP_SCHEMA_SOURCE, "file:" + xsdPath);
+            parser.setProperty(JAXPConstants.JAXP_SCHEMA_SOURCE, xsd);
+            if (!parser.isValidating()) throw new IllegalStateException("invalid xsd defination");
+
+            SAXValidator validator = new SAXValidator(parser.getXMLReader());
+            validator.setErrorHandler(errorHandler);
+            validator.validate(new SAXReader().read(xml)); // 校验
+        } catch (ParserConfigurationException | SAXException | DocumentException e) {
+            throw new IllegalStateException(e);
+        }
+
+        // 如果没有错误信息，说明校验成功
+        if (!errorHandler.getErrors().hasContent()) return;
+
+        // 校验失败则打印错误信息
+        StringBuilder errors = new StringBuilder();
+        Set<String> exists = new HashSet<>();
+        for (Object obj : errorHandler.getErrors().elements()) {
+            Element e = (Element) obj;
+            String position = e.attributeValue("line") + "#" + e.attributeValue("column");
+            if (!exists.add(position)) continue;
+            errors.append(position).append(":").append(e.getTextTrim()).append("\n");
+        }
+
+        if (errors.length() > 3000) {
+            errors.setLength(2997);
+            errors.append("...");
+        }
+        throw new IllegalStateException(errors.toString());
+    }
+
+    public static void validateXmlByXsd(byte[] xsd, byte[] xml) {
+        validateXmlByXsd(new ByteArrayInputStream(xsd), new ByteArrayInputStream(xml));
+    }
+
+    private static final class JAXPConstants {
+        static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
+        static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
+        static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        List<Map<String, String>> list = parseXml(new FileInputStream("d:/test/signers.xml"));
+        System.out.println(list);
+        
+        validateXmlByXsd(new FileInputStream("d:/test/signer.xsd"), new FileInputStream("d:/test/signers.xml"));
+    }
+}

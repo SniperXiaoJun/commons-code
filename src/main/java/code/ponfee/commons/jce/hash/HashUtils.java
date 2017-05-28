@@ -1,0 +1,117 @@
+package code.ponfee.commons.jce.hash;
+
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.ObjectUtils;
+
+/**
+ * hash算法封装
+ * @author fupf
+ */
+public final class HashUtils {
+
+    private static final String[] CHARS = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+        "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0",
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H",
+        "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
+
+    public static byte[] md5(byte[] data) {
+        return digest(data, "MD5");
+    }
+
+    public static String md5Hex(byte[] data) {
+        return Bytes.hexEncode(md5(data));
+    }
+
+    public static String md5Hex(String data) {
+        return md5Hex(data.getBytes());
+    }
+
+    public static String md5Hex(String data, String charset) {
+        return md5Hex(data.getBytes(Charset.forName(charset)));
+    }
+
+    public static byte[] sha1(byte[] data) {
+        return digest(data, "SHA-1");
+    }
+
+    public static String sha1Hex(byte[] data) {
+        return Bytes.hexEncode(sha1(data));
+    }
+
+    public static String sha1Hex(String data) {
+        return sha1Hex(data.getBytes());
+    }
+
+    public static String sha1Hex(String data, String charset) {
+        return sha1Hex(data.getBytes(Charset.forName(charset)));
+    }
+
+    public static byte[] sha256(byte[] data) {
+        return digest(data, "SHA-256");
+    }
+
+    public static String sha256Hex(byte[] data) {
+        return Bytes.hexEncode(sha256(data));
+    }
+
+    public static byte[] sha384(byte[] data) {
+        return digest(data, "SHA-384");
+    }
+
+    public static String sha384Hex(byte[] data) {
+        return Bytes.hexEncode(sha384(data));
+    }
+
+    public static byte[] sha512(byte[] data) {
+        return digest(data, "SHA-512");
+    }
+
+    public static String sha512Hex(byte[] data) {
+        return Bytes.hexEncode(sha512(data));
+    }
+
+    /**
+     * 数据摘要
+     * @param data
+     * @param algorithm
+     * @return
+     */
+    private static byte[] digest(byte[] data, String algorithm) {
+        try {
+            MessageDigest md = MessageDigest.getInstance(algorithm);
+            return md.digest(data);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * 类似微博的短路径地址
+     * @param text
+     * @return
+     */
+    public static String[] shortText(String text) {
+        String hex = HashUtils.md5Hex(text.getBytes());
+        String[] sections = new String[4];
+        for (int len = hex.length() / 8, i = 0; i < len; i++) {
+            StringBuilder builder = new StringBuilder();
+            String subHex = hex.substring(i * 8, i * 8 + 8);
+            long idx = 0x3FFFFFFF & Long.parseLong(subHex, 16);
+            for (int j = 0; j < 6; j++) {
+                int index = (int) (0x0000003D & idx);
+                builder.append(CHARS[index]);
+                idx = idx >> 5;
+            }
+            sections[i] = builder.toString();
+        }
+        return sections;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(ObjectUtils.toString(shortText("http://www.manong5.com/102542001/")));
+    }
+}
