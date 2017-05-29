@@ -143,10 +143,10 @@
         <!-- java mail，解决附件文件名太长导致显示ATT_01CAA8.dat这种格式的附件名 -->
         <dependency>
             <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
+            <artifactId>javax.mail.system</artifactId>
             <version>1.5.5</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/javax.mail-1.5.5.jar</systemPath>
+            <!-- <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/javax.mail-1.5.5.jar</systemPath> -->
         </dependency>
         <!-- dns邮箱验证 -->
         <dependency>
@@ -234,8 +234,8 @@
             <groupId>aspose</groupId>
             <artifactId>words-jdk16</artifactId>
             <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/aspose.words.jdk16.jar</systemPath>
+            <!-- <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/aspose.words.jdk16.jar</systemPath> -->
         </dependency>
         <!-- ====================pdf相关==================== -->
         
@@ -250,15 +250,15 @@
             <groupId>org.mozilla.intl</groupId>
             <artifactId>chardet</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/chardet-1.0.jar</systemPath>
+            <!-- <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/chardet-1.0.jar</systemPath> -->
         </dependency>
         <dependency>
             <groupId>cpdetector</groupId>
             <artifactId>cpdetector</artifactId>
-            <version>1.04</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/cpdetector-1.0.10.jar</systemPath>
+            <version>1.0.10</version>
+            <!-- <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/cpdetector-1.0.10.jar</systemPath> -->
         </dependency>
         <!-- ====================文件编码探测==================== -->
 
@@ -321,8 +321,8 @@
             <groupId>third-jce</groupId>
             <artifactId>third-jce</artifactId>
             <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/third-jce-1.0.0.jar</systemPath>
+            <!-- <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/third-jce-1.0.0.jar</systemPath> -->
         </dependency>
         <!-- ====================加解密==================== -->
     </dependencies>
