@@ -32,8 +32,8 @@ import org.springframework.core.type.filter.TypeFilter;
  *   new ResourcesScanner("\/**\/").scan4text("*.class");
  *   new ResourcesScanner("/").scan4text("*.xml");
  *   
- *   new ResourcesScanner("cn.pay").scan4class();
- *   new ResourcesScanner("cn.pay").scan4class(new Class[] { Service.class });
+ *   new ResourcesScanner("code.ponfee").scan4class();
+ *   new ResourcesScanner("code.ponfee").scan4class(new Class[] { Service.class });
  * </pre>
  * 
  * @Title：资源扫描

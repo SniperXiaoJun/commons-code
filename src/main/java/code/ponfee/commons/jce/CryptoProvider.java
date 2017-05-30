@@ -14,7 +14,7 @@ import code.ponfee.commons.jce.security.RSACryptor;
 
 /**
  * 加解密服务提供
- * @author: fupf
+ * @author fupf
  */
 public abstract class CryptoProvider {
     private static final String DEFAULT_CHARSET = "UTF-8";
