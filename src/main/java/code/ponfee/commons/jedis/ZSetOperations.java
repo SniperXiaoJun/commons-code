@@ -3,19 +3,13 @@ package code.ponfee.commons.jedis;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.Tuple;
-import redis.clients.jedis.exceptions.JedisException;
 
 /**
  * redis sorted set（有序集合操作类）
  * @author fupf
  */
 public class ZSetOperations extends JedisOperations {
-    private static Logger logger = LoggerFactory.getLogger(ZSetOperations.class);
 
     ZSetOperations(JedisClient jedisClient) {
         super(jedisClient);
@@ -37,20 +31,11 @@ public class ZSetOperations extends JedisOperations {
      */
     public long zadd(final String key, final double score,
         final String member, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                long rtn = shardedJedis.zadd(key, score, member);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, score, member, seconds), e);
-                return 0L;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            long rtn = shardedJedis.zadd(key, score, member);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, 0L, key, score, member, seconds);
     }
 
     public long zadd(String key, double score, String member) {
@@ -65,20 +50,11 @@ public class ZSetOperations extends JedisOperations {
      * @return
      */
     public long zadd(final String key, final Map<String, Double> scoreMembers, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                long rtn = shardedJedis.zadd(key, scoreMembers);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, scoreMembers, seconds), e);
-                return 0L;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            long rtn = shardedJedis.zadd(key, scoreMembers);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, 0L, key, scoreMembers, seconds);
     }
 
     public long zadd(String key, Map<String, Double> scoreMembers) {
@@ -97,20 +73,11 @@ public class ZSetOperations extends JedisOperations {
      * @return member 成员的 score 值，以字符串形式表示。
      */
     public Double zscore(final String key, final String member, final Integer seconds) {
-        return new JedisHook<Double>(this) {
-            @Override
-            Double operate(ShardedJedis shardedJedis) {
-                Double score = shardedJedis.zscore(key, member);
-                expire(shardedJedis, key, seconds);
-                return score;
-            }
-
-            @Override
-            Double except(JedisException e) {
-                logger.error(buildError(key, member, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Double score = shardedJedis.zscore(key, member);
+            expire(shardedJedis, key, seconds);
+            return score;
+        }, null, key, member, seconds);
     }
 
     public Double zscore(String key, String member) {
@@ -124,22 +91,13 @@ public class ZSetOperations extends JedisOperations {
      * @return 当 key 存在且是有序集类型时，返回有序集的基数。当 key 不存在时，返回 0 。
      */
     public Long zcard(final String key, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long count = shardedJedis.zcard(key);
-                if (count != null && count > 0) {
-                    expire(shardedJedis, key, seconds);
-                }
-                return count;
+        return call(shardedJedis -> {
+            Long count = shardedJedis.zcard(key);
+            if (count != null && count > 0) {
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, seconds), e);
-                return null;
-            }
-        }.hook();
+            return count;
+        }, null, key, seconds);
     }
 
     public Long zcard(String key) {
@@ -162,20 +120,11 @@ public class ZSetOperations extends JedisOperations {
      */
     public Long zremrangeByRank(final String key, final long start,
         final long end, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long count = shardedJedis.zremrangeByRank(key, start, end);
-                expire(shardedJedis, key, seconds);
-                return count;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, start, end, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Long count = shardedJedis.zremrangeByRank(key, start, end);
+            expire(shardedJedis, key, seconds);
+            return count;
+        }, null, key, start, end, seconds);
     }
 
     /**
@@ -194,20 +143,11 @@ public class ZSetOperations extends JedisOperations {
      */
     public Set<Tuple> zrevrangeByScoreWithScores(final String key, final double max,
         final double min, final int offset, final int count, final Integer seconds) {
-        return new JedisHook<Set<Tuple>>(this) {
-            @Override
-            Set<Tuple> operate(ShardedJedis shardedJedis) {
-                Set<Tuple> set = shardedJedis.zrevrangeByScoreWithScores(key, max, min, offset, count);
-                expire(shardedJedis, key, seconds);
-                return set;
-            }
-
-            @Override
-            Set<Tuple> except(JedisException e) {
-                logger.error(buildError(key, max, min, offset, count, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Set<Tuple> set = shardedJedis.zrevrangeByScoreWithScores(key, max, min, offset, count);
+            expire(shardedJedis, key, seconds);
+            return set;
+        }, null, key, max, min, offset, count, seconds);
     }
 
     public Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min, int offset, int count) {
@@ -223,20 +163,11 @@ public class ZSetOperations extends JedisOperations {
      */
     public Set<Tuple> zrevrangeByScoreWithScores(final String key,
         final double max, final double min, final Integer seconds) {
-        return new JedisHook<Set<Tuple>>(this) {
-            @Override
-            Set<Tuple> operate(ShardedJedis shardedJedis) {
-                Set<Tuple> set = shardedJedis.zrevrangeByScoreWithScores(key, max, min);
-                expire(shardedJedis, key, seconds);
-                return set;
-            }
-
-            @Override
-            Set<Tuple> except(JedisException e) {
-                logger.error(buildError(key, max, min, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Set<Tuple> set = shardedJedis.zrevrangeByScoreWithScores(key, max, min);
+            expire(shardedJedis, key, seconds);
+            return set;
+        }, null, key, max, min, seconds);
     }
 
     public Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min) {
@@ -259,20 +190,11 @@ public class ZSetOperations extends JedisOperations {
      */
     public Set<Tuple> zrangeByScoreWithScores(final String key, final double min,
         final double max, final int offset, final int count, final Integer seconds) {
-        return new JedisHook<Set<Tuple>>(this) {
-            @Override
-            Set<Tuple> operate(ShardedJedis shardedJedis) {
-                Set<Tuple> set = shardedJedis.zrangeByScoreWithScores(key, min, max, offset, count);
-                expire(shardedJedis, key, seconds);
-                return set;
-            }
-
-            @Override
-            Set<Tuple> except(JedisException e) {
-                logger.error(buildError(key, min, max, offset, count, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Set<Tuple> set = shardedJedis.zrangeByScoreWithScores(key, min, max, offset, count);
+            expire(shardedJedis, key, seconds);
+            return set;
+        }, null, key, min, max, offset, count, seconds);
     }
 
     public Set<Tuple> zrangeByScoreWithScores(String key, double min, double max, int offset, int count) {
@@ -287,20 +209,11 @@ public class ZSetOperations extends JedisOperations {
      * @return 被成功移除的成员的数量，不包括被忽略的成员。
      */
     public Long zrem(final String key, final String member, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long rtn = shardedJedis.zrem(key, member);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, member, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Long rtn = shardedJedis.zrem(key, member);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, null, key, member, seconds);
     }
 
     public Long zrem(String key, String member) {
@@ -322,20 +235,11 @@ public class ZSetOperations extends JedisOperations {
      */
     public Set<String> zrevrange(final String key, final long start,
         final long end, final Integer seconds) {
-        return new JedisHook<Set<String>>(this) {
-            @Override
-            Set<String> operate(ShardedJedis shardedJedis) {
-                Set<String> result = shardedJedis.zrevrange(key, start, end);
-                expire(shardedJedis, key, seconds);
-                return result;
-            }
-
-            @Override
-            Set<String> except(JedisException e) {
-                logger.error(buildError(key, start, end, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Set<String> result = shardedJedis.zrevrange(key, start, end);
+            expire(shardedJedis, key, seconds);
+            return result;
+        }, null, key, start, end, seconds);
     }
 
     public Set<String> zrevrange(String key, long start, long end) {
@@ -357,20 +261,11 @@ public class ZSetOperations extends JedisOperations {
      */
     public Set<String> zrange(final String key, final long start,
         final long end, final Integer seconds) {
-        return new JedisHook<Set<String>>(this) {
-            @Override
-            Set<String> operate(ShardedJedis shardedJedis) {
-                Set<String> result = shardedJedis.zrange(key, start, end);
-                expire(shardedJedis, key, seconds);
-                return result;
-            }
-
-            @Override
-            Set<String> except(JedisException e) {
-                logger.error(buildError(key, start, end, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Set<String> result = shardedJedis.zrange(key, start, end);
+            expire(shardedJedis, key, seconds);
+            return result;
+        }, null, key, start, end, seconds);
     }
 
     public Set<String> zrange(String key, long start, long end) {
@@ -389,20 +284,11 @@ public class ZSetOperations extends JedisOperations {
      */
     public Set<Tuple> zrangeWithScores(final String key, final long start,
         final long end, final Integer seconds) {
-        return new JedisHook<Set<Tuple>>(this) {
-            @Override
-            Set<Tuple> operate(ShardedJedis shardedJedis) {
-                Set<Tuple> result = shardedJedis.zrangeWithScores(key, start, end);
-                expire(shardedJedis, key, seconds);
-                return result;
-            }
-
-            @Override
-            Set<Tuple> except(JedisException e) {
-                logger.error(buildError(key, start, end, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Set<Tuple> result = shardedJedis.zrangeWithScores(key, start, end);
+            expire(shardedJedis, key, seconds);
+            return result;
+        }, null, key, start, end, seconds);
     }
 
     public Set<Tuple> zrangeWithScores(String key, long start, long end) {
@@ -419,20 +305,11 @@ public class ZSetOperations extends JedisOperations {
      */
     public Long zcount(final String key, final double min,
         final double max, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long rtn = shardedJedis.zcount(key, min, max);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, min, max, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Long rtn = shardedJedis.zcount(key, min, max);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, null, key, min, max, seconds);
     }
 
     public Long zcount(String key, double min, double max) {
@@ -454,20 +331,11 @@ public class ZSetOperations extends JedisOperations {
      */
     public Double zincrby(final String key, final String member,
         final double score, final Integer seconds) {
-        return new JedisHook<Double>(this) {
-            @Override
-            Double operate(ShardedJedis shardedJedis) {
-                Double rtn = shardedJedis.zincrby(key, score, member);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Double except(JedisException e) {
-                logger.error(buildError(key, member, score, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Double rtn = shardedJedis.zincrby(key, score, member);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, null, key, member, score, seconds);
     }
 
     public Double zincrby(String key, String member, double score) {
@@ -486,20 +354,11 @@ public class ZSetOperations extends JedisOperations {
      * @return 如果 member 是有序集 key 的成员，返回 member 的排名。如果 member 不是有序集 key 的成员，返回 nil 。
      */
     public Long zrank(final String key, final String member, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long rank = shardedJedis.zrank(key, member);
-                expire(shardedJedis, key, seconds);
-                return rank;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, member, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Long rank = shardedJedis.zrank(key, member);
+            expire(shardedJedis, key, seconds);
+            return rank;
+        }, null, key, member, seconds);
     }
 
     public Long zrank(String key, String member) {
@@ -518,20 +377,11 @@ public class ZSetOperations extends JedisOperations {
      * @return 如果 member 是有序集 key 的成员，返回 member 的排名。如果 member 不是有序集 key 的成员，返回 nil 。
      */
     public Long zrevrank(final String key, final String member, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long revrank = shardedJedis.zrevrank(key, member);
-                expire(shardedJedis, key, seconds);
-                return revrank;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, member, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Long revrank = shardedJedis.zrevrank(key, member);
+            expire(shardedJedis, key, seconds);
+            return revrank;
+        }, null, key, member, seconds);
     }
 
     /**
@@ -547,20 +397,11 @@ public class ZSetOperations extends JedisOperations {
      */
     public Long zremrangeByScore(final String key, final long start,
         final long end, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long rtn = shardedJedis.zremrangeByScore(key, start, end);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, start, end, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Long rtn = shardedJedis.zremrangeByScore(key, start, end);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, null, key, start, end, seconds);
     }
 
     public Long zremrangeByScore(String key, long start, long end) {

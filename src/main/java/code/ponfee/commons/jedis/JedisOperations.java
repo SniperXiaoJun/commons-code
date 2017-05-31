@@ -8,6 +8,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import redis.clients.jedis.ShardedJedis;
 
 /**
@@ -24,11 +27,12 @@ abstract class JedisOperations {
     static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
 
     static final ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 200, 60, TimeUnit.SECONDS, // 最大200个线程
-                                                                   new SynchronousQueue<>(), 
-                                                                   new NamedThreadFactory("redis_mget_furture", true));
+        new SynchronousQueue<>(), new NamedThreadFactory("redis_mget_furture", true));
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> EXECUTOR.shutdown()));
     }
+
+    private static Logger logger = LoggerFactory.getLogger(JedisOperations.class);
 
     final JedisClient jedisClient;
 
@@ -36,7 +40,18 @@ abstract class JedisOperations {
         this.jedisClient = jedisClient;
     }
 
-    final String buildError(Object... args) {
+    /**
+     * 调用勾子函数
+     * @param hook        勾子对象
+     * @param defaultVal  异常时返回的值
+     * @param args        参数
+     * @return
+     */
+    final <T> T call(JedisHook<T> hook, T defaultVal, Object... args) {
+        return hook.hook(this, defaultVal, args);
+    }
+
+    final void exception(Exception e, Object... args) {
         StringBuilder builder = new StringBuilder("redis operation occur error: ");
         builder.append(getClass().getSimpleName()).append(".").append(Thread.currentThread().getStackTrace()[5].getMethodName()).append("(");
         String arg;
@@ -45,7 +60,7 @@ abstract class JedisOperations {
                 arg = "null";
             } else if (i == 0 && args[i] instanceof byte[]) {
                 // redis key base64编码
-                arg = "base64: " + Base64.getEncoder().encodeToString((byte[]) args[i]);
+                arg = "b64:" + Base64.getEncoder().encodeToString((byte[]) args[i]);
             } else {
                 arg = args[i].toString();
             }
@@ -58,7 +73,7 @@ abstract class JedisOperations {
                 builder.append(", ");
             }
         }
-        return builder.append(")").toString();
+        logger.error(builder.append(")").toString(), e);
     }
 
     static int getActualExpire(int seconds) {
@@ -116,13 +131,13 @@ abstract class JedisOperations {
      */
     private static void expireDefaultIfInfinite(ShardedJedis shardedJedis, String key) {
         if (shardedJedis.ttl(key) == -1) {
-            expire(shardedJedis, key, DEFAULT_EXPIRE_SECONDS);
+            shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS);
         }
     }
 
     private static void expireDefaultIfInfinite(ShardedJedis shardedJedis, byte[] key) {
         if (shardedJedis.ttl(key) == -1) {
-            expire(shardedJedis, key, DEFAULT_EXPIRE_SECONDS);
+            shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS);
         }
     }
 

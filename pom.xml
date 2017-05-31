@@ -334,7 +334,6 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <env>windows</env>
                 <separator>;</separator>
                 <publish.version>1.0.0-SNAPSHOT</publish.version>
             </properties>
@@ -342,7 +341,6 @@
         <profile>
             <id>linux</id>
             <properties>
-                <env>linux</env>
                 <separator>:</separator>
                 <publish.version>1.0.0</publish.version>
             </properties>

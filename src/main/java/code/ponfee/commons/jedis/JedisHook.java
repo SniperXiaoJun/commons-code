@@ -1,29 +1,29 @@
 package code.ponfee.commons.jedis;
 
 import redis.clients.jedis.ShardedJedis;
-import redis.clients.jedis.exceptions.JedisException;
 
 /**
  * 钩子函数
  * @author fupf
  * @param <T>
  */
-abstract class JedisHook<T> {
-    JedisOperations ops;
+@FunctionalInterface
+interface JedisHook<T> {
 
-    JedisHook(JedisOperations ops) {
-        this.ops = ops;
-    }
+    T operate(ShardedJedis shardedJedis);
 
-    abstract T operate(ShardedJedis shardedJedis);
-
-    abstract T except(JedisException e);
-
-    final T hook() {
+    /**
+     * @param ops         JedisOperations 实例
+     * @param defaultVal  异常时的返回值
+     * @param args        参数列表
+     * @return
+     */
+    default T hook(JedisOperations ops, T defaultVal, Object... args) {
         try (ShardedJedis shardedJedis = ops.jedisClient.getShardedJedis()) {
             return (T) this.operate(shardedJedis);
-        } catch (JedisException e) {
-            return this.except(e);
+        } catch (Exception e) {
+            ops.exception(e, args);
+            return defaultVal;
         }
     }
 }

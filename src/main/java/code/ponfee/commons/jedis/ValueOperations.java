@@ -18,8 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import code.ponfee.commons.serial.Serializer;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.ShardedJedis;
-import redis.clients.jedis.exceptions.JedisException;
 
 /**
  * redis string（字符串）操作类
@@ -52,19 +50,10 @@ public class ValueOperations extends JedisOperations {
      * @return 是否设置成功
      */
     public boolean set(final String key, final String value, final int seconds) {
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                String rtn = shardedJedis.setex(key, getActualExpire(seconds), value);
-                return SUCCESS_MSG.equalsIgnoreCase(rtn);
-            }
-
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(buildError(key, value, seconds), e);
-                return false;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            String rtn = shardedJedis.setex(key, getActualExpire(seconds), value);
+            return SUCCESS_MSG.equalsIgnoreCase(rtn);
+        }, false, key, value, seconds);
     }
 
     public String get(String key) {
@@ -79,23 +68,15 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public String get(final String key, final Integer seconds) {
-        return new JedisHook<String>(this) {
-            @Override
-            String operate(ShardedJedis shardedJedis) {
-                String value = shardedJedis.get(key);
-                if (value != null) {
-                    // 存在则设置失效时间
-                    expire(shardedJedis, key, seconds);
-                }
-                return value;
-            }
 
-            @Override
-            String except(JedisException e) {
-                logger.error(buildError(key, seconds), e);
-                return null;
+        return call(shardedJedis -> {
+            String value = shardedJedis.get(key);
+            if (value != null) {
+                // 存在则设置失效时间
+                expire(shardedJedis, key, seconds);
             }
-        }.hook();
+            return value;
+        }, null, key, seconds);
     }
 
     /**
@@ -104,42 +85,33 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public List<String> gets(final String keyWildcard) {
-        return new JedisHook<List<String>>(this) {
-            @Override
-            List<String> operate(ShardedJedis shardedJedis) {
-                List<Future<List<String>>> futureList = new ArrayList<>();
-                for (final Jedis jedis : shardedJedis.getAllShards()) {
-                    final Set<String> keys = jedis.keys(keyWildcard);
-                    if (keys == null || keys.isEmpty()) continue;
-                    futureList.add(EXECUTOR.submit(new Callable<List<String>>() {
-                        @Override
-                        public List<String> call() throws Exception {
-                            // 相应分片上获取值
-                            return jedis.mget(keys.toArray(new String[keys.size()]));
-                        }
-                    }));
-                }
-                List<String> result = new ArrayList<>();
-                for (Future<List<String>> future : futureList) {
-                    try {
-                        List<String> list = future.get(FUTURE_TIMEOUT, TimeUnit.MILLISECONDS);
-                        if (list == null || list.isEmpty()) continue;
-                        result.addAll(list);
-                    } catch (TimeoutException e) {
-                        logger.error("Jedis mget timeout", e);
-                    } catch (Exception e) {
-                        logger.error("Jedis mget occur error", e);
+        return call(shardedJedis -> {
+            List<Future<List<String>>> futureList = new ArrayList<>();
+            for (final Jedis jedis : shardedJedis.getAllShards()) {
+                final Set<String> keys = jedis.keys(keyWildcard);
+                if (keys == null || keys.isEmpty()) continue;
+                futureList.add(EXECUTOR.submit(new Callable<List<String>>() {
+                    @Override
+                    public List<String> call() throws Exception {
+                        // 相应分片上获取值
+                        return jedis.mget(keys.toArray(new String[keys.size()]));
                     }
+                }));
+            }
+            List<String> result = new ArrayList<>();
+            for (Future<List<String>> future : futureList) {
+                try {
+                    List<String> list = future.get(FUTURE_TIMEOUT, TimeUnit.MILLISECONDS);
+                    if (list == null || list.isEmpty()) continue;
+                    result.addAll(list);
+                } catch (TimeoutException e) {
+                    logger.error("Jedis mget timeout", e);
+                } catch (Exception e) {
+                    logger.error("Jedis mget occur error", e);
                 }
-                return result;
             }
-
-            @Override
-            List<String> except(JedisException e) {
-                logger.error(buildError(keyWildcard), e);
-                return null;
-            }
-        }.hook();
+            return result;
+        }, null, keyWildcard);
     }
 
     /**
@@ -160,19 +132,10 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public boolean setLong(final String key, final long value, final int seconds) {
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                String rtn = shardedJedis.setex(key, getActualExpire(seconds), String.valueOf(value));
-                return SUCCESS_MSG.equalsIgnoreCase(rtn);
-            }
-
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(buildError(key, value, seconds), e);
-                return false;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            String rtn = shardedJedis.setex(key, getActualExpire(seconds), String.valueOf(value));
+            return SUCCESS_MSG.equalsIgnoreCase(rtn);
+        }, false, key, value, seconds);
     }
 
     /**
@@ -185,25 +148,16 @@ public class ValueOperations extends JedisOperations {
     }
 
     public Long getLong(final String key, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long number = null;
-                String value = shardedJedis.get(key);
-                if (value != null) {
-                    // 存在则设置失效时间
-                    number = Long.parseLong(value);
-                    expire(shardedJedis, key, seconds);
-                }
-                return number;
+        return call(shardedJedis -> {
+            Long number = null;
+            String value = shardedJedis.get(key);
+            if (value != null) {
+                // 存在则设置失效时间
+                number = Long.parseLong(value);
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, seconds), e);
-                return null;
-            }
-        }.hook();
+            return number;
+        }, null, key, seconds);
     }
 
     /**
@@ -217,20 +171,11 @@ public class ValueOperations extends JedisOperations {
     }
 
     public String getSet(final String key, final String value, final int seconds) {
-        return new JedisHook<String>(this) {
-            @Override
-            String operate(ShardedJedis shardedJedis) {
-                String oldValue = shardedJedis.getSet(key, value);
-                expire(shardedJedis, key, seconds);
-                return oldValue;
-            }
-
-            @Override
-            String except(JedisException e) {
-                logger.error(buildError(key, value, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            String oldValue = shardedJedis.getSet(key, value);
+            expire(shardedJedis, key, seconds);
+            return oldValue;
+        }, null, key, value, seconds);
     }
 
     /**
@@ -245,25 +190,16 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public boolean setnx(final String key, final String value, final int seconds) {
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                Long result = shardedJedis.setnx(key, value);
-                if (JedisOperations.equals(result, 1)) {
-                    // 设置成功则需要设置失效期
-                    expire(shardedJedis, key, seconds);
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(buildError(key, value, seconds), e);
+        return call(shardedJedis -> {
+            Long result = shardedJedis.setnx(key, value);
+            if (JedisOperations.equals(result, 1)) {
+                // 设置成功则需要设置失效期
+                expire(shardedJedis, key, seconds);
+                return true;
+            } else {
                 return false;
             }
-        }.hook();
+        }, false, key, value, seconds);
     }
 
     /**
@@ -282,20 +218,11 @@ public class ValueOperations extends JedisOperations {
     }
 
     public Long incrBy(final String key, final int step, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long rtn = shardedJedis.incrBy(key, step);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, step, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Long rtn = shardedJedis.incrBy(key, step);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, null, key, step, seconds);
     }
 
     /**
@@ -309,20 +236,11 @@ public class ValueOperations extends JedisOperations {
     }
 
     public Double incrByFloat(final String key, final double step, final Integer seconds) {
-        return new JedisHook<Double>(this) {
-            @Override
-            Double operate(ShardedJedis shardedJedis) {
-                Double rtn = shardedJedis.incrByFloat(key, step);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Double except(JedisException e) {
-                logger.error(buildError(key, step, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Double rtn = shardedJedis.incrByFloat(key, step);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, null, key, step, seconds);
     }
 
     /**
@@ -339,20 +257,11 @@ public class ValueOperations extends JedisOperations {
     }
 
     public Long decrBy(final String key, final int step, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long rtn = shardedJedis.decrBy(key, step);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, step, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Long rtn = shardedJedis.decrBy(key, step);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, null, key, step, seconds);
     }
 
     /**
@@ -367,20 +276,11 @@ public class ValueOperations extends JedisOperations {
         final boolean isCompress, final int seconds) {
         if (t == null) return false;
 
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                byte[] data = jedisClient.serialize(t, isCompress);
-                String rtn = shardedJedis.setex(key, getActualExpire(seconds), data);
-                return SUCCESS_MSG.equalsIgnoreCase(rtn);
-            }
-
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(buildError(key, t, isCompress, seconds), e);
-                return false;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            byte[] data = jedisClient.serialize(t, isCompress);
+            String rtn = shardedJedis.setex(key, getActualExpire(seconds), data);
+            return SUCCESS_MSG.equalsIgnoreCase(rtn);
+        }, false, key, t, isCompress, seconds);
     }
 
     public <T extends Object> boolean setObject(byte[] key, T t, boolean isCompress) {
@@ -405,23 +305,14 @@ public class ValueOperations extends JedisOperations {
      */
     public <T extends Object> T getObject(final byte[] key,
         final Class<T> clazz, final boolean isCompress, final Integer seconds) {
-        return new JedisHook<T>(this) {
-            @Override
-            T operate(ShardedJedis shardedJedis) {
-                T t = jedisClient.deserialize(shardedJedis.get(key), clazz, isCompress);
-                if (t != null) {
-                    // 存在则设置失效时间
-                    expire(shardedJedis, key, seconds);
-                }
-                return t;
+        return call(shardedJedis -> {
+            T t = jedisClient.deserialize(shardedJedis.get(key), clazz, isCompress);
+            if (t != null) {
+                // 存在则设置失效时间
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            T except(JedisException e) {
-                logger.error(buildError(key, clazz, isCompress, seconds), e);
-                return null;
-            }
-        }.hook();
+            return t;
+        }, null, key, clazz, isCompress, seconds);
     }
 
     public <T extends Object> T getObject(byte[] key, Class<T> clazz, boolean isCompress) {
@@ -452,19 +343,10 @@ public class ValueOperations extends JedisOperations {
         if (!isCompress) _value = value;
         else _value = Serializer.compress(value);
 
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                String rtn = shardedJedis.setex(key, getActualExpire(seconds), _value);
-                return SUCCESS_MSG.equalsIgnoreCase(rtn);
-            }
-
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(buildError(key, _value, isCompress, seconds), e);
-                return false;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            String rtn = shardedJedis.setex(key, getActualExpire(seconds), _value);
+            return SUCCESS_MSG.equalsIgnoreCase(rtn);
+        }, false, key, _value, isCompress, seconds);
     }
 
     public boolean set(String key, byte[] value, int seconds) {
@@ -481,25 +363,16 @@ public class ValueOperations extends JedisOperations {
     public byte[] get(final byte[] key, final boolean isCompress, final Integer seconds) {
         if (key == null) return null;
 
-        return new JedisHook<byte[]>(this) {
-            @Override
-            byte[] operate(ShardedJedis shardedJedis) {
-                byte[] result = shardedJedis.get(key);
-                if (result != null) {
-                    if (isCompress) {
-                        result = Serializer.decompress(result);
-                    }
-                    expire(shardedJedis, key, seconds);
+        return call(shardedJedis -> {
+            byte[] result = shardedJedis.get(key);
+            if (result != null) {
+                if (isCompress) {
+                    result = Serializer.decompress(result);
                 }
-                return result;
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            byte[] except(JedisException e) {
-                logger.error(buildError(key, isCompress, seconds), e);
-                return null;
-            }
-        }.hook();
+            return result;
+        }, null, key, isCompress, seconds);
     }
 
     public byte[] get(byte[] key, boolean isCompress) {
@@ -518,58 +391,49 @@ public class ValueOperations extends JedisOperations {
     public Map<String, String> mget(final String... keys) {
         if (keys == null) return null;
 
-        return new JedisHook<Map<String, String>>(this) {
-            @Override
-            Map<String, String> operate(ShardedJedis shardedJedis) {
-                Collection<Jedis> jedisList = shardedJedis.getAllShards();
-                if (jedisList == null || jedisList.isEmpty()) return null;
+        return call(shardedJedis -> {
+            Collection<Jedis> jedisList = shardedJedis.getAllShards();
+            if (jedisList == null || jedisList.isEmpty()) return null;
 
-                Map<String, String> resultMap;
-                if (jedisList.size() < keys.length) { // key数量大于分片数量，则采用mget方式
-                    resultMap = new ConcurrentHashMap<>();
-                    List<Future<List<String>>> futureList = new ArrayList<>();
-                    for (final Jedis jedis : jedisList) {
-                        futureList.add(EXECUTOR.submit(new Callable<List<String>>() {
-                            @Override
-                            public List<String> call() throws Exception {
-                                return jedis.mget(keys);
-                            }
-                        }));
-                    }
-                    for (Future<List<String>> future : futureList) {
-                        try {
-                            // 所有的 future get 等待
-                            List<String> list = future.get(FUTURE_TIMEOUT, TimeUnit.MILLISECONDS);
-                            if (list == null || list.isEmpty()) continue;
-                            String s;
-                            for (int i = 0; i < keys.length; i++) {
-                                s = list.get(i);
-                                if (s != null && !resultMap.containsKey(keys[i])) {
-                                    resultMap.put(keys[i], s);
-                                }
-                            }
-                        } catch (TimeoutException e) {
-                            logger.error("Jedis mget timeout", e);
-                        } catch (Exception e) {
-                            logger.error("Jedis mget occur error", e);
+            Map<String, String> resultMap;
+            if (jedisList.size() < keys.length) { // key数量大于分片数量，则采用mget方式
+                resultMap = new ConcurrentHashMap<>();
+                List<Future<List<String>>> futureList = new ArrayList<>();
+                for (final Jedis jedis : jedisList) {
+                    futureList.add(EXECUTOR.submit(new Callable<List<String>>() {
+                        @Override
+                        public List<String> call() throws Exception {
+                            return jedis.mget(keys);
                         }
-                    }
-                } else { // 直接获取，不用mget方式
-                    resultMap = new HashMap<>();
-                    for (String k : keys) {
-                        String v = shardedJedis.get(k);
-                        if (v != null) resultMap.put(k, v);
+                    }));
+                }
+                for (Future<List<String>> future : futureList) {
+                    try {
+                        // 所有的 future get 等待
+                        List<String> list = future.get(FUTURE_TIMEOUT, TimeUnit.MILLISECONDS);
+                        if (list == null || list.isEmpty()) continue;
+                        String s;
+                        for (int i = 0; i < keys.length; i++) {
+                            s = list.get(i);
+                            if (s != null && !resultMap.containsKey(keys[i])) {
+                                resultMap.put(keys[i], s);
+                            }
+                        }
+                    } catch (TimeoutException e) {
+                        logger.error("Jedis mget timeout", e);
+                    } catch (Exception e) {
+                        logger.error("Jedis mget occur error", e);
                     }
                 }
-                return resultMap;
+            } else { // 直接获取，不用mget方式
+                resultMap = new HashMap<>();
+                for (String k : keys) {
+                    String v = shardedJedis.get(k);
+                    if (v != null) resultMap.put(k, v);
+                }
             }
-
-            @Override
-            Map<String, String> except(JedisException e) {
-                logger.error(buildError(String.valueOf(keys)), e);
-                return null;
-            }
-        }.hook();
+            return resultMap;
+        }, null, String.valueOf(keys));
     }
 
     /**
@@ -581,66 +445,57 @@ public class ValueOperations extends JedisOperations {
     public Map<byte[], byte[]> mget(final boolean isCompress, final byte[]... keys) {
         if (keys == null) return null;
 
-        return new JedisHook<Map<byte[], byte[]>>(this) {
-            @Override
-            Map<byte[], byte[]> operate(ShardedJedis shardedJedis) {
-                Collection<Jedis> jedisList = shardedJedis.getAllShards();
-                if (jedisList == null || jedisList.isEmpty()) return null;
+        return call(shardedJedis -> {
+            Collection<Jedis> jedisList = shardedJedis.getAllShards();
+            if (jedisList == null || jedisList.isEmpty()) return null;
 
-                Map<byte[], byte[]> resultMap;
-                if (jedisList.size() < keys.length) { // key数量大于分片数量，则采用mget方式
-                    resultMap = new ConcurrentHashMap<>();
-                    List<Future<List<byte[]>>> futureList = new ArrayList<>();
-                    for (final Jedis jedis : jedisList) {
-                        futureList.add(EXECUTOR.submit(new Callable<List<byte[]>>() {
-                            @Override
-                            public List<byte[]> call() throws Exception {
-                                return jedis.mget((byte[][]) keys);
-                            }
-                        }));
-                    }
-                    for (Future<List<byte[]>> future : futureList) {
-                        try {
-                            // 获取异步执行的返回数据
-                            byte[] v;
-                            List<byte[]> list = future.get(FUTURE_TIMEOUT, TimeUnit.MILLISECONDS);
-                            if (list == null || list.isEmpty()) continue;
-                            for (int i = 0; i < keys.length; i++) {
-                                v = list.get(i);
-                                if (v != null && !resultMap.containsKey(keys[i])) {
-                                    if (isCompress) {
-                                        v = Serializer.decompress(v);
-                                    }
-                                    resultMap.put(keys[i], v);
+            Map<byte[], byte[]> resultMap;
+            if (jedisList.size() < keys.length) { // key数量大于分片数量，则采用mget方式
+                resultMap = new ConcurrentHashMap<>();
+                List<Future<List<byte[]>>> futureList = new ArrayList<>();
+                for (final Jedis jedis : jedisList) {
+                    futureList.add(EXECUTOR.submit(new Callable<List<byte[]>>() {
+                        @Override
+                        public List<byte[]> call() throws Exception {
+                            return jedis.mget((byte[][]) keys);
+                        }
+                    }));
+                }
+                for (Future<List<byte[]>> future : futureList) {
+                    try {
+                        // 获取异步执行的返回数据
+                        byte[] v;
+                        List<byte[]> list = future.get(FUTURE_TIMEOUT, TimeUnit.MILLISECONDS);
+                        if (list == null || list.isEmpty()) continue;
+                        for (int i = 0; i < keys.length; i++) {
+                            v = list.get(i);
+                            if (v != null && !resultMap.containsKey(keys[i])) {
+                                if (isCompress) {
+                                    v = Serializer.decompress(v);
                                 }
+                                resultMap.put(keys[i], v);
                             }
-                        } catch (TimeoutException e) {
-                            logger.error("Jedis mget timeout", e);
-                        } catch (Exception e) {
-                            logger.error("Jedis mget occur error", e);
                         }
-                    }
-                } else { // 直接获取，不用mget方式
-                    resultMap = new HashMap<>();
-                    byte[] v;
-                    for (byte[] k : (byte[][]) keys) {
-                        v = shardedJedis.get(k);
-                        if (v == null) continue;
-                        if (isCompress) {
-                            v = Serializer.decompress(v);
-                        }
-                        resultMap.put(k, v);
+                    } catch (TimeoutException e) {
+                        logger.error("Jedis mget timeout", e);
+                    } catch (Exception e) {
+                        logger.error("Jedis mget occur error", e);
                     }
                 }
-                return resultMap;
+            } else { // 直接获取，不用mget方式
+                resultMap = new HashMap<>();
+                byte[] v;
+                for (byte[] k : (byte[][]) keys) {
+                    v = shardedJedis.get(k);
+                    if (v == null) continue;
+                    if (isCompress) {
+                        v = Serializer.decompress(v);
+                    }
+                    resultMap.put(k, v);
+                }
             }
-
-            @Override
-            Map<byte[], byte[]> except(JedisException e) {
-                logger.error(buildError(isCompress, keys), e);
-                return null;
-            }
-        }.hook();
+            return resultMap;
+        }, null, isCompress, keys);
     }
 
     public Map<byte[], byte[]> mget(final byte[]... keys) {

@@ -16,7 +16,7 @@ import code.ponfee.commons.util.ObjectUtils;
  *        当以“/”开头时contextClass只起到jar包定位的作用<p>
  *        不以“/”开头时contextClass还起到package相对路径的作用<p>
  *     </li>
- *     <li>context:</li>
+ *     <li>webapp:</li>
  *     <li>file:</li>
  *   </ul>
  *   <p>default classpath:</p>

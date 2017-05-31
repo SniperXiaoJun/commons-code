@@ -3,43 +3,28 @@ package code.ponfee.commons.jedis;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.Transaction;
-import redis.clients.jedis.exceptions.JedisException;
 
 /**
  * redis key（键）操作类
  * @author fupf
  */
 public class KeysOperations extends JedisOperations {
-    private static Logger logger = LoggerFactory.getLogger(KeysOperations.class);
 
     KeysOperations(JedisClient jedisClient) {
         super(jedisClient);
     }
 
     /**
-     * 获取有效期
+     * 当key不存在时，返回 -2
+     * 当key存在但没有设置剩余生存时间时，返回 -1
+     * 否则以秒为单位，返回 key的剩余生存时间
      * @param key
      * @return
      */
     public Long ttl(final String key) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                return shardedJedis.ttl(key);
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(ops.buildError(key), e);
-                return null;
-            }
-        }.hook();
+        return ((JedisHook<Long>) sjedis -> sjedis.ttl(key)).hook(this, null, key);
     }
 
     /**
@@ -48,18 +33,7 @@ public class KeysOperations extends JedisOperations {
      * @return
      */
     public Long pttl(final String key) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                return shardedJedis.pttl(key);
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(ops.buildError(key), e);
-                return null;
-            }
-        }.hook();
+        return call(sjedis -> sjedis.pttl(key), null, key);
     }
 
     /**
@@ -68,22 +42,13 @@ public class KeysOperations extends JedisOperations {
      * @return
      */
     public Set<String> keys(final String keyWildcard) {
-        return new JedisHook<Set<String>>(this) {
-            @Override
-            Set<String> operate(ShardedJedis shardedJedis) {
-                Set<String> keys = new HashSet<>();
-                for (Jedis jedis : shardedJedis.getAllShards()) {
-                    keys.addAll(jedis.keys(keyWildcard));
-                }
-                return keys;
+        return call(shardedJedis -> {
+            Set<String> keys = new HashSet<>();
+            for (Jedis jedis : shardedJedis.getAllShards()) {
+                keys.addAll(jedis.keys(keyWildcard));
             }
-
-            @Override
-            Set<String> except(JedisException e) {
-                logger.error(ops.buildError(keyWildcard), e);
-                return null;
-            }
-        }.hook();
+            return keys;
+        }, null, keyWildcard);
     }
 
     /**
@@ -93,18 +58,9 @@ public class KeysOperations extends JedisOperations {
      * @return 是否设置成功
      */
     public boolean expire(final String key, final int seconds) {
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                return JedisOperations.expire(shardedJedis, key, seconds);
-            }
-
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(ops.buildError(key, seconds), e);
-                return false;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            return JedisOperations.expire(shardedJedis, key, seconds);
+        }, false, key, seconds);
     }
 
     /**
@@ -114,18 +70,9 @@ public class KeysOperations extends JedisOperations {
      * @return 是否设置成功
      */
     public boolean pexpire(final String key, final int milliseconds) {
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                return JedisOperations.pexpire(shardedJedis, key, milliseconds);
-            }
-
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(ops.buildError(key, milliseconds), e);
-                return false;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            return JedisOperations.pexpire(shardedJedis, key, milliseconds);
+        }, false, key, milliseconds);
     }
 
     /**
@@ -134,18 +81,9 @@ public class KeysOperations extends JedisOperations {
      * @return
      */
     public boolean exists(final String key) {
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                return shardedJedis.exists(key);
-            }
-
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(ops.buildError(key), e);
-                return false;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            return shardedJedis.exists(key);
+        }, false, key);
     }
 
     /**
@@ -154,18 +92,9 @@ public class KeysOperations extends JedisOperations {
      * @return 被删除 key 的数量
      */
     public Long del(final String key) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                return shardedJedis.del(key);
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(ops.buildError(key), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            return shardedJedis.del(key);
+        }, null, key);
     }
 
     /**
@@ -174,18 +103,9 @@ public class KeysOperations extends JedisOperations {
      * @return 被删除 key 的数量
      */
     public Long del(final byte[] key) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                return shardedJedis.del(key);
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(ops.buildError(key), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            return shardedJedis.del(key);
+        }, null, key);
     }
 
     /**
@@ -194,25 +114,16 @@ public class KeysOperations extends JedisOperations {
      * @return 被删除 key 的数量
      */
     public long dels(final String keyWildcard) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                long delCounts = 0;
-                for (Jedis jedis : shardedJedis.getAllShards()) {
-                    Set<String> keys = jedis.keys(keyWildcard);
-                    if (keys != null && keys.size() > 0) {
-                        delCounts += jedis.del(keys.toArray(new String[keys.size()]));
-                    }
+        return call(shardedJedis -> {
+            long delCounts = 0;
+            for (Jedis jedis : shardedJedis.getAllShards()) {
+                Set<String> keys = jedis.keys(keyWildcard);
+                if (keys != null && keys.size() > 0) {
+                    delCounts += jedis.del(keys.toArray(new String[keys.size()]));
                 }
-                return delCounts;
             }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(ops.buildError(keyWildcard), e);
-                return 0L;
-            }
-        }.hook();
+            return delCounts;
+        }, 0L, keyWildcard);
     }
 
     /**
@@ -221,18 +132,9 @@ public class KeysOperations extends JedisOperations {
      * @return none (key不存在)；string (字符串)；list (列表)；set (集合)；zset (有序集)；hash (哈希表)
      */
     public String type(final String key) {
-        return new JedisHook<String>(this) {
-            @Override
-            String operate(ShardedJedis shardedJedis) {
-                return shardedJedis.type(key);
-            }
-
-            @Override
-            String except(JedisException e) {
-                logger.error(ops.buildError(key), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            return shardedJedis.type(key);
+        }, null, key);
     }
 
     /**
@@ -241,18 +143,9 @@ public class KeysOperations extends JedisOperations {
      * @return
      */
     public String watch(final String key) {
-        return new JedisHook<String>(this) {
-            @Override
-            String operate(ShardedJedis shardedJedis) {
-                return shardedJedis.getShard(key).watch(key);
-            }
-
-            @Override
-            String except(JedisException e) {
-                logger.error(ops.buildError(key), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            return shardedJedis.getShard(key).watch(key);
+        }, null, key);
     }
 
     /**
@@ -261,18 +154,9 @@ public class KeysOperations extends JedisOperations {
      * @return
      */
     public String unwatch(final String key) {
-        return new JedisHook<String>(this) {
-            @Override
-            String operate(ShardedJedis shardedJedis) {
-                return shardedJedis.getShard(key).unwatch();
-            }
-
-            @Override
-            String except(JedisException e) {
-                logger.error(ops.buildError(key), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            return shardedJedis.getShard(key).unwatch();
+        }, null, key);
     }
 
     /**
@@ -281,33 +165,15 @@ public class KeysOperations extends JedisOperations {
      * @return
      */
     public Transaction multi(final String key) {
-        return new JedisHook<Transaction>(this) {
-            @Override
-            Transaction operate(ShardedJedis shardedJedis) {
-                return shardedJedis.getShard(key).multi();
-            }
-
-            @Override
-            Transaction except(JedisException e) {
-                logger.error(ops.buildError(key), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            return shardedJedis.getShard(key).multi();
+        }, null, key);
     }
 
     public Transaction multi(final byte[] key) {
-        return new JedisHook<Transaction>(this) {
-            @Override
-            Transaction operate(ShardedJedis shardedJedis) {
-                return shardedJedis.getShard(key).multi();
-            }
-
-            @Override
-            Transaction except(JedisException e) {
-                logger.error(ops.buildError(key), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            return shardedJedis.getShard(key).multi();
+        }, null, key);
     }
 
     /**
@@ -316,18 +182,9 @@ public class KeysOperations extends JedisOperations {
      * @return 给定 script 的 SHA1 校验和
      */
     public String scriptLoad(final String script) {
-        return new JedisHook<String>(this) {
-            @Override
-            String operate(ShardedJedis shardedJedis) {
-                return shardedJedis.getShard(script).scriptLoad(script);
-            }
-
-            @Override
-            String except(JedisException e) {
-                logger.error(ops.buildError(script), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            return shardedJedis.getShard(script).scriptLoad(script);
+        }, null, script);
     }
 
 }

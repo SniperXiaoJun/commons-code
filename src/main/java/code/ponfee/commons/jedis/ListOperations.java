@@ -3,18 +3,11 @@ package code.ponfee.commons.jedis;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import redis.clients.jedis.ShardedJedis;
-import redis.clients.jedis.exceptions.JedisException;
-
 /**
  * redis list（列表）操作类
  * @author fupf
  */
 public class ListOperations extends JedisOperations {
-    private static Logger logger = LoggerFactory.getLogger(ListOperations.class);
 
     ListOperations(JedisClient jedisClient) {
         super(jedisClient);
@@ -28,20 +21,11 @@ public class ListOperations extends JedisOperations {
      * @return 执行 LPUSH 命令后，列表的长度。
      */
     public Long lpush(final String key, final Integer seconds, final String... fields) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long rtn = shardedJedis.lpush(key, fields);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, seconds, fields), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Long rtn = shardedJedis.lpush(key, fields);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, null, key, seconds, fields);
     }
 
     public Long lpush(String key, String... fields) {
@@ -58,24 +42,15 @@ public class ListOperations extends JedisOperations {
      */
     public <T extends Object> Long lpushObject(final byte[] key,
         final boolean isCompress, final Integer seconds, final T[] objs) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                byte[][] data = new byte[objs.length][];
-                for (int i = 0; i < objs.length; i++) {
-                    data[i] = jedisClient.serialize(objs[i], isCompress);
-                }
-                Long rtn = shardedJedis.lpush(key, data);
-                expire(shardedJedis, key, seconds);
-                return rtn;
+        return call(shardedJedis -> {
+            byte[][] data = new byte[objs.length][];
+            for (int i = 0; i < objs.length; i++) {
+                data[i] = jedisClient.serialize(objs[i], isCompress);
             }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, isCompress, seconds, objs), e);
-                return null;
-            }
-        }.hook();
+            Long rtn = shardedJedis.lpush(key, data);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, null, key, isCompress, seconds, objs);
     }
 
     public <T extends Object> Long lpushObject(byte[] key, boolean isCompress, T[] objs) {
@@ -98,20 +73,11 @@ public class ListOperations extends JedisOperations {
      * @return 执行 RPUSH 操作后，表的长度。
      */
     public Long rpush(final String key, final Integer seconds, final String... fields) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long rtn = shardedJedis.rpush(key, fields);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, seconds, fields), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Long rtn = shardedJedis.rpush(key, fields);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, null, key, seconds, fields);
     }
 
     public Long rpush(String key, String... fields) {
@@ -125,23 +91,14 @@ public class ListOperations extends JedisOperations {
      * @return 列表的头元素。当 key 不存在时，返回 nil 。
      */
     public String lpop(final String key, final Integer seconds) {
-        return new JedisHook<String>(this) {
-            @Override
-            String operate(ShardedJedis shardedJedis) {
-                String result = shardedJedis.lpop(key);
-                if (result != null) {
-                    // 存在才设置失效时间
-                    expire(shardedJedis, key, seconds);
-                }
-                return result;
+        return call(shardedJedis -> {
+            String result = shardedJedis.lpop(key);
+            if (result != null) {
+                // 存在才设置失效时间
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            String except(JedisException e) {
-                logger.error(buildError(key, seconds), e);
-                return null;
-            }
-        }.hook();
+            return result;
+        }, null, key, seconds);
     }
 
     public String lpop(String key) {
@@ -156,23 +113,14 @@ public class ListOperations extends JedisOperations {
      */
     public <T extends Object> T lpopObject(final byte[] key, final Class<T> clazz,
         final boolean isCompress, final Integer seconds) {
-        return new JedisHook<T>(this) {
-            @Override
-            T operate(ShardedJedis shardedJedis) {
-                T result = jedisClient.deserialize(shardedJedis.lpop(key), clazz, isCompress);
-                if (result != null) {
-                    // 存在才设置失效时间
-                    expire(shardedJedis, key, seconds);
-                }
-                return result;
+        return call(shardedJedis -> {
+            T result = jedisClient.deserialize(shardedJedis.lpop(key), clazz, isCompress);
+            if (result != null) {
+                // 存在才设置失效时间
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            T except(JedisException e) {
-                logger.error(buildError(key, clazz, isCompress, seconds), e);
-                return null;
-            }
-        }.hook();
+            return result;
+        }, null, key, clazz, isCompress, seconds);
     }
 
     public <T extends Object> T lpopObject(byte[] key, Class<T> clazz, boolean isCompress) {
@@ -194,23 +142,14 @@ public class ListOperations extends JedisOperations {
      * @return 列表的尾元素。当 key 不存在时，返回 nil 。
      */
     public String rpop(final String key, final Integer seconds) {
-        return new JedisHook<String>(this) {
-            @Override
-            String operate(ShardedJedis shardedJedis) {
-                String result = shardedJedis.rpop(key);
-                if (result != null) {
-                    // 存在才设置失效时间
-                    expire(shardedJedis, key, seconds);
-                }
-                return result;
+        return call(shardedJedis -> {
+            String result = shardedJedis.rpop(key);
+            if (result != null) {
+                // 存在才设置失效时间
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            String except(JedisException e) {
-                logger.error(buildError(key, seconds), e);
-                return null;
-            }
-        }.hook();
+            return result;
+        }, null, key, seconds);
     }
 
     public String rpop(String key) {
@@ -225,23 +164,14 @@ public class ListOperations extends JedisOperations {
      */
     public <T extends Object> T rpopObject(final byte[] key, final Class<T> clazz,
         final boolean isCompress, final Integer seconds) {
-        return new JedisHook<T>(this) {
-            @Override
-            T operate(ShardedJedis shardedJedis) {
-                T result = jedisClient.deserialize(shardedJedis.rpop(key), clazz, isCompress);
-                if (result != null) {
-                    // 存在才设置失效时间
-                    expire(shardedJedis, key, seconds);
-                }
-                return result;
+        return call(shardedJedis -> {
+            T result = jedisClient.deserialize(shardedJedis.rpop(key), clazz, isCompress);
+            if (result != null) {
+                // 存在才设置失效时间
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            T except(JedisException e) {
-                logger.error(buildError(key, clazz, isCompress, seconds), e);
-                return null;
-            }
-        }.hook();
+            return result;
+        }, null, key, clazz, isCompress, seconds);
     }
 
     public <T extends Object> T rpopObject(byte[] key, Class<T> clazz, boolean isCompress) {
@@ -273,23 +203,14 @@ public class ListOperations extends JedisOperations {
      */
     public long lrem(final String key, final int count,
         final String filed, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                long rtn = shardedJedis.lrem(key, count, filed);
-                if (rtn > 0) {
-                    // 存在才设置失效时间
-                    expire(shardedJedis, key, seconds);
-                }
-                return rtn;
+        return call(shardedJedis -> {
+            long rtn = shardedJedis.lrem(key, count, filed);
+            if (rtn > 0) {
+                // 存在才设置失效时间
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, count, filed, seconds), e);
-                return 0L;
-            }
-        }.hook();
+            return rtn;
+        }, 0L, key, count, filed, seconds);
     }
 
     public long lrem(String key, int count, String filed) {
@@ -313,23 +234,14 @@ public class ListOperations extends JedisOperations {
      */
     public long lrem(final byte[] key, final int count,
         final byte[] filed, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                long rtn = shardedJedis.lrem(key, count, filed);
-                if (rtn > 0) {
-                    // 存在才设置失效时间
-                    expire(shardedJedis, key, seconds);
-                }
-                return rtn;
+        return call(shardedJedis -> {
+            long rtn = shardedJedis.lrem(key, count, filed);
+            if (rtn > 0) {
+                // 存在才设置失效时间
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, count, filed, seconds), e);
-                return 0L;
-            }
-        }.hook();
+            return rtn;
+        }, 0L, key, count, filed, seconds);
     }
 
     public long lrem(byte[] key, int count, byte[] filed) {
@@ -347,23 +259,14 @@ public class ListOperations extends JedisOperations {
      * @return 列表 key 的长度。
      */
     public long llen(final String key, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                long result = shardedJedis.llen(key);
-                if (result > 0) {
-                    // 存在才设置失效时间
-                    expire(shardedJedis, key, seconds);
-                }
-                return result;
+        return call(shardedJedis -> {
+            long result = shardedJedis.llen(key);
+            if (result > 0) {
+                // 存在才设置失效时间
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, seconds), e);
-                return 0L;
-            }
-        }.hook();
+            return result;
+        }, 0L, key, seconds);
     }
 
     public long llen(String key) {
@@ -386,20 +289,11 @@ public class ListOperations extends JedisOperations {
      */
     public List<String> lrange(final String key, final long start,
         final long end, final Integer seconds) {
-        return new JedisHook<List<String>>(this) {
-            @Override
-            List<String> operate(ShardedJedis shardedJedis) {
-                List<String> result = shardedJedis.lrange(key, start, end);
-                expire(shardedJedis, key, seconds);
-                return result;
-            }
-
-            @Override
-            List<String> except(JedisException e) {
-                logger.error(buildError(key, start, end, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            List<String> result = shardedJedis.lrange(key, start, end);
+            expire(shardedJedis, key, seconds);
+            return result;
+        }, null, key, start, end, seconds);
     }
 
     public List<String> lrange(String key, long start, long end) {
@@ -422,27 +316,18 @@ public class ListOperations extends JedisOperations {
      */
     public <T extends Object> List<T> lrange(final byte[] key, final Class<T> clazz,
         final boolean isCompress, final long start, final long end, final Integer seconds) {
-        return new JedisHook<List<T>>(this) {
-            @Override
-            List<T> operate(ShardedJedis shardedJedis) {
-                List<T> result = new ArrayList<>();
-                List<byte[]> datas = shardedJedis.lrange(key, start, end);
-                if (datas != null && !datas.isEmpty()) {
-                    for (byte[] data : datas) {
-                        T t = jedisClient.deserialize(data, clazz, isCompress);
-                        if (t != null) result.add(t);
-                    }
+        return call(shardedJedis -> {
+            List<T> result = new ArrayList<>();
+            List<byte[]> datas = shardedJedis.lrange(key, start, end);
+            if (datas != null && !datas.isEmpty()) {
+                for (byte[] data : datas) {
+                    T t = jedisClient.deserialize(data, clazz, isCompress);
+                    if (t != null) result.add(t);
                 }
-                expire(shardedJedis, key, seconds);
-                return result;
             }
-
-            @Override
-            List<T> except(JedisException e) {
-                logger.error(buildError(key, clazz, isCompress, start, end, seconds), e);
-                return null;
-            }
-        }.hook();
+            expire(shardedJedis, key, seconds);
+            return result;
+        }, null, key, clazz, isCompress, start, end, seconds);
     }
 
     public <T extends Object> List<T> lrange(byte[] key, Class<T> clazz, boolean isCompress,

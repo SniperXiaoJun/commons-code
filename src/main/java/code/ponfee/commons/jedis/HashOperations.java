@@ -7,19 +7,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPipeline;
-import redis.clients.jedis.exceptions.JedisException;
 
 /**
  * redis hash（哈希表）操作类
  * @author fupf
  */
 public class HashOperations extends JedisOperations {
-    private static Logger logger = LoggerFactory.getLogger(HashOperations.class);
 
     HashOperations(JedisClient jedisClient) {
         super(jedisClient);
@@ -41,20 +35,11 @@ public class HashOperations extends JedisOperations {
     public boolean hset(final String key, final String field, final String value, final Integer seconds) {
         if (value == null) return false;
 
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                boolean flag = JedisOperations.equals(shardedJedis.hset(key, field, value), 1);
-                expire(shardedJedis, key, seconds);
-                return flag;
-            }
-
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(buildError(key, field, value, seconds), e);
-                return false;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            boolean flag = JedisOperations.equals(shardedJedis.hset(key, field, value), 1);
+            expire(shardedJedis, key, seconds);
+            return flag;
+        }, false, key, field, value, seconds);
     }
 
     public boolean hset(String key, String field, String value) {
@@ -69,22 +54,13 @@ public class HashOperations extends JedisOperations {
      * @return 给定域的值。当给定域不存在或是给定 key 不存在时，返回 nil 。
      */
     public String hget(final String key, final String field, final Integer seconds) {
-        return new JedisHook<String>(this) {
-            @Override
-            String operate(ShardedJedis shardedJedis) {
-                String result = shardedJedis.hget(key, field);
-                if (result != null) {
-                    expire(shardedJedis, key, seconds);
-                }
-                return result;
+        return call(shardedJedis -> {
+            String result = shardedJedis.hget(key, field);
+            if (result != null) {
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            String except(JedisException e) {
-                logger.error(buildError(key, field, seconds), e);
-                return null;
-            }
-        }.hook();
+            return result;
+        }, null, key, field, seconds);
     }
 
     public String hget(String key, String field) {
@@ -102,22 +78,13 @@ public class HashOperations extends JedisOperations {
      * @return 以map形式返回哈希表的域和域的值
      */
     public Map<String, String> hgetAll(final String key, final Integer seconds) {
-        return new JedisHook<Map<String, String>>(this) {
-            @Override
-            Map<String, String> operate(ShardedJedis shardedJedis) {
-                Map<String, String> result = shardedJedis.hgetAll(key);
-                if (result != null && !result.isEmpty()) {
-                    expire(shardedJedis, key, seconds);
-                }
-                return result;
+        return call(shardedJedis -> {
+            Map<String, String> result = shardedJedis.hgetAll(key);
+            if (result != null && !result.isEmpty()) {
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            Map<String, String> except(JedisException e) {
-                logger.error(buildError(key, seconds), e);
-                return null;
-            }
-        }.hook();
+            return result;
+        }, null, key, seconds);
     }
 
     public Map<String, String> hgetAll(String key) {
@@ -132,22 +99,14 @@ public class HashOperations extends JedisOperations {
      * @return 一个包含哈希表中所有值的表
      */
     public List<String> hvals(final String key, final Integer seconds) {
-        return new JedisHook<List<String>>(this) {
-            @Override
-            List<String> operate(ShardedJedis shardedJedis) {
-                List<String> result = shardedJedis.hvals(key);
-                if (result != null && !result.isEmpty()) {
-                    expire(shardedJedis, key, seconds);
-                }
-                return result;
+        return call(shardedJedis -> {
+            List<String> result = shardedJedis.hvals(key);
+            if (result != null && !result.isEmpty()) {
+                expire(shardedJedis, key, seconds);
             }
+            return result;
+        }, null, key, seconds);
 
-            @Override
-            List<String> except(JedisException e) {
-                logger.error(buildError(key, seconds), e);
-                return null;
-            }
-        }.hook();
     }
 
     public List<String> hvals(String key) {
@@ -172,21 +131,12 @@ public class HashOperations extends JedisOperations {
         final T t, final boolean isCompress, final Integer seconds) {
         if (t == null) return false;
 
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                byte[] data = jedisClient.serialize(t, isCompress);
-                boolean flag = JedisOperations.equals(shardedJedis.hset(key, field, data), 1);
-                expire(shardedJedis, key, seconds);
-                return flag;
-            }
-
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(buildError(key, field, t, isCompress, seconds), e);
-                return false;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            byte[] data = jedisClient.serialize(t, isCompress);
+            boolean flag = JedisOperations.equals(shardedJedis.hset(key, field, data), 1);
+            expire(shardedJedis, key, seconds);
+            return flag;
+        }, false, key, field, t, isCompress, seconds);
     }
 
     public <T extends Object> boolean hsetObject(byte[] key, byte[] field, T t, boolean isCompress) {
@@ -212,23 +162,14 @@ public class HashOperations extends JedisOperations {
      */
     public <T extends Object> T hgetObject(final byte[] key, final byte[] field,
         final Class<T> clazz, final boolean isCompress, final Integer seconds) {
-        return new JedisHook<T>(this) {
-            @Override
-            T operate(ShardedJedis shardedJedis) {
-                byte[] data = shardedJedis.hget(key, field);
-                T t = jedisClient.deserialize(data, clazz, isCompress);
-                if (t != null) {
-                    expire(shardedJedis, key, seconds);
-                }
-                return t;
+        return call(shardedJedis -> {
+            byte[] data = shardedJedis.hget(key, field);
+            T t = jedisClient.deserialize(data, clazz, isCompress);
+            if (t != null) {
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            T except(JedisException e) {
-                logger.error(buildError(key, field, clazz, isCompress, seconds), e);
-                return null;
-            }
-        }.hook();
+            return t;
+        }, null, key, field, clazz, isCompress, seconds);
     }
 
     public <T extends Object> T hgetObject(byte[] key, byte[] field, Class<T> clazz,
@@ -258,27 +199,18 @@ public class HashOperations extends JedisOperations {
      */
     public <T extends Object> Map<byte[], T> hgetAllObject(final byte[] key,
         final Class<T> clazz, final boolean isCompress, final Integer seconds) {
-        return new JedisHook<Map<byte[], T>>(this) {
-            @Override
-            Map<byte[], T> operate(ShardedJedis shardedJedis) {
-                Map<byte[], byte[]> datas = shardedJedis.hgetAll(key);
-                Map<byte[], T> result = new HashMap<>();
-                if (datas != null && !datas.isEmpty()) {
-                    for (Entry<byte[], byte[]> entry : datas.entrySet()) {
-                        T t = jedisClient.deserialize(entry.getValue(), clazz, isCompress);
-                        result.put(entry.getKey(), t);
-                    }
-                    expire(shardedJedis, key, seconds);
+        return call(shardedJedis -> {
+            Map<byte[], byte[]> datas = shardedJedis.hgetAll(key);
+            Map<byte[], T> result = new HashMap<>();
+            if (datas != null && !datas.isEmpty()) {
+                for (Entry<byte[], byte[]> entry : datas.entrySet()) {
+                    T t = jedisClient.deserialize(entry.getValue(), clazz, isCompress);
+                    result.put(entry.getKey(), t);
                 }
-                return result;
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            Map<byte[], T> except(JedisException e) {
-                logger.error(buildError(key, clazz, isCompress, seconds), e);
-                return null;
-            }
-        }.hook();
+            return result;
+        }, null, key, clazz, isCompress, seconds);
     }
 
     public <T extends Object> Map<byte[], T> hgetAllObject(byte[] key, Class<T> clazz,
@@ -304,24 +236,15 @@ public class HashOperations extends JedisOperations {
      */
     public <T extends Object> List<T> hvalsObject(final byte[] key,
         final Class<T> clazz, final boolean isCompress, final Integer seconds) {
-        return new JedisHook<List<T>>(this) {
-            @Override
-            List<T> operate(ShardedJedis shardedJedis) {
-                List<T> list = new ArrayList<T>();
-                for (byte[] data : shardedJedis.hvals(key)) {
-                    T t = jedisClient.deserialize(data, clazz, isCompress);
-                    if (t != null) list.add(t);
-                }
-                expire(shardedJedis, key, seconds);
-                return list;
+        return call(shardedJedis -> {
+            List<T> list = new ArrayList<T>();
+            for (byte[] data : shardedJedis.hvals(key)) {
+                T t = jedisClient.deserialize(data, clazz, isCompress);
+                if (t != null) list.add(t);
             }
-
-            @Override
-            List<T> except(JedisException e) {
-                logger.error(buildError(key, clazz, isCompress, seconds), e);
-                return null;
-            }
-        }.hook();
+            expire(shardedJedis, key, seconds);
+            return list;
+        }, null, key, clazz, isCompress, seconds);
     }
 
     public <T extends Object> List<T> hvalsObject(byte[] key, Class<T> clazz, boolean isCompress) {
@@ -352,26 +275,16 @@ public class HashOperations extends JedisOperations {
      */
     public <T extends Object> boolean hmsetObjects(final byte[] key, final Map<byte[], T> map,
         final boolean isCompress, final Integer seconds) {
-        if (map == null || map.isEmpty()) return false;
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                Map<byte[], byte[]> data = new HashMap<byte[], byte[]>();
-                for (Entry<byte[], T> entry : map.entrySet()) {
-                    data.put(entry.getKey(), jedisClient.serialize(entry.getValue(), isCompress));
-                }
-
-                String rtn = shardedJedis.hmset(key, data);
-                expire(shardedJedis, key, seconds);
-                return SUCCESS_MSG.equalsIgnoreCase(rtn);
+        return call(shardedJedis -> {
+            Map<byte[], byte[]> data = new HashMap<byte[], byte[]>();
+            for (Entry<byte[], T> entry : map.entrySet()) {
+                data.put(entry.getKey(), jedisClient.serialize(entry.getValue(), isCompress));
             }
 
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(buildError(key, map, isCompress, seconds), e);
-                return false;
-            }
-        }.hook();
+            String rtn = shardedJedis.hmset(key, data);
+            expire(shardedJedis, key, seconds);
+            return SUCCESS_MSG.equalsIgnoreCase(rtn);
+        }, false, key, map, isCompress, seconds);
     }
 
     public <T extends Object> boolean hmsetObjects(byte[] key, Map<byte[], T> map, boolean isCompress) {
@@ -402,28 +315,18 @@ public class HashOperations extends JedisOperations {
      */
     public <T extends Object> List<T> hmgetObjects(final byte[] key, final Class<T> clazz,
         final boolean isCompress, final Integer seconds, final byte[]... fields) {
-        if (key == null || fields == null) return null;
-        return new JedisHook<List<T>>(this) {
-            @Override
-            List<T> operate(ShardedJedis shardedJedis) {
-                List<byte[]> datas = shardedJedis.hmget(key, fields);
-                if (datas == null || datas.isEmpty()) return null;
+        return call(shardedJedis -> {
+            List<byte[]> datas = shardedJedis.hmget(key, fields);
+            if (datas == null || datas.isEmpty()) return null;
 
-                List<T> list = new ArrayList<>();
-                for (byte[] data : datas) {
-                    T t = jedisClient.deserialize(data, clazz, isCompress);
-                    if (t != null) list.add(t);
-                }
-                expire(shardedJedis, key, seconds);
-                return list;
+            List<T> list = new ArrayList<>();
+            for (byte[] data : datas) {
+                T t = jedisClient.deserialize(data, clazz, isCompress);
+                if (t != null) list.add(t);
             }
-
-            @Override
-            List<T> except(JedisException e) {
-                logger.error(buildError(key, clazz, isCompress, seconds, fields), e);
-                return null;
-            }
-        }.hook();
+            expire(shardedJedis, key, seconds);
+            return list;
+        }, null, key, clazz, isCompress, seconds, fields);
     }
 
     public <T extends Object> List<T> hmgetObjects(byte[] key, Class<T> clazz, boolean isCompress,
@@ -455,20 +358,11 @@ public class HashOperations extends JedisOperations {
      */
     public Long hincrBy(final String key, final String field,
         final int value, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long rtn = shardedJedis.hincrBy(key, field, value);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, field, value, seconds), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Long rtn = shardedJedis.hincrBy(key, field, value);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, null, key, field, value, seconds);
     }
 
     public Long hincrBy(String key, String field, int value) {
@@ -490,20 +384,11 @@ public class HashOperations extends JedisOperations {
     public boolean hmset(final String key, final Map<String, String> map, final Integer seconds) {
         if (map == null || map.isEmpty()) return false;
 
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                String rtn = shardedJedis.hmset(key, map);
-                expire(shardedJedis, key, seconds);
-                return SUCCESS_MSG.equalsIgnoreCase(rtn);
-            }
-
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(buildError(key, map, seconds), e);
-                return false;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            String rtn = shardedJedis.hmset(key, map);
+            expire(shardedJedis, key, seconds);
+            return SUCCESS_MSG.equalsIgnoreCase(rtn);
+        }, false, key, map, seconds);
     }
 
     public boolean hmset(String key, Map<String, String> map) {
@@ -523,20 +408,11 @@ public class HashOperations extends JedisOperations {
      * @return 一个包含多个给定域的关联值的表，表值的排列顺序和给定域参数的请求顺序一样。
      */
     public List<String> hmget(final String key, final Integer seconds, final String... fields) {
-        return new JedisHook<List<String>>(this) {
-            @Override
-            List<String> operate(ShardedJedis shardedJedis) {
-                List<String> list = shardedJedis.hmget(key, fields);
-                expire(shardedJedis, key, seconds);
-                return list;
-            }
-
-            @Override
-            List<String> except(JedisException e) {
-                logger.error(buildError(key, seconds, fields), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            List<String> list = shardedJedis.hmget(key, fields);
+            expire(shardedJedis, key, seconds);
+            return list;
+        }, null, key, seconds, fields);
     }
 
     public List<String> hmget(String key, String... fields) {
@@ -551,20 +427,11 @@ public class HashOperations extends JedisOperations {
      * @return 被成功移除的域的数量，不包括被忽略的域
      */
     public Long hdel(final String key, final Integer seconds, final String... fields) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long rtn = shardedJedis.hdel(key, fields);
-                expire(shardedJedis, key, seconds);
-                return rtn;
-            }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, seconds, fields), e);
-                return null;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            Long rtn = shardedJedis.hdel(key, fields);
+            expire(shardedJedis, key, seconds);
+            return rtn;
+        }, null, key, seconds, fields);
     }
 
     public Long hdel(String key, String... fields) {
@@ -578,23 +445,14 @@ public class HashOperations extends JedisOperations {
      * @return 哈希表中域的数量，当 key 不存在时，返回 0 。
      */
     public Long hlen(final String key, final Integer seconds) {
-        return new JedisHook<Long>(this) {
-            @Override
-            Long operate(ShardedJedis shardedJedis) {
-                Long rtn = shardedJedis.hlen(key);
-                if (rtn != null && rtn != 0) {
-                    // key存在时才设置失效时间
-                    expire(shardedJedis, key, seconds);
-                }
-                return rtn;
+        return call(shardedJedis -> {
+            Long rtn = shardedJedis.hlen(key);
+            if (rtn != null && rtn != 0) {
+                // key存在时才设置失效时间
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            Long except(JedisException e) {
-                logger.error(buildError(key, seconds), e);
-                return null;
-            }
-        }.hook();
+            return rtn;
+        }, null, key, seconds);
     }
 
     public Long hlen(String key) {
@@ -609,20 +467,11 @@ public class HashOperations extends JedisOperations {
      * @return 返回值：true哈希表含有给定域；false哈希表不含有给定域（或key）不存在；
      */
     public boolean hexists(final String key, final String field, final Integer seconds) {
-        return new JedisHook<Boolean>(this) {
-            @Override
-            Boolean operate(ShardedJedis shardedJedis) {
-                boolean result = shardedJedis.hexists(key, field);
-                expire(shardedJedis, key, seconds);
-                return result;
-            }
-
-            @Override
-            Boolean except(JedisException e) {
-                logger.error(buildError(key, field, seconds), e);
-                return false;
-            }
-        }.hook();
+        return call(shardedJedis -> {
+            boolean result = shardedJedis.hexists(key, field);
+            expire(shardedJedis, key, seconds);
+            return result;
+        }, false, key, field, seconds);
     }
 
     /**
@@ -632,23 +481,14 @@ public class HashOperations extends JedisOperations {
      * @return 一个包含哈希表中所有域的表。当 key 不存在时，返回一个空表。
      */
     public Set<String> hkeys(final String key, final Integer seconds) {
-        return new JedisHook<Set<String>>(this) {
-            @Override
-            Set<String> operate(ShardedJedis shardedJedis) {
-                Set<String> keys = shardedJedis.hkeys(key);
-                if (keys != null && !keys.isEmpty()) {
-                    // 存在时才设置失效时间
-                    expire(shardedJedis, key, seconds);
-                }
-                return keys;
+        return call(shardedJedis -> {
+            Set<String> keys = shardedJedis.hkeys(key);
+            if (keys != null && !keys.isEmpty()) {
+                // 存在时才设置失效时间
+                expire(shardedJedis, key, seconds);
             }
-
-            @Override
-            Set<String> except(JedisException e) {
-                logger.error(buildError(key, seconds), e);
-                return null;
-            }
-        }.hook();
+            return keys;
+        }, null, key, seconds);
     }
 
     /**
@@ -658,26 +498,16 @@ public class HashOperations extends JedisOperations {
      */
     public List<Object> hmget(final Map<String, String[]> queryParams) {
         if (queryParams == null || queryParams.isEmpty()) return null;
-
-        return new JedisHook<List<Object>>(this) {
-            @Override
-            List<Object> operate(ShardedJedis shardedJedis) {
-                ShardedJedisPipeline pipeline = shardedJedis.pipelined();
-                //Map<String, Response<List<String>>> result = new HashMap<>();
-                for (Entry<String, String[]> entry : queryParams.entrySet()) {
-                    /*Response<List<String>> resp = pipeline.hmget(entry.getKey(), entry.getValue());
-                    result.put(entry.getKey(), resp);*/
-                    pipeline.hmget(entry.getKey(), entry.getValue());
-                }
-                return pipeline.syncAndReturnAll();
+        return call(shardedJedis -> {
+            ShardedJedisPipeline pipeline = shardedJedis.pipelined();
+            //Map<String, Response<List<String>>> result = new HashMap<>();
+            for (Entry<String, String[]> entry : queryParams.entrySet()) {
+                /*Response<List<String>> resp = pipeline.hmget(entry.getKey(), entry.getValue());
+                result.put(entry.getKey(), resp);*/
+                pipeline.hmget(entry.getKey(), entry.getValue());
             }
-
-            @Override
-            List<Object> except(JedisException e) {
-                logger.error(buildError(queryParams), e);
-                return null;
-            }
-        }.hook();
+            return pipeline.syncAndReturnAll();
+        }, null, queryParams);
     }
 
 }
