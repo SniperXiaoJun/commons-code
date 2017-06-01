@@ -325,6 +325,14 @@
             <systemPath>${pom.basedir}/lib/third-jce-1.0.0.jar</systemPath> -->
         </dependency>
         <!-- ====================加解密==================== -->
+        
+        <dependency><!-- 数字信封 -->
+            <groupId>jdk-lib</groupId>
+            <artifactId>tools</artifactId>
+            <version>1.8.0_121</version>
+            <!-- <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/jdk-tools-1.8.0_121.jar</systemPath> -->
+        </dependency>
     </dependencies>
 
     <profiles>

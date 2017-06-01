@@ -28,8 +28,8 @@ abstract class JedisOperations {
     static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
 
     static final ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 100, 60, TimeUnit.SECONDS, // 最大100个线程
-                                                                   new SynchronousQueue<>(),  // 同步队列，超过数量让调用线程处理
-                                                                   new NamedThreadFactory("redis_mget_furture", true));
+        new SynchronousQueue<>(), // 同步队列，超过数量让调用线程处理
+        new NamedThreadFactory("redis_mget_furture", true));
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> EXECUTOR.shutdown()));
     }
@@ -55,14 +55,23 @@ abstract class JedisOperations {
 
     final void exception(Exception e, Object... args) {
         StringBuilder builder = new StringBuilder("redis operation occur error: ");
-        builder.append(getClass().getSimpleName()).append(".").append(Thread.currentThread()
-               .getStackTrace()[5].getMethodName()).append("(");
+        builder.append(getClass().getSimpleName()).append(".").append(Thread.currentThread().getStackTrace()[5].getMethodName()).append("(");
         String arg;
         for (int n = args.length, i = 0; i < n; i++) {
             if (args[i] == null) {
                 arg = "null";
-            } else if (i == 0 && args[i] instanceof byte[]) {
-                arg = toString((byte[]) args[i]); // redis key base64编码
+            } else if (i == 0 && (args[i] instanceof byte[] || args[i] instanceof Byte[])) {
+                byte[] bytes;
+                if (args[i] instanceof Byte[]) {
+                    Byte[] b = (Byte[]) args[i];
+                    bytes = new byte[b.length > 40 ? 40 : b.length];
+                    for (int j = 0; j < bytes.length; j++) {
+                        bytes[i] = b[i];
+                    }
+                } else {
+                    bytes = (byte[]) args[i];
+                }
+                arg = toString(bytes); // redis key base64编码
             } else {
                 arg = args[i].toString();
             }
@@ -191,5 +200,10 @@ abstract class JedisOperations {
         public ThreadGroup getThreadGroup() {
             return mGroup;
         }
+    }
+
+    public static void main(String[] args) {
+        Object b = new Byte[10];
+        System.out.println((b instanceof Byte[]));
     }
 }

@@ -1,29 +1,30 @@
 
 package test.compile;
 
-import java.io.File;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import $._.a.b.n323c23.$._.CompilerSource;
 import code.ponfee.commons.compile.impl.JdkCompiler;
 import code.ponfee.commons.compile.model.JavaSource;
-import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.compile.model.JavacJavaSource;
+import code.ponfee.commons.compile.model.RegexJavaSource;
+import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.Streams;
+import test.concurrent.TestThread;
 
 public class JavaSourceCompilerTester {
 
     @Test
     public void testComplex() throws Exception {
+        //Class<?> _clazz = JavaSourceCompilerTester.class;
         Class<?> _clazz = CompilerSource.class;
-        //Class<?> _clazz = JavaSourceCompilerTest.class;
-
-        String path = ClassUtils.getClasspath(_clazz);
-        path = new File(path).getParentFile().getParentFile().getPath() + "/src/test/java/";
-        path += _clazz.getCanonicalName().replace('.', '/') + ".java";
-        String sourceCode = Streams.file2string(path);
-        JavaSource javaSource = new JavaSource(sourceCode);
+        String sourceCode = Streams.file2string(MavenProjects.getTestJavaFile(_clazz));
+        
+        //JavaSource javaSource = new JavacJavaSource(sourceCode);
+        JavaSource javaSource = new RegexJavaSource(sourceCode);
+        
+        
         System.out.println("packageName:" + javaSource.getPackageName());
         System.out.println("className:" + javaSource.getPublicClass());
 
@@ -37,9 +38,9 @@ public class JavaSourceCompilerTester {
     }
     
     
-    public @Test void test() throws Exception {
-        String sourceCode = Streams.file2string("d:/String.java");
-        JavaSource javaSource = new JavaSource(sourceCode);
+    public @Test void test2() throws Exception {
+        String sourceCode = Streams.file2string(MavenProjects.getTestJavaFile(TestThread.class));
+        JavaSource javaSource = new JavacJavaSource(sourceCode);
         System.out.println(javaSource.getFullyQualifiedName());
 
         Class<?> clazz = new JdkCompiler().compile(javaSource);
@@ -53,4 +54,7 @@ public class JavaSourceCompilerTester {
         System.out.println(clazz3==clazz4);
     }
     
+    public static void say() {
+        System.out.println("hello world!");
+    }
 }

@@ -33,7 +33,7 @@ public class KeyStoreResolver {
         JKS, PKCS12;
     }
 
-    private KeyStore keyStore;
+    private final KeyStore keyStore;
 
     public KeyStoreResolver(KeyStoreType type) {
         this(type, null);

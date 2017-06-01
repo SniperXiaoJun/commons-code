@@ -15,7 +15,9 @@ import javax.tools.ToolProvider;
 
 import $._.a.b.n323c23.$._.CompilerSource;
 import code.ponfee.commons.compile.model.JavaSource;
+import code.ponfee.commons.compile.model.RegexJavaSource;
 import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.Streams;
 
 /**
@@ -24,13 +26,14 @@ import code.ponfee.commons.util.Streams;
  */
 public class JavaSourceCompilerDemo {
     public static void main(String[] args) throws Exception {
-        compile(Streams.file2string("D:/github/commons-code/src/test/java/$/_/a/b/n323c23/$/_/CompilerSource.java"));
+        compile(Streams.file2string(MavenProjects.getTestJavaFile(CompilerSource.class)));
     }
 
     @SuppressWarnings({ "unchecked", "resource", "rawtypes" })
     public static void compile(String sourceCode) throws Exception {
         // 1.解析源码
-        JavaSource code = new JavaSource(sourceCode);
+        //JavaSource code = new JavacJavaSource(sourceCode);
+        JavaSource code = new RegexJavaSource(sourceCode);
 
         // 2.开始编译  
         List<JavaFileObject> srcs = Arrays.asList(new JavaStringObject(code.getPublicClass(), sourceCode));
@@ -52,7 +55,7 @@ public class JavaSourceCompilerDemo {
         method.invoke(classl.newInstance());
     }
 
-    public static class JavaStringObject extends SimpleJavaFileObject {
+    private static class JavaStringObject extends SimpleJavaFileObject {
         private String code;
 
         public JavaStringObject(String name, String code) {

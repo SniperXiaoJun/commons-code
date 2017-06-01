@@ -3,7 +3,7 @@ package code.ponfee.commons.resource;
 import java.io.InputStream;
 
 /**
- * 获取资源
+ * 资源类
  * @author fupf
  */
 public class Resource {

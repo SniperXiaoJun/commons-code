@@ -13,6 +13,7 @@ import code.ponfee.commons.compile.exception.CompileExprException;
 import code.ponfee.commons.compile.exception.JdkCompileException;
 import code.ponfee.commons.compile.model.JavaSource;
 import code.ponfee.commons.compile.model.JdkCompilerClassLoader;
+import code.ponfee.commons.compile.model.RegexJavaSource;
 
 /**
  * jdk编译
@@ -31,7 +32,7 @@ public class JdkCompiler implements JavaSourceCompiler {
     }
 
     public Class<?> compile(String sourceString) {
-        JavaSource source = new JavaSource(sourceString);
+        JavaSource source = new RegexJavaSource(sourceString);
         return compile(source);
     }
 

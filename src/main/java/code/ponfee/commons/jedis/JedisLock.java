@@ -61,6 +61,7 @@ public class JedisLock implements Lock, Serializable {
 
     private static final int MAX_TOMEOUT = 86400; // 最大超 时为1天
     private static final int MIN_TOMEOUT = 1; // 最小超 时为1秒
+    private static final int MIN_SLEEP_MILLIS = 9; // 最小休眠时间为5毫秒
     private static final String SEPARATOR = ":"; // 分隔符
     private static final transient ThreadLocal<String> LOCK_VALUE = new ThreadLocal<>();
 
@@ -97,7 +98,7 @@ public class JedisLock implements Lock, Serializable {
         }
         this.timeoutSeconds = timeoutSeconds;
         this.timeoutNanos = TimeUnit.SECONDS.toNanos(timeoutSeconds);
-        this.sleepMillis = sleepMillis;
+        this.sleepMillis = sleepMillis < MIN_SLEEP_MILLIS ? MIN_SLEEP_MILLIS : sleepMillis;
     }
 
     /**

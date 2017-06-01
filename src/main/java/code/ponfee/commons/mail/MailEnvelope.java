@@ -101,7 +101,7 @@ public class MailEnvelope implements Serializable {
     public void addAttachment(String fileName, byte[] data) {
         checkMimeType();
         if (this.attachments.containsKey(fileName)) {
-            throw new IllegalArgumentException("repeated attachment filename.");
+            throw new IllegalArgumentException("repeated attachment filename: " + fileName);
         }
         this.attachments.put(fileName, buildDataSource(data));
     }
@@ -121,7 +121,7 @@ public class MailEnvelope implements Serializable {
     public void addAttachment(String fileName, File file) {
         checkMimeType();
         if (this.attachments.containsKey(fileName)) {
-            throw new IllegalArgumentException("repeated attachment filename.");
+            throw new IllegalArgumentException("repeated attachment filename: " + fileName);
         }
         this.attachments.put(fileName, new FileDataSource(file));
     }
@@ -134,7 +134,7 @@ public class MailEnvelope implements Serializable {
     public void addContentImage(String contentId, byte[] data) {
         checkMimeType();
         if (this.contentImages.containsKey(contentId)) {
-            throw new IllegalArgumentException("repeated image content-id.");
+            throw new IllegalArgumentException("repeated image content-id: " + contentId);
         }
         this.contentImages.put(contentId, buildDataSource(data));
     }
@@ -158,7 +158,7 @@ public class MailEnvelope implements Serializable {
     public void addContentImage(String contentId, File file) {
         checkMimeType();
         if (this.contentImages.containsKey(contentId)) {
-            throw new IllegalArgumentException("repeated image content-id.");
+            throw new IllegalArgumentException("repeated image content-id: " + contentId);
         }
         this.contentImages.put(contentId, new FileDataSource(file));
     }
