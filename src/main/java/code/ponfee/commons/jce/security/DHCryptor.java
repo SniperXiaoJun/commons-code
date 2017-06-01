@@ -17,7 +17,8 @@ import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 
 /**
- * DH安全编码组件
+ * Diffie-Hellman加解密组件
+ * 一般用于密钥交换
  */
 public abstract class DHCryptor {
     private static final String ALGORITHM = "DH";

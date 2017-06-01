@@ -38,7 +38,7 @@ public class JedisClient implements DisposableBean {
     private SetOpertions setOps;
     private ZSetOperations zsetOps;
 
-    // -----------------------------------ShardedJedisPool-----------------------------------
+    // -----------------------------------ShardedJedisPool（分片模式）-----------------------------------
     public JedisClient(final GenericObjectPoolConfig poolCfg, String hosts) {
         this(poolCfg, hosts, DEFAULT_TIMEOUT_MILLIS, null);
     }
@@ -96,7 +96,7 @@ public class JedisClient implements DisposableBean {
         init(new ShardedJedisPool(poolCfg, infos), serializer);
     }
 
-    // -----------------------------------ShardedJedisSentinelPool-----------------------------------
+    // -----------------------------------ShardedJedisSentinelPool（哨兵+分片）-----------------------------------
     public JedisClient(final GenericObjectPoolConfig poolCfg, String masters, String sentinels) {
         this(poolCfg, masters, sentinels, DEFAULT_TIMEOUT_MILLIS, null, null);
     }
@@ -113,6 +113,15 @@ public class JedisClient implements DisposableBean {
         this(poolCfg, masters, sentinels, DEFAULT_TIMEOUT_MILLIS, password, null);
     }
 
+    /**
+     * 
+     * @param poolCfg
+     * @param masters    哨兵mastername名称，多个以“;”分隔，如：sen_redis_master1:sen_redis_master2
+     * @param sentinels  哨兵服务器ip及端口，多个以“;”分隔，如：127.0.0.1:16379;127.0.0.1:16380;
+     * @param timeout    超时时间
+     * @param password   密码
+     * @param serializer 序列化对象
+     */
     public JedisClient(final GenericObjectPoolConfig poolCfg, String masters,
         String sentinels, int timeout, String password, Serializer serializer) {
         List<String> master = Arrays.asList(masters.split(SEPARATOR));
@@ -163,7 +172,7 @@ public class JedisClient implements DisposableBean {
     void closeShardedJedis(ShardedJedis shardedJedis) {
         if (shardedJedis != null) try {
             shardedJedis.close();
-        } catch (JedisException e) {
+        } catch (/*JedisException*/Throwable e) {
             logger.error("redis close occur error", e);
         }
     }

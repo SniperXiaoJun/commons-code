@@ -23,7 +23,8 @@ import sun.security.ec.ECPrivateKeyImpl;
 import sun.security.ec.ECPublicKeyImpl;
 
 /**
- * ECC安全编码组件
+ * 基于椭圆曲线算法的非对称加解密
+ * 未实现
  */
 @SuppressWarnings("restriction")
 public abstract class ECCCryptor {

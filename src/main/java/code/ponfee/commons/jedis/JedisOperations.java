@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,14 +21,15 @@ import redis.clients.jedis.ShardedJedis;
 abstract class JedisOperations {
 
     private static final int MIN_EXPIRE_SECONDS = 1; // min 1 seconds
-    private static final int MAX_EXPIRE_SECONDS = 30 * 86400; // max 30 days
-    private static final int MAX_LEN = 50; // max methods length
     static final int DEFAULT_EXPIRE_SECONDS = 86400; // default 1 days
+    private static final int MAX_EXPIRE_SECONDS = 30 * DEFAULT_EXPIRE_SECONDS; // max 30 days
+    private static final int MAX_LEN = 50; // max str length
     static final String SUCCESS_MSG = "OK"; // 返回成功信息
     static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
 
-    static final ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 200, 60, TimeUnit.SECONDS, // 最大200个线程
-        new SynchronousQueue<>(), new NamedThreadFactory("redis_mget_furture", true));
+    static final ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 100, 60, TimeUnit.SECONDS, // 最大100个线程
+                                                                   new SynchronousQueue<>(),  // 同步队列，超过数量让调用线程处理
+                                                                   new NamedThreadFactory("redis_mget_furture", true));
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> EXECUTOR.shutdown()));
     }
@@ -42,25 +44,25 @@ abstract class JedisOperations {
 
     /**
      * 调用勾子函数
-     * @param hook        勾子对象
-     * @param defaultVal  异常时返回的值
-     * @param args        参数
+     * @param hook              勾子对象
+     * @param occurErrorRtnVal  出现异常时的返回值
+     * @param args              参数
      * @return
      */
-    final <T> T call(JedisHook<T> hook, T defaultVal, Object... args) {
-        return hook.hook(this, defaultVal, args);
+    final <T> T call(JedisHook<T> hook, T occurErrorRtnVal, Object... args) {
+        return hook.hook(this, occurErrorRtnVal, args);
     }
 
     final void exception(Exception e, Object... args) {
         StringBuilder builder = new StringBuilder("redis operation occur error: ");
-        builder.append(getClass().getSimpleName()).append(".").append(Thread.currentThread().getStackTrace()[5].getMethodName()).append("(");
+        builder.append(getClass().getSimpleName()).append(".").append(Thread.currentThread()
+               .getStackTrace()[5].getMethodName()).append("(");
         String arg;
         for (int n = args.length, i = 0; i < n; i++) {
             if (args[i] == null) {
                 arg = "null";
             } else if (i == 0 && args[i] instanceof byte[]) {
-                // redis key base64编码
-                arg = "b64:" + Base64.getEncoder().encodeToString((byte[]) args[i]);
+                arg = toString((byte[]) args[i]); // redis key base64编码
             } else {
                 arg = args[i].toString();
             }
@@ -74,6 +76,13 @@ abstract class JedisOperations {
             }
         }
         logger.error(builder.append(")").toString(), e);
+    }
+
+    private String toString(byte[] bytes) {
+        if (bytes.length > 40) {
+            bytes = ArrayUtils.subarray(bytes, 0, 40);
+        }
+        return "b64:" + Base64.getEncoder().encodeToString(bytes);
     }
 
     static int getActualExpire(int seconds) {

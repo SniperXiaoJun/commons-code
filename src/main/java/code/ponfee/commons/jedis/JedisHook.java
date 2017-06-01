@@ -13,17 +13,17 @@ interface JedisHook<T> {
     T operate(ShardedJedis shardedJedis);
 
     /**
-     * @param ops         JedisOperations 实例
-     * @param defaultVal  异常时的返回值
-     * @param args        参数列表
+     * @param ops              JedisOperation
+     * @param occurErrorRtnVal 出现异常时的返回值
+     * @param args             参数列表
      * @return
      */
-    default T hook(JedisOperations ops, T defaultVal, Object... args) {
+    default T hook(JedisOperations ops, T occurErrorRtnVal, Object... args) {
         try (ShardedJedis shardedJedis = ops.jedisClient.getShardedJedis()) {
-            return (T) this.operate(shardedJedis);
+            return this.operate(shardedJedis);
         } catch (Exception e) {
             ops.exception(e, args);
-            return defaultVal;
+            return occurErrorRtnVal;
         }
     }
 }
