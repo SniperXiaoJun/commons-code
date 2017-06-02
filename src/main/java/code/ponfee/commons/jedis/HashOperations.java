@@ -237,7 +237,7 @@ public class HashOperations extends JedisOperations {
     public <T extends Object> List<T> hvalsObject(final byte[] key,
         final Class<T> clazz, final boolean isCompress, final Integer seconds) {
         return call(shardedJedis -> {
-            List<T> list = new ArrayList<T>();
+            List<T> list = new ArrayList<>();
             for (byte[] data : shardedJedis.hvals(key)) {
                 T t = jedisClient.deserialize(data, clazz, isCompress);
                 if (t != null) list.add(t);
@@ -276,7 +276,7 @@ public class HashOperations extends JedisOperations {
     public <T extends Object> boolean hmsetObjects(final byte[] key, final Map<byte[], T> map,
         final boolean isCompress, final Integer seconds) {
         return call(shardedJedis -> {
-            Map<byte[], byte[]> data = new HashMap<byte[], byte[]>();
+            Map<byte[], byte[]> data = new HashMap<>();
             for (Entry<byte[], T> entry : map.entrySet()) {
                 data.put(entry.getKey(), jedisClient.serialize(entry.getValue(), isCompress));
             }

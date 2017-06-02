@@ -28,8 +28,8 @@ abstract class JedisOperations {
     static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
 
     static final ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 100, 60, TimeUnit.SECONDS, // 最大100个线程
-        new SynchronousQueue<>(), // 同步队列，超过数量让调用线程处理
-        new NamedThreadFactory("redis_mget_furture", true));
+                                                                   new SynchronousQueue<>(), // 同步队列，超过数量让调用线程处理
+                                                                   new NamedThreadFactory("redis_mget_furture", true));
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> EXECUTOR.shutdown()));
     }

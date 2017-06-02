@@ -32,14 +32,19 @@ import net.sf.jmimemagic.MagicMatchNotFoundException;
  *  Accept属于请求头， Content-Type属于实体头
  *     请求方的http报头结构：通用报头|请求报头|实体报头 
  *     响应方的http报头结构：通用报头|响应报头|实体报头
- *  
- *  Accept代表请求端（客户端）希望接受的数据类型
- *     比如：Accept：text/xml; 
- *     代表客户端希望接受的数据类型是xml类型
- *  
- *  Content-Type代表实体报头数据类型
- *     比如：Content-Type：text/html; 
- *     代表实体报头的数据格式是html
+ *
+ *  <p>
+ *  请求报头有：Accept、Accept-Charset、Accept-Encoding、Accept-Language、Referer、
+ *          Authorization、From、Host、If-Match、User-Agent、If-Modified-Since等
+ *  Accept：告诉WEB服务器自己接受什么介质类型，*∕*表示任何类型，type∕*表示该类型下的所有子类型，type∕sub-type，如Accept(text/html)
+ *
+ *  <p>
+ *  响应报头有：Age、Server、Accept-Ranges、Vary等
+ *
+ *  <p>
+ *  实体报头有：Allow、Location、Content-Base、Content-Encoding、Content-Length、
+ *          Content-Range、Content-MD5、Content-Type、Expires、Last-Modified等
+ *  Content-Type：WEB服务器告诉浏览器自己响应的消息格式，例如Content-Type(application/xml)
  * </pre>
  * 
  * http工具类

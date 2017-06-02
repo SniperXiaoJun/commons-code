@@ -93,7 +93,7 @@ public class Table implements Serializable {
     }
 
     private void resolveThead(List<Thead> thead) {
-        // 1验重
+        // 1、验重
         Set<Integer> nodes = new HashSet<>();
         for (Thead cell : thead) {
             if (cell.getOrder() < 1) {
@@ -103,10 +103,10 @@ public class Table implements Serializable {
             }
         }
 
-        // 2排序
+        // 2、排序
         Collections.sort(thead);
 
-        // 3拼装pathCode
+        // 3、搜索各节点的节点路径
         Set<Integer> parents = new HashSet<>();
         for (int i = 0; i < thead.size(); i++) {
             Thead cell = thead.get(i);
@@ -145,7 +145,7 @@ public class Table implements Serializable {
             cell.setNodePath(nodePath);
         }
 
-        // 4判断是否是叶子节点
+        // 4、判断是否是叶子节点
         for (Thead cell : thead) {
             if (parents.contains(cell.getOrder())) {
                 cell.setLeaf(false);
@@ -155,7 +155,7 @@ public class Table implements Serializable {
             }
         }
 
-        // 5计算
+        // 5、计算
         Collections.sort(thead);
         Collections.reverse(thead); // 逆序（叶子节点在前）
 
