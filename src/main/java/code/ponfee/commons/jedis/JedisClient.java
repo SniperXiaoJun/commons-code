@@ -13,6 +13,7 @@ import org.springframework.beans.factory.DisposableBean;
 
 import code.ponfee.commons.serial.FstSerializer;
 import code.ponfee.commons.serial.Serializer;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
@@ -37,6 +38,8 @@ public class JedisClient implements DisposableBean {
     private ListOperations listOps;
     private SetOpertions setOps;
     private ZSetOperations zsetOps;
+    private ScriptOperations scriptOps;
+    private MQOperations mqOps;
 
     // -----------------------------------ShardedJedisPool（分片模式）-----------------------------------
     public JedisClient(final GenericObjectPoolConfig poolCfg, String hosts) {
@@ -139,6 +142,8 @@ public class JedisClient implements DisposableBean {
         this.listOps = new ListOperations(this);
         this.setOps = new SetOpertions(this);
         this.zsetOps = new ZSetOperations(this);
+        this.scriptOps = new ScriptOperations(this);
+        this.mqOps = new MQOperations(this);
     }
 
     public KeysOperations keysOps() {
@@ -165,6 +170,19 @@ public class JedisClient implements DisposableBean {
         return this.zsetOps;
     }
 
+    public ScriptOperations scriptOps() {
+        return this.scriptOps;
+    }
+
+    public MQOperations mqOps() {
+        return this.mqOps;
+    }
+
+    public @Override void destroy() {
+        if (shardedJedisPool == null || shardedJedisPool.isClosed()) return;
+        shardedJedisPool.close();
+    }
+
     ShardedJedis getShardedJedis() throws JedisException {
         return this.shardedJedisPool.getResource();
     }
@@ -172,39 +190,35 @@ public class JedisClient implements DisposableBean {
     void closeShardedJedis(ShardedJedis shardedJedis) {
         if (shardedJedis != null) try {
             shardedJedis.close();
+            //shardedJedis.disconnect();
         } catch (/*JedisException*/Throwable e) {
             logger.error("redis close occur error", e);
         }
     }
 
-    public <T extends Object> byte[] serialize(T t, boolean isCompress) {
+    Jedis getJedis(String key) {
+        return this.getShardedJedis().getShard(key);
+    }
+
+    void closeJedis(Jedis jedis) {
+        jedis.close();
+        //jedis.disconnect();
+    }
+
+    <T extends Object> byte[] serialize(T t, boolean isCompress) {
         return serializer.serialize(t, isCompress);
     }
 
-    public <T extends Object> byte[] serialize(T t) {
+    <T extends Object> byte[] serialize(T t) {
         return this.serialize(t, true);
     }
 
-    public <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
+    <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
         return serializer.deserialize(data, clazz, isCompress);
     }
 
-    public final <T extends Object> T deserialize(byte[] data, Class<T> clazz) {
+    final <T extends Object> T deserialize(byte[] data, Class<T> clazz) {
         return this.deserialize(data, clazz, true);
-    }
-
-    public @Override void destroy() {
-        if (shardedJedisPool != null && !shardedJedisPool.isClosed()) {
-            shardedJedisPool.close();
-        }
-        this.shardedJedisPool = null;
-        this.serializer = null;
-        this.keysOps = null;
-        this.valueOps = null;
-        this.hashOps = null;
-        this.listOps = null;
-        this.zsetOps = null;
-        this.setOps = null;
     }
 
     private static boolean isBlank(CharSequence cs) {

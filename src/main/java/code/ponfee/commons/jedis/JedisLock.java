@@ -52,6 +52,7 @@ import redis.clients.jedis.Transaction;
  * </pre>
  * 
  * 基于redis的分布式锁
+ * redis transaction的一个应用场景
  * @author fupf
  */
 public class JedisLock implements Lock, Serializable {
@@ -152,12 +153,8 @@ public class JedisLock implements Lock, Serializable {
                 Transaction tx = jedis.multi();
                 tx.getSet(lockKey, buildValue());
                 tx.expire(lockKey, JedisOperations.getActualExpire(timeoutSeconds));
-                List<Object> exec = tx.exec();
-                if (exec == null || exec.isEmpty() || !value.equalsIgnoreCase((String) exec.get(0))) {
-                    return false;
-                } else {
-                    return true;
-                }
+                List<Object> exec = tx.exec(); // exec执行完后被监控的键会自动unwatch
+                return exec != null && !exec.isEmpty() && value.equals(exec.get(0));
             }
         } finally {
             jedisClient.closeShardedJedis(shardedJedis);
@@ -268,7 +265,8 @@ public class JedisLock implements Lock, Serializable {
         // 设置成功，返回 1。设置失败，返回 0 。
         if (result == null || result.intValue() != 1) return false;
 
-        JedisOperations.expire(shardedJedis, lockKey, timeoutSeconds); // 设置成功则需要设置失效期
+        // 设置成功则需要设置失效期
+        JedisOperations.expire(shardedJedis, lockKey, timeoutSeconds);
         return true;
     }
 
@@ -277,7 +275,8 @@ public class JedisLock implements Lock, Serializable {
      * @return
      */
     private String buildValue() {
-        String value = new StringBuilder(ObjectUtils.uuid32()).append(SEPARATOR).append(String.valueOf(System.nanoTime() + timeoutNanos)).toString();
+        String value = new StringBuilder(ObjectUtils.uuid32()).append(SEPARATOR)
+                           .append(System.nanoTime() + timeoutNanos).toString();
         LOCK_VALUE.set(value);
         return value;
     }

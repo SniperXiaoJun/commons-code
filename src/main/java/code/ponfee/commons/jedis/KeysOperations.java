@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Transaction;
 
 /**
  * redis key（键）操作类
@@ -135,56 +134,6 @@ public class KeysOperations extends JedisOperations {
         return call(shardedJedis -> {
             return shardedJedis.type(key);
         }, null, key);
-    }
-
-    /**
-     * key watch操作
-     * @param key
-     * @return
-     */
-    public String watch(final String key) {
-        return call(shardedJedis -> {
-            return shardedJedis.getShard(key).watch(key);
-        }, null, key);
-    }
-
-    /**
-     * key unwatch操作
-     * @param key
-     * @return
-     */
-    public String unwatch(final String key) {
-        return call(shardedJedis -> {
-            return shardedJedis.getShard(key).unwatch();
-        }, null, key);
-    }
-
-    /**
-     * multi 操作
-     * @param key
-     * @return
-     */
-    public Transaction multi(final String key) {
-        return call(shardedJedis -> {
-            return shardedJedis.getShard(key).multi();
-        }, null, key);
-    }
-
-    public Transaction multi(final byte[] key) {
-        return call(shardedJedis -> {
-            return shardedJedis.getShard(key).multi();
-        }, null, key);
-    }
-
-    /**
-     * 将脚本 script 添加到脚本缓存中，但并不立即执行这个脚本。
-     * @param script
-     * @return 给定 script 的 SHA1 校验和
-     */
-    public String scriptLoad(final String script) {
-        return call(shardedJedis -> {
-            return shardedJedis.getShard(script).scriptLoad(script);
-        }, null, script);
     }
 
 }

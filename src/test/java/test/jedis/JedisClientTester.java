@@ -1,8 +1,6 @@
 package test.jedis;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,12 +10,15 @@ import java.util.UUID;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.google.common.collect.Lists;
 
 import bean.TestBean;
 import code.ponfee.commons.jedis.JedisClient;
@@ -100,7 +101,7 @@ public class JedisClientTester {
             jedisClient.valueOps().set(key, bytes, true, 1000);
         }
         long start = System.currentTimeMillis();
-        Map<byte[], byte[]> result = jedisClient.valueOps().mget(true, keys);
+        jedisClient.valueOps().mget(true, keys);
         System.out.println("mget cost: " + (System.currentTimeMillis() - start));
 
         start = System.currentTimeMillis();
@@ -156,24 +157,27 @@ public class JedisClientTester {
     }
 
     @Test
-    public void testLua() {
-        byte[] lua = read(JedisTester.class.getResourceAsStream("/redis-script-node.lua"));
-        String sha1 = jedisClient.keysOps().scriptLoad(new String(lua));
+    public void testLua() throws IOException {
+        String lua = IOUtils.toString(JedisTester.class.getResourceAsStream("/redis-script-node.lua"), "UTF-8");
+        String sha1 = jedisClient.scriptOps().scriptLoad(lua);
         System.out.println(sha1);
+        System.out.println(jedisClient.scriptOps().evalsha(lua,sha1, Lists.newArrayList("myname", "1"), Lists.newArrayList()));
+    }
+    
+    @Test
+    public void testLua2() throws IOException {
+        String lua = "return {KEYS[1],KEYS[2],ARGV[1],ARGV[2],'bar'}";
+        String sha1 = jedisClient.scriptOps().scriptLoad(lua);
+        System.out.println(sha1);
+        System.out.println(jedisClient.scriptOps().evalsha(lua,sha1, Lists.newArrayList("myname", "test"), Lists.newArrayList("a", "b")));
     }
 
-    private static byte[] read(InputStream in) {
-        ByteArrayOutputStream baos = null;
-        try {
-            baos = new ByteArrayOutputStream();
-            byte[] data = new byte[1024];
-            int count = -1;
-            while ((count = in.read(data, 0, 1024)) != -1)
-                baos.write(data, 0, count);
-            return baos.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+    @Test
+    public void testScript() {
+        System.out.println(jedisClient.scriptOps().eval("return 10", Lists.newArrayList(), Lists.newArrayList()));
+        System.out.println(jedisClient.scriptOps().eval("return {KEYS[1],KEYS[2],ARGV[1],ARGV[2]}", Lists.newArrayList("myname", "test"), Lists.newArrayList("a", "b")));
+        System.out.println(jedisClient.scriptOps().eval("return redis.call('set',KEYS[1],'bar')", Lists.newArrayList("myname"), Lists.newArrayList()));
+        System.out.println(jedisClient.scriptOps().get("return redis.call('set',KEYS[1],'bar')", "myname", null));
     }
+
 }
