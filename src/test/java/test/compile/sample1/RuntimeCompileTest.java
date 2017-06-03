@@ -3,10 +3,6 @@ package test.compile.sample1;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
-/**
- * @author    liaoyu
- * @created   Jul 15, 2015 
- */
 public class RuntimeCompileTest {
 
     public static void main(String args[]) throws IOException {

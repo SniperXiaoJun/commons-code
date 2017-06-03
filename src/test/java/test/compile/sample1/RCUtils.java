@@ -4,10 +4,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-/**
- * @author    liaoyu
- * @created   Jul 15, 2015 
- */
 public class RCUtils {
     private static Pattern classNamePattern = Pattern.compile("\\s+class\\s+([a-zA-Z_$]+[0-9a-zA-Z_$]+)[\\s{]");
     private static Pattern packagePattern = Pattern.compile("\\s*package\\s+([a-z\\.]+)[\\s;]");

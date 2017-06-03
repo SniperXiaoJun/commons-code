@@ -13,10 +13,6 @@ import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.ToolProvider;
 
-/**
- * @author    liaoyu
- * @created   Jul 15, 2015 
- */
 public class RuntimeCompiler {
 
     private List<String> options = null;
@@ -52,10 +48,6 @@ public class RuntimeCompiler {
     }
 }
 
-/**
- * @author    liaoyu
- * @created   Jul 15, 2015 
- */
 class StringJavaFileObject extends SimpleJavaFileObject {
 
     final String code;

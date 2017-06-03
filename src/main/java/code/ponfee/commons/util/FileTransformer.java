@@ -24,7 +24,7 @@ import info.monitorenter.cpdetector.io.ParsingDetector;
 import info.monitorenter.cpdetector.io.UnicodeDetector;
 
 /**
- * 文件编码转换 
+ * 文件编码转换与文本内容替换
  * @author fupf
  */
 public class FileTransformer {

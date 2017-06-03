@@ -4,7 +4,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
-public final class Urls {
+/**
+ * url编码/解码
+ * @author fupf
+ */
+public final class UrlCoder {
 
     private static final String DEFAULT_CHARSET = "UTF-8";
 
