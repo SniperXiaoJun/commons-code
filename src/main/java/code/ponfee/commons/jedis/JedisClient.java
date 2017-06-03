@@ -2,10 +2,12 @@ package code.ponfee.commons.jedis;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +15,6 @@ import org.springframework.beans.factory.DisposableBean;
 
 import code.ponfee.commons.serial.FstSerializer;
 import code.ponfee.commons.serial.Serializer;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
@@ -25,10 +26,11 @@ import redis.clients.util.Pool;
  * @author fupf
  */
 public class JedisClient implements DisposableBean {
-    private static Logger logger = LoggerFactory.getLogger(JedisClient.class);
-
     private final static String SEPARATOR = ";";
     private final static int DEFAULT_TIMEOUT_MILLIS = 2000; // default 2000 millis timeout
+    private static final int MAX_BYTE_LEN = 40; // max bytes length
+    private static final int MAX_LEN = 50; // max str length
+    private static Logger logger = LoggerFactory.getLogger(JedisClient.class);
 
     private Pool<ShardedJedis> shardedJedisPool;
     private Serializer serializer;
@@ -117,8 +119,7 @@ public class JedisClient implements DisposableBean {
     }
 
     /**
-     * 
-     * @param poolCfg
+     * @param poolCfg    连接池
      * @param masters    哨兵mastername名称，多个以“;”分隔，如：sen_redis_master1:sen_redis_master2
      * @param sentinels  哨兵服务器ip及端口，多个以“;”分隔，如：127.0.0.1:16379;127.0.0.1:16380;
      * @param timeout    超时时间
@@ -178,46 +179,111 @@ public class JedisClient implements DisposableBean {
         return this.mqOps;
     }
 
-    public @Override void destroy() {
-        if (shardedJedisPool == null || shardedJedisPool.isClosed()) return;
-        shardedJedisPool.close();
+    @Override
+    public void destroy() {
+        if (shardedJedisPool != null && !shardedJedisPool.isClosed()) {
+            shardedJedisPool.close();
+            shardedJedisPool = null;
+        }
     }
 
     ShardedJedis getShardedJedis() throws JedisException {
         return this.shardedJedisPool.getResource();
     }
 
-    void closeShardedJedis(ShardedJedis shardedJedis) {
+    /**
+     * 调用勾子函数：有返回值
+     * @param hook              勾子对象
+     * @param occurErrorRtnVal  出现异常时的返回值
+     * @param args              参数
+     * @return
+     */
+    public final <T> T hook(JedisHook<T> hook, T occurErrorRtnVal, Object... args) {
+        return hook.hook(this, occurErrorRtnVal, args);
+    }
+
+    /**
+     * 调用勾子函数：无返回值
+     * @param call 调用勾子函数
+     * @param args 参数列表
+     */
+    public final void call(JedisCall call, Object... args) {
+        call.call(this, args);
+    }
+
+    final void exception(Exception e, Object... args) {
+        //StackTraceElement[] st = Thread.currentThread().getStackTrace();
+        //builder.append(st[p].getClassName()).append(".").append(st[p].getMethodName()).append("(");
+        StringBuilder builder = new StringBuilder("redis operation occur error, args(");
+        String arg;
+        for (int n = args.length, i = 0; i < n; i++) {
+            if (args[i] == null) {
+                arg = "null";
+            } else if (i == 0 && (args[i] instanceof byte[] || args[i] instanceof Byte[])) {
+                byte[] bytes;
+                if (args[i] instanceof Byte[]) {
+                    Byte[] b = (Byte[]) args[i];
+                    bytes = new byte[b.length > MAX_BYTE_LEN ? MAX_BYTE_LEN : b.length];
+                    for (int j = 0; j < bytes.length; j++) {
+                        bytes[i] = b[i];
+                    }
+                } else {
+                    bytes = (byte[]) args[i];
+                }
+                arg = toString(bytes); // redis key base64编码
+            } else {
+                arg = args[i].toString();
+            }
+
+            if (arg.length() > MAX_LEN) {
+                arg = arg.substring(0, MAX_LEN - 3) + "...";
+            }
+            builder.append("`").append(arg).append("`");
+            if (i != n - 1) {
+                builder.append(", ");
+            }
+        }
+        logger.error(builder.append(")").toString(), e);
+    }
+
+    private String toString(byte[] bytes) {
+        if (bytes.length > MAX_BYTE_LEN) {
+            bytes = ArrayUtils.subarray(bytes, 0, MAX_BYTE_LEN);
+        }
+        return "b64:" + Base64.getEncoder().encodeToString(bytes);
+    }
+
+    /*void closeShardedJedis(ShardedJedis shardedJedis) {
         if (shardedJedis != null) try {
             shardedJedis.close();
             //shardedJedis.disconnect();
-        } catch (/*JedisException*/Throwable e) {
+        } catch (Throwable e) {
             logger.error("redis close occur error", e);
         }
     }
-
+    
     Jedis getJedis(String key) {
         return this.getShardedJedis().getShard(key);
     }
-
+    
     void closeJedis(Jedis jedis) {
         jedis.close();
         //jedis.disconnect();
-    }
+    }*/
 
-    <T extends Object> byte[] serialize(T t, boolean isCompress) {
+    <T> byte[] serialize(T t, boolean isCompress) {
         return serializer.serialize(t, isCompress);
     }
 
-    <T extends Object> byte[] serialize(T t) {
+    <T> byte[] serialize(T t) {
         return this.serialize(t, true);
     }
 
-    <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
+    <T> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
         return serializer.deserialize(data, clazz, isCompress);
     }
 
-    final <T extends Object> T deserialize(byte[] data, Class<T> clazz) {
+    final <T> T deserialize(byte[] data, Class<T> clazz) {
         return this.deserialize(data, clazz, true);
     }
 

@@ -1,16 +1,11 @@
 package code.ponfee.commons.jedis;
 
-import java.util.Base64;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.ShardedJedis;
 
@@ -23,7 +18,6 @@ abstract class JedisOperations {
     private static final int MIN_EXPIRE_SECONDS = 1; // min 1 seconds
     static final int DEFAULT_EXPIRE_SECONDS = 86400; // default 1 days
     private static final int MAX_EXPIRE_SECONDS = 30 * DEFAULT_EXPIRE_SECONDS; // max 30 days
-    private static final int MAX_LEN = 50; // max str length
     static final String SUCCESS_MSG = "OK"; // 返回成功信息
     static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
 
@@ -34,8 +28,6 @@ abstract class JedisOperations {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> EXECUTOR.shutdown()));
     }
 
-    private static Logger logger = LoggerFactory.getLogger(JedisOperations.class);
-
     final JedisClient jedisClient;
 
     JedisOperations(JedisClient jedisClient) {
@@ -43,55 +35,23 @@ abstract class JedisOperations {
     }
 
     /**
-     * 调用勾子函数
+     * 调用勾子函数：有返回值
      * @param hook              勾子对象
      * @param occurErrorRtnVal  出现异常时的返回值
      * @param args              参数
      * @return
      */
-    final <T> T call(JedisHook<T> hook, T occurErrorRtnVal, Object... args) {
-        return hook.hook(this, occurErrorRtnVal, args);
+    final <T> T hook(JedisHook<T> hook, T occurErrorRtnVal, Object... args) {
+        return jedisClient.hook(hook, occurErrorRtnVal, args);
     }
 
-    final void exception(Exception e, Object... args) {
-        StringBuilder builder = new StringBuilder("redis operation occur error: ");
-        builder.append(getClass().getSimpleName()).append(".").append(Thread.currentThread().getStackTrace()[5].getMethodName()).append("(");
-        String arg;
-        for (int n = args.length, i = 0; i < n; i++) {
-            if (args[i] == null) {
-                arg = "null";
-            } else if (i == 0 && (args[i] instanceof byte[] || args[i] instanceof Byte[])) {
-                byte[] bytes;
-                if (args[i] instanceof Byte[]) {
-                    Byte[] b = (Byte[]) args[i];
-                    bytes = new byte[b.length > 40 ? 40 : b.length];
-                    for (int j = 0; j < bytes.length; j++) {
-                        bytes[i] = b[i];
-                    }
-                } else {
-                    bytes = (byte[]) args[i];
-                }
-                arg = toString(bytes); // redis key base64编码
-            } else {
-                arg = args[i].toString();
-            }
-
-            if (arg.length() > MAX_LEN) {
-                arg = arg.substring(0, MAX_LEN - 3) + "...";
-            }
-            builder.append("`").append(arg).append("`");
-            if (i != n - 1) {
-                builder.append(", ");
-            }
-        }
-        logger.error(builder.append(")").toString(), e);
-    }
-
-    private String toString(byte[] bytes) {
-        if (bytes.length > 40) {
-            bytes = ArrayUtils.subarray(bytes, 0, 40);
-        }
-        return "b64:" + Base64.getEncoder().encodeToString(bytes);
+    /**
+     * 调用勾子函数：无返回值
+     * @param call 调用勾子函数
+     * @param args 参数列表
+     */
+    final void call(JedisCall call, Object... args) {
+        jedisClient.call(call, args);
     }
 
     static int getActualExpire(int seconds) {
@@ -202,8 +162,4 @@ abstract class JedisOperations {
         }
     }
 
-    public static void main(String[] args) {
-        Object b = new Byte[10];
-        System.out.println((b instanceof Byte[]));
-    }
 }

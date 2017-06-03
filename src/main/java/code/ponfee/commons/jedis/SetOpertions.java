@@ -28,7 +28,7 @@ public class SetOpertions extends JedisOperations {
      * @return 被添加到集合中的新元素的数量，不包括被忽略的元素。
      */
     public Long sadd(final String key, final Integer seconds, final String... members) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             Long rtn = shardedJedis.sadd(key, members);
             expire(shardedJedis, key, seconds);
             return rtn;
@@ -53,7 +53,7 @@ public class SetOpertions extends JedisOperations {
      */
     public <T extends Object> Long sadd(final byte[] key, final boolean isCompress,
         final Integer seconds, final T[] members) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             byte[][] data = new byte[members.length][];
             for (int i = 0; i < members.length; i++) {
                 data[i] = jedisClient.serialize(members[i], isCompress);
@@ -87,7 +87,7 @@ public class SetOpertions extends JedisOperations {
      * @return 被移除的随机元素。当 key 不存在或 key 是空集时，返回 nil 。
      */
     public String spop(final String key, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             String result = shardedJedis.spop(key);
             if (result != null) {
                 expire(shardedJedis, key, seconds);
@@ -112,7 +112,7 @@ public class SetOpertions extends JedisOperations {
      */
     public <T extends Object> T spop(final byte[] key, final Class<T> clazz,
         final boolean isCompress, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             byte[] data = shardedJedis.spop(key);
             T t = jedisClient.deserialize(data, clazz, isCompress);
             if (t != null) {
@@ -142,7 +142,7 @@ public class SetOpertions extends JedisOperations {
      * @return 如果 member 元素是集合的成员，返回 true 。如果 member 元素不是集合的成员，或 key 不存在，返回 false 。
      */
     public boolean sismember(final String key, final String member, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             boolean result = shardedJedis.sismember(key, member);
             expire(shardedJedis, key, seconds);
             return result;
@@ -164,7 +164,7 @@ public class SetOpertions extends JedisOperations {
      * @return 集合中的所有成员。
      */
     public Set<String> smembers(final String key, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             Set<String> result = shardedJedis.smembers(key);
             if (result != null && !result.isEmpty()) {
                 expire(shardedJedis, key, seconds);
@@ -189,7 +189,7 @@ public class SetOpertions extends JedisOperations {
      */
     public <T extends Object> Set<T> smembers(final byte[] key, final Class<T> clazz,
         final boolean isCompress, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             Set<byte[]> datas = shardedJedis.smembers(key);
             Set<T> result = new HashSet<>();
             if (datas != null && !datas.isEmpty()) {
@@ -224,7 +224,7 @@ public class SetOpertions extends JedisOperations {
      * @return 集合的基数。当 key 不存在时，返回 0 。
      */
     public Long scard(final String key, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             Long rtn = shardedJedis.scard(key);
             if (rtn != null && rtn > 0) {
                 expire(shardedJedis, key, seconds);
@@ -251,7 +251,7 @@ public class SetOpertions extends JedisOperations {
      * @return 只提供 key 参数时，返回一个元素；如果集合为空，返回 nil；如果提供了 count 参数，那么返回一个数组；如果集合为空，返回空数组。
      */
     public List<String> srandmember(final String key, final int count, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             List<String> result = shardedJedis.srandmember(key, count);
             if (result != null && !result.isEmpty()) {
                 expire(shardedJedis, key, seconds);
@@ -290,7 +290,7 @@ public class SetOpertions extends JedisOperations {
     @SuppressWarnings("unchecked")
     public <T extends Object> List<T> srandmember(final byte[] key, final Class<T> clazz,
         final boolean isCompress, final int count, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             List<byte[]> datas = shardedJedis.srandmember(key, count);
             List<T> result = new ArrayList<>();
             if (datas != null && !datas.isEmpty()) {
@@ -326,7 +326,7 @@ public class SetOpertions extends JedisOperations {
      * @return 被成功移除的元素的数量，不包括被忽略的元素。
      */
     public Long srem(final String key, final String member, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             Long rtn = shardedJedis.srem(key, member);
             expire(shardedJedis, key, seconds);
             return rtn;

@@ -35,7 +35,7 @@ public class HashOperations extends JedisOperations {
     public boolean hset(final String key, final String field, final String value, final Integer seconds) {
         if (value == null) return false;
 
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             boolean flag = JedisOperations.equals(shardedJedis.hset(key, field, value), 1);
             expire(shardedJedis, key, seconds);
             return flag;
@@ -54,7 +54,7 @@ public class HashOperations extends JedisOperations {
      * @return 给定域的值。当给定域不存在或是给定 key 不存在时，返回 nil 。
      */
     public String hget(final String key, final String field, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             String result = shardedJedis.hget(key, field);
             if (result != null) {
                 expire(shardedJedis, key, seconds);
@@ -78,7 +78,7 @@ public class HashOperations extends JedisOperations {
      * @return 以map形式返回哈希表的域和域的值
      */
     public Map<String, String> hgetAll(final String key, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             Map<String, String> result = shardedJedis.hgetAll(key);
             if (result != null && !result.isEmpty()) {
                 expire(shardedJedis, key, seconds);
@@ -99,7 +99,7 @@ public class HashOperations extends JedisOperations {
      * @return 一个包含哈希表中所有值的表
      */
     public List<String> hvals(final String key, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             List<String> result = shardedJedis.hvals(key);
             if (result != null && !result.isEmpty()) {
                 expire(shardedJedis, key, seconds);
@@ -131,7 +131,7 @@ public class HashOperations extends JedisOperations {
         final T t, final boolean isCompress, final Integer seconds) {
         if (t == null) return false;
 
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             byte[] data = jedisClient.serialize(t, isCompress);
             boolean flag = JedisOperations.equals(shardedJedis.hset(key, field, data), 1);
             expire(shardedJedis, key, seconds);
@@ -162,7 +162,7 @@ public class HashOperations extends JedisOperations {
      */
     public <T extends Object> T hgetObject(final byte[] key, final byte[] field,
         final Class<T> clazz, final boolean isCompress, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             byte[] data = shardedJedis.hget(key, field);
             T t = jedisClient.deserialize(data, clazz, isCompress);
             if (t != null) {
@@ -199,7 +199,7 @@ public class HashOperations extends JedisOperations {
      */
     public <T extends Object> Map<byte[], T> hgetAllObject(final byte[] key,
         final Class<T> clazz, final boolean isCompress, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             Map<byte[], byte[]> datas = shardedJedis.hgetAll(key);
             Map<byte[], T> result = new HashMap<>();
             if (datas != null && !datas.isEmpty()) {
@@ -236,7 +236,7 @@ public class HashOperations extends JedisOperations {
      */
     public <T extends Object> List<T> hvalsObject(final byte[] key,
         final Class<T> clazz, final boolean isCompress, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             List<T> list = new ArrayList<>();
             for (byte[] data : shardedJedis.hvals(key)) {
                 T t = jedisClient.deserialize(data, clazz, isCompress);
@@ -275,7 +275,7 @@ public class HashOperations extends JedisOperations {
      */
     public <T extends Object> boolean hmsetObjects(final byte[] key, final Map<byte[], T> map,
         final boolean isCompress, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             Map<byte[], byte[]> data = new HashMap<>();
             for (Entry<byte[], T> entry : map.entrySet()) {
                 data.put(entry.getKey(), jedisClient.serialize(entry.getValue(), isCompress));
@@ -315,7 +315,7 @@ public class HashOperations extends JedisOperations {
      */
     public <T extends Object> List<T> hmgetObjects(final byte[] key, final Class<T> clazz,
         final boolean isCompress, final Integer seconds, final byte[]... fields) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             List<byte[]> datas = shardedJedis.hmget(key, fields);
             if (datas == null || datas.isEmpty()) return null;
 
@@ -358,7 +358,7 @@ public class HashOperations extends JedisOperations {
      */
     public Long hincrBy(final String key, final String field,
         final int value, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             Long rtn = shardedJedis.hincrBy(key, field, value);
             expire(shardedJedis, key, seconds);
             return rtn;
@@ -384,7 +384,7 @@ public class HashOperations extends JedisOperations {
     public boolean hmset(final String key, final Map<String, String> map, final Integer seconds) {
         if (map == null || map.isEmpty()) return false;
 
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             String rtn = shardedJedis.hmset(key, map);
             expire(shardedJedis, key, seconds);
             return SUCCESS_MSG.equalsIgnoreCase(rtn);
@@ -408,7 +408,7 @@ public class HashOperations extends JedisOperations {
      * @return 一个包含多个给定域的关联值的表，表值的排列顺序和给定域参数的请求顺序一样。
      */
     public List<String> hmget(final String key, final Integer seconds, final String... fields) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             List<String> list = shardedJedis.hmget(key, fields);
             expire(shardedJedis, key, seconds);
             return list;
@@ -427,7 +427,7 @@ public class HashOperations extends JedisOperations {
      * @return 被成功移除的域的数量，不包括被忽略的域
      */
     public Long hdel(final String key, final Integer seconds, final String... fields) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             Long rtn = shardedJedis.hdel(key, fields);
             expire(shardedJedis, key, seconds);
             return rtn;
@@ -445,7 +445,7 @@ public class HashOperations extends JedisOperations {
      * @return 哈希表中域的数量，当 key 不存在时，返回 0 。
      */
     public Long hlen(final String key, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             Long rtn = shardedJedis.hlen(key);
             if (rtn != null && rtn != 0) {
                 // key存在时才设置失效时间
@@ -467,7 +467,7 @@ public class HashOperations extends JedisOperations {
      * @return 返回值：true哈希表含有给定域；false哈希表不含有给定域（或key）不存在；
      */
     public boolean hexists(final String key, final String field, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             boolean result = shardedJedis.hexists(key, field);
             expire(shardedJedis, key, seconds);
             return result;
@@ -481,7 +481,7 @@ public class HashOperations extends JedisOperations {
      * @return 一个包含哈希表中所有域的表。当 key 不存在时，返回一个空表。
      */
     public Set<String> hkeys(final String key, final Integer seconds) {
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             Set<String> keys = shardedJedis.hkeys(key);
             if (keys != null && !keys.isEmpty()) {
                 // 存在时才设置失效时间
@@ -498,7 +498,7 @@ public class HashOperations extends JedisOperations {
      */
     public List<Object> hmget(final Map<String, String[]> queryParams) {
         if (queryParams == null || queryParams.isEmpty()) return null;
-        return call(shardedJedis -> {
+        return hook(shardedJedis -> {
             ShardedJedisPipeline pipeline = shardedJedis.pipelined();
             //Map<String, Response<List<String>>> result = new HashMap<>();
             for (Entry<String, String[]> entry : queryParams.entrySet()) {

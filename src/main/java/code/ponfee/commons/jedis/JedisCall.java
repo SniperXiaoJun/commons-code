@@ -5,25 +5,22 @@ import redis.clients.jedis.ShardedJedis;
 /**
  * 钩子函数
  * @author fupf
- * @param <T>
  */
 @FunctionalInterface
-public interface JedisHook<T> {
+public interface JedisCall {
 
-    T hook(ShardedJedis shardedJedis);
+    void call(ShardedJedis shardedJedis);
 
     /**
      * @param ops              JedisClient
-     * @param occurErrorRtnVal 出现异常时的返回值
      * @param args             参数列表
      * @return
      */
-    default T hook(JedisClient jedisClient, T occurErrorRtnVal, Object... args) {
+    default void call(JedisClient jedisClient, Object... args) {
         try (ShardedJedis shardedJedis = jedisClient.getShardedJedis()) {
-            return this.hook(shardedJedis);
+            this.call(shardedJedis);
         } catch (Exception e) {
-            jedisClient.exception(e, args);
-            return occurErrorRtnVal;
+            jedisClient.exception(e);
         }
     }
 }

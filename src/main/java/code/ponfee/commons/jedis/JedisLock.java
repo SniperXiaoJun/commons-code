@@ -134,30 +134,29 @@ public class JedisLock implements Lock, Serializable {
      */
     public @Override boolean tryLock() {
         innerLock.lock();
-        ShardedJedis shardedJedis = null;
         try {
-            shardedJedis = jedisClient.getShardedJedis();
-            if (this.setnx(shardedJedis)) return true; // 抢占锁成功
+            return jedisClient.hook(shardedJedis -> {
+                if (this.setnx(shardedJedis)) return true; // 抢占锁成功
 
-            Jedis jedis = shardedJedis.getShard(lockKey);
-            jedis.watch(lockKey); // 监视lockKey
-            String value = jedis.get(lockKey); // 获取当前锁值
-            if (value == null) {
-                jedis.unwatch();
-                return tryLock(); // 锁被释放，重新获取
-            } else if (System.nanoTime() <= parseValue(value)) {
-                jedis.unwatch();
-                return false; // 锁未超时
-            } else {
-                // 锁已超时，争抢锁（事务控制）
-                Transaction tx = jedis.multi();
-                tx.getSet(lockKey, buildValue());
-                tx.expire(lockKey, JedisOperations.getActualExpire(timeoutSeconds));
-                List<Object> exec = tx.exec(); // exec执行完后被监控的键会自动unwatch
-                return exec != null && !exec.isEmpty() && value.equals(exec.get(0));
-            }
+                Jedis jedis = shardedJedis.getShard(lockKey);
+                jedis.watch(lockKey); // 监视lockKey
+                String value = jedis.get(lockKey); // 获取当前锁值
+                if (value == null) {
+                    jedis.unwatch();
+                    return tryLock(); // 锁被释放，重新获取
+                } else if (System.nanoTime() <= parseValue(value)) {
+                    jedis.unwatch();
+                    return false; // 锁未超时
+                } else {
+                    // 锁已超时，争抢锁（事务控制）
+                    Transaction tx = jedis.multi();
+                    tx.getSet(lockKey, buildValue());
+                    tx.expire(lockKey, JedisOperations.getActualExpire(timeoutSeconds));
+                    List<Object> exec = tx.exec(); // exec执行完后被监控的键会自动unwatch
+                    return exec != null && !exec.isEmpty() && value.equals(exec.get(0));
+                }
+            }, false);
         } finally {
-            jedisClient.closeShardedJedis(shardedJedis);
             innerLock.unlock();
         }
     }
@@ -182,26 +181,23 @@ public class JedisLock implements Lock, Serializable {
      */
     public @Override void unlock() {
         innerLock.lock();
-        ShardedJedis shardedJedis = null;
         try {
-            shardedJedis = jedisClient.getShardedJedis();
-
-            // 根据分片获取jedis
-            Jedis jedis = shardedJedis.getShard(lockKey);
-            jedis.watch(lockKey);
-            String value = LOCK_VALUE.get(); // 获取当前线程保存的锁值
-            if (value == null || !value.equals(jedis.get(lockKey))) {
-                // 当前线程未获取过锁或锁已被其它线程获取，则跳过不处理
-                jedis.unwatch();
-                return;
-            }
-
-            // 当前线程持有锁，需要释放锁
-            Transaction tx = jedis.multi();
-            tx.del(lockKey);
-            tx.exec();
+            jedisClient.call(shardedJedis -> {
+                // 根据分片获取jedis
+                Jedis jedis = shardedJedis.getShard(lockKey);
+                jedis.watch(lockKey);
+                String value = LOCK_VALUE.get(); // 获取当前线程保存的锁值
+                if (value == null || !value.equals(jedis.get(lockKey))) {
+                    // 当前线程未获取过锁或锁已被其它线程获取
+                    jedis.unwatch();
+                } else {
+                    // 当前线程持有锁，需要释放锁
+                    Transaction tx = jedis.multi();
+                    tx.del(lockKey);
+                    tx.exec();
+                }
+            });
         } finally {
-            jedisClient.closeShardedJedis(shardedJedis);
             innerLock.unlock();
         }
     }
@@ -275,8 +271,7 @@ public class JedisLock implements Lock, Serializable {
      * @return
      */
     private String buildValue() {
-        String value = new StringBuilder(ObjectUtils.uuid32()).append(SEPARATOR)
-                           .append(System.nanoTime() + timeoutNanos).toString();
+        String value = new StringBuilder(ObjectUtils.uuid32()).append(SEPARATOR).append(System.nanoTime() + timeoutNanos).toString();
         LOCK_VALUE.set(value);
         return value;
     }

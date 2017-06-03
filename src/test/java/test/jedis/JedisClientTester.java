@@ -22,6 +22,8 @@ import com.google.common.collect.Lists;
 
 import bean.TestBean;
 import code.ponfee.commons.jedis.JedisClient;
+import code.ponfee.commons.jedis.ScriptOperations;
+import redis.clients.jedis.JedisPubSub;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:jedis-cfg.xml" })
@@ -161,23 +163,82 @@ public class JedisClientTester {
         String lua = IOUtils.toString(JedisTester.class.getResourceAsStream("/redis-script-node.lua"), "UTF-8");
         String sha1 = jedisClient.scriptOps().scriptLoad(lua);
         System.out.println(sha1);
-        System.out.println(jedisClient.scriptOps().evalsha(lua,sha1, Lists.newArrayList("myname", "1"), Lists.newArrayList()));
+        System.out.println(jedisClient.scriptOps().evalsha(sha1, Lists.newArrayList("myname", "1"), Lists.newArrayList()));
     }
-    
+
     @Test
     public void testLua2() throws IOException {
         String lua = "return {KEYS[1],KEYS[2],ARGV[1],ARGV[2],'bar'}";
         String sha1 = jedisClient.scriptOps().scriptLoad(lua);
         System.out.println(sha1);
-        System.out.println(jedisClient.scriptOps().evalsha(lua,sha1, Lists.newArrayList("myname", "test"), Lists.newArrayList("a", "b")));
+        System.out.println(jedisClient.scriptOps().evalsha(sha1, Lists.newArrayList("myname", "test"), Lists.newArrayList("a", "b")));
     }
 
     @Test
     public void testScript() {
         System.out.println(jedisClient.scriptOps().eval("return 10", Lists.newArrayList(), Lists.newArrayList()));
         System.out.println(jedisClient.scriptOps().eval("return {KEYS[1],KEYS[2],ARGV[1],ARGV[2]}", Lists.newArrayList("myname", "test"), Lists.newArrayList("a", "b")));
-        System.out.println(jedisClient.scriptOps().eval("return redis.call('set',KEYS[1],'bar')", Lists.newArrayList("myname"), Lists.newArrayList()));
-        System.out.println(jedisClient.scriptOps().get("return redis.call('set',KEYS[1],'bar')", "myname", null));
+        System.out.println(jedisClient.scriptOps().eval("return redis.call('set',KEYS[1],'bar11')", Lists.newArrayList("myname"), Lists.newArrayList()));
+        System.out.println(jedisClient.hook(shardedJedis -> {
+            return shardedJedis.getShard(ScriptOperations.JEDIS_SCRIPT_OPS).get("myname");
+        }, null, "myname"));
     }
 
+    @Test
+    public void testHook() {
+        jedisClient.hook(shardedJedis -> {
+            System.out.println(shardedJedis.set("aaa", "111"));
+            System.out.println(shardedJedis.get("aaa"));
+            return 1;
+        }, true, 1, 2, 3);
+
+        jedisClient.call(shardedJedis -> {
+            System.out.println(shardedJedis.set("aaa", "111"));
+            System.out.println(shardedJedis.get("aaa"));
+        });
+
+        jedisClient.valueOps().get("abc");
+    }
+    
+    /*@Test
+    public void testHook2() {
+        jedisClient.hook2((shardedJedis, args) -> {
+            return 1;
+        }, 1, 1, 2, 3);
+    }*/
+
+    @Test
+    public void testPubsub() throws InterruptedException {
+        new Thread(() -> {
+            jedisClient.mqOps().subscribe(new JedisPubSub() {
+                @Override
+                public void onMessage(String channel, String message) {
+                    System.out.println(channel + " --> " + message);
+                }
+
+                @Override
+                public void onPMessage(String pattern, String channel, String message) {}
+
+                @Override
+                public void onPSubscribe(String pattern, int subscribedChannels) {}
+
+                @Override
+                public void onPUnsubscribe(String pattern, int subscribedChannels) {}
+
+                @Override
+                public void onSubscribe(String channel, int subscribedChannels) {}
+
+                @Override
+                public void onUnsubscribe(String channel, int subscribedChannels) {}
+            }, "testChannel", "testChannel1");
+        }).start();
+        System.out.println("====================");
+        jedisClient.mqOps().publish("testChannel", "a");
+        jedisClient.mqOps().publish("testChannel", "b");
+        jedisClient.mqOps().publish("testChannel", "c");
+        jedisClient.mqOps().publish("testChannel1", "1");
+        jedisClient.mqOps().publish("testChannel1", "2");
+        jedisClient.mqOps().publish("testChannel1", "3");
+        Thread.sleep(10000);
+    }
 }

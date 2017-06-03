@@ -2,13 +2,12 @@ package code.ponfee.commons.jedis;
 
 import java.util.List;
 
-import redis.clients.jedis.Jedis;
-
 /**
  * redis lua script
  * @author fupf
  */
 public class ScriptOperations extends JedisOperations {
+    public static final String JEDIS_SCRIPT_OPS = "jedis-script-ops-9acf774bbb85429b8a3b4302ceb51313";
 
     ScriptOperations(JedisClient jedisClient) {
         super(jedisClient);
@@ -20,8 +19,8 @@ public class ScriptOperations extends JedisOperations {
      * @return
      */
     public Object eval(String script, List<String> keys, List<String> args) {
-        return call(shardedJedis -> {
-            return shardedJedis.getShard(script).eval(script, keys, args);
+        return hook(shardedJedis -> {
+            return shardedJedis.getShard(JEDIS_SCRIPT_OPS).eval(script, keys, args);
         }, null, script, keys, args);
     }
 
@@ -31,8 +30,8 @@ public class ScriptOperations extends JedisOperations {
      * @return 给定 script 的 SHA1 校验和
      */
     public String scriptLoad(String script) {
-        return call(shardedJedis -> {
-            return shardedJedis.getShard(script).scriptLoad(script);
+        return hook(shardedJedis -> {
+            return shardedJedis.getShard(JEDIS_SCRIPT_OPS).scriptLoad(script);
         }, null, script);
     }
 
@@ -43,27 +42,10 @@ public class ScriptOperations extends JedisOperations {
      * @param args
      * @return
      */
-    public Object evalsha(String script, String sha1, List<String> keys, List<String> args) {
-        return call(shardedJedis -> {
-            return shardedJedis.getShard(script).evalsha(sha1, keys, args);
-        }, null, script, sha1, keys, args);
+    public Object evalsha(String sha1, List<String> keys, List<String> args) {
+        return hook(shardedJedis -> {
+            return shardedJedis.getShard(JEDIS_SCRIPT_OPS).evalsha(sha1, keys, args);
+        }, null, sha1, keys, args);
     }
 
-    /**
-     * 获取lua脚本执行后的值
-     * @param script
-     * @param key
-     * @param seconds
-     * @return
-     */
-    public Object get(String script, String key, Integer seconds) {
-        return call(shardedJedis -> {
-            Jedis jedis = shardedJedis.getShard(script);
-            Object value = jedis.get(key);
-            if (seconds != null) {
-                jedis.expire(key, seconds);
-            }
-            return value;
-        }, null, script, key, seconds);
-    }
 }
