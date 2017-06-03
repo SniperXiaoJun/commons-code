@@ -16,7 +16,7 @@ import java.util.Map;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
- * DSA加解密
+ * DSA签名/验签
  * 只用于数字签名
  */
 public abstract class DSACryptor {

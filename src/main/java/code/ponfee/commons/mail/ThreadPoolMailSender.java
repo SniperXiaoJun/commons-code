@@ -50,7 +50,10 @@ public class ThreadPoolMailSender {
             futures.add(EXECUTOR.submit(new Sender(mailSender, envlop)));
         }
 
-        if (async) return true; // 异步发送，直接返回成功
+        if (async) {
+            futures.clear();
+            return true; // 异步发送，直接返回成功
+        }
 
         // 同步发送
         boolean flag = true;

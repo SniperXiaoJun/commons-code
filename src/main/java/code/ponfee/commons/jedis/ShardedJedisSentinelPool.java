@@ -400,7 +400,7 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
 
     public static void main(String[] args) {
         List<String> masters = Arrays.asList("TEST_SEN_MASTER1", "TEST_SEN_MASTER2");
-        Set<String> sens = new HashSet<>(Arrays.asList("194.125.15.1:26379", "194.125.15.1:26380"));
+        Set<String> sens = new HashSet<>(Arrays.asList("127.0.0.1:26379", "127.0.0.1:26380"));
         new ShardedJedisSentinelPool(masters, sens);
     }
 }

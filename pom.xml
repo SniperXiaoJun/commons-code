@@ -16,6 +16,38 @@
         <slf4j.version>1.7.25</slf4j.version>
     </properties>
 
+    <profiles>
+        <profile>
+            <id>develop</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <distributionManagement>
+                <repository>
+                    <id>snapshots</id>
+                    <url>http://127.0.0.1:8081/nexus/content/repositories/snapshots</url>
+                </repository>
+            </distributionManagement>
+            <properties>
+                <publish.version>1.0.0-SNAPSHOT</publish.version>
+                <separator>;</separator>
+            </properties>
+        </profile>
+        <profile>
+            <id>product</id>
+            <distributionManagement>
+                <repository>
+                    <id>releases</id>
+                    <url>http://127.0.0.1:8081/nexus/content/repositories/releases</url>
+                </repository>
+            </distributionManagement>
+            <properties>
+                <publish.version>1.0.0</publish.version>
+                <separator>:</separator>
+            </properties>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -341,28 +373,8 @@
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>develop</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <separator>;</separator>
-                <publish.version>1.0.0-SNAPSHOT</publish.version>
-            </properties>
-        </profile>
-        <profile>
-            <id>product</id>
-            <properties>
-                <separator>:</separator>
-                <publish.version>1.0.0</publish.version>
-            </properties>
-        </profile>
-    </profiles>
-
     <build>
-        <finalName>${project.artifactId}</finalName>
+        <finalName>${project.artifactId}-${publish.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
