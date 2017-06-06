@@ -42,7 +42,7 @@ public final class XmlWriters {
     /**
      * 构建包含多个子元素的元素
      * @param parentName 父元素标签名
-     * @param childPairs childName1, childValue1, childName2, childValu2, ...，长度必读为2的倍数
+     * @param childPairs childName1, childValue1, childName2, childValu2, ...，长度必须为2的倍数
      * @return this
      */
     public XmlWriters element(String parentName, Object... childPairs) {

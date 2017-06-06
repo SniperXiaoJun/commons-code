@@ -13,6 +13,7 @@ import java.util.Vector;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 
 import code.ponfee.commons.jce.Providers;
+import code.ponfee.commons.jce.RSASignAlgorithm;
 import code.ponfee.commons.util.ObjectUtils;
 import sun.security.pkcs10.PKCS10;
 import sun.security.util.ObjectIdentifier;
@@ -40,7 +41,7 @@ public class X509CertGenerator {
 
     private static final Random RANDOM = new Random();
 
-    public static X509Certificate createRootCert(String issuer, String sigAlg,
+    public static X509Certificate createRootCert(String issuer, RSASignAlgorithm sigAlg,
         PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
         return createRootCert(null, issuer, sigAlg, privateKey, publicKey, notBefore, notAfter);
     }
@@ -56,7 +57,7 @@ public class X509CertGenerator {
      * @param notAfter
      * @return
      */
-    public static X509Certificate createRootCert(Integer sn, String issuer, String sigAlg,
+    public static X509Certificate createRootCert(Integer sn, String issuer, RSASignAlgorithm sigAlg,
         PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
         PKCS10 pkcs10 = createPkcs10(issuer, privateKey, publicKey, sigAlg);
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(true));
@@ -64,7 +65,7 @@ public class X509CertGenerator {
     }
 
     public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, String subject,
-        String sigAlg, PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
+        RSASignAlgorithm sigAlg, PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
         return createSubjectCert(caCert, caKey, null, subject, sigAlg, privateKey, publicKey, notBefore, notAfter);
     }
 
@@ -82,7 +83,7 @@ public class X509CertGenerator {
      * @return
      */
     public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, Integer sn,
-        String subject, String sigAlg, PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
+        String subject, RSASignAlgorithm sigAlg, PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
         PKCS10 pkcs10 = createPkcs10(subject, privateKey, publicKey, sigAlg);
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(false));
         return signCert(caCert, caKey, certInfo);
@@ -117,10 +118,10 @@ public class X509CertGenerator {
      * @param sigAlg
      * @return
      */
-    public static PKCS10 createPkcs10(String subject, PrivateKey privateKey, PublicKey publicKey, String sigAlg) {
+    public static PKCS10 createPkcs10(String subject, PrivateKey privateKey, PublicKey publicKey, RSASignAlgorithm sigAlg) {
         try {
             PKCS10 pkcs10 = new PKCS10(publicKey);
-            Signature signature = Signature.getInstance(sigAlg);
+            Signature signature = Signature.getInstance(sigAlg.name());
             signature.initSign(privateKey);
             pkcs10.encodeAndSign(new X500Name(subject), signature);
             return pkcs10;
@@ -212,11 +213,11 @@ public class X509CertGenerator {
      * @param certInfo
      * @return
      */
-    private static X509Certificate signSelf(PrivateKey privateKey, String sigAlg, X509CertInfo certInfo) {
+    private static X509Certificate signSelf(PrivateKey privateKey, RSASignAlgorithm sigAlg, X509CertInfo certInfo) {
         try {
             certInfo.set(X509CertInfo.ISSUER, certInfo.get(X509CertInfo.SUBJECT));
             X509CertImpl signedCert = new X509CertImpl(certInfo);
-            signedCert.sign(privateKey, sigAlg); // 签名
+            signedCert.sign(privateKey, sigAlg.name()); // 签名
             return signedCert;
         } catch (Exception e) {
             throw new SecurityException(e);

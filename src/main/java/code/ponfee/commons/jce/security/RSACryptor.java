@@ -27,6 +27,7 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 
 import code.ponfee.commons.exception.UnimplementedException;
+import code.ponfee.commons.jce.RSASignAlgorithm;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.Streams;
@@ -38,8 +39,6 @@ import code.ponfee.commons.util.Streams;
 public final class RSACryptor {
 
     private static final String ALG_RSA = "RSA";
-    private static final String ALG_SHA1withRSA = "SHA1withRSA";
-    private static final String ALG_MD5withRSA = "MD5withRSA";
 
     /**
      * 密钥生成
@@ -174,7 +173,7 @@ public final class RSACryptor {
      * @return
      */
     public static byte[] signSha1(byte[] data, RSAPrivateKey privateKey) {
-        return sign(data, privateKey, ALG_SHA1withRSA);
+        return sign(data, privateKey, RSASignAlgorithm.SHA1withRSA);
     }
 
     /**
@@ -184,7 +183,7 @@ public final class RSACryptor {
      * @return
      */
     public static byte[] signMd5(byte[] data, RSAPrivateKey privateKey) {
-        return sign(data, privateKey, ALG_MD5withRSA);
+        return sign(data, privateKey, RSASignAlgorithm.MD5withRSA);
     }
 
     /**
@@ -195,7 +194,7 @@ public final class RSACryptor {
      * @return
      */
     public static boolean verifySha1(byte[] data, RSAPublicKey publicKey, byte[] signed) {
-        return verify(data, publicKey, signed, ALG_SHA1withRSA);
+        return verify(data, publicKey, signed, RSASignAlgorithm.SHA1withRSA);
     }
 
     /**
@@ -206,7 +205,7 @@ public final class RSACryptor {
      * @return
      */
     public static boolean verifyMd5(byte[] data, RSAPublicKey publicKey, byte[] signed) {
-        return verify(data, publicKey, signed, ALG_MD5withRSA);
+        return verify(data, publicKey, signed, RSASignAlgorithm.MD5withRSA);
     }
 
     /**
@@ -279,9 +278,9 @@ public final class RSACryptor {
      * @param algId
      * @return
      */
-    private static byte[] sign(byte[] data, RSAPrivateKey privateKey, String algId) {
+    private static byte[] sign(byte[] data, RSAPrivateKey privateKey, RSASignAlgorithm alg) {
         try {
-            Signature signature = Signature.getInstance(algId);
+            Signature signature = Signature.getInstance(alg.name());
             signature.initSign(privateKey);
             signature.update(data);
             return signature.sign();
@@ -298,9 +297,9 @@ public final class RSACryptor {
      * @param algId
      * @return
      */
-    private static boolean verify(byte[] data, RSAPublicKey publicKey, byte[] signed, String algId) {
+    private static boolean verify(byte[] data, RSAPublicKey publicKey, byte[] signed, RSASignAlgorithm alg) {
         try {
-            Signature signature = Signature.getInstance(algId);
+            Signature signature = Signature.getInstance(alg.name());
             signature.initVerify(publicKey);
             signature.update(data);
             return signature.verify(signed);

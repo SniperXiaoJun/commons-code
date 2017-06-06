@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import code.ponfee.commons.util.ObjectUtils;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.Transaction;
 
 /**
@@ -136,9 +135,10 @@ public class JedisLock implements Lock, Serializable {
         innerLock.lock();
         try {
             return jedisClient.hook(shardedJedis -> {
-                if (this.setnx(shardedJedis)) return true; // 抢占锁成功
-
                 Jedis jedis = shardedJedis.getShard(lockKey);
+
+                if (this.setnx(jedis)) return true; // 抢占锁成功
+
                 jedis.watch(lockKey); // 监视lockKey
                 String value = jedis.get(lockKey); // 获取当前锁值
                 if (value == null) {
@@ -252,17 +252,17 @@ public class JedisLock implements Lock, Serializable {
     /**
      * 将 key 的值设为 value ，当且仅当 key 不存在。
      * 若给定的 key 已经存在，则 SETNX 不做任何动作。
-     * @param shardedJedis
+     * @param jedis
      * @return  设置是否成功
      */
-    private boolean setnx(ShardedJedis shardedJedis) {
-        Long result = shardedJedis.setnx(lockKey, buildValue());
+    private boolean setnx(Jedis jedis) {
+        Long result = jedis.setnx(lockKey, buildValue());
 
         // 设置成功，返回 1。设置失败，返回 0 。
         if (result == null || result.intValue() != 1) return false;
 
         // 设置成功则需要设置失效期
-        JedisOperations.expire(shardedJedis, lockKey, timeoutSeconds);
+        jedis.expire(lockKey, timeoutSeconds);
         return true;
     }
 
@@ -271,7 +271,8 @@ public class JedisLock implements Lock, Serializable {
      * @return
      */
     private String buildValue() {
-        String value = new StringBuilder(ObjectUtils.uuid32()).append(SEPARATOR).append(System.nanoTime() + timeoutNanos).toString();
+        String value = new StringBuilder(ObjectUtils.uuid32()).append(SEPARATOR)
+                           .append(System.nanoTime() + timeoutNanos).toString();
         LOCK_VALUE.set(value);
         return value;
     }
