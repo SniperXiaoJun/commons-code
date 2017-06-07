@@ -17,8 +17,6 @@ package code.ponfee.commons.jce.pwd;
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 
-import code.ponfee.commons.jce.hash.HashUtils;
-
 /**
 * BCrypt implements OpenBSD-style Blowfish password hashing using
 * the scheme described in "A Future-Adaptable Password Scheme" by
@@ -786,23 +784,19 @@ public final class BCrypt {
     }
 
     public static void main(String[] args) {
-        String hased = BCrypt.create(HashUtils.sha1Hex("passwd"));
+        String password = "passwd";
+        String hased = BCrypt.create(password);
         System.out.println(hased);
-        boolean b = BCrypt.check(HashUtils.sha1Hex("passwd"), hased);
+        boolean b = BCrypt.check(password, hased);
         System.out.println(b);
 
         String salt = gensalt();
+        System.out.println(salt); // real_salt = salt.substring(4 + 3, 4 + 25);
         String hashed1 = create("password", salt);
-        String hashed2 = create("password", hashed1);
+        String hashed2 = create("password", salt);
         String hashed3 = create("password", hashed2);
-        String hashed4 = create("password", hashed3);
-        String hashed5 = create("password", hashed4);
-        String hashed6 = create("password", salt);
         System.out.println(hashed1);
         System.out.println(hashed2);
         System.out.println(hashed3);
-        System.out.println(hashed4);
-        System.out.println(hashed5);
-        System.out.println(hashed6);
     }
 }

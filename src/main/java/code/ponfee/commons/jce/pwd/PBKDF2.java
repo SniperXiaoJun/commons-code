@@ -6,12 +6,11 @@ import static java.lang.System.arraycopy;
 
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
+import java.util.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
-
-import code.ponfee.commons.util.Bytes;
 
 /**
  * An implementation of the Password-Based Key Derivation Function as specified in RFC 2898.
@@ -34,8 +33,8 @@ public class PBKDF2 {
             mac.init(new SecretKeySpec(P, alg));
             byte[] DK = new byte[dkLen];
             pbkdf2(mac, S, c, DK, dkLen);
-            return Bytes.base64Encode(DK);
-        } catch(GeneralSecurityException e) {
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(DK);
+        } catch (GeneralSecurityException e) {
             throw new SecurityException(e);
         }
     }
@@ -87,7 +86,7 @@ public class PBKDF2 {
                         T[k] ^= U[k];
                     }
                 }
-            } catch(ShortBufferException | IllegalStateException e) {
+            } catch (ShortBufferException | IllegalStateException e) {
                 throw new SecurityException(e);
             }
 

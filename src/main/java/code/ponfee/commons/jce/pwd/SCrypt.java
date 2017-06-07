@@ -8,12 +8,10 @@ import static java.lang.System.arraycopy;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
+import java.util.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
-import code.ponfee.commons.util.Bytes;
-import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * An implementation of the <a href="http://www.tarsnap.com/scrypt/scrypt.pdf"/>scrypt</a> key derivation function. This class will attempt to load a native
@@ -25,7 +23,7 @@ import code.ponfee.commons.util.ObjectUtils;
 public class SCrypt {
 
     /**
-     * Hash the supplied plaintext password and generate output in the format described in {@link SCryptUtil}.
+     * Hash the supplied plaintext password and generate output in the format described in {@link SCryp}.
      * @param passwd Password.
      * @param N CPU cost parameter.
      * @param r Memory cost parameter.
@@ -37,19 +35,19 @@ public class SCrypt {
             byte[] salt = new byte[16];
             SecureRandom.getInstance("SHA1PRNG").nextBytes(salt);
 
-            byte[] derived = SCrypt.scrypt(passwd.getBytes("UTF-8"), salt, N, r, p, 32);
+            byte[] derived = scrypt(passwd.getBytes("UTF-8"), salt, N, r, p, 32);
 
             String params = Long.toString(log2(N) << 16L | r << 8 | p, 16);
 
             StringBuilder sb = new StringBuilder((salt.length + derived.length) * 2);
             sb.append("$s0$").append(params).append('$');
-            sb.append(Bytes.base64Encode(salt)).append('$');
-            sb.append(Bytes.base64Encode(derived));
+            sb.append(Base64.getUrlEncoder().withoutPadding().encodeToString(salt)).append('$');
+            sb.append(Base64.getUrlEncoder().withoutPadding().encodeToString(derived));
 
             return sb.toString();
-        } catch(UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException("JVM doesn't support UTF-8?");
-        } catch(GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw new IllegalStateException("JVM doesn't support SHA1PRNG or HMAC_SHA256?");
         }
     }
@@ -69,14 +67,14 @@ public class SCrypt {
             }
 
             long params = Long.parseLong(parts[2], 16);
-            byte[] salt = Bytes.base64Decode(parts[3]);
-            byte[] derived0 = Bytes.base64Decode(parts[4]);
+            byte[] salt = Base64.getUrlDecoder().decode(parts[3]);
+            byte[] derived0 = Base64.getUrlDecoder().decode(parts[4]);
 
             int N = (int) Math.pow(2, params >> 16 & 0xffff);
             int r = (int) params >> 8 & 0xff;
             int p = (int) params & 0xff;
 
-            byte[] derived1 = SCrypt.scrypt(passwd.getBytes("UTF-8"), salt, N, r, p, 32);
+            byte[] derived1 = scrypt(passwd.getBytes("UTF-8"), salt, N, r, p, 32);
 
             if (derived0.length != derived1.length) return false;
 
@@ -85,9 +83,9 @@ public class SCrypt {
                 result |= derived0[i] ^ derived1[i];
             }
             return result == 0;
-        } catch(UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException("JVM doesn't support UTF-8?");
-        } catch(GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw new IllegalStateException("JVM doesn't support SHA1PRNG or HMAC_SHA256?");
         }
     }
@@ -277,9 +275,10 @@ public class SCrypt {
     }
 
     public static void main(String[] args) {
-        String hashed = SCrypt.create("passwd", 2, 255, 255);
-        System.out.println(ObjectUtils.toString(hashed.split("\\$")));
-        System.out.println(SCrypt.check("passwd", hashed));
+        String password = "passwd";
+        String hashed = create(password, 2, 255, 255);
+        System.out.println(hashed);
+        System.out.println(check(password, hashed));
     }
 
 }

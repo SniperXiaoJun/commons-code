@@ -4,6 +4,7 @@ import java.security.GeneralSecurityException;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -118,4 +119,10 @@ public class Encryptor {
         return bytes;
     }
 
+    
+    public static void main(String[] args) {
+        System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes(10)));
+        System.out.println(org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(randomBytes(10)));
+    }
+    
 }

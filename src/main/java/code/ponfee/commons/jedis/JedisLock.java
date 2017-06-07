@@ -137,7 +137,12 @@ public class JedisLock implements Lock, Serializable {
             return jedisClient.hook(shardedJedis -> {
                 Jedis jedis = shardedJedis.getShard(lockKey);
 
-                if (this.setnx(jedis)) return true; // 抢占锁成功
+                // 仅当lockKey不存在才能设置成功并返回1，否则setnx不做任何动作返回0
+                Long result = jedis.setnx(lockKey, buildValue());
+                if (result != null && result.intValue() == 1) {
+                    jedis.expire(lockKey, timeoutSeconds); // 成功则需要设置失效期
+                    return true;
+                }
 
                 jedis.watch(lockKey); // 监视lockKey
                 String value = jedis.get(lockKey); // 获取当前锁值
@@ -247,23 +252,6 @@ public class JedisLock implements Lock, Serializable {
      */
     private long parseValue(String value) {
         return Long.parseLong(value.split(SEPARATOR)[1]);
-    }
-
-    /**
-     * 将 key 的值设为 value ，当且仅当 key 不存在。
-     * 若给定的 key 已经存在，则 SETNX 不做任何动作。
-     * @param jedis
-     * @return  设置是否成功
-     */
-    private boolean setnx(Jedis jedis) {
-        Long result = jedis.setnx(lockKey, buildValue());
-
-        // 设置成功，返回 1。设置失败，返回 0 。
-        if (result == null || result.intValue() != 1) return false;
-
-        // 设置成功则需要设置失效期
-        jedis.expire(lockKey, timeoutSeconds);
-        return true;
     }
 
     /**

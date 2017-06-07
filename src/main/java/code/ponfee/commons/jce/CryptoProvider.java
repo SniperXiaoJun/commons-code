@@ -29,7 +29,7 @@ public abstract class CryptoProvider {
 
     public final String encrypt(String plaintext, String charset) {
         byte[] original = plaintext.getBytes(Charset.forName(charset));
-        return Base64.getUrlEncoder().encodeToString(encrypt(original));
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(encrypt(original));
     }
 
     public final String decrypt(String ciphertext) {

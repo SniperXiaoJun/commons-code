@@ -6,11 +6,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Base64;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import code.ponfee.commons.jce.pwd.SCrypt;
-import code.ponfee.commons.util.Bytes;
 
 public class SCryptTester {
     String passwd = "secret";
@@ -26,8 +27,8 @@ public class SCryptTester {
 
         assertEquals(5, parts.length);
         assertEquals("s0", parts[1]);
-        Assert.assertEquals(16, Bytes.base64Decode(parts[3]).length);
-        assertEquals(32, Bytes.base64Decode(parts[4]).length);
+        Assert.assertEquals(16, Base64.getUrlDecoder().decode(parts[3]).length);
+        assertEquals(32, Base64.getUrlDecoder().decode(parts[4]).length);
 
         int params = Integer.valueOf(parts[2], 16);
 

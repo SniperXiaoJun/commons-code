@@ -7,7 +7,7 @@ import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.reflect.Fields;
 
 /**
- * 统一的返回结果数据结构体
+ * 返回结果数据结构体封装类
  * @param <T>
  * @author fupf
  */

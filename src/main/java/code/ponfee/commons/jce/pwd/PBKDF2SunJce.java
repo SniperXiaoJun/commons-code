@@ -4,11 +4,10 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-
-import code.ponfee.commons.util.Bytes;
 
 /**
  * PBKDF2 salted password hashing.
@@ -65,7 +64,11 @@ public class PBKDF2SunJce {
         // Hash the password
         byte[] hash = pbkdf2(algorithm, password, salt, PBKDF2_ITERATIONS, HASH_BYTE_SIZE);
         // format iterations:salt:hash
-        return PBKDF2_ITERATIONS + SEPARATOR + Bytes.base64Encode(salt) + SEPARATOR + Bytes.base64Encode(hash);
+        return PBKDF2_ITERATIONS + SEPARATOR + toBase64(salt) + SEPARATOR + toBase64(hash);
+    }
+
+    private static String toBase64(byte[] data) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
     public static boolean check(String password, String correctHash) {
@@ -92,8 +95,8 @@ public class PBKDF2SunJce {
         // Decode the hash into its parameters
         String[] params = correctHash.split("\\" + SEPARATOR);
         int iterations = Integer.parseInt(params[ITERATION_INDEX]);
-        byte[] salt = Bytes.base64Decode(params[SALT_INDEX]);
-        byte[] hash = Bytes.base64Decode(params[PBKDF2_INDEX]);
+        byte[] salt = Base64.getUrlDecoder().decode(params[SALT_INDEX]);
+        byte[] hash = Base64.getUrlDecoder().decode(params[PBKDF2_INDEX]);
         // Compute the hash of the provided password, using the same salt, 
         // iteration count, and hash length
         byte[] testHash = pbkdf2(algorithm, password, salt, iterations, hash.length);
