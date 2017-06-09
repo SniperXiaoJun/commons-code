@@ -33,7 +33,7 @@ public class ZSetOperations extends JedisOperations {
         final String member, final Integer seconds) {
         return hook(shardedJedis -> {
             long rtn = shardedJedis.zadd(key, score, member);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return rtn;
         }, 0L, key, score, member, seconds);
     }
@@ -52,7 +52,7 @@ public class ZSetOperations extends JedisOperations {
     public long zadd(final String key, final Map<String, Double> scoreMembers, final Integer seconds) {
         return hook(shardedJedis -> {
             long rtn = shardedJedis.zadd(key, scoreMembers);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return rtn;
         }, 0L, key, scoreMembers, seconds);
     }
@@ -333,7 +333,7 @@ public class ZSetOperations extends JedisOperations {
         final double score, final Integer seconds) {
         return hook(shardedJedis -> {
             Double rtn = shardedJedis.zincrby(key, score, member);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return rtn;
         }, null, key, member, score, seconds);
     }

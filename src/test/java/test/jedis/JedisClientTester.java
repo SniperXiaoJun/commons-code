@@ -62,7 +62,7 @@ public class JedisClientTester {
 
     @Test
     public void testSet() {
-        int n = 10000;
+        int n = 1;
         TestBean[] breans = new TestBean[n];
         for (int i = 0; i < n; i++) {
             breans[i] = new TestBean(i, new Random().nextLong(), UUID.randomUUID().toString());
@@ -76,7 +76,7 @@ public class JedisClientTester {
 
     @Test
     public void testMget() {
-        int n = 10000;
+        int n = 1;
         List<byte[]> keys = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             byte[] key = ("test_mget_" + i).getBytes();
@@ -90,7 +90,7 @@ public class JedisClientTester {
 
     @Test
     public void testMgetByte() {
-        int n = 5000;
+        int n = 1;
         byte[][] keys = new byte[n][];
         for (int i = 0; i < n; i++) {
             byte[] key = ("test_mget_" + i).getBytes();
@@ -118,7 +118,7 @@ public class JedisClientTester {
 
     @Test
     public void testMgetObj() {
-        int n = 80000;
+        int n = 1;
         byte[][] keys = new byte[n][];
         for (int i = 0; i < n; i++) {
             byte[] key = ("test_mget_" + i).getBytes();

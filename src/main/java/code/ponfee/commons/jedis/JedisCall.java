@@ -3,7 +3,7 @@ package code.ponfee.commons.jedis;
 import redis.clients.jedis.ShardedJedis;
 
 /**
- * 钩子函数
+ * 钩子函数（无返回值时使用）
  * @author fupf
  */
 @FunctionalInterface
@@ -12,8 +12,9 @@ public interface JedisCall {
     void call(ShardedJedis shardedJedis);
 
     /**
-     * @param ops              JedisClient
-     * @param args             参数列表
+     * 挂勾
+     * @param jedisClient JedisClient
+     * @param args        参数列表
      * @return
      */
     default void call(JedisClient jedisClient, Object... args) {

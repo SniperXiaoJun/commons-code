@@ -172,7 +172,7 @@ public class ValueOperations extends JedisOperations {
     public String getSet(final String key, final String value, final int seconds) {
         return hook(shardedJedis -> {
             String oldValue = shardedJedis.getSet(key, value);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return oldValue;
         }, null, key, value, seconds);
     }
@@ -193,7 +193,7 @@ public class ValueOperations extends JedisOperations {
             Long result = shardedJedis.setnx(key, value);
             if (JedisOperations.equals(result, 1)) {
                 // 设置成功则需要设置失效期
-                expire(shardedJedis, key, seconds);
+                expireForce(shardedJedis, key, seconds);
                 return true;
             } else {
                 return false;
@@ -219,7 +219,7 @@ public class ValueOperations extends JedisOperations {
     public Long incrBy(final String key, final int step, final Integer seconds) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.incrBy(key, step);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return rtn;
         }, null, key, step, seconds);
     }
@@ -237,7 +237,7 @@ public class ValueOperations extends JedisOperations {
     public Double incrByFloat(final String key, final double step, final Integer seconds) {
         return hook(shardedJedis -> {
             Double rtn = shardedJedis.incrByFloat(key, step);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return rtn;
         }, null, key, step, seconds);
     }
@@ -258,7 +258,7 @@ public class ValueOperations extends JedisOperations {
     public Long decrBy(final String key, final int step, final Integer seconds) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.decrBy(key, step);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return rtn;
         }, null, key, step, seconds);
     }

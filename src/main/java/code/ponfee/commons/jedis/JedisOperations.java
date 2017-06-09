@@ -36,9 +36,9 @@ abstract class JedisOperations {
 
     /**
      * 调用勾子函数：有返回值
-     * @param hook              勾子对象
-     * @param occurErrorRtnVal  出现异常时的返回值
-     * @param args              参数
+     * @param hook             勾子对象
+     * @param occurErrorRtnVal 出现异常时的返回值
+     * @param args             参数
      * @return
      */
     final <T> T hook(JedisHook<T> hook, T occurErrorRtnVal, Object... args) {
@@ -47,7 +47,7 @@ abstract class JedisOperations {
 
     /**
      * 调用勾子函数：无返回值
-     * @param call 调用勾子函数
+     * @param call 勾子对象
      * @param args 参数列表
      */
     final void call(JedisCall call, Object... args) {
@@ -64,42 +64,83 @@ abstract class JedisOperations {
     }
 
     /**
-     * 设置过期时间
+     * 设置过期时间，若seconds为null则不做处理
+     * @param shardedJedis
+     * @param key
      * @param seconds
      * @return
      */
     static boolean expire(ShardedJedis shardedJedis, String key, Integer seconds) {
-        if (seconds == null) {
-            expireDefaultIfInfinite(shardedJedis, key);
-            return false;
-        }
+        if (seconds == null) return false;
         return equals(shardedJedis.expire(key, getActualExpire(seconds)), 1);
     }
 
     static boolean expire(ShardedJedis shardedJedis, byte[] key, Integer seconds) {
-        if (seconds == null) {
-            expireDefaultIfInfinite(shardedJedis, key);
-            return false;
-        }
+        if (seconds == null) return false;
         return equals(shardedJedis.expire(key, getActualExpire(seconds)), 1);
     }
 
     /**
-     * 设置过期时间
+     * 设置过期时间，若milliseconds为null则不做处理
+     * @param shardedJedis
+     * @param key
      * @param milliseconds
      * @return
      */
     static boolean pexpire(ShardedJedis shardedJedis, String key, Integer milliseconds) {
-        if (milliseconds == null) {
-            expireDefaultIfInfinite(shardedJedis, key);
-            return false;
-        }
-        int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(milliseconds);
-        return expire(shardedJedis, key, seconds);
+        if (milliseconds == null) return false;
+        return expire(shardedJedis, key, (int) TimeUnit.MILLISECONDS.toSeconds(milliseconds));
     }
 
-    static boolean equals(Number a, Number b) {
-        return (a == b) || (a != null && b != null && a.longValue() == b.longValue());
+    static boolean pexpire(ShardedJedis shardedJedis, byte[] key, Integer milliseconds) {
+        if (milliseconds == null) return false;
+        return expire(shardedJedis, key, (int) TimeUnit.MILLISECONDS.toSeconds(milliseconds));
+    }
+
+    /**
+     * 设置过期时间，若seconds为null且无失效期限则设置默认失效时间
+     * @param shardedJedis
+     * @param key
+     * @param seconds
+     * @return
+     */
+    static boolean expireForce(ShardedJedis shardedJedis, String key, Integer seconds) {
+        if (seconds != null) {
+            return expire(shardedJedis, key, seconds);
+        }
+        expireDefaultIfInfinite(shardedJedis, key);
+        return false;
+    }
+
+    static boolean expireForce(ShardedJedis shardedJedis, byte[] key, Integer seconds) {
+        if (seconds != null) {
+            return expire(shardedJedis, key, seconds);
+        }
+        expireDefaultIfInfinite(shardedJedis, key);
+        return false;
+    }
+
+    /**
+     * 设置过期时间，若milliseconds为null且无失效期限则设置默认失效时间
+     * @param shardedJedis
+     * @param key
+     * @param milliseconds
+     * @return
+     */
+    static boolean pexpireForce(ShardedJedis shardedJedis, String key, Integer milliseconds) {
+        if (milliseconds != null) {
+            return pexpire(shardedJedis, key, milliseconds);
+        }
+        expireDefaultIfInfinite(shardedJedis, key);
+        return false;
+    }
+
+    static boolean pexpireForce(ShardedJedis shardedJedis, byte[] key, Integer milliseconds) {
+        if (milliseconds != null) {
+            return pexpire(shardedJedis, key, milliseconds);
+        }
+        expireDefaultIfInfinite(shardedJedis, key);
+        return false;
     }
 
     /**
@@ -117,6 +158,10 @@ abstract class JedisOperations {
         if (shardedJedis.ttl(key) == -1) {
             shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS);
         }
+    }
+
+    static boolean equals(Number a, Number b) {
+        return (a == b) || (a != null && b != null && a.longValue() == b.longValue());
     }
 
     /**

@@ -30,7 +30,7 @@ public class SetOpertions extends JedisOperations {
     public Long sadd(final String key, final Integer seconds, final String... members) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.sadd(key, members);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return rtn;
         }, null, key, seconds, members);
     }
@@ -59,7 +59,7 @@ public class SetOpertions extends JedisOperations {
                 data[i] = jedisClient.serialize(members[i], isCompress);
             }
             Long rtn = shardedJedis.sadd(key, data);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return rtn;
         }, null, key, isCompress, seconds, members);
     }

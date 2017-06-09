@@ -23,7 +23,7 @@ public class ListOperations extends JedisOperations {
     public Long lpush(final String key, final Integer seconds, final String... fields) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.lpush(key, fields);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return rtn;
         }, null, key, seconds, fields);
     }
@@ -48,7 +48,7 @@ public class ListOperations extends JedisOperations {
                 data[i] = jedisClient.serialize(objs[i], isCompress);
             }
             Long rtn = shardedJedis.lpush(key, data);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return rtn;
         }, null, key, isCompress, seconds, objs);
     }
@@ -75,7 +75,7 @@ public class ListOperations extends JedisOperations {
     public Long rpush(final String key, final Integer seconds, final String... fields) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.rpush(key, fields);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return rtn;
         }, null, key, seconds, fields);
     }
