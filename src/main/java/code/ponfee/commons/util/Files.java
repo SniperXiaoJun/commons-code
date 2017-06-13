@@ -33,11 +33,23 @@ public class Files {
 
     /**
      * 创建目录
-     * @param dir
+     * @param path
      */
-    public static File mkdir(String dir) {
-        File file = new File(dir);
-        if (!file.exists()) file.mkdirs();
+    public static File mkdir(String path) {
+        return mkdir(new File(path));
+    }
+
+    /**
+     * 创建目录
+     * @param file
+     * @return
+     */
+    public static File mkdir(File file) {
+        if (!file.exists()) {
+            file.mkdirs();
+        } else if (file.isFile()) {
+            throw new IllegalArgumentException("file [" + file.getAbsolutePath() + "] not a dir");
+        }
         return file;
     }
 
@@ -66,7 +78,7 @@ public class Files {
                 throw new RuntimeException(e);
             }
         } else if (file.isDirectory()) {
-            throw new IllegalArgumentException("error: " + file.getAbsolutePath() + " is dir, not a file");
+            throw new IllegalArgumentException("dir [" + file.getAbsolutePath() + "] not a file");
         }
         return file;
     }

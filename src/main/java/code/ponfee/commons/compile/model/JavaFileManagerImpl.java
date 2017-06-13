@@ -24,7 +24,7 @@ public class JavaFileManagerImpl extends ForwardingJavaFileManager<JavaFileManag
 
     private final JdkCompilerClassLoader classLoader;
 
-    private final Map<URI, JavaFileObject> fileObjects = new HashMap<URI, JavaFileObject>();
+    private final Map<URI, JavaFileObject> fileObjects = new HashMap<>();
 
     public JavaFileManagerImpl(JavaFileManager fileManager, JdkCompilerClassLoader classLoader) {
         super(fileManager);

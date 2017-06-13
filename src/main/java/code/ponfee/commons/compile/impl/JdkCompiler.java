@@ -26,7 +26,7 @@ public class JdkCompiler implements JavaSourceCompiler {
     private List<String> options;
 
     public JdkCompiler() {
-        options = new ArrayList<String>();
+        options = new ArrayList<>();
         //options.add("-target");
         //options.add("1.6");
     }
@@ -63,7 +63,7 @@ public class JdkCompiler implements JavaSourceCompiler {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private Class<?> compile(JavaSource javaSource, JdkCompilerClassLoader classLoader) {
         try {
-            DiagnosticCollector<JavaFileObject> errs = new DiagnosticCollector<JavaFileObject>();
+            DiagnosticCollector<JavaFileObject> errs = new DiagnosticCollector<>();
             JdkCompileTask<?> compileTask = new JdkCompileTask(classLoader, options);
             return compileTask.compile(javaSource.getFullyQualifiedName(), javaSource.getSourceCode(), errs);
         } catch (JdkCompileException ex) {

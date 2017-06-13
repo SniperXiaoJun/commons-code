@@ -60,7 +60,7 @@ public class JdkCompileTask<T> {
             && (!loader.getClass().getName().equalsIgnoreCase("sun.misc.Launcher$AppClassLoader"))) {
             try {
                 @SuppressWarnings("resource") URLClassLoader urlClassLoader = (URLClassLoader) loader;
-                List<File> path = new ArrayList<File>();
+                List<File> path = new ArrayList<>();
                 for (URL url : urlClassLoader.getURLs()) {
                     File file = new File(url.getFile());
                     path.add(file);
@@ -73,7 +73,7 @@ public class JdkCompileTask<T> {
         }
 
         javaFileManager = new JavaFileManagerImpl(fileManager, classLoader);
-        this.options = new ArrayList<String>();
+        this.options = new ArrayList<>();
         if (options != null) { // make a save copy of input options
             for (String option : options) {
                 this.options.add(option);
@@ -82,29 +82,24 @@ public class JdkCompileTask<T> {
     }
 
     public synchronized Class<?> compile(final String className, final CharSequence javaSource,
-        final DiagnosticCollector<JavaFileObject> diagnosticsList)
-        throws JdkCompileException,
-        ClassCastException {
+        final DiagnosticCollector<JavaFileObject> diagnosticsList) throws JdkCompileException, ClassCastException {
         if (diagnosticsList != null) {
             diagnostics = diagnosticsList;
         } else {
             diagnostics = new DiagnosticCollector<JavaFileObject>();
         }
 
-        Map<String, CharSequence> classes = new HashMap<String, CharSequence>(1);
+        Map<String, CharSequence> classes = new HashMap<>(1);
         classes.put(className, javaSource);
 
-        Map<String, Class<?>> compiled = compile(classes, diagnosticsList);
-        Class<?> newClass = compiled.get(className);
-        return newClass;
+        return compile(classes, diagnosticsList).get(className);
     }
 
     public synchronized Map<String, Class<?>> compile(final Map<String, CharSequence> classes,
-        final DiagnosticCollector<JavaFileObject> diagnosticsList)
-        throws JdkCompileException {
-        Map<String, Class<?>> compiled = new HashMap<String, Class<?>>();
+        final DiagnosticCollector<JavaFileObject> diagnosticsList) throws JdkCompileException {
+        Map<String, Class<?>> compiled = new HashMap<>();
 
-        List<JavaFileObject> sources = new ArrayList<JavaFileObject>();
+        List<JavaFileObject> sources = new ArrayList<>();
         for (Entry<String, CharSequence> entry : classes.entrySet()) {
             String qualifiedClassName = entry.getKey();
             CharSequence javaSource = entry.getValue();
