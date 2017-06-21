@@ -54,7 +54,7 @@ public class MailSender {
     private String charset = "UTF-8";
     private int retryTimes;
     private int validateTimes;
-    private MailSentFailLogger sentFailHandler = new DefaultMailSentFailLogger();
+    private MailSentFailLogger sentFailHandler = new DefaultMailSentFailedLogger();
 
     private final transient Session session;
 

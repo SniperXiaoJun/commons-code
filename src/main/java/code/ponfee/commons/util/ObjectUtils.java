@@ -6,26 +6,19 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.zip.CRC32;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -41,11 +34,6 @@ import code.ponfee.commons.reflect.Fields;
  */
 public final class ObjectUtils {
 
-    private static final String FOLDER_SEPARATOR = "/";
-    private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
-    private static final String TOP_PATH = "..";
-    private static final String CURRENT_PATH = ".";
-
     // 不区分大小写，去掉了1,0,i,o几个容易混淆的字符
     private static final String[] CASE_SENSITIVE = { "a", "b", "c", "d", "e", "f", "g", "h", /*"i",*/"j", "k",
         "l", "m", "n", /*"o",*/ "p", "q", "r", "s", "t", "u", "v", "x", "w", "y", "z", /*"0", "1",*/ "2", "3",
@@ -58,17 +46,41 @@ public final class ObjectUtils {
 
     /**
      * 对象toString
-     * @param t
+     * @param obj
      * @return
      */
-    public static <T> String toString(T t) {
-        return ReflectionToStringBuilder.reflectionToString(t, ToStringStyle.DEFAULT_STYLE);
+    public static String toString(Object obj) {
+        return ReflectionToStringBuilder.reflectionToString(obj, ToStringStyle.JSON_STYLE);
+        /*if (obj == null) return null;
+        StringBuilder builder = new StringBuilder();
+        if (obj.getClass().isArray()) {
+            int length = Array.getLength(obj);
+            Object o = null;
+            for (int i = 0; i < length; i++) {
+                o = Array.get(obj, i);
+                if (o == null) {
+                    builder.append("null, ");
+                } else if (o.getClass().isArray()) {
+                    builder.append(toString(o) + ", ");
+                } else {
+                    builder.append(Array.get(obj, i) + ", ");
+                }
+            }
+            if (builder.length() > 0) {
+                builder.delete(builder.length() - 2, builder.length())
+                       .insert(0, "[").append("]");
+            }
+        } else {
+            builder.append(obj);
+        }
+        return builder.toString();*/
     }
 
     /**
      * <pre>
      *   递归地比较两个数组是否相同，支持多维数组。
-     *   如果比较的对象不是数组，则此方法的结果同<code>Objects.equals</code>。
+     *   如果比较的对象不是数组，则此方法的结果同
+     *   <code>Objects.equals</code>。
      * </pre>
      * 
      * @param obj1
@@ -126,12 +138,12 @@ public final class ObjectUtils {
         }
         return list.toArray((T[]) Array.newInstance(type, list.size()));
         //return list.toArray((T[]) new Object[list.size()]); // [Ljava.lang.Object; cannot be cast to [Ljava.lang.String;
-        //return list.toArray((T[]) Array.newInstance(list.get(0).getClass(), list.size())); // list.get(0) may null
+        //return list.toArray((T[]) Array.newInstance(list.get(0).getClass(), list.size())); // list.get(0) may be null
     }
 
     public static byte[] concat(byte[] first, byte[]... rest) {
         if (first == null) {
-            throw new IllegalArgumentException("the first array must be not null");
+            throw new IllegalArgumentException("the first array must be non null");
         }
         int totalLength = first.length;
         for (byte[] array : rest) {
@@ -177,33 +189,6 @@ public final class ObjectUtils {
 
     public static Object nullValue(Object obj, Object nullDefault) {
         return obj == null ? nullDefault : obj;
-    }
-
-    public static String mask(String text, String regex, String replacement) {
-        if (text == null) return null;
-        return text.replaceAll(regex, replacement);
-    }
-
-    /**
-     * 遮掩
-     * @param text
-     * @param start
-     * @param num
-     * @return
-     */
-    public static String mask(String text, int start, int num) {
-        if (num < 1 || StringUtils.isEmpty(text) || text.length() < start) {
-            return text;
-        }
-        if (start < 0) {
-            start = 0;
-        }
-        if (text.length() < start + num) {
-            num = text.length() - start;
-        }
-        int end = text.length() - start - num;
-        String regex = "(\\w{" + start + "})\\w{" + num + "}(\\w{" + end + "})";
-        return mask(text, regex, "$1" + StringUtils.repeat("*", num) + "$2");
     }
 
     /**
@@ -363,22 +348,6 @@ public final class ObjectUtils {
     }
 
     /**
-     * 字符串转long
-     * @param str
-     * @param charset
-     * @return
-     */
-    public static long crc32(String str, String charset) {
-        CRC32 crc32 = new CRC32();
-        crc32.update(str.getBytes(Charset.forName(charset)));
-        return crc32.getValue();
-    }
-
-    public static long crc32(String str) {
-        return crc32(str, "UTF-8");
-    }
-
-    /**
      * 3≤len≤32
      * @param len
      * @return
@@ -391,7 +360,7 @@ public final class ObjectUtils {
         String[] chars = caseSensitive ? CASE_SENSITIVE : CASE_IGNORE;
         int size = chars.length;
         StringBuilder builder = new StringBuilder();
-        for (String str : slice(uuid32(), len)) {
+        for (String str : Strings.slice(uuid32(), len)) {
             if (isEmpty(str)) continue;
             builder.append(chars[(int) (Long.parseLong(str, 16) % size)]);
         }
@@ -404,21 +373,6 @@ public final class ObjectUtils {
 
     public static String uuid36() {
         return UUID.randomUUID().toString();
-    }
-
-    /**
-     * 字符串分片
-     * @param str
-     * @param segment
-     * @return
-     */
-    public static String[] slice(String str, int segment) {
-        int[] array = Numbers.sharding(str.length(), segment);
-        String[] result = new String[array.length];
-        for (int j = 0, i = 0; i < array.length; i++) {
-            result[i] = str.substring(j, (j += array[i]));
-        }
-        return result;
     }
 
     /**
@@ -441,277 +395,6 @@ public final class ObjectUtils {
         return intersect(array1, Lists.newArrayList(array2));
     }
 
-    /**
-     * 获取IEME校验码
-     * @param code
-     * @return
-     */
-    public static int generateIEMECode(String code) {
-        int checkSum = 0;
-        char[] chars = code.toCharArray();
-        for (int i = 0, num; i < chars.length; i++) {
-            num = chars[i] - '0'; // ascii to num  
-            if (i % 2 == 0) {
-                checkSum += num; // 1、将奇数位数字相加（从1开始计数）
-            } else {
-                num *= 2; // 2、将偶数位数字分别乘以2，分别计算个位数和十位数之和（从1开始计数）
-                if (num < 10) checkSum += num;
-                else checkSum += num - 9;
-            }
-        }
-        return (10 - checkSum % 10) % 10;
-    }
-
-    /**
-     * Normalize the path by suppressing sequences like "path/.." and inner simple dots.
-     * <p>
-     * The result is convenient for path comparison. For other uses, notice that Windows separators ("\") are replaced by simple slashes.
-     * @param path the original path
-     * @return the normalized path
-     */
-    public static String cleanPath(String path) {
-        if (path == null) {
-            return null;
-        }
-        String pathToUse = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
-
-        // Strip prefix from path to analyze, to not treat it as part of the
-        // first path element. This is necessary to correctly parse paths like
-        // "file:core/../core/io/Resource.class", where the ".." should just
-        // strip the first "core" directory while keeping the "file:" prefix.
-        int prefixIndex = pathToUse.indexOf(":");
-        String prefix = "";
-        if (prefixIndex != -1) {
-            prefix = pathToUse.substring(0, prefixIndex + 1);
-            if (prefix.contains("/")) {
-                prefix = "";
-            } else {
-                pathToUse = pathToUse.substring(prefixIndex + 1);
-            }
-        }
-        if (pathToUse.startsWith(FOLDER_SEPARATOR)) {
-            prefix = prefix + FOLDER_SEPARATOR;
-            pathToUse = pathToUse.substring(1);
-        }
-
-        String[] pathArray = delimitedListToStringArray(pathToUse, FOLDER_SEPARATOR);
-        List<String> pathElements = new LinkedList<String>();
-        int tops = 0;
-
-        for (int i = pathArray.length - 1; i >= 0; i--) {
-            String element = pathArray[i];
-            if (CURRENT_PATH.equals(element)) {
-                // Points to current directory - drop it.
-            } else if (TOP_PATH.equals(element)) {
-                // Registering top path found.
-                tops++;
-            } else {
-                if (tops > 0) {
-                    // Merging path element with element corresponding to top path.
-                    tops--;
-                } else {
-                    // Normal path element found.
-                    pathElements.add(0, element);
-                }
-            }
-        }
-
-        // Remaining top paths need to be retained.
-        for (int i = 0; i < tops; i++) {
-            pathElements.add(0, TOP_PATH);
-        }
-
-        return prefix + collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
-    }
-
-    /**
-     * Replace all occurrences of a substring within a string with another string.
-     * @param inString String to examine
-     * @param oldPattern String to replace
-     * @param newPattern String to insert
-     * @return a String with the replacements
-     */
-    public static String replace(String inString, String oldPattern, String newPattern) {
-        if (!hasLength(inString) || !hasLength(oldPattern) || newPattern == null) {
-            return inString;
-        }
-        StringBuilder sb = new StringBuilder();
-        int pos = 0; // our position in the old string
-        int index = inString.indexOf(oldPattern);
-        // the index of an occurrence we've found, or -1
-        int patLen = oldPattern.length();
-        while (index >= 0) {
-            sb.append(inString.substring(pos, index));
-            sb.append(newPattern);
-            pos = index + patLen;
-            index = inString.indexOf(oldPattern, pos);
-        }
-        sb.append(inString.substring(pos));
-        // remember to append any characters to the right of a match
-        return sb.toString();
-    }
-
-    /**
-     * Check that the given CharSequence is neither {@code null} nor of length 0. Note: Will return {@code true} for a CharSequence that purely consists of
-     * whitespace.
-     * <p>
-     * 
-     * <pre class="code">
-     * hasLength(null) = false
-     * hasLength("") = false
-     * hasLength(" ") = true
-     * hasLength("Hello") = true
-     * </pre>
-     * 
-     * @param str the CharSequence to check (may be {@code null})
-     * @return {@code true} if the CharSequence is not null and has length
-     * @see #hasText(String)
-     */
-    public static boolean hasLength(CharSequence str) {
-        return (str != null && str.length() > 0);
-    }
-
-    /**
-     * Check that the given String is neither {@code null} nor of length 0. Note: Will return {@code true} for a String that purely consists of whitespace.
-     * @param str the String to check (may be {@code null})
-     * @return {@code true} if the String is not null and has length
-     * @see #hasLength(CharSequence)
-     */
-    public static boolean hasLength(String str) {
-        return hasLength((CharSequence) str);
-    }
-
-    /**
-     * Convenience method to return a Collection as a delimited (e.g. CSV) String. E.g. useful for {@code toString()} implementations.
-     * @param coll the Collection to display
-     * @param delim the delimiter to use (probably a ",")
-     * @param prefix the String to start each element with
-     * @param suffix the String to end each element with
-     * @return the delimited String
-     */
-    public static String collectionToDelimitedString(Collection<?> coll, String delim, String prefix, String suffix) {
-        if (coll == null || coll.isEmpty()) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        Iterator<?> it = coll.iterator();
-        while (it.hasNext()) {
-            sb.append(prefix).append(it.next()).append(suffix);
-            if (it.hasNext()) {
-                sb.append(delim);
-            }
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Convenience method to return a Collection as a delimited (e.g. CSV) String. E.g. useful for {@code toString()} implementations.
-     * @param coll the Collection to display
-     * @param delim the delimiter to use (probably a ",")
-     * @return the delimited String
-     */
-    public static String collectionToDelimitedString(Collection<?> coll, String delim) {
-        return collectionToDelimitedString(coll, delim, "", "");
-    }
-
-    /**
-     * Take a String which is a delimited list and convert it to a String array.
-     * <p>
-     * A single delimiter can consists of more than one character: It will still be considered as single delimiter string, rather than as bunch of potential
-     * delimiter characters - in contrast to {@code tokenizeToStringArray}.
-     * @param str the input String
-     * @param delimiter the delimiter between elements (this is a single delimiter, rather than a bunch individual delimiter characters)
-     * @return an array of the tokens in the list
-     * @see #tokenizeToStringArray
-     */
-    public static String[] delimitedListToStringArray(String str, String delimiter) {
-        return delimitedListToStringArray(str, delimiter, null);
-    }
-
-    /**
-     * Take a String which is a delimited list and convert it to a String array.
-     * <p>
-     * A single delimiter can consists of more than one character: It will still be considered as single delimiter string, rather than as bunch of potential
-     * delimiter characters - in contrast to {@code tokenizeToStringArray}.
-     * @param str the input String
-     * @param delimiter the delimiter between elements (this is a single delimiter, rather than a bunch individual delimiter characters)
-     * @param charsToDelete a set of characters to delete. Useful for deleting unwanted line breaks: e.g. "\r\n\f" will delete all new lines and line feeds in a
-     *        String.
-     * @return an array of the tokens in the list
-     * @see #tokenizeToStringArray
-     */
-    public static String[] delimitedListToStringArray(String str, String delimiter, String charsToDelete) {
-        if (str == null) {
-            return new String[0];
-        }
-        if (delimiter == null) {
-            return new String[] { str };
-        }
-        List<String> result = new ArrayList<String>();
-        if ("".equals(delimiter)) {
-            for (int i = 0; i < str.length(); i++) {
-                result.add(deleteAny(str.substring(i, i + 1), charsToDelete));
-            }
-        } else {
-            int pos = 0;
-            int delPos;
-            while ((delPos = str.indexOf(delimiter, pos)) != -1) {
-                result.add(deleteAny(str.substring(pos, delPos), charsToDelete));
-                pos = delPos + delimiter.length();
-            }
-            if (str.length() > 0 && pos <= str.length()) {
-                // Add rest of String, but not in case of empty input.
-                result.add(deleteAny(str.substring(pos), charsToDelete));
-            }
-        }
-        return toStringArray(result);
-    }
-
-    /**
-     * Delete any character in a given String.
-     * @param inString the original String
-     * @param charsToDelete a set of characters to delete. E.g. "az\n" will delete 'a's, 'z's and new lines.
-     * @return the resulting String
-     */
-    public static String deleteAny(String inString, String charsToDelete) {
-        if (!hasLength(inString) || !hasLength(charsToDelete)) {
-            return inString;
-        }
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < inString.length(); i++) {
-            char c = inString.charAt(i);
-            if (charsToDelete.indexOf(c) == -1) {
-                sb.append(c);
-            }
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Copy the given Collection into a String array. The Collection must contain String elements only.
-     * @param collection the Collection to copy
-     * @return the String array ({@code null} if the passed-in Collection was {@code null})
-     */
-    public static String[] toStringArray(Collection<String> collection) {
-        if (collection == null) {
-            return null;
-        }
-        return collection.toArray(new String[collection.size()]);
-    }
-
-    /**
-     * Copy the given Enumeration into a String array. The Enumeration must contain String elements only.
-     * @param enumeration the Enumeration to copy
-     * @return the String array ({@code null} if the passed-in Enumeration was {@code null})
-     */
-    public static String[] toStringArray(Enumeration<String> enumeration) {
-        if (enumeration == null) {
-            return null;
-        }
-        List<String> list = Collections.list(enumeration);
-        return list.toArray(new String[list.size()]);
-    }
-
     public static void main(String[] args) throws IOException {
         int len = 8;
         Set<String> set = new HashSet<>();
@@ -723,7 +406,7 @@ public final class ObjectUtils {
             }
         }
 
-        System.out.println(toString(slice("6f2e8fb0df2a4cf29abd382a08ef329e", 33)));
+        System.out.println(toString(Strings.slice("6f2e8fb0df2a4cf29abd382a08ef329e", 33)));
         System.out.println(uuid(8, true));
 
         String[] s1 = { "1" };
@@ -738,7 +421,7 @@ public final class ObjectUtils {
         System.out.println(toString(intersect(list1, list2)));
         System.out.println(list1);
         System.out.println(list2);
-        
-        System.out.println(crc32(uuid32()));
+
+        System.out.println(Strings.crc32(uuid32()));
     }
 }

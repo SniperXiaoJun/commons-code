@@ -5,7 +5,7 @@ import java.util.List;
 import javax.servlet.ServletContext;
 
 import code.ponfee.commons.reflect.ClassUtils;
-import code.ponfee.commons.util.ObjectUtils;
+import code.ponfee.commons.util.Strings;
 
 /**
  * <pre>
@@ -137,17 +137,17 @@ public class ResourceLoaderFacade {
 
     private static String cleanPath(String path) {
         if (path.startsWith(WEB_PREFIX)) {
-            path = ObjectUtils.cleanPath(path.substring(WEB_PREFIX.length()));
+            path = Strings.cleanPath(path.substring(WEB_PREFIX.length()));
             if (!path.startsWith("/")) {
                 path = (new StringBuilder()).append("/").append(path).toString();
             }
         } else if (path.startsWith(FS_PREFIX)) {
-            path = ObjectUtils.cleanPath(path.substring(FS_PREFIX.length()));
+            path = Strings.cleanPath(path.substring(FS_PREFIX.length()));
         } else if (path.startsWith(CP_PREFIX)) {
-            path = ObjectUtils.cleanPath(path.substring(CP_PREFIX.length()));
+            path = Strings.cleanPath(path.substring(CP_PREFIX.length()));
             if (path.startsWith("/")) path = path.substring(1);
         } else {
-            path = ObjectUtils.cleanPath(path);
+            path = Strings.cleanPath(path);
         }
         return path;
     }

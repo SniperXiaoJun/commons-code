@@ -69,8 +69,8 @@ public class ZipUtils {
      */
     public static String zip(String src, String dest, boolean recursion,
         String passwd, String comment) throws ZipException {
-        File srcFile = new File(ObjectUtils.cleanPath(src));
-        dest = buildDestFilePath(srcFile, ObjectUtils.cleanPath(dest));
+        File srcFile = new File(Strings.cleanPath(src));
+        dest = buildDestFilePath(srcFile, Strings.cleanPath(dest));
         ZipParameters parameters = new ZipParameters();
         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE); // 压缩方式
         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL); // 压缩级别
