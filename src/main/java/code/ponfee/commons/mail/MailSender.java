@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -37,6 +36,7 @@ import com.sun.mail.util.MailConnectException;
 
 import code.ponfee.commons.mail.MailEnvelope.MailType;
 import code.ponfee.commons.util.ObjectUtils;
+import code.ponfee.commons.util.RegexUtils;
 
 /**
  * 邮件发送
@@ -44,7 +44,6 @@ import code.ponfee.commons.util.ObjectUtils;
  */
 public class MailSender {
 
-    private static final Pattern EMAIL = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$");
     private static final int SEND_TIMEOUT_SLEEP = 2000;
     private static Logger logger = LoggerFactory.getLogger(MailSender.class);
 
@@ -65,7 +64,7 @@ public class MailSender {
      * @param smtpHost 主机地址
      */
     MailSender(String user, String password, String smtpHost, boolean authRequire, Integer connTimeout, Integer readTimeout) {
-        if (!EMAIL.matcher(user).matches()) {
+        if (!RegexUtils.isEmail(user)) {
             throw new IllegalArgumentException("illegal sender email: " + user);
         }
 
@@ -270,7 +269,7 @@ public class MailSender {
         for (String email : emails) {
             if (StringUtils.isBlank(email)) {
                 continue;
-            } else if (!EMAIL.matcher(email).matches()) {
+            } else if (!RegexUtils.isEmail(email)) {
                 logger.error("illegal email address[{}]", email);
             } else if (!EMailValidator.verify(email, this.validateTimes)) {
                 logger.error("invalid email address[{}]", email);

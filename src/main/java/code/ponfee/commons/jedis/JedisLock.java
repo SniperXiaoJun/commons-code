@@ -259,7 +259,8 @@ public class JedisLock implements Lock, Serializable {
      * @return
      */
     private String buildValue() {
-        String value = new StringBuilder(ObjectUtils.uuid32()).append(SEPARATOR).append(System.nanoTime() + timeoutNanos).toString();
+        String value = new StringBuilder(ObjectUtils.uuid32()).append(SEPARATOR)
+                           .append(System.nanoTime() + timeoutNanos).toString();
         LOCK_VALUE.set(value);
         return value;
     }

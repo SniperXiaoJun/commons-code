@@ -19,23 +19,55 @@ import code.ponfee.commons.jce.security.RSACryptor;
 public abstract class CryptoProvider {
     private static final String DEFAULT_CHARSET = "UTF-8";
 
+    /**
+     * 数据加密
+     * @param original  原文
+     * @return
+     */
     public abstract byte[] encrypt(byte[] original);
 
+    /**
+     * 数据解密
+     * @param encrypted  密文
+     * @return
+     */
     public abstract byte[] decrypt(byte[] encrypted);
 
+    /**
+     * 字符串数据加密
+     * @param plaintext  明文
+     * @return
+     */
     public final String encrypt(String plaintext) {
         return encrypt(plaintext, DEFAULT_CHARSET);
     }
 
+    /**
+     * 字符串数据加密
+     * @param plaintext 明文
+     * @param charset   字符串编码
+     * @return
+     */
     public final String encrypt(String plaintext, String charset) {
         byte[] original = plaintext.getBytes(Charset.forName(charset));
         return Base64.getUrlEncoder().withoutPadding().encodeToString(encrypt(original));
     }
 
+    /**
+     * 数据解密
+     * @param ciphertext  密文数据的base64编码
+     * @return
+     */
     public final String decrypt(String ciphertext) {
         return decrypt(ciphertext, DEFAULT_CHARSET);
     }
 
+    /**
+     * 数据解密
+     * @param ciphertext  密文数据的base64编码
+     * @param charset     明文字符串编码
+     * @return
+     */
     public final String decrypt(String ciphertext, String charset) {
         byte[] original = decrypt(Base64.getUrlDecoder().decode(ciphertext));
         return new String(original, Charset.forName(charset));
@@ -45,8 +77,8 @@ public abstract class CryptoProvider {
      * AES加/解密
      */
     public static final CryptoProvider AES_CRYPTO = new CryptoProvider() {
-        private final Encryptor key = EncryptorBuilder.newBuilder(Algorithm.AES).key("z]_5Fi!X$ed4OY8j".getBytes()).mode(Mode.CBC)
-                                                      .padding(Padding.PKCS5Padding).ivParameter("SVE<r[)qK`n%zQ'o".getBytes()).build();
+        private final Encryptor key =
+            EncryptorBuilder.newBuilder(Algorithm.AES).key("z]_5Fi!X$ed4OY8j".getBytes()).mode(Mode.CBC).padding(Padding.PKCS5Padding).ivParameter("SVE<r[)qK`n%zQ'o".getBytes()).build();
 
         @Override
         public byte[] encrypt(byte[] original) {
@@ -63,8 +95,10 @@ public abstract class CryptoProvider {
      * RSA加/解密
      */
     public static final CryptoProvider RSA_CRYPTO = new CryptoProvider() {
-        private final RSAPublicKey pubKey = RSACryptor.parseB64PublicKey("MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAPaVNplmvsicFxdVUG91i+bpNOkXNowEWD5XFdCStMeHzF26Efa6TJaSfXK+AdcGyXQRGvB/pEoGyUThSrJpIRUCAwEAAQ==");
-        private final RSAPrivateKey priKey = RSACryptor.parseB64Pkcs8PrivateKey("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
+        private final RSAPublicKey pubKey =
+            RSACryptor.parseB64PublicKey("MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAPaVNplmvsicFxdVUG91i+bpNOkXNowEWD5XFdCStMeHzF26Efa6TJaSfXK+AdcGyXQRGvB/pEoGyUThSrJpIRUCAwEAAQ==");
+        private final RSAPrivateKey priKey =
+            RSACryptor.parseB64Pkcs8PrivateKey("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
 
         @Override
         public byte[] encrypt(byte[] original) {
