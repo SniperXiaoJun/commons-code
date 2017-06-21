@@ -3,6 +3,9 @@ package code.ponfee.commons.serial;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,8 +13,11 @@ import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import code.ponfee.commons.util.Files;
 
 /**
  * 序例化抽象类
@@ -19,7 +25,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Serializer {
 
-    private static final int EOF = -1;
     static final int BUFF_SIZE = 4096; // 4KB
 
     private static Logger logger = LoggerFactory.getLogger(Serializer.class);
@@ -91,16 +96,29 @@ public abstract class Serializer {
      * @return
      */
     public static byte[] compress(byte[] data) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        compress(new ByteArrayInputStream(data), baos);
+        return baos.toByteArray();
+    }
+
+    /**
+     * gzip压缩
+     * @param input
+     * @param output
+     */
+    public static void compress(InputStream input, OutputStream output) {
         GZIPOutputStream gzout = null;
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            gzout = new ExtendedGZIPOutputStream(baos);
-            gzout.write(data);
+            gzout = new ExtendedGZIPOutputStream(output);
+            byte[] buffer = new byte[BUFF_SIZE];
+            int len;
+            while ((len = input.read(buffer)) != Files.EOF) {
+                gzout.write(buffer, 0, len);
+            }
             gzout.finish();
             gzout.flush();
             gzout.close();
             gzout = null;
-            return baos.toByteArray();
         } catch (IOException e) {
             throw new SerializationException(e);
         } finally {
@@ -118,10 +136,21 @@ public abstract class Serializer {
      * @return
      */
     public static byte[] decompress(byte[] data) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        decompress(new ByteArrayInputStream(data), baos);
+        return baos.toByteArray();
+    }
+
+    /**
+     * gzip解压缩
+     * @param input
+     * @param output
+     */
+    public static void decompress(InputStream input, OutputStream output) {
         GZIPInputStream gzin = null;
         try {
-            gzin = new GZIPInputStream(new ByteArrayInputStream(data));
-            return toByteArray(gzin);
+            gzin = new GZIPInputStream(input);
+            IOUtils.copy(gzin, output);
         } catch (IOException e) {
             throw new SerializationException(e);
         } finally {
@@ -131,21 +160,6 @@ public abstract class Serializer {
                 logger.error("close GZIPInputStream exception", e);
             }
         }
-    }
-
-    /**
-     * 将InputStream转换成byte数组
-     * @param in InputStream
-     * @return byte[]
-     * @throws IOException
-     */
-    public static byte[] toByteArray(InputStream in) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] buff = new byte[BUFF_SIZE];
-        for (int n; (n = in.read(buff)) != EOF;) {
-            out.write(buff, 0, n);
-        }
-        return out.toByteArray();
     }
 
     /**
@@ -162,4 +176,8 @@ public abstract class Serializer {
         }
     }
 
+    public static void main(String[] args) throws FileNotFoundException {
+        //compress(new FileInputStream("d:/test.txt"), new FileOutputStream("d:/test2.txt"));
+        decompress(new FileInputStream("d:/test2.txt"), new FileOutputStream("d:/test3.txt"));
+    }
 }

@@ -18,7 +18,7 @@ import sun.security.action.GetPropertyAction;
 public class Files {
 
     private static final String[] FILE_SIZE_UNITS = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-
+    public static final int EOF = -1;
     public static final String LINE_SEPARATOR;
     static {
         String separator = (String) AccessController.doPrivileged(new GetPropertyAction("line.separator"));

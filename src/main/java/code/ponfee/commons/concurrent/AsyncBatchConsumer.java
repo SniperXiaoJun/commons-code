@@ -19,8 +19,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class AsyncBatchConsumer<T> implements Runnable {
     private final RunnableFactory<T> factory;
     private final ExecutorService executor;
-    private  final int thresholdPeriod;
-    private  final int thresholdQuantity;
+    private final int thresholdPeriod;
+    private final int thresholdQuantity;
     private final Queue<T> queue = new ConcurrentLinkedQueue<>();
     private long lastHandleTimeMillis = System.currentTimeMillis();
     private boolean needDistoryWhenEnd = false;
@@ -34,7 +34,7 @@ public final class AsyncBatchConsumer<T> implements Runnable {
         needDistoryWhenEnd = true;
     }
 
-    public AsyncBatchConsumer(RunnableFactory<T> factory, ExecutorService executor, 
+    public AsyncBatchConsumer(RunnableFactory<T> factory, ExecutorService executor,
         int thresholdPeriod, int thresholdQuantity) {
         this.factory = factory;
         this.executor = executor;
@@ -72,7 +72,7 @@ public final class AsyncBatchConsumer<T> implements Runnable {
             if (list.size() > thresholdQuantity
                 || (!list.isEmpty() && (isEnd || System.currentTimeMillis() - lastHandleTimeMillis > thresholdPeriod))) {
                 // task抛异常后： execute会输出错误信息，线程结束，后续任务会创建新线程执行
-                //            submit不会输出错误信息，线程继续分配执行其它任务
+                //               submit不会输出错误信息，线程继续分配执行其它任务
                 executor.submit(factory.create(list, isEnd && queue.isEmpty())); // 提交到异步处理
                 list = null;
                 lastHandleTimeMillis = System.currentTimeMillis();
@@ -81,12 +81,27 @@ public final class AsyncBatchConsumer<T> implements Runnable {
     }
 
     /**
-     * consume log record to queue
+     * consume for queue
      * @param t
      * @return
      */
     public boolean consume(T t) {
         return queue.offer(t);
+    }
+
+    /**
+     * consume for queue
+     * @param list
+     * @return
+     */
+    public boolean consume(List<T> list) {
+        boolean flag = true;
+        for (T t : list) {
+            if (!queue.offer(t)) {
+                flag = false;
+            }
+        }
+        return flag;
     }
 
     public void end() {
@@ -110,15 +125,15 @@ public final class AsyncBatchConsumer<T> implements Runnable {
         AtomicInteger increment = new AtomicInteger();
         for (int i = 0; i < 100; i++) {
             Thread thread = new Thread(() -> {
-                    while (true) {
-                        try {
-                            Thread.sleep(150 + new Random().nextInt(1780));
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        writer.consume(increment.getAndIncrement());
+                while (true) {
+                    try {
+                        Thread.sleep(150 + new Random().nextInt(1780));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                });
+                    writer.consume(increment.getAndIncrement());
+                }
+            });
             thread.setDaemon(true);
             thread.start();
         }

@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.IOUtils;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -56,7 +58,7 @@ public class JsonSerializer extends Serializer {
         try {
             if (isCompress) {
                 gzin = new GZIPInputStream(new ByteArrayInputStream(data));
-                data = toByteArray(gzin);
+                data =  IOUtils.toByteArray(gzin);
             }
             return MAPPER.readValue(data, clazz);
         } catch (IOException e) {

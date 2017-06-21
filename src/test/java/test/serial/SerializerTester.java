@@ -22,7 +22,7 @@ public class SerializerTester {
     private String text;
 
     @Before
-    public void setup() {
+    public void setUp() {
         FileInputStream in = null;
         Scanner scan = null;
         try {

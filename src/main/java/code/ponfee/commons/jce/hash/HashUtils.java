@@ -1,11 +1,16 @@
 package code.ponfee.commons.jce.hash;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import code.ponfee.commons.util.Bytes;
-import code.ponfee.commons.util.ObjectUtils;
+import code.ponfee.commons.util.Files;
 
 /**
  * hash算法封装
@@ -13,13 +18,22 @@ import code.ponfee.commons.util.ObjectUtils;
  */
 public final class HashUtils {
 
+    private static final int BUF_SIZE = 4096;
     private static final String[] CHARS = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
         "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0",
         "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H",
         "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
 
+    public static byte[] md5(InputStream input) {
+        return digest(input, "MD5");
+    }
+
     public static byte[] md5(byte[] data) {
-        return digest(data, "MD5");
+        return md5(new ByteArrayInputStream(data));
+    }
+
+    public static String md5Hex(InputStream input) {
+        return Bytes.hexEncode(md5(input));
     }
 
     public static String md5Hex(byte[] data) {
@@ -34,8 +48,16 @@ public final class HashUtils {
         return md5Hex(data.getBytes(Charset.forName(charset)));
     }
 
+    public static byte[] sha1(InputStream input) {
+        return digest(input, "SHA-1");
+    }
+
     public static byte[] sha1(byte[] data) {
-        return digest(data, "SHA-1");
+        return sha1(new ByteArrayInputStream(data));
+    }
+
+    public static String sha1Hex(InputStream input) {
+        return Bytes.hexEncode(sha1(input));
     }
 
     public static String sha1Hex(byte[] data) {
@@ -51,7 +73,7 @@ public final class HashUtils {
     }
 
     public static byte[] sha256(byte[] data) {
-        return digest(data, "SHA-256");
+        return digest(new ByteArrayInputStream(data), "SHA-256");
     }
 
     public static String sha256Hex(byte[] data) {
@@ -59,7 +81,7 @@ public final class HashUtils {
     }
 
     public static byte[] sha384(byte[] data) {
-        return digest(data, "SHA-384");
+        return digest(new ByteArrayInputStream(data), "SHA-384");
     }
 
     public static String sha384Hex(byte[] data) {
@@ -67,7 +89,7 @@ public final class HashUtils {
     }
 
     public static byte[] sha512(byte[] data) {
-        return digest(data, "SHA-512");
+        return digest(new ByteArrayInputStream(data), "SHA-512");
     }
 
     public static String sha512Hex(byte[] data) {
@@ -80,12 +102,52 @@ public final class HashUtils {
      * @param algorithm
      * @return
      */
-    private static byte[] digest(byte[] data, String algorithm) {
-        try {
-            MessageDigest md = MessageDigest.getInstance(algorithm);
-            return md.digest(data);
+    private static byte[] digest(InputStream input, String algorithm) {
+        /*try {
+            return MessageDigest.getInstance(algorithm).digest(data);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(e);
+        }*/
+
+        /*try { // 4G文件47秒
+            byte[] buffer = new byte[BUF_SIZE];
+            MessageDigest md = MessageDigest.getInstance(algorithm);
+            int len;
+            while ((len = input.read(buffer)) != Files.EOF) {
+                md.update(buffer, 0, len);
+            }
+            return md.digest();
+        } catch (NoSuchAlgorithmException | IOException e) {
+            throw new IllegalArgumentException(e);
+        } finally {
+            if (input != null) try {
+                input.close();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
+            }
+        }*/
+
+        DigestInputStream digestInput = null;
+        try { // 4G文件46秒
+            MessageDigest md = MessageDigest.getInstance(algorithm);
+            digestInput = new DigestInputStream(input, md);
+            byte[] buffer = new byte[BUF_SIZE];
+            while (digestInput.read(buffer) != Files.EOF) {
+            }
+            return md.digest();
+        } catch (NoSuchAlgorithmException | IOException e) {
+            throw new IllegalArgumentException(e);
+        } finally {
+            if (digestInput != null) try {
+                digestInput.close();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
+            }
+            if (input != null) try {
+                input.close();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
+            }
         }
     }
 
@@ -111,7 +173,10 @@ public final class HashUtils {
         return sections;
     }
 
-    public static void main(String[] args) {
-        System.out.println(ObjectUtils.toString(shortText("http://www.manong5.com/102542001/")));
+    public static void main(String[] args) throws Exception {
+        //System.out.println(ObjectUtils.toString(shortText("http://www.manong5.com/102542001/")));
+        long start = System.currentTimeMillis();
+        System.out.println(sha1Hex(new FileInputStream("E:\\tools\\develop\\linux\\CentOS-6.6-x86_64-bin-DVD1.iso")));
+        System.out.println((System.currentTimeMillis() - start) / 1000);
     }
 }
