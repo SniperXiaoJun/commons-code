@@ -23,7 +23,7 @@ import code.ponfee.commons.util.Networks;
  */
 public final class WebUtils {
     private static final List<String> LOCAL_IP = Arrays.asList("127.0.0.1", "0:0:0:0:0:0:0:1");
-    private final static Pattern pattern = Pattern.compile("\\S*[?]\\S*");
+    private final static Pattern PATTERN_SUFFIX = Pattern.compile("\\S*[?]\\S*");
 
     /** session trace */
     public static final String SESSION_TRACE_HEADER = "X-Auth-Token";
@@ -132,7 +132,7 @@ public final class WebUtils {
 
         String[] pathInfos = url.toString().split("/");
         String endUrl = pathInfos[pathInfos.length - 1];
-        if (pattern.matcher(url).find()) {
+        if (PATTERN_SUFFIX.matcher(url).find()) {
             String[] spEndUrl = endUrl.split("\\?");
             return spEndUrl[0].split("\\.")[1];
         }

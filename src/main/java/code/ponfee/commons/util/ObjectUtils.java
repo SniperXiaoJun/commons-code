@@ -6,6 +6,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.zip.CRC32;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
@@ -358,6 +360,22 @@ public final class ObjectUtils {
         Result<Pager<Object[]>> target = new Result<Pager<Object[]>>(source.getCode(), source.getMsg(), null);
         Fields.put(target, "data", pager);
         return target;
+    }
+
+    /**
+     * 字符串转long
+     * @param str
+     * @param charset
+     * @return
+     */
+    public static long crc32(String str, String charset) {
+        CRC32 crc32 = new CRC32();
+        crc32.update(str.getBytes(Charset.forName(charset)));
+        return crc32.getValue();
+    }
+
+    public static long crc32(String str) {
+        return crc32(str, "UTF-8");
     }
 
     /**
@@ -720,5 +738,7 @@ public final class ObjectUtils {
         System.out.println(toString(intersect(list1, list2)));
         System.out.println(list1);
         System.out.println(list2);
+        
+        System.out.println(crc32(uuid32()));
     }
 }

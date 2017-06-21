@@ -16,12 +16,11 @@ import org.w3c.dom.NodeList;
 public final class XmlMaps extends LinkedHashMap<String, String> {
 
     private static final long serialVersionUID = 2775335692799838871L;
-    private static final String DEFAULT_ROOT = "xml";
 
     private String root;
 
     public XmlMaps(Map<String, String> map) {
-        this(map, DEFAULT_ROOT);
+        this(map, "xml");
     }
 
     public XmlMaps(Map<String, String> map, String root) {
@@ -97,7 +96,7 @@ public final class XmlMaps extends LinkedHashMap<String, String> {
     public static void main(String[] args) {
         String s = "<xml><a><![CDATA[<b>12</b><c>34</c>]]></a><d>a</d></xml>";
         System.out.println(new XmlMaps(s).toString()); // {d=a, a=<b>12</b><c>34</c>}
-        
+
         /*String s = "<xml><a><b>12</b><c>34</c></a><d>a</d></xml>";
         System.out.println(new XmlMaps(s).toString()); // {d=a, a=1234}*/
     }

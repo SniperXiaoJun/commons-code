@@ -90,6 +90,7 @@ public final class Bytes {
      * @return
      */
     public static String hexEncode(byte[] bytes) {
+        //new BigInteger(1, bytes).toString(16);
         StringBuilder sb = new StringBuilder(bytes.length * 2);
         // 将字节数组中每个字节拆解成2位16进制整数
         for (int i = 0; i < bytes.length; i++) {

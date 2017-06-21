@@ -168,4 +168,11 @@ public final class XmlWriters {
             return content.toString();
         }
     }
+
+    public static void main(String[] args) {
+        XmlWriters writers = XmlWriters.create();
+        writers.element("name", "value");
+        String xml = writers.build("root");
+        System.out.println(xml);
+    }
 }

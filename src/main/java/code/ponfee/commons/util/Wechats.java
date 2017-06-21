@@ -75,9 +75,10 @@ public class Wechats {
     }
 
     // -------------------------拉取用户信息(需scope为 snsapi_userinfo)------------------------- //
+    // http://www.cnblogs.com/txw1958/p/weixin76-user-info.html
     /**
      * <pre>
-     *  https://api.weixin.qq.com/sns/userinfo
+     *  1、https://api.weixin.qq.com/sns/userinfo
      *  {
      *    "openid":"oLVPpjqs9BhvzwPj5A-vTYAX3GLc",
      *    "nickname":"方倍",
@@ -90,7 +91,7 @@ public class Wechats {
      *    "privilege":[]
      *  }
      *  
-     *  https://api.weixin.qq.com/cgi-bin/user/info  需要使用全局的access_token（getUserInfo，目前版本已不能使用了）
+     *  2、https://api.weixin.qq.com/cgi-bin/user/info  需要使用全局的access_token
      *  {
      *    "subscribe": 1,
      *    "openid": "osdhfjkdsfh78sdjkljljkkj",

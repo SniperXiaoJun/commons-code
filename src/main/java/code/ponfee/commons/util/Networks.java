@@ -66,7 +66,7 @@ public class Networks {
     }
 
     /**
-     * ip转long
+     * ip转long，max  4294967295
      * @param ip
      * @return
      */
@@ -93,6 +93,14 @@ public class Networks {
         return ipAddress.toString();
     }
 
+    /**
+     * ip最小化压缩
+     * false  max  1020
+     * true   max  1068
+     * @param ip         ip地址
+     * @param isPoint    是否要累加每个数字
+     * @return
+     */
     public static int ipReduce(String ip, boolean isPoint) {
         if (!IP_PATTERN.matcher(ip).matches()) {
             throw new IllegalArgumentException("invalid ip address[" + ip + "]");
@@ -128,16 +136,9 @@ public class Networks {
 
     public static void main(String[] args) {
         System.out.println(getSiteIp());
-        /*System.out.println(ipReduce("114.55.92.22", false));
-        System.out.println(ipReduce("114.55.108.14", false));
-        System.out.println(ipReduce("114.55.108.73", false));
+        System.out.println(ip2long("255.255.255.255"));
+        System.out.println(long2ip(4294912345L));
         System.out.println(ipReduce("255.255.255.255", false));
-        System.out.println(ipReduce(false));
-        System.out.println("===============================");
-        System.out.println(ipReduce("114.55.92.22"));
-        System.out.println(ipReduce("114.55.108.14"));
-        System.out.println(ipReduce("114.55.108.73"));
         System.out.println(ipReduce("255.255.255.255"));
-        System.out.println(ipReduce());*/
     }
 }

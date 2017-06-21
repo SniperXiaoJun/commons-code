@@ -107,7 +107,8 @@ public final class UrlCoder {
         System.out.println(s);
         System.out.println(decodeURI(s));
 
-        s = URLEncoder.encode("http://www.oschina.net/search?scope=bbs&q=C语言", DEFAULT_CHARSET);
+        System.out.println("======================================");
+        s = encodeURIComponent("http://www.oschina.net/search?scope=bbs&q=C语言", DEFAULT_CHARSET);
         System.out.println(s);
         System.out.println(decodeURIComponent(s));
 
