@@ -1,7 +1,12 @@
 package code.ponfee.commons.util;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
+import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.text.DecimalFormat;
 
@@ -29,6 +34,35 @@ public class Files {
         if (size <= 0) return "0";
         int digit = (int) (Math.log10(size) / Math.log10(1024));
         return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digit)) + FILE_SIZE_UNITS[digit];
+    }
+
+    public static CharSequence readFile(String file) {
+        return readFile(new File(file));
+    }
+
+    public static CharSequence readFile(File file) {
+        FileInputStream in = null;
+        FileChannel channel = null;
+        try {
+            in = new FileInputStream(file);
+            channel = in.getChannel();
+            ByteBuffer buffer = channel.map(MapMode.READ_ONLY, 0, channel.size());
+            return Charset.defaultCharset().decode(buffer);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (channel != null) try {
+                channel.close();
+            } catch (IOException e) {
+                // ignored
+            }
+
+            if (in != null) try {
+                in.close();
+            } catch (IOException e) {
+                // ignored
+            }
+        }
     }
 
     /**
