@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 异步批量消费
- * @author 01367825
+ * @author fupf
  * @param <T>
  */
 public final class AsyncBatchConsumer<T> implements Runnable {
