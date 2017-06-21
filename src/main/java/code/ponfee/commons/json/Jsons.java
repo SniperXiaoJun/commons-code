@@ -25,7 +25,7 @@ public final class Jsons {
     /** 忽略对象中值为默认值的属性（慎用） */
     public static final Jsons NON_DEFAULT = new Jsons(JsonInclude.Include.NON_DEFAULT);
 
-    /** Jackson ObjectMapper */
+    /** Jackson ObjectMapper(thread safe) */
     private final ObjectMapper mapper = new ObjectMapper();
 
     private Jsons(JsonInclude.Include include) {
@@ -46,7 +46,7 @@ public final class Jsons {
     }
 
     /**
-     * 序列化 convert an object(POJO, Collection, ...) to json string
+     * 序列化 convert an object(POJO, Array, Collection, ...) to json string
      * @param target target object
      * @return json string
      * @throws code.ponfee.commons.json.JsonException the exception for json
@@ -60,10 +60,22 @@ public final class Jsons {
     }
 
     /**
+     * 序列化成json流数据
+     * @param target  object
+     * @return byte[] array
+     */
+    public byte[] serialize(Object target) {
+        try {
+            return mapper.writeValueAsBytes(target);
+        } catch (IOException e) {
+            throw new JsonException(e);
+        }
+    }
+
+    /**
      * 反序列化 deserialize a json to target class object
      * @param json json string
      * @param target target class
-     * @param <T> the generic type
      * @return target object
      * @throws JsonException the exception for json
      */
@@ -78,19 +90,30 @@ public final class Jsons {
     }
 
     /**
+     * 反序列化集合对象
+     * @param json
+     * @param collectionClass
+     * @param elementClasses
+     * @return
+     */
+    public <T> T parse(String json, Class<?> collectionClass, Class<?>... elementClasses) {
+        JavaType javaType = mapper.getTypeFactory().constructParametricType(collectionClass, elementClasses);
+        return parse(json, javaType);
+    }
+
+    /**
      * 反序列化
+     * @param json json string
      * @param javaType JavaType
-     * @param jsonString json string
-     * @param <T> the generic type
      * @see #createCollectionType(Class, Class...)
      * @return the javaType's object
      * @throws JsonException the exception for json
      */
-    public <T> T parse(String jsonString, JavaType javaType) {
-        if (isEmpty(jsonString)) return null;
+    public <T> T parse(String json, JavaType javaType) {
+        if (isEmpty(json)) return null;
 
         try {
-            return mapper.readValue(jsonString, javaType);
+            return mapper.readValue(json, javaType);
         } catch (Exception e) {
             throw new JsonException(e);
         }

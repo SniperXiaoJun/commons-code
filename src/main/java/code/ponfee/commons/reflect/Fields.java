@@ -18,7 +18,7 @@ public final class Fields {
             f.setAccessible(true);
             UNSAFE = (Unsafe) f.get(null);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException("failed to get unsafe instance, cause");
+            throw new RuntimeException("failed to get unsafe instance", e);
         }
     }
 

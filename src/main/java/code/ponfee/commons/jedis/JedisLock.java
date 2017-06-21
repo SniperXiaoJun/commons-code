@@ -51,7 +51,7 @@ import redis.clients.jedis.Transaction;
  * </pre>
  * 
  * 基于redis的分布式锁
- * redis transaction的一个应用场景
+ * 使用redis transaction功能实现
  * @author fupf
  */
 public class JedisLock implements Lock, Serializable {
@@ -59,8 +59,8 @@ public class JedisLock implements Lock, Serializable {
     private static final long serialVersionUID = -6209919116306827731L;
     private static Logger logger = LoggerFactory.getLogger(JedisLock.class);
 
-    private static final int MAX_TOMEOUT = 86400; // 最大超 时为1天
-    private static final int MIN_TOMEOUT = 1; // 最小超 时为1秒
+    private static final int MAX_TOMEOUT_SECONDS = 86400; // 最大超 时为1天
+    private static final int MIN_TOMEOUT_SECONDS = 1; // 最小超 时为1秒
     private static final int MIN_SLEEP_MILLIS = 9; // 最小休眠时间为5毫秒
     private static final String SEPARATOR = ":"; // 分隔符
     private static final transient ThreadLocal<String> LOCK_VALUE = new ThreadLocal<>();
@@ -73,7 +73,7 @@ public class JedisLock implements Lock, Serializable {
     private final long sleepMillis;
 
     public JedisLock(JedisClient jedisClient, String lockKey) {
-        this(jedisClient, lockKey, MAX_TOMEOUT);
+        this(jedisClient, lockKey, MAX_TOMEOUT_SECONDS);
     }
 
     public JedisLock(JedisClient jedisClient, String lockKey, int timeoutSeconds) {
@@ -83,18 +83,18 @@ public class JedisLock implements Lock, Serializable {
     /**
      * 锁对象构造函数
      * @param jedisClient        jedisClient实例
-     * @param lockKey            锁键
+     * @param lockKey            待加锁的键
      * @param timeoutSeconds     锁超时时间（防止死锁）
      * @param sleepMillis        休眠时间（毫秒）
      */
     public JedisLock(JedisClient jedisClient, String lockKey, int timeoutSeconds, int sleepMillis) {
         this.jedisClient = jedisClient;
-        this.lockKey = "lock:" + lockKey;
+        this.lockKey = "jedis:lock:" + lockKey;
         timeoutSeconds = Math.abs(timeoutSeconds);
-        if (timeoutSeconds > MAX_TOMEOUT) {
-            timeoutSeconds = MAX_TOMEOUT;
-        } else if (timeoutSeconds < MIN_TOMEOUT) {
-            timeoutSeconds = MIN_TOMEOUT;
+        if (timeoutSeconds > MAX_TOMEOUT_SECONDS) {
+            timeoutSeconds = MAX_TOMEOUT_SECONDS;
+        } else if (timeoutSeconds < MIN_TOMEOUT_SECONDS) {
+            timeoutSeconds = MIN_TOMEOUT_SECONDS;
         }
         this.timeoutSeconds = timeoutSeconds;
         this.timeoutNanos = TimeUnit.SECONDS.toNanos(timeoutSeconds);
@@ -259,8 +259,7 @@ public class JedisLock implements Lock, Serializable {
      * @return
      */
     private String buildValue() {
-        String value = new StringBuilder(ObjectUtils.uuid32()).append(SEPARATOR)
-                           .append(System.nanoTime() + timeoutNanos).toString();
+        String value = new StringBuilder(ObjectUtils.uuid32()).append(SEPARATOR).append(System.nanoTime() + timeoutNanos).toString();
         LOCK_VALUE.set(value);
         return value;
     }
