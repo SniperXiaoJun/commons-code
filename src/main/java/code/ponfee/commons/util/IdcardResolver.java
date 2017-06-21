@@ -2,14 +2,17 @@ package code.ponfee.commons.util;
 
 import static java.util.Calendar.YEAR;
 
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 身份证解析类
@@ -33,19 +36,6 @@ public class IdcardResolver {
         M, F, N;
     }
 
-    public static void main(String[] args) {
-        System.out.println(Integer.valueOf('1'));
-        System.out.println(Character.getNumericValue('1'));
-
-        IdcardResolver resolver = new IdcardResolver("530626201408302303");
-        System.out.println(resolver);
-
-        for (int i = 0; i < 10; i++) {
-            System.out.print(generate());
-            System.out.print("\t");
-        }
-    }
-
     private String idcard; // idCard
     private boolean isValid = false; // 是否有效
     private CertType type; // 类型
@@ -57,9 +47,9 @@ public class IdcardResolver {
 
     public static String generate() {
         StringBuilder builder = new StringBuilder();
-        builder.append(randomAreaCode());
-        builder.append(randomBirthday());
-        builder.append(randomCode());
+        builder.append(AREA_CODE_LIST.get(ThreadLocalRandom.current().nextInt(AREA_CODE_LIST.size())));
+        builder.append(Dates.format(Dates.random(ORIGIN_DATE), "yyyyMMdd"));
+        builder.append(StringUtils.leftPad(String.valueOf(ThreadLocalRandom.current().nextInt(1000)), 3, '0'));
         builder.append(calcTrailingNumber(builder.toString().toCharArray()));
         return builder.toString();
     }
@@ -395,7 +385,6 @@ public class IdcardResolver {
 
     public static final Map<String, Integer> DISTRICT_NAME_MAPPING = new HashMap<String, Integer>() {
         private static final long serialVersionUID = 3370000601683193691L;
-
         {
             put("北京市", 110000);
             put("市辖区", 110100);
@@ -3915,7 +3904,9 @@ public class IdcardResolver {
         }
     };
 
-    public static final Map<Integer, String> DISTRICT_CODE_MAPPING = new HashMap<>();
+    private static final List<Integer> AREA_CODE_LIST = new ArrayList<>(DISTRICT_NAME_MAPPING.values());
+
+    private static final Map<Integer, String> DISTRICT_CODE_MAPPING = new HashMap<>();
     static {
         for (Entry<String, Integer> entry : DISTRICT_NAME_MAPPING.entrySet()) {
             DISTRICT_CODE_MAPPING.put(entry.getValue(), entry.getKey());
@@ -3938,23 +3929,6 @@ public class IdcardResolver {
             put("N", 14);
         }
     };*/
-
-    private static int randomAreaCode() {
-        int index = (int) (Math.random() * DISTRICT_NAME_MAPPING.size());
-        Collection<Integer> values = DISTRICT_NAME_MAPPING.values();
-        Iterator<Integer> iter = values.iterator();
-        int code = 0;
-        for (int i = 0; i < index && iter.hasNext(); i++) {
-            code = iter.next();
-        }
-        return code;
-    }
-
-    private static String randomBirthday() {
-        long diffSeconds = Dates.clockdiff(ORIGIN_DATE, Dates.now());
-        Date date = Dates.addSeconds(ORIGIN_DATE, (int) (Math.random() * diffSeconds));
-        return Dates.format(date, "yyyyMMdd");
-    }
 
     /**
      * <p>18位身份证验证</p>
@@ -3979,11 +3953,16 @@ public class IdcardResolver {
         return JUXTAPOSE[result % 11];
     }
 
-    private static String randomCode() {
-        int code = (int) (Math.random() * 1000);
-        if (code < 10) return "00" + code;
-        else if (code < 100) return "0" + code;
-        else return String.valueOf(code);
-    }
+    public static void main(String[] args) {
+        System.out.println(Integer.valueOf('1'));
+        System.out.println(Character.getNumericValue('1'));
 
+        IdcardResolver resolver = new IdcardResolver("530626201408302303");
+        System.out.println(resolver);
+
+        for (int i = 0; i < 10; i++) {
+            System.out.print(IdcardResolver.generate());
+            System.out.print("\t");
+        }
+    }
 }

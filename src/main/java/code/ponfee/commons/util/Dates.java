@@ -3,6 +3,7 @@ package code.ponfee.commons.util;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -146,10 +147,10 @@ public class Dates {
      * @param end 结束时间
      * @return 时间间隔
      */
-    public static long clockdiff(Date start, Date end) {
+    public static int clockdiff(Date start, Date end) {
         Objects.requireNonNull(start, "start date non null");
         Objects.requireNonNull(end, "end date non null");
-        return (end.getTime() - start.getTime()) / 1000;
+        return (int) ((end.getTime() - start.getTime()) / 1000);
     }
 
     /**
@@ -158,7 +159,7 @@ public class Dates {
      * @param numOfMillis 毫秒数
      * @return 时间
      */
-    public static Date addMillis(Date date, int numOfMillis) {
+    public static Date plusMillis(Date date, int numOfMillis) {
         return new DateTime(date).plusMillis(numOfMillis).toDate();
     }
 
@@ -168,7 +169,7 @@ public class Dates {
      * @param numOfSeconds 秒数
      * @return 时间
      */
-    public static Date addSeconds(Date date, int numOfSeconds) {
+    public static Date plusSeconds(Date date, int numOfSeconds) {
         return new DateTime(date).plusSeconds(numOfSeconds).toDate();
     }
 
@@ -178,7 +179,7 @@ public class Dates {
      * @param numOfMinutes 分钟数
      * @return 时间
      */
-    public static Date addMinutes(Date date, int numOfMinutes) {
+    public static Date plusMinutes(Date date, int numOfMinutes) {
         return new DateTime(date).plusMinutes(numOfMinutes).toDate();
     }
 
@@ -188,7 +189,7 @@ public class Dates {
      * @param numOfHours 小时数
      * @return 时间
      */
-    public static Date addHours(Date date, int numOfHours) {
+    public static Date plusHours(Date date, int numOfHours) {
         return new DateTime(date).plusHours(numOfHours).toDate();
     }
 
@@ -198,7 +199,7 @@ public class Dates {
      * @param numdays 天数
      * @return 时间
      */
-    public static Date addDays(Date date, int numdays) {
+    public static Date plusDays(Date date, int numdays) {
         return new DateTime(date).plusDays(numdays).toDate();
     }
 
@@ -208,7 +209,7 @@ public class Dates {
      * @param numWeeks 周数
      * @return 时间
      */
-    public static Date addWeeks(Date date, int numWeeks) {
+    public static Date plusWeeks(Date date, int numWeeks) {
         return new DateTime(date).plusWeeks(numWeeks).toDate();
     }
 
@@ -218,7 +219,7 @@ public class Dates {
      * @param numMonths 月数
      * @return 时间
      */
-    public static Date addMonths(Date date, int numMonths) {
+    public static Date plusMonths(Date date, int numMonths) {
         return new DateTime(date).plusMonths(numMonths).toDate();
     }
 
@@ -228,7 +229,7 @@ public class Dates {
      * @param numYears 年数
      * @return 时间
      */
-    public static Date addYears(Date date, int numYears) {
+    public static Date plusYears(Date date, int numYears) {
         return new DateTime(date).plusYears(numYears).toDate();
     }
 
@@ -289,7 +290,7 @@ public class Dates {
     }
 
     /**
-     * 获取指定日期所在周的开始时间：yyyy-MM-周一　00:00:00
+     * 获取指定日期所在周的开始时间：yyyy-MM-周一 00:00:00
      * @param date 日期
      * @return 当前周第一天
      */
@@ -298,7 +299,7 @@ public class Dates {
     }
 
     /**
-     * 获取指定日期所在周的结束时间：yyyy-MM-周日　23:59:59
+     * 获取指定日期所在周的结束时间：yyyy-MM-周日 23:59:59
      * @param date 日期
      * @return 当前周最后一天
      */
@@ -307,7 +308,7 @@ public class Dates {
     }
 
     /**
-     * 获取指定日期所在月的开始时间：yyyy-MM-01　00:00:00
+     * 获取指定日期所在月的开始时间：yyyy-MM-01 00:00:00
      * @param date 日期
      * @return 当前月的第一天
      */
@@ -316,7 +317,7 @@ public class Dates {
     }
 
     /**
-     * 获取指定日期所在月的结束时间：yyyy-MM-月未　23:59:59
+     * 获取指定日期所在月的结束时间：yyyy-MM-月未 23:59:59
      * @param date 日期
      * @return 当前月的最后一天
      */
@@ -325,7 +326,7 @@ public class Dates {
     }
 
     /**
-     * 获取指定日期所在月的开始时间：yyyy-01-01　00:00:00
+     * 获取指定日期所在月的开始时间：yyyy-01-01 00:00:00
      * @param date 日期
      * @return 当前年的第一天
      */
@@ -334,7 +335,7 @@ public class Dates {
     }
 
     /**
-     * 获取指定日期所在月的结束时间：yyyy-12-31　23:59:59
+     * 获取指定日期所在月的结束时间：yyyy-12-31 23:59:59
      * @param date 日期
      * @return 当前年的最后一天
      */
@@ -400,30 +401,49 @@ public class Dates {
     }
 
     /**
-     * @param originDate 起源（起始）时间
-     * @param cycleType 类型
-     * @param referDate 目标时间
+     * 日期随机
+     * @param begin  开发日期
+     * @param end    结束日期
+     * @return
+     */
+    public static Date random(Date begin, Date end) {
+        int seconds = ThreadLocalRandom.current().nextInt(clockdiff(begin, end));
+        return Dates.plusSeconds(begin, seconds);
+    }
+
+    public static Date random(Date begin) {
+        return random(begin, now());
+    }
+
+    public static Date random() {
+        return random(toDate(0), now());
+    }
+
+    /**
+     * @param origin 起源（起始）时间
+     * @param type 类型
+     * @param reference 目标时间
      * @param interval 周期数
      * @param next 目标周期的下next周期
      * @return
      */
-    public static Date[] cycleDateCalc(Date originDate, String cycleType, Date referDate, int interval, int next) {
+    public static Date[] calculateCycle(Date origin, String type, Date reference, int interval, int next) {
         if (interval < 1) {
             throw new IllegalArgumentException("interval mus be positive number");
         }
-        if (originDate.after(referDate)) {
+        if (origin.after(reference)) {
             throw new IllegalArgumentException("end date must be after begin date");
         }
 
         Calendar c1 = Calendar.getInstance();
         Calendar c2 = Calendar.getInstance();
-        c1.setTime(originDate);
-        c2.setTime(referDate);
+        c1.setTime(origin);
+        c2.setTime(reference);
         Date startDate = null;
         int cycleNum, year;
         Calendar tmp;
         float days;
-        switch (cycleType) {
+        switch (type) {
             case "weekly":
                 interval *= 7;
             case "daily":
@@ -444,7 +464,7 @@ public class Dates {
             case "yearly": // 年度
             case "monthly": // 月
             case "month_once":
-                switch (cycleType) {
+                switch (type) {
                     case "quarterly": // 季度
                         interval *= 3;
                         break;
@@ -474,8 +494,8 @@ public class Dates {
         return new Date[] { startDate, c1.getTime() };
     }
 
-    public static Date[] cycleDateCalc(String cycleType, Date referDate, int next) {
-        return cycleDateCalc(ORIGIN_DATE, cycleType, referDate, 1, next);
+    public static Date[] calculateCycle(String type, Date reference, int next) {
+        return calculateCycle(ORIGIN_DATE, type, reference, 1, next);
     }
 
     public static void main(String[] args) {
@@ -495,7 +515,8 @@ public class Dates {
         System.out.println(format(dayOfYear(155), "yyyy-MM-dd HH:mm:ss SSS"));
 
         System.out.println("============================================");
-        Date[] dates = cycleDateCalc("weekly", new Date(), -1);
+        Date[] dates = calculateCycle("weekly", new Date(), -1);
         System.out.println(format(dates[0], "yyyy-MM-dd HH:mm:ss SSS") + "  ~  " + format(dates[1], "yyyy-MM-dd HH:mm:ss SSS"));
+        System.out.println(format(toDate(0), "yyyy-MM-dd HH:mm:ss SSS"));
     }
 }
