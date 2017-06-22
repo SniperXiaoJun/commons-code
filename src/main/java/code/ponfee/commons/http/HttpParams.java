@@ -136,8 +136,8 @@ public class HttpParams {
         // 拼接待签名串
         StringBuilder signing = new StringBuilder("");
         for (Map.Entry<String, String> entry : signingMap.entrySet()) {
-            signing.append(entry.getKey()).append('=').append(wrapChar);
-            signing.append(entry.getValue()).append(wrapChar).append('&');
+            signing.append(entry.getKey()).append('=').append(wrapChar)
+                   .append(entry.getValue()).append(wrapChar).append('&');
         }
         if (signing.length() > 0) {
             signing.deleteCharAt(signing.length() - 1); // 删除未位的'&'
@@ -153,14 +153,17 @@ public class HttpParams {
      */
     public static String buildForm(String url, Map<String, String> params) {
         StringBuilder form = new StringBuilder();
-        form.append("<form action=\"").append(url).append("\" method=\"POST\">");
+        String formName = ObjectUtils.uuid32();
+        form.append("<form action=\"").append(url).append("\" name=\"")
+            .append(formName).append("\" method=\"POST\">");
         for (Map.Entry<String, String> param : params.entrySet()) {
-            form.append("<input type=\"hidden\" name=\"").append(param.getKey()).append("\" value=\"");
-            form.append(StringUtils.defaultString(param.getValue())).append("\" />");
+            form.append("<input type=\"hidden\" name=\"").append(param.getKey()).append("\" value=\"")
+                .append(StringUtils.defaultString(param.getValue())).append("\" />");
         }
-        form.append("<input type=\"submit\" style=\"display:none;\" />");
-        form.append("</form>");
-        form.append("<script>document.forms[0].submit();</script>");
+        form.append("<input type=\"submit\" style=\"display:none;\" />")
+            .append("</form>")
+            .append("<script>document.forms['").append(formName)
+            .append("'].submit();</script>");
         return form.toString();
     }
 
@@ -244,5 +247,7 @@ public class HttpParams {
         System.out.println(HttpParams.parseParams(s, "utf-8").get("merReserved")[0]);
 
         System.out.println(buildUrlPath("/index.html", "utf-8", map));
+        
+        System.out.println(buildForm("http://localhost:8080", map));
     }
 }

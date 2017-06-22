@@ -82,10 +82,22 @@ public final class WebUtils {
         return ip;
     }
 
+    /**
+     * 判断是否ajax请求
+     * @param req
+     * @return
+     */
     public static boolean isAjax(HttpServletRequest req) {
         return "XMLHttpRequest".equals(req.getHeader("X-Requested-With"));
     }
 
+    /**
+     * 响应数据到请求客户端
+     * @param resp
+     * @param contentType
+     * @param text
+     * @param charset
+     */
     public static void response(HttpServletResponse resp, String contentType, String text, String charset) {
         resp.setContentType(contentType + ";charset=" + charset);
         resp.setCharacterEncoding(charset);
@@ -101,6 +113,11 @@ public final class WebUtils {
         }
     }
 
+    /**
+     * 响应json数据
+     * @param resp
+     * @param json
+     */
     public static void respJson(HttpServletResponse resp, String json) {
         respJson(resp, json, DEFAULT_CHARSET);
     }
@@ -113,19 +130,35 @@ public final class WebUtils {
         respJsonp(response, callback, json, DEFAULT_CHARSET);
     }
 
+    /**
+     * 响应jsonp数据
+     * @param resp
+     * @param callback
+     * @param json
+     * @param charset
+     */
     public static void respJsonp(HttpServletResponse resp, String callback, String json, String charset) {
         respJson(resp, callback + "(" + json + ");", charset);
     }
 
+    /**
+     * 允许跨站
+     * @param resp
+     */
     public static void cors(HttpServletResponse resp) {
         resp.setHeader("Access-Control-Allow-Origin", "*");
-        resp.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+        resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
         resp.setHeader("Access-Control-Max-Age", "0");
         resp.setHeader("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With");
         resp.setHeader("Access-Control-Allow-Credentials", "true");
         resp.setHeader("XDomainRequestAllowed", "1");
     }
 
+    /**
+     * 获取请求地址后缀名
+     * @param req
+     * @return
+     */
     public static String getUrlSuffix(HttpServletRequest req) {
         String url = req.getRequestURI();
         if (url.indexOf(".") < 0) return null;
@@ -189,6 +222,14 @@ public final class WebUtils {
         resp.addCookie(createCookie(name, value, path, maxAge));
     }
 
+    /**
+     * 创建cookie
+     * @param name
+     * @param value
+     * @param path
+     * @param maxAge
+     * @return
+     */
     public static Cookie createCookie(String name, String value, String path, int maxAge) {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath(path);

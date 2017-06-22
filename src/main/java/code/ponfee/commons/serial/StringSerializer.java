@@ -2,6 +2,8 @@ package code.ponfee.commons.serial;
 
 import java.nio.charset.Charset;
 
+import code.ponfee.commons.reflect.ClassUtils;
+
 /**
  * 字段串序例化
  * @author fupf
@@ -30,17 +32,21 @@ public class StringSerializer extends Serializer {
             if (isCompress) data = compress(data);
             return data;
         } else {
-            throw new SerializationException("must be string data type");
+            throw new SerializationException("object must be java.lang.String type, but it's "
+                                             + ClassUtils.getClassName(t.getClass()));
         }
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
-        if (data == null) return null;
         if (clazz != String.class) {
-            throw new SerializationException("clazz must be String.class");
+            throw new SerializationException("argument class must be java.lang.String.class, but it's "
+                                             + ClassUtils.getClassName(clazz) + ".class");
         }
+
+        if (data == null) return null;
+
         if (isCompress) data = decompress(data);
         return (T) new String(data, charset);
     }

@@ -75,5 +75,13 @@ public class HttpTester {
         s = http.data("a=1&b=2").request();
         System.out.println("======================================================\n" + s);
     }
+    
+    
+    @Test
+    public void test2() throws IOException {
+        String url = "http://10.118.58.156:8080/express/risk/outeridentify.html";
+        String resp = Http.post(url).part("file", "import.txt", IOUtils.toByteArray(new FileInputStream("D:\\miwen1.txt"))).request();        
+        System.out.println(resp);
+    }
 
 }

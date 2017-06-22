@@ -17,7 +17,7 @@ public final class MailSenderBuilder {
     private int retryTimes;
     private int validateTimes;
     private boolean authRequire = true;
-    private MailSentFailLogger sentFailHandler;
+    private MailSentFailedLogger sentFailHandler;
 
     private MailSenderBuilder() {}
 
@@ -68,7 +68,7 @@ public final class MailSenderBuilder {
         return this;
     }
 
-    public MailSenderBuilder sentFailHandler(MailSentFailLogger sentFailHandler) {
+    public MailSenderBuilder sentFailHandler(MailSentFailedLogger sentFailHandler) {
         this.sentFailHandler = sentFailHandler;
         return this;
     }

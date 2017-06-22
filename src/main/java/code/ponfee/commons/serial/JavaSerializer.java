@@ -8,6 +8,8 @@ import java.io.ObjectOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import code.ponfee.commons.reflect.ClassUtils;
+
 /**
  * java序例化
  * @author fupf
@@ -64,9 +66,9 @@ public class JavaSerializer extends Serializer {
             }
 
             T t = (T) ois.readObject();
-            if (!clazz.equals(t.getClass())) {
-                throw new IllegalArgumentException(t.getClass().getCanonicalName()
-                    + " not equal to " + clazz.getCanonicalName());
+            if (clazz != t.getClass()) {
+                throw new IllegalArgumentException("expect " + ClassUtils.getClassName(clazz) 
+                      + " type, but it's " + ClassUtils.getClassName(t.getClass()) + " type");
             }
             return t;
         } catch (IOException | ClassNotFoundException e) {

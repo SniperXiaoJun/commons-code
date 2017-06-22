@@ -54,7 +54,7 @@ public class MailSender {
     private String charset = "UTF-8";
     private int retryTimes;
     private int validateTimes;
-    private MailSentFailLogger sentFailHandler = new DefaultMailSentFailedLogger();
+    private MailSentFailedLogger sentFailHandler = new DefaultMailSentFailedLogger();
 
     private final transient Session session;
 
@@ -112,7 +112,7 @@ public class MailSender {
         this.nickname = nickname;
     }
 
-    void sentFailHandler(MailSentFailLogger sentFailHandler) {
+    void sentFailHandler(MailSentFailedLogger sentFailHandler) {
         if (sentFailHandler != null) {
             this.sentFailHandler = sentFailHandler;
         }

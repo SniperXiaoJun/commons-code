@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import com.caucho.hessian.io.HessianSerializerInput;
 import com.caucho.hessian.io.HessianSerializerOutput;
 
+import code.ponfee.commons.reflect.ClassUtils;
+
 /**
  * hessian序例化
  * @author fupf
@@ -71,9 +73,9 @@ public class HessianSerializer extends Serializer {
                 hessian = new HessianSerializerInput(bais);
             }
             T t = (T) hessian.readObject();
-            if (!clazz.equals(t.getClass())) {
-                throw new IllegalArgumentException(t.getClass().getCanonicalName()
-                    + " not equal to " + clazz.getCanonicalName());
+            if (clazz != t.getClass()) {
+                throw new IllegalArgumentException("expect " + ClassUtils.getClassName(clazz) 
+                + " type, but it's " + ClassUtils.getClassName(t.getClass()) + " type");
             }
             return t;
         } catch (IOException e) {

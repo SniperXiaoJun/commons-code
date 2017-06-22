@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
  * 邮件发送失败日志接口默认实现类
  * @author fupf
  */
-public class DefaultMailSentFailedLogger implements MailSentFailLogger {
+public class DefaultMailSentFailedLogger implements MailSentFailedLogger {
     private static Logger logger = LoggerFactory.getLogger(DefaultMailSentFailedLogger.class);
 
     @Override
