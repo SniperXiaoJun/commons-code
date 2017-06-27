@@ -42,9 +42,13 @@ import redis.clients.jedis.Transaction;
  * 
  * class Z {
  *   public void m() {
+ *     Lock lock = new JedisLock(jedisClient, "lockKey", 5);
  *     // auto timeout release lock
- *     if (new JedisLock(jedisClient, "lockKey", 5).tryLock()) {
+ *     if (!lock.tryLock(100, TimeUnit.MILLISECONDS)) return;
+ *     try {
  *       // ... method body
+ *     } finally {
+ *       lock.unlock();
  *     }
  *   }
  * }
@@ -108,7 +112,7 @@ public class JedisLock implements Lock, Serializable {
         while (true) {
             if (tryLock()) break;
             try {
-                Thread.sleep(sleepMillis); // sleep sleepMillis milliseconds
+                Thread.sleep(sleepMillis);
             } catch (InterruptedException e) {
                 logger.error("jedis lock interrupted exception", e);
             }
@@ -124,7 +128,7 @@ public class JedisLock implements Lock, Serializable {
                 throw new InterruptedException();
             }
             if (tryLock()) break;
-            Thread.sleep(sleepMillis); // sleep sleepMillis milliseconds
+            Thread.sleep(sleepMillis);
         }
     }
 
@@ -177,7 +181,7 @@ public class JedisLock implements Lock, Serializable {
             if (Thread.interrupted()) throw new InterruptedException();
             if (System.nanoTime() - startTime > timeout) return false; // 等待超时则返回
             if (tryLock()) return true;
-            Thread.sleep(sleepMillis); // sleep sleepMillis milliseconds
+            Thread.sleep(sleepMillis);
         }
     }
 

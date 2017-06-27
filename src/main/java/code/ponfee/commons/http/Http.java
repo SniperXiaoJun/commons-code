@@ -46,6 +46,7 @@ import net.sf.jmimemagic.MagicMatchNotFoundException;
  *          Content-Range、Content-MD5、Content-Type、Expires、Last-Modified等
  *  Content-Type：WEB服务器告诉浏览器自己响应的消息格式，例如Content-Type(application/xml)
  * </pre>
+ * http://www.atool.org/httptest.php
  * 
  * http工具类
  * @author fupf
