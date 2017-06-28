@@ -25,7 +25,7 @@ public class MQOperations extends JedisOperations {
      */
     public Long publish(String channel, String message) {
         return hook(shardedJedis -> {
-            return shardedJedis.getShard(JEDIS_MQ_OPS).publish(channel, message);
+            return getShard(shardedJedis, JEDIS_MQ_OPS).publish(channel, message);
         }, null, channel, message);
     }
 
@@ -37,7 +37,7 @@ public class MQOperations extends JedisOperations {
      */
     public Long publish(byte[] channel, byte[] message) {
         return hook(shardedJedis -> {
-            return shardedJedis.getShard(JEDIS_MQ_OPS).publish(channel, message);
+            return getShard(shardedJedis, JEDIS_MQ_OPS).publish(channel, message);
         }, null, channel, message);
     }
 
@@ -48,43 +48,43 @@ public class MQOperations extends JedisOperations {
      */
     public void subscribe(JedisPubSub jedisPubSub, String... channels) {
         call(shardedJedis -> {
-            shardedJedis.getShard(JEDIS_MQ_OPS).subscribe(jedisPubSub, channels);
+            getShard(shardedJedis, JEDIS_MQ_OPS).subscribe(jedisPubSub, channels);
         });
     }
 
     public void psubscribe(JedisPubSub jedisPubSub, String... patterns) {
         call(shardedJedis -> {
-            shardedJedis.getShard(JEDIS_MQ_OPS).psubscribe(jedisPubSub, patterns);
+            getShard(shardedJedis, JEDIS_MQ_OPS).psubscribe(jedisPubSub, patterns);
         });
     }
 
     public void subscribe(BinaryJedisPubSub jedisPubSub, byte[]... channels) {
         call(shardedJedis -> {
-            shardedJedis.getShard(JEDIS_MQ_OPS).subscribe(jedisPubSub, channels);
+            getShard(shardedJedis, JEDIS_MQ_OPS).subscribe(jedisPubSub, channels);
         });
     }
 
     public void psubscribe(BinaryJedisPubSub jedisPubSub, byte[]... patterns) {
         call(shardedJedis -> {
-            shardedJedis.getShard(JEDIS_MQ_OPS).psubscribe(jedisPubSub, patterns);
+            getShard(shardedJedis, JEDIS_MQ_OPS).psubscribe(jedisPubSub, patterns);
         });
     }
 
     public List<String> pubsubChannels(String patterns) {
         return hook(shardedJedis -> {
-            return shardedJedis.getShard(JEDIS_MQ_OPS).pubsubChannels(patterns);
+            return getShard(shardedJedis, JEDIS_MQ_OPS).pubsubChannels(patterns);
         }, null, patterns);
     }
 
     public Map<String, String> pubsubNumSub(String... channels) {
         return hook(shardedJedis -> {
-            return shardedJedis.getShard(JEDIS_MQ_OPS).pubsubNumSub(channels);
+            return getShard(shardedJedis, JEDIS_MQ_OPS).pubsubNumSub(channels);
         }, null, String.valueOf(channels));
     }
 
     public Long pubsubNumPat() {
         return hook(shardedJedis -> {
-            return shardedJedis.getShard(JEDIS_MQ_OPS).pubsubNumPat();
+            return getShard(shardedJedis, JEDIS_MQ_OPS).pubsubNumPat();
         }, null);
     }
 

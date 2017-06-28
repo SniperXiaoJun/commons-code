@@ -11,13 +11,13 @@ public final class MailSenderBuilder {
     private String smtpHost;
     private String nickname;
 
-    private Integer connTimeout;
-    private Integer readTimeout;
-    private String charset;
-    private int retryTimes;
-    private int validateTimes;
     private boolean authRequire = true;
-    private MailSentFailedLogger sentFailHandler;
+    private Integer connTimeout; // 建立连接超时时间
+    private Integer readTimeout; // 邮件发送读写超时时间
+    private int validateTimes; // 邮箱验证次数
+    private String charset; // 字符编码
+    private int retryTimes; // 重试次数
+    private MailSentFailedLogger sentFailedLogger;
 
     private MailSenderBuilder() {}
 
@@ -68,18 +68,18 @@ public final class MailSenderBuilder {
         return this;
     }
 
-    public MailSenderBuilder sentFailHandler(MailSentFailedLogger sentFailHandler) {
-        this.sentFailHandler = sentFailHandler;
+    public MailSenderBuilder sentFailedLogger(MailSentFailedLogger sentFailedLogger) {
+        this.sentFailedLogger = sentFailedLogger;
         return this;
     }
 
     public MailSender build() {
         MailSender sender = new MailSender(user, password, smtpHost, authRequire, connTimeout, readTimeout);
-        sender.nickname(nickname);
-        sender.charset(charset);
-        sender.retryTimes(retryTimes);
-        sender.validateTimes(validateTimes);
-        sender.sentFailHandler(sentFailHandler);
+        sender.setNickname(nickname);
+        sender.setCharset(charset);
+        sender.setRetryTimes(retryTimes);
+        sender.setValidateTimes(validateTimes);
+        sender.setSentFailedLogger(sentFailedLogger);
         return sender;
     }
 
@@ -88,8 +88,8 @@ public final class MailSenderBuilder {
         builder.nickname("张三").connTimeout(5000).readTimeout(5000).charset("UTF-8").retryTimes(2).validateTimes(0).authRequire(false);
         MailSender sender = builder.build();
         MailEnvelope evp = MailEnvelope.newMimeInstance("fupengfei163@163.com", "图片", "你好，看附件：<hr/><img src=\"cid:contentid123\" />");
-        evp.setCc(new String[]{"395191357@qq.com", "fdsaewfdfa@fdsa.com"});
-        evp.setBcc(new String[]{"fdsaewfdfa@test.com"});
+        evp.setCc(new String[] { "395191357@qq.com", "fdsaewfdfa@fdsa.com" });
+        evp.setBcc(new String[] { "fdsaewfdfa@test.com" });
         //evp.addContentImage("contentid123", "d:/QQ图片20170320235130.png");
         //evp.addAttachment("名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长.xlsx", "d:/abc.xlsx");
         //evp.addAttachment("百度名字有点长魂牵梦萦脍少朝秦暮楚脍塔顶地额外负担要暮云春树工奇巧魂牵梦萦地魂牵梦萦城.txt", "d:/baidu.html");

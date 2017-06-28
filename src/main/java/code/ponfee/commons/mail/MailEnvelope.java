@@ -19,6 +19,7 @@ import org.apache.commons.io.FilenameUtils;
 public class MailEnvelope implements Serializable {
 
     private static final long serialVersionUID = 2375709603692620293L;
+    private static final int MAX_LEN = 200;
 
     private final MailType type;
     private String[] to; // 接收人
@@ -221,9 +222,9 @@ public class MailEnvelope implements Serializable {
     private String substr(String str) {
         if (str == null) return null;
 
-        if (str.length() > 200) {
+        if (str.length() > MAX_LEN) {
             StringBuilder builder = new StringBuilder(str);
-            builder.setLength(197);
+            builder.setLength(MAX_LEN - 3);
             str = builder.append("...").toString();
         }
         return str.toString();

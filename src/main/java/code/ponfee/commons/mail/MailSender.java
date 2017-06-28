@@ -54,7 +54,9 @@ public class MailSender {
     private String charset = "UTF-8";
     private int retryTimes;
     private int validateTimes;
-    private MailSentFailedLogger sentFailHandler = new DefaultMailSentFailedLogger();
+
+    /** 默认发送失败日志处理 {@link #sentFailHandler(MailSentFailedLogger)} */
+    private MailSentFailedLogger sentFailedLogger = new DefaultMailSentFailedLogger();
 
     private final transient Session session;
 
@@ -73,7 +75,7 @@ public class MailSender {
         }
         Properties props = new Properties();
         props.setProperty("mail.smtp.host", smtpHost);
-        //props.setProperty("mail.smtp.starttls.enable", "true"); // 如果是网易邮箱设为false
+        //props.setProperty("mail.smtp.starttls.enable", "true"); // 网易邮箱设为false
         props.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         if (connTimeout != null) {
             props.setProperty("mail.smtp.connectiontimeout", connTimeout.toString());
@@ -94,27 +96,27 @@ public class MailSender {
         this.smtpHost = smtpHost;
     }
 
-    void charset(String charset) {
+    void setCharset(String charset) {
         if (charset != null) {
             this.charset = charset;
         }
     }
 
-    void retryTimes(int retryTimes) {
+    void setRetryTimes(int retryTimes) {
         this.retryTimes = retryTimes;
     }
 
-    void validateTimes(int validateTimes) {
+    void setValidateTimes(int validateTimes) {
         this.validateTimes = validateTimes;
     }
 
-    void nickname(String nickname) {
+    void setNickname(String nickname) {
         this.nickname = nickname;
     }
 
-    void sentFailHandler(MailSentFailedLogger sentFailHandler) {
-        if (sentFailHandler != null) {
-            this.sentFailHandler = sentFailHandler;
+    void setSentFailedLogger(MailSentFailedLogger sentFailedLogger) {
+        if (sentFailedLogger != null) {
+            this.sentFailedLogger = sentFailedLogger;
         }
     }
 
@@ -202,8 +204,8 @@ public class MailSender {
             trans.sendMessage(message, message.getAllRecipients());
             return true;
         } catch (MessagingException | UnsupportedEncodingException e) {
-            if (sentFailHandler != null) try {
-                sentFailHandler.log(logid, retries, envlop, e);
+            if (sentFailedLogger != null) try {
+                sentFailedLogger.log(logid, retries, envlop, e);
             } catch (Exception ignored) {
             }
 

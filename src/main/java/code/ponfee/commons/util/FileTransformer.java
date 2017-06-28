@@ -54,8 +54,12 @@ public class FileTransformer {
         this.encoding = encoding;
     }
 
-    public void setIncludeFileExtensions(String includeFileExtensions) {
-        this.includeFileExtensions = includeFileExtensions;
+    /**
+     * 文件后缀名，不加“.”
+     * @param includeFileExtensions
+     */
+    public void setIncludeFileExtensions(String... includeFileExtensions) {
+        this.includeFileExtensions = "(?i)^(.+\\.)(" + StringUtils.join(includeFileExtensions, "|") + ")$";
     }
 
     public void setReplaceEach(String[] searchList, String[] replacementList) {
@@ -90,7 +94,7 @@ public class FileTransformer {
         String filepath = file.getAbsolutePath(), charset;
         File dest = Files.touch(targetPath + filepath.substring(sourcePath.length()));
         boolean isMatch = file.getName().matches(includeFileExtensions);
-        if (!StringUtils.isEmpty(encoding) && isMatch && (charset = guessEncoding(filepath)) != null 
+        if (!StringUtils.isEmpty(encoding) && isMatch && (charset = guessEncoding(filepath)) != null
             && !"void".equalsIgnoreCase(charset) && !encoding.equalsIgnoreCase(charset)) {
             logger.append("**转换").append("  ").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("  -->  ");
             transform(file, dest, charset, encoding, searchList, replacementList);

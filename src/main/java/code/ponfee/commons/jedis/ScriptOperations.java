@@ -20,7 +20,7 @@ public class ScriptOperations extends JedisOperations {
      */
     public Object eval(String script, List<String> keys, List<String> args) {
         return hook(shardedJedis -> {
-            return shardedJedis.getShard(JEDIS_SCRIPT_OPS).eval(script, keys, args);
+            return getShard(shardedJedis, JEDIS_SCRIPT_OPS).eval(script, keys, args);
         }, null, script, keys, args);
     }
 
@@ -31,7 +31,7 @@ public class ScriptOperations extends JedisOperations {
      */
     public String scriptLoad(String script) {
         return hook(shardedJedis -> {
-            return shardedJedis.getShard(JEDIS_SCRIPT_OPS).scriptLoad(script);
+            return getShard(shardedJedis, JEDIS_SCRIPT_OPS).scriptLoad(script);
         }, null, script);
     }
 
@@ -44,7 +44,7 @@ public class ScriptOperations extends JedisOperations {
      */
     public Object evalsha(String sha1, List<String> keys, List<String> args) {
         return hook(shardedJedis -> {
-            return shardedJedis.getShard(JEDIS_SCRIPT_OPS).evalsha(sha1, keys, args);
+            return getShard(shardedJedis, JEDIS_SCRIPT_OPS).evalsha(sha1, keys, args);
         }, null, sha1, keys, args);
     }
 

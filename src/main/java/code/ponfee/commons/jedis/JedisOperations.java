@@ -7,6 +7,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
 
 /**
@@ -52,6 +53,16 @@ abstract class JedisOperations {
      */
     final void call(JedisCall call, Object... args) {
         jedisClient.call(call, args);
+    }
+
+    /**
+     * 获取分片的Jedis
+     * @param shardedJedis
+     * @param key
+     * @return 具体哈希片的Jedis
+     */
+    final Jedis getShard(ShardedJedis shardedJedis, String key) {
+        return shardedJedis.getShard(key);
     }
 
     static int getActualExpire(int seconds) {

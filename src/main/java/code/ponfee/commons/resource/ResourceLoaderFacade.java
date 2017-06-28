@@ -130,7 +130,7 @@ public class ResourceLoaderFacade {
         if (path.startsWith("/")) {
             path = path.substring(1);
         } else if (contextClass != null) {
-            path = ClassUtils.toResourcePath(contextClass) + "/" + path;
+            path = ClassUtils.getPackagePath(contextClass) + "/" + path;
         }
         return path;
     }

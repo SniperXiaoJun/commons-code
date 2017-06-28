@@ -150,28 +150,6 @@ public final class ClassUtils {
         }
     }
 
-    public static String getClassName(Class<?> clazz) {
-        String name = clazz.getCanonicalName();
-        if (name == null) name = clazz.getName();
-
-        return name;
-    }
-
-    /**
-     * @see org.springframework.util.ClassUtils#convertClassNameToResourcePath
-     * @param className
-     * @return
-     */
-    public static String toResourcePath(String name) {
-        return name.replace('.', '/');
-    }
-
-    public static String toResourcePath(Class<?> clazz) {
-        String className = getClassName(clazz);
-        if (className.indexOf('.') < 0) return ""; // none package name
-        return toResourcePath(className.substring(0, className.lastIndexOf('.')));
-    }
-
     /**
      * 获取字段
      * @param clazz
@@ -194,11 +172,48 @@ public final class ClassUtils {
     }
 
     /**
-     * 获取类文件路径
+     * 获取类名称
+     * getClassName(ClassUtils.class)  ->  code.ponfee.commons.reflect.ClassUtils
      * @param clazz
      * @return
      */
-    public static String getFilepath(Class<?> clazz) {
+    public static String getClassName(Class<?> clazz) {
+        String name = clazz.getCanonicalName();
+        if (name == null) name = clazz.getName();
+
+        return name;
+    }
+
+    /**
+     * 包名称转目录路径名
+     * getPackagePath("code.ponfee.commons.reflect")  ->  code/ponfee/commons/reflect
+     * @see org.springframework.util.ClassUtils#convertClassNameToResourcePath
+     * @param className
+     * @return
+     */
+    public static String getPackagePath(String packageName) {
+        return packageName.replace('.', '/');
+    }
+
+    /**
+     * 包名称转目录路径名
+     * getPackagePath(ClassUtils.class)  ->  code/ponfee/commons/reflect
+     * @param clazz
+     * @return
+     */
+    public static String getPackagePath(Class<?> clazz) {
+        String className = getClassName(clazz);
+        if (className.indexOf('.') < 0) return ""; // none package name
+        return getPackagePath(className.substring(0, className.lastIndexOf('.')));
+    }
+
+    /**
+     * 获取类文件的路径（文件）
+     * getClassFilePath(ClassUtils.class)  ->  D:\github\commons-code\target\classes\code\ponfee\commons\reflect\ClassUtils.class
+     * @param clazz
+     * @return
+     */
+    public static String getClassFilePath(Class<?> clazz) {
         URL url = clazz.getProtectionDomain().getCodeSource().getLocation();
         String path = null;
         try {
@@ -213,7 +228,8 @@ public final class ClassUtils {
     }
 
     /**
-     * 获取类路径
+     * 获取指定类的类路径（目录）
+     * getClasspath(StringUtils.class)  ->  D:\maven_repos\org\apache\commons\commons-lang3\3.5\
      * @param clazz
      * @return
      */
@@ -233,7 +249,8 @@ public final class ClassUtils {
     }
 
     /**
-     * 获取类路径
+     * 获取当前的类路径（目录）
+     * getClasspath()  ->  D:\github\commons-code\target\classes\
      * @return
      */
     public static String getClasspath() {
@@ -266,6 +283,9 @@ public final class ClassUtils {
     }
 
     public static void main(String[] args) throws Exception {
+        System.out.println(getClassName(ClassUtils.class));
+        System.out.println(getPackagePath("code.ponfee.commons.reflect"));
+        System.out.println(getPackagePath(ClassUtils.class));
         //Method m = ObjectUtils.class.getMethod("mergeArray", Object[][].class);
         //Method m = ObjectUtils.class.getMethod("hexDump", byte[].class);
         Method m = ObjectUtils.class.getMethod("map2array", List.class, String[].class);
@@ -279,8 +299,8 @@ public final class ClassUtils {
         System.out.println(getClasspath());
 
         System.out.println("========================================");
-        System.out.println(getFilepath(ClassUtils.class));
-        System.out.println(getFilepath(ThreadPoolTaskExecutor.class));
+        System.out.println(getClassFilePath(ClassUtils.class));
+        System.out.println(getClassFilePath(ThreadPoolTaskExecutor.class));
     }
 
 }
