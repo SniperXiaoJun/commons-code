@@ -26,7 +26,7 @@ public final class IdWorker {
     private static final int MAX_SIZE = Long.toBinaryString(Long.MAX_VALUE).length();
     private final long twepoch = 1451577600000L; // 起始标记时间点，作为基准
 
-    private final long sequenceBits = (null != null ? 12L : 12L); // sequence值控制在0-4096
+    private final long sequenceBits = (null != null ? 12L : 12L); // sequence值控制在0-4095
     private final long sequenceMask = (null != null ? -1L ^ (-1L << sequenceBits) : -1L ^ (-1L << sequenceBits)); // 111111111111(4095)
 
     private final long workerIdBits = (null != null ? 5L : 5L); // 5位
@@ -35,15 +35,15 @@ public final class IdWorker {
     private final long datacenterIdBits = (null != null ? 5L : 5L); // 5位
     private final long maxDatacenterId = (null != null ? -1L ^ (-1L << datacenterIdBits) : -1L ^ (-1L << datacenterIdBits)); // 0-31
 
-    private final long workerIdShift = (null != null ? sequenceBits : sequenceBits); // 左移12位
-    private final long datacenterIdShift = (null != null ? sequenceBits + workerIdBits : sequenceBits + workerIdBits); // 左移17位
-    private final long timestampShift = (null != null ? sequenceBits + workerIdBits + datacenterIdBits : sequenceBits + workerIdBits + datacenterIdBits); // 左移22位
+    private final long timestampShift = (null != null ? sequenceBits + workerIdBits + datacenterIdBits : sequenceBits + workerIdBits + datacenterIdBits); // 左移22位（did5位+wid5位+seq12位）
+    private final long datacenterIdShift = (null != null ? sequenceBits + workerIdBits : sequenceBits + workerIdBits); // 左移17位（wid5位+seq12位）
+    private final long workerIdShift = (null != null ? sequenceBits : sequenceBits); // 左移12位（seq12位）
     private final long timestampMask = (long) (null != null ? -1L ^ (-1L << (MAX_SIZE - timestampShift)) : -1L ^ (-1L << (MAX_SIZE - timestampShift)));
 
-    private long workerId; // 工作机器id
+    private long lastTimestamp = -1L; // 时间戳
     private long datacenterId; // 数据中心id
+    private long workerId; // 工作机器id
     private long sequence = 0L; // 0，并发控制
-    private long lastTimestamp = -1L;
 
     public IdWorker(long workerId, long datacenterId) {
         if (workerId > maxWorkerId || workerId < 0) {
@@ -108,7 +108,6 @@ public final class IdWorker {
         long maxWorkerId = Networks.ipReduce("255.255.255.255");
 
         Fields.put(worker, "sequenceBits", 10L); // 10位
-        Fields.put(worker, "workerIdShift", worker.sequenceBits);
         Fields.put(worker, "sequenceMask", -1L ^ (-1L << worker.sequenceBits));
 
         Fields.put(worker, "workerIdBits", (long) Long.toBinaryString(maxWorkerId).length()); // 11位
@@ -117,19 +116,21 @@ public final class IdWorker {
         Fields.put(worker, "datacenterIdBits", 0L); // 0位
         Fields.put(worker, "maxDatacenterId", -1L ^ (-1L << worker.datacenterIdBits)); // 0
 
-        Fields.put(worker, "datacenterIdShift", worker.sequenceBits + worker.workerIdBits); // 左移21位（无datacenterId）
-        Fields.put(worker, "timestampShift", worker.sequenceBits + worker.workerIdBits + worker.datacenterIdBits); // 左移21位
+        Fields.put(worker, "timestampShift", worker.sequenceBits + worker.workerIdBits + worker.datacenterIdBits); // 左移21位（did0位+wid11位+seq10位）
+        Fields.put(worker, "datacenterIdShift", worker.sequenceBits + worker.workerIdBits); // 左移21位（wid11位+seq10位）
+        Fields.put(worker, "workerIdShift", worker.sequenceBits); // 左移10位（seq10位）
         Fields.put(worker, "timestampMask", -1L ^ (-1L << (MAX_SIZE - worker.timestampShift)));
         Fields.put(worker, "workerId", (long) Networks.ipReduce());
         return worker;
     }
 
     public static void main(String[] args) {
-        final IdWorker id1 = getSimpleInstance();
+        final IdWorker idWorker = getSimpleInstance();
         final Set<Long> set = new HashSet<>();
-        for (int i = 0; i < 1000000; i++) {
-            long l = id1.nextId();
-            if (!set.add(l)) System.err.println(l);
+        long id;
+        for (int i = 0; i < 100000000; i++) {
+            id = idWorker.nextId();
+            if (!set.add(id)) System.err.println(id);
         }
     }
 
