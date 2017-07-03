@@ -26,7 +26,7 @@ abstract class JedisOperations {
                                                                    new SynchronousQueue<>(), // 同步队列，超过数量让调用线程处理
                                                                    new NamedThreadFactory("redis-mget-furture", true));
     static {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> EXECUTOR.shutdown()));
+        Runtime.getRuntime().addShutdownHook(new Thread(EXECUTOR::shutdown));
     }
 
     final JedisClient jedisClient;

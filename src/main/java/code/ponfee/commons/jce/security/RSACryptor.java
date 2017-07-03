@@ -38,6 +38,13 @@ import code.ponfee.commons.util.Streams;
  */
 public final class RSACryptor {
 
+    public static enum RSAPadding {
+        NO_PADDING, // 
+        PKCS1_PADDING, // 原文必须 比RSA钥模长(modulus)短至少11个字节
+        PKCS1_OAEP_PADDING, // RSA_size(rsa) – 41
+        SSLV23_PADDING;
+    }
+
     private static final String ALG_RSA = "RSA";
 
     /**

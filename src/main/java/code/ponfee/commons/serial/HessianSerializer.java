@@ -73,9 +73,9 @@ public class HessianSerializer extends Serializer {
                 hessian = new HessianSerializerInput(bais);
             }
             T t = (T) hessian.readObject();
-            if (clazz != t.getClass()) {
-                throw new IllegalArgumentException("expect " + ClassUtils.getClassName(clazz) 
-                + " type, but it's " + ClassUtils.getClassName(t.getClass()) + " type");
+            if (!clazz.isInstance(t)) {
+                throw new IllegalArgumentException("expect " + ClassUtils.getClassName(clazz)
+                      + " type, but it's " + ClassUtils.getClassName(t.getClass()) + " type");
             }
             return t;
         } catch (IOException e) {

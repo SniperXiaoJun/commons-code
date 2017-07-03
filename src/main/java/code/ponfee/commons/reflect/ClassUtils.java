@@ -22,7 +22,6 @@ import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.Type;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import code.ponfee.commons.util.ObjectUtils;
 
@@ -210,6 +209,7 @@ public final class ClassUtils {
     /**
      * 获取类文件的路径（文件）
      * getClassFilePath(ClassUtils.class)  ->  D:\github\commons-code\target\classes\code\ponfee\commons\reflect\ClassUtils.class
+     * getClassFilePath(StringUtils.class) ->  D:\maven_repos\org\apache\commons\commons-lang3\3.5\commons-lang3-3.5.jar!\org\apache\commons\lang3\StringUtils.class
      * @param clazz
      * @return
      */
@@ -229,6 +229,7 @@ public final class ClassUtils {
 
     /**
      * 获取指定类的类路径（目录）
+     * getClasspath(ClassUtils.class)   ->  D:\github\commons-code\target\classes\
      * getClasspath(StringUtils.class)  ->  D:\maven_repos\org\apache\commons\commons-lang3\3.5\
      * @param clazz
      * @return
@@ -295,12 +296,13 @@ public final class ClassUtils {
         System.out.println(getMethodSignature(m));
 
         System.out.println("========================================");
-        System.out.println(getClasspath(StringUtils.class));
+        System.out.println(getClasspath(ClassUtils.class));
         System.out.println(getClasspath());
+        System.out.println(getClasspath(StringUtils.class));
 
         System.out.println("========================================");
         System.out.println(getClassFilePath(ClassUtils.class));
-        System.out.println(getClassFilePath(ThreadPoolTaskExecutor.class));
+        System.out.println(getClassFilePath(StringUtils.class));
     }
 
 }

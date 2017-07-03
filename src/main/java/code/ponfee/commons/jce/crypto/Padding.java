@@ -8,5 +8,5 @@ package code.ponfee.commons.jce.crypto;
  * @author fupf
  */
 public enum Padding {
-    NoPadding/*, PKCS1Padding*/, PKCS5Padding, PKCS7Padding, PADDING_ISO10126;
+    NoPadding, PKCS5Padding, PKCS7Padding, PADDING_ISO10126;
 }

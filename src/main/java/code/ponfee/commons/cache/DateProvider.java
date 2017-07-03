@@ -6,7 +6,7 @@ package code.ponfee.commons.cache;
  */
 interface DateProvider {
 
-    DateProvider SYSTEM = () -> System.currentTimeMillis();
+    DateProvider SYSTEM = System::currentTimeMillis;
 
     long now();
 

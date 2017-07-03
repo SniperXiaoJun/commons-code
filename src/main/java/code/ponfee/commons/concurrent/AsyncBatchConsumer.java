@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author fupf
  * @param <T>
  */
-public final class AsyncBatchConsumer<T> implements Runnable {
+public final class AsyncBatchConsumer<T> extends Thread {
     private final RunnableFactory<T> factory;
     private final ExecutorService executor;
     private final int thresholdPeriod;
@@ -35,14 +35,14 @@ public final class AsyncBatchConsumer<T> implements Runnable {
     }
 
     public AsyncBatchConsumer(RunnableFactory<T> factory, ExecutorService executor,
-        int thresholdPeriod, int thresholdQuantity) {
+        int thresholdPeriod, int thresholdChunk) {
         this.factory = factory;
         this.executor = executor;
         this.thresholdPeriod = thresholdPeriod;
-        this.thresholdChunk = thresholdQuantity;
-        Thread thread = new Thread(this, "async-batch-consumer-" + Integer.toHexString(hashCode()));
-        thread.setDaemon(true);
-        thread.start();
+        this.thresholdChunk = thresholdChunk;
+        super.setName("async-batch-consumer-" + Integer.toHexString(hashCode()));
+        super.setDaemon(true);
+        super.start();
     }
 
     @Override

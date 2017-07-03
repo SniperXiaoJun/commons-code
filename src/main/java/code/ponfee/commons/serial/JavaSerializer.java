@@ -66,8 +66,8 @@ public class JavaSerializer extends Serializer {
             }
 
             T t = (T) ois.readObject();
-            if (clazz != t.getClass()) {
-                throw new IllegalArgumentException("expect " + ClassUtils.getClassName(clazz) 
+            if (!clazz.isInstance(t)) {
+                throw new IllegalArgumentException("expect " + ClassUtils.getClassName(clazz)
                       + " type, but it's " + ClassUtils.getClassName(t.getClass()) + " type");
             }
             return t;
