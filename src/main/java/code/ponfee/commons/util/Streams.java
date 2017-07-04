@@ -13,7 +13,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Objects;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -326,8 +326,7 @@ public final class Streams {
 
     public static void main(String[] args) {
         byte[] b = new byte[8];
-        Random ran = new Random();
-        ran.nextBytes(b);
+        ThreadLocalRandom.current().nextBytes(b);
         System.out.println(Bytes.hexEncode(b));
         String b64 = Bytes.base64EncodeUrlSafe(b);
         System.out.println(Objects.deepEquals(Bytes.base64DecodeUrlSafe(b64), b));

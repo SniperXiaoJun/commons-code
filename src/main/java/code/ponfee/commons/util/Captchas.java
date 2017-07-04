@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.sun.image.codec.jpeg.ImageFormatException;
 import com.sun.image.codec.jpeg.JPEGCodec;
@@ -48,10 +48,9 @@ public class Captchas {
             sources = CODES;
         }
         int codesLen = sources.length();
-        Random random = new Random();
         StringBuilder codes = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
-            codes.append(sources.charAt(random.nextInt(codesLen - 1)));
+            codes.append(sources.charAt(ThreadLocalRandom.current().nextInt(codesLen - 1)));
         }
         return codes.toString();
     }
@@ -66,14 +65,13 @@ public class Captchas {
     public static void generate(int width, int height, OutputStream out, String code) {
         int verifySize = code.length();
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Random rand = new Random();
         Graphics2D g2 = image.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         Color[] colors = new Color[5];
         float[] fractions = new float[colors.length];
         for (int i = 0; i < colors.length; i++) {
-            colors[i] = COLOR_SPACES[rand.nextInt(COLOR_SPACES.length)];
-            fractions[i] = rand.nextFloat();
+            colors[i] = COLOR_SPACES[ThreadLocalRandom.current().nextInt(COLOR_SPACES.length)];
+            fractions[i] = ThreadLocalRandom.current().nextFloat();
         }
         Arrays.sort(fractions);
 
@@ -85,13 +83,12 @@ public class Captchas {
         g2.fillRect(0, 2, width, height - 4);
 
         //绘制干扰线
-        Random random = new Random();
         g2.setColor(getRandColor(160, 200));// 设置线条的颜色
         for (int i = 0; i < 20; i++) {
-            int x = random.nextInt(width - 1);
-            int y = random.nextInt(height - 1);
-            int xl = random.nextInt(6) + 1;
-            int yl = random.nextInt(12) + 1;
+            int x = ThreadLocalRandom.current().nextInt(width - 1);
+            int y = ThreadLocalRandom.current().nextInt(height - 1);
+            int xl = ThreadLocalRandom.current().nextInt(6) + 1;
+            int yl = ThreadLocalRandom.current().nextInt(12) + 1;
             g2.drawLine(x, y, x + xl + 40, y + yl + 20);
         }
 
@@ -99,8 +96,8 @@ public class Captchas {
         float yawpRate = 0.05f;// 噪声率
         int area = (int) (yawpRate * width * height);
         for (int i = 0; i < area; i++) {
-            int x = random.nextInt(width);
-            int y = random.nextInt(height);
+            int x = ThreadLocalRandom.current().nextInt(width);
+            int y = ThreadLocalRandom.current().nextInt(height);
             int rgb = getRandomIntColor();
             image.setRGB(x, y, rgb);
         }
@@ -114,7 +111,8 @@ public class Captchas {
         char[] chars = code.toCharArray();
         for (int i = 0; i < verifySize; i++) {
             AffineTransform affine = new AffineTransform();
-            affine.setToRotation(Math.PI / 4 * rand.nextDouble() * (rand.nextBoolean() ? 1 : -1), (width / verifySize) * i + fontSize / 2, height / 2);
+            affine.setToRotation(Math.PI / 4 * ThreadLocalRandom.current().nextDouble() * (ThreadLocalRandom.current().nextBoolean() ? 1 : -1), (width
+                / verifySize) * i + fontSize / 2, height / 2);
             g2.setTransform(affine);
             g2.drawChars(chars, i, 1, ((width - 10) / verifySize) * i + 5, height / 2 + fontSize / 2 - 10);
         }
@@ -131,12 +129,11 @@ public class Captchas {
 
     //-------------------------private methods
     private static Color getRandColor(int fc, int bc) {
-        Random random = new Random();
         if (fc > 255) fc = 255;
         if (bc > 255) bc = 255;
-        int r = fc + random.nextInt(bc - fc);
-        int g = fc + random.nextInt(bc - fc);
-        int b = fc + random.nextInt(bc - fc);
+        int r = fc + ThreadLocalRandom.current().nextInt(bc - fc);
+        int g = fc + ThreadLocalRandom.current().nextInt(bc - fc);
+        int b = fc + ThreadLocalRandom.current().nextInt(bc - fc);
         return new Color(r, g, b);
     }
 
@@ -151,10 +148,9 @@ public class Captchas {
     }
 
     private static int[] getRandomRgb() {
-        Random random = new Random();
         int[] rgb = new int[3];
         for (int i = 0; i < 3; i++) {
-            rgb[i] = random.nextInt(255);
+            rgb[i] = ThreadLocalRandom.current().nextInt(255);
         }
         return rgb;
     }
@@ -165,12 +161,11 @@ public class Captchas {
     }
 
     private static void shearX(Graphics g, int w1, int h1, Color color) {
-        Random random = new Random();
-        int period = random.nextInt(2);
+        int period = ThreadLocalRandom.current().nextInt(2);
 
         boolean borderGap = true;
         int frames = 1;
-        int phase = random.nextInt(2);
+        int phase = ThreadLocalRandom.current().nextInt(2);
 
         for (int i = 0; i < h1; i++) {
             double d = (double) (period >> 1) * Math.sin((double) i / (double) period + (6.2831853071795862D * (double) phase) / (double) frames);
@@ -184,8 +179,7 @@ public class Captchas {
     }
 
     private static void shearY(Graphics g, int w1, int h1, Color color) {
-        Random random = new Random();
-        int period = random.nextInt(40) + 10; // 50;
+        int period = ThreadLocalRandom.current().nextInt(40) + 10; // 50;
 
         boolean borderGap = true;
         int frames = 20;

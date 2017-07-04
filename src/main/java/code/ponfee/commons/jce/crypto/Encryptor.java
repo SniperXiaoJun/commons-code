@@ -10,6 +10,8 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
+import code.ponfee.commons.util.ObjectUtils;
+
 /**
  * 对称加密
  * @author fupf
@@ -19,7 +21,7 @@ public class Encryptor {
     /** 随机数 */
     private static final SecureRandom RANDOM = new SecureRandom();
     static {
-        RANDOM.setSeed(new SecureRandom().generateSeed(20));
+        RANDOM.setSeed(new SecureRandom(ObjectUtils.uuid32().getBytes()).generateSeed(20));
     }
 
     /** 
@@ -121,8 +123,8 @@ public class Encryptor {
 
     
     public static void main(String[] args) {
-        System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes(10)));
-        System.out.println(org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(randomBytes(10)));
+        System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes(20)));
+        System.out.println(org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(randomBytes(20)));
     }
     
 }

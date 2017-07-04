@@ -3,10 +3,10 @@ package code.ponfee.commons.concurrent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,10 +27,8 @@ public final class AsyncBatchConsumer<T> extends Thread {
     private volatile boolean isEnd = false;
 
     public AsyncBatchConsumer(RunnableFactory<T> factory) {
-        this(factory, new ThreadPoolExecutor(1, 20, 300, TimeUnit.SECONDS, 
-                                             new SynchronousQueue<Runnable>(), // 超过则让调用方线程处理
-                                             new ThreadPoolExecutor.CallerRunsPolicy()), 
-             2000, 200);
+        this(factory, new ThreadPoolExecutor(1, 20, 300, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), // 超过则让调用方线程处理
+            new ThreadPoolExecutor.CallerRunsPolicy()), 2000, 200);
         needDistoryWhenEnd = true;
     }
 
@@ -127,7 +125,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
             Thread thread = new Thread(() -> {
                 while (true) {
                     try {
-                        Thread.sleep(150 + new Random().nextInt(1780));
+                        Thread.sleep(150 + ThreadLocalRandom.current().nextInt(1780));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

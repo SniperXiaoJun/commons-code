@@ -7,8 +7,8 @@ import java.security.Security;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Random;
 import java.util.Vector;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 
@@ -38,8 +38,6 @@ import sun.security.x509.X509CertInfo;
  */
 @SuppressWarnings("restriction")
 public class X509CertGenerator {
-
-    private static final Random RANDOM = new Random();
 
     public static X509Certificate createRootCert(String issuer, RSASignAlgorithm sigAlg,
         PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
@@ -182,7 +180,7 @@ public class X509CertGenerator {
      */
     private static X509CertInfo createCertInfo(Integer sn, PKCS10 pkcs10,
         Date notBefore, Date notAfter, CertificateExtensions extensions) {
-        if (sn == null) sn = RANDOM.nextInt() & Integer.MAX_VALUE;
+        if (sn == null) sn = ThreadLocalRandom.current().nextInt() & Integer.MAX_VALUE;
         try {
             // 验证pkcs10
             Security.addProvider(Providers.BC.get());
