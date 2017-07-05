@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.JedisLock;
-import code.ponfee.commons.serial.JavaSerializer;
+import code.ponfee.commons.serial.JdkSerializer;
 import redis.clients.jedis.JedisPoolConfig;
 
 public class JedisLockTester {
@@ -37,7 +37,7 @@ public class JedisLockTester {
         poolCfg.setMinEvictableIdleTimeMillis(60000);
         poolCfg.setTimeBetweenEvictionRunsMillis(30000);
         //jedisClient = new JedisClient(poolCfg, "local1:127.0.0.1:6379", new KryoSerializer());
-        jedisClient = new JedisClient(poolCfg, "127.0.0.1:6379;127.0.0.1:6380;", new JavaSerializer());
+        jedisClient = new JedisClient(poolCfg, "127.0.0.1:6379;127.0.0.1:6380;", new JdkSerializer());
     }
 
     @After

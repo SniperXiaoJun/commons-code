@@ -68,18 +68,6 @@ public abstract class Serializer {
     /**
      * 关闭流
      * @param closeable
-     */
-    public static void closeQuietly(Closeable closeable) {
-        if (closeable != null) try {
-            closeable.close();
-        } catch (Exception e) {
-            // ignored
-        }
-    }
-
-    /**
-     * 关闭流
-     * @param closeable
      * @param error
      */
     public static void close(Closeable closeable, String error) {

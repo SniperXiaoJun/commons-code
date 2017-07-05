@@ -14,7 +14,7 @@ import code.ponfee.commons.reflect.ClassUtils;
  * java序例化
  * @author fupf
  */
-public class JavaSerializer extends Serializer {
+public class JdkSerializer extends Serializer {
 
     public <T extends Object> byte[] serialize(T t, boolean isCompress) {
         if (t == null) return null;

@@ -1,6 +1,5 @@
 package test.serial;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,11 +11,12 @@ import org.junit.Test;
 import bean.TestBean;
 import code.ponfee.commons.serial.FstSerializer;
 import code.ponfee.commons.serial.HessianSerializer;
-import code.ponfee.commons.serial.JavaSerializer;
+import code.ponfee.commons.serial.JdkSerializer;
 import code.ponfee.commons.serial.JsonSerializer;
 import code.ponfee.commons.serial.KryoSerializer;
 import code.ponfee.commons.serial.Serializer;
 import code.ponfee.commons.serial.StringSerializer;
+import code.ponfee.commons.util.MavenProjects;
 
 public class SerializerTester {
     private String text;
@@ -26,10 +26,7 @@ public class SerializerTester {
         FileInputStream in = null;
         Scanner scan = null;
         try {
-            String path = Thread.currentThread().getContextClassLoader().getResource("").getFile();
-            path = new File(path).getParentFile().getParentFile().getPath() + "/src/test/java/";
-            path += this.getClass().getCanonicalName().replace('.', '/') + ".java";
-            in = new FileInputStream(path);
+            in = new FileInputStream(MavenProjects.getTestJavaFile(this.getClass()));
             scan = new Scanner(in);
             StringBuilder builder = new StringBuilder();
             while (scan.hasNext()) {
@@ -90,7 +87,7 @@ public class SerializerTester {
 
         System.out.println("--------------------no gzip---------------------------------");
         isCompress = false;
-        serializer = new JavaSerializer();
+        serializer = new JdkSerializer();
         data = serializer.serialize(new TestBean(1312321111, 222243222L, text), isCompress);
         System.out.println("序例化后不压缩的数据大小：" + data.length);
         b = serializer.deserialize(data, TestBean.class, isCompress);
@@ -98,7 +95,7 @@ public class SerializerTester {
 
         System.out.println("--------------------use gzip---------------------------------");
         isCompress = true;
-        serializer = new JavaSerializer();
+        serializer = new JdkSerializer();
         data = serializer.serialize(new TestBean(1312321111, 222243222L, text), isCompress);
         System.out.println("序例化后压缩的数据大小：" + data.length);
         b = serializer.deserialize(data, TestBean.class, isCompress);

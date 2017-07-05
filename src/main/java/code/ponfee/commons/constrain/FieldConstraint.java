@@ -75,20 +75,20 @@ public class FieldConstraint {
         }
     }
 
-    protected final String constrain(String key, String name, Object value, Constraint cst, Class<?> type) {
-        key += "@" + name;
-        checkResult result = META_CFG_CACHE.get(key);
+    protected final String constrain(String name, String field, Object value, Constraint cst, Class<?> type) {
+        name += "@" + field;
+        checkResult result = META_CFG_CACHE.get(name);
         if (result == null) {
             LOCK.lock();
             try {
-                if ((result = META_CFG_CACHE.get(key)) == null) {
+                if ((result = META_CFG_CACHE.get(name)) == null) {
                     try {
-                        verifyMeta(name, cst, type);
+                        verifyMeta(field, cst, type);
                         result = new checkResult(true);
-                        META_CFG_CACHE.set(key, result);
+                        META_CFG_CACHE.set(name, result);
                     } catch (Exception e) {
                         result = new checkResult(false, e.getMessage());
-                        META_CFG_CACHE.set(key, result);
+                        META_CFG_CACHE.set(name, result);
                         throw e;
                     }
                 }
@@ -101,7 +101,7 @@ public class FieldConstraint {
         if (!result.flag) throw new UnsupportedOperationException(result.msg);
 
         // 配置合法
-        String error = verifyValue(name, value, cst);
+        String error = verifyValue(field, value, cst);
         if (isNotBlank(error) && isNotBlank(cst.msg())) {
             return cst.msg() + ";";
         } else if (isBlank(error)) {

@@ -32,7 +32,8 @@ public final class PageBoundsResolver {
         if (pageSize < 1) {
             List<PageBounds> bounds = new ArrayList<>();
             for (int i = 0; i < subTotalCounts.length; i++) {
-                bounds.add(new PageBounds(i, 1, 0, 0, 0)); // index,pageNum=1,pageSize=0,offset=0,limit=0
+                // index, subTotalCounts, offset=0, limit=subTotalCounts
+                bounds.add(new PageBounds(i, subTotalCounts[i], 0, (int) subTotalCounts[i]));
             }
             return bounds;
         }
@@ -47,31 +48,22 @@ public final class PageBoundsResolver {
 
         // 分页计算
         List<PageBounds> bounds = new ArrayList<>();
-        long start = offset, end = offset + pageSize, cursor = 0;
+        long start = offset, end = start + pageSize, cursor = 0;
         for (int limit, i = 0; i < subTotalCounts.length; cursor += subTotalCounts[i], i++) {
             if (start >= cursor + subTotalCounts[i]) continue;
 
             offset = start - cursor;
             if (end > cursor + subTotalCounts[i]) {
                 limit = (int) (cursor + subTotalCounts[i] - start);
-                addBounds(bounds, i, pageNum, pageSize, offset, limit);
+                bounds.add(new PageBounds(i, subTotalCounts[i], offset, limit));
                 start = cursor + subTotalCounts[i];
             } else {
                 limit = (int) (end - start);
-                addBounds(bounds, i, pageNum, pageSize, offset, limit);
+                bounds.add(new PageBounds(i, subTotalCounts[i], offset, limit));
                 break;
             }
         }
         return bounds;
-    }
-
-    private static void addBounds(List<PageBounds> bounds, int index, int pageNum, long pageSize, long offset, int limit) {
-        if (index > 0) {
-            // 非第一个数据源，都是从第一页开始查询，页大小设置为记录数
-            pageNum = 1;
-            pageSize = limit;
-        }
-        bounds.add(new PageBounds(index, pageNum, pageSize, offset, limit));
     }
 
     /**
@@ -93,15 +85,13 @@ public final class PageBoundsResolver {
      */
     public static final class PageBounds {
         private final int index; // 数据源下标（start 0）
-        private final int pageNum; // 页码（start 1）
-        private final long pageSize; // 页大小
+        private final long total; // 总记录数
         private final long offset; // 偏移量（start 0）
         private final int limit; // 数据行数
 
-        PageBounds(int index, int pageNum, long pageSize, long offset, int limit) {
+        PageBounds(int index, long total, long offset, int limit) {
             this.index = index;
-            this.pageNum = pageNum;
-            this.pageSize = pageSize;
+            this.total = total;
             this.offset = offset;
             this.limit = limit;
         }
@@ -110,12 +100,8 @@ public final class PageBoundsResolver {
             return index;
         }
 
-        public int getPageNum() {
-            return pageNum;
-        }
-
-        public long getPageSize() {
-            return pageSize;
+        public long getTotal() {
+            return total;
         }
 
         public long getOffset() {
@@ -128,8 +114,7 @@ public final class PageBoundsResolver {
 
         @Override
         public String toString() {
-            return "PageBounds{index=" + index + ", pageNum=" + pageNum
-                + ", pageSize=" + pageSize + ", offset=" + offset + ", limit=" + limit + "}";
+            return "PageBounds [index=" + index + ", total=" + total + ", offset=" + offset + ", limit=" + limit + "]";
         }
     }
 
@@ -137,7 +122,7 @@ public final class PageBoundsResolver {
         System.out.println(resolve(11, 10, 101));
 
         System.out.println("\n==============================");
-        System.out.println(resolve(6, 15, 80, 9, 7, 10));
+        System.out.println(resolve(7, 15, 80, 9, 7, 10));
 
         System.out.println("\n==============================");
         System.out.println(resolve(16, 10, 155, 100));

@@ -31,7 +31,15 @@ import code.ponfee.commons.reflect.ClassUtils;
  */
 public abstract class LoggerAspect {
     private static Logger logger = LoggerFactory.getLogger(LoggerAspect.class);
-    private static final int ALARM_THRESHOLD_MILLIS = 2000; // 告警阀值2000ms
+    private final int alarmThresholdMillis; // 告警阀值
+
+    public LoggerAspect() {
+        this(2000); // default 2000ms
+    }
+
+    public LoggerAspect(int alarmThresholdMillis) {
+        this.alarmThresholdMillis = alarmThresholdMillis < 0 ? 1 : alarmThresholdMillis;
+    }
 
     /**
      * 日志拦截
@@ -71,7 +79,7 @@ public abstract class LoggerAspect {
             int cost = (int) (System.currentTimeMillis() - start);
             logInfo.setRetVal(retVal);
             logInfo.setCostTime(cost);
-            if (cost > ALARM_THRESHOLD_MILLIS && logger.isWarnEnabled()) {
+            if (cost > alarmThresholdMillis && logger.isWarnEnabled()) {
                 logger.warn("[exec-time]-[{}]{}-[cost {}]", methodName, logs, cost);
             }
             if (logger.isInfoEnabled()) {
