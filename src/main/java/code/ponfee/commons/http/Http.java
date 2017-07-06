@@ -119,6 +119,7 @@ public final class Http {
     /**
      * 设置请求参数：经使用有点问题，慎用
      * 最终是拼接成queryString的形式追加到url（即作为get的http请求参数）
+     * {@link #data(Map)}
      * @param params
      * @return
      */
@@ -318,6 +319,7 @@ public final class Http {
         return output.toByteArray();
     }
 
+    // ----------------------------private methods--------------------------
     private HttpRequest _request() {
         HttpRequest request;
         switch (method) {

@@ -1,6 +1,12 @@
 package code.ponfee.commons.serial;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.nustaq.serialization.FSTConfiguration;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 import code.ponfee.commons.reflect.ClassUtils;
 
@@ -34,6 +40,15 @@ public class FstSerializer extends Serializer {
                   + " type, but it's " + ClassUtils.getClassName(t.getClass()) + " type");
         }
         return t;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void main(String[] args) {
+        Map<String, Object> map = ImmutableMap.of("a", 1, "b", Lists.newArrayList("1", "2"));
+        FstSerializer serializer = new FstSerializer();
+        byte[] data = serializer.serialize(map);
+        map = serializer.deserialize(data, HashMap.class);
+        System.out.println(map.getClass());
     }
 
 }

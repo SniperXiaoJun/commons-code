@@ -4,6 +4,7 @@ import java.io.File;
 
 /**
  * maven标准的项目文件工具类
+ * only use test case
  * @author fupf
  */
 public class MavenProjects {

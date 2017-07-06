@@ -2,11 +2,10 @@ package code.ponfee.commons.jedis;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
+import code.ponfee.commons.concurrent.NamedThreadFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
 
@@ -118,17 +117,19 @@ abstract class JedisOperations {
     static boolean expireForce(ShardedJedis shardedJedis, String key, Integer seconds) {
         if (seconds != null) {
             return expire(shardedJedis, key, seconds);
+        } else {
+            expireDefaultIfInfinite(shardedJedis, key);
+            return false;
         }
-        expireDefaultIfInfinite(shardedJedis, key);
-        return false;
     }
 
     static boolean expireForce(ShardedJedis shardedJedis, byte[] key, Integer seconds) {
         if (seconds != null) {
             return expire(shardedJedis, key, seconds);
+        } else {
+            expireDefaultIfInfinite(shardedJedis, key);
+            return false;
         }
-        expireDefaultIfInfinite(shardedJedis, key);
-        return false;
     }
 
     /**
@@ -173,49 +174,6 @@ abstract class JedisOperations {
 
     static boolean equals(Number a, Number b) {
         return (a == b) || (a != null && b != null && a.longValue() == b.longValue());
-    }
-
-    /**
-     * 线程工厂
-     * @author fupf
-     */
-    private static class NamedThreadFactory implements ThreadFactory {
-        private static final AtomicInteger POOL_SEQ = new AtomicInteger(1);
-
-        private final AtomicInteger mThreadNum = new AtomicInteger(1);
-        private final String mPrefix;
-        private final boolean mDaemo;
-        private final ThreadGroup mGroup;
-
-        @SuppressWarnings("unused")
-        NamedThreadFactory() {
-            this("pool-" + POOL_SEQ.getAndIncrement(), false);
-        }
-
-        @SuppressWarnings("unused")
-        NamedThreadFactory(String prefix) {
-            this(prefix, false);
-        }
-
-        NamedThreadFactory(String prefix, boolean daemo) {
-            mPrefix = prefix + "-thread-";
-            mDaemo = daemo;
-            SecurityManager s = System.getSecurityManager();
-            mGroup = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
-        }
-
-        @Override
-        public Thread newThread(Runnable runnable) {
-            String name = mPrefix + mThreadNum.getAndIncrement();
-            Thread ret = new Thread(mGroup, runnable, name, 0);
-            ret.setDaemon(mDaemo);
-            return ret;
-        }
-
-        @SuppressWarnings("unused")
-        public ThreadGroup getThreadGroup() {
-            return mGroup;
-        }
     }
 
 }

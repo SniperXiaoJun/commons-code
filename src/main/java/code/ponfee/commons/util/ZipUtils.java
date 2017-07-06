@@ -1,15 +1,12 @@
 package code.ponfee.commons.util;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import code.ponfee.commons.jce.hash.HashUtils;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.FileHeader;
@@ -70,6 +67,8 @@ public class ZipUtils {
     public static String zip(String src, String dest, boolean recursion,
         String passwd, String comment) throws ZipException {
         File srcFile = new File(Strings.cleanPath(src));
+        if (!srcFile.exists()) return null;
+
         dest = buildDestFilePath(srcFile, Strings.cleanPath(dest));
         ZipParameters parameters = new ZipParameters();
         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE); // 压缩方式
@@ -87,7 +86,11 @@ public class ZipUtils {
         if (srcFile.isFile()) { // 压缩文件
             zipFile.addFile(srcFile, parameters);
         } else { // 压缩目录
-            for (File file : srcFile.listFiles()) {
+            File[] files = srcFile.listFiles();
+            if (files == null || files.length == 0) {
+                return null;
+            }
+            for (File file : files) {
                 if (file.isFile()) {
                     zipFile.addFile(file, parameters);
                 } else if (recursion) { // 递归压缩目录
@@ -96,13 +99,9 @@ public class ZipUtils {
             }
         }
 
-        if (comment == null) try {
-            comment = HashUtils.sha1Hex(new FileInputStream(dest));
-        } catch (FileNotFoundException ignored) {
-            comment = "calculate zip file sha-1 occur error";
-            ignored.printStackTrace();
+        if (comment != null) {
+            zipFile.setComment(comment);
         }
-        zipFile.setComment(comment);
         return dest;
     }
 
@@ -114,7 +113,11 @@ public class ZipUtils {
      * @throws ZipException
      */
     public static File[] unzip(String zipFile) throws ZipException {
-        return unzip(zipFile, null);
+        String dest = zipFile;
+        if (dest.toLowerCase().endsWith(SUFFIX)) {
+            dest = dest.substring(0, dest.toLowerCase().indexOf(SUFFIX));
+        }
+        return unzip(zipFile, dest);
     }
 
     /**
@@ -153,15 +156,24 @@ public class ZipUtils {
      */
     @SuppressWarnings("unchecked")
     public static File[] unzip(File zipFile, String dest, String passwd, String charset) throws ZipException {
+        if (StringUtils.isEmpty(dest)) {
+            throw new IllegalArgumentException("dest path can't be null");
+        }
         Files.mkdir(dest); // 校验并创建解压缩存放目录
 
         ZipFile zFile = new ZipFile(zipFile);
-        zFile.setFileNameCharset(charset);
+        if (!StringUtils.isEmpty(charset)) {
+            zFile.setFileNameCharset(charset);
+        }
         if (!zFile.isValidZipFile()) {
             throw new ZipException("invalid zip file.");
         }
         if (zFile.isEncrypted()) {
-            zFile.setPassword(passwd.toCharArray());
+            if (StringUtils.isEmpty(passwd)) {
+                throw new IllegalArgumentException("passwd can't be null");
+            } else {
+                zFile.setPassword(passwd.toCharArray());
+            }
         }
         zFile.extractAll(dest);
 
@@ -220,9 +232,9 @@ public class ZipUtils {
 
         //zip("D:\\test.txt", "d:\\test.zip");
 
-        zip("D:\\guiminer", null);
-        zip("D:\\guiminer", null);
-        //unzip("D:\\guiminer.zip", "D:\\guiminer2", "123");
+        zip("D:\\a", null);
+        //zip("D:\\guiminer", null, true, null, "abc");
+        //unzip("D:\\guiminer.zip");
         //unzip(new File("d:/aaa.zip"), "d://aaa", "123", "UTF-8");
     }
 }

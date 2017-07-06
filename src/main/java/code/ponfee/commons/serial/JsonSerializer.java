@@ -20,17 +20,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class JsonSerializer extends Serializer {
 
     /** json object mapper */
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
     static {
-        MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
     public <T extends Object> byte[] serialize(T t, boolean isCompress) {
         if (t == null) return null;
         GZIPOutputStream gzout = null;
         try {
-            byte[] data = MAPPER.writeValueAsBytes(t);
+            byte[] data = mapper.writeValueAsBytes(t);
             if (isCompress) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 gzout = new ExtendedGZIPOutputStream(baos);
@@ -60,7 +60,7 @@ public class JsonSerializer extends Serializer {
                 gzin = new GZIPInputStream(new ByteArrayInputStream(data));
                 data =  IOUtils.toByteArray(gzin);
             }
-            return MAPPER.readValue(data, clazz);
+            return mapper.readValue(data, clazz);
         } catch (IOException e) {
             throw new SerializationException(e);
         } finally {
