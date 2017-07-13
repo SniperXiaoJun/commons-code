@@ -5,7 +5,8 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.jws.WebService;
-import javax.xml.ws.Endpoint;
+
+import code.ponfee.commons.ws.JAXWS;
 
 @WebService(targetNamespace = "http://jdk6.webservice/demo", serviceName = "HelloService")
 public class WSProvider {
@@ -27,7 +28,7 @@ public class WSProvider {
             //发布WSProvider到http://localhost:8889/demo/WSProvider这个地址,之前必须调用wsgen命令   
             //生成服务类WSProvider的支持类,命令如下:  
             //wsgen -cp . test.http.jdk.WSProvider  
-            Endpoint.publish("http://localhost:8889/demo/WSProvider", new WSProvider());
+            JAXWS.publish("http://localhost:8889/demo/WSProvider", new WSProvider());
 
             // 访问  http://localhost:8889/demo/WSProvider?wsdl
         }

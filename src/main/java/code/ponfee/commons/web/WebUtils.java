@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import code.ponfee.commons.util.Networks;
 
@@ -32,6 +34,8 @@ public final class WebUtils {
 
     /** charset */
     public static final String DEFAULT_CHARSET = "UTF-8";
+
+    private static Logger logger = LoggerFactory.getLogger(WebUtils.class);
 
     /**
      * 获取请求参数，<b>支付模块参数签名/验签时使用</b>
@@ -107,7 +111,7 @@ public final class WebUtils {
             out.write(text);
             out.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("http response error", e);
         } finally {
             if (out != null) out.close();
         }

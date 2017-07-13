@@ -11,7 +11,7 @@ import sun.misc.Unsafe;
  */
 @SuppressWarnings("restriction")
 public final class Fields {
-    private static final Unsafe UNSAFE;
+    private static final Unsafe UNSAFE/* = Unsafe.getUnsafe()*/;
     static {
         try {
             Field f = Unsafe.class.getDeclaredField("theUnsafe");
@@ -55,7 +55,7 @@ public final class Fields {
      * put field to target object
      * @param target target object
      * @param field object field
-     * @param value field valiue
+     * @param value field value
      */
     public static void put(Object target, Field field, Object value) {
         field.setAccessible(true);
@@ -84,7 +84,7 @@ public final class Fields {
     }
 
     /**
-     * put field to target object
+     * put field to target object if value is null
      * @param target
      * @param field
      * @param value
@@ -99,7 +99,6 @@ public final class Fields {
      * get field of target object
      * @param target 目标对象
      * @param name field name
-     * @param <T> generic type
      * @return the field value
      */
     public static Object get(Object target, String name) {
@@ -112,8 +111,8 @@ public final class Fields {
 
     /**
      * get field of target object
-     * @param target
-     * @param field
+     * @param target 目标对象
+     * @param field  字段
      * @return
      */
     public static Object get(Object target, Field field) {
@@ -140,6 +139,50 @@ public final class Fields {
         }
     }
 
+    /**
+     * 支持volatile语义
+     * @param target
+     * @param name
+     * @return
+     */
+    public static Object getVolatile(Object target, String name) {
+        try {
+            return getVolatile(target, ClassUtils.getField(target.getClass(), name));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 支持volatile语义
+     * @param target
+     * @param field
+     * @return
+     */
+    public static Object getVolatile(Object target, Field field) {
+        long fieldOffset = UNSAFE.objectFieldOffset(field);
+        Class<?> type = field.getType();
+        if (Boolean.TYPE.equals(type)) {
+            return UNSAFE.getBooleanVolatile(target, fieldOffset);
+        } else if (Byte.TYPE.equals(type)) {
+            return UNSAFE.getByteVolatile(target, fieldOffset);
+        } else if (Character.TYPE.equals(type)) {
+            return UNSAFE.getCharVolatile(target, fieldOffset);
+        } else if (Short.TYPE.equals(type)) {
+            return UNSAFE.getShortVolatile(target, fieldOffset);
+        } else if (Integer.TYPE.equals(type)) {
+            return UNSAFE.getIntVolatile(target, fieldOffset);
+        } else if (Long.TYPE.equals(type)) {
+            return UNSAFE.getLongVolatile(target, fieldOffset);
+        } else if (Double.TYPE.equals(type)) {
+            return UNSAFE.getDoubleVolatile(target, fieldOffset);
+        } else if (Float.TYPE.equals(type)) {
+            return UNSAFE.getFloatVolatile(target, fieldOffset);
+        } else {
+            return UNSAFE.getObjectVolatile(target, fieldOffset);
+        }
+    }
+
     public static void main(String[] args) {
         Result<?> result = Result.SUCCESS;
         System.out.println(get(result, "code"));
@@ -158,6 +201,7 @@ public final class Fields {
         System.out.println(get(a, "i"));
         System.out.println(get(a, "_i"));
     }
+
     @SuppressWarnings("unused")
     private static class Test {
         private int _i;
