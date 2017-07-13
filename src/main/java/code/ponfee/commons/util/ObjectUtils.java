@@ -24,7 +24,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.google.common.collect.Lists;
 
-import code.ponfee.commons.model.Pager;
+import code.ponfee.commons.model.Pagination;
 import code.ponfee.commons.model.Result;
 import code.ponfee.commons.reflect.Fields;
 
@@ -314,36 +314,36 @@ public final class ObjectUtils {
     }
 
     /**
-     * Result<Pager<LinkedHashMap<String, Object>>>转Result<Pager<Object[]>>
+     * Result<Pagination<LinkedHashMap<String, Object>>>转Result<Pagination<Object[]>>
      * @param source
      * @return
      */
-    public static Result<Pager<Object[]>> map2array(Result<Pager<LinkedHashMap<String, Object>>> source) {
-        Pager<LinkedHashMap<String, Object>> pager = source.getData();
-        List<Object[]> list = map2array(pager.getRows());
+    public static Result<Pagination<Object[]>> map2array(Result<Pagination<LinkedHashMap<String, Object>>> source) {
+        Pagination<LinkedHashMap<String, Object>> pagination = source.getData();
+        List<Object[]> list = map2array(pagination.getRows());
 
-        Fields.put(pager, "rows", list);
-        Result<Pager<Object[]>> target = new Result<Pager<Object[]>>(source.getCode(), source.getMsg(), null);
-        Fields.put(target, "data", pager);
+        Fields.put(pagination, "rows", list);
+        Result<Pagination<Object[]>> target = new Result<Pagination<Object[]>>(source.getCode(), source.getMsg(), null);
+        Fields.put(target, "data", pagination);
         return target;
     }
 
     /**
-     * Result<Pager<Map<String, Object>>>转Result<Pager<Object[]>>
+     * Result<Pagination<Map<String, Object>>>转Result<Pagination<Object[]>>
      * @param source
      * @param fields
      * @return
      */
-    public static Result<Pager<Object[]>> map2array(Result<Pager<Map<String, Object>>> source, String... fields) {
-        Pager<Map<String, Object>> pager = source.getData();
+    public static Result<Pagination<Object[]>> map2array(Result<Pagination<Map<String, Object>>> source, String... fields) {
+        Pagination<Map<String, Object>> pagination = source.getData();
         List<Object[]> list = Lists.newArrayList();
-        for (Map<String, Object> map : pager.getRows()) {
+        for (Map<String, Object> map : pagination.getRows()) {
             list.add(map2array(map, fields));
         }
 
-        Fields.put(pager, "rows", list);
-        Result<Pager<Object[]>> target = new Result<Pager<Object[]>>(source.getCode(), source.getMsg(), null);
-        Fields.put(target, "data", pager);
+        Fields.put(pagination, "rows", list);
+        Result<Pagination<Object[]>> target = new Result<Pagination<Object[]>>(source.getCode(), source.getMsg(), null);
+        Fields.put(target, "data", pagination);
         return target;
     }
 

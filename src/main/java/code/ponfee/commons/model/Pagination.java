@@ -13,7 +13,7 @@ import com.github.pagehelper.Page;
  * 
  * 从第1页开始到pages页
  */
-public class Pager<T> implements Serializable {
+public class Pagination<T> implements Serializable {
     private static final long serialVersionUID = 1313118491812094979L;
 
     private int pageNum; // 当前页
@@ -36,7 +36,7 @@ public class Pager<T> implements Serializable {
     private int navigateFirstPage; // 导航条上的第一页
     private int navigateLastPage; // 导航条上的最后一页
 
-    public Pager() {
+    public Pagination() {
         this(new ArrayList<>());
     }
 
@@ -44,7 +44,7 @@ public class Pager<T> implements Serializable {
      * 包装Page对象
      * @param list
      */
-    public Pager(List<T> list) {
+    public Pagination(List<T> list) {
         this(list, 8);
     }
 
@@ -53,7 +53,7 @@ public class Pager<T> implements Serializable {
      * @param list          page结果
      * @param navigatePages 页码数量
      */
-    public Pager(List<T> list, int navigatePages) {
+    public Pagination(List<T> list, int navigatePages) {
         if (list instanceof Page) {
             Page<T> page = (Page<T>) list;
             this.pageNum = page.getPageNum();
@@ -312,7 +312,7 @@ public class Pager<T> implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("PageInfo{");
+        final StringBuffer sb = new StringBuffer("Pagination{");
         sb.append("pageNum=").append(pageNum);
         sb.append(", pageSize=").append(pageSize);
         sb.append(", size=").append(size);

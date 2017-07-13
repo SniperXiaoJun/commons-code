@@ -4,14 +4,14 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import code.ponfee.commons.model.Pager;
+import code.ponfee.commons.model.Pagination;
 
 /**
- * pager转换
+ * Pagination转换
  * @author fupf
  * @param <T>
  */
-public class TransitPager<T> {
+public class TransitPagination<T> {
 
     private ArrayItem<T> rows;
     private int pageNum; // 当前页
@@ -176,67 +176,67 @@ public class TransitPager<T> {
         this.navigateLastPage = navigateLastPage;
     }
 
-    public static <T> TransitPager<T> marshal(Pager<?> pager, T[] t) {
-        TransitPager<T> transit = new TransitPager<>();
+    public static <T> TransitPagination<T> marshal(Pagination<?> pagination, T[] t) {
+        TransitPagination<T> transit = new TransitPagination<>();
         transit.setRows(new ArrayItem<T>(t));
-        copy(transit, pager);
+        copy(transit, pagination);
         return transit;
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> TransitPager<T> marshal(Class<?> type, Pager<T> pager) {
-        TransitPager<T> transit = new TransitPager<>();
-        List<T> data = pager.getRows();
+    public static <T> TransitPagination<T> marshal(Class<?> type, Pagination<T> pagination) {
+        TransitPagination<T> transit = new TransitPagination<>();
+        List<T> data = pagination.getRows();
         T[] array = data.toArray((T[]) Array.newInstance(type, data.size()));
         transit.setRows(new ArrayItem<T>(array));
-        copy(transit, pager);
+        copy(transit, pagination);
         return transit;
     }
 
-    private static void copy(TransitPager<?> transit, Pager<?> pager) {
-        transit.setPageNum(pager.getPageNum());
-        transit.setPageSize(pager.getPageSize());
-        transit.setSize(pager.getSize());
-        transit.setStartRow(pager.getStartRow());
-        transit.setEndRow(pager.getEndRow());
-        transit.setTotal(pager.getTotal());
-        transit.setPages(pager.getPages());
-        transit.setPrePage(pager.getPrePage());
-        transit.setNextPage(pager.getNextPage());
-        transit.setFirstPage(pager.isFirstPage());
-        transit.setLastPage(pager.isLastPage());
-        transit.setHasPreviousPage(pager.isHasPreviousPage());
-        transit.setHasNextPage(pager.isHasNextPage());
-        transit.setNavigatePages(pager.getNavigatePages());
-        transit.setNavigatepageNums(pager.getNavigatepageNums());
-        transit.setNavigateFirstPage(pager.getNavigateFirstPage());
-        transit.setNavigateLastPage(pager.getNavigateLastPage());
+    private static void copy(TransitPagination<?> transit, Pagination<?> pagination) {
+        transit.setPageNum(pagination.getPageNum());
+        transit.setPageSize(pagination.getPageSize());
+        transit.setSize(pagination.getSize());
+        transit.setStartRow(pagination.getStartRow());
+        transit.setEndRow(pagination.getEndRow());
+        transit.setTotal(pagination.getTotal());
+        transit.setPages(pagination.getPages());
+        transit.setPrePage(pagination.getPrePage());
+        transit.setNextPage(pagination.getNextPage());
+        transit.setFirstPage(pagination.isFirstPage());
+        transit.setLastPage(pagination.isLastPage());
+        transit.setHasPreviousPage(pagination.isHasPreviousPage());
+        transit.setHasNextPage(pagination.isHasNextPage());
+        transit.setNavigatePages(pagination.getNavigatePages());
+        transit.setNavigatepageNums(pagination.getNavigatepageNums());
+        transit.setNavigateFirstPage(pagination.getNavigateFirstPage());
+        transit.setNavigateLastPage(pagination.getNavigateLastPage());
     }
 
-    public static <T> Pager<T> unmarshal(TransitPager<T> transit) {
-        Pager<T> pager = new Pager<>();
+    public static <T> Pagination<T> unmarshal(TransitPagination<T> transit) {
+        Pagination<T> pagination = new Pagination<>();
         List<T> list = new ArrayList<>();
         for (T t : transit.getRows().getItem()) {
             list.add(t);
         }
-        pager.setRows(list);
-        pager.setPageNum(transit.getPageNum());
-        pager.setPageSize(transit.getPageSize());
-        pager.setSize(transit.getSize());
-        pager.setStartRow(transit.getStartRow());
-        pager.setEndRow(transit.getEndRow());
-        pager.setTotal(transit.getTotal());
-        pager.setPages(transit.getPages());
-        pager.setPrePage(transit.getPrePage());
-        pager.setNextPage(transit.getNextPage());
-        pager.setFirstPage(transit.isFirstPage());
-        pager.setLastPage(transit.isLastPage());
-        pager.setHasPreviousPage(transit.isHasPreviousPage());
-        pager.setHasNextPage(transit.isHasNextPage());
-        pager.setNavigatePages(transit.getNavigatePages());
-        pager.setNavigatepageNums(transit.getNavigatepageNums());
-        pager.setNavigateFirstPage(transit.getNavigateFirstPage());
-        pager.setNavigateLastPage(transit.getNavigateLastPage());
-        return pager;
+        pagination.setRows(list);
+        pagination.setPageNum(transit.getPageNum());
+        pagination.setPageSize(transit.getPageSize());
+        pagination.setSize(transit.getSize());
+        pagination.setStartRow(transit.getStartRow());
+        pagination.setEndRow(transit.getEndRow());
+        pagination.setTotal(transit.getTotal());
+        pagination.setPages(transit.getPages());
+        pagination.setPrePage(transit.getPrePage());
+        pagination.setNextPage(transit.getNextPage());
+        pagination.setFirstPage(transit.isFirstPage());
+        pagination.setLastPage(transit.isLastPage());
+        pagination.setHasPreviousPage(transit.isHasPreviousPage());
+        pagination.setHasNextPage(transit.isHasNextPage());
+        pagination.setNavigatePages(transit.getNavigatePages());
+        pagination.setNavigatepageNums(transit.getNavigatepageNums());
+        pagination.setNavigateFirstPage(transit.getNavigateFirstPage());
+        pagination.setNavigateLastPage(transit.getNavigateLastPage());
+        return pagination;
     }
 }
