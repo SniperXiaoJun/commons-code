@@ -14,16 +14,16 @@
             <PatternLayout pattern="%-4r %-5p [%t] %37c %3x - %m%n" />
         </Console>
 
-        <!-- 输出到文件，按天或者超过80MB分割 -->
+        <!-- 输出到文件，按天或者超过100MB分割 -->
         <RollingFile name="RollingFile" fileName="${LOG_HOME}/${LOG_FILE_NAME}.log" 
-                     filePattern="${LOG_HOME}/$${date:yyyy-MM}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}-%i.log.gz">
+             filePattern="${LOG_HOME}/$${date:yyyy-MM}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}-%i.log.gz">
             <!-- 需要记录的级别 -->
             <!-- <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" /> -->
             <PatternLayout pattern="[%-5p] %d{yyyy-MM-dd HH:mm:ss} %l%n%m%n" />
             <Policies>
                 <OnStartupTriggeringPolicy />
                 <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="80 MB" />
+                <SizeBasedTriggeringPolicy size="100 MB" />
             </Policies>
         </RollingFile>
     </Appenders>

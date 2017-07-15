@@ -10,39 +10,39 @@ import com.google.common.collect.Maps;
 import code.ponfee.commons.reflect.Fields;
 import code.ponfee.commons.ws.adapter.model.MapEntry;
 import code.ponfee.commons.ws.adapter.model.MapItem;
-import code.ponfee.commons.model.Pagination;
+import code.ponfee.commons.model.Page;
 import code.ponfee.commons.model.Result;
 import code.ponfee.commons.reflect.ClassUtils;
 
 
 /**
- * Result<Pagination<Map<K, V>>>转换器
+ * Result<Page<Map<K, V>>>转换器
  * @author fupf
  * @param <K>
  * @param <V>
  */
 @SuppressWarnings("unchecked")
-public abstract class ResultPaginationMapAdapter<K, V> extends XmlAdapter<Result<Pagination<MapItem>>, Result<Pagination<Map<K, V>>>> {
+public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<Page<MapItem>>, Result<Page<Map<K, V>>>> {
 
     protected final Class<K> ktype;
     protected final Class<V> vtype;
 
-    protected ResultPaginationMapAdapter() {
+    protected ResultPageMapAdapter() {
         ktype = ClassUtils.getClassGenricType(this.getClass(), 0);
         vtype = ClassUtils.getClassGenricType(this.getClass(), 1);
     }
 
     @Override
-    public Result<Pagination<Map<K, V>>> unmarshal(Result<Pagination<MapItem>> v) throws Exception {
+    public Result<Page<Map<K, V>>> unmarshal(Result<Page<MapItem>> v) throws Exception {
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         } else if (v.getData().getList() == null) {
-            return new Result<>(v.getCode(), v.getMsg(), new Pagination<>());
+            return new Result<>(v.getCode(), v.getMsg(), new Page<>());
         }
 
         List<Map<K, V>> list = Lists.newArrayList();
-        Pagination<MapItem> pagination = v.getData();
-        for (MapItem items : pagination.getList()) {
+        Page<MapItem> page = v.getData();
+        for (MapItem items : page.getList()) {
             if (items == null) continue;
             Map<K, V> map = Maps.newLinkedHashMap();
             for (MapEntry<K, V> item : items.getItem()) {
@@ -51,21 +51,21 @@ public abstract class ResultPaginationMapAdapter<K, V> extends XmlAdapter<Result
             list.add(map);
         }
 
-        Fields.put(pagination, "list", list);
-        Result<Pagination<Map<K, V>>> result = new Result<>(v.getCode(), v.getMsg(), null);
-        Fields.put(result, "data", pagination);
+        Fields.put(page, "list", list);
+        Result<Page<Map<K, V>>> result = new Result<>(v.getCode(), v.getMsg(), null);
+        Fields.put(result, "data", page);
         return result;
     }
 
     @Override
-    public Result<Pagination<MapItem>> marshal(Result<Pagination<Map<K, V>>> v) throws Exception {
+    public Result<Page<MapItem>> marshal(Result<Page<Map<K, V>>> v) throws Exception {
         if (v.getData() == null || v.getData().getList() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         }
 
         List<MapItem> list = Lists.newArrayList();
-        Pagination<Map<K, V>> pagination = v.getData();
-        for (Map<K, V> map : pagination.getList()) {
+        Page<Map<K, V>> page = v.getData();
+        for (Map<K, V> map : page.getList()) {
             if (map == null) continue;
             MapEntry<K, V>[] item = new MapEntry[map.size()];
             int index = 0;
@@ -75,9 +75,9 @@ public abstract class ResultPaginationMapAdapter<K, V> extends XmlAdapter<Result
             list.add(new MapItem(item));
         }
 
-        Fields.put(pagination, "list", list);
-        Result<Pagination<MapItem>> result = new Result<>(v.getCode(), v.getMsg(), null);
-        Fields.put(result, "data", pagination);
+        Fields.put(page, "list", list);
+        Result<Page<MapItem>> result = new Result<>(v.getCode(), v.getMsg(), null);
+        Fields.put(result, "data", page);
         return result;
     }
 

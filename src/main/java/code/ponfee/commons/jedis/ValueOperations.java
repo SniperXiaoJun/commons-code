@@ -8,10 +8,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.ExecutorCompletionService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,26 +84,28 @@ public class ValueOperations extends JedisOperations {
      */
     public List<String> gets(final String keyWildcard) {
         return hook(shardedJedis -> {
-            List<Future<List<String>>> futureList = new ArrayList<>();
+            CompletionService<List<String>> service = new ExecutorCompletionService<>(EXECUTOR);
+            int number = 0;
             for (final Jedis jedis : shardedJedis.getAllShards()) {
                 final Set<String> keys = jedis.keys(keyWildcard);
                 if (keys == null || keys.isEmpty()) continue;
-                futureList.add(EXECUTOR.submit(new Callable<List<String>>() {
+
+                service.submit(new Callable<List<String>>() {
                     @Override
                     public List<String> call() throws Exception {
                         // 相应分片上获取值
                         return jedis.mget(keys.toArray(new String[keys.size()]));
                     }
-                }));
+                });
+                number++;
             }
             List<String> result = new ArrayList<>();
-            for (Future<List<String>> future : futureList) {
+            for (; number > 0; number--) {
                 try {
-                    List<String> list = future.get(FUTURE_TIMEOUT, TimeUnit.MILLISECONDS);
-                    if (list == null || list.isEmpty()) continue;
-                    result.addAll(list);
-                } catch (TimeoutException e) {
-                    logger.error("Jedis mget timeout", e);
+                    List<String> list = service.take().get();
+                    if (list != null && !list.isEmpty()) {
+                        result.addAll(list);
+                    }
                 } catch (Exception e) {
                     logger.error("Jedis mget occur error", e);
                 }
@@ -397,19 +398,20 @@ public class ValueOperations extends JedisOperations {
             Map<String, String> resultMap;
             if (jedisList.size() < keys.length) { // key数量大于分片数量，则采用mget方式
                 resultMap = new ConcurrentHashMap<>();
-                List<Future<List<String>>> futureList = new ArrayList<>();
+                CompletionService<List<String>> service = new ExecutorCompletionService<>(EXECUTOR);
+                int number = jedisList.size();
                 for (final Jedis jedis : jedisList) {
-                    futureList.add(EXECUTOR.submit(new Callable<List<String>>() {
+                    service.submit(new Callable<List<String>>() {
                         @Override
                         public List<String> call() throws Exception {
                             return jedis.mget(keys);
                         }
-                    }));
+                    });
                 }
-                for (Future<List<String>> future : futureList) {
+                for (; number > 0; number--) {
                     try {
                         // 所有的 future get 等待
-                        List<String> list = future.get(FUTURE_TIMEOUT, TimeUnit.MILLISECONDS);
+                        List<String> list = service.take().get();
                         if (list == null || list.isEmpty()) continue;
                         String s;
                         for (int i = 0; i < keys.length; i++) {
@@ -418,8 +420,6 @@ public class ValueOperations extends JedisOperations {
                                 resultMap.put(keys[i], s);
                             }
                         }
-                    } catch (TimeoutException e) {
-                        logger.error("Jedis mget timeout", e);
                     } catch (Exception e) {
                         logger.error("Jedis mget occur error", e);
                     }
@@ -451,20 +451,21 @@ public class ValueOperations extends JedisOperations {
             Map<byte[], byte[]> resultMap;
             if (jedisList.size() < keys.length) { // key数量大于分片数量，则采用mget方式
                 resultMap = new ConcurrentHashMap<>();
-                List<Future<List<byte[]>>> futureList = new ArrayList<>();
+                CompletionService<List<byte[]>> service = new ExecutorCompletionService<>(EXECUTOR);
+                int number = jedisList.size();
                 for (final Jedis jedis : jedisList) {
-                    futureList.add(EXECUTOR.submit(new Callable<List<byte[]>>() {
+                    service.submit(new Callable<List<byte[]>>() {
                         @Override
                         public List<byte[]> call() throws Exception {
                             return jedis.mget((byte[][]) keys);
                         }
-                    }));
+                    });
                 }
-                for (Future<List<byte[]>> future : futureList) {
+                for (; number > 0; number--) {
                     try {
                         // 获取异步执行的返回数据
                         byte[] v;
-                        List<byte[]> list = future.get(FUTURE_TIMEOUT, TimeUnit.MILLISECONDS);
+                        List<byte[]> list = service.take().get();
                         if (list == null || list.isEmpty()) continue;
                         for (int i = 0; i < keys.length; i++) {
                             v = list.get(i);
@@ -475,8 +476,6 @@ public class ValueOperations extends JedisOperations {
                                 resultMap.put(keys[i], v);
                             }
                         }
-                    } catch (TimeoutException e) {
-                        logger.error("Jedis mget timeout", e);
                     } catch (Exception e) {
                         logger.error("Jedis mget occur error", e);
                     }

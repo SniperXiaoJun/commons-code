@@ -232,9 +232,11 @@ public class ZipUtils {
 
         //zip("D:\\test.txt", "d:\\test.zip");
 
-        zip("D:\\a", null);
+        //zip("D:\\a", null);
         //zip("D:\\guiminer", null, true, null, "abc");
         //unzip("D:\\guiminer.zip");
         //unzip(new File("d:/aaa.zip"), "d://aaa", "123", "UTF-8");
+        
+        zip(MavenProjects.getProjectBaseDir(), null, "123");
     }
 }

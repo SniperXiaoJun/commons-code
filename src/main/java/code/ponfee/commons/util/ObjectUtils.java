@@ -24,7 +24,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.google.common.collect.Lists;
 
-import code.ponfee.commons.model.Pagination;
+import code.ponfee.commons.model.Page;
 import code.ponfee.commons.model.Result;
 import code.ponfee.commons.reflect.Fields;
 
@@ -314,36 +314,36 @@ public final class ObjectUtils {
     }
 
     /**
-     * Result<Pagination<LinkedHashMap<String, Object>>>转Result<Pagination<Object[]>>
+     * Result<Page<LinkedHashMap<String, Object>>>转Result<Page<Object[]>>
      * @param source
      * @return
      */
-    public static Result<Pagination<Object[]>> map2array(Result<Pagination<LinkedHashMap<String, Object>>> source) {
-        Pagination<LinkedHashMap<String, Object>> pagination = source.getData();
-        List<Object[]> list = map2array(pagination.getRows());
+    public static Result<Page<Object[]>> map2array(Result<Page<LinkedHashMap<String, Object>>> source) {
+        Page<LinkedHashMap<String, Object>> page = source.getData();
+        List<Object[]> list = map2array(page.getRows());
 
-        Fields.put(pagination, "rows", list);
-        Result<Pagination<Object[]>> target = new Result<Pagination<Object[]>>(source.getCode(), source.getMsg(), null);
-        Fields.put(target, "data", pagination);
+        Fields.put(page, "rows", list);
+        Result<Page<Object[]>> target = new Result<Page<Object[]>>(source.getCode(), source.getMsg(), null);
+        Fields.put(target, "data", page);
         return target;
     }
 
     /**
-     * Result<Pagination<Map<String, Object>>>转Result<Pagination<Object[]>>
+     * Result<Page<Map<String, Object>>>转Result<Page<Object[]>>
      * @param source
      * @param fields
      * @return
      */
-    public static Result<Pagination<Object[]>> map2array(Result<Pagination<Map<String, Object>>> source, String... fields) {
-        Pagination<Map<String, Object>> pagination = source.getData();
+    public static Result<Page<Object[]>> map2array(Result<Page<Map<String, Object>>> source, String... fields) {
+        Page<Map<String, Object>> page = source.getData();
         List<Object[]> list = Lists.newArrayList();
-        for (Map<String, Object> map : pagination.getRows()) {
+        for (Map<String, Object> map : page.getRows()) {
             list.add(map2array(map, fields));
         }
 
-        Fields.put(pagination, "rows", list);
-        Result<Pagination<Object[]>> target = new Result<Pagination<Object[]>>(source.getCode(), source.getMsg(), null);
-        Fields.put(target, "data", pagination);
+        Fields.put(page, "rows", list);
+        Result<Page<Object[]>> target = new Result<Page<Object[]>>(source.getCode(), source.getMsg(), null);
+        Fields.put(target, "data", page);
         return target;
     }
 

@@ -1,12 +1,12 @@
 package code.ponfee.commons.mail;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -21,9 +21,8 @@ import org.slf4j.LoggerFactory;
 public class ThreadPoolMailSender {
 
     private static Logger logger = LoggerFactory.getLogger(ThreadPoolMailSender.class);
-    private static final ExecutorService EXECUTOR = new ThreadPoolExecutor(5, 20, 300, TimeUnit.SECONDS, 
-                                                                           new SynchronousQueue<Runnable>(), 
-                                                                           new ThreadPoolExecutor.CallerRunsPolicy());
+    private static final ExecutorService EXECUTOR =
+        new ThreadPoolExecutor(5, 20, 300, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), new ThreadPoolExecutor.CallerRunsPolicy());
 
     public static boolean send(MailSender mailSender, MailEnvelope envlop) {
         return send(mailSender, envlop, true);
@@ -45,27 +44,30 @@ public class ThreadPoolMailSender {
      * @return
      */
     public static boolean send(MailSender mailSender, List<MailEnvelope> envlops, boolean async) {
-        List<Future<Boolean>> futures = new ArrayList<>();
-        for (MailEnvelope envlop : envlops) {
-            futures.add(EXECUTOR.submit(new Sender(mailSender, envlop)));
-        }
-
-        if (async) {
-            futures.clear();
-            return true; // 异步发送，直接返回成功
-        }
-
-        // 同步发送
         boolean flag = true;
-        for (Future<Boolean> future : futures) {
-            try {
-                //future.isDone(); // 是否完成
-                if (!future.get()) flag = false;
-            } catch (InterruptedException | ExecutionException e) {
-                logger.error("thread send mail error", e);
-                flag = false;
+        if (async) { // 异步发送
+            for (MailEnvelope envlop : envlops) {
+                EXECUTOR.submit(new Sender(mailSender, envlop));
+            }
+        } else { // 同步发送
+            CompletionService<Boolean> service = new ExecutorCompletionService<>(EXECUTOR);
+            int number = envlops.size();
+            for (MailEnvelope envlop : envlops) {
+                service.submit(new Sender(mailSender, envlop));
+            }
+            for (; number > 0; number--) {
+                try {
+                    //future.isDone(); // 是否完成
+                    if (!service.take().get()) {
+                        flag = false;
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("thread send mail error", e);
+                    flag = false;
+                }
             }
         }
+
         return flag;
     }
 

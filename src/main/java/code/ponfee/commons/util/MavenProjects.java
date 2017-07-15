@@ -9,7 +9,7 @@ import java.io.File;
  */
 public class MavenProjects {
 
-    private static String getProjectBaseDir() {
+    public static String getProjectBaseDir() {
         String path = Thread.currentThread().getContextClassLoader().getResource("").getFile();
         return new File(path).getParentFile().getParentFile().getPath();
     }

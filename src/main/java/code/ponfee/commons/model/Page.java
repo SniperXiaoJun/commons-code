@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.pagehelper.Page;
-
 /**
  * 参考guthub
  *   新增分页的多项属性，主要参考:http://bbs.csdn.net/topics/360010907
@@ -13,7 +11,7 @@ import com.github.pagehelper.Page;
  * 
  * 从第1页开始到pages页
  */
-public class Pagination<T> implements Serializable {
+public class Page<T> implements Serializable {
     private static final long serialVersionUID = 1313118491812094979L;
 
     private int pageNum; // 当前页
@@ -36,7 +34,7 @@ public class Pagination<T> implements Serializable {
     private int navigateFirstPage; // 导航条上的第一页
     private int navigateLastPage; // 导航条上的最后一页
 
-    public Pagination() {
+    public Page() {
         this(new ArrayList<>());
     }
 
@@ -44,7 +42,7 @@ public class Pagination<T> implements Serializable {
      * 包装Page对象
      * @param list
      */
-    public Pagination(List<T> list) {
+    public Page(List<T> list) {
         this(list, 8);
     }
 
@@ -53,9 +51,9 @@ public class Pagination<T> implements Serializable {
      * @param list          page结果
      * @param navigatePages 页码数量
      */
-    public Pagination(List<T> list, int navigatePages) {
-        if (list instanceof Page) {
-            Page<T> page = (Page<T>) list;
+    public Page(List<T> list, int navigatePages) {
+        if (list instanceof com.github.pagehelper.Page) {
+            com.github.pagehelper.Page<T> page = (com.github.pagehelper.Page<T>) list;
             this.pageNum = page.getPageNum();
             this.pageSize = page.getPageSize();
             //this.orderBy = page.getOrderBy();
@@ -89,7 +87,7 @@ public class Pagination<T> implements Serializable {
         judgePageBoudary(); // 判断页面边界
     }
 
-    private List<T> copy(Page<T> page) {
+    private List<T> copy(com.github.pagehelper.Page<T> page) {
         List<T> list = new ArrayList<>(page.size());
         for (T t : page) {
             list.add(t);
@@ -312,7 +310,7 @@ public class Pagination<T> implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("Pagination{");
+        final StringBuffer sb = new StringBuffer("Page{");
         sb.append("pageNum=").append(pageNum);
         sb.append(", pageSize=").append(pageSize);
         sb.append(", size=").append(size);
