@@ -32,12 +32,12 @@ public class ImageUtils {
     /**
      * 获取图片大小
      * @param input
-     * @return
+     * @return [width, height]
      */
     public static int[] getImageSize(InputStream input) {
         try {
             BufferedImage image = ImageIO.read(input);
-            return new int[] { image.getWidth(), image.getWidth() };
+            return new int[] { image.getWidth(), image.getHeight() };
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {

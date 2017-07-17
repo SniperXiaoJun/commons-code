@@ -30,7 +30,7 @@ public class JAXWS {
         try {
             return new URL(address);
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("invalid url address: " + address, e);
         }
     }
 

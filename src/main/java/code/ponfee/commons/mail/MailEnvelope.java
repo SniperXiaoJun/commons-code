@@ -22,11 +22,12 @@ public class MailEnvelope implements Serializable {
     private static final int MAX_LEN = 200;
 
     private final MailType type;
+    private final String subject; // 主题
+    private final Object content; // 内容
     private String[] to; // 接收人
-    private String subject; // 主题
-    private Object content; // 内容
     private String[] cc; // 抄送
     private String[] bcc; // 密送
+    private String[] reply; // 回复
 
     /** 邮件附件：key为邮件附件名 */
     private final Map<String, DataSource> attachments = new HashMap<>();
@@ -92,6 +93,10 @@ public class MailEnvelope implements Serializable {
 
     public void setBcc(String[] bcc) {
         this.bcc = bcc;
+    }
+
+    public void setReply(String[] reply) {
+        this.reply = reply;
     }
 
     /**
@@ -187,6 +192,10 @@ public class MailEnvelope implements Serializable {
 
     public String[] getBcc() {
         return bcc;
+    }
+
+    public String[] getReply() {
+        return reply;
     }
 
     public Map<String, DataSource> getAttachments() {
