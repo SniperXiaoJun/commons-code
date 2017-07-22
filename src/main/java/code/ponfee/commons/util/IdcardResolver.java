@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * 身份证解析类
+ * 身份证解析及生成
  * @author fupf
  */
 public class IdcardResolver {
@@ -45,12 +45,16 @@ public class IdcardResolver {
     private int age; // 年龄
     private Sex sex; // 性别
 
+    /**
+     * 随机身份证号码生成
+     * @return
+     */
     public static String generate() {
         StringBuilder builder = new StringBuilder();
         builder.append(AREA_CODE_LIST.get(ThreadLocalRandom.current().nextInt(AREA_CODE_LIST.size())));
         builder.append(Dates.format(Dates.random(ORIGIN_DATE), "yyyyMMdd"));
         builder.append(StringUtils.leftPad(String.valueOf(ThreadLocalRandom.current().nextInt(1000)), 3, '0'));
-        builder.append(calcTrailingNumber(builder.toString().toCharArray()));
+        builder.append(genPowerSum(builder.toString().toCharArray()));
         return builder.toString();
     }
 
@@ -80,8 +84,7 @@ public class IdcardResolver {
 
         // 转成18位
         idcard = idcard.substring(0, 6) + "19" + idcard.substring(6);
-        int checkSum17 = getPowerSum(toIntArray(idcard));
-        idcard += JUXTAPOSE[checkSum17 % 11];
+        idcard += genPowerSum(idcard.toCharArray());
         boolean flag = isSecond(idcard);
         if (flag) this.type = CertType.FIRST;
         return flag;
@@ -104,8 +107,7 @@ public class IdcardResolver {
 
         // 校验码验证
         String prefix17 = idcard.substring(0, 17);
-        int checkSum17 = getPowerSum(toIntArray(prefix17));
-        String checkCode = JUXTAPOSE[checkSum17 % 11];
+        String checkCode = genPowerSum(prefix17.toCharArray());
         if (!checkCode.equals(idcard.substring(17))) return false;
 
         // 生日验证
@@ -184,7 +186,8 @@ public class IdcardResolver {
     /**
      * <pre>
      * 验证香港身份证号码(存在bug，部份特殊身份证无法校验)
-     * 身份证前2位为英文字符，如果只出现一个英文字符则表示第一位是空格，对应数字58 前2位英文字符A-Z分别对应数字10-35 最后一位校验码为0-9的数字加上字符"A"，"A"代表10
+     * 身份证前2位为英文字符，如果只出现一个英文字符则表示第一位是空格，对应数字58 
+     * 前2位英文字符A-Z分别对应数字10-35 最后一位校验码为0-9的数字加上字符"A"，"A"代表10
      * 将身份证号码全部转换为数字，分别对应乘9-1相加的总和，整除11则证件号码有效
      * </pre>
      * 
@@ -220,29 +223,26 @@ public class IdcardResolver {
     }
 
     /**
-     * 将字符数组转换成数字数组
-     * @param chars 字符数组
-     * @return 数字数组
+     * <p>18位身份证验证</p>
+     * 根据〖中华人民共和国国家标准 GB 11643-1999〗中有关公民身份号码的规定，公民身份号码是特征组合码，由十七位数字本体码和一位数字校验码组成。
+     * 排列顺序从左至右依次为：六位数字地址码，八位数字出生日期码，三位数字顺序码和一位数字校验码。
+     * 第十八位数字(校验码)的计算方法为：
+     * 1.将前面的身份证号码17位数分别乘以不同的系数。从第一位到第十七位的系数分别为：7 9 10 5 8 4 2 1 6 3 7 9 10 5 8 4 2
+     * 2.将这17位数字和系数相乘的结果相加。
+     * 3.用加出来和除以11，看余数是多少？
+     * 4.余数只可能有0 1 2 3 4 5 6 7 8 9 10这11个数字。其分别对应的最后一位身份证的号码为1 0 X 9 8 7 6 5 4 3 2。
+     * 5.通过上面得知如果余数是2，就会在身份证的第18位数字上出现罗马数字的Ⅹ。如果余数是10，身份证的最后一位号码就是2。
      */
-    private int[] toIntArray(String str) {
-        int[] result = new int[str.length()];
-        for (int i = 0; i < str.length(); i++) {
-            result[i] = Character.getNumericValue(str.charAt(i));
+    private static String genPowerSum(char[] chars) {
+        int[] n = new int[chars.length];
+        int result = 0;
+        for (int i = 0; i < n.length; i++) {
+            n[i] = Character.getNumericValue(chars[i]);
         }
-        return result;
-    }
-
-    /**
-     * 将身份证的每位和对应位的加权因子相乘之后，再得到和值
-     * @param ints
-     * @return 身份证编码。
-     */
-    private int getPowerSum(int[] ints) {
-        int iSum = 0;
-        for (int i = 0; i < POWER.length; i++) {
-            iSum += ints[i] * POWER[i];
+        for (int i = 0; i < n.length; i++) {
+            result += POWER[i] * n[i];
         }
-        return iSum;
+        return JUXTAPOSE[result % 11];
     }
 
     /**
@@ -297,9 +297,8 @@ public class IdcardResolver {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("{\"idcard\":\"").append(idcard).append("\", \"isValid\":\"").append(isValid).append("\", \"type\":\"").append(type).append("\", \"province\":\"").append(province).append("\", \"district\":\"").append(district).append("\", \"birthday\":\"").append(birthday).append("\", \"age\":\"").append(age).append("\", \"sex\":\"").append(sex).append("\"}  ");
-        return builder.toString();
+        return "IdcardResolver [idcard=" + idcard + ", isValid=" + isValid + ", type=" + type + ", province=" + province
+            + ", district=" + district + ", birthday=" + birthday + ", age=" + age + ", sex=" + sex + "]";
     }
 
     /** 每位加权因子 */
@@ -3929,29 +3928,6 @@ public class IdcardResolver {
             put("N", 14);
         }
     };*/
-
-    /**
-     * <p>18位身份证验证</p>
-     * 根据〖中华人民共和国国家标准 GB 11643-1999〗中有关公民身份号码的规定，公民身份号码是特征组合码，由十七位数字本体码和一位数字校验码组成。
-     * 排列顺序从左至右依次为：六位数字地址码，八位数字出生日期码，三位数字顺序码和一位数字校验码。
-     * 第十八位数字(校验码)的计算方法为：
-     * 1.将前面的身份证号码17位数分别乘以不同的系数。从第一位到第十七位的系数分别为：7 9 10 5 8 4 2 1 6 3 7 9 10 5 8 4 2
-     * 2.将这17位数字和系数相乘的结果相加。
-     * 3.用加出来和除以11，看余数是多少？
-     * 4.余数只可能有0 1 2 3 4 5 6 7 8 9 10这11个数字。其分别对应的最后一位身份证的号码为1 0 X 9 8 7 6 5 4 3 2。
-     * 5.通过上面得知如果余数是2，就会在身份证的第18位数字上出现罗马数字的Ⅹ。如果余数是10，身份证的最后一位号码就是2。
-     */
-    private static String calcTrailingNumber(char[] chars) {
-        int[] n = new int[chars.length];
-        int result = 0;
-        for (int i = 0; i < n.length; i++) {
-            n[i] = Character.getNumericValue(chars[i]);
-        }
-        for (int i = 0; i < n.length; i++) {
-            result += POWER[i] * n[i];
-        }
-        return JUXTAPOSE[result % 11];
-    }
 
     public static void main(String[] args) {
         System.out.println(Integer.valueOf('1'));

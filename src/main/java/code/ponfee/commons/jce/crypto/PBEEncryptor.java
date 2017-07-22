@@ -38,14 +38,14 @@ public class PBEEncryptor extends Encryptor {
     public static final String ALG_PBE_SHA1_RC2 = "PBEWithSHA1AndRC2_40";
     //public static final String ALG_PBE_MD5_3DES = "PBEWithMD5AndTripleDES"; // was wrong
 
-    public static final RandomStringGenerator generator = new RandomStringGenerator.Builder().withinRange('!', '~').build();
+    private static final RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder().withinRange('!', '~').build();
 
     /**
      * default key 24 character
      * @param algName
      */
     public PBEEncryptor(String algName) {
-        this(algName, generator.generate(24).toCharArray());
+        this(algName, GENERATOR.generate(24).toCharArray());
     }
 
     /**
@@ -107,6 +107,6 @@ public class PBEEncryptor extends Encryptor {
 
         System.out.println(new String(b));
         
-        System.out.println(generator.generate(100));
+        System.out.println(GENERATOR.generate(100));
     }
 }

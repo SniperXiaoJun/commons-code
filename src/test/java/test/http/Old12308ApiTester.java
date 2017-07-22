@@ -17,7 +17,7 @@ import code.ponfee.commons.http.Http;
 import code.ponfee.commons.http.HttpParams;
 import code.ponfee.commons.jce.hash.HashUtils;
 
-public class WebApiTester {
+public class Old12308ApiTester {
     private static final String URL = "http://192.168.1.49:8080/service-webapp";
 
     private static final String SECRET = "abc";

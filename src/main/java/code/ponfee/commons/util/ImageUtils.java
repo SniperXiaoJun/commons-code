@@ -16,7 +16,7 @@ import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.swing.ImageIcon;
 
 /**
- * 图片合并
+ * 图片工具类
  * @author fupf
  */
 public class ImageUtils {

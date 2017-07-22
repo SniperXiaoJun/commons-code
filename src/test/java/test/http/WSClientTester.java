@@ -25,8 +25,7 @@ public class WSClientTester {
 
     @Test
     public void testSoap1() throws Exception {
-        String soap =
-            "<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><getSupportCity xmlns=\"http://WebXml.com.cn/\"><byProvinceName></byProvinceName></getSupportCity></soap:Body></soap:Envelope>";
+        String soap = "<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><getSupportCity xmlns=\"http://WebXml.com.cn/\"><byProvinceName></byProvinceName></getSupportCity></soap:Body></soap:Envelope>";
         URL url = new URL("http://www.webxml.com.cn/WebServices/WeatherWebService.asmx?wsdl");
         URLConnection conn = url.openConnection();
         conn.setUseCaches(false);
@@ -122,14 +121,12 @@ public class WSClientTester {
 
     /*String endpoint = "http://10.202.16.116:8080/cos_webservice/services/CreateComplainService";
     String request = "{\"carryId\":\"070034424401\",\"title\":\"\",\"complainLevel\":\"15\",\"urgency\":\"11\",\"complainChannel\":\"60014708\",\"complainDetailChannel\":\"\",\"complainSource\":\"30\",\"linkman\":\"张先生\",\"linkmanPhone\":\"15623850085\",\"receiveSendChoose\":\"19057\",\"contactLink\":\"101000000\",\"focus\":\"101030000\",\"customerFeedback\":\"101030100\",\"content\":\"此单客户来电反馈，商品其在4月3日上午9点订购的，5号19点多才发出来已经超过48小时了，其现在要求退款，还请将此单商品拦截不要派送，点部作废即可，谢谢SSM姜亮\",\"internalComplainSource\":\"CCS5-SYSTEM\",\"dealWithAreaCode\":\"755Y\",\"problemLink\":\"\",\"monthAccount\":\"\"}";
-    
     @Test
     public void test1() throws Exception {
         net.bingosoft.complain.CreateComplainServicePortType Service = new net.bingosoft.complain.CreateComplainServicePortTypeProxy(endpoint);
         String resp = Service.newComplainFromCommon(request);
         System.out.println(resp);
     }
-    
     @Test
     public void test2() throws Exception {
         org.apache.cxf.jaxws.endpoint.dynamic.JaxWsDynamicClientFactory dcf = org.apache.cxf.jaxws.endpoint.dynamic.JaxWsDynamicClientFactory.newInstance();
