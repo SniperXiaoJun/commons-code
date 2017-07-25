@@ -32,11 +32,12 @@ public final class Jsons {
         // 设置序列化时的特性
         if (include != null) mapper.setSerializationInclusion(include);
 
-        // ignore attributes exists in json string, but not in java object when deserialization
+        // 反序列化时忽略不存在于对象中的属性
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
         /*mapper.enable(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
         mapper.enable(com.fasterxml.jackson.core.JsonGenerator.Feature.QUOTE_FIELD_NAMES);
+        //mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         mapper.setPropertyNamingStrategy(new PropertyNamingStrategy(){
             private static final long serialVersionUID = -3401320843245849044L;
             // todo

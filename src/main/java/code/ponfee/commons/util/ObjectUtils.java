@@ -22,6 +22,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import code.ponfee.commons.model.Page;
@@ -129,13 +130,14 @@ public final class ObjectUtils {
         List<T> list = new ArrayList<>();
         Class<?> type = null;
         for (T[] array : arrays) {
-            if (array == null) {
-                continue;
-            } else if (type == null) {
+            if (array == null) continue;
+            if (type == null) {
                 type = array.getClass().getComponentType();
             }
             list.addAll(Arrays.asList(array));
         }
+        if (type == null) return null;
+
         return list.toArray((T[]) Array.newInstance(type, list.size()));
         //return list.toArray((T[]) new Object[list.size()]); // [Ljava.lang.Object; cannot be cast to [Ljava.lang.String;
         //return list.toArray((T[]) Array.newInstance(list.get(0).getClass(), list.size())); // list.get(0) may be null
@@ -197,33 +199,31 @@ public final class ObjectUtils {
      * @param bean
      */
     public static <T> void map2bean(Map<String, ?> map, T bean) {
-        // 获取类属性
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
             // 给 JavaBean 对象的属性赋值  
-            for (PropertyDescriptor d : beanInfo.getPropertyDescriptors()) {
-                String name = d.getName();
-                if (map.containsKey(name)) {
-                    try {
-                        d.getWriteMethod().invoke(bean, new Object[] { map.get(name) });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
+                String name = property.getName();
+                if (name.equals("class")) continue;
+
+                if (map.containsKey(name) || map.containsKey(name = Strings.underscoreName(name))) {
+                    property.getWriteMethod().invoke(bean, map.get(name));
                 }
             }
-        } catch (IntrospectionException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     public static <T> T map2bean(Map<String, ?> map, Class<T> type) {
+        T bean;
         try {
-            T bean = type.getConstructor().newInstance();
-            map2bean(map, bean);
-            return bean;
+            bean = type.getConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        map2bean(map, bean);
+        return bean;
     }
 
     /**
@@ -235,14 +235,14 @@ public final class ObjectUtils {
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
             Map<String, Object> map = new HashMap<>();
-            for (PropertyDescriptor d : beanInfo.getPropertyDescriptors()) {
-                String name = d.getName();
-                if (!name.equals("class")) {
-                    try {
-                        map.put(name, d.getReadMethod().invoke(bean, new Object[0]));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
+                String name = property.getName();
+                if (name.equals("class")) continue;
+
+                try {
+                    map.put(name, property.getReadMethod().invoke(bean));
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
             return map;
@@ -271,7 +271,7 @@ public final class ObjectUtils {
      * @param fields
      * @return
      */
-    public static List<Object[]> map2array(List<Map<String, Object>> data, String[] fields) {
+    public static List<Object[]> map2array(List<Map<String, Object>> data, String... fields) {
         if (data == null) return null;
 
         List<Object[]> results = new ArrayList<>(data.size());
@@ -348,7 +348,7 @@ public final class ObjectUtils {
     }
 
     /**
-     * 3≤len≤32
+     * should between 3 (inclusive) and 32 (exclusive)
      * @param len
      * @return
      */
@@ -423,5 +423,44 @@ public final class ObjectUtils {
         System.out.println(list2);
 
         System.out.println(Strings.crc32(uuid32()));
+
+        System.out.println(bean2map(new TestBean(1, "zs")));
+        System.out.println(map2bean(ImmutableMap.of("age", 1, "firstName", "lisi"), TestBean.class));
+        System.out.println(map2bean(ImmutableMap.of("age", 1, "first_name", "lisi"), TestBean.class));
+    }
+
+    static class TestBean {
+        private int age;
+        private String firstName;
+
+        public TestBean() {}
+
+        public TestBean(int age, String firstName) {
+            super();
+            this.age = age;
+            this.firstName = firstName;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(String firstName) {
+            this.firstName = firstName;
+        }
+
+        @Override
+        public String toString() {
+            return "TestBean [age=" + age + ", firstName=" + firstName + "]";
+        }
+
     }
 }

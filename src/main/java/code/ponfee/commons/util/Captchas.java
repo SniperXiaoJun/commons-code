@@ -7,6 +7,8 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -25,8 +27,8 @@ public class Captchas {
     //使用到Algerian字体，系统里没有的话需要安装字体，字体只显示大写，去掉了1,0,i,o几个容易混淆的字符
     private static final String CODES = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 
-    private static final Color[] COLOR_SPACES = { Color.WHITE, Color.CYAN, Color.GRAY,
-        Color.LIGHT_GRAY, Color.MAGENTA, Color.ORANGE, Color.PINK, Color.YELLOW };
+    private static final Color[] COLOR_SPACES = { Color.RED, Color.CYAN, Color.GRAY, Color.LIGHT_GRAY,
+        Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.WHITE, Color.PINK, Color.BLUE, Color.YELLOW };
 
     /**
      * 使用系统默认字符源生成验证码
@@ -47,10 +49,10 @@ public class Captchas {
         if (sources == null || sources.length() == 0) {
             sources = CODES;
         }
-        int codesLen = sources.length();
+        int len = sources.length() - 1;
         StringBuilder codes = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
-            codes.append(sources.charAt(ThreadLocalRandom.current().nextInt(codesLen - 1)));
+            codes.append(sources.charAt(ThreadLocalRandom.current().nextInt(len)));
         }
         return codes.toString();
     }
@@ -164,16 +166,14 @@ public class Captchas {
         int period = ThreadLocalRandom.current().nextInt(2);
 
         boolean borderGap = true;
-        int frames = 1;
-        int phase = ThreadLocalRandom.current().nextInt(2);
-
-        for (int i = 0; i < h1; i++) {
-            double d = (double) (period >> 1) * Math.sin((double) i / (double) period + (6.2831853071795862D * (double) phase) / (double) frames);
-            g.copyArea(0, i, w1, 1, (int) d, 0);
+        double frames = 1, phase = ThreadLocalRandom.current().nextInt(2);
+        for (int d, i = 0; i < h1; i++) {
+            d = (int) ((period >> 1) * Math.sin((double) i / period + (2 * Math.PI * phase) / frames));
+            g.copyArea(0, i, w1, 1, d, 0);
             if (borderGap) {
                 g.setColor(color);
-                g.drawLine((int) d, i, 0, i);
-                g.drawLine((int) d + w1, i, w1, i);
+                g.drawLine(d, i, 0, i);
+                g.drawLine(d + w1, i, w1, i);
             }
         }
     }
@@ -182,17 +182,20 @@ public class Captchas {
         int period = ThreadLocalRandom.current().nextInt(40) + 10; // 50;
 
         boolean borderGap = true;
-        int frames = 20;
-        int phase = 7;
-        for (int i = 0; i < w1; i++) {
-            double d = (double) (period >> 1) * Math.sin((double) i / (double) period + (6.2831853071795862D * (double) phase) / (double) frames);
-            g.copyArea(i, 0, 1, h1, 0, (int) d);
+        double frames = 20, phase = 7;
+        for (int d, i = 0; i < w1; i++) {
+            d = (int) ((period >> 1) * Math.sin((double) i / period + (2 * Math.PI * phase) / frames));
+            g.copyArea(i, 0, 1, h1, 0, d);
             if (borderGap) {
                 g.setColor(color);
-                g.drawLine(i, (int) d, i, 0);
-                g.drawLine(i, (int) d + h1, i, h1);
+                g.drawLine(i, d, i, 0);
+                g.drawLine(i, d + h1, i, h1);
             }
         }
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        generate(100, (int) (100 * 0.618), new FileOutputStream("D:/a.jpg"), random(4));
     }
 
 }
