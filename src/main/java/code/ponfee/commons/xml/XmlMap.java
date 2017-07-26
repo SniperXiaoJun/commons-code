@@ -13,32 +13,32 @@ import org.w3c.dom.NodeList;
  * xml和map相互转换工具
  * @author fupf
  */
-public final class XmlMaps extends LinkedHashMap<String, String> {
+public final class XmlMap extends LinkedHashMap<String, String> {
 
     private static final long serialVersionUID = 2775335692799838871L;
 
     private String root;
 
-    public XmlMaps(Map<String, String> map) {
+    public XmlMap(Map<String, String> map) {
         this(map, "xml");
     }
 
-    public XmlMaps(Map<String, String> map, String root) {
+    public XmlMap(Map<String, String> map, String root) {
         this.root = root;
         super.putAll(map);
     }
 
-    public XmlMaps(String xml) {
+    public XmlMap(String xml) {
         Map<String, String> map;
         if (StringUtils.isEmpty(xml)) {
             map = Collections.emptyMap();
         } else {
-            map = read(XmlReaders.create(xml));
+            map = read(XmlReader.create(xml));
         }
         super.putAll(map);
     }
 
-    public XmlMaps(XmlReaders reader) {
+    public XmlMap(XmlReader reader) {
         super.putAll(read(reader));
     }
 
@@ -55,7 +55,7 @@ public final class XmlMaps extends LinkedHashMap<String, String> {
      * @return
      */
     public String toXml() {
-        XmlWriters writers = XmlWriters.create();
+        XmlWriter writers = XmlWriter.create();
         for (Map.Entry<String, String> param : this.entrySet()) {
             if (!StringUtils.isEmpty(param.getValue())) {
                 writers.element(param.getKey(), param.getValue());
@@ -74,7 +74,7 @@ public final class XmlMaps extends LinkedHashMap<String, String> {
      * @param readers xmlReaders
      * @return Map对象
      */
-    private Map<String, String> read(XmlReaders reader) {
+    private Map<String, String> read(XmlReader reader) {
         this.root = reader.getRoot();
         Node rootNode = reader.getNode(this.root);
         NodeList children;
@@ -95,10 +95,8 @@ public final class XmlMaps extends LinkedHashMap<String, String> {
 
     public static void main(String[] args) {
         String s = "<xml><a><![CDATA[<b>12</b><c>34</c>]]></a><d>a</d></xml>";
-        System.out.println(new XmlMaps(s).toString()); // {d=a, a=<b>12</b><c>34</c>}
-
-        /*String s = "<xml><a><b>12</b><c>34</c></a><d>a</d></xml>";
-        System.out.println(new XmlMaps(s).toString()); // {d=a, a=1234}*/
+        System.out.println(new XmlMap(s).toString()); // {d=a, a=<b>12</b><c>34</c>}
+        System.out.println(new XmlMap(s).get("a")); // <b>12</b><c>34</c>
     }
 
 }

@@ -451,7 +451,7 @@ public class ExcelExporter extends AbstractExporter {
         Tmeta tmeta, Object value, int i, int j, Map<String, Object> options) {
         XSSFCell cell = row.createCell(colIndex);
         // 设置单元格格式
-        if (tmeta != null && tmeta.getType() == Type.NUMBER) {
+        if (tmeta != null && tmeta.getType() == Type.NUMERIC) {
             cell.setCellType(CellType.NUMERIC);
             if (value == null || (String.class.isInstance(value) && StringUtils.isBlank((String) value))) {
                 cell.setCellValue(new XSSFRichTextString());

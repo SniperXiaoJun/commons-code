@@ -9,33 +9,33 @@ import java.util.List;
  * xml构建
  * @author fupf
  */
-public final class XmlWriters {
+public final class XmlWriter {
     private static final String DEFAULT_ROOT = "xml";
     private final List<E> elements = new ArrayList<>();
 
-    private XmlWriters() {}
+    private XmlWriter() {}
 
-    public static XmlWriters create() {
-        return new XmlWriters();
+    public static XmlWriter create() {
+        return new XmlWriter();
     }
 
-    public XmlWriters element(String name, String text) {
+    public XmlWriter element(String name, String text) {
         E e = new TextE(name, text);
         elements.add(e);
         return this;
     }
 
-    public XmlWriters element(String name, Number number) {
+    public XmlWriter element(String name, Number number) {
         E e = new NumberE(name, number);
         elements.add(e);
         return this;
     }
 
-    public XmlWriters element(String parentName, String childName, String childText) {
+    public XmlWriter element(String parentName, String childName, String childText) {
         return element(parentName, new TextE(childName, childText));
     }
 
-    public XmlWriters element(String parentName, String childName, Number childNumber) {
+    public XmlWriter element(String parentName, String childName, Number childNumber) {
         return element(parentName, new NumberE(childName, childNumber));
     }
 
@@ -45,7 +45,7 @@ public final class XmlWriters {
      * @param childPairs childName1, childValue1, childName2, childValu2, ...，长度必须为2的倍数
      * @return this
      */
-    public XmlWriters element(String parentName, Object... childPairs) {
+    public XmlWriter element(String parentName, Object... childPairs) {
         if (childPairs.length % 2 != 0) {
             throw new XmlException("var args's length must % 2 = 0");
         }
@@ -65,14 +65,14 @@ public final class XmlWriters {
         return this;
     }
 
-    public XmlWriters element(String parentName, E child) {
+    public XmlWriter element(String parentName, E child) {
         E e = new TextE(parentName, null);
         e.children = Arrays.asList(child);
         elements.add(e);
         return this;
     }
 
-    public XmlWriters element(String parentName, List<E> children) {
+    public XmlWriter element(String parentName, List<E> children) {
         E e = new TextE(parentName, null);
         e.children = children;
         elements.add(e);
@@ -170,7 +170,7 @@ public final class XmlWriters {
     }
 
     public static void main(String[] args) {
-        XmlWriters writers = XmlWriters.create();
+        XmlWriter writers = XmlWriter.create();
         writers.element("name", "value");
         String xml = writers.build("root");
         System.out.println(xml);

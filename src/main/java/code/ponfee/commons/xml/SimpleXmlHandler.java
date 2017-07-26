@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -108,7 +109,7 @@ public class SimpleXmlHandler {
      * </pre>
      */
     @SuppressWarnings("unchecked")
-    public static List<Map<String, String>> parseXml(InputStream xml) {
+    public static List<Map<String, String>> parse(InputStream xml) {
         try {
             List<Map<String, String>> results = new ArrayList<>();
             Element root = new SAXReader().read(xml).getRootElement();
@@ -137,14 +138,18 @@ public class SimpleXmlHandler {
         }
     }
 
-    public static List<Map<String, String>> parseXml(byte[] xml) {
-        return parseXml(new ByteArrayInputStream(xml));
+    public static List<Map<String, String>> parse(byte[] xml) {
+        return parse(new ByteArrayInputStream(xml));
+    }
+
+    public static List<Map<String, String>> parse(String xml, String charset) {
+        return parse(xml.getBytes(Charset.forName(charset)));
     }
 
     /**
      * 通过Schema验证xml文件
      */
-    public static void validateXmlByXsd(InputStream xsd, InputStream xml) {
+    public static void validateByXsd(InputStream xsd, InputStream xml) {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setValidating(true);
         factory.setNamespaceAware(true);
@@ -183,8 +188,8 @@ public class SimpleXmlHandler {
         throw new IllegalStateException(errors.toString());
     }
 
-    public static void validateXmlByXsd(byte[] xsd, byte[] xml) {
-        validateXmlByXsd(new ByteArrayInputStream(xsd), new ByteArrayInputStream(xml));
+    public static void validateByXsd(byte[] xsd, byte[] xml) {
+        validateByXsd(new ByteArrayInputStream(xsd), new ByteArrayInputStream(xml));
     }
 
     private static final class JAXPConstants {
@@ -194,9 +199,9 @@ public class SimpleXmlHandler {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        List<Map<String, String>> list = parseXml(new FileInputStream("d:/test/signers.xml"));
+        List<Map<String, String>> list = parse(new FileInputStream("d:/test/signers.xml"));
         System.out.println(list);
-        
-        validateXmlByXsd(new FileInputStream("d:/test/signer.xsd"), new FileInputStream("d:/test/signers.xml"));
+
+        validateByXsd(new FileInputStream("d:/test/signer.xsd"), new FileInputStream("d:/test/signers.xml"));
     }
 }

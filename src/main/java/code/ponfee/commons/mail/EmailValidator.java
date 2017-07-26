@@ -18,7 +18,7 @@ import org.xbill.DNS.Type;
  * 电子邮箱地址验证
  * @author fupf
  */
-public class EMailValidator {
+public class EmailValidator {
 
     private static final String[] HOSTNAME = { "techmagazine.ws", "internetmoment.com", "domain.com",
         "lifehacker.biz", "corbad.org", "megacheaphosting.com", "verify-email.org", "discursive.com" };

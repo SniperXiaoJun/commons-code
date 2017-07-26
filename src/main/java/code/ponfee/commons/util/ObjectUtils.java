@@ -1,7 +1,6 @@
 package code.ponfee.commons.util;
 
 import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
@@ -201,7 +200,7 @@ public final class ObjectUtils {
     public static <T> void map2bean(Map<String, ?> map, T bean) {
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
-            // 给 JavaBean 对象的属性赋值  
+            // 给 JavaBean对象的属性赋值  
             for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
                 String name = property.getName();
                 if (name.equals("class")) continue;
@@ -239,14 +238,10 @@ public final class ObjectUtils {
                 String name = property.getName();
                 if (name.equals("class")) continue;
 
-                try {
-                    map.put(name, property.getReadMethod().invoke(bean));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                map.put(name, property.getReadMethod().invoke(bean));
             }
             return map;
-        } catch (IntrospectionException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

@@ -302,7 +302,7 @@ public class MailSender {
                 continue;
             } else if (!RegexUtils.isEmail(email)) {
                 logger.error("illegal email address[{}]", email);
-            } else if (!EMailValidator.verify(email, this.validateTimes)) {
+            } else if (!EmailValidator.verify(email, this.validateTimes)) {
                 logger.error("invalid email address[{}]", email);
             } else {
                 addresses.add(new InternetAddress(email));

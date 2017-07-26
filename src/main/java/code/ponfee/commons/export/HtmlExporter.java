@@ -101,7 +101,9 @@ public class HtmlExporter extends AbstractExporter {
             }
 
             // tfoot---------
+            boolean hasTfoot = false;
             if (!ObjectUtils.isEmpty(table.getTfoot())) {
+                hasTfoot = true;
                 html.append("<tfoot><tr>");
                 int merge = table.getTotalLeafCount() - table.getTfoot().length;
                 if (merge > 0) html.append("<th colspan=\"" + merge + "\" style=\"text-align:right;\">合计</th>");
@@ -125,12 +127,12 @@ public class HtmlExporter extends AbstractExporter {
                 builder.append("<tr><td colspan=\"").append(table.getTotalLeafCount());
                 builder.append("\" style=\"color:red; padding: 3px;font-size: 14px;\">");
                 builder.append("<div style=\"font-weight: bold;\">备注：</div>");
-                for (String r : comments) {
-                    builder.append("<div style=\"text-indent: 2em;\">").append(r).append("</div>");
+                for (String comment : comments) {
+                    builder.append("<div style=\"text-indent: 2em;\">").append(comment).append("</div>");
                 }
                 builder.append("</td></tr>");
 
-                if (html.toString().endsWith("</tfoot>")) {
+                if (hasTfoot) {
                     html.insert(html.lastIndexOf("</tfoot>"), builder);
                 } else {
                     html.append("<tfoot>").append(builder).append("</tfoot>");
@@ -209,7 +211,7 @@ public class HtmlExporter extends AbstractExporter {
             return "";
         } else if (tmeta == null) {
             return obj.toString();
-        } else if (tmeta.getType() == Type.NUMBER) {
+        } else if (tmeta.getType() == Type.NUMERIC) {
             return Numbers.format(obj);
         } else {
             return obj.toString();

@@ -81,7 +81,7 @@ public class Tmeta implements Serializable {
     }
 
     public static enum Type {
-        CHAR, NUMBER, DATETIME;
+        CHAR, NUMERIC, DATETIME;
     }
 
     public static enum Align {

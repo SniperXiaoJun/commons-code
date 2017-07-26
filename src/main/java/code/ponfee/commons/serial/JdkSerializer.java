@@ -67,8 +67,8 @@ public class JdkSerializer extends Serializer {
 
             T t = (T) ois.readObject();
             if (!clazz.isInstance(t)) {
-                throw new IllegalArgumentException("expect " + ClassUtils.getClassName(clazz)
-                      + " type, but it's " + ClassUtils.getClassName(t.getClass()) + " type");
+                throw new IllegalArgumentException(ClassUtils.getClassName(t.getClass())
+                                     + " can't cast " + ClassUtils.getClassName(clazz));
             }
             return t;
         } catch (IOException | ClassNotFoundException e) {

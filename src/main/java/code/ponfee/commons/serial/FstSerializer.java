@@ -36,8 +36,8 @@ public class FstSerializer extends Serializer {
         if (isCompress) data = decompress(data);
         T t = (T) FST_CFG.get().asObject(data);
         if (!clazz.isInstance(t)) {
-            throw new IllegalArgumentException("expect " + ClassUtils.getClassName(clazz)
-                  + " type, but it's " + ClassUtils.getClassName(t.getClass()) + " type");
+            throw new IllegalArgumentException(ClassUtils.getClassName(t.getClass())
+                                 + " can't cast " + ClassUtils.getClassName(clazz));
         }
         return t;
     }
@@ -45,9 +45,9 @@ public class FstSerializer extends Serializer {
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         Map<String, Object> map = ImmutableMap.of("a", 1, "b", Lists.newArrayList("1", "2"));
-        //Serializer serializer = new FstSerializer();
+        Serializer serializer = new FstSerializer();
         //Serializer serializer = new JsonSerializer();
-        Serializer serializer = new HessianSerializer();
+        //Serializer serializer = new HessianSerializer();
         byte[] data = serializer.serialize(map);
         map = serializer.deserialize(data, HashMap.class);
         System.out.println(map.getClass());
