@@ -10,6 +10,8 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
+
 import code.ponfee.commons.export.AbstractExporter;
 import code.ponfee.commons.export.CsvExporter;
 import code.ponfee.commons.export.ExcelExporter;
@@ -67,6 +69,8 @@ public class ExportTester {
 
         Table table = new Table(list);
         table.setCaption("abc");
+        table.setTobdy(Lists.newArrayList(new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}));
+        table.setComment("comment");
         builder.build(table);
 
         table = new Table(list);

@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.zeroturnaround.zip.ByteSource;
 import org.zeroturnaround.zip.ZipEntrySource;
 
+import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.UrlCoder;
+
 public class Ztzip {
 
     private static Logger logger = LoggerFactory.getLogger(Ztzip.class);
@@ -32,5 +35,9 @@ public class Ztzip {
         logger.info("abcd");
         logger.warn("abcd");
         logger.error("abcd");
+        
+        
+        
+        System.out.println(Bytes.hexDump(UrlCoder.decodeURI("EQAVTggIStNJKr7aEHFff8qyUlw%3D").getBytes()));
     }
 }

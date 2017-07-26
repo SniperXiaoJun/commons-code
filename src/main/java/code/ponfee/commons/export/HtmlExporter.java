@@ -17,7 +17,7 @@ import code.ponfee.commons.util.ObjectUtils;
  */
 public class HtmlExporter extends AbstractExporter {
     //private static final Pattern PATTERN_NEGATIVE = Pattern.compile("^(-(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*)))(%)?$");
-    private static final String HORIZON = "<hr style=\"border:3 double #B0C4DE; with: 95%; margin: 20px 0;\" />";
+    private static final String HORIZON = "<hr style=\"border:3 double #b0c4de; with: 95%; margin: 20px 0;\" />";
     private static final String TEMPLATE;
     static {
         StringBuilder builder = new StringBuilder();
@@ -28,15 +28,15 @@ public class HtmlExporter extends AbstractExporter {
         builder.append("    <title>#{title}</title>                                                                                           \n");
         builder.append("    <style>                                                                                                           \n");
         builder.append("      * '{font-family: Microsoft YaHei;}'                                                                             \n");
-        builder.append("      div.grid '{overflow-x: auto;background-color: #ffffff;color: #555;}'                                            \n");
+        builder.append("      div.grid '{overflow-x: auto;background-color: #fff;color: #555;}'                                               \n");
         builder.append("      div.grid table '{width: 100%;font-size: 12px;border-collapse: collapse;border-style: hidden;}'                  \n");
         builder.append("      div.grid table, div.grid table caption, div.grid table tr '{border: 1px solid #6d6d6d;}'                        \n");
         builder.append("      div.grid table tr td, div.grid table tr th '{border: 1px solid #6d6d6d;}'                                       \n");
         builder.append("      div.grid table caption '{font-size:14px;padding:5px;background:#e6e6fa;font-weight:bolder;border-bottom:none;}' \n");
-        builder.append("      div.grid table thead th '{padding: 5px;background: #cccccc;}'                                                   \n");
+        builder.append("      div.grid table thead th '{padding: 5px;background: #ccc;}'                                                      \n");
         builder.append("      div.grid table tbody td '{text-align: center;padding: 3px;}'                                                    \n");
         builder.append("      div.grid table tfoot th '{padding: 5px;}'                                                                       \n");
-        builder.append("      div.grid table tr:nth-child(odd) td'{background:#FFFFFF;}'                                                      \n");
+        builder.append("      div.grid table tr:nth-child(odd) td'{background:#fff;}'                                                         \n");
         builder.append("      div.grid table tr:nth-child(even) td'{background: #e8e8e8}'                                                     \n");
         builder.append("      div.grid p.remark '{font-size: 14px;}'                                                                          \n");
         builder.append("      div.grid .nowrap '{white-space: nowrap;word-break: keep-all;overflow: hidden;text-overflow: ellipsis;}'         \n");
@@ -93,7 +93,7 @@ public class HtmlExporter extends AbstractExporter {
 
                         processMeta(datas[j], table.getThead().get(j).getTmeta(), i, j, table.getOptions());
 
-                        html.append(">").append(formatData(datas[j], table.getThead().get(j).getTmeta().getType())).append("</td>");
+                        html.append(">").append(formatData(datas[j], table.getThead().get(j).getTmeta())).append("</td>");
                     }
                     html.append("</tr>");
                 }
@@ -112,7 +112,7 @@ public class HtmlExporter extends AbstractExporter {
                     processMeta(table.getTfoot()[i], table.getThead().get(merge + i).getTmeta());
 
                     html.append(">");
-                    html.append(formatData(table.getTfoot()[i], table.getThead().get(merge + i).getTmeta().getType()));
+                    html.append(formatData(table.getTfoot()[i], table.getThead().get(merge + i).getTmeta()));
                     html.append("</th>");
                 }
                 html.append("</tr></tfoot>");
@@ -204,10 +204,12 @@ public class HtmlExporter extends AbstractExporter {
         html.append("</tr></thead>");
     }
 
-    private String formatData(Object obj, Type type) {
+    private String formatData(Object obj, Tmeta tmeta) {
         if (ObjectUtils.isEmpty(obj)) {
             return "";
-        } else if (type == Type.NUMBER) {
+        } else if (tmeta == null) {
+            return obj.toString();
+        } else if (tmeta.getType() == Type.NUMBER) {
             return Numbers.format(obj);
         } else {
             return obj.toString();

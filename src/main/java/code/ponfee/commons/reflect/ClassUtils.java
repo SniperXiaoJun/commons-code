@@ -142,10 +142,10 @@ public final class ClassUtils {
         } else if (params[index] instanceof GenericArrayType) {
             java.lang.reflect.Type type = ((GenericArrayType) params[index]).getGenericComponentType();
             return Array.newInstance((Class<?>) ((ParameterizedType) type).getRawType(), 0).getClass();
-        } else if (!(params[index] instanceof Class<?>)) {
-            return Object.class;
-        } else {
+        } else if (params[index] instanceof Class<?>) {
             return (Class<?>) params[index];
+        } else {
+            return Object.class;
         }
     }
 

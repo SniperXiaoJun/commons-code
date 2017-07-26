@@ -78,17 +78,27 @@
             <artifactId>log4j-jcl</artifactId>
             <version>${log4j2.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jul</artifactId>
+            <version>${log4j2.version}</version>
+        </dependency>
         <dependency> <!-- log4j-web -->
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-web</artifactId>
             <version>${log4j2.version}</version>
+            <scope>runtime</scope>
         </dependency>
+        <!-- <context-param> web.xml自定义位置
+            <param-name>log4jConfiguration</param-name>
+            <param-value>/WEB-INF/classes/log4j2.xml</param-value>
+        </context-param> -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
-        <!-- <dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
@@ -97,7 +107,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
-        </dependency> -->
+        </dependency>
 
         <!-- commons -->
         <dependency>
@@ -413,6 +423,7 @@
             <systemPath>${pom.basedir}/lib/jdk-tools-1.8.0_121.jar</systemPath> -->
         </dependency>
 
+        <!-- zip压缩 -->
         <dependency>
             <groupId>org.zeroturnaround</groupId>
             <artifactId>zt-zip</artifactId>

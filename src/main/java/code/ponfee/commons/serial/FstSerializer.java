@@ -45,7 +45,9 @@ public class FstSerializer extends Serializer {
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         Map<String, Object> map = ImmutableMap.of("a", 1, "b", Lists.newArrayList("1", "2"));
-        FstSerializer serializer = new FstSerializer();
+        //Serializer serializer = new FstSerializer();
+        //Serializer serializer = new JsonSerializer();
+        Serializer serializer = new HessianSerializer();
         byte[] data = serializer.serialize(map);
         map = serializer.deserialize(data, HashMap.class);
         System.out.println(map.getClass());

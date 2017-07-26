@@ -24,6 +24,10 @@ public class StringSerializer extends Serializer {
         this.charset = charset;
     }
 
+    public StringSerializer(String charset) {
+        this.charset = Charset.forName(charset);
+    }
+
     @Override
     public <T> byte[] serialize(T t, boolean isCompress) {
         if (t == null) {
@@ -34,7 +38,7 @@ public class StringSerializer extends Serializer {
             return data;
         } else {
             throw new SerializationException("object must be java.lang.String type, but it's "
-                                            + ClassUtils.getClassName(t.getClass()) + " type");
+                + ClassUtils.getClassName(t.getClass()) + " type");
         }
     }
 
@@ -43,7 +47,7 @@ public class StringSerializer extends Serializer {
     public <T> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
         if (clazz != String.class) {
             throw new SerializationException("argument class must be java.lang.String.class, but it's "
-                                            + ClassUtils.getClassName(clazz) + ".class");
+                + ClassUtils.getClassName(clazz) + ".class");
         }
 
         if (data == null) return null;
