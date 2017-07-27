@@ -1,10 +1,14 @@
 package code.ponfee.commons.resource;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.ServletContext;
 
+import org.apache.logging.log4j.core.LogEventListener;
+
 import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.util.Streams;
 import code.ponfee.commons.util.Strings;
 
 /**
@@ -25,17 +29,17 @@ import code.ponfee.commons.util.Strings;
  * 资源文件加载门面类
  * @author fupf
  */
-public class ResourceLoaderFacade {
+public final class ResourceLoaderFacade {
 
     private static final String CP_PREFIX = "classpath:";
     private static final String WEB_PREFIX = "webapp:";
-    private static final String FS_PREFIX = "file:";
+    static final String FS_PREFIX = "file:";
     private static final String DEFAULT_ENCODING = "UTF-8";
     //private static final String CP_ALL_PREFIX = "classpath*:";
 
     private static final ClassPathResourceLoader CP_LOADER = new ClassPathResourceLoader();
     private static final FileSystemResourceLoader FS_LOADER = new FileSystemResourceLoader();
-    private static final ServletContextResourceLoader WEB_LOADER = new ServletContextResourceLoader();
+    private static final WebappResourceLoader WEB_LOADER = new WebappResourceLoader();
 
     public static void setServletContext(ServletContext servletContext) {
         WEB_LOADER.setServletContext(servletContext);
@@ -152,4 +156,10 @@ public class ResourceLoaderFacade {
         return path;
     }
 
+    public static void main(String[] args) throws IOException {
+        System.out.println(ResourceLoaderFacade.getResource("Log4j-config.xsd"));
+        System.out.println(Streams.input2string(ResourceLoaderFacade.getResource("Log4j-config.xsd").getStream()));
+        System.out.println(Streams.input2string(ResourceLoaderFacade.getResource("/Log4j-config.xsd", LogEventListener.class).getStream()));
+        System.out.println(ResourceLoaderFacade.getResource("log4j2.xml"));
+    }
 }

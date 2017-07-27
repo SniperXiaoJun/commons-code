@@ -44,4 +44,10 @@ public class Resource {
     public void setStream(InputStream stream) {
         this.stream = stream;
     }
+
+    @Override
+    public String toString() {
+        return "Resource [path=" + path + ", fileName=" + fileName + ", stream=" + stream + "]";
+    }
+
 }

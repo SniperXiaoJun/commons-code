@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * 文件资源加载器
  * @author fupf
  */
-class FileSystemResourceLoader {
+final class FileSystemResourceLoader {
 
     private static Logger logger = LoggerFactory.getLogger(FileSystemResourceLoader.class);
 
@@ -23,7 +23,7 @@ class FileSystemResourceLoader {
         try {
             File f = new File(filePath);
             return new Resource(f.getAbsolutePath(), f.getName(), new FileInputStream(f));
-        } catch(FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             logger.error("file not found: " + filePath, e);
             return null;
         }
@@ -39,7 +39,7 @@ class FileSystemResourceLoader {
                     list.add(new Resource(f.getAbsolutePath(), f.getName(), new FileInputStream(f)));
                 }
             }
-        } catch(FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             logger.error("file not found: " + directory, e);
         }
         return list;

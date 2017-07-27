@@ -14,15 +14,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * servlet容器上下文路径资源加载器
+ * webapp资源加载器
  * @author fupf
  */
-class ServletContextResourceLoader {
-    private static Logger logger = LoggerFactory.getLogger(ServletContextResourceLoader.class);
+final class WebappResourceLoader {
+    private static Logger logger = LoggerFactory.getLogger(WebappResourceLoader.class);
 
     private ServletContext servletContext;
 
-    ServletContextResourceLoader() {}
+    WebappResourceLoader() {}
 
     void setServletContext(ServletContext servletContext) {
         this.servletContext = servletContext;
