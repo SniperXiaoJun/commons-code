@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import code.ponfee.commons.serial.Serializer;
+import code.ponfee.commons.util.Numbers;
 import redis.clients.jedis.Jedis;
 
 /**
@@ -192,7 +193,7 @@ public class ValueOperations extends JedisOperations {
     public boolean setnx(final String key, final String value, final int seconds) {
         return hook(shardedJedis -> {
             Long result = shardedJedis.setnx(key, value);
-            if (JedisOperations.equals(result, 1)) {
+            if (Numbers.equals(result, 1)) {
                 // 设置成功则需要设置失效期
                 expireForce(shardedJedis, key, seconds);
                 return true;

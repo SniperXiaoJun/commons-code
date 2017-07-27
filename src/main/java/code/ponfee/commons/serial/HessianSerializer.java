@@ -74,8 +74,8 @@ public class HessianSerializer extends Serializer {
             }
             T t = (T) hessian.readObject();
             if (!clazz.isInstance(t)) {
-                throw new IllegalArgumentException(ClassUtils.getClassName(t.getClass())
-                                     + " can't cast " + ClassUtils.getClassName(clazz));
+                throw new ClassCastException(ClassUtils.getClassName(t.getClass())
+                         + " can't be cast to " + ClassUtils.getClassName(clazz));
             }
             return t;
         } catch (IOException e) {

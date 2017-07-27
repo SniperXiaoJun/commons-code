@@ -6,6 +6,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import code.ponfee.commons.concurrent.NamedThreadFactory;
+import code.ponfee.commons.util.Numbers;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
 
@@ -82,12 +83,12 @@ abstract class JedisOperations {
      */
     static boolean expire(ShardedJedis shardedJedis, String key, Integer seconds) {
         if (seconds == null) return false;
-        return equals(shardedJedis.expire(key, getActualExpire(seconds)), 1);
+        return Numbers.equals(shardedJedis.expire(key, getActualExpire(seconds)), 1);
     }
 
     static boolean expire(ShardedJedis shardedJedis, byte[] key, Integer seconds) {
         if (seconds == null) return false;
-        return equals(shardedJedis.expire(key, getActualExpire(seconds)), 1);
+        return Numbers.equals(shardedJedis.expire(key, getActualExpire(seconds)), 1);
     }
 
     /**
@@ -170,10 +171,6 @@ abstract class JedisOperations {
         if (shardedJedis.ttl(key) == -1) {
             shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS);
         }
-    }
-
-    static boolean equals(Number a, Number b) {
-        return (a == b) || (a != null && b != null && a.longValue() == b.longValue());
     }
 
 }

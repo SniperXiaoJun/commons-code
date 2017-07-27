@@ -36,8 +36,8 @@ public class FstSerializer extends Serializer {
         if (isCompress) data = decompress(data);
         T t = (T) FST_CFG.get().asObject(data);
         if (!clazz.isInstance(t)) {
-            throw new IllegalArgumentException(ClassUtils.getClassName(t.getClass())
-                                 + " can't cast " + ClassUtils.getClassName(clazz));
+            throw new ClassCastException(ClassUtils.getClassName(t.getClass())
+                     + " can't be cast to " + ClassUtils.getClassName(clazz));
         }
         return t;
     }
@@ -51,6 +51,9 @@ public class FstSerializer extends Serializer {
         byte[] data = serializer.serialize(map);
         map = serializer.deserialize(data, HashMap.class);
         System.out.println(map.getClass());
+        
+        Object obj = "fdas";
+        System.out.println((int)obj);
     }
 
 }

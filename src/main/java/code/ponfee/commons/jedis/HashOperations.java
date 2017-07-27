@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import code.ponfee.commons.util.Numbers;
 import redis.clients.jedis.ShardedJedisPipeline;
 
 /**
@@ -36,7 +37,7 @@ public class HashOperations extends JedisOperations {
         if (value == null) return false;
 
         return hook(shardedJedis -> {
-            boolean flag = JedisOperations.equals(shardedJedis.hset(key, field, value), 1);
+            boolean flag = Numbers.equals(shardedJedis.hset(key, field, value), 1);
             expire(shardedJedis, key, seconds);
             return flag;
         }, false, key, field, value, seconds);
@@ -133,7 +134,7 @@ public class HashOperations extends JedisOperations {
 
         return hook(shardedJedis -> {
             byte[] data = jedisClient.serialize(t, isCompress);
-            boolean flag = JedisOperations.equals(shardedJedis.hset(key, field, data), 1);
+            boolean flag = Numbers.equals(shardedJedis.hset(key, field, data), 1);
             expire(shardedJedis, key, seconds);
             return flag;
         }, false, key, field, t, isCompress, seconds);

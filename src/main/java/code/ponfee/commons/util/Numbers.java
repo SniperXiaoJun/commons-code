@@ -8,13 +8,17 @@ import java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * 数字精度工具类
+ * 数字工具类
  * @author fupf
  */
-public class Numbers {
+public final class Numbers {
+
     public static final Integer INTEGER_ZERO = Integer.valueOf(0);
+
     private static final String[] CN_UPPER_NUMBER = { "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖" };
-    private static final String[] CN_UPPER_MONETRAY_UNIT = { "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰", "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
+
+    private static final String[] CN_UPPER_MONETRAY_UNIT = { "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
+                                                            "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
 
     /**
      * 数字精度化
@@ -51,6 +55,13 @@ public class Numbers {
         return new BigDecimal(value * Math.pow(10, pow)).doubleValue();
     }
 
+    /**
+     * 百分比
+     * @param numerator
+     * @param denominator
+     * @param scale
+     * @return
+     */
     public static String percent(double numerator, double denominator, int scale) {
         if (denominator == 0) return "--";
         return percent(numerator / denominator, scale);
@@ -70,6 +81,11 @@ public class Numbers {
         return new DecimalFormat(format + "%").format(value);
     }
 
+    /**
+     * 数字格式化
+     * @param obj
+     * @return
+     */
     public static String format(Object obj) {
         return format(obj, "###,###.###");
     }
@@ -94,25 +110,33 @@ public class Numbers {
         }
     }
 
+    /**
+     * 加法
+     * @param num1
+     * @param num2
+     * @return
+     */
     public static double add(Double num1, Double num2) {
         num1 = num1 == null ? 0 : num1;
         num2 = num2 == null ? 0 : num2;
         return num1 + num2;
     }
 
+    /**
+     * 区间取值
+     * @param value
+     * @param min
+     * @param max
+     * @return
+     */
     public static int range(Integer value, int min, int max) {
         if (value == null || value < min) return min;
         else if (value > max) return max;
         else return value;
     }
 
-    public static int toInt(Object obj) {
-        if (obj == null) return 0;
-        return Integer.parseInt(obj.toString());
-    }
-
     /**
-     * 均分
+     * 分片
      * @param quantity
      * @param segment
      * @return
@@ -123,6 +147,36 @@ public class Numbers {
         Arrays.fill(array, 0, remainder, quantity / segment + 1);
         Arrays.fill(array, remainder, segment, quantity / segment);
         return array;
+    }
+
+    /**
+     * 数字比较
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean equals(Long a, Long b) {
+        return (a == b) || (a != null && b != null && a.longValue() == b.longValue());
+    }
+
+    /**
+     * 数字比较
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean equals(Long a, Integer b) {
+        return a != null && b != null && a.longValue() == b.intValue();
+    }
+
+    /**
+     * 数字比较
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean equals(Integer a, Integer b) {
+        return (a == b) || (a != null && b != null && a.intValue() == b.intValue());
     }
 
     /**
