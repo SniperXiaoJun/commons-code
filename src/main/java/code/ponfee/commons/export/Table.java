@@ -21,7 +21,7 @@ public class Table implements Serializable {
     private List<Object[]> tobdy; // 表体
     private Object[] tfoot; // 表尾
     private String comment; // 注释说明
-    private Map<String, Object> options; // 其它特殊配置项，如：{\"highlight\":{\"cells\":[[2,15],[2,16]],\"color\":\"#FF0000\"}}
+    private Map<String, Object> options; // 其它特殊配置项，如：{\"highlight\":{\"cells\":[[2,15],[2,16]],\"color\":\"#f00\"}}
 
     private int maxTheadLevel = 1; // 最大节点层级（从1开始）
     private int totalLeafCount = 0; // 总叶子节点个数

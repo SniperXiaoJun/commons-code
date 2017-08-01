@@ -36,11 +36,11 @@ import org.springframework.core.type.filter.TypeFilter;
  *   new ResourcesScanner("code.ponfee").scan4class(new Class[] { Service.class });
  * </pre>
  * 
- * @Title：资源扫描
+ * 资源扫描
  * @author fupf
  */
-public class ResourcesScanner {
-    private static Logger logger = LoggerFactory.getLogger(ResourcesScanner.class);
+public class ResourceScanner {
+    private static Logger logger = LoggerFactory.getLogger(ResourceScanner.class);
     private static final String DEFAULT_CHARSET = "UTF-8";
 
     private List<String> scanPaths = new LinkedList<String>();
@@ -48,7 +48,7 @@ public class ResourcesScanner {
     /**
      * @param paths 扫描路径
      */
-    public ResourcesScanner(String... paths) {
+    public ResourceScanner(String... paths) {
         if (paths == null || paths.length == 0) {
             paths = new String[] { "*" };
         }
@@ -199,7 +199,7 @@ public class ResourcesScanner {
     public static void main(String[] args) {
         //System.out.println(new ResourcesScanner("/**/").scan4binary("*.class"));
         //System.out.println(new ResourcesScanner("/**/*.properties").scan4text());
-        System.out.println(new ResourcesScanner("code/ponfee/commons/").scan4class());
+        System.out.println(new ResourceScanner("code/ponfee/commons/").scan4class());
     }
 
 }

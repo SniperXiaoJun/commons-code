@@ -18,6 +18,8 @@ import code.ponfee.commons.util.ObjectUtils;
 public class HtmlExporter extends AbstractExporter {
     //private static final Pattern PATTERN_NEGATIVE = Pattern.compile("^(-(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*)))(%)?$");
     private static final String HORIZON = "<hr style=\"border:3 double #b0c4de; with: 95%; margin: 20px 0;\" />";
+    private static final String TITLE = "title";
+    private static final String REPORT = "report";
     private static final String TEMPLATE;
     static {
         StringBuilder builder = new StringBuilder();
@@ -25,7 +27,7 @@ public class HtmlExporter extends AbstractExporter {
         builder.append("<html>                                                                                                                \n");
         builder.append("  <head lang=\"en\">                                                                                                  \n");
         builder.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />                                         \n");
-        builder.append("    <title>#{title}</title>                                                                                           \n");
+        builder.append("    <title>#{" + TITLE + "}</title>                                                                                   \n");
         builder.append("    <style>                                                                                                           \n");
         builder.append("      * '{font-family: Microsoft YaHei;}'                                                                             \n");
         builder.append("      div.grid '{overflow-x: auto;background-color: #fff;color: #555;}'                                               \n");
@@ -42,7 +44,7 @@ public class HtmlExporter extends AbstractExporter {
         builder.append("      div.grid .nowrap '{white-space: nowrap;word-break: keep-all;overflow: hidden;text-overflow: ellipsis;}'         \n");
         builder.append("    </style>                                                                                                          \n");
         builder.append("  </head>                                                                                                             \n");
-        builder.append("  <body>#{export}</body>                                                                                              \n");
+        builder.append("  <body>#{" + REPORT + "}</body>                                                                                      \n");
         builder.append("</html>                                                                                                               \n");
         TEMPLATE = builder.toString();
     }
@@ -146,7 +148,7 @@ public class HtmlExporter extends AbstractExporter {
 
     @Override
     public String export() {
-        return ExtendedMessageFormat.formatPair(TEMPLATE, "title", super.getName(), "export", html.toString());
+        return ExtendedMessageFormat.formatPair(TEMPLATE, TITLE, super.getName(), REPORT, html.toString());
     }
 
     @Override

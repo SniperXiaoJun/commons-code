@@ -226,16 +226,16 @@ public class ExcelExporter extends AbstractExporter {
         }
     }
 
-    public void nestedImage(byte[] imageBytes) {
+    public void insertImage(byte[] imageBytes) {
         int[] size = ImageUtils.getImageSize(new ByteArrayInputStream(imageBytes));
-        nestedImage(imageBytes, size[0], size[1]);
+        insertImage(imageBytes, size[0], size[1]);
     }
 
     /**
      * excel中嵌入图片
      * excel.nestedImage(byte[] image, width, cheight);
      */
-    public void nestedImage(byte[] imageBytes, int width, int height) {
+    public void insertImage(byte[] imageBytes, int width, int height) {
         if (ObjectUtils.isEmpty(imageBytes)) return;
         super.nonEmpty();
 

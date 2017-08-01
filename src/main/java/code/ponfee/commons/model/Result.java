@@ -20,7 +20,7 @@ public class Result<T> implements Serializable {
     private T data; // 结果数据
 
     // -----------------------constructor method
-    public Result() {}
+    public Result() {} // code is null
 
     public Result(int code, String msg) {
         this(code, msg, null);

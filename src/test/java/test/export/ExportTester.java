@@ -204,8 +204,8 @@ public class ExportTester {
 
         // ------------------------------------------
         excel.setName("图表");
-        ((ExcelExporter)excel).nestedImage(Streams.file2bytes("d:/test/2.png"));
-        ((ExcelExporter)excel).nestedImage(Streams.file2bytes("d:/test/2.png"));
+        ((ExcelExporter)excel).insertImage(Streams.file2bytes("d:/test/2.png"));
+        ((ExcelExporter)excel).insertImage(Streams.file2bytes("d:/test/2.png"));
         
         IOUtils.write((byte[]) excel.export(), new FileOutputStream("d:/abc.xlsx"));
         excel.close();

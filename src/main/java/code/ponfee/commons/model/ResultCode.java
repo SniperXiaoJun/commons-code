@@ -5,23 +5,23 @@ import java.io.Serializable;
 import code.ponfee.commons.json.Jsons;
 
 /**
- * 公用错误码区间[100 ~ 999]
+ * 公用错误码区间[000 ~ 999]
  * @author fupf
  */
 public final class ResultCode implements Serializable {
     private static final long serialVersionUID = -679746150956111045L;
 
     /** 公用结果码 */
-    public static final ResultCode SUCCESS            = create(200, "成功");
-    public static final ResultCode ILLEGAL_ARGUMENTS  = create(400, "参数错误");
-    public static final ResultCode UNAUTHORIZED       = create(401, "未授权");
-    public static final ResultCode FORBIDDEN          = create(403, "拒绝访问");
-    public static final ResultCode RESOURCE_NOT_FOUND = create(404, "资源未找到");
-    public static final ResultCode REQUEST_TIMEOUT    = create(408, "请求超时");
-    public static final ResultCode OCCUR_CONFLICT     = create(409, "出现冲突");
-    public static final ResultCode SERVER_ERROR       = create(500, "服务器错误");
-    public static final ResultCode SERVER_UNAVAILABLE = create(503, "服务不可用");
-    public static final ResultCode SERVER_UNSUPPORTED = create(505, "服务不支持");
+    public static final ResultCode SUCCESS            = create0(200, "成功");
+    public static final ResultCode ILLEGAL_ARGUMENTS  = create0(400, "参数错误");
+    public static final ResultCode UNAUTHORIZED       = create0(401, "未授权");
+    public static final ResultCode FORBIDDEN          = create0(403, "拒绝访问");
+    public static final ResultCode RESOURCE_NOT_FOUND = create0(404, "资源未找到");
+    public static final ResultCode REQUEST_TIMEOUT    = create0(408, "请求超时");
+    public static final ResultCode OCCUR_CONFLICT     = create0(409, "出现冲突");
+    public static final ResultCode SERVER_ERROR       = create0(500, "服务器错误");
+    public static final ResultCode SERVER_UNAVAILABLE = create0(503, "服务不可用");
+    public static final ResultCode SERVER_UNSUPPORTED = create0(505, "服务不支持");
 
     private final Integer code;
     private final String msg;
@@ -30,7 +30,7 @@ public final class ResultCode implements Serializable {
      * 加上无参构造，解决反序例化报错问题
      */
     private ResultCode() {
-        this(null, null);
+        this(null, null); // code is null
     }
 
     private ResultCode(Integer code, String msg) {
@@ -38,7 +38,14 @@ public final class ResultCode implements Serializable {
         this.msg = msg;
     }
 
+    private static ResultCode create0(int code, String msg) {
+        return new ResultCode(code, msg);
+    }
+
     public static ResultCode create(int code, String msg) {
+        if (code >= 0 && code < 1000) {
+            throw new IllegalArgumentException("the code must not between 0 and 999.");
+        }
         return new ResultCode(code, msg);
     }
 

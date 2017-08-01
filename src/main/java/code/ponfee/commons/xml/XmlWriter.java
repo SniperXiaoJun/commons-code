@@ -10,6 +10,7 @@ import java.util.Objects;
  * @author fupf
  */
 public final class XmlWriter {
+    private static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
     private final List<E<?>> elements = new ArrayList<>();
 
     private XmlWriter() {}
@@ -36,50 +37,23 @@ public final class XmlWriter {
         return element(parentName, new NumberE(childName, childNumber));
     }
 
+    /**
+     * 构建包含多个子元素的元素
+     * @param parentName 父元素名
+     * @param childPairs
+     * @return this
+     */
+    public XmlWriter element(String parentName, Object... childPairs) {
+        return element(parentName, newElement(childPairs));
+    }
+
     public XmlWriter element(String parentName, E<?> child) {
         return element(parentName, Arrays.asList(child));
     }
 
     public XmlWriter element(String parentName, List<E<?>> children) {
-        elements.add(new ComplexE(parentName, children));
+        elements.add(new NodeE(parentName, children));
         return this;
-    }
-
-    /**
-     * 构建包含多个子元素的元素
-     * @param parentName 父元素名
-     * @param childPairs childName1, childValue1, childName2, childValu2, ...，长度必须为2的倍数
-     * @return this
-     */
-    public XmlWriter element(String parentName, Object... childPairs) {
-        elements.add(newElement(parentName, childPairs));
-        return this;
-    }
-
-    /**
-     * 构建包含多个子元素的元素
-     * @param parentName 父元素标签名
-     * @param childPairs childName1, childValue1, childName2, childValu2, ... 长度必须为2的倍数
-     * @return an element
-     */
-    public static E<?> newElement(String parentName, Object... childPairs) {
-        if (childPairs.length % 2 != 0) {
-            throw new XmlException("args Object array must be pair");
-        }
-
-        List<E<?>> children = new ArrayList<>();
-        E<?> child;
-        for (int i = 0; i < childPairs.length; i = i + 2) {
-            if (childPairs[i + 1] instanceof Number) {
-                child = new NumberE((String) childPairs[i], (Number) childPairs[i + 1]);
-            } else if (childPairs[i + 1] instanceof List<?>) {
-                child = new ComplexE((String) childPairs[i], (List<?>) childPairs[i + 1]);
-            } else {
-                child = new TextE((String) childPairs[i], Objects.toString(childPairs[i + 1], null));
-            }
-            children.add(child);
-        }
-        return new ComplexE(parentName, children);
     }
 
     public String build() {
@@ -87,18 +61,51 @@ public final class XmlWriter {
     }
 
     public String build(String root) {
-        StringBuilder xml = new StringBuilder("<").append(root).append(">");
+        StringBuilder xml = new StringBuilder(XML_DECLARATION).append("<").append(root).append(">");
         for (E<?> e : elements) {
             xml.append(e.render());
         }
         return xml.append("</").append(root).append(">").toString();
     }
 
-    private abstract static class E<T> {
+    /**
+     * 创建多个元素的节点列表
+     * @param childPairs childName1, childValue1, childName2, childValu2, ...，长度必须为2的倍数
+     * @return
+     */
+    public static List<E<?>> newElement(Object... childPairs) {
+        if (childPairs.length % 2 != 0) {
+            throw new XmlException("args Object array must be pair");
+        }
+
+        List<E<?>> nodes = new ArrayList<>();
+        for (int i = 0; i < childPairs.length; i = i + 2) {
+            nodes.add(newElement((String) childPairs[i], childPairs[i + 1]));
+        }
+        return nodes;
+    }
+
+    /**
+     * 创建元素
+     * @param name  元素名
+     * @param value 元素值
+     * @return
+     */
+    public static E<?> newElement(String name, Object value) {
+        if (value instanceof Number) {
+            return new NumberE(name, (Number) value);
+        } else if (value instanceof E<?>) {
+            return new NodeE(name, Arrays.asList((NodeE) value));
+        } else {
+            return new TextE(name, Objects.toString(value, null));
+        }
+    }
+
+    public abstract static class E<T> {
         protected final String name;
         protected final T value;
 
-        protected E(String name, T value) {
+        public E(String name, T value) {
             if (name == null) {
                 throw new IllegalArgumentException("element name cannot be null.");
             }
@@ -106,55 +113,53 @@ public final class XmlWriter {
             this.value = value;
         }
 
-        protected abstract String render();
+        private String render() {
+            StringBuilder content = new StringBuilder("<").append(name).append(">");
+            if (value != null) {
+                content.append(value());
+            }
+            return content.append("</").append(name).append(">").toString();
+        }
+
+        protected abstract String value();
     }
 
-    private static class TextE extends E<String> {
-        TextE(String name, String content) {
+    public static class TextE extends E<String> {
+        public TextE(String name, String content) {
             super(name, content);
         }
 
         @Override
-        protected String render() {
-            StringBuilder content = new StringBuilder("<").append(name).append(">");
-            if (value != null) {
-                content.append("<![CDATA[").append(value).append("]]>");
-            }
-            return content.append("</").append(name).append(">").toString();
+        protected String value() {
+            return new StringBuilder("<![CDATA[").append(value).append("]]>").toString();
         }
     }
 
-    private static class NumberE extends E<Number> {
-        NumberE(String name, Number value) {
+    public static class NumberE extends E<Number> {
+        public NumberE(String name, Number value) {
             super(name, value);
         }
 
         @Override
-        protected String render() {
-            return new StringBuilder("<").append(name).append(">")
-              .append(value).append("</").append(name).append(">")
-              .toString();
+        protected String value() {
+            return value.toString();
         }
     }
 
-    private static class ComplexE extends E<List<?>> {
-        ComplexE(String name, List<?> nodes) {
+    public static class NodeE extends E<List<E<?>>> {
+        public NodeE(String name, List<E<?>> nodes) {
             super(name, nodes);
         }
 
         @Override
-        protected String render() {
-            StringBuilder content = new StringBuilder("<").append(name).append(">");
-            for (Object obj : (List<?>) value) {
-                if (obj == null) {
-                    continue;
-                } else if (obj instanceof E<?>) {
-                    content.append(((E<?>) obj).render());
-                } else {
-                    content.append(obj.toString());
+        protected String value() {
+            StringBuilder content = new StringBuilder("");
+            for (E<?> e : value) {
+                if (e != null) {
+                    content.append(e.render());
                 }
             }
-            return content.append("</").append(name).append(">").toString();
+            return content.toString();
         }
     }
 
@@ -162,6 +167,7 @@ public final class XmlWriter {
         XmlWriter writers = XmlWriter.create();
         writers.element("k", "v");
         writers.element("book", "price", 98.8, "name", "one book");
+        writers.element("d", newElement("a", 1, "b", "bb", "c", "cc"));
         String xml = writers.build("root");
         System.out.println(xml);
     }
