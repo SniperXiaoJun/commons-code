@@ -34,24 +34,11 @@ public final class Streams {
      * @throws IOException
      */
     public static void bytes2file(byte[] datas, String targetPath) throws IOException {
-        OutputStream out = null;
-        BufferedOutputStream bos = null;
-        try {
-            out = new FileOutputStream(targetPath);
-            bos = new BufferedOutputStream(out, BUFFER_SIZE);
+        try ( OutputStream out = new FileOutputStream(targetPath);
+              BufferedOutputStream bos = new BufferedOutputStream(out, BUFFER_SIZE);
+        ) {
             bos.write(datas);
             bos.flush();
-        } finally {
-            if (out != null) try {
-                out.close();
-            } catch (IOException e) {
-                logger.error("byte流保存为文件关闭流时出错", e);
-            }
-            if (bos != null) try {
-                bos.close();
-            } catch (IOException e) {
-                logger.error("byte流保存为文件关闭流时出错", e);
-            }
         }
     }
 

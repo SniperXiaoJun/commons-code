@@ -94,7 +94,7 @@ public class FileTransformer {
         String filepath = file.getAbsolutePath(), charset;
         File dest = Files.touch(targetPath + filepath.substring(sourcePath.length()));
         boolean isMatch = file.getName().matches(includeFileExtensions);
-        if (!StringUtils.isEmpty(encoding) && isMatch && (charset = guessEncoding(filepath)) != null
+        if (StringUtils.isNotEmpty(encoding) && isMatch && (charset = guessEncoding(filepath)) != null
             && !"void".equalsIgnoreCase(charset) && !encoding.equalsIgnoreCase(charset)) {
             logger.append("**转换").append("  ").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("  -->  ");
             transform(file, dest, charset, encoding, searchList, replacementList);
@@ -114,39 +114,14 @@ public class FileTransformer {
      * @param target
      */
     public static void transform(File source, File target) {
-        RandomAccessFile sourceFile = null;
-        FileChannel sourceChannel = null;
-        RandomAccessFile targetFile = null;
-        FileChannel targetChannel = null;
-        try {
-            sourceFile = new RandomAccessFile(source, "r");
-            sourceChannel = sourceFile.getChannel();
-            targetFile = new RandomAccessFile(target, "rw");
-            targetChannel = targetFile.getChannel();
+        try ( RandomAccessFile sourceFile = new RandomAccessFile(source, "r");
+              FileChannel sourceChannel = sourceFile.getChannel();
+              RandomAccessFile targetFile = new RandomAccessFile(target, "rw");
+              FileChannel targetChannel = targetFile.getChannel();
+        ) {
             sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            if (sourceChannel != null) try {
-                sourceChannel.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (sourceFile != null) try {
-                sourceFile.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (targetChannel != null) try {
-                targetChannel.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (targetFile != null) try {
-                targetFile.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -157,11 +132,13 @@ public class FileTransformer {
      * @param replacementList  the Strings to replace them with, no-op if null
      */
     public static void transform(File source, File target, String[] searchList, String[] replacementList) {
-        BufferedReader in = null;
-        PrintWriter out = null;
-        try {
-            in = new BufferedReader(new InputStreamReader(new FileInputStream(source)));
-            out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(target)));
+        try ( FileInputStream fis = new FileInputStream(source);
+              InputStreamReader isr = new InputStreamReader(fis);
+              BufferedReader in = new BufferedReader(isr);
+              FileOutputStream fos = new FileOutputStream(target);
+              OutputStreamWriter osw = new OutputStreamWriter(fos);
+              PrintWriter out = new PrintWriter(osw);
+        ) {
             String line;
             while ((line = in.readLine()) != null) {
                 if (!ObjectUtils.isEmpty(searchList)) {
@@ -171,13 +148,6 @@ public class FileTransformer {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            if (in != null) try {
-                in.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (out != null) out.close();
         }
     }
 
@@ -189,12 +159,15 @@ public class FileTransformer {
      * @param searchList  the Strings to search for, no-op if null
      * @param replacementList  the Strings to replace them with, no-op if null
      */
-    public static void transform(File source, File target, String fromCharset, String toCharset, String[] searchList, String[] replacementList) {
-        BufferedReader in = null;
-        PrintWriter out = null;
-        try {
-            in = new BufferedReader(new InputStreamReader(new FileInputStream(source), fromCharset));
-            out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(target), toCharset));
+    public static void transform(File source, File target, String fromCharset,
+        String toCharset, String[] searchList, String[] replacementList) {
+        try ( FileInputStream fis = new FileInputStream(source); 
+              InputStreamReader isr = new InputStreamReader(fis, fromCharset); 
+              BufferedReader in = new BufferedReader(isr);
+              FileOutputStream fos = new FileOutputStream(target); 
+              OutputStreamWriter osw = new OutputStreamWriter(fos, toCharset); 
+              PrintWriter out = new PrintWriter(osw)
+        ) {
             String line;
             while ((line = in.readLine()) != null) {
                 if (!ObjectUtils.isEmpty(searchList)) {
@@ -204,13 +177,6 @@ public class FileTransformer {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            if (in != null) try {
-                in.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (out != null) out.close();
         }
     }
 
@@ -248,7 +214,8 @@ public class FileTransformer {
     /**
      * 利用第三方开源包cpdetector获取文件编码格式(cpdetector.jar)
      * detector是探测器，它把探测任务交给具体的探测实现类的实例完成。
-     * cpDetector内置了一些常用的探测实现类，这些探测实现类的实例可以通过add方法 加进来，如ParsingDetector、JChardetFacade、ASCIIDetector、UnicodeDetector。
+     * cpDetector内置了一些常用的探测实现类，这些探测实现类的实例可以通过add方法 加进来，
+     *           如ParsingDetector、JChardetFacade、ASCIIDetector、UnicodeDetector。
      * detector按照“谁最先返回非空的探测结果，就以该结果为准”的原则返回探测到的字符集编码。
      * cpDetector是基于统计学原理的，不保证完全正确。
      * @return
@@ -273,8 +240,8 @@ public class FileTransformer {
         //System.out.println(detectBytesCharset(Streams.file2bytes("D:\\test\\2.png")));
         //System.out.println(detectBytesCharset(Streams.file2bytes("D:\\test\\lib\\cache\\Cache.java")));
 
-        FileTransformer transformer = new FileTransformer("D:\\test\\origin", "d:\\test\\target");
-        transformer.setReplaceEach(new String[] { "commons.lib." }, new String[] { "code.ponfee.commons." });
+        FileTransformer transformer = new FileTransformer("D:\\test\\origin", "d:\\test\\target", "GBK");
+        transformer.setReplaceEach(new String[] { "code.ponfee.commons." }, new String[] { "commons.lib." });
         transformer.transform();
         System.out.println(transformer.getTransformLog());
     }

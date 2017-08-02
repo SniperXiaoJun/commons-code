@@ -3,7 +3,7 @@ package code.ponfee.commons.compile;
 import code.ponfee.commons.compile.model.JavaSource;
 
 /**
- * 源码编译，更改自alibaba代码
+ * java源代码动态编译
  * @author fupf
  */
 public interface JavaSourceCompiler {

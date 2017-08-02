@@ -8,7 +8,7 @@ public class BasicException extends RuntimeException {
     private static final long serialVersionUID = -5678901285130119481L;
 
     /** 错误编码 */
-    private int code = 0;
+    private Integer code;
 
     /**
      * 默认构造函数
@@ -20,7 +20,7 @@ public class BasicException extends RuntimeException {
     /**
      * 默认构造函数
      */
-    public BasicException(int code) {
+    public BasicException(Integer code) {
         super();
         this.code = code;
     }
@@ -51,7 +51,7 @@ public class BasicException extends RuntimeException {
      * @param code 错误编码
      * @param message 错误消息
      */
-    public BasicException(int code, String message) {
+    public BasicException(Integer code, String message) {
         super(message);
         this.code = code;
     }
@@ -60,7 +60,7 @@ public class BasicException extends RuntimeException {
      * @param code 错误编码
      * @param cause 异常原因
      */
-    public BasicException(int code, Throwable cause) {
+    public BasicException(Integer code, Throwable cause) {
         super(cause);
         this.code = code;
     }
@@ -70,16 +70,29 @@ public class BasicException extends RuntimeException {
      * @param message 错误消息
      * @param cause 异常原因
      */
-    public BasicException(int code, String message, Throwable cause) {
+    public BasicException(Integer code, String message, Throwable cause) {
         super(message, cause);
         this.code = code;
     }
 
     /**
+     * @param code                错误编码
+     * @param message             detail msg
+     * @param cause               the cause
+     * @param enableSuppression
+     * @param writableStackTrace
+     */
+    public BasicException(Integer code, String message, Throwable cause, 
+                          boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+        this.code = code;
+    }
+    
+    /**
      * 取得错误编码
      * @return
      */
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 

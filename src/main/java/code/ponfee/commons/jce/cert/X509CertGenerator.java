@@ -39,6 +39,7 @@ import sun.security.x509.X509CertInfo;
 @SuppressWarnings("restriction")
 public class X509CertGenerator {
 
+    // ------------------------create root ca cert of self sign -----------------------------
     public static X509Certificate createRootCert(String issuer, RSASignAlgorithm sigAlg,
         PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
         return createRootCert(null, issuer, sigAlg, privateKey, publicKey, notBefore, notAfter);
@@ -62,6 +63,7 @@ public class X509CertGenerator {
         return signSelf(privateKey, sigAlg, certInfo);
     }
 
+    // ---------------------------------create subject cert of ca sign ------------------------------
     public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, String subject,
         RSASignAlgorithm sigAlg, PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
         return createSubjectCert(caCert, caKey, null, subject, sigAlg, privateKey, publicKey, notBefore, notAfter);
@@ -108,6 +110,7 @@ public class X509CertGenerator {
         return signCert(caCert, caKey, certInfo);
     }
 
+    // -------------------------------------------create pkcs10 ------------------------------------------
     /**
      * 创建pkcs10
      * @param subject
@@ -128,6 +131,7 @@ public class X509CertGenerator {
         }
     }
 
+    // -------------------------------------------create cert ext-----------------------------------------
     /**
      * 创建默认的扩展信息
      * @return
@@ -169,6 +173,7 @@ public class X509CertGenerator {
         }
     }
 
+    // -------------------------------------------private methods----------------------------------------
     /**
      * 根据pkcs10创建证书
      * @param sn

@@ -30,6 +30,7 @@ public class RepairX500Principal implements Principal {
     @Override
     public String getName() {
         if (input == null) return null;
+
         byte[] oid = new byte[9];
         int oidType, valueType;
         StringBuilder sb = null;

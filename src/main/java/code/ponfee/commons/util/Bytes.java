@@ -32,10 +32,10 @@ public final class Bytes {
         40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1 };
 
     /**
-     * 与HexDump、HexDumpEncoder功能相似（PS：早知有现成的就不用重复造轮子了）
-     * @see new org.apache.commons.io.HexDump()#dump(byte[],0,System.out,bytes[].length);
-     * @see new HexDumpEncoder()#encode((byte[], System.out);
      * dump byte array
+     * @see org.apache.commons.io.HexDump#dump(byte[], long, java.io.OutputStream, int)
+     * @see sun.misc.HexDumpEncoder#encode(byte[], java.io.OutputStream);
+     * 
      * @param bytes  字节数组
      * @param block  每块大小
      * @param chunk  每行块数

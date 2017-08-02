@@ -50,9 +50,9 @@ public final class Jsons {
      * 序列化 convert an object(POJO, Array, Collection, ...) to json string
      * @param target target object
      * @return json string
-     * @throws code.ponfee.commons.json.JsonException the exception for json
+     * @throws code.ponfee.commons.json.JsonException   the exception for json
      */
-    public String stringify(Object target) {
+    public String stringify(Object target) throws JsonException {
         try {
             return mapper.writeValueAsString(target);
         } catch (IOException e) {
@@ -64,8 +64,9 @@ public final class Jsons {
      * 序列化成json流数据
      * @param target  object
      * @return byte[] array
+     * @throws code.ponfee.commons.json.JsonException   the exception for json
      */
-    public byte[] serialize(Object target) {
+    public byte[] serialize(Object target) throws JsonException {
         try {
             return mapper.writeValueAsBytes(target);
         } catch (IOException e) {
@@ -78,9 +79,9 @@ public final class Jsons {
      * @param json json string
      * @param target target class
      * @return target object
-     * @throws JsonException the exception for json
+     * @throws code.ponfee.commons.json.JsonException   the exception for json
      */
-    public <T> T parse(String json, Class<T> target) {
+    public <T> T parse(String json, Class<T> target) throws JsonException {
         if (isEmpty(json)) return null;
 
         try {
@@ -95,9 +96,10 @@ public final class Jsons {
      * @param json
      * @param collectionClass
      * @param elementClasses
-     * @return
+     * @return the objects of collection
+     * @throws JsonException the exception for json
      */
-    public <T> T parse(String json, Class<?> collectionClass, Class<?>... elementClasses) {
+    public <T> T parse(String json, Class<?> collectionClass, Class<?>... elementClasses) throws JsonException {
         JavaType javaType = mapper.getTypeFactory().constructParametricType(collectionClass, elementClasses);
         return parse(json, javaType);
     }
@@ -110,7 +112,7 @@ public final class Jsons {
      * @return the javaType's object
      * @throws JsonException the exception for json
      */
-    public <T> T parse(String json, JavaType javaType) {
+    public <T> T parse(String json, JavaType javaType) throws JsonException {
         if (isEmpty(json)) return null;
 
         try {

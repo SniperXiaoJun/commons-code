@@ -22,7 +22,7 @@ public class CryptoMessageSyntaxTester {
         X509Certificate cert = resolver.getX509CertChain()[0];
         PrivateKey privateKey = resolver.getPrivateKey("123456");
         //byte[] data = Streams.file2bytes(MavenProjects.getTestJavaFile(CMSTester.class));
-        byte[] data = Http.get("http://www.baidu.com").receive();
+        byte[] data = Http.get("http://www.baidu.com").download();
         long start = System.currentTimeMillis();
         //System.out.println(Bytes.hexDump(data));
         System.out.println("origin len------------" + data.length);

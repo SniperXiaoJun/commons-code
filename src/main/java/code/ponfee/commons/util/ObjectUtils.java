@@ -18,11 +18,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import code.ponfee.commons.model.Page;
 import code.ponfee.commons.model.Result;
@@ -213,13 +215,23 @@ public final class ObjectUtils {
     public static <T> void map2bean(Map<String, ?> map, T bean) {
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
-            // 给 JavaBean对象的属性赋值  
             for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
                 String name = property.getName();
                 if (name.equals("class")) continue;
 
                 if (map.containsKey(name) || map.containsKey(name = Strings.underscoreName(name))) {
-                    property.getWriteMethod().invoke(bean, map.get(name));
+                    Object value = map.get(name);
+                    Class<?> type = property.getPropertyType();
+                    if (value == null && type.isPrimitive()) continue; // 原始类型
+
+                    if (value != null && ClassUtils.isPrimitiveOrWrapper(type)) { // 原始或包装类型
+                        type = ClassUtils.primitiveToWrapper(type); // 转包装类型
+                        if (type != value.getClass()) { // map<String,?>可知value不可能为原始类型
+                            //value = type.getConstructor(value.getClass()).newInstance(value);
+                            value = type.getConstructor(String.class).newInstance(value.toString());
+                        }
+                    }
+                    property.getWriteMethod().invoke(bean, value);
                 }
             }
         } catch (Exception e) {
@@ -307,6 +319,7 @@ public final class ObjectUtils {
     }
 
     /**
+     * List<LinkedHashMap<String, Object>> -> List<Object[]>
      * @param data
      * @return
      */
@@ -407,6 +420,38 @@ public final class ObjectUtils {
         return intersect(array1, Lists.newArrayList(array2));
     }
 
+    /**
+     * 获取堆栈信息
+     * @param deep
+     * @return
+     */
+    public static String getStackTrace(int deep) {
+        StackTraceElement[] traces = Thread.currentThread().getStackTrace();
+        if (traces.length <= deep) {
+            return "warning: out of stack trace.";
+        }
+
+        StackTraceElement trace = traces[deep];
+        return new StringBuilder(trace.getClassName()).append("#").append(trace.getMethodName())
+                                .append("(").append(trace.getLineNumber()).append(")").toString();
+    }
+
+    /**
+     * 转map
+     * @param kv
+     * @return
+     */
+    public static Map<String, Object> ofMap(Object... kv) {
+        if (kv.length % 2 != 0) {
+            throw new IllegalArgumentException("arguments must be pair.");
+        }
+        Map<String, Object> map = Maps.newLinkedHashMap();
+        for (int i = 0; i < kv.length; i = i + 2) {
+            map.put((String) kv[i], kv[i + 1]);
+        }
+        return map;
+    }
+
     public static void main(String[] args) throws IOException {
         int len = 8;
         Set<String> set = new HashSet<>();
@@ -441,10 +486,12 @@ public final class ObjectUtils {
         System.out.println(map2bean(ImmutableMap.of("age", 1, "first_name", "lisi"), TestBean.class));
 
         System.out.println((Long.parseLong("ff", 16)));
+        System.out.println(map2bean(ImmutableMap.of("height", "1.0", "first_name", "lisi"), TestBean.class));
     }
 
     static class TestBean {
         private int age;
+        private double height;
         private String firstName;
 
         public TestBean() {}
@@ -471,10 +518,17 @@ public final class ObjectUtils {
             this.firstName = firstName;
         }
 
-        @Override
-        public String toString() {
-            return "TestBean [age=" + age + ", firstName=" + firstName + "]";
+        public double getHeight() {
+            return height;
         }
 
+        public void setHeight(double height) {
+            this.height = height;
+        }
+
+        @Override
+        public String toString() {
+            return "TestBean [age=" + age + ", height=" + height + ", firstName=" + firstName + "]";
+        }
     }
 }

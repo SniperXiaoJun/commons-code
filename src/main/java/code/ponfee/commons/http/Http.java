@@ -23,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.JavaType;
 
 import code.ponfee.commons.json.Jsons;
-import code.ponfee.commons.util.Bytes;
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatchNotFoundException;
 
@@ -273,7 +272,7 @@ public final class Http {
      * 下载文件
      * @param output
      */
-    public void receive(OutputStream output) {
+    public void download(OutputStream output) {
         HttpRequest request = _request();
         BufferedOutputStream bos = null;
         try {
@@ -293,19 +292,11 @@ public final class Http {
         }
     }
 
-    public void receive(String filepath) {
-        OutputStream out = null;
-        try {
-            out = new FileOutputStream(filepath);
-            receive(out);
-        } catch (FileNotFoundException e) {
-            throw new HttpException("file not found: " + filepath, e);
-        } finally {
-            if (out != null) try {
-                out.close();
-            } catch (IOException e) {
-                // ignore
-            }
+    public void download(String filepath) {
+        try (OutputStream out = new FileOutputStream(filepath)) {
+            download(out);
+        } catch (IOException e) {
+            throw new HttpException("download error: " + filepath, e);
         }
     }
 
@@ -313,9 +304,9 @@ public final class Http {
      * 下载文件
      * @return
      */
-    public byte[] receive() {
+    public byte[] download() {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        receive(output);
+        download(output);
         return output.toByteArray();
     }
 
@@ -417,10 +408,11 @@ public final class Http {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        System.out.println(Bytes.hexDump(Http.get("http://www.apachelounge.com/download/VC14/binaries/httpd-2.4.25-win64-VC14.zip").receive()));
+        //System.out.println(Bytes.hexDump(Http.get("http://www.apachelounge.com/download/VC14/binaries/httpd-2.4.25-win64-VC14.zip").download()));
+        Http.get("https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.zip").download(new FileOutputStream("d:/elasticsearch-5.5.1.zip"));
         System.out.println("\r\n");
-        //System.out.println(Bytes.hexDump(Http.get("http://www.stockstar.com").receive()));
+        //System.out.println(Bytes.hexDump(Http.get("http://www.stockstar.com").download()));
         System.out.println("\r\n");
-        Http.get("http://www.baidu.com").receive("d:/baidu.html");
+        Http.get("http://www.baidu.com").download("d:/baidu.html");
     }
 }

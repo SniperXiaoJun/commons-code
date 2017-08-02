@@ -4,7 +4,7 @@ package code.ponfee.commons.export;
  * 数据导出
  * @author fupf
  */
-public interface DataExporter {
+public interface DataExporter extends AutoCloseable {
 
     /** 提示无结果 */
     String TIP_NO_RESULT = "no data found";
@@ -27,5 +27,5 @@ public interface DataExporter {
     /**
      * 关闭资源
      */
-    void close();
+    @Override void close();
 }
