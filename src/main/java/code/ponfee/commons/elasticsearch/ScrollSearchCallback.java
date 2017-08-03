@@ -7,7 +7,7 @@ import org.elasticsearch.search.SearchHits;
  * @author fupf
  */
 @FunctionalInterface
-public interface ScrollSearchHitsCallback {
+public interface ScrollSearchCallback {
 
     /**
      * 滚动到下一页

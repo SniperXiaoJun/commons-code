@@ -633,7 +633,7 @@ public class ElasticSearchClient implements DisposableBean {
      * @param size      每次滚动的数据量大小
      * @param callback  回调处理量
      */
-    public void scrollingSearch(ESQueryBuilder query, int scrollSize, ScrollSearchHitsCallback callback) {
+    public void scrollingSearch(ESQueryBuilder query, int scrollSize, ScrollSearchCallback callback) {
         SearchResponse scrollResp = query.scrolling(client, scrollSize);
         this.scrollingSearch(scrollResp, scrollSize, callback);
     }
@@ -645,7 +645,7 @@ public class ElasticSearchClient implements DisposableBean {
      * @param scrollSize
      * @param callback
      */
-    public void scrollingSearch(SearchRequestBuilder search, int scrollSize, ScrollSearchHitsCallback callback) {
+    public void scrollingSearch(SearchRequestBuilder search, int scrollSize, ScrollSearchCallback callback) {
         SearchResponse scrollResp = search.setSize(scrollSize).setScroll(SCROLL_TIMEOUT).get();
         this.scrollingSearch(scrollResp, scrollSize, callback);
     }
@@ -731,7 +731,7 @@ public class ElasticSearchClient implements DisposableBean {
      * @param scrollSize
      * @param callback
      */
-    private void scrollingSearch(SearchResponse scrollResp, int scrollSize, ScrollSearchHitsCallback callback) {
+    private void scrollingSearch(SearchResponse scrollResp, int scrollSize, ScrollSearchCallback callback) {
         if (scrollSize > MAX_SCROLL_EACH_SIZE) {
             throw new UnsupportedOperationException("each scrolling records too large, size[" + scrollSize + "].");
         }
