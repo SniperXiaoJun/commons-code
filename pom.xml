@@ -167,6 +167,13 @@
             <version>2.2.3</version>
         </dependency>
 
+        <!-- elasticsearch java client -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>transport</artifactId>
+            <version>5.5.1</version>
+        </dependency>
+
         <!-- ====================spring==================== -->
         <dependency>
             <groupId>org.springframework</groupId>

@@ -1,21 +1,19 @@
 package code.ponfee.commons.resource;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
  * 资源类
  * @author fupf
  */
-public class Resource {
+public class Resource implements AutoCloseable {
 
-    private String path;
-    private String fileName;
+    private final String path;
+    private final String fileName;
     private InputStream stream;
 
-    public Resource() {}
-
     public Resource(String path, String fileName, InputStream stream) {
-        super();
         this.path = path;
         this.fileName = fileName;
         this.stream = stream;
@@ -25,29 +23,27 @@ public class Resource {
         return path;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public String getFileName() {
         return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
     }
 
     public InputStream getStream() {
         return stream;
     }
 
-    public void setStream(InputStream stream) {
-        this.stream = stream;
-    }
-
     @Override
     public String toString() {
         return "Resource [path=" + path + ", fileName=" + fileName + ", stream=" + stream + "]";
+    }
+
+    @Override
+    public void close() {
+        if (stream != null) try {
+            stream.close();
+            stream = null;
+        } catch (IOException ignored) {
+            ignored.printStackTrace();
+        }
     }
 
 }

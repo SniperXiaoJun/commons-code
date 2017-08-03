@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 参考guthub
- *   新增分页的多项属性，主要参考:http://bbs.csdn.net/topics/360010907
- *   项目地址 : http://git.oschina.net/free/Mybatis_PageHelper
+ * 参考guthub开源的mybatis分页工具
+ *   项目地址：http://git.oschina.net/free/Mybatis_PageHelper
+ *   属性配置：http://bbs.csdn.net/topics/360010907
  * 
- * 从第1页开始到pages页
+ * @author fupf
  */
 public class Page<T> implements Serializable {
     private static final long serialVersionUID = 1313118491812094979L;

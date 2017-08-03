@@ -73,7 +73,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
             if (list.size() > thresholdChunk
                 || (!list.isEmpty() && (isEnd || System.currentTimeMillis() - lastProcessTimeMillis > thresholdPeriod))) {
                 // task抛异常后： execute会输出错误信息，线程结束，后续任务会创建新线程执行
-                //               submit不会输出错误信息，线程继续分配执行其它任务
+                //            submit不会输出错误信息，线程继续分配执行其它任务
                 executor.submit(factory.create(list, isEnd && queue.isEmpty())); // 提交到异步处理
                 list = null;
                 lastProcessTimeMillis = System.currentTimeMillis();

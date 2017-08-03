@@ -269,7 +269,7 @@ public final class Http {
     }
 
     /**
-     * 下载文件
+     * http下载
      * @param output
      */
     public void download(OutputStream output) {
@@ -280,7 +280,7 @@ public final class Http {
                 bos = new BufferedOutputStream(output);
                 request.receive(bos);
             } else {
-                throw new HttpException("request fail, status: " + request.code());
+                throw new HttpException("request failed, status: " + request.code());
             }
         } finally {
             disconnect(request);
