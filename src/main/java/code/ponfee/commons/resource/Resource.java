@@ -9,18 +9,18 @@ import java.io.InputStream;
  */
 public class Resource implements AutoCloseable {
 
-    private final String path;
+    private final String filePath;
     private final String fileName;
     private InputStream stream;
 
-    public Resource(String path, String fileName, InputStream stream) {
-        this.path = path;
+    public Resource(String filePath, String fileName, InputStream stream) {
+        this.filePath = filePath;
         this.fileName = fileName;
         this.stream = stream;
     }
 
-    public String getPath() {
-        return path;
+    public String getFilePath() {
+        return filePath;
     }
 
     public String getFileName() {
@@ -33,7 +33,8 @@ public class Resource implements AutoCloseable {
 
     @Override
     public String toString() {
-        return "Resource [path=" + path + ", fileName=" + fileName + ", stream=" + stream + "]";
+        return "Resource [filePath=" + filePath
+            + ", fileName=" + fileName + ", stream=" + stream + "]";
     }
 
     @Override

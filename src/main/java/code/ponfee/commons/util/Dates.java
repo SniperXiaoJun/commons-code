@@ -14,6 +14,7 @@ import org.joda.time.format.DateTimeFormat;
  * @author fupf
  */
 public class Dates {
+
     private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final Date ORIGIN_DATE = toDate("2007-01-01 00:00:00", DEFAULT_DATE_FORMAT);
 
