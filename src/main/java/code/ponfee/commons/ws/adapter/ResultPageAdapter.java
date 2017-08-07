@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import code.ponfee.commons.model.Page;
 import code.ponfee.commons.model.Result;
-import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.reflect.GenericUtils;
 import code.ponfee.commons.ws.adapter.model.TransitPage;
 
 /**
@@ -19,7 +19,7 @@ public abstract class ResultPageAdapter<T> extends XmlAdapter<Result<TransitPage
     protected final Class<T> type;
 
     protected ResultPageAdapter() {
-        type = ClassUtils.getClassGenricType(this.getClass());
+        type = GenericUtils.getClassGenricType(this.getClass());
     }
 
     @Override

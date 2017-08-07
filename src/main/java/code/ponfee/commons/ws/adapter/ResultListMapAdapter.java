@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import code.ponfee.commons.model.Result;
-import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.reflect.GenericUtils;
 import code.ponfee.commons.ws.adapter.model.MapEntry;
 import code.ponfee.commons.ws.adapter.model.MapItem;
 import code.ponfee.commons.ws.adapter.model.MapItemArray;
@@ -29,8 +29,8 @@ public abstract class ResultListMapAdapter<K, V> extends XmlAdapter<Result<MapIt
     protected final Class<V> vtype;
 
     protected ResultListMapAdapter() {
-        ktype = ClassUtils.getClassGenricType(this.getClass(), 0);
-        vtype = ClassUtils.getClassGenricType(this.getClass(), 1);
+        ktype = GenericUtils.getClassGenricType(this.getClass(), 0);
+        vtype = GenericUtils.getClassGenricType(this.getClass(), 1);
     }
 
     @Override

@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -199,6 +200,10 @@ public final class ObjectUtils {
         }
     }
 
+    public static boolean isEmptyString(Object value) {
+        return CharSequence.class.isInstance(value) && StringUtils.isEmpty((CharSequence) value);
+    }
+
     public static Object nullValue(Object obj) {
         return nullValue(obj, "");
     }
@@ -215,6 +220,7 @@ public final class ObjectUtils {
     public static <T> void map2bean(Map<String, ?> map, T bean) {
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
+            // 给 JavaBean 对象的属性赋值
             for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
                 String name = property.getName();
                 if (name.equals("class")) continue;
@@ -222,15 +228,26 @@ public final class ObjectUtils {
                 if (map.containsKey(name) || map.containsKey(name = Strings.underscoreName(name))) {
                     Object value = map.get(name);
                     Class<?> type = property.getPropertyType();
-                    if (value == null && type.isPrimitive()) continue; // 原始类型
 
-                    if (value != null && ClassUtils.isPrimitiveOrWrapper(type)) { // 原始或包装类型
+                    if ((value == null || isEmptyString(value)) && type.isPrimitive()) {
+                        continue; // 原始类型跳过
+                    } else if (isEmptyString(value) && ClassUtils.isPrimitiveWrapper(type)) {
+                        value = null; // 包装类型则设置为null
+                    }
+
+                    // 字符序列转换
+                    if (CharSequence.class.isAssignableFrom(type) && value != null && !type.isInstance(value)) {
+                        value = type.getConstructor(String.class).newInstance(value.toString());
+                    }
+
+                    // 原始或包装类型
+                    if (value != null && ClassUtils.isPrimitiveOrWrapper(type)) {
                         type = ClassUtils.primitiveToWrapper(type); // 转包装类型
-                        if (type != value.getClass()) { // map<String,?>可知value不可能为原始类型
-                            //value = type.getConstructor(value.getClass()).newInstance(value);
-                            value = type.getConstructor(String.class).newInstance(value.toString());
+                        if (!type.isAssignableFrom(value.getClass())) {
+                            value = type.getConstructor(String.class).newInstance(value.toString()); // 字符串值转包装类型
                         }
                     }
+
                     property.getWriteMethod().invoke(bean, value);
                 }
             }
@@ -432,8 +449,7 @@ public final class ObjectUtils {
         }
 
         StackTraceElement trace = traces[deep];
-        return new StringBuilder(trace.getClassName()).append("#").append(trace.getMethodName())
-                                .append("(").append(trace.getLineNumber()).append(")").toString();
+        return new StringBuilder(trace.getClassName()).append("#").append(trace.getMethodName()).append("(").append(trace.getLineNumber()).append(")").toString();
     }
 
     /**
@@ -486,11 +502,17 @@ public final class ObjectUtils {
         System.out.println(map2bean(ImmutableMap.of("age", 1, "first_name", "lisi"), TestBean.class));
 
         System.out.println((Long.parseLong("ff", 16)));
-        System.out.println(map2bean(ImmutableMap.of("height", "1.0", "first_name", "lisi"), TestBean.class));
+        System.out.println(map2bean(ImmutableMap.of("height", "1.0", "first_name", "lisi", "weight", 123.4), TestBean.class));
+        System.out.println(String.class.isInstance(null));
+        
+        int i = 1;
+        Object o = i;
+        System.out.println(o.getClass());
     }
 
     static class TestBean {
         private int age;
+        private String weight;
         private double height;
         private String firstName;
 
@@ -526,9 +548,18 @@ public final class ObjectUtils {
             this.height = height;
         }
 
+        public String getWeight() {
+            return weight;
+        }
+
+        public void setWeight(String weight) {
+            this.weight = weight;
+        }
+
         @Override
         public String toString() {
-            return "TestBean [age=" + age + ", height=" + height + ", firstName=" + firstName + "]";
+            return "TestBean [age=" + age + ", weight=" + weight + ", height=" + height + ", firstName=" + firstName + "]";
         }
+
     }
 }

@@ -10,8 +10,8 @@ import com.google.common.collect.Maps;
 
 import code.ponfee.commons.model.Page;
 import code.ponfee.commons.model.Result;
-import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.reflect.Fields;
+import code.ponfee.commons.reflect.GenericUtils;
 import code.ponfee.commons.ws.adapter.model.MapEntry;
 import code.ponfee.commons.ws.adapter.model.MapItem;
 import code.ponfee.commons.ws.adapter.model.TransitPage;
@@ -29,8 +29,8 @@ public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<Trans
     protected final Class<V> vtype;
 
     protected ResultPageMapAdapter() {
-        ktype = ClassUtils.getClassGenricType(this.getClass(), 0);
-        vtype = ClassUtils.getClassGenricType(this.getClass(), 1);
+        ktype = GenericUtils.getClassGenricType(this.getClass(), 0);
+        vtype = GenericUtils.getClassGenricType(this.getClass(), 1);
     }
 
     @Override

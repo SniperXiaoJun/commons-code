@@ -408,6 +408,16 @@ public class Strings {
         return (10 - checkSum % 10) % 10;
     }
 
+    /**
+     * 如果为空则重置
+     * @param str
+     * @param defaultStr
+     * @return
+     */
+    public static String resetIfEmpty(String str, String defaultStr) {
+        return StringUtils.isEmpty(str) ? defaultStr : str;
+    }
+
     public static void main(String[] args) {
         System.out.println(deleteAny("hello world", "eo"));
         System.out.println(ObjectUtils.toString(split("hello world", "l", "eo")));

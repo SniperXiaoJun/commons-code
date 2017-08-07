@@ -3,12 +3,9 @@ package code.ponfee.commons.reflect;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -106,43 +103,6 @@ public final class ClassUtils {
         }
         builder.append(StringUtils.join(params.toArray(), ", ")).append(")");
         return builder.toString();
-    }
-
-    /**
-     * 获取泛化参数类型
-     * @param clazz
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> Class<T> getClassGenricType(final Class<?> clazz) {
-        return getClassGenricType(clazz, 0);
-    }
-
-    /**
-     * 获取泛化参数类型
-     * @param clazz
-     * @param index
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static Class getClassGenricType(final Class<?> clazz, final int index) {
-        java.lang.reflect.Type genType = clazz.getGenericSuperclass();
-        if (!(genType instanceof ParameterizedType)) {
-            return Object.class;
-        }
-        java.lang.reflect.Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
-        if (index >= params.length || index < 0) {
-            return Object.class;
-        } else if (params[index] instanceof ParameterizedType) {
-            return (Class<?>) ((ParameterizedType) params[index]).getRawType();
-        } else if (params[index] instanceof GenericArrayType) {
-            java.lang.reflect.Type type = ((GenericArrayType) params[index]).getGenericComponentType();
-            return Array.newInstance((Class<?>) ((ParameterizedType) type).getRawType(), 0).getClass();
-        } else if (params[index] instanceof Class<?>) {
-            return (Class<?>) params[index];
-        } else {
-            return Object.class;
-        }
     }
 
     /**

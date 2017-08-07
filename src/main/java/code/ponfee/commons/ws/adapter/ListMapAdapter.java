@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.reflect.GenericUtils;
 import code.ponfee.commons.ws.adapter.model.MapEntry;
 import code.ponfee.commons.ws.adapter.model.MapItem;
 import code.ponfee.commons.ws.adapter.model.MapItemArray;
@@ -28,8 +28,8 @@ public abstract class ListMapAdapter<K, V> extends XmlAdapter<MapItemArray, List
     protected final Class<V> vtype;
 
     protected ListMapAdapter() {
-        ktype = ClassUtils.getClassGenricType(this.getClass(), 0);
-        vtype = ClassUtils.getClassGenricType(this.getClass(), 1);
+        ktype = GenericUtils.getClassGenricType(this.getClass(), 0);
+        vtype = GenericUtils.getClassGenricType(this.getClass(), 1);
     }
 
     @Override

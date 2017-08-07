@@ -18,7 +18,7 @@ public final class Numbers {
     private static final String[] CN_UPPER_NUMBER = { "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖" };
 
     private static final String[] CN_UPPER_MONETRAY_UNIT = { "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
-                                                            "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
+        "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
 
     /**
      * 数字精度化
@@ -186,10 +186,12 @@ public final class Numbers {
      */
     public static String amountChinese(BigDecimal amount) {
         StringBuilder builder = new StringBuilder();
-        // -1, 0, or 1 as the value of this BigDecimal is negative, zero, or
-        int signum = amount.signum(); // positive
-        if (signum == 0) return "零元整"; // 零元整的情况
-        //这里会进行金额的四舍五入
+        int signum = amount.signum(); // 正负数：0,1,-1
+        if (signum == 0) {
+            return "零元整"; // 零元整的情况
+        }
+
+        // 这里会进行金额的四舍五入
         long number = amount.movePointRight(2).setScale(0, 4).abs().longValue();
         // 得到小数点后两位值
         long scale = number % 100;
@@ -262,5 +264,9 @@ public final class Numbers {
         double money = 2020004.01;
         String s = amountChinese(new BigDecimal(money));
         System.out.println("[" + money + "]   ->   [" + s.toString() + "]");
+
+        System.out.println(new BigDecimal(0).signum());
+        System.out.println(new BigDecimal(1).signum());
+        System.out.println(new BigDecimal(-1).signum());
     }
 }

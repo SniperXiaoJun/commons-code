@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.model.Result;
-import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.reflect.GenericUtils;
 
 /**
  * Result<data> -> Result<json>
@@ -18,7 +18,7 @@ public abstract class ResultDataJsonAdapter<T> extends XmlAdapter<Result<String>
     protected final Class<T> type;
 
     protected ResultDataJsonAdapter() {
-        type = ClassUtils.getClassGenricType(this.getClass());
+        type = GenericUtils.getClassGenricType(this.getClass());
     }
 
     @Override

@@ -49,9 +49,12 @@ public class CsvExporter extends AbstractExporter {
 
             // tfoot---------
             if (!ObjectUtils.isEmpty(table.getTfoot())) {
-                for (int i = 0; i < table.getTfoot().length; i++) {
+                int n = table.getTotalLeafCount();
+                for (int i = n - table.getTfoot().length; i < n; i++) {
                     csv.append(table.getTfoot()[i]);
-                    if (i < table.getTfoot().length - 1) csv.append(",");
+                    if (i < table.getTfoot().length - 1) {
+                        csv.append(",");
+                    }
                 }
                 csv.append(Files.LINE_SEPARATOR);
             }

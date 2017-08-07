@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import com.google.common.collect.Lists;
 
 import code.ponfee.commons.model.Result;
-import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.reflect.GenericUtils;
 import code.ponfee.commons.ws.adapter.model.ArrayItem;
 
 /**
@@ -23,7 +23,7 @@ public abstract class ResultListAdapter<T> extends XmlAdapter<Result<ArrayItem<T
     protected final Class<T> type;
 
     protected ResultListAdapter() {
-        type = ClassUtils.getClassGenricType(this.getClass());
+        type = GenericUtils.getClassGenricType(this.getClass());
     }
 
     @Override

@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import com.google.common.collect.Maps;
 
 import code.ponfee.commons.model.Result;
-import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.reflect.GenericUtils;
 import code.ponfee.commons.ws.adapter.model.MapEntry;
 import code.ponfee.commons.ws.adapter.model.MapItem;
 
@@ -24,8 +24,8 @@ public abstract class ResultMapAdapter<K, V> extends XmlAdapter<Result<MapItem>,
     protected final Class<V> vtype;
 
     protected ResultMapAdapter() {
-        ktype = ClassUtils.getClassGenricType(this.getClass(), 0);
-        vtype = ClassUtils.getClassGenricType(this.getClass(), 1);
+        ktype = GenericUtils.getClassGenricType(this.getClass(), 0);
+        vtype = GenericUtils.getClassGenricType(this.getClass(), 1);
     }
 
     public @Override Result<Map<K, V>> unmarshal(Result<MapItem> v) throws Exception {

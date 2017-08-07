@@ -27,17 +27,15 @@ public class Table implements Serializable {
     private int totalLeafCount = 0; // 总叶子节点个数
 
     public Table(List<Thead> thead) {
-        this.thead = thead;
-        resolveThead(this.thead);
+        resolveThead(this.thead = thead);
     }
 
     public Table(String[] thead) {
         List<Thead> _thead = new ArrayList<>();
-        for (int i = 0; i < thead.length; i++) {
-            _thead.add(new Thead(thead[i], i + 1, 0));
+        for (int i = 1; i <= thead.length; i++) {
+            _thead.add(new Thead(thead[i], i, 0)); // porder set 0
         }
-        this.thead = _thead;
-        resolveThead(this.thead);
+        resolveThead(this.thead = _thead);
     }
 
     public String getCaption() {
