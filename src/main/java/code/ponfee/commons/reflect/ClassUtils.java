@@ -36,9 +36,10 @@ public final class ClassUtils {
     private ClassUtils() {}
 
     /**
-     * <p>
-     * 获取方法的参数名（编译未清除）
-     * </p>
+     * 获取方法的参数名（编译未清除）<p>
+     * getMethodParamNames()                         -> []
+     * getMethodSignature(Method method)             -> [method]
+     * getClassGenricType(Class<?> clazz, int index) -> [clazz,index]
      * @param method
      * @return
      */
@@ -49,7 +50,7 @@ public final class ClassUtils {
             /*String name = getFilepath(method.getDeclaringClass());
             classReader = new ClassReader(new FileInputStream(name));*/
 
-            // 第二种方式（报错）
+            // 第二种方式（sometimes was wrong）
             //classReader = new ClassReader(getClassName(method.getDeclaringClass()));
 
             // 第三种方式
@@ -61,21 +62,16 @@ public final class ClassUtils {
 
         final String[] paramNames = new String[method.getParameterTypes().length];
         classReader.accept(new ClassVisitor(Opcodes.ASM5, new ClassWriter(ClassWriter.COMPUTE_MAXS)) {
-            @Override
-            public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-                final Type[] args = Type.getArgumentTypes(desc);
-
-                // 方法名相同并且参数个数相同
-                if (!name.equals(method.getName()) || !sameType(args, method.getParameterTypes())) {
-                    return super.visitMethod(access, name, desc, signature, exceptions);
+            public @Override MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+                if (!name.equals(method.getName()) || !sameType(Type.getArgumentTypes(desc), method.getParameterTypes())) {
+                    return super.visitMethod(access, name, desc, signature, exceptions); // 方法名相同并且参数个数相同
                 }
+
                 return new MethodVisitor(Opcodes.ASM5, cv.visitMethod(access, name, desc, signature, exceptions)) {
-                    @Override
-                    public void visitLocalVariable(String name, String desc, String sign, Label start, Label end, int index) {
+                    public @Override void visitLocalVariable(String name, String desc, String sign, Label start, Label end, int index) {
                         int i = index;
-                        // 非静态方法第一个参数是"this"
                         if (!Modifier.isStatic(method.getModifiers())) {
-                            i -= 1;
+                            i -= 1; // 非静态方法第一个参数是“this”
                         }
                         if (i >= 0 && i < paramNames.length) {
                             paramNames[i] = name;
@@ -153,10 +149,12 @@ public final class ClassUtils {
      * 获取字段
      * @param clazz
      * @param field
-     * @return
+     * @return Filed object
      * @throws Exception
      */
     public static Field getField(Class<?> clazz, String field) throws Exception {
+        if (clazz.isInterface() || clazz == Object.class) return null;
+
         Exception ex;
         do {
             try {
@@ -165,7 +163,7 @@ public final class ClassUtils {
                 ex = e;
                 clazz = clazz.getSuperclass();
             }
-        } while (clazz != null && !clazz.equals(Object.class));
+        } while (clazz != null && clazz != Object.class);
 
         throw ex;
     }

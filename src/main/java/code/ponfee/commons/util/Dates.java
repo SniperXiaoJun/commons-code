@@ -23,7 +23,7 @@ public class Dates {
      * @param date 输入日期
      * @return 有效返回true, 反之false
      */
-    public static Boolean isValidDate(String date) {
+    public static boolean isValidDate(String date) {
         return isValidDate(date, DEFAULT_DATE_FORMAT);
     }
 
@@ -33,8 +33,9 @@ public class Dates {
      * @param pattern 日期格式
      * @return 有效返回true, 反之false
      */
-    public static Boolean isValidDate(String date, String pattern) {
+    public static boolean isValidDate(String date, String pattern) {
         if (StringUtils.isEmpty(date)) return false;
+
         try {
             toDate(date, pattern);
             return true;
@@ -236,40 +237,40 @@ public class Dates {
 
     /**
      * 日期a是否大于日期b
-     * @param a 日期a
-     * @param b 日期b
+     * @param source 待比较日期
+     * @param target 目标日期
      * @return 大于返回true，反之false
      */
-    public static Boolean isAfter(Date a, Date b) {
-        return new DateTime(a).isAfter(b.getTime());
+    public static Boolean isAfter(Date source, Date target) {
+        return new DateTime(source).isAfter(target.getTime());
     }
 
     /**
      * 日期a是否大于当前日期
-     * @param a 日期a
+     * @param source 待比较日期
      * @return 大于返回true，反之false
      */
-    public static Boolean isAfterNow(Date a) {
-        return new DateTime(a).isAfterNow();
+    public static Boolean isAfterNow(Date source) {
+        return new DateTime(source).isAfterNow();
     }
 
     /**
      * 日期a是否小于日期b
-     * @param src 日期a
-     * @param target 日期b
+     * @param source 待比较日期
+     * @param target 目标日期
      * @return 小于返回true，反之false
      */
-    public static Boolean isBefore(Date src, Date target) {
-        return new DateTime(src).isBefore(target.getTime());
+    public static Boolean isBefore(Date source, Date target) {
+        return new DateTime(source).isBefore(target.getTime());
     }
 
     /**
      * 日期a是否大于当前日期
-     * @param a 日期a
+     * @param source 待比较日期
      * @return 小于返回true，反之false
      */
-    public static Boolean isBefore(Date a) {
-        return new DateTime(a).isBeforeNow();
+    public static Boolean isBeforeNow(Date source) {
+        return new DateTime(source).isBeforeNow();
     }
 
     /**
@@ -296,7 +297,8 @@ public class Dates {
      * @return 当前周第一天
      */
     public static Date startOfWeek(Date date) {
-        return new DateTime(date).dayOfWeek().withMinimumValue().withTimeAtStartOfDay().toDate();
+        return new DateTime(date).dayOfWeek().withMinimumValue()
+                                 .withTimeAtStartOfDay().toDate();
     }
 
     /**
@@ -305,7 +307,8 @@ public class Dates {
      * @return 当前周最后一天
      */
     public static Date endOfWeek(Date date) {
-        return new DateTime(date).dayOfWeek().withMaximumValue().millisOfDay().withMaximumValue().toDate();
+        return new DateTime(date).dayOfWeek().withMaximumValue()
+                                 .millisOfDay().withMaximumValue().toDate();
     }
 
     /**
@@ -314,7 +317,8 @@ public class Dates {
      * @return 当前月的第一天
      */
     public static Date startOfMonth(Date date) {
-        return new DateTime(date).dayOfMonth().withMinimumValue().withTimeAtStartOfDay().toDate();
+        return new DateTime(date).dayOfMonth().withMinimumValue()
+                                 .withTimeAtStartOfDay().toDate();
     }
 
     /**
@@ -323,7 +327,8 @@ public class Dates {
      * @return 当前月的最后一天
      */
     public static Date endOfMonth(Date date) {
-        return new DateTime(date).dayOfMonth().withMaximumValue().millisOfDay().withMaximumValue().toDate();
+        return new DateTime(date).dayOfMonth().withMaximumValue()
+                                 .millisOfDay().withMaximumValue().toDate();
     }
 
     /**
@@ -341,7 +346,8 @@ public class Dates {
      * @return 当前年的最后一天
      */
     public static Date endOfYear(Date date) {
-        return new DateTime(date).dayOfYear().withMaximumValue().millisOfDay().withMaximumValue().toDate();
+        return new DateTime(date).dayOfYear().withMaximumValue()
+                                 .millisOfDay().withMaximumValue().toDate();
     }
 
     /**
@@ -349,7 +355,7 @@ public class Dates {
      * @param day 1:星期一，2:星期二，...
      * @return 本周周几的日期对象
      */
-    public static Date dayOfWeek(Integer day) {
+    public static Date currentDayOfWeek(int day) {
         return dayOfWeek(now(), day);
     }
 
@@ -359,7 +365,7 @@ public class Dates {
      * @param day
      * @return
      */
-    public static Date dayOfWeek(Date date, Integer day) {
+    public static Date dayOfWeek(Date date, int day) {
         return new DateTime(startOfDay(date)).withDayOfWeek(day).toDate();
     }
 
@@ -368,7 +374,7 @@ public class Dates {
      * @param day
      * @return
      */
-    public static Date dayOfMonth(Integer day) {
+    public static Date currentDayOfMonth(int day) {
         return dayOfMonth(now(), day);
     }
 
@@ -378,7 +384,7 @@ public class Dates {
      * @param day
      * @return
      */
-    public static Date dayOfMonth(Date date, Integer day) {
+    public static Date dayOfMonth(Date date, int day) {
         return new DateTime(startOfDay(date)).withDayOfMonth(day).toDate();
     }
 
@@ -387,7 +393,7 @@ public class Dates {
      * @param day
      * @return
      */
-    public static Date dayOfYear(Integer day) {
+    public static Date currentDayOfYear(int day) {
         return dayOfYear(now(), day);
     }
 
@@ -397,7 +403,7 @@ public class Dates {
      * @param day
      * @return
      */
-    public static Date dayOfYear(Date date, Integer day) {
+    public static Date dayOfYear(Date date, int day) {
         return new DateTime(startOfDay(date)).withDayOfYear(day).toDate();
     }
 
@@ -421,25 +427,25 @@ public class Dates {
     }
 
     /**
-     * @param origin 起源（起始）时间
-     * @param type 类型
-     * @param reference 目标时间
+     * @param origin   最开始的周期（起点）时间
+     * @param source   待计算时间
+     * @param type     周期类型
      * @param interval 周期数
-     * @param next 目标周期的下next周期
+     * @param next     目标周期的下next个周期
      * @return
      */
-    public static Date[] calculateCycle(Date origin, String type, Date reference, int interval, int next) {
+    public static Date[] calculateCycle(Date origin, Date source, String type, int interval, int next) {
         if (interval < 1) {
             throw new IllegalArgumentException("interval mus be positive number");
         }
-        if (origin.after(reference)) {
+        if (origin.after(source)) {
             throw new IllegalArgumentException("end date must be after begin date");
         }
 
         Calendar c1 = Calendar.getInstance();
         Calendar c2 = Calendar.getInstance();
         c1.setTime(origin);
-        c2.setTime(reference);
+        c2.setTime(source);
         Date startDate = null;
         int cycleNum, year;
         Calendar tmp;
@@ -478,10 +484,12 @@ public class Dates {
                     default:
                         throw new IllegalArgumentException("invalid cycle type");
                 }
-                int intervalMonth = (c2.get(Calendar.YEAR) - c1.get(Calendar.YEAR)) * 12 + c2.get(Calendar.MONTH) - c1.get(Calendar.MONTH); // 间隔月数
+                // 间隔月数
+                int intervalMonth = (c2.get(Calendar.YEAR) - c1.get(Calendar.YEAR)) * 12 + c2.get(Calendar.MONTH) - c1.get(Calendar.MONTH);
                 cycleNum = (int) Math.floor(intervalMonth / interval);
                 tmp = (Calendar) c1.clone();
-                tmp.add(Calendar.MONTH, cycleNum * interval); // 跨月问题，当前时间仍属于该周期内，则应减一个周期数，如：(2012-01-15 ~ 2012-02-14，当前时间为2012-02-14，则当前时间属于该周期，而不是下一周期)
+                // 跨月问题，当前时间仍属于该周期内，则应减一个周期数，如：(2012-01-15 ~ 2012-02-14，当前时间为2012-02-14，则当前时间属于该周期，而不是下一周期)
+                tmp.add(Calendar.MONTH, cycleNum * interval);
                 if (tmp.after(c2)) cycleNum -= 1;
                 cycleNum += next; // 上一个周期
                 c1.add(Calendar.MONTH, cycleNum * interval);
@@ -495,8 +503,8 @@ public class Dates {
         return new Date[] { startDate, c1.getTime() };
     }
 
-    public static Date[] calculateCycle(String type, Date reference, int next) {
-        return calculateCycle(ORIGIN_DATE, type, reference, 1, next);
+    public static Date[] calculateCycle(String type, Date source, int next) {
+        return calculateCycle(ORIGIN_DATE, source, type, 1, next);
     }
 
     public static void main(String[] args) {
@@ -511,9 +519,9 @@ public class Dates {
         System.out.println(format(endOfYear(new Date()), "yyyy-MM-dd HH:mm:ss SSS"));
 
         System.out.println("============================================");
-        System.out.println(format(dayOfWeek(1), "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(dayOfMonth(15), "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(dayOfYear(155), "yyyy-MM-dd HH:mm:ss SSS"));
+        System.out.println(format(currentDayOfWeek(1), "yyyy-MM-dd HH:mm:ss SSS"));
+        System.out.println(format(currentDayOfMonth(15), "yyyy-MM-dd HH:mm:ss SSS"));
+        System.out.println(format(currentDayOfYear(155), "yyyy-MM-dd HH:mm:ss SSS"));
 
         System.out.println("============================================");
         Date[] dates = calculateCycle("weekly", new Date(), -1);

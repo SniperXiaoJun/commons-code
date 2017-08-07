@@ -11,10 +11,10 @@ public interface ScrollSearchCallback {
 
     /**
      * 滚动到下一页
-     * @param searchHits
-     * @param totalRecord
-     * @param totalPage
-     * @param pageNo
+     * @param searchHits   搜索结果
+     * @param totalRecord  总记录数
+     * @param totalPage    总页数
+     * @param pageNo       当前滚动的页码
      */
     void nextPage(SearchHits searchHits, int totalRecord, int totalPage, int pageNo);
 

@@ -65,8 +65,6 @@ import code.ponfee.commons.util.ObjectUtils;
 public class ElasticSearchClient implements DisposableBean {
 
     static final TimeValue SCROLL_TIMEOUT = TimeValue.timeValueSeconds(120); // 2 minutes
-    private static final int MAX_SCROLL_TOTAL_SIZE = 1000000; // 总的滚动数据大小限制：最大100W
-    private static final int MAX_SCROLL_EACH_SIZE = 20000; // 每次滚动数据大小限制：最大2W
     private static Logger logger = LoggerFactory.getLogger(ElasticSearchClient.class);
     private final TransportClient client; // ES集群客户端
 
@@ -89,7 +87,7 @@ public class ElasticSearchClient implements DisposableBean {
                                               .build();
         client = new PreBuiltTransportClient(settings);
 
-        logger.info("====================init ElasticSearch client clusterName:{} clusterNodes:{} start====================", clusterName, clusterNodes);
+        logger.info("=======init ElasticSearch client clusterName:{} clusterNodes:{} start=======", clusterName, clusterNodes);
         for (String clusterNode : split(clusterNodes, ",")) {
             try {
                 InetAddress hostName = InetAddress.getByName(substringBeforeLast(clusterNode, ":"));
@@ -103,7 +101,7 @@ public class ElasticSearchClient implements DisposableBean {
         for (DiscoveryNode node : client.connectedNodes()) {
             logger.info("connected node {}", node.getHostAddress());
         }
-        logger.info("====================init ElasticSearch client clusterName:{} clusterNodes:{} end====================", clusterName, clusterNodes);
+        logger.info("========init ElasticSearch client clusterName:{} clusterNodes:{} end=======", clusterName, clusterNodes);
     }
 
     /**
@@ -732,16 +730,9 @@ public class ElasticSearchClient implements DisposableBean {
      * @param callback
      */
     private void scrollingSearch(SearchResponse scrollResp, int scrollSize, ScrollSearchCallback callback) {
-        if (scrollSize > MAX_SCROLL_EACH_SIZE) {
-            throw new UnsupportedOperationException("each scrolling records too large, size[" + scrollSize + "].");
-        }
-
         try {
             SearchHits searchHits = scrollResp.getHits();
             int totalRecord = (int) searchHits.getTotalHits(); // 总记录数
-            if (totalRecord > MAX_SCROLL_TOTAL_SIZE) {
-                throw new UnsupportedOperationException("scrolled records too large, hits[" + totalRecord + "].");
-            }
 
             int totalPage = (totalRecord + scrollSize - 1) / scrollSize; // 总页数
             String caller = ObjectUtils.getStackTrace(4);

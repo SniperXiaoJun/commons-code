@@ -1,12 +1,11 @@
 package code.ponfee.commons.loadbalance;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 加权随机法
@@ -14,7 +13,6 @@ import java.util.Random;
  */
 public class WeightRandomLoadBalance extends AbstractLoadBalance {
     private final List<String> servers;
-    private final Random random = new SecureRandom();
 
     public WeightRandomLoadBalance(Map<String, Integer> serverMap) {
         this.servers = new ArrayList<String>();
@@ -28,7 +26,7 @@ public class WeightRandomLoadBalance extends AbstractLoadBalance {
 
     @Override
     public String select() {
-        return servers.get(random.nextInt(servers.size()));
+        return servers.get(ThreadLocalRandom.current().nextInt(servers.size()));
     }
 
 }
