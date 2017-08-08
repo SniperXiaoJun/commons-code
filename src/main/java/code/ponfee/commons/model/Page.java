@@ -17,7 +17,6 @@ public class Page<T> implements Serializable {
     private int pageNum; // 当前页
     private int pageSize; // 每页的数量
     private int size; // 当前页的数量
-    //private String orderBy; // 排序
     private int startRow; // 当前页面第一个元素在数据库中的行号
     private int endRow; // 当前页面最后一个元素在数据库中的行号
     private long total; // 总记录数
@@ -25,8 +24,8 @@ public class Page<T> implements Serializable {
     private List<T> rows; // 结果集
     private int prePage; // 前一页
     private int nextPage; // 下一页
-    private boolean firstPage = false; // 是否为第一页
-    private boolean lastPage = false; // 是否为最后一页
+    private boolean isFirstPage = false; // 是否为第一页
+    private boolean isLastPage = false; // 是否为最后一页
     private boolean hasPreviousPage = false; // 是否有前一页
     private boolean hasNextPage = false; // 是否有下一页
     private int navigatePages; // 导航页码数
@@ -56,7 +55,6 @@ public class Page<T> implements Serializable {
             com.github.pagehelper.Page<T> page = (com.github.pagehelper.Page<T>) list;
             this.pageNum = page.getPageNum();
             this.pageSize = page.getPageSize();
-            //this.orderBy = page.getOrderBy();
 
             this.pages = page.getPages();
             this.rows = copy(page);
@@ -73,7 +71,7 @@ public class Page<T> implements Serializable {
             this.pageNum = 1;
             this.pageSize = list.size();
 
-            this.pages = 1;
+            this.pages = this.pageSize > 0 ? 1 : 0;
             this.rows = list;
             this.size = list.size();
             this.total = list.size();
@@ -150,8 +148,8 @@ public class Page<T> implements Serializable {
      * 判定页面边界
      */
     private void judgePageBoudary() {
-        firstPage = pageNum == 1;
-        lastPage = pageNum == pages;
+        isFirstPage = pageNum == 1;
+        isLastPage = pageNum == pages;
         hasPreviousPage = pageNum > 1;
         hasNextPage = pageNum < pages;
     }
@@ -180,32 +178,24 @@ public class Page<T> implements Serializable {
         this.size = size;
     }
 
-    /*public String getOrderBy() {
-        return orderBy;
+    public int getStartRow() {
+        return startRow;
     }
-    
-    public void setOrderBy(String orderBy) {
-        this.orderBy = orderBy;
-    }*/
 
     public boolean isFirstPage() {
-        return firstPage;
+        return isFirstPage;
     }
 
-    public void setFirstPage(boolean firstPage) {
-        this.firstPage = firstPage;
+    public void setFirstPage(boolean isFirstPage) {
+        this.isFirstPage = isFirstPage;
     }
 
     public boolean isLastPage() {
-        return lastPage;
+        return isLastPage;
     }
 
-    public void setLastPage(boolean lastPage) {
-        this.lastPage = lastPage;
-    }
-
-    public int getStartRow() {
-        return startRow;
+    public void setLastPage(boolean isLastPage) {
+        this.isLastPage = isLastPage;
     }
 
     public void setStartRow(int startRow) {
@@ -310,36 +300,36 @@ public class Page<T> implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("Page{");
-        sb.append("pageNum=").append(pageNum);
-        sb.append(", pageSize=").append(pageSize);
-        sb.append(", size=").append(size);
-        sb.append(", startRow=").append(startRow);
-        sb.append(", endRow=").append(endRow);
-        sb.append(", total=").append(total);
-        sb.append(", pages=").append(pages);
-        sb.append(", rows=").append(rows);
-        sb.append(", prePage=").append(prePage);
-        sb.append(", nextPage=").append(nextPage);
-        sb.append(", firstPage=").append(firstPage);
-        sb.append(", lastPage=").append(lastPage);
-        sb.append(", hasPreviousPage=").append(hasPreviousPage);
-        sb.append(", hasNextPage=").append(hasNextPage);
-        sb.append(", navigatePages=").append(navigatePages);
-        sb.append(", navigateFirstPage").append(navigateFirstPage);
-        sb.append(", navigateLastPage").append(navigateLastPage);
-        sb.append(", navigatepageNums=");
+        StringBuilder builder = new StringBuilder("Page{");
+        builder.append("pageNum=").append(pageNum);
+        builder.append(", pageSize=").append(pageSize);
+        builder.append(", size=").append(size);
+        builder.append(", startRow=").append(startRow);
+        builder.append(", endRow=").append(endRow);
+        builder.append(", total=").append(total);
+        builder.append(", pages=").append(pages);
+        builder.append(", rows=").append(rows);
+        builder.append(", prePage=").append(prePage);
+        builder.append(", nextPage=").append(nextPage);
+        builder.append(", isFirstPage=").append(isFirstPage);
+        builder.append(", isLastPage=").append(isLastPage);
+        builder.append(", hasPreviousPage=").append(hasPreviousPage);
+        builder.append(", hasNextPage=").append(hasNextPage);
+        builder.append(", navigatePages=").append(navigatePages);
+        builder.append(", navigateFirstPage").append(navigateFirstPage);
+        builder.append(", navigateLastPage").append(navigateLastPage);
+        builder.append(", navigatepageNums=");
         if (navigatepageNums == null) {
-            sb.append("null");
+            builder.append("null");
         } else {
-            sb.append('[');
+            builder.append('[');
             for (int i = 0; i < navigatepageNums.length; ++i) {
-                sb.append(i == 0 ? "" : ", ").append(navigatepageNums[i]);
+                builder.append(i == 0 ? "" : ", ").append(navigatepageNums[i]);
             }
-            sb.append(']');
+            builder.append(']');
         }
-        sb.append('}');
-        return sb.toString();
+        builder.append('}');
+        return builder.toString();
     }
 
 }

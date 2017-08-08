@@ -663,7 +663,7 @@ public class HttpRequest {
      *
      * @param <V>
      */
-    abstract static class Operation<V> implements Callable<V> {
+    private abstract static class Operation<V> implements Callable<V> {
 
         /**
          * Run operation
@@ -707,7 +707,7 @@ public class HttpRequest {
      *
      * @param <V>
      */
-    abstract static class CloseOperation<V> extends Operation<V> {
+    private abstract static class CloseOperation<V> extends Operation<V> {
 
         private final Closeable closeable;
 
@@ -743,7 +743,7 @@ public class HttpRequest {
      *
      * @param <V>
      */
-    abstract static class FlushOperation<V> extends Operation<V> {
+    private abstract static class FlushOperation<V> extends Operation<V> {
 
         private final Flushable flushable;
 
@@ -1408,7 +1408,7 @@ public class HttpRequest {
 
     private boolean ignoreCloseExceptions = true;
 
-    private boolean uncompress = false;
+    private boolean decompress = false;
 
     private int bufferSize = 8192;
 
@@ -1671,7 +1671,7 @@ public class HttpRequest {
     }
 
     /**
-     * Set whether or not the response body should be automatically uncompressed
+     * Set whether or not the response body should be automatically decompress
      * when read from.
      * <p>
      * This will only affect requests that have the 'Content-Encoding' response
@@ -1679,17 +1679,17 @@ public class HttpRequest {
      * <p>
      * This causes all receive methods to use a {@link GZIPInputStream} when
      * applicable so that higher level streams and readers can read the data
-     * uncompressed.
+     * decompress.
      * <p>
      * Setting this option does not cause any request headers to be set
      * automatically so {@link #acceptGzipEncoding()} should be used in
      * conjunction with this setting to tell the server to gzip the response.
      *
-     * @param uncompress
+     * @param decompress
      * @return this request
      */
-    public HttpRequest uncompress(final boolean uncompress) {
-        this.uncompress = uncompress;
+    public HttpRequest decompress(final boolean decompress) {
+        this.decompress = decompress;
         return this;
     }
 
@@ -1822,8 +1822,9 @@ public class HttpRequest {
             }
         }
 
-        if (!uncompress || !ENCODING_GZIP.equals(contentEncoding())) return stream;
-        else try {
+        if (!decompress || !ENCODING_GZIP.equals(contentEncoding())) {
+            return stream;
+        } else try {
             return new GZIPInputStream(stream);
         } catch (IOException e) {
             throw new HttpRequestException(e);
@@ -2287,7 +2288,7 @@ public class HttpRequest {
     /**
      * Set the 'Accept-Encoding' header to 'gzip'
      *
-     * @see #uncompress(boolean)
+     * @see #decompress(boolean)
      * @return this request
      */
     public HttpRequest acceptGzipEncoding() {

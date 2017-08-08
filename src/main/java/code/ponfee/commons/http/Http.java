@@ -54,8 +54,10 @@ public final class Http {
 
     private final String url; // url
     private HttpMethod method = HttpMethod.GET; // 请求方法
-    private Map<String, String> headers = new HashMap<>(); // http头
-    private Map<String, ?> params = Collections.emptyMap(); // http参数
+
+    private final Map<String, String> headers = new HashMap<>(); // http头
+    private final Map<String, Object> params = Collections.emptyMap(); // http参数
+
     private String data; // 请求data
     private int connectTimeout = 1000 * 5; // 连接超时时间
     private int readTimeout = 1000 * 5; // 读取返回数据超时时间
@@ -63,7 +65,7 @@ public final class Http {
     private String contentType; // 请求内容类型
     private String contentCharset; // 请求内容编码
     private String accept; // 接收类型
-    private List<MimePart> parts = new ArrayList<>(); // 上传的文件
+    private final List<MimePart> parts = new ArrayList<>(); // 上传的文件
     private SSLSocketFactory sslSocketFactory; // 信任的SSL
 
     private Http(String url) {
@@ -88,8 +90,20 @@ public final class Http {
         return new Http(url).method(HttpMethod.PUT);
     }
 
+    public static Http head(String url) {
+        return new Http(url).method(HttpMethod.HEAD);
+    }
+
     public static Http delete(String url) {
         return new Http(url).method(HttpMethod.DELETE);
+    }
+
+    public static Http trace(String url) {
+        return new Http(url).method(HttpMethod.TRACE);
+    }
+
+    public static Http options(String url) {
+        return new Http(url).method(HttpMethod.OPTIONS);
     }
 
     // ----------------------------header--------------------------
@@ -122,8 +136,8 @@ public final class Http {
      * @param params
      * @return
      */
-    public Http params(Map<String, ?> params) {
-        this.params = params;
+    public Http params(Map<String, ? extends Object> params) {
+        this.params.putAll(params);
         return this;
     }
 
@@ -320,12 +334,28 @@ public final class Http {
             case POST:
                 request = HttpRequest.post(url, params, encode);
                 break;
+            case PUT:
+                request = HttpRequest.put(url, params, encode);
+                break;
+            case HEAD:
+                request = HttpRequest.head(url, params, encode);
+                break;
+            case DELETE:
+                request = HttpRequest.delete(url, params, encode);
+                break;
+            case TRACE:
+                request = HttpRequest.trace(url);
+                break;
+            case OPTIONS:
+                request = HttpRequest.options(url);
+                break;
             default:
                 throw new UnsupportedOperationException("unsupported http method " + method.name());
         }
 
-        request.trustAllCerts().trustAllHosts().connectTimeout(connectTimeout);
-        request.readTimeout(readTimeout).headers(headers).acceptGzipEncoding().uncompress(true);
+        request.trustAllCerts().trustAllHosts();
+        request.connectTimeout(connectTimeout).readTimeout(readTimeout);
+        request.headers(headers).acceptGzipEncoding().decompress(true);
 
         if (!StringUtils.isEmpty(contentType)) {
             request.contentType(contentType, contentCharset);
@@ -383,7 +413,7 @@ public final class Http {
      * http method
      */
     private static enum HttpMethod {
-        GET, POST, PUT, DELETE
+        GET, POST, PUT, DELETE, HEAD, TRACE, OPTIONS;
     }
 
     /**
