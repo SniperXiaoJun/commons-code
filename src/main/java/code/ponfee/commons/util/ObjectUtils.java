@@ -257,14 +257,13 @@ public final class ObjectUtils {
     }
 
     public static <T> T map2bean(Map<String, ?> map, Class<T> type) {
-        T bean;
         try {
-            bean = type.getConstructor().newInstance();
+            T bean = type.getConstructor().newInstance();
+            map2bean(map, bean);
+            return bean;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        map2bean(map, bean);
-        return bean;
     }
 
     /**
@@ -504,7 +503,7 @@ public final class ObjectUtils {
         System.out.println((Long.parseLong("ff", 16)));
         System.out.println(map2bean(ImmutableMap.of("height", "1.0", "first_name", "lisi", "weight", 123.4), TestBean.class));
         System.out.println(String.class.isInstance(null));
-        
+
         int i = 1;
         Object o = i;
         System.out.println(o.getClass());

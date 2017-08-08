@@ -229,7 +229,7 @@ public final class Http {
         return this;
     }
 
-    // ----------------------------timeout--------------------------
+    // --------------------------------timeout------------------------------
     /**
      * set connect timeout
      * @param seconds (s)
@@ -261,6 +261,7 @@ public final class Http {
         return this;
     }
 
+    // --------------------------------request------------------------------
     public <T> T request(JavaType type) {
         return Jsons.NORMAL.parse(request(), type);
     }
@@ -443,6 +444,6 @@ public final class Http {
         System.out.println("\r\n");
         //System.out.println(Bytes.hexDump(Http.get("http://www.stockstar.com").download()));
         System.out.println("\r\n");
-        Http.get("http://www.baidu.com").download("d:/baidu.html");
+        //Http.get("http://www.baidu.com").download("d:/baidu.html");
     }
 }

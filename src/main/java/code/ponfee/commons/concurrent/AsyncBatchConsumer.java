@@ -18,13 +18,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @param <T>
  */
 public final class AsyncBatchConsumer<T> extends Thread {
+
     private final RunnableFactory<T> factory;
     private final ExecutorService executor;
     private final int thresholdPeriod;
     private final int thresholdChunk;
     private final Queue<T> queue = new ConcurrentLinkedQueue<>();
-    private long lastProcessTimeMillis = System.currentTimeMillis();
     private boolean needDestroyWhenEnd = false;
+
+    private volatile long lastProcessTimeMillis = System.currentTimeMillis();
     private volatile boolean isEnd = false;
 
     public AsyncBatchConsumer(RunnableFactory<T> factory) {

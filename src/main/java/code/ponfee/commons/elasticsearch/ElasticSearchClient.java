@@ -73,12 +73,7 @@ public class ElasticSearchClient implements DisposableBean {
      * @param clusterName  集群名称：es-cluster
      * @param clusterNodes 集群节点列表：ip1:port1,ip2:port2
      */
-    public ElasticSearchClient(boolean enable, String clusterName, String clusterNodes) {
-        if (!enable) {
-            client = null;
-            return;
-        }
-
+    public ElasticSearchClient(String clusterName, String clusterNodes) {
         Settings settings = Settings.builder().put("cluster.name", clusterName)
                                               .put("client.transport.sniff", true)
                                               .put("client.transport.ignore_cluster_name", false)

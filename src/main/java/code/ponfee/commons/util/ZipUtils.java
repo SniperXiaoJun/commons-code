@@ -22,7 +22,7 @@ public class ZipUtils {
     private static final String SEPARATOR = "/";
     private static final String SUFFIX = ".zip";
 
-    // -----------------------------------解压缩-----------------------------------
+    // -----------------------------------压缩-----------------------------------
     /**
      * 压缩指定文件到当前文件夹，压缩后的文件名为：待压缩文件名+.zip
      * @param src 要压缩的指定文件

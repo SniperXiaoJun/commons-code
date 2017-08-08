@@ -33,7 +33,7 @@ public class Result<T> implements Serializable {
     }
 
     // -----------------------------static method
-    public static final Result<Void> success() {
+    public static Result<Void> success() {
         return SUCCESS;
     }
 
