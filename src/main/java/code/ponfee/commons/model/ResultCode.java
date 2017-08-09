@@ -13,15 +13,15 @@ public final class ResultCode implements Serializable {
 
     /** 公用结果码 */
     public static final ResultCode SUCCESS            = create0(200, "成功");
-    public static final ResultCode ILLEGAL_ARGUMENTS  = create0(400, "参数错误");
+    public static final ResultCode ILLEGAL_ARGS       = create0(400, "参数错误");
     public static final ResultCode UNAUTHORIZED       = create0(401, "未授权");
     public static final ResultCode FORBIDDEN          = create0(403, "拒绝访问");
-    public static final ResultCode RESOURCE_NOT_FOUND = create0(404, "资源未找到");
+    public static final ResultCode RESOURCE_UNFOUND   = create0(404, "资源未找到");
     public static final ResultCode REQUEST_TIMEOUT    = create0(408, "请求超时");
-    public static final ResultCode OCCUR_CONFLICT     = create0(409, "出现冲突");
+    public static final ResultCode OPS_CONFLICT       = create0(409, "操作冲突");
     public static final ResultCode SERVER_ERROR       = create0(500, "服务器错误");
     public static final ResultCode SERVER_UNAVAILABLE = create0(503, "服务不可用");
-    public static final ResultCode SERVER_UNSUPPORTED = create0(505, "服务不支持");
+    public static final ResultCode SERVER_UNSUPPORT   = create0(505, "服务不支持");
 
     private final Integer code;
     private final String msg;

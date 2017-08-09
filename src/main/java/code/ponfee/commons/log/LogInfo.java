@@ -9,13 +9,13 @@ import code.ponfee.commons.log.LogAnnotation.LogType;
 public class LogInfo implements java.io.Serializable {
     private static final long serialVersionUID = -4824757481106145723L;
 
-    private LogType type;
-    private String desc;
-    private String methodName;
-    private Object args;
-    private Object retVal;
-    private String exception;
-    private int costTime;
+    private LogType type; // 日志类型
+    private String desc; // 日志描述
+    private String methodName; // 方法名称
+    private Object args; // 调用参数
+    private Object retVal; // 返回值
+    private String exception; // 异常信息
+    private int costTime; // 调用消耗时间（毫秒）
 
     public LogInfo() {}
 

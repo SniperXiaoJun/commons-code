@@ -1,6 +1,6 @@
 package code.ponfee.commons.constrain;
 
-import static code.ponfee.commons.model.ResultCode.ILLEGAL_ARGUMENTS;
+import static code.ponfee.commons.model.ResultCode.ILLEGAL_ARGS;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -154,7 +154,7 @@ public class MethodConstraint extends FieldConstraint {
     protected Object returnFailed(Method method, String errMsg) {
         try {
             Constructor<?> c = method.getReturnType().getConstructor(int.class, String.class);
-            return c.newInstance(ILLEGAL_ARGUMENTS.getCode(), ILLEGAL_ARGUMENTS.getMsg() + ": " + errMsg);
+            return c.newInstance(ILLEGAL_ARGS.getCode(), ILLEGAL_ARGS.getMsg() + ": " + errMsg);
         } catch (Exception e) {
             throw new IllegalArgumentException(errMsg);
         }

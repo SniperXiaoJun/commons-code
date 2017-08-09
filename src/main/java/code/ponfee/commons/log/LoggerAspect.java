@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import code.ponfee.commons.exception.ExceptionTracker;
-import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * <pre>
@@ -30,6 +30,7 @@ import code.ponfee.commons.reflect.ClassUtils;
  * @author fupf
  */
 public abstract class LoggerAspect {
+
     private static Logger logger = LoggerFactory.getLogger(LoggerAspect.class);
     private final int alarmThresholdMillis; // 告警阀值
 
@@ -71,46 +72,51 @@ public abstract class LoggerAspect {
         String logs = getLogs(log);
         logInfo.setArgs(pjp.getArgs());
         if (logger.isInfoEnabled()) {
-            logger.info("[exec-before]-[{}]{}-{}", methodName, logs, toJson(logInfo.getArgs()));
+            logger.info("[exec-before]-[{}]{}-{}", methodName, logs, ObjectUtils.toString(logInfo.getArgs()));
         }
+        int cost = 0;
+        long start = System.currentTimeMillis();
         try {
-            long start = System.currentTimeMillis();
             Object retVal = pjp.proceed();
-            int cost = (int) (System.currentTimeMillis() - start);
+            cost = (int) (System.currentTimeMillis() - start);
             logInfo.setRetVal(retVal);
-            logInfo.setCostTime(cost);
             if (cost > alarmThresholdMillis && logger.isWarnEnabled()) {
+                // 执行时间告警
                 logger.warn("[exec-time]-[{}]{}-[cost {}]", methodName, logs, cost);
             }
             if (logger.isInfoEnabled()) {
-                logger.info("[exec-after]-[{}]{}-[{}]", methodName, logs, toJson(retVal));
+                logger.info("[exec-after]-[{}]{}-[{}]", methodName, logs, ObjectUtils.toString(retVal));
             }
             return retVal;
         } catch (Throwable e) {
-            logger.error("[exec-throwing]-[{}]{}-{}", methodName, logs, toJson(logInfo.getArgs()), e);
+            cost = (int) (System.currentTimeMillis() - start);
+            logger.error("[exec-throwing]-[{}]{}-{}", methodName, logs, ObjectUtils.toString(logInfo.getArgs()), e);
             logInfo.setException(ExceptionTracker.peekStackTrace(e));
             throw e;
-            /*try {
-                return method.getReturnType().getConstructor(int.class, String.class).newInstance(-1, e.getMessage());
-            } catch(Exception ex) {
-                throw e;
-            }*/
         } finally {
-            log(logInfo);
+            logInfo.setCostTime(cost);
+            try {
+                log(logInfo);
+            } catch (Throwable ignored) {
+                ignored.printStackTrace();
+            }
         }
     }
 
+    /**
+     * 日志记录（可用于记录到日志表）
+     * @param logInfo
+     */
     protected void log(LogInfo logInfo) {
         // do no thing
     }
 
     private String getLogs(LogAnnotation log) {
         if (log == null) return "";
-        return "-[" + log.type() + (log.desc() != null ? "," + log.desc() : "") + "]";
-    }
 
-    private String toJson(Object obj) {
-        return Jsons.NON_NULL.stringify(obj);
+        StringBuilder builder = new StringBuilder("-[").append(log.type());
+        builder.append(log.desc() != null ? "," + log.desc() : "");
+        return builder.append("]").toString();
     }
 
 }

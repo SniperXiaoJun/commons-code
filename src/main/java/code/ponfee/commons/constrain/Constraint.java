@@ -26,6 +26,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Constraint {
+
     /**
      * 参数索引位置（第一个参数为0，第二个参数为1，...，第N个参数为N-1）
      */
@@ -53,7 +54,6 @@ public @interface Constraint {
 
     /**
      * 是否不为空白串（只针对CharSequence）
-     * @return
      */
     boolean notBlank() default false;
 
@@ -112,6 +112,7 @@ public @interface Constraint {
      */
     public static enum Tense {
         PAST("过去"), FUTURE("将来"), ANY("任意"), NON(null);
+
         private String desc;
 
         Tense(String desc) {
