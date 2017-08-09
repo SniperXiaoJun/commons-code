@@ -1,7 +1,6 @@
 package code.ponfee.commons.model;
 
 import java.beans.Transient;
-import java.io.Serializable;
 
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.reflect.Fields;
@@ -11,7 +10,8 @@ import code.ponfee.commons.reflect.Fields;
  * @param <T>
  * @author fupf
  */
-public class Result<T> implements Serializable {
+public class Result<T> implements java.io.Serializable {
+
     private static final long serialVersionUID = -2804195259517755050L;
     public static final Result<Void> SUCCESS = new SuccessResult();
 
@@ -19,7 +19,7 @@ public class Result<T> implements Serializable {
     private String msg; // 返回信息
     private T data; // 结果数据
 
-    // -----------------------constructor method
+    // -----------------------constructor methods
     public Result() {} // code is null
 
     public Result(int code, String msg) {
@@ -32,7 +32,7 @@ public class Result<T> implements Serializable {
         this.data = data;
     }
 
-    // -----------------------------static method
+    // -----------------------------static methods/success methods
     public static Result<Void> success() {
         return SUCCESS;
     }
@@ -45,6 +45,7 @@ public class Result<T> implements Serializable {
         return new Result<>(SUCCESS.getCode(), msg, data);
     }
 
+    // -----------------------------static methods/failure methods
     public static <T> Result<T> failure(Enum<?> e) {
         int code = (int) Fields.get(e, "code");
         String msg = (String) Fields.get(e, "msg");
@@ -66,7 +67,7 @@ public class Result<T> implements Serializable {
         return new Result<>(code, msg, data);
     }
 
-    // -----------------------------get/set method
+    // -----------------------------getter/setter methods
     public int getCode() {
         return code;
     }

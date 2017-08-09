@@ -34,6 +34,7 @@ import code.ponfee.commons.util.ObjectUtils;
  */
 public class FieldConstraint {
 
+    static final int MAX_MSG_SIZE = 2000;
     private static final String CFG_ERR = "约束配置错误[";
     private static final String EMPTY = "";
     private static final Lock LOCK = new ReentrantLock();
@@ -98,7 +99,9 @@ public class FieldConstraint {
         }
 
         // 配置非法
-        if (!result.flag) throw new UnsupportedOperationException(result.msg);
+        if (!result.flag) {
+            throw new UnsupportedOperationException(result.msg);
+        }
 
         // 配置合法
         String error = verifyValue(field, value, cst);

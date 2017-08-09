@@ -1,6 +1,9 @@
 package code.ponfee.commons.constrain;
 
+import static code.ponfee.commons.model.ResultCode.ILLEGAL_ARGUMENTS;
+
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -10,11 +13,12 @@ import org.slf4j.LoggerFactory;
 
 import code.ponfee.commons.exception.ExceptionTracker;
 import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * <pre>
  * 方法参数校验：拦截参数中包含@ConstrainParam注解的方法
- *  `@Around(value = "execution(public * cn.xxx.service.impl.*Impl.*(@code.ponfee.commons.constrain.ConstrainParam (*)))")
+ *  `@Around(value = "execution(public * code.ponfee.xxx.service.impl.*Impl.*(@code.ponfee.commons.constrain.ConstrainParam (*)))")
  *  public Object constrain(ProceedingJoinPoint joinPoint) throws Throwable {
  *      return new ParameterConstraint().constrain(joinPoint);
  *  }
@@ -23,6 +27,7 @@ import code.ponfee.commons.reflect.ClassUtils;
  * @author fupf
  */
 public class ParamsConstraint extends FieldConstraint {
+
     private static Logger logger = LoggerFactory.getLogger(ParamsConstraint.class);
 
     /**
@@ -33,18 +38,20 @@ public class ParamsConstraint extends FieldConstraint {
      */
     public Object constrain(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
-        if (args == null || args.length == 0) return joinPoint.proceed();
+        if (args == null || args.length == 0) {
+            return joinPoint.proceed();
+        }
 
         // 参数校验
         StringBuilder builder = new StringBuilder();
         String[] argsName = null;
         Method method = null;
+        String methodSign = null;
         try {
             // 缓存方法参数名
             MethodSignature mSign = (MethodSignature) joinPoint.getSignature();
             method = joinPoint.getTarget().getClass().getMethod(mSign.getName(), mSign.getParameterTypes());
-
-            String methodSign = ClassUtils.getMethodSignature(method);
+            methodSign = ClassUtils.getMethodSignature(method);
             argsName = METHOD_SIGN_CACHE.get(methodSign);
             if (argsName == null) {
                 argsName = ClassUtils.getMethodParamNames(method);
@@ -71,20 +78,35 @@ public class ParamsConstraint extends FieldConstraint {
             builder.append(ExceptionTracker.peekStackTrace(e));
         }
 
-        // verify result
-        if (builder.length() > 0) {
-            if (builder.length() > 3000) {
-                builder.setLength(2997);
+        if (builder.length() == 0) { // 校验成功
+            return joinPoint.proceed();
+        } else { // 校验失败，不调用方法，进入失败处理
+            if (builder.length() > MAX_MSG_SIZE) {
+                builder.setLength(MAX_MSG_SIZE - 3);
                 builder.append("...");
             }
             String errMsg = builder.toString();
-            try {
-                return method.getReturnType().getConstructor(int.class, String.class).newInstance(-9999, errMsg);
-            } catch (Exception e) {
-                throw new IllegalArgumentException(errMsg);
+            if (logger.isInfoEnabled()) {
+                logger.info("[参数校验失败]-[{}]-{}-[{}]", methodSign, ObjectUtils.toString(args), errMsg);
             }
-        } else {
-            return joinPoint.proceed();
+
+            return returnFailed(method, errMsg);
+        }
+    }
+
+    /**
+     * 参数验证错误时返回数据处理<p>
+     * 子类可覆盖此方法来自定义返回<p>
+     * @param method  验证的目标方法
+     * @param errMsg  错误信息
+     * @return
+     */
+    protected Object returnFailed(Method method, String errMsg) {
+        try {
+            Constructor<?> c = method.getReturnType().getConstructor(int.class, String.class);
+            return c.newInstance(ILLEGAL_ARGUMENTS.getCode(), ILLEGAL_ARGUMENTS.getMsg() + ": " + errMsg);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(errMsg);
         }
     }
 }

@@ -17,9 +17,9 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.reflect.Fields;
+import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * <pre>
@@ -30,7 +30,7 @@ import code.ponfee.commons.reflect.Fields;
  *        `@Component
  *        `@Aspect
  *        public class TestMethodValidator extends MethodConstraint {
- *            `@Around(value = "execution(public * com.xxx.service.impl.*Impl.*(..)) && `@annotation(cst)", argNames = "pjp,cst")
+ *            `@Around(value = "execution(public * code.ponfee.xxx.service.impl.*Impl.*(..)) && `@annotation(cst)", argNames = "pjp,cst")
  *            public `@Override Object constrain(ProceedingJoinPoint pjp, Constraints cst) throws Throwable {
  *                return super.constrain(pjp, cst);
  *            }
@@ -41,6 +41,7 @@ import code.ponfee.commons.reflect.Fields;
  * @author fupf
  */
 public class MethodConstraint extends FieldConstraint {
+
     private static Logger logger = LoggerFactory.getLogger(MethodConstraint.class);
 
     /**
@@ -69,11 +70,11 @@ public class MethodConstraint extends FieldConstraint {
         StringBuilder builder = new StringBuilder();
         Class<?>[] paramTypes = method.getParameterTypes();
         Constraint cst = null;
+        String fieldName;
+        Object fieldVal;
+        Class<?> fieldType;
+        Constraint[] csts = validator.value();
         try {
-            String fieldName;
-            Object fieldVal;
-            Class<?> fieldType;
-            Constraint[] csts = validator.value();
             boolean[] argsNullable = argsNullable(args, csts);
             for (int len = csts.length, i = 0; i < len; i++) {
                 cst = csts[i];
@@ -88,8 +89,11 @@ public class MethodConstraint extends FieldConstraint {
                 } else if (fieldVal == null) {
                     // 不可为空，则抛出异常
                     String msg;
-                    if (args.length == 1) msg = "参数不能为空;";
-                    else msg = "参数{" + argsName[cst.index()] + "}不能为空;";
+                    if (args.length == 1) {
+                        msg = "参数不能为空;";
+                    } else {
+                        msg = "参数{" + argsName[cst.index()] + "}不能为空;";
+                    }
                     throw new IllegalArgumentException(msg);
                 } else if (Map.class.isInstance(fieldVal) || Dictionary.class.isInstance(fieldVal)) {
                     // 验证map对象
@@ -124,33 +128,48 @@ public class MethodConstraint extends FieldConstraint {
             builder.append("参数约束校验异常：" + e.getMessage());
         }
 
-        // 校验成功
-        if (builder.length() == 0) return joinPoint.proceed();
+        if (builder.length() == 0) { // 校验成功
+            return joinPoint.proceed(); // 调用方法
+        } else { // 校验失败，不调用方法，进入失败处理
+            if (builder.length() > MAX_MSG_SIZE) {
+                builder.setLength(MAX_MSG_SIZE - 3);
+                builder.append("...");
+            }
+            String errMsg = builder.toString();
+            if (logger.isInfoEnabled()) {
+                logger.info("[参数校验失败]-[{}]-{}-[{}]", methodSign, ObjectUtils.toString(args), errMsg);
+            }
 
-        // 校验失败
-        if (builder.length() > 3000) {
-            builder.setLength(2997);
-            builder.append("...");
+            return returnFailed(method, errMsg);
         }
-        String errMsg = builder.toString();
-        if (logger.isInfoEnabled()) {
-            logger.info("[参数校验失败]-[{}]-{}-[{}]", methodSign, Jsons.NORMAL.stringify(args), errMsg);
-        }
+    }
+
+    /**
+     * 参数验证错误时返回数据处理<p>
+     * 子类可覆盖此方法来自定义返回<p>
+     * @param method  验证的目标方法
+     * @param errMsg  错误信息
+     * @return
+     */
+    protected Object returnFailed(Method method, String errMsg) {
         try {
             Constructor<?> c = method.getReturnType().getConstructor(int.class, String.class);
-            return c.newInstance(ILLEGAL_ARGUMENTS.getCode(), ILLEGAL_ARGUMENTS.getMsg());
+            return c.newInstance(ILLEGAL_ARGUMENTS.getCode(), ILLEGAL_ARGUMENTS.getMsg() + ": " + errMsg);
         } catch (Exception e) {
             throw new IllegalArgumentException(errMsg);
         }
     }
 
+    // --------------------------------------private methods-----------------------------------
     private boolean[] argsNullable(Object[] args, Constraint[] csts) {
         Set<String> set = new HashSet<>();
         boolean[] isArgsNullable = new boolean[args.length];
         Arrays.fill(isArgsNullable, false);
         for (int i = 0; i < csts.length; i++) {
             String key = "index=" + csts[i].index() + ", field=\"" + csts[i].field() + "\"";
-            if (!set.add(key)) throw new RuntimeException("配置错误，重复校验[" + key + "]");
+            if (!set.add(key)) {
+                throw new RuntimeException("配置错误，重复校验[" + key + "]");
+            }
 
             if (csts[i].index() > args.length - 1) {
                 throw new RuntimeException("配置错误，下标超出[index=" + csts[i].index() + "]");
