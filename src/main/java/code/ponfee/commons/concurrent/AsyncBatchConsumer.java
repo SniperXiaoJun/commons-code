@@ -30,7 +30,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
     private volatile boolean isEnd = false;
 
     public AsyncBatchConsumer(RunnableFactory<T> factory) {
-        this(factory, new ThreadPoolExecutor(1, 20, 300, TimeUnit.SECONDS, 
+        this(factory, new ThreadPoolExecutor(1, 10, 300, TimeUnit.SECONDS, 
                                              new SynchronousQueue<Runnable>(), // 超过则让调用方线程处理
                                              new ThreadPoolExecutor.CallerRunsPolicy()), 
              2000, 200);

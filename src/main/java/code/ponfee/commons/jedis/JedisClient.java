@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +72,8 @@ public class JedisClient implements DisposableBean {
     public JedisClient(final GenericObjectPoolConfig poolCfg, String hosts, int timeout, Serializer serializer) {
         List<JedisShardInfo> infos = new ArrayList<>();
         for (String str : hosts.split(SEPARATOR)) {
-            if (isBlank(str)) continue;
+            if (StringUtils.isBlank(str)) continue;
+
             String name, host, port, password = null;
             String[] array = str.split(":");
             if (array.length == 2) {
@@ -89,7 +91,7 @@ public class JedisClient implements DisposableBean {
                 throw new IllegalArgumentException("invalid hosts config[" + hosts + "]");
             }
             JedisShardInfo info = new JedisShardInfo(host, Integer.parseInt(port), timeout, name);
-            if (!isBlank(password)) {
+            if (StringUtils.isNotBlank(password)) {
                 info.setPassword(password);
             }
             infos.add(info);
@@ -271,33 +273,20 @@ public class JedisClient implements DisposableBean {
         //jedis.disconnect();
     }*/
 
-    <T> byte[] serialize(T t, boolean isCompress) {
+    final <T> byte[] serialize(T t, boolean isCompress) {
         return serializer.serialize(t, isCompress);
     }
 
-    <T> byte[] serialize(T t) {
+    final <T> byte[] serialize(T t) {
         return this.serialize(t, true);
     }
 
-    <T> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
+    final <T> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
         return serializer.deserialize(data, clazz, isCompress);
     }
 
     final <T> T deserialize(byte[] data, Class<T> clazz) {
         return this.deserialize(data, clazz, true);
-    }
-
-    private static boolean isBlank(CharSequence cs) {
-        int strLen;
-        if (cs == null || (strLen = cs.length()) == 0) {
-            return true;
-        }
-        for (int i = 0; i < strLen; i++) {
-            if (!Character.isWhitespace(cs.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
     }
 
 }

@@ -1,6 +1,5 @@
 package code.ponfee.commons.util;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -16,7 +15,6 @@ import org.joda.time.format.DateTimeFormat;
 public class Dates {
 
     private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static final Date ORIGIN_DATE = toDate("2007-01-01 00:00:00", DEFAULT_DATE_FORMAT);
 
     /**
      * 简单的日期格式校验(yyyy-MM-dd HH:mm:ss)
@@ -297,8 +295,7 @@ public class Dates {
      * @return 当前周第一天
      */
     public static Date startOfWeek(Date date) {
-        return new DateTime(date).dayOfWeek().withMinimumValue()
-                                 .withTimeAtStartOfDay().toDate();
+        return new DateTime(date).dayOfWeek().withMinimumValue().withTimeAtStartOfDay().toDate();
     }
 
     /**
@@ -307,8 +304,7 @@ public class Dates {
      * @return 当前周最后一天
      */
     public static Date endOfWeek(Date date) {
-        return new DateTime(date).dayOfWeek().withMaximumValue()
-                                 .millisOfDay().withMaximumValue().toDate();
+        return new DateTime(date).dayOfWeek().withMaximumValue().millisOfDay().withMaximumValue().toDate();
     }
 
     /**
@@ -317,8 +313,7 @@ public class Dates {
      * @return 当前月的第一天
      */
     public static Date startOfMonth(Date date) {
-        return new DateTime(date).dayOfMonth().withMinimumValue()
-                                 .withTimeAtStartOfDay().toDate();
+        return new DateTime(date).dayOfMonth().withMinimumValue().withTimeAtStartOfDay().toDate();
     }
 
     /**
@@ -327,8 +322,7 @@ public class Dates {
      * @return 当前月的最后一天
      */
     public static Date endOfMonth(Date date) {
-        return new DateTime(date).dayOfMonth().withMaximumValue()
-                                 .millisOfDay().withMaximumValue().toDate();
+        return new DateTime(date).dayOfMonth().withMaximumValue().millisOfDay().withMaximumValue().toDate();
     }
 
     /**
@@ -346,8 +340,7 @@ public class Dates {
      * @return 当前年的最后一天
      */
     public static Date endOfYear(Date date) {
-        return new DateTime(date).dayOfYear().withMaximumValue()
-                                 .millisOfDay().withMaximumValue().toDate();
+        return new DateTime(date).dayOfYear().withMaximumValue().millisOfDay().withMaximumValue().toDate();
     }
 
     /**
@@ -426,87 +419,6 @@ public class Dates {
         return random(toDate(0), now());
     }
 
-    /**
-     * @param origin   最开始的周期（起点）时间
-     * @param source   待计算时间
-     * @param type     周期类型
-     * @param interval 周期数
-     * @param next     目标周期的下next个周期
-     * @return
-     */
-    public static Date[] calculateCycle(Date origin, Date source, String type, int interval, int next) {
-        if (interval < 1) {
-            throw new IllegalArgumentException("interval mus be positive number");
-        }
-        if (origin.after(source)) {
-            throw new IllegalArgumentException("end date must be after begin date");
-        }
-
-        Calendar c1 = Calendar.getInstance();
-        Calendar c2 = Calendar.getInstance();
-        c1.setTime(origin);
-        c2.setTime(source);
-        Date startDate = null;
-        int cycleNum, year;
-        Calendar tmp;
-        float days;
-        switch (type) {
-            case "weekly":
-                interval *= 7;
-            case "daily":
-                days = c2.get(Calendar.DAY_OF_YEAR) - c1.get(Calendar.DAY_OF_YEAR); // 间隔天数
-                year = c2.get(Calendar.YEAR);
-                tmp = (Calendar) c1.clone();
-                while (tmp.get(Calendar.YEAR) != year) {
-                    days += tmp.getActualMaximum(Calendar.DAY_OF_YEAR);// 得到当年的实际天数
-                    tmp.add(Calendar.YEAR, 1);
-                }
-                cycleNum = (int) Math.floor(days / interval) + next; // 上一个周期
-                c1.add(Calendar.DAY_OF_YEAR, cycleNum * interval);
-                startDate = c1.getTime();
-                c1.add(Calendar.DAY_OF_YEAR, interval);
-                break;
-            case "quarterly": // 季度
-            case "half_yearly": // 半年度
-            case "yearly": // 年度
-            case "monthly": // 月
-            case "month_once":
-                switch (type) {
-                    case "quarterly": // 季度
-                        interval *= 3;
-                        break;
-                    case "half_yearly": // 半年度
-                        interval *= 6;
-                        break;
-                    case "yearly":
-                        interval *= 12; // 年度
-                        break;
-                    default:
-                        throw new IllegalArgumentException("invalid cycle type");
-                }
-                // 间隔月数
-                int intervalMonth = (c2.get(Calendar.YEAR) - c1.get(Calendar.YEAR)) * 12 + c2.get(Calendar.MONTH) - c1.get(Calendar.MONTH);
-                cycleNum = (int) Math.floor(intervalMonth / interval);
-                tmp = (Calendar) c1.clone();
-                // 跨月问题，当前时间仍属于该周期内，则应减一个周期数，如：(2012-01-15 ~ 2012-02-14，当前时间为2012-02-14，则当前时间属于该周期，而不是下一周期)
-                tmp.add(Calendar.MONTH, cycleNum * interval);
-                if (tmp.after(c2)) cycleNum -= 1;
-                cycleNum += next; // 上一个周期
-                c1.add(Calendar.MONTH, cycleNum * interval);
-                startDate = c1.getTime(); // 本周期开始时间
-                c1.add(Calendar.MONTH, interval); // 本周期结束时间
-                break;
-            default:
-                throw new IllegalArgumentException("invalid cycle type");
-        }
-        c1.add(Calendar.MILLISECOND, -1);
-        return new Date[] { startDate, c1.getTime() };
-    }
-
-    public static Date[] calculateCycle(String type, Date source, int next) {
-        return calculateCycle(ORIGIN_DATE, source, type, 1, next);
-    }
-
     public static void main(String[] args) {
         System.out.println(isValidDate("2017-02-29", "yyyy-MM-dd"));
         System.out.println(format(startOfDay(new Date()), "yyyy-MM-dd HH:mm:ss SSS"));
@@ -522,10 +434,5 @@ public class Dates {
         System.out.println(format(currentDayOfWeek(1), "yyyy-MM-dd HH:mm:ss SSS"));
         System.out.println(format(currentDayOfMonth(15), "yyyy-MM-dd HH:mm:ss SSS"));
         System.out.println(format(currentDayOfYear(155), "yyyy-MM-dd HH:mm:ss SSS"));
-
-        System.out.println("============================================");
-        Date[] dates = calculateCycle("weekly", new Date(), -1);
-        System.out.println(format(dates[0], "yyyy-MM-dd HH:mm:ss SSS") + "  ~  " + format(dates[1], "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(toDate(0), "yyyy-MM-dd HH:mm:ss SSS"));
     }
 }

@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class ThreadPoolMailSender {
 
     private static Logger logger = LoggerFactory.getLogger(ThreadPoolMailSender.class);
-    private static final ExecutorService EXECUTOR = new ThreadPoolExecutor(5, 20, 300, TimeUnit.SECONDS, 
+    private static final ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 10, 300, TimeUnit.SECONDS, 
                                                                            new SynchronousQueue<Runnable>(), 
                                                                            new ThreadPoolExecutor.CallerRunsPolicy());
 
