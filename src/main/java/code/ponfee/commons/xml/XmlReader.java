@@ -29,7 +29,7 @@ public final class XmlReader {
         try {
             BUILDER = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            throw new XmlException("init XmlReaders failed");
+            throw new XmlException("init XmlReader failed");
         }
     }
 

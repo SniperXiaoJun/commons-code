@@ -595,16 +595,10 @@ public class HttpRequest {
          * @since 2.3.1
          */
         public static byte[] encodeBytesToBytes(byte[] source, int off, int len) {
-
             if (source == null) throw new NullPointerException("Cannot serialize a null array.");
-
-            if (off < 0) throw new IllegalArgumentException("Cannot have negative offset: "
-                + off);
-
+            if (off < 0) throw new IllegalArgumentException("Cannot have negative offset: " + off);
             if (len < 0) throw new IllegalArgumentException("Cannot have length offset: " + len);
-
-            if (off
-                + len > source.length) throw new IllegalArgumentException(String.format("Cannot have offset of %d and length of %d with array of length %d", off, len, source.length));
+            if (off + len > source.length) throw new IllegalArgumentException(String.format("Cannot have offset of %d and length of %d with array of length %d", off, len, source.length));
 
             // Bytes needed for actual encoding
             int encLen = (len / 3) * 4 + (len % 3 > 0 ? 4 : 0);
@@ -626,7 +620,9 @@ public class HttpRequest {
                 byte[] finalOut = new byte[e];
                 System.arraycopy(outBuff, 0, finalOut, 0, e);
                 return finalOut;
-            } else return outBuff;
+            } else {
+                return outBuff;
+            }
         }
     }
 
@@ -727,13 +723,19 @@ public class HttpRequest {
 
         @Override
         protected void done() throws IOException {
-            if (closeable instanceof Flushable) ((Flushable) closeable).flush();
-            if (ignoreCloseExceptions) try {
-                closeable.close();
-            } catch (IOException e) {
-                // Ignored
+            if (closeable instanceof Flushable) {
+                ((Flushable) closeable).flush();
             }
-            else closeable.close();
+
+            if (ignoreCloseExceptions) {
+                try {
+                    closeable.close();
+                } catch (IOException e) {
+                    // Ignored
+                }
+            } else {
+                closeable.close();
+            }
         }
     }
 
@@ -916,7 +918,9 @@ public class HttpRequest {
         final String baseUrl = url.toString();
         if (params == null || params.length == 0) return baseUrl;
 
-        if (params.length % 2 != 0) throw new IllegalArgumentException("Must specify an even number of parameter names/values");
+        if (params.length % 2 != 0) {
+            throw new IllegalArgumentException("Must specify an even number of parameter names/values");
+        }
 
         final StringBuilder result = new StringBuilder(baseUrl);
 
@@ -3150,7 +3154,9 @@ public class HttpRequest {
      * @return this request
      */
     public HttpRequest useProxy(final String proxyHost, final int proxyPort) {
-        if (connection != null) throw new IllegalStateException("The connection has already been created. This method must be called before reading or writing to the request.");
+        if (connection != null) {
+            throw new IllegalStateException("The connection has already been created. This method must be called before reading or writing to the request.");
+        }
 
         this.httpProxyHost = proxyHost;
         this.httpProxyPort = proxyPort;
