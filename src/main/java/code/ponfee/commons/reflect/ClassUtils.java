@@ -59,12 +59,12 @@ public final class ClassUtils {
 
         final String[] paramNames = new String[method.getParameterTypes().length];
         classReader.accept(new ClassVisitor(Opcodes.ASM5, new ClassWriter(ClassWriter.COMPUTE_MAXS)) {
-            public @Override MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+            public @Override MethodVisitor visitMethod(int access, String name, String desc, String sign, String[] ex) {
                 if (!name.equals(method.getName()) || !sameType(Type.getArgumentTypes(desc), method.getParameterTypes())) {
-                    return super.visitMethod(access, name, desc, signature, exceptions); // 方法名相同并且参数个数相同
+                    return super.visitMethod(access, name, desc, sign, ex); // 方法名相同并且参数个数相同
                 }
 
-                return new MethodVisitor(Opcodes.ASM5, cv.visitMethod(access, name, desc, signature, exceptions)) {
+                return new MethodVisitor(Opcodes.ASM5, cv.visitMethod(access, name, desc, sign, ex)) {
                     public @Override void visitLocalVariable(String name, String desc, String sign, Label start, Label end, int index) {
                         int i = index;
                         if (!Modifier.isStatic(method.getModifiers())) {
@@ -84,6 +84,8 @@ public final class ClassUtils {
 
     /**
      * 获取方法签名
+     * Method m = ObjectUtils.class.getMethod("map2array", List.class, String[].class);
+     * getMethodSignature(m) -> public static java.util.List code.ponfee.commons.util.ObjectUtils.map2array(java.util.List data, java.lang.String[] fields)
      * @param method
      * @return
      */
@@ -106,7 +108,7 @@ public final class ClassUtils {
     }
 
     /**
-     * 获取字段
+     * 获取反射字段对象
      * @param clazz
      * @param field
      * @return Filed object
@@ -223,12 +225,10 @@ public final class ClassUtils {
     }
 
     /**
-     * <p>
-     * 比较参数类型是否一致
-     * </p>
+     * 比较参数类型是否一致<p>
      * @param types asm的类型({@link Type})
      * @param clazzes java 类型({@link Class})
-     * @return
+     * @return {@code true} if the Type array each of equals the Class array
      */
     private static boolean sameType(Type[] types, Class<?>[] clazzes) {
         if (types.length != clazzes.length) return false;

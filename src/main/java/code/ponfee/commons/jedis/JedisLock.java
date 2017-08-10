@@ -1,6 +1,5 @@
 package code.ponfee.commons.jedis;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -58,7 +57,7 @@ import redis.clients.jedis.Transaction;
  * 使用redis transaction功能实现
  * @author fupf
  */
-public class JedisLock implements Lock, Serializable {
+public class JedisLock implements Lock, java.io.Serializable {
 
     private static final long serialVersionUID = -6209919116306827731L;
     private static Logger logger = LoggerFactory.getLogger(JedisLock.class);
@@ -109,10 +108,10 @@ public class JedisLock implements Lock, Serializable {
      * 等待锁直到获取
      */
     public @Override void lock() {
-        while (true) {
+        for (;;) {
             if (tryLock()) break;
             try {
-                Thread.sleep(sleepMillis);
+                TimeUnit.MILLISECONDS.sleep(sleepMillis);
             } catch (InterruptedException e) {
                 logger.error("jedis lock interrupted exception", e);
             }
@@ -128,7 +127,7 @@ public class JedisLock implements Lock, Serializable {
                 throw new InterruptedException();
             }
             if (tryLock()) break;
-            Thread.sleep(sleepMillis);
+            TimeUnit.MILLISECONDS.sleep(sleepMillis);
         }
     }
 
@@ -181,7 +180,7 @@ public class JedisLock implements Lock, Serializable {
             if (Thread.interrupted()) throw new InterruptedException();
             if (System.nanoTime() - startTime > timeout) return false; // 等待超时则返回
             if (tryLock()) return true;
-            Thread.sleep(sleepMillis);
+            TimeUnit.MILLISECONDS.sleep(sleepMillis);
         }
     }
 

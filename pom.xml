@@ -457,6 +457,7 @@
                     <!-- <debug>true</debug>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>false</showWarnings> -->
+                    <compilerArgument>-parameters</compilerArgument>
                     <compilerArguments>
                         <!-- <verbose /> -->
                         <!-- windows用;分隔，linux用:分隔 -->

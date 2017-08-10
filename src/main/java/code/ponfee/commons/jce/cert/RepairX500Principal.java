@@ -36,7 +36,7 @@ public class RepairX500Principal implements Principal {
         StringBuilder sb = null;
         if (preLen(0x30) == input.available()) {
             sb = new StringBuilder();
-            while (true) {
+            for (;;) {
                 if (preLen(0x31) == 0) break;
                 if (preLen(0x30) == 0) break;
                 int len = preLen(0x06);

@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+//@Repeatable(Constraints.class)
 public @interface Constraint {
 
     /**
