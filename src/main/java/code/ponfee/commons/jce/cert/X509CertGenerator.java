@@ -26,7 +26,6 @@ import sun.security.x509.CertificateValidity;
 import sun.security.x509.CertificateVersion;
 import sun.security.x509.CertificateX509Key;
 import sun.security.x509.ExtendedKeyUsageExtension;
-import sun.security.x509.Extension;
 import sun.security.x509.KeyUsageExtension;
 import sun.security.x509.X500Name;
 import sun.security.x509.X509CertImpl;
@@ -36,12 +35,13 @@ import sun.security.x509.X509CertInfo;
  * 证书生成工具类
  * @author fupf
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({ "restriction", "deprecation" })
 public class X509CertGenerator {
 
     // ------------------------create root ca cert of self sign -----------------------------
     public static X509Certificate createRootCert(String issuer, RSASignAlgorithm sigAlg,
-        PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
+        PrivateKey privateKey, PublicKey publicKey,
+        Date notBefore, Date notAfter) {
         return createRootCert(null, issuer, sigAlg, privateKey, publicKey, notBefore, notAfter);
     }
 
@@ -57,7 +57,8 @@ public class X509CertGenerator {
      * @return
      */
     public static X509Certificate createRootCert(Integer sn, String issuer, RSASignAlgorithm sigAlg,
-        PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
+        PrivateKey privateKey, PublicKey publicKey,
+        Date notBefore, Date notAfter) {
         PKCS10 pkcs10 = createPkcs10(issuer, privateKey, publicKey, sigAlg);
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(true));
         return signSelf(privateKey, sigAlg, certInfo);
@@ -83,7 +84,8 @@ public class X509CertGenerator {
      * @return
      */
     public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, Integer sn,
-        String subject, RSASignAlgorithm sigAlg, PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
+        String subject, RSASignAlgorithm sigAlg, PrivateKey privateKey,
+        PublicKey publicKey, Date notBefore, Date notAfter) {
         PKCS10 pkcs10 = createPkcs10(subject, privateKey, publicKey, sigAlg);
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(false));
         return signCert(caCert, caKey, certInfo);
@@ -104,8 +106,8 @@ public class X509CertGenerator {
      * @param notAfter
      * @return
      */
-    public static X509Certificate createSubjectCert(X509Certificate caCert,
-        PrivateKey caKey, Integer sn, PKCS10 pkcs10, Date notBefore, Date notAfter) {
+    public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, Integer sn,
+        PKCS10 pkcs10, Date notBefore, Date notAfter) {
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(false));
         return signCert(caCert, caKey, certInfo);
     }
@@ -119,7 +121,8 @@ public class X509CertGenerator {
      * @param sigAlg
      * @return
      */
-    public static PKCS10 createPkcs10(String subject, PrivateKey privateKey, PublicKey publicKey, RSASignAlgorithm sigAlg) {
+    public static PKCS10 createPkcs10(String subject, PrivateKey privateKey,
+        PublicKey publicKey, RSASignAlgorithm sigAlg) {
         try {
             PKCS10 pkcs10 = new PKCS10(publicKey);
             Signature signature = Signature.getInstance(sigAlg.name());
@@ -139,18 +142,18 @@ public class X509CertGenerator {
     public static CertificateExtensions createExtensions(boolean isCA) {
         try {
             CertificateExtensions extensions = new CertificateExtensions();
-            byte[] userData = null;
+            //byte[] userData = null;
 
             // 密钥用法
             KeyUsageExtension keyUsage = new KeyUsageExtension();
             keyUsage.set(KeyUsageExtension.DIGITAL_SIGNATURE, true);
             if (isCA) {
-                userData = "Digital Signature, Certificate Signing, Off-line CRL Signing, CRL Signing (86)".getBytes();
+                //userData = "Digital Signature, Certificate Signing, Off-line CRL Signing, CRL Signing (86)".getBytes();
 
                 keyUsage.set(KeyUsageExtension.KEY_CERTSIGN, true);
                 keyUsage.set(KeyUsageExtension.CRL_SIGN, true);
             } else {
-                userData = "Digital Signature, Data Encipherment (90)".getBytes();
+                //userData = "Digital Signature, Data Encipherment (90)".getBytes();
 
                 //keyUsage.set(KeyUsageExtension.KEY_ENCIPHERMENT, true);
                 keyUsage.set(KeyUsageExtension.DATA_ENCIPHERMENT, true);
@@ -163,9 +166,10 @@ public class X509CertGenerator {
             extensions.set(KeyUsageExtension.NAME, keyUsage);
 
             // 版本号：v1、v2、v3，此扩展信息必须是v3版本，生成一个extension对象参数分别为oid，是否关键扩展，byte[]型的内容值
-            ObjectIdentifier oid = new ObjectIdentifier(new int[] { 1, 22 }); // 扩展域:第1位最大为2，第2位最大为39，后续不明
-            userData = ObjectUtils.concat(new byte[] { 0x04, (byte) userData.length }, userData); // flag,data length, data
-            extensions.set("UserData", new Extension(oid, true, userData));
+            //ObjectIdentifier oid = new ObjectIdentifier(new int[] { 1, 22 }); // 扩展域:第1位最大为2，第2位最大为39，后续不明
+            //userData = ObjectUtils.concat(new byte[] { 0x04, (byte) userData.length }, userData); // flag,data length, data
+            // PKCS7Signature验证签名会报错：java.security.SignatureException: Certificate has unsupported critical extension(s)
+            //extensions.set("UserData", new sun.security.x509.Extension(oid, true, userData)); 
 
             return extensions;
         } catch (IOException e) {

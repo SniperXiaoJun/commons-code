@@ -1,5 +1,8 @@
 package code.ponfee.commons.util;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -434,5 +437,10 @@ public class Dates {
         System.out.println(format(currentDayOfWeek(1), "yyyy-MM-dd HH:mm:ss SSS"));
         System.out.println(format(currentDayOfMonth(15), "yyyy-MM-dd HH:mm:ss SSS"));
         System.out.println(format(currentDayOfYear(155), "yyyy-MM-dd HH:mm:ss SSS"));
+
+        System.out.println(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+        System.out.println(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        System.out.println(ZonedDateTime.now().format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
+        System.out.println(Dates.format(now(), "yyyy-MM-dd'T'HH:mm:ss.SSS"));
     }
 }

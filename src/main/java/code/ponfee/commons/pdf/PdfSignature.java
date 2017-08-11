@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.Calendar;
 
 import com.itextpdf.text.BadElementException;
@@ -12,64 +13,61 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfSignatureAppearance.RenderingMode;
-
-import code.ponfee.commons.util.ImageUtils;
-
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.security.BouncyCastleDigest;
+import com.itextpdf.text.pdf.security.ExternalSignature;
+import com.itextpdf.text.pdf.security.MakeSignature;
+import com.itextpdf.text.pdf.security.MakeSignature.CryptoStandard;
+import com.itextpdf.text.pdf.security.PrivateKeySignature;
+
+import code.ponfee.commons.util.ImageUtils;
+import sun.security.x509.AlgorithmId;
 
 /**
  * pdf签章
  * @author fupf
  */
+@SuppressWarnings("restriction")
 public class PdfSignature {
 
     public static final float SIGN_AREA_RATE = 0.8f;
 
     /**
      * 对pdf签名
-     * @param pdf
-     * @param stamp
-     * @param signer
-     * @return
+     * @param pdf    pdf文档数据流
+     * @param stamp  签章图片信息 {@link Stamp}
+     * @param signer 签名人信息 {@link Signer}
+     * @return byte[]  the signed pdf byte array data
      */
     public static byte[] sign(byte[] pdf, Stamp stamp, Signer signer) {
         PdfReader reader = null;
-        PdfStamper stp = null;
+        PdfStamper stamper = null;
         try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream(1024 * 1024);
+            ByteArrayOutputStream out = new ByteArrayOutputStream(8192);
             reader = new PdfReader(pdf);
+            stamper = PdfStamper.createSignature(reader, out, '\0', null, true); // 最后一个参数为true，允许对同一文档多次签名
 
-            //stp = PdfStamper.createSignature(reader, out, '\0');
-            stp = PdfStamper.createSignature(reader, out, '\0', null, true); // 最后一个参数为true，允许对同一文档多次签名
+            Calendar calendar = Calendar.getInstance();
+            PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
+            //appearance.setReason("");appearance.setLocation("");appearance.setContact("");
+            String fieldName = String.valueOf(calendar.getTimeInMillis());
+            appearance.setVisibleSignature(calcRectangle(signer.getImage(), stamp), stamp.getPageNo(), fieldName);
 
-            PdfSignatureAppearance sap = stp.getSignatureAppearance();
-            sap.setCrypto(signer.getPriKey(), signer.getCertChain(), null, PdfSignatureAppearance.VERISIGN_SIGNED);
-            //sap.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);
-            sap.setCertificationLevel(PdfSignatureAppearance.NOT_CERTIFIED);
-            /*sap.setReason("");
-            sap.setLocation("");
-            sap.setContact("");
-            sap.setProvider("");*/
+            appearance.setSignDate(calendar); // 设置签名时间为当前日期
+            appearance.setSignatureGraphic(signer.getImage());
+            appearance.setCertificationLevel(PdfSignatureAppearance.NOT_CERTIFIED);
+            appearance.setRenderingMode(RenderingMode.GRAPHIC);
 
-            Image image = signer.getImage();
-            sap.setSignDate(Calendar.getInstance()); // 设置签名时间为当前日期
-            sap.setSignatureGraphic(image);
-            sap.setAcro6Layers(true);
-            sap.setRenderingMode(RenderingMode.GRAPHIC);
-            String flag = "pdf seal[" + System.nanoTime() + "]";
-            /*Rectangle mediabox = reader.getPageSize(stamp.getPageNum());
-            float bottom = stamp.getTop() - image.getHeight();
-            float top = mediabox.getTop() - stamp.getTop();
-            float bottom = top - image.getHeight();*/
+            String signAlg = ((X509Certificate) signer.getCertChain()[0]).getSigAlgName();
+            ExternalSignature signature = new PrivateKeySignature(signer.getPriKey(), AlgorithmId.getDigAlgFromSigAlg(signAlg), null);
 
-            float urx = stamp.getLeft() + image.getWidth() * SIGN_AREA_RATE;
-            float ury = stamp.getBottom() + image.getTop() * SIGN_AREA_RATE;
-            Rectangle rectangle = new Rectangle(stamp.getLeft(), stamp.getBottom(), urx, ury);
-            sap.setVisibleSignature(rectangle, stamp.getPageNum(), flag);
-            PdfWriter writer = stp.getWriter();
-            stp.close();
-            stp = null;
+            MakeSignature.signDetached(appearance, new BouncyCastleDigest(), signature, 
+                                       signer.getCertChain(), null, null, null, 0, CryptoStandard.CMS);
+
+            PdfWriter writer = stamper.getWriter();
+            stamper.close();
+            stamper = null;
             writer.setCompressionLevel(5);
             writer.flush();
             out.flush();
@@ -82,8 +80,8 @@ public class PdfSignature {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            if (stp != null) try {
-                stp.close();
+            if (stamper != null) try {
+                stamper.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -91,7 +89,7 @@ public class PdfSignature {
     }
 
     /**
-     * 签多次
+     * 多次签章
      * @param pdf
      * @param stamps
      * @param signer
@@ -107,37 +105,46 @@ public class PdfSignature {
     }
 
     /**
+     * 计算签名位置
+     * @param image
+     * @param stamp
+     * @return
+     */
+    private static Rectangle calcRectangle(Image image, Stamp stamp) {
+        float urx = stamp.getLeft() + image.getWidth() * SIGN_AREA_RATE;
+        float ury = stamp.getBottom() + image.getTop() * SIGN_AREA_RATE;
+        Rectangle rectangle = new Rectangle(stamp.getLeft(), stamp.getBottom(), urx, ury);
+        return rectangle;
+    }
+
+    /**
      * 印章相关信息
      */
-    public static class Stamp {
+    public static class Stamp implements java.io.Serializable {
+        private static final long serialVersionUID = -6348664154098224106L;
 
-        private float left;
-        private float bottom;
-        private int pageNum;
+        private final int pageNo;
+        private final float left;
+        private final float bottom;
+
+        public Stamp(int pageNo, float left, float bottom) {
+            this.pageNo = pageNo;
+            this.left = left;
+            this.bottom = bottom;
+        }
+
+        public int getPageNo() {
+            return pageNo;
+        }
 
         public float getLeft() {
             return left;
-        }
-
-        public void setLeft(float left) {
-            this.left = left;
-        }
-
-        public int getPageNum() {
-            return pageNum;
-        }
-
-        public void setPageNum(int pageNum) {
-            this.pageNum = pageNum;
         }
 
         public float getBottom() {
             return bottom;
         }
 
-        public void setBottom(float bottom) {
-            this.bottom = bottom;
-        }
     }
 
     /**

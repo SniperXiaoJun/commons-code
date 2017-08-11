@@ -14,12 +14,12 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public final class EncryptorBuilder {
 
-    private Algorithm algorithm;
-    private byte[] key;
-    private Mode mode;
-    private Padding padding;
-    private IvParameterSpec iv;
-    private Provider provider;
+    private Algorithm algorithm; // 加密算法
+    private byte[] key; // 密钥
+    private Mode mode; // 分组加密模式
+    private Padding padding; // 填充
+    private IvParameterSpec iv; // 填充向量
+    private Provider provider; // 加密服务提供方
 
     private EncryptorBuilder() {};
 

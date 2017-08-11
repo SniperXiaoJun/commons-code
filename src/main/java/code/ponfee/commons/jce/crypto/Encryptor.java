@@ -49,7 +49,8 @@ public class Encryptor {
     /** 密钥 */
     private final SecretKey secretKey;
 
-    protected Encryptor(SecretKey secretKey, Mode mode, Padding padding, AlgorithmParameterSpec parameter, Provider provider) {
+    protected Encryptor(SecretKey secretKey, Mode mode, Padding padding, 
+                        AlgorithmParameterSpec parameter, Provider provider) {
         this.secretKey = secretKey;
         this.mode = mode;
         this.padding = padding;

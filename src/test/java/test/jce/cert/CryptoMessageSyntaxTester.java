@@ -39,8 +39,8 @@ public class CryptoMessageSyntaxTester {
         //System.out.println(new String(unveloped));
         System.out.println("===============================================");
     }
-    
-    public @Test void testSign() throws Exception {
+
+    public @Test void testCMSSign() throws Exception {
         KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.PKCS12, new FileInputStream("d:/test/subject.pfx"), "123456");
         X509Certificate[] certChain = resolver.getX509CertChain();
         PrivateKey privateKey = resolver.getPrivateKey("123456");
@@ -49,10 +49,10 @@ public class CryptoMessageSyntaxTester {
         byte[] signed = CryptoMessageSyntax.sign(data, privateKey, certChain);
         System.out.println("signed len------------" + signed.length);
         CryptoMessageSyntax.verify(signed);
+        PKCS7Signature.verify(signed);
     }
-    
-    
-    public @Test void testSign2() throws Exception {
+
+    public @Test void testPKCS7Sign() throws Exception {
         KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.PKCS12, new FileInputStream("d:/test/cas_test.pfx"), "1234");
         X509Certificate[] certChain = resolver.getX509CertChain();
         PrivateKey privateKey = resolver.getPrivateKey("1234");
@@ -60,6 +60,7 @@ public class CryptoMessageSyntaxTester {
         System.out.println("origin len------------" + data.length);
         byte[] signed = PKCS7Signature.sign(privateKey, certChain[0], data, true);
         System.out.println("signed len------------" + signed.length);
+        CryptoMessageSyntax.verify(signed);
         PKCS7Signature.verify(signed);
     }
 

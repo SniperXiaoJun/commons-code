@@ -20,7 +20,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.Certificate;
+//import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
@@ -39,6 +40,7 @@ import code.ponfee.commons.util.Bytes;
  * 证书工具类
  * @author fupf
  */
+@SuppressWarnings({ "deprecation" })
 public class X509CertUtils {
 
     private static Logger logger = LoggerFactory.getLogger(X509CertUtils.class);
@@ -66,7 +68,8 @@ public class X509CertUtils {
                 }
                 input = new ASN1InputStream(new ByteArrayInputStream(bytes));
                 ASN1Sequence seq = (ASN1Sequence) input.readObject();
-                X509CertificateStructure struct = new X509CertificateStructure(seq);
+                //X509CertificateStructure struct = new X509CertificateStructure(seq); // bcmail-jdk16
+                Certificate struct = Certificate.getInstance(seq); // bcmail-jdk15on
 
                 // JDK1.5可以运行，并且可以获取SM2 publicKey
                 // JDK1.6不行：Unknown named curve: 1.2.156.10197.1.301
@@ -197,7 +200,8 @@ public class X509CertUtils {
         byte[] bytes = cert.getExtensionValue(oid);
         String reuslt = null;
         if (null != bytes && bytes.length > 0) {
-            /* String result = new String(bytes); if (result.charAt(0) == 12) result = result.substring(2); */
+            //String result = new String(bytes); 
+            //if (result.charAt(0) == 12) result = result.substring(2);
             String value = new String(bytes);
             reuslt = value.substring(4, value.length());
         }
@@ -313,7 +317,7 @@ public class X509CertUtils {
             CMSSignedData cms = new CMSSignedData(p7bytes);
             result.put("content", cms.getSignedContent().getContent()); // 原文
 
-            Store certStore = cms.getCertificates();
+            Store<?> certStore = cms.getCertificates();
             SignerInformationStore signerStore = cms.getSignerInfos();
             Collection<SignerInformation> signers = signerStore.getSigners();
             //List<X509CertificateObject> certs = new ArrayList<X509CertificateObject>(); // 报错
@@ -321,7 +325,8 @@ public class X509CertUtils {
             int i = 0;
             for (SignerInformation signer : signers) {
                 Collection<X509CertificateHolder> certChain = certStore.getMatches(signer.getSID());
-                X509CertificateStructure cert = certChain.iterator().next().toASN1Structure();
+                //X509CertificateStructure cert = certChain.iterator().next().toASN1Structure(); // bcmail-jdk16
+                Certificate cert = certChain.iterator().next().toASN1Structure(); // bcmail-jdk15on
                 certs[i++] = new X509CertificateObject(cert);
             }
             result.put("certs", certs);

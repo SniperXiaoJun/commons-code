@@ -43,6 +43,7 @@ import org.bouncycastle.util.Store;;
  */
 public final class CryptoMessageSyntax {
 
+    // -----------------------------------------sign/verify----------------------------------
     /**
      * 附原文签名（单人）
      * @param data
@@ -64,14 +65,16 @@ public final class CryptoMessageSyntax {
     public static byte[] sign(byte[] data, List<PrivateKey> keys, List<X509Certificate[]> certs) {
         try {
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+            DigestCalculatorProvider dcp = new JcaDigestCalculatorProviderBuilder().setProvider(BC.get()).build();
             for (int i = 0; i < keys.size(); i++) {
                 gen.addCertificates(new JcaCertStore(Arrays.asList(certs.get(i))));
-                ContentSigner signer = new JcaContentSignerBuilder(certs.get(i)[0].getSigAlgName()).setProvider(BC.get()).build(keys.get(i));
-                DigestCalculatorProvider provider = new JcaDigestCalculatorProviderBuilder().setProvider(BC.get()).build();
-                gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(provider).build(signer, certs.get(i)[0]));
+
+                ContentSigner signer = new JcaContentSignerBuilder(certs.get(i)[0].getSigAlgName())
+                                                         .setProvider(BC.get()).build(keys.get(i));
+                JcaSignerInfoGeneratorBuilder jsBuilder = new JcaSignerInfoGeneratorBuilder(dcp);
+                gen.addSignerInfoGenerator(jsBuilder.build(signer, certs.get(i)[0]));
             }
-            CMSSignedData sigData = gen.generate(new CMSProcessableByteArray(data), true);
-            return sigData.getEncoded();
+            return gen.generate(new CMSProcessableByteArray(data), true).getEncoded(); // true附原文
         } catch (OperatorCreationException | CertificateEncodingException | CMSException | IOException e) {
             throw new SecurityException(e);
         }
@@ -85,10 +88,10 @@ public final class CryptoMessageSyntax {
     public static void verify(byte[] signed) {
         try {
             CMSSignedData sign = new CMSSignedData(signed); // 构建PKCS#7签名数据处理对象
-            Store store = sign.getCertificates();
+            Store<?> store = sign.getCertificates();
             for (Iterator<?> iter = sign.getSignerInfos().getSigners().iterator(); iter.hasNext();) {
                 SignerInformation signer = (SignerInformation) iter.next();
-                Collection<?> certChain = store.getMatches(signer.getSID()); // 证书链
+                @SuppressWarnings("unchecked") Collection<?> certChain = store.getMatches(signer.getSID()); // 证书链
                 X509CertificateHolder cert = (X509CertificateHolder) certChain.iterator().next();
                 if (!signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC.get()).build(cert))) {
                     String certSN = cert.getSerialNumber().toString(16);
@@ -101,6 +104,7 @@ public final class CryptoMessageSyntax {
         }
     }
 
+    // -----------------------------------------envelop/unenvelop----------------------------------
     /**
      * 构造数字信封
      * PKCSObjectIdentifiers.des_EDE3_CBC
@@ -122,7 +126,7 @@ public final class CryptoMessageSyntax {
             edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(cert).setProvider(BC.get()));
             CMSEnvelopedData ed = edGen.generate(msg, new JceCMSContentEncryptorBuilder(alg).setProvider(BC.get()).build());
             return ed.getEncoded();
-        } catch (OperatorCreationException | CertificateEncodingException | CMSException | IOException e) {
+        } catch (CertificateEncodingException | CMSException | IOException e) {
             throw new SecurityException(e);
         }
     }

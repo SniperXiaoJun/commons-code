@@ -29,13 +29,13 @@ import code.ponfee.commons.util.Dates;
 public class KeyStoreResolverTester {
 
     public @Test void testLoad() {
-        KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.PKCS12, ResourceLoaderFacade.getResource("/cas_test.pfx").getStream(), "1234");
+        KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.PKCS12, ResourceLoaderFacade.getResource("cas_test.pfx").getStream(), "1234");
         String alias = resolver.listAlias().get(0);
         _test((RSAPrivateKey)resolver.getPrivateKey(alias, "1234"), (RSAPublicKey)resolver.getPublicKey(alias));
     }
 
     public @Test void testCreateCert() throws Exception {
-        Date before = Dates.toDate("2017-03-01 00:00:00"), after = Dates.toDate("2017-08-01 00:00:00");
+        Date before = Dates.toDate("2017-03-01 00:00:00"), after = Dates.toDate("2027-08-01 00:00:00");
         RSAKeyPair p1 = RSACryptor.genRSAKeyPair(2048), p2 = RSACryptor.genRSAKeyPair(2048);
         RSASignAlgorithm alg = RSASignAlgorithm.SHA1withRSA;
         String caPwd = "1234", subjectPwd = "123456";
@@ -80,7 +80,7 @@ public class KeyStoreResolverTester {
         try {
             System.out.println("=============================加密测试==============================");
             //byte[] data = "加解密测试".getBytes();
-            byte[] data = IOUtils.toByteArray(ResourceLoaderFacade.getResource("cas_test.pfx").getStream());
+            byte[] data = IOUtils.toByteArray(ResourceLoaderFacade.getResource("2.png").getStream());
             System.out.println("加密前：");
             System.out.println(Bytes.hexDump(ArrayUtils.subarray(data, 0, 100)));
             byte[] encodedData = RSACryptor.encrypt(data, (RSAPublicKey) publicKey);
