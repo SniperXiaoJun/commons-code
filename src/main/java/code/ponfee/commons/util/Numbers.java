@@ -156,7 +156,7 @@ public final class Numbers {
      * @return
      */
     public static boolean equals(Long a, Long b) {
-        return (a == b) || (a != null && b != null && a.longValue() == b.longValue());
+        return (a == b) || (a != null && a.equals(b));
     }
 
     /**
@@ -166,7 +166,7 @@ public final class Numbers {
      * @return
      */
     public static boolean equals(Long a, Integer b) {
-        return a != null && b != null && a.longValue() == b.intValue();
+        return a != null && b != null && a.intValue() == b.intValue();
     }
 
     /**
@@ -176,7 +176,7 @@ public final class Numbers {
      * @return
      */
     public static boolean equals(Integer a, Integer b) {
-        return (a == b) || (a != null && b != null && a.intValue() == b.intValue());
+        return (a == b) || (a != null && a.equals(b));
     }
 
     /**

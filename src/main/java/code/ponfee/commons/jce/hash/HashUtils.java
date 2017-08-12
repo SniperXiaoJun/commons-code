@@ -163,6 +163,7 @@ public final class HashUtils {
             digestInput = new DigestInputStream(input, md);
             byte[] buffer = new byte[BUF_SIZE];
             while (digestInput.read(buffer) != Files.EOF) {
+                //  nothing to do
             }
             return md.digest();
         } catch (NoSuchAlgorithmException | IOException e) {

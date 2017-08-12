@@ -51,9 +51,6 @@ public class FstSerializer extends Serializer {
         byte[] data = serializer.serialize(map);
         map = serializer.deserialize(data, HashMap.class);
         System.out.println(map.getClass());
-        
-        Object obj = "fdas";
-        System.out.println((int)obj);
     }
 
 }

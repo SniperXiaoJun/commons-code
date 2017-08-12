@@ -31,12 +31,8 @@ public class DatePeriodCalculator {
      * @return
      */
     public Date[] calculate(int quantity, int next) {
-        if (quantity < 1) {
-            throw new IllegalArgumentException("quantity must be positive number");
-        }
-        if (starting.after(target)) {
-            throw new IllegalArgumentException("starting canot after target date");
-        }
+        if (quantity < 1) throw new IllegalArgumentException("quantity must be positive number");
+        if (starting.after(target)) throw new IllegalArgumentException("starting canot after target date");
 
         Calendar c1 = Calendar.getInstance();
         Calendar c2 = Calendar.getInstance();
@@ -77,7 +73,7 @@ public class DatePeriodCalculator {
                         quantity *= 12; // 年度
                         break;
                     default:
-                        throw new IllegalArgumentException("invalid cycle type");
+                        throw new IllegalArgumentException("invalid period type");
                 }
                 // 间隔月数
                 int intervalMonth = (c2.get(Calendar.YEAR) - c1.get(Calendar.YEAR)) * 12 + c2.get(Calendar.MONTH) - c1.get(Calendar.MONTH);
@@ -92,7 +88,7 @@ public class DatePeriodCalculator {
                 c1.add(Calendar.MONTH, quantity); // 本周期结束时间
                 break;
             default:
-                throw new IllegalArgumentException("invalid cycle type");
+                throw new IllegalArgumentException("invalid period type");
         }
         c1.add(Calendar.MILLISECOND, -1);
         return new Date[] { startDate, c1.getTime() };

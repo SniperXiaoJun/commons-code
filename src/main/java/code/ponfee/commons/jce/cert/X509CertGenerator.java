@@ -39,9 +39,8 @@ import sun.security.x509.X509CertInfo;
 public class X509CertGenerator {
 
     // ------------------------create root ca cert of self sign -----------------------------
-    public static X509Certificate createRootCert(String issuer, RSASignAlgorithm sigAlg,
-        PrivateKey privateKey, PublicKey publicKey,
-        Date notBefore, Date notAfter) {
+    public static X509Certificate createRootCert(String issuer, RSASignAlgorithm sigAlg, PrivateKey privateKey, 
+                                                 PublicKey publicKey,  Date notBefore, Date notAfter) {
         return createRootCert(null, issuer, sigAlg, privateKey, publicKey, notBefore, notAfter);
     }
 
@@ -57,8 +56,7 @@ public class X509CertGenerator {
      * @return
      */
     public static X509Certificate createRootCert(Integer sn, String issuer, RSASignAlgorithm sigAlg,
-        PrivateKey privateKey, PublicKey publicKey,
-        Date notBefore, Date notAfter) {
+                                                 PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
         PKCS10 pkcs10 = createPkcs10(issuer, privateKey, publicKey, sigAlg);
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(true));
         return signSelf(privateKey, sigAlg, certInfo);
