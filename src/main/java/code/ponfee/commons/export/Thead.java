@@ -1,5 +1,6 @@
 package code.ponfee.commons.export;
 
+import java.beans.Transient;
 import java.io.Serializable;
 import java.util.List;
 
@@ -47,7 +48,8 @@ public class Thead implements Serializable, Comparable<Thead> {
         return tmeta;
     }
 
-    boolean isLeaf() {
+    // -----------------------------------------------
+    @Transient boolean isLeaf() {
         return isLeaf;
     }
 
@@ -55,7 +57,7 @@ public class Thead implements Serializable, Comparable<Thead> {
         this.isLeaf = isLeaf;
     }
 
-    int getChildLeafCount() {
+    @Transient int getChildLeafCount() {
         return childLeafCount;
     }
 
@@ -63,7 +65,7 @@ public class Thead implements Serializable, Comparable<Thead> {
         this.childLeafCount = childLeafCount;
     }
 
-    int getLeftLeafCount() {
+    @Transient int getLeftLeafCount() {
         return leftLeafCount;
     }
 
@@ -71,7 +73,7 @@ public class Thead implements Serializable, Comparable<Thead> {
         this.leftLeafCount = leftLeafCount;
     }
 
-    List<Integer> getNodePath() {
+    @Transient List<Integer> getNodePath() {
         return nodePath;
     }
 
@@ -79,7 +81,7 @@ public class Thead implements Serializable, Comparable<Thead> {
         this.nodePath = nodePath;
     }
 
-    int getNodeLevel() {
+    @Transient int getNodeLevel() {
         if (nodePath == null) return 0;
         else return nodePath.size();
     }

@@ -10,8 +10,9 @@ import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.DSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.HashMap;
 import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
 
 import code.ponfee.commons.util.ObjectUtils;
 
@@ -47,12 +48,8 @@ public abstract class DSACryptor {
         SecureRandom secureRandom = new SecureRandom();
         secureRandom.setSeed(seed.getBytes());
         keygen.initialize(keySize, secureRandom);
-        KeyPair keys = keygen.genKeyPair();
-
-        Map<String, DSAKey> map = new HashMap<>(2);
-        map.put(PUBLIC_KEY, (DSAKey) keys.getPublic());
-        map.put(PRIVATE_KEY, (DSAKey) keys.getPrivate());
-        return map;
+        KeyPair pair = keygen.genKeyPair();
+        return ImmutableMap.of(PUBLIC_KEY, (DSAKey) pair.getPublic(), PRIVATE_KEY, (DSAKey) pair.getPrivate());
     }
 
     /**

@@ -49,7 +49,7 @@ public class Encryptor {
     /** 密钥 */
     private final SecretKey secretKey;
 
-    protected Encryptor(SecretKey secretKey, Mode mode, Padding padding, 
+    protected Encryptor(SecretKey secretKey, Mode mode, Padding padding,
                         AlgorithmParameterSpec parameter, Provider provider) {
         this.secretKey = secretKey;
         this.mode = mode;
@@ -66,6 +66,12 @@ public class Encryptor {
         return this.docrypt(encrypted, Cipher.DECRYPT_MODE);
     }
 
+    /**
+     * 加密解
+     * @param bytes     待加密/密文数据
+     * @param cryptMode 密码模式：1加密；2解密；
+     * @return
+     */
     private byte[] docrypt(byte[] bytes, int cryptMode) {
         StringBuilder transformation = new StringBuilder(getAlgorithm());
         if (mode != null) {
@@ -122,10 +128,9 @@ public class Encryptor {
         return bytes;
     }
 
-    
     public static void main(String[] args) {
         System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes(20)));
         System.out.println(org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(randomBytes(20)));
     }
-    
+
 }

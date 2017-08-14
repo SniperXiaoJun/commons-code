@@ -38,7 +38,8 @@ public class PBEEncryptor extends Encryptor {
     public static final String ALG_PBE_SHA1_RC2 = "PBEWithSHA1AndRC2_40";
     //public static final String ALG_PBE_MD5_3DES = "PBEWithMD5AndTripleDES"; // was wrong
 
-    private static final RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder().withinRange('!', '~').build();
+    private static final RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
+                                                               .withinRange('!', '~').build();
 
     /**
      * default key 24 character
@@ -68,7 +69,8 @@ public class PBEEncryptor extends Encryptor {
     }
 
     public PBEEncryptor(String algName, char[] pass, byte[] salt, int iterations) {
-        super(generateSecret(algName, pass), null, null, new PBEParameterSpec(salt, iterations), new SunJCE());
+        super(generateSecret(algName, pass), null, null, 
+              new PBEParameterSpec(salt, iterations), new SunJCE());
     }
 
     // --------------------------getter

@@ -7,7 +7,7 @@ import java.util.List;
  * @author fupf
  */
 public class ScriptOperations extends JedisOperations {
-    public static final String JEDIS_SCRIPT_OPS = "jedis-script-ops-9acf774bbb85429b8a3b4302ceb51313";
+    public static final String JEDIS_SCRIPT_OPS = "jedis-script-ops";
 
     ScriptOperations(JedisClient jedisClient) {
         super(jedisClient);

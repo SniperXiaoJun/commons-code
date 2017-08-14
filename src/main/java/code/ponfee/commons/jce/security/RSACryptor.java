@@ -3,6 +3,7 @@ package code.ponfee.commons.jce.security;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -13,6 +14,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 import javax.crypto.Cipher;
 
@@ -25,8 +27,11 @@ import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 
-import code.ponfee.commons.exception.UnimplementedException;
 import code.ponfee.commons.jce.RSASignAlgorithm;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
@@ -67,6 +72,7 @@ public final class RSACryptor {
         return genRSAKeyPair(1024);
     }
 
+    // ----------------------------------PRIVATE KEY-----------------------------------
     /**
      * 解析PKCS#8私钥
      * @param pkcs8PrivateKey
@@ -88,7 +94,7 @@ public final class RSACryptor {
      * @return RSAPrivateKey
      */
     public static RSAPrivateKey parseB64Pkcs8PrivateKey(String b64Pkcs8PrivateKey) {
-        return parsePkcs8PrivateKey(Bytes.base64Decode(b64Pkcs8PrivateKey));
+        return parsePkcs8PrivateKey(Base64.getDecoder().decode(b64Pkcs8PrivateKey));
     }
 
     /**
@@ -121,16 +127,68 @@ public final class RSACryptor {
      * @return RSAPrivateKey
      */
     public static RSAPrivateKey parseB64Pkcs1PrivateKey(String b64Pkcs1PrivateKey) {
-        return parsePkcs1PrivateKey(Bytes.base64Decode(b64Pkcs1PrivateKey));
+        return parsePkcs1PrivateKey(Base64.getDecoder().decode(b64Pkcs1PrivateKey));
     }
 
     /**
-     * 解析公钥
-     * @param publicKey（base64编码）
+     * 私钥base64编码（pkcs8格式）
+     * @param privateKey
+     * @return pkcs8 base64
+     */
+    public static String toB64Pkcs8Encode(RSAPrivateKey privateKey) {
+        return Base64.getEncoder().encodeToString(privateKey.getEncoded());
+    }
+
+    /**
+     * Convert private key from PKCS8 to PKCS1
+     * @param privateKey
+     * @return pkcs1 base64
+     */
+    public static String toB64Pkcs1Encode(RSAPrivateKey privateKey) {
+        return Base64.getEncoder().encodeToString(toPkcs1Encode(privateKey));
+    }
+
+    /**
+     * Convert private key from PKCS8 to PKCS1
+     * @param privateKey
+     * @return
+     */
+    public static byte[] toPkcs1Encode(RSAPrivateKey privateKey) {
+        try {
+            PrivateKeyInfo privKeyInfo = PrivateKeyInfo.getInstance(privateKey.getEncoded());
+            return privKeyInfo.parsePrivateKey().toASN1Primitive().getEncoded();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Convert private key in PKCS1 to PEM
+     * @param privateKey
+     * @return
+     */
+    public static String toPkcs1Pem(RSAPrivateKey privateKey) {
+        PemObject pemObject = new PemObject("RSA PRIVATE KEY", toPkcs1Encode(privateKey));
+        try (StringWriter stringWriter = new StringWriter(); 
+             PemWriter pemWriter = new PemWriter(stringWriter);
+        ) {
+            pemWriter.writeObject(pemObject);
+            stringWriter.flush();
+            pemWriter.flush();
+            return stringWriter.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // ----------------------------------PRIVATE KEY-----------------------------------
+    /**
+     * parse public key from base64 X509 encoded
+     * @param publicKey      base64 X509 public key encoded
      * @return RSAPublicKey
      */
-    public static RSAPublicKey parseB64PublicKey(String publicKey) {
-        byte[] keyBytes = Bytes.base64Decode(publicKey);
+    public static RSAPublicKey parseB64X509PublicKey(String publicKey) {
+        byte[] keyBytes = Base64.getDecoder().decode(publicKey);
         X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(ALG_RSA);
@@ -141,32 +199,57 @@ public final class RSACryptor {
     }
 
     /**
-     * 私钥base64编码（pkcs8格式）
-     * @param privateKey
-     * @return pkcs8 base64
-     */
-    public static String toB64Pkcs8Encode(RSAPrivateKey privateKey) {
-        return Bytes.base64Encode(privateKey.getEncoded());
-    }
-
-    /**
-     * 私钥base64编码（pkcs1格式），未实现
-     * @param privateKey
-     * @return pkcs1 base64
-     */
-    public static String toB64Pkcs1Encode(RSAPrivateKey privateKey) {
-        throw new UnimplementedException();
-    }
-
-    /**
-     * 转base64编码
+     * to X.509 SubjectPublicKeyInfo encode
      * @param publicKey
      * @return
      */
-    public static String toB64Encode(RSAPublicKey publicKey) {
-        return Bytes.base64Encode(publicKey.getEncoded());
+    public static String toB64X509Encode(RSAPublicKey publicKey) {
+        return Base64.getEncoder().encodeToString(publicKey.getEncoded());
     }
 
+    /**
+     * Convert public key from X.509 SubjectPublicKeyInfo to PKCS1
+     * @param publicKey
+     * @return
+     */
+    public static byte[] toPkcs1Encode(RSAPublicKey publicKey) {
+        try {
+            SubjectPublicKeyInfo spkInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
+            return spkInfo.parsePublicKey().getEncoded();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Convert public key from X.509 SubjectPublicKeyInfo to PKCS1
+     * @param publicKey
+     * @return
+     */
+    public static String toB64Pkcs1Encode(RSAPublicKey publicKey) {
+        return Base64.getEncoder().encodeToString(toPkcs1Encode(publicKey));
+    }
+
+    /**
+     * Convert public key in PKCS1 to PEM
+     * @param publicKey
+     * @return
+     */
+    public static String toPkcs1Pem(RSAPublicKey publicKey) {
+        PemObject pemObject = new PemObject("RSA PUBLIC KEY", toPkcs1Encode(publicKey));
+        try (StringWriter stringWriter = new StringWriter(); 
+             PemWriter pemWriter = new PemWriter(stringWriter);
+        ) {
+            pemWriter.writeObject(pemObject);
+            stringWriter.flush();
+            pemWriter.flush();
+            return stringWriter.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // ---------------------------------------sign/verify---------------------------------------
     /**
      * SHA1签名
      * @param data
@@ -335,11 +418,15 @@ public final class RSACryptor {
         }
 
         public String getB64Pkcs1PrivateKey() {
-            throw new UnimplementedException();
+            return toB64Pkcs1Encode(privateKey);
         }
 
-        public String getB64PublicKey() {
-            return toB64Encode(publicKey);
+        public String getB64X509PublicKey() {
+            return toB64X509Encode(publicKey);
+        }
+
+        public String getB64Pkcs1PublicKey() {
+            return toB64Pkcs1Encode(publicKey);
         }
     }
 
@@ -348,9 +435,14 @@ public final class RSACryptor {
         RSAKeyPair keyPair = genRSAKeyPair(512);
 
         RSAPrivateKey privateKey = keyPair.getPrivateKey();
+        String pkcs1Key = toB64Pkcs1Encode(privateKey);
+        System.out.println("--pkcs1Key: " + pkcs1Key);
+        System.out.println("--pkcs8Key: " + toB64Pkcs8Encode(privateKey));
+        privateKey = parseB64Pkcs1PrivateKey(pkcs1Key);
+
         RSAPublicKey publicKey = keyPair.getPublicKey();
         System.out.println(RSACryptor.toB64Pkcs8Encode(privateKey));
-        System.out.println(RSACryptor.toB64Encode(publicKey));
+        System.out.println(RSACryptor.toB64X509Encode(publicKey));
 
         System.out.println("=============================加密测试==============================");
         //byte[] data = "加解密测试".getBytes();

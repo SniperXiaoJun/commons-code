@@ -11,7 +11,7 @@ import redis.clients.jedis.JedisPubSub;
  * @author fupf
  */
 public class MQOperations extends JedisOperations {
-    public static final String JEDIS_MQ_OPS = "jedis-mq-ops-90f21b8728c347f4b1ca2f3a860320de";
+    public static final String JEDIS_MQ_OPS = "jedis-mq-ops";
 
     MQOperations(JedisClient jedisClient) {
         super(jedisClient);

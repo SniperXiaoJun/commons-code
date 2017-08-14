@@ -22,8 +22,6 @@ public final class Fields {
         }
     }
 
-    private Fields() {}
-
     /**
      * put field to target object
      * @param target 目标对象

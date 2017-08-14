@@ -52,11 +52,10 @@ public class ThreadPoolMailSender {
             }
         } else { // 同步发送
             CompletionService<Boolean> service = new ExecutorCompletionService<>(EXECUTOR);
-            int number = envlops.size();
             for (MailEnvelope envlop : envlops) {
                 service.submit(new Sender(mailSender, envlop));
             }
-            for (; number > 0; number--) {
+            for (int number = envlops.size(); number > 0; number--) {
                 try {
                     //future.isDone(); // 是否完成
                     if (!service.take().get()) {

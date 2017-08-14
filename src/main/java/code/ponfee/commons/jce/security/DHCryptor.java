@@ -16,14 +16,15 @@ import javax.crypto.interfaces.DHPrivateKey;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 
+import com.google.common.collect.ImmutableMap;
+
 /**
  * Diffie-Hellman加解密组件
  * 一般用于密钥交换
  */
 public abstract class DHCryptor {
     private static final String ALGORITHM = "DH";
-    /** DH加密下需要一种对称加密算法对数据加密，这里我们使用DESede，也可以使用其他对称加密算法。 */
-    private static final String SECRET_ALGORITHM = "DESede";
+    private static final String SECRET_ALGORITHM = "DESede"; // 使用3DES对称加密
     private static final String PUBLIC_KEY = "DHPublicKey";
     private static final String PRIVATE_KEY = "DHPrivateKey";
 
@@ -40,12 +41,8 @@ public abstract class DHCryptor {
     public static Map<String, DHKey> initPartAKey(int keySize) throws Exception {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
         keyPairGenerator.initialize(keySize);
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
-
-        Map<String, DHKey> keyMap = new HashMap<>(2);
-        keyMap.put(PUBLIC_KEY, (DHKey) keyPair.getPublic()); // 甲方公钥
-        keyMap.put(PRIVATE_KEY, (DHKey) keyPair.getPrivate()); // 甲方私钥
-        return keyMap;
+        KeyPair pair = keyPairGenerator.generateKeyPair();
+        return ImmutableMap.of(PUBLIC_KEY, (DHKey) pair.getPublic(), PRIVATE_KEY, (DHKey) pair.getPrivate());
     }
 
     /**
@@ -122,7 +119,7 @@ public abstract class DHCryptor {
         PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(bPriKey);
         DHPrivateKey priKey = (DHPrivateKey) keyFactory.generatePrivate(pkcs8KeySpec);
 
-        return getSecretKey(pubKey, priKey);
+        return genSecretKey(pubKey, priKey);
     }
 
     /**
@@ -132,7 +129,7 @@ public abstract class DHCryptor {
      * @return
      * @throws Exception
      */
-    public static SecretKey getSecretKey(DHPublicKey aPubKey, DHPrivateKey bPriKey) throws Exception {
+    public static SecretKey genSecretKey(DHPublicKey aPubKey, DHPrivateKey bPriKey) throws Exception {
         KeyAgreement keyAgree = KeyAgreement.getInstance(aPubKey.getAlgorithm());
         keyAgree.init(bPriKey);
         keyAgree.doPhase(aPubKey, true);
@@ -165,13 +162,13 @@ public abstract class DHCryptor {
         byte[] data = "123456".getBytes();
 
         // 乙方加密甲方解密
-        byte[] encrypted = encrypt(data, getSecretKey(getPublicKey(partA), getPrivateKey(partB)));
-        byte[] decrypted = decrypt(encrypted, getSecretKey(getPublicKey(partB), getPrivateKey(partA)));
+        byte[] encrypted = encrypt(data, genSecretKey(getPublicKey(partA), getPrivateKey(partB)));
+        byte[] decrypted = decrypt(encrypted, genSecretKey(getPublicKey(partB), getPrivateKey(partA)));
         System.out.println(new String(decrypted));
 
         // 甲方加密乙方解密
-        encrypted = encrypt(data, getSecretKey(getPublicKey(partB), getPrivateKey(partA)));
-        decrypted = decrypt(encrypted, getSecretKey(getPublicKey(partA), getPrivateKey(partB)));
+        encrypted = encrypt(data, genSecretKey(getPublicKey(partB), getPrivateKey(partA)));
+        decrypted = decrypt(encrypted, genSecretKey(getPublicKey(partA), getPrivateKey(partB)));
         System.out.println(new String(decrypted));
     }
 }
