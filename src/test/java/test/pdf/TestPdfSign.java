@@ -13,10 +13,13 @@ import code.ponfee.commons.util.Streams;
 public class TestPdfSign {
 
     public static void main(String[] args) throws IOException {
-        KeyStoreResolver r = new KeyStoreResolver(KeyStoreType.PKCS12, ResourceLoaderFacade.getResource("cas_test.pfx").getStream(), "1234");
-
+        /*String sign = "cas_test.pfx";
+        String pwd = "1234";*/
+        String sign = "subject.pfx";
+        String pwd = "123456";
+        KeyStoreResolver r = new KeyStoreResolver(KeyStoreType.PKCS12, ResourceLoaderFacade.getResource(sign).getStream(), pwd);
         byte[] img = Streams.input2bytes(ResourceLoaderFacade.getResource("2.png").getStream());
-        Signer signer = new Signer(r.getPrivateKey("1234"), r.getX509CertChain(), img);
+        Signer signer = new Signer(r.getPrivateKey(pwd), r.getX509CertChain(), img, true);
         
         Stamp stamp1 = new Stamp(1,100,250);
         Stamp stamp2 = new Stamp(1,300,250);

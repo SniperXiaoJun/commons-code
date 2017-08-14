@@ -31,8 +31,7 @@ public final class WebContext {
     private static ThreadLocal<HttpServletRequest> request = new ThreadLocal<>();
     private static ThreadLocal<HttpServletResponse> response = new ThreadLocal<>();
     private static ThreadLocal<Map<String, String[]>> custparams = new ThreadLocal<Map<String, String[]>>() {
-        @Override
-        public synchronized Map<String, String[]> initialValue() {
+        public @Override synchronized Map<String, String[]> initialValue() {
             return new HashMap<String, String[]>();
         }
     };

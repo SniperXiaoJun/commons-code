@@ -75,7 +75,9 @@ public class PdfWaterMark {
             stamper = new PdfStamper(reader, out);
             //stamper.setEncryption("user".getBytes(), "owner".getBytes(), PdfWriter.ALLOW_COPY | PdfWriter.ALLOW_PRINTING, PdfWriter.STANDARD_ENCRYPTION_40);
 
-            //BaseFont base = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED); // 设置字体
+            // 1、使用iTextAsian.jar中的字体：BaseFont.createFont("STSong-Light", "UniGB-UCS2-H",BaseFont.NOT_EMBEDDED);
+            // 2、使用Windows系统字体（TrueType）：BaseFont.createFont("C:/WINDOWS/Fonts/SIMYOU.TTF", BaseFont.IDENTITY_H,BaseFont.NOT_EMBEDDED);
+            // 3、使用资源字体（ClassPath）：BaseFont.createFont("/SIMYOU.TTF", BaseFont.IDENTITY_H,BaseFont.NOT_EMBEDDED);
             BaseFont base = BaseFont.createFont("code/ponfee/commons/pdf/aspose/simfang.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
 
             PdfGState pdfGState = new PdfGState();

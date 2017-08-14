@@ -33,12 +33,20 @@ public interface Providers {
         return provider;
     }
 
-    Providers BC =           () -> get(org.bouncycastle.jce.provider.BouncyCastleProvider.class);
-    Providers SUN_RSA_SIGN = () -> get(sun.security.rsa.SunRsaSign.class);
-    Providers SUN_JCE =      () -> get(com.sun.crypto.provider.SunJCE.class);
+    Providers BC =         () -> get(org.bouncycastle.jce.provider.BouncyCastleProvider.class);
+    Providers SUN =        () -> get(sun.security.provider.Sun.class);
+    Providers SunRsaSign = () -> get(sun.security.rsa.SunRsaSign.class);
+    Providers SunEC =      () -> get(sun.security.ec.SunEC.class);
+    Providers SunJSSE =    () -> get(com.sun.net.ssl.internal.ssl.Provider.class);
+    Providers SunJCE =     () -> get(com.sun.crypto.provider.SunJCE.class);
+    Providers SunJGSS =    () -> get(sun.security.jgss.SunProvider.class);
+    Providers SunSASL =    () -> get(com.sun.security.sasl.Provider.class);
+    Providers XMLDSig =    () -> get(org.jcp.xml.dsig.internal.dom.XMLDSigRI.class);
+    Providers SunPCSC =    () -> get(sun.security.smartcardio.SunPCSC.class);
+    Providers SunMSCAPI =  () -> get(sun.security.mscapi.SunMSCAPI.class);
 
     static final class ProvidersHolder {
-        private static final Map<Class<? extends Provider>, Provider> HOLDER = new ConcurrentHashMap<>();
+        private static final Map<Class<? extends Provider>, Provider> HOLDER = new ConcurrentHashMap<>(16);
         static {
             Provider[] providers = Security.getProviders();
             if (providers != null && providers.length > 0) {
@@ -50,10 +58,6 @@ public interface Providers {
     }
 
     public static void main(String[] args) {
-        SUN_RSA_SIGN.get();
-        SUN_RSA_SIGN.get();
-        SUN_JCE.get();
-        SUN_JCE.get();
         BC.get();
         BC.get();
     }

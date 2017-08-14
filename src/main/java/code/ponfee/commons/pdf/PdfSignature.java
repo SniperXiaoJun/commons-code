@@ -21,6 +21,7 @@ import com.itextpdf.text.pdf.security.MakeSignature;
 import com.itextpdf.text.pdf.security.MakeSignature.CryptoStandard;
 import com.itextpdf.text.pdf.security.PrivateKeySignature;
 
+import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.util.ImageUtils;
 import sun.security.x509.AlgorithmId;
 
@@ -46,7 +47,7 @@ public class PdfSignature {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream(8192);
             reader = new PdfReader(pdf);
-            stamper = PdfStamper.createSignature(reader, out, '\0', null, true); // 最后一个参数为true，允许对同一文档多次签名
+            stamper = PdfStamper.createSignature(reader, out, '\0', null, true); // true：允许对同一文档多次签名
 
             Calendar calendar = Calendar.getInstance();
             PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
@@ -60,7 +61,9 @@ public class PdfSignature {
             appearance.setRenderingMode(RenderingMode.GRAPHIC);
 
             String signAlg = ((X509Certificate) signer.getCertChain()[0]).getSigAlgName();
-            ExternalSignature signature = new PrivateKeySignature(signer.getPriKey(), AlgorithmId.getDigAlgFromSigAlg(signAlg), null);
+            String hashAlg = AlgorithmId.getDigAlgFromSigAlg(signAlg); // 获取摘要算法
+            ExternalSignature signature = new PrivateKeySignature(signer.getPriKey(), hashAlg, 
+                                                                  Providers.BC.get().getName());
 
             MakeSignature.signDetached(appearance, new BouncyCastleDigest(), signature, 
                                        signer.getCertChain(), null, null, null, 0, CryptoStandard.CMS);
@@ -113,8 +116,7 @@ public class PdfSignature {
     private static Rectangle calcRectangle(Image image, Stamp stamp) {
         float urx = stamp.getLeft() + image.getWidth() * SIGN_AREA_RATE;
         float ury = stamp.getBottom() + image.getTop() * SIGN_AREA_RATE;
-        Rectangle rectangle = new Rectangle(stamp.getLeft(), stamp.getBottom(), urx, ury);
-        return rectangle;
+        return new Rectangle(stamp.getLeft(), stamp.getBottom(), urx, ury);
     }
 
     /**
@@ -155,12 +157,12 @@ public class PdfSignature {
         private final PrivateKey priKey;
         private final Certificate[] certChain;
         private final Image image;
-        private boolean transparent = true;
 
-        public Signer(PrivateKey priKey, Certificate[] certChain, byte[] img) {
+        public Signer(PrivateKey priKey, Certificate[] certChain, 
+                      byte[] img, boolean transparent) {
             this.priKey = priKey;
             this.certChain = certChain;
-            if (transparent) {
+            if (transparent) { // 图片透明化处理
                 img = ImageUtils.transparent(img, 250, 235);
             }
             try {

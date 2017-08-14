@@ -45,9 +45,8 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         BeansException ex = null;
         for (ApplicationContext c : HOLDER) {
             try {
-                if (c.getBean(name) != null) {
-                    return c.getBean(name);
-                }
+                Object bean = c.getBean(name);
+                if (bean != null) return bean;
             } catch (BeansException e) {
                 ex = e;
             }
@@ -66,9 +65,8 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         BeansException ex = null;
         for (ApplicationContext c : HOLDER) {
             try {
-                if (c.getBean(clszz) != null) {
-                    return c.getBean(clszz);
-                }
+                T bean = c.getBean(clszz);
+                if (bean != null) return bean;
             } catch (BeansException e) {
                 ex = e;
             }
@@ -87,8 +85,9 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         BeansException ex = null;
         for (ApplicationContext c : HOLDER) {
             try {
-                if (c.getBean(clszz) != null) {
-                    return c.getBean(name, clszz);
+                T bean = c.getBean(name, clszz);
+                if (bean != null) {
+                    return bean;
                 }
             } catch (BeansException e) {
                 ex = e;
@@ -159,9 +158,8 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
     public static String[] getAliases(String name) {
         assertContextInjected();
         for (ApplicationContext c : HOLDER) {
-            if (c.getAliases(name) != null) {
-                return c.getAliases(name);
-            }
+            String[] aliases = c.getAliases(name);
+            if (aliases != null) return aliases;
         }
         return null;
     }
@@ -170,6 +168,6 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
      * 检查ApplicationContext不为空.
      */
     private static void assertContextInjected() {
-        Assert.state(HOLDER.size() > 0, "must be defined SpringContextHolder within spring xml config file.");
+        Assert.state(HOLDER.size() > 0, "must be defined SpringContextHolder within spring config file.");
     }
 }
