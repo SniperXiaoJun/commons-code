@@ -52,31 +52,10 @@ public class KeyStoreResolver {
 
     public static KeyStoreResolver loadFromPem(String pem) {
         KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.JKS);
+        // X509CertUtils.loadX509Cert(pem.getBytes())
         resolver.setCertificateEntry(HashUtils.md5Hex(pem), X509CertUtils.loadFromPem(pem));
         return resolver;
     }
-
-    /*public static KeyStoreResolver parseFromPem(String pem) {
-        try ( Reader reader = new StringReader(pem);
-              PEMParser pemParser = new PEMParser(reader);
-        ) {
-            Object pemCertObj = pemParser.readObject();
-            PemObject pemKeyObj = pemParser.readPemObject();
-    
-            PKCS8EncodedKeySpec privKeySpec = new PKCS8EncodedKeySpec(pemKeyObj.getContent());
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            PrivateKey privKey = kf.generatePrivate(privKeySpec);
-    
-            X509CertificateHolder certHolder = (X509CertificateHolder) pemCertObj;
-            X509Certificate cert = new JcaX509CertificateConverter().setProvider(Providers.BC.get().getName())
-                                                                    .getCertificate(certHolder);
-            KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.JKS);
-            resolver.setKeyEntry(HashUtils.md5Hex(pem), privKey, null, new X509Certificate[]{cert});
-            return resolver;
-        } catch (Exception e) {
-            throw new SecurityException(e);
-        }
-    }*/
 
     /**
      * 创建密钥库
@@ -129,14 +108,20 @@ public class KeyStoreResolver {
         }
     }
 
-    /*public final void setKeyEntry(String alias, byte[] key, Certificate[] chain) {
+    /**
+     * set key entry
+     * @param alias
+     * @param pkcs8Key
+     * @param chain
+     */
+    public final void setKeyEntry(String alias, byte[] pkcs8Key, Certificate[] chain) {
         try {
             checkAliasNotExists(alias);
-            this.keyStore.setKeyEntry(alias, key, chain);
+            this.keyStore.setKeyEntry(alias, pkcs8Key, chain);
         } catch (KeyStoreException e) {
             throw new SecurityException(e);
         }
-    }*/
+    }
 
     public byte[] export(String storePassword) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -201,7 +186,7 @@ public class KeyStoreResolver {
     public PublicKey getPublicKey(String alias) {
         try {
             /*if (!keyStore.isCertificateEntry(alias)) {
-                throw new SecurityException("alias[" + alias + "] is not certificate entry.");
+                throw new SecurityException(alias + " is not certificate entry.");
             }*/
             Certificate cert = keyStore.getCertificate(alias);
             return cert.getPublicKey();

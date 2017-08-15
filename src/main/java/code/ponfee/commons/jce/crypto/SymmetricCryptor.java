@@ -2,27 +2,17 @@ package code.ponfee.commons.jce.crypto;
 
 import java.security.GeneralSecurityException;
 import java.security.Provider;
-import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import code.ponfee.commons.util.ObjectUtils;
-
 /**
  * 对称加密
  * @author fupf
  */
-public class Encryptor {
-
-    /** 随机数 */
-    private static final SecureRandom RANDOM = new SecureRandom();
-    static {
-        RANDOM.setSeed(new SecureRandom(ObjectUtils.uuid32().getBytes()).generateSeed(20));
-    }
+public class SymmetricCryptor {
 
     /** 
      * 分组对称加密模式时padding不能为null 
@@ -49,7 +39,7 @@ public class Encryptor {
     /** 密钥 */
     private final SecretKey secretKey;
 
-    protected Encryptor(SecretKey secretKey, Mode mode, Padding padding,
+    protected SymmetricCryptor(SecretKey secretKey, Mode mode, Padding padding,
                         AlgorithmParameterSpec parameter, Provider provider) {
         this.secretKey = secretKey;
         this.mode = mode;
@@ -115,22 +105,6 @@ public class Encryptor {
      */
     public byte[] getParameter() {
         return ((IvParameterSpec) parameter).getIV();
-    }
-
-    /**
-     * random byte[] array by SecureRandom
-     * @param numBytes
-     * @return
-     */
-    public static byte[] randomBytes(int numBytes) {
-        byte[] bytes = new byte[numBytes];
-        RANDOM.nextBytes(bytes);
-        return bytes;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes(20)));
-        System.out.println(org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(randomBytes(20)));
     }
 
 }

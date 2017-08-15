@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Base64;
 import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
@@ -95,7 +96,7 @@ public class KeyStoreResolverTester {
             System.out.println(Bytes.hexDump(ArrayUtils.subarray(RSACryptor.decrypt(encodedData, (RSAPrivateKey) privateKey), 0, 100)));
 
             System.out.println("\n\n===========================签名测试=========================");
-            data = Bytes.base64Decode("");
+            data = Base64.getDecoder().decode("");
             byte[] signed = RSACryptor.signSha1(data, privateKey);
             String hex = Bytes.hexEncode(signed);
             System.out.println("签名结果：" + hex.length() + " --> " + hex);

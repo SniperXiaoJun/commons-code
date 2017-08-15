@@ -1,6 +1,7 @@
 package test.pdf;
 
 import java.io.FileOutputStream;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -26,7 +27,6 @@ import code.ponfee.commons.jce.pkcs.PKCS1Signature;
 import code.ponfee.commons.jce.security.KeyStoreResolver;
 import code.ponfee.commons.jce.security.KeyStoreResolver.KeyStoreType;
 import code.ponfee.commons.resource.ResourceLoaderFacade;
-import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.Streams;
 
 public class PdfP7Sign {
@@ -89,7 +89,7 @@ public class PdfP7Sign {
         PdfPKCS7 pkcs7 = new PdfPKCS7(resolver.getPrivateKey("123456"), resolver.getX509CertChain(), "SHA1", null, null, false);
         byte[] bytes = pkcs7.getAuthenticatedAttributeBytes(hash, ocsp, null, CryptoStandard.CMS);
         byte[] signed = PKCS1Signature.sign(bytes, resolver.getPrivateKey("123456"), resolver.getX509CertChain()[0]);
-        System.out.println("signed：" + Bytes.base64Encode(signed));
+        System.out.println("signed：" + Base64.getEncoder().encodeToString(signed));
         pkcs7.setExternalDigest(signed, null, "RSA");
 
         //sgn.update(sh, 0, sh.length);

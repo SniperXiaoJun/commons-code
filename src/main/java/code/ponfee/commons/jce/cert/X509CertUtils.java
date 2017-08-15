@@ -14,6 +14,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,8 +38,6 @@ import org.bouncycastle.util.Store;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import code.ponfee.commons.util.Bytes;
-
 /**
  * 证书工具类
  * @author fupf
@@ -52,7 +51,7 @@ public class X509CertUtils {
     private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     /**
-     * 根据证书二进制数据加载证书
+     * load from cert bytes or pem bytes
      * @param certBase64
      * @return
      */
@@ -123,6 +122,9 @@ public class X509CertUtils {
     }
 
     /**
+     * certpem = "-----BEGIN CERTIFICATE-----\n" +
+     *           toBase64Encoded(chain[0].getEncoded())) +
+     *           "\n-----END CERTIFICATE-----\n";
      * certificate export to pem format
      * @param cert
      * @return
@@ -261,7 +263,7 @@ public class X509CertUtils {
                 case ISSUER_DN:
                     return new X509Principal(cert.getIssuerX500Principal().getEncoded()).getName();
                 case PUBLIC_KEY:
-                    return Bytes.base64Encode(cert.getPublicKey().getEncoded());
+                    return Base64.getEncoder().encodeToString(cert.getPublicKey().getEncoded());
                 case USAGE:
                     if (cert.getKeyUsage()[0]) return "signature";
                     else if (cert.getKeyUsage()[3]) return "encipherment";
@@ -434,7 +436,7 @@ public class X509CertUtils {
                 l += stringbuffer.length();
                 inputstream.reset();
                 inputstream.skip(l);
-                return Bytes.base64Decode(stringbuffer.toString());
+                return Base64.getDecoder().decode(stringbuffer.toString());
             }
         } finally {
             if (inputstream != null) try {

@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -294,8 +295,8 @@ public final class Streams {
         byte[] b = new byte[8];
         ThreadLocalRandom.current().nextBytes(b);
         System.out.println(Bytes.hexEncode(b));
-        String b64 = Bytes.base64EncodeUrlSafe(b);
-        System.out.println(Objects.deepEquals(Bytes.base64DecodeUrlSafe(b64), b));
+        String b64 = Base64.getUrlEncoder().encodeToString(b);
+        System.out.println(Objects.deepEquals(Base64.getUrlDecoder().decode(b64), b));
 
         addBOM(new File("d:/csv.csv"));
     }

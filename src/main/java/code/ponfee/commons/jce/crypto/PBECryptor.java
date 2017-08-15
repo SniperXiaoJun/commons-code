@@ -11,6 +11,8 @@ import org.apache.commons.text.RandomStringGenerator;
 
 import com.sun.crypto.provider.SunJCE;
 
+import code.ponfee.commons.util.Bytes;
+
 /**
  * <pre>
  *  |---------------------------------------|-------------------|---------------------------|
@@ -30,7 +32,7 @@ import com.sun.crypto.provider.SunJCE;
  * @author fupf
  */
 @SuppressWarnings("restriction")
-public class PBEEncryptor extends Encryptor {
+public class PBECryptor extends SymmetricCryptor {
 
     /** 支持以下任意一种算法 */
     public static final String ALG_PBE_MD5_DES = "PBEWITHMD5andDES";
@@ -45,7 +47,7 @@ public class PBEEncryptor extends Encryptor {
      * default key 24 character
      * @param algName
      */
-    public PBEEncryptor(String algName) {
+    public PBECryptor(String algName) {
         this(algName, GENERATOR.generate(24).toCharArray());
     }
 
@@ -54,8 +56,8 @@ public class PBEEncryptor extends Encryptor {
      * @param algName
      * @param key
      */
-    public PBEEncryptor(String algName, char[] key) {
-        this(algName, key, randomBytes(24));
+    public PBECryptor(String algName, char[] key) {
+        this(algName, key, Bytes.randomBytes(24));
     }
 
     /**
@@ -64,11 +66,11 @@ public class PBEEncryptor extends Encryptor {
      * @param pass
      * @param salt
      */
-    public PBEEncryptor(String algName, char[] pass, byte[] salt) {
+    public PBECryptor(String algName, char[] pass, byte[] salt) {
         this(algName, pass, salt, 100);
     }
 
-    public PBEEncryptor(String algName, char[] pass, byte[] salt, int iterations) {
+    public PBECryptor(String algName, char[] pass, byte[] salt, int iterations) {
         super(generateSecret(algName, pass), null, null, 
               new PBEParameterSpec(salt, iterations), new SunJCE());
     }
@@ -97,14 +99,14 @@ public class PBEEncryptor extends Encryptor {
     }
 
     public static void main(String[] args) {
-        String ag = PBEEncryptor.ALG_PBE_SHA1_3DES;
+        String ag = PBECryptor.ALG_PBE_SHA1_3DES;
 
         // 加密
-        PBEEncryptor p = new PBEEncryptor(ag, "fdsafasd".toCharArray(), "12343215678".getBytes(), 1000);
+        PBECryptor p = new PBECryptor(ag, "fdsafasd".toCharArray(), "12343215678".getBytes(), 1000);
         byte[] a = p.encrypt("abc".getBytes());
 
         // 解密
-        p = new PBEEncryptor(ag, p.getPass(), p.getParameter(), p.getIterations());
+        p = new PBECryptor(ag, p.getPass(), p.getParameter(), p.getIterations());
         byte[] b = p.decrypt(a);
 
         System.out.println(new String(b));

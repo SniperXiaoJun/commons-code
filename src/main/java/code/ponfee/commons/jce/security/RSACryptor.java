@@ -2,17 +2,23 @@ package code.ponfee.commons.jce.security;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.security.interfaces.RSAKey;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
@@ -29,9 +35,21 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemWriter;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.PKCS8Generator;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.OutputEncryptor;
+import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
+import org.bouncycastle.pkcs.PKCSException;
+import org.bouncycastle.pkcs.jcajce.JcePKCSPBEInputDecryptorProviderBuilder;
+import org.bouncycastle.pkcs.jcajce.JcePKCSPBEOutputEncryptorBuilder;
 
+import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.jce.RSASignAlgorithm;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
@@ -44,6 +62,10 @@ import code.ponfee.commons.util.Streams;
 public final class RSACryptor {
 
     private static final String ALG_RSA = "RSA";
+
+    public static RSAKeyPair genRsaKeyPair() {
+        return genRSAKeyPair(1024);
+    }
 
     /**
      * 密钥生成
@@ -58,52 +80,34 @@ public final class RSACryptor {
             throw new SecurityException(e);
         }
         keyPairGen.initialize(keySize);
-        KeyPair keyPair = keyPairGen.generateKeyPair();
-        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-        return new RSAKeyPair(privateKey, publicKey);
+        KeyPair pair = keyPairGen.generateKeyPair();
+        return new RSAKeyPair((RSAPrivateKey) pair.getPrivate(), (RSAPublicKey) pair.getPublic());
     }
 
+    // ----------------------------------PRIVATE KEY PKCS1 FORMAT-----------------------------------
     /**
-     * 1024位密钥生成
-     * @return
+     * MIICXAIBAAKBgQCo20qAU4iyZIInpu2XzNXYHhFv6FVC/N1vsfz4ZrwX3VQaFsXf720QBkuP34Y31jy/6B+OB7DzklDBTnJXltCX2XdHyBY5WQYMX9rsQrfbvUL47u676FD1T8o1/e+cEOGS75mKQIQjyt1zCZOl26Hy6x4TPeBSdVzFNYSr7KNjLQIDAQABAoGALFd51v0YtpACRdtmJSjbNyeeOJ7wVOkGVWCOJ8UCu9mZTkiQqd+76itdCGkQW/VceqDAOJH4e93+auTozeuC1w/srrUuPASUsE/5VLwPBvR90kToC28B59wAdl31nD0KM8COq/9EdrkVkz6XO7KAik9gr3PLHCXu4i7tzf9djlkCQQDhagX7hsjJZ554Pr0uBhXHwMmhiLPOK1b3884Wc1rHTMShVGF3DJH6stJV5hXwzjXBwSA8zCbxGDsqVdmbQBkPAkEAv8Sv4GtdXCucN0GsZcRhvOmGhNkhQU7W3qkPqLaAvBzfCzT/Kty4YEWTlF+sCP1+/Chl7AHf4FQ+3ivNkftoAwJAEZ0YRJQ+okY/gsPcQnllQEuXNdEZw7VtQUjCxMxUvpgIEVcnmobX7VAF0YJ+GmfymWY+36FQNaygCunUbCYxDwJAQaKxS8+Tmbt3cVYyCnbnuP/4wbmLb03rrzQQHv+wGjKLiMtv1pzLInBN7ce9Gyqgbu/oypltpdtP1T0K1D9HPwJBAKskq4+amIGnJ7FxGiPXAi0+Y96QPbAR/WjXiIaLRvwRa4Jwy8U6E6HHfYYTeuuB7h1ga6kyzfB7nUeGyeWSSkI=
+     * 
+     * convert private key to base64 pkcs1 format
+     * @param privateKey
+     * @return pkcs1  encoded base64 pkcs1 format private key
      */
-    public static RSAKeyPair genRsaKeyPair() {
-        return genRSAKeyPair(1024);
-    }
-
-    // ----------------------------------PRIVATE KEY-----------------------------------
-    /**
-     * 解析PKCS#8私钥
-     * @param pkcs8PrivateKey
-     * @return RSAPrivateKey
-     */
-    public static RSAPrivateKey parsePkcs8PrivateKey(byte[] pkcs8PrivateKey) {
-        PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(pkcs8PrivateKey);
+    public static String toPkcs1PrivateKey(RSAPrivateKey privateKey) {
+        PrivateKeyInfo privKeyInfo = PrivateKeyInfo.getInstance(privateKey.getEncoded());
         try {
-            KeyFactory keyFactory = KeyFactory.getInstance(ALG_RSA);
-            return (RSAPrivateKey) keyFactory.generatePrivate(pkcs8KeySpec);
-        } catch (Exception e) {
+            byte[] bytes = privKeyInfo.parsePrivateKey().toASN1Primitive().getEncoded();
+            return Base64.getEncoder().encodeToString(bytes);
+        } catch (IOException e) {
             throw new SecurityException(e);
         }
     }
 
     /**
-     * 解析PKCS#8私钥
-     * @param b64Pkcs8PrivateKey
-     * @return RSAPrivateKey
-     */
-    public static RSAPrivateKey parseB64Pkcs8PrivateKey(String b64Pkcs8PrivateKey) {
-        return parsePkcs8PrivateKey(Base64.getDecoder().decode(b64Pkcs8PrivateKey));
-    }
-
-    /**
-     * 解析PKCS#1私钥
+     * parse private key from pkcs1 format
      * @param pkcs1PrivateKey
      * @return RSAPrivateKey
      */
-    public static RSAPrivateKey parsePkcs1PrivateKey(byte[] pkcs1PrivateKey) {
-        // add PKCS#8 formatting
+    public static RSAPrivateKey fromPkcs1PrivateKey(String pkcs1PrivateKey) {
         ASN1EncodableVector v1 = new ASN1EncodableVector();
         v1.add(new ASN1ObjectIdentifier(PKCSObjectIdentifiers.rsaEncryption.getId()));
         v1.add(DERNull.INSTANCE);
@@ -111,84 +115,247 @@ public final class RSACryptor {
         ASN1EncodableVector v2 = new ASN1EncodableVector();
         v2.add(new ASN1Integer(0));
         v2.add(new DERSequence(v1));
-        v2.add(new DEROctetString(pkcs1PrivateKey));
+        v2.add(new DEROctetString(Base64.getDecoder().decode(pkcs1PrivateKey)));
         ASN1Sequence seq = new DERSequence(v2);
         try {
             //return parsePkcs8PrivateKey(seq.getEncoded(ASN1Sequence.DER)); // bcmail-jdk16
-            return parsePkcs8PrivateKey(seq.getEncoded()); // bcmail-jdk15on
+            return fromPkcs8PrivateKey(Base64.getEncoder().encodeToString(seq.getEncoded())); // bcmail-jdk15on
+        } catch (IOException e) {
+            throw new SecurityException(e);
+        }
+    }
+
+    // ----------------------------------PRIVATE KEY PKCS1 PEM FORMAT-----------------------------------
+    /**
+     * -----BEGIN RSA PRIVATE KEY-----
+     * MIICXAIBAAKBgQCo20qAU4iyZIInpu2XzNXYHhFv6FVC/N1vsfz4ZrwX3VQaFsXf
+     * 720QBkuP34Y31jy/6B+OB7DzklDBTnJXltCX2XdHyBY5WQYMX9rsQrfbvUL47u67
+     * 6FD1T8o1/e+cEOGS75mKQIQjyt1zCZOl26Hy6x4TPeBSdVzFNYSr7KNjLQIDAQAB
+     * AoGALFd51v0YtpACRdtmJSjbNyeeOJ7wVOkGVWCOJ8UCu9mZTkiQqd+76itdCGkQ
+     * W/VceqDAOJH4e93+auTozeuC1w/srrUuPASUsE/5VLwPBvR90kToC28B59wAdl31
+     * nD0KM8COq/9EdrkVkz6XO7KAik9gr3PLHCXu4i7tzf9djlkCQQDhagX7hsjJZ554
+     * Pr0uBhXHwMmhiLPOK1b3884Wc1rHTMShVGF3DJH6stJV5hXwzjXBwSA8zCbxGDsq
+     * VdmbQBkPAkEAv8Sv4GtdXCucN0GsZcRhvOmGhNkhQU7W3qkPqLaAvBzfCzT/Kty4
+     * YEWTlF+sCP1+/Chl7AHf4FQ+3ivNkftoAwJAEZ0YRJQ+okY/gsPcQnllQEuXNdEZ
+     * w7VtQUjCxMxUvpgIEVcnmobX7VAF0YJ+GmfymWY+36FQNaygCunUbCYxDwJAQaKx
+     * S8+Tmbt3cVYyCnbnuP/4wbmLb03rrzQQHv+wGjKLiMtv1pzLInBN7ce9Gyqgbu/o
+     * ypltpdtP1T0K1D9HPwJBAKskq4+amIGnJ7FxGiPXAi0+Y96QPbAR/WjXiIaLRvwR
+     * a4Jwy8U6E6HHfYYTeuuB7h1ga6kyzfB7nUeGyeWSSkI=
+     * -----END RSA PRIVATE KEY-----
+     * <p>
+     * 
+     * new PemObject("RSA PRIVATE KEY", toPkcs1Encode(privateKey))
+     * 
+     * convert private key to pem format
+     * @param privateKey
+     * @return  encoded base64 pem fromat private key
+     */
+    public static String toPemPrivateKey(RSAPrivateKey privateKey) {
+        try (StringWriter stringWriter = new StringWriter(); 
+            JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
+        ) {
+            pemWriter.writeObject(privateKey);
+            pemWriter.flush();
+            return stringWriter.toString();
         } catch (IOException e) {
             throw new SecurityException(e);
         }
     }
 
     /**
-     * 解析PKCS#1私钥
-     * @param pkcs1PrivateKey（base64编码）
-     * @return RSAPrivateKey
+     * parse private key from pem format
+     * @param pemPrivateKey  encoded pem format private key
+     * @return
      */
-    public static RSAPrivateKey parseB64Pkcs1PrivateKey(String b64Pkcs1PrivateKey) {
-        return parsePkcs1PrivateKey(Base64.getDecoder().decode(b64Pkcs1PrivateKey));
+    public static RSAPrivateKey fromPemPrivateKey(String pemPrivateKey) {
+        try (Reader reader = new StringReader(pemPrivateKey); 
+            PEMParser pemParser = new PEMParser(reader);
+        ) {
+            PEMKeyPair keyPair = (PEMKeyPair) pemParser.readObject();
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(Providers.BC.get().getName());
+            //PublicKey publicKey = converter.getPublicKey(keyPair.getPublicKeyInfo());
+            return (RSAPrivateKey) converter.getPrivateKey(keyPair.getPrivateKeyInfo());
+        } catch (Exception e) {
+            throw new SecurityException(e);
+        }
     }
 
+    // ----------------------------------PRIVATE KEY PKCS8 FORMAT-----------------------------------
     /**
-     * 私钥base64编码（pkcs8格式）
+     * MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAKjbSoBTiLJkgiem7ZfM1dgeEW/oVUL83W+x/PhmvBfdVBoWxd/vbRAGS4/fhjfWPL/oH44HsPOSUMFOcleW0JfZd0fIFjlZBgxf2uxCt9u9Qvju7rvoUPVPyjX975wQ4ZLvmYpAhCPK3XMJk6XbofLrHhM94FJ1XMU1hKvso2MtAgMBAAECgYAsV3nW/Ri2kAJF22YlKNs3J544nvBU6QZVYI4nxQK72ZlOSJCp37vqK10IaRBb9Vx6oMA4kfh73f5q5OjN64LXD+yutS48BJSwT/lUvA8G9H3SROgLbwHn3AB2XfWcPQozwI6r/0R2uRWTPpc7soCKT2Cvc8scJe7iLu3N/12OWQJBAOFqBfuGyMlnnng+vS4GFcfAyaGIs84rVvfzzhZzWsdMxKFUYXcMkfqy0lXmFfDONcHBIDzMJvEYOypV2ZtAGQ8CQQC/xK/ga11cK5w3QaxlxGG86YaE2SFBTtbeqQ+otoC8HN8LNP8q3LhgRZOUX6wI/X78KGXsAd/gVD7eK82R+2gDAkARnRhElD6iRj+Cw9xCeWVAS5c10RnDtW1BSMLEzFS+mAgRVyeahtftUAXRgn4aZ/KZZj7foVA1rKAK6dRsJjEPAkBBorFLz5OZu3dxVjIKdue4//jBuYtvTeuvNBAe/7AaMouIy2/WnMsicE3tx70bKqBu7+jKmW2l20/VPQrUP0c/AkEAqySrj5qYgacnsXEaI9cCLT5j3pA9sBH9aNeIhotG/BFrgnDLxToTocd9hhN664HuHWBrqTLN8HudR4bJ5ZJKQg==
+     * 
+     * convert private key to pkcs8 format
      * @param privateKey
-     * @return pkcs8 base64
+     * @return pkcs8      base64 pkcs8 format private key
      */
-    public static String toB64Pkcs8Encode(RSAPrivateKey privateKey) {
+    public static String toPkcs8PrivateKey(RSAPrivateKey privateKey) {
         return Base64.getEncoder().encodeToString(privateKey.getEncoded());
     }
 
     /**
-     * Convert private key from PKCS8 to PKCS1
-     * @param privateKey
-     * @return pkcs1 base64
+     * parse private key from pkcs8 format
+     * @param pkcs8PrivateKey   encoded base64 pkcs8 fromat private key
+     * @return RSAPrivateKey
      */
-    public static String toB64Pkcs1Encode(RSAPrivateKey privateKey) {
-        return Base64.getEncoder().encodeToString(toPkcs1Encode(privateKey));
-    }
-
-    /**
-     * Convert private key from PKCS8 to PKCS1
-     * @param privateKey
-     * @return
-     */
-    public static byte[] toPkcs1Encode(RSAPrivateKey privateKey) {
+    public static RSAPrivateKey fromPkcs8PrivateKey(String pkcs8PrivateKey) {
+        byte[] bytes = Base64.getDecoder().decode(pkcs8PrivateKey);
         try {
-            PrivateKeyInfo privKeyInfo = PrivateKeyInfo.getInstance(privateKey.getEncoded());
-            return privKeyInfo.parsePrivateKey().toASN1Primitive().getEncoded();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            KeyFactory keyFactory = KeyFactory.getInstance(ALG_RSA);
+            return (RSAPrivateKey) keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
+        } catch (Exception e) {
+            throw new SecurityException(e);
         }
     }
 
+    // ----------------------------------PRIVATE KEY ENCRYPTED PKCS8 PEM FORMAT-----------------------------------
     /**
-     * Convert private key in PKCS1 to PEM
+     * BEGIN ENCRYPTED PRIVATE KEY
+     * 
+     * convert private key to encrypted pem format
      * @param privateKey
+     * @param password      encrypt password
+     * @param outEncryptor  encrypt alg
      * @return
      */
-    public static String toPkcs1Pem(RSAPrivateKey privateKey) {
-        PemObject pemObject = new PemObject("RSA PRIVATE KEY", toPkcs1Encode(privateKey));
-        try (StringWriter stringWriter = new StringWriter(); 
-             PemWriter pemWriter = new PemWriter(stringWriter);
+    public static String toEncryptedPemPrivateKey(RSAPrivateKey privateKey, String password, OutputEncryptor outEncryptor) {
+        try ( StringWriter stringWriter = new StringWriter(); 
+              JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
         ) {
-            pemWriter.writeObject(pemObject);
-            stringWriter.flush();
+            PrivateKeyInfo privKeyInfo = PrivateKeyInfo.getInstance(privateKey.getEncoded());
+            pemWriter.writeObject(new PKCS8Generator(privKeyInfo, outEncryptor));
             pemWriter.flush();
             return stringWriter.toString();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new SecurityException(e);
         }
     }
 
-    // ----------------------------------PRIVATE KEY-----------------------------------
     /**
-     * parse public key from base64 X509 encoded
-     * @param publicKey      base64 X509 public key encoded
+     * -----BEGIN ENCRYPTED PRIVATE KEY-----
+     * MIICrjAoBgoqhkiG9w0BDAEDMBoEFA4ymXPHyGS9n5BRIibZHRkJ+idqAgIEAASC
+     * AoA5TutO4A/F9MX4h3278DBIihEEetPGU7GxbmCySVsJraL8tXueMEZrLSDWC9rl
+     * StJR82Umv0H8fpiMKlzYyHQjmqclY7e367+tQ87EqEenZNCCC1uveYLfBM7kZ+4/
+     * m276IY6sNuJqYp3k8RrIBfYG9KCCQ7ywWiORuKvGbNAytFW9H+Z9JAyO5E70ysWe
+     * pvfeLCFbRgJ0BOkm1aSyk81MN/alZ9d6a3d/UJLnnV42u7dS++mONVi66y6gKoON
+     * Y5xVX2ICPRGoIvZmXeeQYzH02XFpTn9+vQ//KG4iGErXjNaWLSWpLyCY2qHQWwQ1
+     * YB43aX7xYOiKUN24PMiwGKwjhBaKzakMt4lcmGNd6ZcwPC+ghhkmpPcCu4gSabQk
+     * Etv5tmkChBLIjRgxmmnlEYLDl68e8vth5RquJvwB4zBOQkDo9tPcwWnOk4vbvGJP
+     * w1WXfwHU4X4oy+FOiOTe7+lOTN6CeXxfx8a91h5zS1tA16bQLAgTA7oJGPD3yHpF
+     * aBYXPNzwIOpAUkEqCSbZuuYZ5uidjrm7rV8nSjXu0fkYxzpXbQAps+NBtlKHFXNC
+     * JWvj2g6UFtk/RoT4ghgtTx11DZUh+GsKbCjLM52omDDNLK8K+GOEFzElWiZIEWfh
+     * yoUAN9KuuCprC3RsqV4K70nQewuiX5NBt9xYcaKVBQ5jRgL0xnVpquyFeFXrY0Ge
+     * EDgOZTSUVVxlbNQ+iwBb52cD2cFmPcIszSNpQ85cS8eISdYiwaW42yUa7LYpO98S
+     * jyTNnLzOMRt04gcBcp71EOWEheE9Ui6AqweSA6LUHulSbOK4+4oKtdKH5KjdcWYI
+     * WDgTEoIGOC3se36z3v5Mlr8h
+     * -----END ENCRYPTED PRIVATE KEY-----
+     * <p>
+     * 
+     * convert private key to encrypted pem format
+     * normal pbeWithSHAAnd3_KeyTripleDES_CBC to encrypt
+     * @param privateKey
+     * @param password
+     * @return
+     */
+    public static String toEncryptedPemPrivateKey(RSAPrivateKey privateKey, String password) {
+        try {
+            ASN1ObjectIdentifier s = PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC;
+            JcePKCSPBEOutputEncryptorBuilder encryptorBuilder = new JcePKCSPBEOutputEncryptorBuilder(s);
+            return toEncryptedPemPrivateKey(privateKey, password, encryptorBuilder.build(password.toCharArray()));
+        } catch (OperatorCreationException e) {
+            throw new SecurityException(e);
+        }
+    }
+
+    /**
+     * parse private key from encrypted pem format
+     * @param encryptedPem  encoded pem encrypted private key
+     * @param password
+     * @return
+     */
+    public static RSAPrivateKey fromEncryptedPemPrivateKey(String encryptedPem, String password) {
+        try ( Reader reader = new StringReader(encryptedPem); 
+              PEMParser pemParser = new PEMParser(reader);
+        ) {
+            PKCS8EncryptedPrivateKeyInfo encrypted = (PKCS8EncryptedPrivateKeyInfo) pemParser.readObject();
+            JcePKCSPBEInputDecryptorProviderBuilder decryptorBuilder = new JcePKCSPBEInputDecryptorProviderBuilder();
+            PrivateKeyInfo pkInfo = encrypted.decryptPrivateKeyInfo(decryptorBuilder.build(password.toCharArray()));
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(Providers.BC.get().getName());
+            return (RSAPrivateKey) converter.getPrivateKey(pkInfo);
+        } catch (IOException | PKCSException e) {
+            throw new SecurityException(e);
+        }
+    }
+
+    // ----------------------------------EXTRACT PUBLIC KEY FROM PRIVATE KEY-----------------------------------
+    /**
+     * extract public key from private key
+     * @param privateKey
+     * @return
+     */
+    public static RSAPublicKey extractPublicKey(RSAPrivateKey privateKey) {
+        try {
+            RSAPrivateCrtKey key = (RSAPrivateCrtKey) privateKey;
+            RSAPublicKeySpec keySpec = new RSAPublicKeySpec(key.getModulus(), key.getPublicExponent());
+            return (RSAPublicKey) KeyFactory.getInstance(ALG_RSA).generatePublic(keySpec);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            throw new SecurityException(e);
+        }
+    }
+
+    // ----------------------------------PUBLIC KEY PKCS8 FORMAT-----------------------------------
+    /**
+     * MIGJAoGBAKVpbo/Wum3G5ciustuKNGvPX/rgkdZw33QGqBR5UOKUoD5/h/IeQlS7ladX+oa+ciVCXyP854Zq+0RVQ7x87DfAohLmyXlIGOJ7KLJZkUWDYSG0WsPbnTOEmxQcRzqEV5g9pVHIjgPH6N/j6HHKRs5xDEd3pVpoRBZKEncbZ85xAgMBAAE=
+     * <p>
+     * 
+     * The RSA Public key PEM file is specific for RSA keys.<p>
+     * convert public key to pkcs8 format<p>
+     * @param publicKey
+     * @return
+     */
+    public static String toPkcs8PublicKey(RSAPublicKey publicKey) {
+        try {
+            SubjectPublicKeyInfo spkInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
+            return Base64.getEncoder().encodeToString(spkInfo.parsePublicKey().getEncoded());
+        } catch (IOException e) {
+            throw new SecurityException(e);
+        }
+    }
+
+    /**
+     * parse public key from pkcs8 format
+     * @param pkcs8PublicKey  encoded base64 pkcs8 public key
+     * @return
+     */
+    public static RSAPublicKey fromPkcs8PublicKey(String pkcs8PublicKey) {
+        byte[] bytes = Base64.getDecoder().decode(pkcs8PublicKey);
+        try {
+            org.bouncycastle.asn1.pkcs.RSAPublicKey pk = org.bouncycastle.asn1.pkcs.RSAPublicKey.getInstance(bytes);
+            RSAPublicKeySpec keySpec = new RSAPublicKeySpec(pk.getModulus(), pk.getPublicExponent());
+            return (RSAPublicKey) KeyFactory.getInstance(ALG_RSA).generatePublic(keySpec);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new SecurityException(e);
+        }
+    }
+
+    // ----------------------------------PUBLIC KEY X509 PKCS1 FORMAT-----------------------------------
+    /**
+     * MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQClaW6P1rptxuXIrrLbijRrz1/64JHWcN90BqgUeVDilKA+f4fyHkJUu5WnV/qGvnIlQl8j/OeGavtEVUO8fOw3wKIS5sl5SBjieyiyWZFFg2EhtFrD250zhJsUHEc6hFeYPaVRyI4Dx+jf4+hxykbOcQxHd6VaaEQWShJ3G2fOcQIDAQAB
+     * 
+     * convert public key to x509 pkcs1 fromat
+     * @param publicKey
+     * @return
+     */
+    public static String toPkcs1PublicKey(RSAPublicKey publicKey) {
+        return Base64.getEncoder().encodeToString(publicKey.getEncoded());
+    }
+
+    /**
+     * parse public key from base64 X509 pkcs1 fromat
+     * @param pkcs1PublicKey  encoded base64 x509 pkcs1 fromat
      * @return RSAPublicKey
      */
-    public static RSAPublicKey parseB64X509PublicKey(String publicKey) {
-        byte[] keyBytes = Base64.getDecoder().decode(publicKey);
+    public static RSAPublicKey fromPkcs1PublicKey(String pkcs1PublicKey) {
+        byte[] keyBytes = Base64.getDecoder().decode(pkcs1PublicKey);
         X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(ALG_RSA);
@@ -198,54 +365,49 @@ public final class RSACryptor {
         }
     }
 
+    // ----------------------------------PUBLIC KEY X509 PKCS1 PEM FORMAT-----------------------------------
     /**
-     * to X.509 SubjectPublicKeyInfo encode
+     * -----BEGIN PUBLIC KEY-----
+     * MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQClaW6P1rptxuXIrrLbijRrz1/6
+     * 4JHWcN90BqgUeVDilKA+f4fyHkJUu5WnV/qGvnIlQl8j/OeGavtEVUO8fOw3wKIS
+     * 5sl5SBjieyiyWZFFg2EhtFrD250zhJsUHEc6hFeYPaVRyI4Dx+jf4+hxykbOcQxH
+     * d6VaaEQWShJ3G2fOcQIDAQAB
+     * -----END PUBLIC KEY-----
+     * <p>
+     * 
+     * new PemObject("RSA PUBLIC KEY", toPkcs1Encode(publicKey))
+     * 
+     * convert public key to pem fromat (pkcs1)
      * @param publicKey
      * @return
      */
-    public static String toB64X509Encode(RSAPublicKey publicKey) {
-        return Base64.getEncoder().encodeToString(publicKey.getEncoded());
-    }
-
-    /**
-     * Convert public key from X.509 SubjectPublicKeyInfo to PKCS1
-     * @param publicKey
-     * @return
-     */
-    public static byte[] toPkcs1Encode(RSAPublicKey publicKey) {
-        try {
-            SubjectPublicKeyInfo spkInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
-            return spkInfo.parsePublicKey().getEncoded();
+    public static String toPemPublicKey(RSAPublicKey publicKey) {
+        try (StringWriter stringWriter = new StringWriter(); 
+            JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
+        ) {
+            pemWriter.writeObject(publicKey);
+            pemWriter.flush();
+            return stringWriter.toString();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new SecurityException(e);
         }
     }
 
     /**
-     * Convert public key from X.509 SubjectPublicKeyInfo to PKCS1
-     * @param publicKey
+     * parse public key from pem format
+     * @param pemPublicKey  encoded pem public key
      * @return
      */
-    public static String toB64Pkcs1Encode(RSAPublicKey publicKey) {
-        return Base64.getEncoder().encodeToString(toPkcs1Encode(publicKey));
-    }
-
-    /**
-     * Convert public key in PKCS1 to PEM
-     * @param publicKey
-     * @return
-     */
-    public static String toPkcs1Pem(RSAPublicKey publicKey) {
-        PemObject pemObject = new PemObject("RSA PUBLIC KEY", toPkcs1Encode(publicKey));
-        try (StringWriter stringWriter = new StringWriter(); 
-             PemWriter pemWriter = new PemWriter(stringWriter);
+    public static RSAPublicKey fromPemPublicKey(String pemPublicKey) {
+        try (Reader reader = new StringReader(pemPublicKey); 
+             PEMParser pemParser = new PEMParser(reader);
         ) {
-            pemWriter.writeObject(pemObject);
-            stringWriter.flush();
-            pemWriter.flush();
-            return stringWriter.toString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            SubjectPublicKeyInfo subPkInfo = (SubjectPublicKeyInfo) pemParser.readObject();
+            RSAKeyParameters param = (RSAKeyParameters) PublicKeyFactory.createKey(subPkInfo);
+            RSAPublicKeySpec keySpec = new RSAPublicKeySpec(param.getModulus(), param.getExponent());
+            return (RSAPublicKey) KeyFactory.getInstance(ALG_RSA).generatePublic(keySpec);
+        } catch (Exception e) {
+            throw new SecurityException(e);
         }
     }
 
@@ -413,37 +575,46 @@ public final class RSACryptor {
             return publicKey;
         }
 
-        public String getB64Pkcs8PrivateKey() {
-            return toB64Pkcs8Encode(privateKey);
+        public String getPkcs8PrivateKey() {
+            return toPkcs8PrivateKey(privateKey);
         }
 
-        public String getB64Pkcs1PrivateKey() {
-            return toB64Pkcs1Encode(privateKey);
+        public String getPkcs1PrivateKey() {
+            return toPkcs1PrivateKey(privateKey);
         }
 
-        public String getB64X509PublicKey() {
-            return toB64X509Encode(publicKey);
+        public String getPkcs8PublicKey() {
+            return toPkcs8PublicKey(publicKey);
         }
 
-        public String getB64Pkcs1PublicKey() {
-            return toB64Pkcs1Encode(publicKey);
+        public String getPkcs1PublicKey() {
+            return toPkcs1PublicKey(publicKey);
         }
     }
 
     public static void main(String[] args) throws Exception {
+        RSAKeyPair keyPair = genRSAKeyPair(1024);
+        test(keyPair.getPrivateKey(), extractPublicKey(keyPair.getPrivateKey()));
+        
+        test(fromPemPrivateKey(toPemPrivateKey(fromPkcs1PrivateKey(keyPair.getPkcs1PrivateKey()))),
+             fromPemPublicKey(toPemPublicKey(fromPkcs1PublicKey(keyPair.getPkcs1PublicKey()))));
+        
+        test(fromPkcs1PrivateKey(toPkcs1PrivateKey(keyPair.getPrivateKey())),
+             fromPkcs1PublicKey(keyPair.getPkcs1PublicKey()));
+
+        test(fromPkcs8PrivateKey(keyPair.getPkcs8PrivateKey()),
+             fromPkcs8PublicKey(keyPair.getPkcs8PublicKey()));
+
+        System.out.println(fromEncryptedPemPrivateKey(toEncryptedPemPrivateKey(keyPair.getPrivateKey(),"123"), "123"));
+
+        System.out.println(toPkcs1PrivateKey(keyPair.getPrivateKey()));
+        System.out.println(toPkcs8PrivateKey(keyPair.getPrivateKey()));
+        System.out.println(toPemPrivateKey(keyPair.getPrivateKey()));
+        System.out.println(toEncryptedPemPrivateKey(keyPair.getPrivateKey(), "1234"));
+    }
+
+    private  static void test(RSAPrivateKey privateKey, RSAPublicKey publicKey) throws IOException {
         long i = System.currentTimeMillis();
-        RSAKeyPair keyPair = genRSAKeyPair(512);
-
-        RSAPrivateKey privateKey = keyPair.getPrivateKey();
-        String pkcs1Key = toB64Pkcs1Encode(privateKey);
-        System.out.println("--pkcs1Key: " + pkcs1Key);
-        System.out.println("--pkcs8Key: " + toB64Pkcs8Encode(privateKey));
-        privateKey = parseB64Pkcs1PrivateKey(pkcs1Key);
-
-        RSAPublicKey publicKey = keyPair.getPublicKey();
-        System.out.println(RSACryptor.toB64Pkcs8Encode(privateKey));
-        System.out.println(RSACryptor.toB64X509Encode(publicKey));
-
         System.out.println("=============================加密测试==============================");
         //byte[] data = "加解密测试".getBytes();
         byte[] data = Streams.file2bytes(MavenProjects.getMainJavaFile(RSACryptor.class));
@@ -456,15 +627,11 @@ public final class RSACryptor {
         System.out.println(Bytes.hexDump(ArrayUtils.subarray(RSACryptor.decrypt(encodedData, privateKey), 0, 100)));
 
         System.out.println("===========================签名测试=========================");
-        data = Bytes.base64Decode("");
+        data = Base64.getDecoder().decode("");
         byte[] signed = RSACryptor.signSha1(data, privateKey);
-        System.out.println("签名数据：len->" + signed.length + " ， b64->" + Bytes.base64Encode(signed));
+        System.out.println("签名数据：len->" + signed.length + " ， b64->" + Base64.getEncoder().encodeToString(signed));
         System.out.println("验签结果：" + RSACryptor.verifySha1(data, publicKey, signed));
 
         System.out.println("cost time: " + (System.currentTimeMillis() - i));
-
-        parseB64Pkcs1PrivateKey("MIIEoQIBAAKCAQB87L/ttdhGrffwOW7TzgDHDIbQCm2qU+PqCwP5z6QOqZWywnqeudF19FhlWY1nh16e7j03eMPeCCa/ZUOsoelsxdXZ1zyxtxoylWeg1RxtvPIw1YpvvyNbeTiInAMI01qxG4OOusgKjCmga+xIqZiH87kr5NWkEcQIOW4e+H0oROVzGSUr8cpHj5xwX3HRORgF/Papm5LcSYVNuU3iTRy6MhuPouQclI7CwwcukC7YVCLra+Z3+GHWauKZMrVNHPjM/2zyu3KvOR2IZDWg6cBIV5c6aHdiB6MwKiRj6fIzPbqh/szumgrVrrz3VeSnPlNWVaUy2MWfkKT0KJa7vfjXAgMBAAECggEAJIkdLMl1Il6417IEXr+t7IkWWHvkTN9SFd344LPAmGUymeBU+l0ADI5U1/dT6sZlfvfQQYv5RNN/eZSFMVT9LsnBXH+diaAycj7N2vTY5qNO9cdOQJZXIeaXCSUPoiImMQwJ8tFfte3+MqO9rBalvIUkT9kSPnTPr1QUh8xG1mK7Em/rx+8fRcl2IKHEyFoch31e3xuKxuxtQhkWyqXNinWJ/AQRojtysDcjZNy/Ics/9/YO803do3DUvIhzVouxgZcw0hriKt6QEyeJ/n1HLXI+JXogxDNUdjJsfzUMHgagdOdrBSYCAyx8DXd/O9NSJRAluwjvRDOETYhvl9kRGQKBgQDt0OcntHaWyDMpVSZvu5TUhk39XYWbStWA+z2/VCtehoZWF1+W7mG5H5mjZ6GKgiQ0fEXoR/gkVF3GOGOfMpG0+grTAygG37ugllr/tKZKx+I4MSftXh9shqOzQKtFDiUHIU6vzXjPE62fWCGiGYCUmgZk2p4hHxEVtXPN9hUEiwKBgQCGehK07j8mBbBa4HTWunkZBIoy+gTtDPFWJjBE2GlbXJ7L5mzDm04VGPrVvwzTxV+MuuepCUv/dsWxQX/RiFUQffXI1tSi4b0NKDbY2xxDQlUwIfG4bIn53uX/NqTtggUFWzY9GMghqD8t6s6HdFfuMt6Ul/utULZd9aaZI8lKZQKBgGz6XfMD75QJCejW7FYnT3xUT0jbom4XTN9eQl165KTcYJLzAwrXElES+gS3aH9gQ9cJW7+lu0BqqM486On68mpMaslnmOANhp2ASRMEZW+/SRsW64UKrLu+tyVdbR6n7K/nw3csYUADdHyglkkCBroSGvv8cpoa8mlQTVEEg30hAoGAK43aBTOszDnHdoeAEBPxKMMpp30Gn2gzuf1AYOveo7KJ0+xbibcBQSAIDbaFBwnD+qaGZV8XeDQVr2VRaqHHO0Iwms3JrL+EJYDC0tWUf8w6Hw6/ZUXyIjWpNFGUdUBJNATouj0OhKgjXlHQdlqeKA3dvS7EWsvrZN8tCChpB2kCgYBxODTwc5l/0zz85TIapeERIj+fEP+KxupV2H7aHsUNdxVn6VcfqqL1ihlpSWFDrQvvs5pLiLUuQvxM1kpFOnYJ0cj7jK7YUq3GGg2FVtDSyOLoepDH45jK0NTRzUvbfiXNHSgn+gT6NGikAIXpseDabwWX9+dAc0U7TH2nQGqYew==");
-        parseB64Pkcs8PrivateKey("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
     }
-
 }

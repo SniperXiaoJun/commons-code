@@ -8,11 +8,13 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import code.ponfee.commons.util.Bytes;
+
 /**
  * 加密构建类
  * @author fupf
  */
-public final class EncryptorBuilder {
+public final class SymmetricCryptorBuilder {
 
     private Algorithm algorithm; // 加密算法
     private byte[] key; // 密钥
@@ -21,45 +23,45 @@ public final class EncryptorBuilder {
     private IvParameterSpec iv; // 填充向量
     private Provider provider; // 加密服务提供方
 
-    private EncryptorBuilder() {};
+    private SymmetricCryptorBuilder() {};
 
-    public static EncryptorBuilder newBuilder(Algorithm algorithm) {
-        EncryptorBuilder builder = new EncryptorBuilder();
+    public static SymmetricCryptorBuilder newBuilder(Algorithm algorithm) {
+        SymmetricCryptorBuilder builder = new SymmetricCryptorBuilder();
         builder.algorithm = algorithm;
         return builder;
     }
 
-    public EncryptorBuilder key(byte[] key) {
+    public SymmetricCryptorBuilder key(byte[] key) {
         this.key = key;
         return this;
     }
 
-    public EncryptorBuilder key(int keySize) {
-        this.key = Encryptor.randomBytes(keySize);
+    public SymmetricCryptorBuilder key(int keySize) {
+        this.key = Bytes.randomBytes(keySize);
         return this;
     }
 
-    public EncryptorBuilder mode(Mode mode) {
+    public SymmetricCryptorBuilder mode(Mode mode) {
         this.mode = mode;
         return this;
     }
 
-    public EncryptorBuilder padding(Padding padding) {
+    public SymmetricCryptorBuilder padding(Padding padding) {
         this.padding = padding;
         return this;
     }
 
-    public EncryptorBuilder ivParameter(byte[] ivBytes) {
+    public SymmetricCryptorBuilder ivParameter(byte[] ivBytes) {
         this.iv = new IvParameterSpec(ivBytes);
         return this;
     }
 
-    public EncryptorBuilder provider(Provider provider) {
+    public SymmetricCryptorBuilder provider(Provider provider) {
         this.provider = provider;
         return this;
     }
 
-    public Encryptor build() {
+    public SymmetricCryptor build() {
         SecretKey secretKey;
         if (key == null) {
             try {
@@ -70,7 +72,7 @@ public final class EncryptorBuilder {
         } else {
             secretKey = new SecretKeySpec(key, algorithm.name());
         }
-        return new Encryptor(secretKey, mode, padding, iv, provider);
+        return new SymmetricCryptor(secretKey, mode, padding, iv, provider);
     }
 
 }
