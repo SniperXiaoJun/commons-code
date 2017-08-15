@@ -1,6 +1,5 @@
 package code.ponfee.commons.util;
 
-import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
@@ -200,8 +199,14 @@ public final class ObjectUtils {
         }
     }
 
+    /**
+     * 判断是否为空字符串
+     * @param value
+     * @return
+     */
     public static boolean isEmptyString(Object value) {
-        return CharSequence.class.isInstance(value) && StringUtils.isEmpty((CharSequence) value);
+        return CharSequence.class.isInstance(value) 
+               && StringUtils.isEmpty((CharSequence) value);
     }
 
     public static Object nullValue(Object obj) {
@@ -218,16 +223,15 @@ public final class ObjectUtils {
      * @param bean
      */
     public static <T> void map2bean(Map<String, ?> map, T bean) {
+        String name;
         try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
-            // 给 JavaBean 对象的属性赋值
-            for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
-                String name = property.getName();
-                if (name.equals("class")) continue;
+            for (PropertyDescriptor prop : Introspector.getBeanInfo(bean.getClass()).getPropertyDescriptors()) {
+                name = prop.getName();
+                if ("class".equals(name)) continue;
 
                 if (map.containsKey(name) || map.containsKey(name = Strings.underscoreName(name))) {
                     Object value = map.get(name);
-                    Class<?> type = property.getPropertyType();
+                    Class<?> type = prop.getPropertyType();
 
                     if ((value == null || isEmptyString(value)) && type.isPrimitive()) {
                         continue; // 原始类型跳过
@@ -248,21 +252,28 @@ public final class ObjectUtils {
                         }
                     }
 
-                    property.getWriteMethod().invoke(bean, value);
+                    // setter value into bean field
+                    prop.getWriteMethod().invoke(bean, value);
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
+    /**
+     * map value set to bean property
+     * @param map
+     * @param type   bean type, must be has default constructor
+     * @return
+     */
     public static <T> T map2bean(Map<String, ?> map, Class<T> type) {
         try {
             T bean = type.getConstructor().newInstance();
             map2bean(map, bean);
             return bean;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -273,17 +284,17 @@ public final class ObjectUtils {
      */
     public static Map<String, Object> bean2map(Object bean) {
         try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
             Map<String, Object> map = new HashMap<>();
-            for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
-                String name = property.getName();
-                if (name.equals("class")) continue;
-
-                map.put(name, property.getReadMethod().invoke(bean));
+            String name;
+            for (PropertyDescriptor prop : Introspector.getBeanInfo(bean.getClass()).getPropertyDescriptors()) {
+                name = prop.getName();
+                if (!"class".equals(name)) {
+                    map.put(name, prop.getReadMethod().invoke(bean));
+                }
             }
             return map;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 

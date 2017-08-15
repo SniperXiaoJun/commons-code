@@ -5,7 +5,6 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -265,37 +264,21 @@ public class ExcelExporter extends AbstractExporter {
      * 输出到输出流
      */
     public void write(OutputStream out) {
-        BufferedOutputStream bos = null;
-        try {
-            bos = new BufferedOutputStream(out);
+        try (BufferedOutputStream bos = new BufferedOutputStream(out)) {
             createFreezePane();
             workbook.write(bos);
             bos.flush();
             out.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            if (bos != null) try {
-                bos.close();
-            } catch (IOException e) {
-                logger.error(null, e);
-            }
         }
     }
 
     public void write(String filepath) {
-        OutputStream out = null;
-        try {
-            out = new FileOutputStream(new File(filepath));
+        try (OutputStream out = new FileOutputStream(new File(filepath))) {
             write(out);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            if (out != null) try {
-                out.close();
-            } catch (IOException e) {
-                logger.error(null, e);
-            }
         }
     }
 

@@ -23,6 +23,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import code.ponfee.commons.jce.cert.X509CertUtils;
+import code.ponfee.commons.jce.hash.HashUtils;
+
 /**
  * 密钥库解析类
  * @author fupf
@@ -46,6 +49,34 @@ public class KeyStoreResolver {
     public KeyStoreResolver(KeyStoreType type, byte[] keyStore, String storePassword) {
         this(type, new ByteArrayInputStream(keyStore), storePassword);
     }
+
+    public static KeyStoreResolver loadFromPem(String pem) {
+        KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.JKS);
+        resolver.setCertificateEntry(HashUtils.md5Hex(pem), X509CertUtils.loadFromPem(pem));
+        return resolver;
+    }
+
+    /*public static KeyStoreResolver parseFromPem(String pem) {
+        try ( Reader reader = new StringReader(pem);
+              PEMParser pemParser = new PEMParser(reader);
+        ) {
+            Object pemCertObj = pemParser.readObject();
+            PemObject pemKeyObj = pemParser.readPemObject();
+    
+            PKCS8EncodedKeySpec privKeySpec = new PKCS8EncodedKeySpec(pemKeyObj.getContent());
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            PrivateKey privKey = kf.generatePrivate(privKeySpec);
+    
+            X509CertificateHolder certHolder = (X509CertificateHolder) pemCertObj;
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(Providers.BC.get().getName())
+                                                                    .getCertificate(certHolder);
+            KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.JKS);
+            resolver.setKeyEntry(HashUtils.md5Hex(pem), privKey, null, new X509Certificate[]{cert});
+            return resolver;
+        } catch (Exception e) {
+            throw new SecurityException(e);
+        }
+    }*/
 
     /**
      * 创建密钥库

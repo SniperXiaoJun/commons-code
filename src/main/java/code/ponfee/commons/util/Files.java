@@ -41,10 +41,8 @@ public class Files {
     }
 
     public static CharSequence readFile(File file) {
-        FileInputStream in = null;
         FileChannel channel = null;
-        try {
-            in = new FileInputStream(file);
+        try (FileInputStream in = new FileInputStream(file)) {
             channel = in.getChannel();
             ByteBuffer buffer = channel.map(MapMode.READ_ONLY, 0, channel.size());
             return Charset.defaultCharset().decode(buffer);
@@ -53,12 +51,6 @@ public class Files {
         } finally {
             if (channel != null) try {
                 channel.close();
-            } catch (IOException e) {
-                // ignored
-            }
-
-            if (in != null) try {
-                in.close();
             } catch (IOException e) {
                 // ignored
             }

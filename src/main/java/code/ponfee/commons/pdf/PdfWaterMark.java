@@ -112,7 +112,7 @@ public class PdfWaterMark {
     }
 
     public static void main(String[] args) throws Exception {
-        ByteArrayInputStream input = new ByteArrayInputStream(Streams.file2bytes("d:/test/pdf.pdf"));
+        ByteArrayInputStream input = new ByteArrayInputStream(Streams.file2bytes("d:/test/213.pdf"));
         //waterImgMark(input, Streams.file2bytes("d:/test/2.png"), new FileOutputStream("d:/test/image.pdf"));
         waterWordMark(input, "1234", new FileOutputStream("d:/test/word.pdf"));
     }

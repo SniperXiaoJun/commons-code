@@ -28,10 +28,15 @@ import code.ponfee.commons.util.Dates;
 
 public class KeyStoreResolverTester {
 
-    public @Test void testLoad() {
+    public @Test void testLoad() throws Exception {
         KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.PKCS12, ResourceLoaderFacade.getResource("cas_test.pfx").getStream(), "1234");
         String alias = resolver.listAlias().get(0);
         _test((RSAPrivateKey)resolver.getPrivateKey(alias, "1234"), (RSAPublicKey)resolver.getPublicKey(alias));
+
+        String pem = X509CertUtils.exportToPem(resolver.getX509CertChain()[0]);
+        resolver = new KeyStoreResolver(KeyStoreType.JKS);
+        resolver.setCertificateEntry("pem", X509CertUtils.loadFromPem(pem));
+        System.out.println(resolver.getKeyStore()); 
     }
 
     public @Test void testCreateCert() throws Exception {

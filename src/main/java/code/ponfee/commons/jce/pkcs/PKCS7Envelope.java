@@ -97,7 +97,7 @@ public final class PKCS7Envelope {
             env.addObject(recipientInfos);
             env.addObject(cont);
 
-            // 封闭成p7
+            // 封装成pkcs#7 format
             DERConstructedSequence pkcs7 = new DERConstructedSequence();
             pkcs7.addObject(new DERObjectIdentifier(OID_ENVELOPEDDATATYPE));
             pkcs7.addObject(new DERTaggedObject(true, 0, env));

@@ -50,18 +50,10 @@ public final class Word2Pdf {
         }
 
         // 加载license
-        InputStream input = null;
-        try {
-            input = ResourceLoaderFacade.getResource("license.xml", Word2Pdf.class).getStream();
+        try (InputStream input = ResourceLoaderFacade.getResource("license.xml", Word2Pdf.class).getStream()) {
             new License().setLicense(input);
         } catch (Exception ignored) {
             ignored.printStackTrace();
-        } finally {
-            if (input != null) try {
-                input.close();
-            } catch (IOException ignored) {
-                ignored.printStackTrace();
-            }
         }
     }
 

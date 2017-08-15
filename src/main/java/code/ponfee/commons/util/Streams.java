@@ -89,9 +89,7 @@ public final class Streams {
     public static void string2file(String str, String targetPath, String charset) throws IOException {
         BufferedWriter writer = null;
         OutputStreamWriter osw = null;
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(targetPath);
+        try (FileOutputStream fos = new FileOutputStream(targetPath)) {
             if (charset != null && charset.trim().length() > 0) {
                 osw = new OutputStreamWriter(fos, charset);
             } else {
@@ -101,11 +99,6 @@ public final class Streams {
             writer.write(str);
             writer.flush();
         } finally {
-            if (fos != null) try {
-                fos.close();
-            } catch (IOException e) {
-                logger.error("关闭输出流时出错", e);
-            }
             if (osw != null) try {
                 osw.close();
             } catch (IOException e) {
@@ -128,11 +121,9 @@ public final class Streams {
     }
 
     public static void addBOM(File file) {
-        FileInputStream input = null;
         FileOutputStream output = null;
         BufferedOutputStream bos = null;
-        try {
-            input = new FileInputStream(file);
+        try (FileInputStream input = new FileInputStream(file)) {
             int length = input.available();
             byte[] bytes1, bytes2;
             if (length >= 3) {
@@ -157,11 +148,6 @@ public final class Streams {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            if (input != null) try {
-                input.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             if (bos != null) try {
                 bos.close();
             } catch (IOException e) {
@@ -184,11 +170,9 @@ public final class Streams {
     }
 
     public static void removeBOM(File file) {
-        FileInputStream input = null;
         FileOutputStream output = null;
         BufferedOutputStream bos = null;
-        try {
-            input = new FileInputStream(file);
+        try (FileInputStream input = new FileInputStream(file)) {
             int length = input.available();
             if (length <= 3) return;
 
@@ -206,11 +190,6 @@ public final class Streams {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            if (input != null) try {
-                input.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             if (bos != null) try {
                 bos.close();
             } catch (IOException e) {
@@ -318,6 +297,6 @@ public final class Streams {
         String b64 = Bytes.base64EncodeUrlSafe(b);
         System.out.println(Objects.deepEquals(Bytes.base64DecodeUrlSafe(b64), b));
 
-        removeBOM(new File("d:/csv.csv"));
+        addBOM(new File("d:/csv.csv"));
     }
 }

@@ -113,7 +113,9 @@ public final class WebUtils {
         } catch (IOException e) {
             logger.error("http response error", e);
         } finally {
-            if (out != null) out.close();
+            if (out != null) {
+                out.close();
+            }
         }
     }
 

@@ -4,10 +4,12 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
@@ -30,6 +32,7 @@ import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.X509CRLObject;
 import org.bouncycastle.jce.provider.X509CRLParser;
 import org.bouncycastle.jce.provider.X509CertificateObject;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.util.Store;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,23 +114,46 @@ public class X509CertUtils {
 
     /**
      * 通过证书文件路径加载证书
-     * @param certPath
+     * @param certFile
      * @return
      * @throws IOException
      */
-    public static X509Certificate loadX509Cert(String certPath) throws IOException {
-        return loadX509Cert(IOUtils.toByteArray(new FileInputStream(certPath)));
+    public static X509Certificate loadX509Cert(File certFile) throws IOException {
+        return loadX509Cert(IOUtils.toByteArray(new FileInputStream(certFile)));
     }
 
     /**
-     * 根据证书base64编码串加载证书
-     * @param certBase64
+     * certificate export to pem format
+     * @param cert
      * @return
      */
-    public static X509Certificate loadX509CertFromBase64(String certBase64) {
-        return loadX509Cert(Bytes.base64Decode(certBase64));
+    public static String exportToPem(java.security.cert.Certificate cert) {
+        try (StringWriter writer = new StringWriter(); 
+            // X509Certificate,X509CRL,KeyPair,PrivateKey,PublicKey
+             JcaPEMWriter pemWriter = new JcaPEMWriter(writer);
+        ) {
+            pemWriter.writeObject(cert);
+            pemWriter.flush();
+            return writer.toString();
+        } catch (IOException e) {
+            throw new SecurityException(e);
+        }
     }
 
+    /**
+     * pem加载证书
+     * @param pem
+     * @return
+     */
+    public static X509Certificate loadFromPem(String pem) {
+        try {
+            return loadX509Cert(new ByteArrayInputStream(pem.getBytes()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // ---------------------------------------crl--------------------------------------
     /**
      * 根据byte流获取吊销列表
      * @param bytes
@@ -170,23 +196,25 @@ public class X509CertUtils {
     }
 
     /**
-     * 获取crl
+     * 加载CRL
+     * @param crlFile
+     * @return
      * @throws IOException
      */
-    public static X509CRL loadX509Crl(String filePath) throws IOException {
-        return loadX509Crl(IOUtils.toByteArray(new FileInputStream(filePath)));
+    public static X509CRL loadX509Crl(File crlFile) throws IOException {
+        return loadX509Crl(IOUtils.toByteArray(new FileInputStream(crlFile)));
     }
 
     /**
      * 获取证书掉销实体
-     * @param crlPath
-     * @param certPath
+     * @param crlFile
+     * @param certFile
      * @return
      * @throws IOException
      */
-    public static X509CRLEntry getX509CrlEntry(String crlPath, String certPath) throws IOException {
-        X509CRL crl = loadX509Crl(crlPath);
-        X509Certificate cert = loadX509Cert(certPath);
+    public static X509CRLEntry getX509CrlEntry(File crlFile, File certFile) throws IOException {
+        X509CRL crl = loadX509Crl(crlFile);
+        X509Certificate cert = loadX509Cert(certFile);
         return crl.getRevokedCertificate(cert);
     }
 

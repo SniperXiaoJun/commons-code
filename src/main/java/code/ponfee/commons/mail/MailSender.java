@@ -149,7 +149,7 @@ public class MailSender {
     }
 
     private boolean send0(String logid, MailEnvelope envlop, int retries) {
-        Transport trans = null;
+        Transport transport = null;
         try {
             MimeMessage message = new MimeMessage(session);
 
@@ -228,9 +228,9 @@ public class MailSender {
             message.saveChanges();
 
             //Transport.send(message); // new SmtpAuth(user, password)
-            trans = session.getTransport("smtp");
-            trans.connect(smtpHost, user, password);
-            trans.sendMessage(message, message.getAllRecipients());
+            transport = session.getTransport("smtp");
+            transport.connect(smtpHost, user, password);
+            transport.sendMessage(message, message.getAllRecipients());
             return true;
         } catch (MessagingException | UnsupportedEncodingException e) {
             if (sentFailedLogger != null) try {
@@ -279,8 +279,8 @@ public class MailSender {
 
             return false;
         } finally {
-            if (trans != null && trans.isConnected()) try {
-                trans.close();
+            if (transport != null && transport.isConnected()) try {
+                transport.close();
             } catch (MessagingException e) {
                 logger.warn("mail transport close occur error", e);
             }
