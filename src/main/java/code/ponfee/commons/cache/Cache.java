@@ -2,7 +2,10 @@ package code.ponfee.commons.cache;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -10,6 +13,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * 缓存类
@@ -17,30 +21,37 @@ import code.ponfee.commons.jce.hash.HashUtils;
  * @param <T>
  */
 public class Cache<T> {
-    public static final long KEEPALIVE_FOREVER = 0;
-    private final boolean caseSensitiveKey;
-    private final boolean compressKey;
-    private final int autoReleaseInSeconds;
-    private final long keepAliveInMillis;
-    private final Map<Comparable<?>, CacheBean<T>> cache;
 
-    private final Lock lock = new ReentrantLock();
+    public static final long KEEPALIVE_FOREVER = 0; // 为0表示不失效
+
+    private final boolean caseSensitiveKey; // 是否忽略大小写（只针对String）
+    private final boolean compressKey; // 是否压缩key（只针对String）
+    private final long keepAliveInMillis; // 默认的数据保存的时间
+    private final Map<Comparable<?>, CacheBean<T>> cache = new ConcurrentHashMap<>(); // 缓存容器
+
     private DateProvider dateProvider = DateProvider.SYSTEM;
+    private final Lock lock = new ReentrantLock(); // 定时清理加锁
 
-    Cache(boolean caseSensitiveKey, boolean compressKey, int autoReleaseInSeconds, long keepAliveInMillis) {
+    Cache(boolean caseSensitiveKey, boolean compressKey, long keepAliveInMillis, int autoReleaseInSeconds) {
         this.caseSensitiveKey = caseSensitiveKey;
         this.compressKey = compressKey;
-        this.autoReleaseInSeconds = autoReleaseInSeconds;
         this.keepAliveInMillis = keepAliveInMillis;
 
-        cache = new ConcurrentHashMap<Comparable<?>, CacheBean<T>>();
-        if (this.autoReleaseInSeconds > 0) {
-            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    cleanExpiration();
+        if (autoReleaseInSeconds > 0) {
+            // 定时清理
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+                if (!lock.tryLock()) return;
+                try {
+                    long now = now();
+                    for (Iterator<Entry<Comparable<?>, CacheBean<T>>> t = cache.entrySet().iterator(); t.hasNext();) {
+                        if (t.next().getValue().isExpire(now)) {
+                            t.remove();
+                        }
+                    }
+                } finally {
+                    lock.unlock();
                 }
-            }, this.autoReleaseInSeconds, this.autoReleaseInSeconds, TimeUnit.SECONDS);
+            }, autoReleaseInSeconds, autoReleaseInSeconds, TimeUnit.SECONDS);
         }
     }
 
@@ -60,10 +71,6 @@ public class Cache<T> {
         return dateProvider;
     }
 
-    public Integer getAutoReleaseInSeconds() {
-        return autoReleaseInSeconds;
-    }
-
     private long now() {
         return dateProvider.now();
     }
@@ -72,6 +79,7 @@ public class Cache<T> {
         this.dateProvider = dateProvider;
     }
 
+    // --------------------------------cache value-------------------------------
     public void set(Comparable<?> key) {
         set(key, null);
     }
@@ -87,6 +95,10 @@ public class Cache<T> {
         this.set(key, value, expireTimeMillis);
     }
 
+    public void setWithAliveInMillis(Comparable<?> key, T value, int aliveInMillis) {
+        this.set(key, value, now() + aliveInMillis);
+    }
+
     public void set(Comparable<?> key, long expireTimeMillis) {
         set(key, null, expireTimeMillis);
     }
@@ -98,7 +110,7 @@ public class Cache<T> {
     }
 
     /**
-     * 获取并移除
+     * 获取
      * @param key
      * @return
      */
@@ -116,50 +128,12 @@ public class Cache<T> {
     }
 
     /**
-     * 删除
+     * 获取并删除
      * @param key
      */
-    public T remove(Comparable<?> key) {
-        key = getEffectiveKey(key);
-        CacheBean<T> cacheBean = cache.get(key);
-        if (cacheBean == null) {
-            return null;
-        } else if (cacheBean.isExpire(now())) {
-            cache.remove(key);
-            return null;
-        } else {
-            cache.remove(key);
-            return cacheBean.getValue();
-        }
-    }
-
-    /**
-     * 移除所有
-     */
-    public void clear() {
-        cache.clear();
-    }
-
-    /**
-     * 查看数量
-     * @return
-     */
-    public int size() {
-        int size = 0;
-        for (CacheBean<T> cacheValue : cache.values()) {
-            if (cacheValue.isAlive(now())) {
-                size++;
-            }
-        }
-        return size;
-    }
-
-    /**
-     * 是否为空
-     * @return
-     */
-    public boolean isEmpty() {
-        return size() == 0;
+    public T getAndRemove(Comparable<?> key) {
+        CacheBean<T> cacheBean = cache.remove(getEffectiveKey(key));
+        return cacheBean == null ? null : cacheBean.getValue();
     }
 
     /**
@@ -185,53 +159,107 @@ public class Cache<T> {
      * @return
      */
     public boolean containsValue(T value) {
-        for (T val : values()) {
-            if (val.equals(value)) return true;
+        Entry<Comparable<?>, CacheBean<T>> entry;
+        for (Iterator<Entry<Comparable<?>, CacheBean<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
+            entry = iter.next();
+            if (entry.getValue().isAlive(now())) {
+                if ((value == null && entry.getValue().getValue() == null) ||
+                    (value != null && value.equals(entry.getValue().getValue()))) {
+                    return true;
+                }
+            } else {
+                iter.remove();
+            }
         }
         return false;
     }
 
     /**
-     * @return
+     * get for value collection
+     * @return  the collection of values
      */
     public Collection<T> values() {
         Collection<T> values = new ArrayList<>();
-        for (CacheBean<T> cacheValue : cache.values()) {
-            if (cacheValue.isAlive(now())) {
-                values.add(cacheValue.getValue());
+        Entry<Comparable<?>, CacheBean<T>> entry;
+        for (Iterator<Entry<Comparable<?>, CacheBean<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
+            entry = iter.next();
+            if (entry.getValue().isAlive(now())) {
+                values.add(entry.getValue().getValue());
+            } else {
+                iter.remove();
             }
         }
         return values;
     }
 
     /**
+     * get size of the cache keys
+     * @return
+     */
+    public int size() {
+        int size = 0;
+        long now = now();
+
+        for (Iterator<Entry<Comparable<?>, CacheBean<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
+            if (iter.next().getValue().isAlive(now)) {
+                size++;
+            } else {
+                iter.remove();
+            }
+        }
+        return size;
+    }
+
+    /**
+     * check is empty
+     * @return
+     */
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    /**
+     * get effective key
      * @param key
      * @return
      */
     private Comparable<?> getEffectiveKey(Comparable<?> key) {
         if (CharSequence.class.isInstance(key)) {
             if (!caseSensitiveKey) {
-                key = String.valueOf(key).toLowerCase(); // 不区分大小写
+                key = key.toString().toLowerCase(); // 不区分大小写（转小写）
             }
             if (compressKey) {
-                key = HashUtils.sha1Hex(String.valueOf(key)); // 压缩
+                key = HashUtils.sha1Hex(key.toString()); // 压缩key
             }
         }
         return key;
     }
 
     /**
-     * 删除过期数据
+     * clear all
      */
-    private void cleanExpiration() {
-        if (!lock.tryLock()) return;
-        long now = now();
-        try {
-            for (Map.Entry<Comparable<?>, CacheBean<T>> entry : cache.entrySet()) {
-                if (entry.getValue().isExpire(now)) cache.remove(entry.getKey());
-            }
-        } finally {
-            lock.unlock();
+    public void clear() {
+        cache.clear();
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        Random random = new Random();
+        DateProvider dateProvider = DateProvider.SYSTEM;
+        Cache<Void> cache = CacheBuilder.newBuilder().caseSensitiveKey(false).compressKey(true).autoReleaseInSeconds(2).build();
+        for (int i = 0; i < 10; i++) {
+            new Thread() {
+                @Override
+                public void run() {
+                    while (true) {
+                        cache.set(ObjectUtils.uuid(8, true), null, dateProvider.now() + random.nextInt(3000));
+                    }
+                }
+            }.start();
+        }
+
+        while (true) {
+            System.out.println(cache.size());
+            Thread.sleep(1000);
         }
     }
 

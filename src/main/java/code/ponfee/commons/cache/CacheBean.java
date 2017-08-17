@@ -5,7 +5,10 @@ package code.ponfee.commons.cache;
  * @author fupf
  * @param <T>
  */
-class CacheBean<T> {
+class CacheBean<T> implements java.io.Serializable {
+
+    private static final long serialVersionUID = 4266458031910874821L;
+
     private long expireTimeMillis; // 失效时间
     private T value; // 值
 
@@ -14,7 +17,7 @@ class CacheBean<T> {
         this.expireTimeMillis = expireTimeMillis;
     }
 
-    public boolean isAlive(long refTimeMillis) {
+    boolean isAlive(long refTimeMillis) {
         if (Cache.KEEPALIVE_FOREVER == expireTimeMillis) {
             return true;
         } else {
@@ -22,11 +25,11 @@ class CacheBean<T> {
         }
     }
 
-    public boolean isExpire(long refTimeMillis) {
+    boolean isExpire(long refTimeMillis) {
         return !isAlive(refTimeMillis);
     }
 
-    public T getValue() {
+    T getValue() {
         return value;
     }
 

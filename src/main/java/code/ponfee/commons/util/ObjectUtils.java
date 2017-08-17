@@ -22,7 +22,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -38,18 +37,18 @@ public final class ObjectUtils {
 
     // 不区分大小写，去掉了1,0,i,o几个容易混淆的字符
     private static final String[] CASE_SENSITIVE = {
-        "a", "b", "c", "d", "e", "f", "g", "h", /*"i",*/"j", "k", "l",
-        "m", "n", /*"o",*/ "p", "q", "r", "s", "t", "u", "v", "x", "w",
-        "y", "z", /*"0", "1",*/ "2", "3", "4", "5", "6", "7", "8", "9",
-        "A", "B", "C", "D", "E", "F", "G", "H", /*"I",*/"J", "K", "L",
-        "M", "N", /*"O",*/ "P", "Q", "R", "S", "T", "U", "V", "X", "W",
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l",
+        "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
+        "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
+        "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X",
         "Y", "Z" };
 
     // 纯大写字母加数字
     private static final String[] CASE_IGNORE = {
-        "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E",
-        "F", "G", "H", "J", "K", "L", "M", "N", "P", "Q", "R", "S", "T",
-        "U", "V", "X", "W", "Y", "Z" };
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", 
+        "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", 
+        "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
 
     public static final String[] URL_SAFE_BASE64_CODES = {
         "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
@@ -205,8 +204,8 @@ public final class ObjectUtils {
      * @return
      */
     public static boolean isEmptyString(Object value) {
-        return CharSequence.class.isInstance(value) 
-               && StringUtils.isEmpty((CharSequence) value);
+        return CharSequence.class.isInstance(value)
+            && StringUtils.isEmpty((CharSequence) value);
     }
 
     public static Object nullValue(Object obj) {
@@ -482,8 +481,8 @@ public final class ObjectUtils {
         int len = 8;
         Set<String> set = new HashSet<>();
         String uuid;
-        for (int i = 0; i < 999; i++) {
-            uuid = uuid(len);
+        for (int i = 0; i < 99; i++) {
+            uuid = uuid(len, URL_SAFE_BASE64_CODES);
             if (!set.add(uuid)) {
                 System.err.println(uuid);
             }
@@ -504,72 +503,5 @@ public final class ObjectUtils {
         System.out.println(toString(intersect(list1, list2)));
         System.out.println(list1);
         System.out.println(list2);
-
-        System.out.println(Strings.crc32(uuid32()));
-
-        System.out.println(bean2map(new TestBean(1, "zs")));
-        System.out.println(map2bean(ImmutableMap.of("age", 1, "firstName", "lisi"), TestBean.class));
-        System.out.println(map2bean(ImmutableMap.of("age", 1, "first_name", "lisi"), TestBean.class));
-
-        System.out.println((Long.parseLong("ff", 16)));
-        System.out.println(map2bean(ImmutableMap.of("height", "1.0", "first_name", "lisi", "weight", 123.4), TestBean.class));
-        System.out.println(String.class.isInstance(null));
-
-        int i = 1;
-        Object o = i;
-        System.out.println(o.getClass());
-    }
-
-    static class TestBean {
-        private int age;
-        private String weight;
-        private double height;
-        private String firstName;
-
-        public TestBean() {}
-
-        public TestBean(int age, String firstName) {
-            super();
-            this.age = age;
-            this.firstName = firstName;
-        }
-
-        public int getAge() {
-            return age;
-        }
-
-        public void setAge(int age) {
-            this.age = age;
-        }
-
-        public String getFirstName() {
-            return firstName;
-        }
-
-        public void setFirstName(String firstName) {
-            this.firstName = firstName;
-        }
-
-        public double getHeight() {
-            return height;
-        }
-
-        public void setHeight(double height) {
-            this.height = height;
-        }
-
-        public String getWeight() {
-            return weight;
-        }
-
-        public void setWeight(String weight) {
-            this.weight = weight;
-        }
-
-        @Override
-        public String toString() {
-            return "TestBean [age=" + age + ", weight=" + weight + ", height=" + height + ", firstName=" + firstName + "]";
-        }
-
     }
 }
