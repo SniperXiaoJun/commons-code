@@ -4,7 +4,7 @@ import java.util.Date;
 
 import code.ponfee.commons.constrain.Constraint;
 import code.ponfee.commons.constrain.Constraint.Tense;
-import code.ponfee.commons.constrain.FieldConstraint;
+import code.ponfee.commons.constrain.FieldValidator;
 
 public class TestConstraint {
 
@@ -25,6 +25,6 @@ public class TestConstraint {
         t.s2 = "1";
         t.date = new Date(System.currentTimeMillis()+5000000);
 
-        FieldConstraint.newInstance().constrain(t);
+        FieldValidator.newInstance().constrain(t);
     }
 }

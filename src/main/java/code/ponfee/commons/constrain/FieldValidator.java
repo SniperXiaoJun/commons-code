@@ -26,13 +26,13 @@ import code.ponfee.commons.util.ObjectUtils;
 /**
  * <pre>
  *   校验bean实体中含@Constraint注解的属性
- *   e.g.：FieldConstraint.newInstance().constrain(bean);
+ *   e.g.：FieldValidator.newInstance().constrain(bean);
  * </pre>
  * 
  * 字段校验
  * @author fupf
  */
-public class FieldConstraint {
+public class FieldValidator {
 
     static final int MAX_MSG_SIZE = 2000;
     private static final String CFG_ERR = "约束配置错误[";
@@ -41,8 +41,8 @@ public class FieldConstraint {
     static final Cache<String[]> METHOD_SIGN_CACHE = CacheBuilder.newBuilder().compressKey(true).build();
     private static final Cache<checkResult> META_CFG_CACHE = CacheBuilder.newBuilder().compressKey(true).build();
 
-    public static FieldConstraint newInstance() {
-        return new FieldConstraint();
+    public static FieldValidator newInstance() {
+        return new FieldValidator();
     }
 
     /**
@@ -76,7 +76,8 @@ public class FieldConstraint {
         }
     }
 
-    protected final String constrain(String name, String field, Object value, Constraint cst, Class<?> type) {
+    protected final String constrain(String name, String field, Object value, 
+                                     Constraint cst, Class<?> type) {
         name += "@" + field;
         checkResult result = META_CFG_CACHE.get(name);
         if (result == null) {
@@ -114,7 +115,8 @@ public class FieldConstraint {
         }
     }
 
-    protected final String constrain(String name, Object value, Constraint cst, Class<?> type) {
+    protected final String constrain(String name, Object value, 
+                                     Constraint cst, Class<?> type) {
         // 验证配置
         verifyMeta(name, cst, type);
 
@@ -138,7 +140,8 @@ public class FieldConstraint {
     private void verifyMeta(String name, Constraint c, Class<?> type) {
         if (type == null) return;
 
-        type = org.apache.commons.lang3.ClassUtils.primitiveToWrapper(type); // 基本类型转包装类型（如果是）
+        // 基本类型转包装类型（如果是）
+        type = org.apache.commons.lang3.ClassUtils.primitiveToWrapper(type);
         if ((isNotBlank(c.regExp()) || isNotBlank(c.datePattern())
             || c.notBlank() || c.maxLen() > -1 || c.minLen() > -1)
             && !CharSequence.class.isAssignableFrom(type)) {
@@ -160,14 +163,16 @@ public class FieldConstraint {
             && !Date.class.isAssignableFrom(type)) {
             throw new UnsupportedOperationException(CFG_ERR + name + "]：非日期类型不支持时态验证");
         }
-        if (c.notEmpty() && !isEmptyType(type)) {
+        if (c.notEmpty() && !isEmptiable(type)) {
             throw new UnsupportedOperationException(CFG_ERR + name + "非集合/字符类型不支持非空验证");
         }
     }
 
-    private boolean isEmptyType(Class<?> type) {
-        return CharSequence.class.isAssignableFrom(type) || Collection.class.isAssignableFrom(type)
-            || type.isArray() || Map.class.isAssignableFrom(type) || Dictionary.class.isAssignableFrom(type);
+    private boolean isEmptiable(Class<?> type) {
+        return CharSequence.class.isAssignableFrom(type) || 
+               Collection.class.isAssignableFrom(type) || 
+               type.isArray() || Map.class.isAssignableFrom(type) || 
+               Dictionary.class.isAssignableFrom(type);
     }
 
     /**

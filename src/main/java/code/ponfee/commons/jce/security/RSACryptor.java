@@ -24,7 +24,6 @@ import java.util.Base64;
 
 import javax.crypto.Cipher;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -51,18 +50,17 @@ import org.bouncycastle.pkcs.jcajce.JcePKCSPBEOutputEncryptorBuilder;
 
 import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.jce.RSASignAlgorithm;
-import code.ponfee.commons.util.Bytes;
-import code.ponfee.commons.util.MavenProjects;
-import code.ponfee.commons.util.Streams;
 
 /**
  * RSA加/解密，签名/验签
  * 
  * PKCS#1格式：BEGIN RSA PRIVATE KEY
  * PKCS#8格式：BEGIN PRIVATE KEY
+ * PKCS#8加密：BEGIN ENCRYPTED PRIVATE KEY
  * @author fupf
  */
 public final class RSACryptor {
+    private RSACryptor() {}
 
     private static final String ALG_RSA = "RSA";
 
@@ -121,8 +119,7 @@ public final class RSACryptor {
         v2.add(new DEROctetString(Base64.getDecoder().decode(pkcs1PrivateKey)));
         ASN1Sequence seq = new DERSequence(v2);
         try {
-            //return fromPkcs8PrivateKey(seq.getEncoded(ASN1Sequence.DER)); // bcmail-jdk16
-            return fromPkcs8PrivateKey(Base64.getEncoder().encodeToString(seq.getEncoded())); // bcmail-jdk15on
+            return fromPkcs8PrivateKey(Base64.getEncoder().encodeToString(seq.getEncoded()));
         } catch (IOException e) {
             throw new SecurityException(e);
         }
@@ -596,46 +593,4 @@ public final class RSACryptor {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        RSAKeyPair keyPair = genRSAKeyPair(1024);
-        test(keyPair.getPrivateKey(), extractPublicKey(keyPair.getPrivateKey()));
-        
-        test(fromPkcs1PemPrivateKey(toPkcs1PemPrivateKey(fromPkcs1PrivateKey(keyPair.getPkcs1PrivateKey()))),
-             fromPkcs8PemPublicKey(toPkcs8PemPublicKey(fromPkcs1PublicKey(keyPair.getPkcs1PublicKey()))));
-        
-        test(fromPkcs1PrivateKey(toPkcs1PrivateKey(keyPair.getPrivateKey())),
-             fromPkcs1PublicKey(keyPair.getPkcs1PublicKey()));
-
-        test(fromPkcs8PrivateKey(keyPair.getPkcs8PrivateKey()),
-             fromPkcs8PublicKey(keyPair.getPkcs8PublicKey()));
-
-        System.out.println(fromEncryptedPkcs8PemPrivateKey(toEncryptedPkcs8PemPrivateKey(keyPair.getPrivateKey(),"123"), "123"));
-
-        System.out.println(toPkcs1PrivateKey(keyPair.getPrivateKey()));
-        System.out.println(toPkcs8PrivateKey(keyPair.getPrivateKey()));
-        System.out.println(toPkcs1PemPrivateKey(keyPair.getPrivateKey()));
-        System.out.println(toEncryptedPkcs8PemPrivateKey(keyPair.getPrivateKey(), "1234"));
-    }
-
-    private  static void test(RSAPrivateKey privateKey, RSAPublicKey publicKey) throws IOException {
-        long i = System.currentTimeMillis();
-        System.out.println("=============================加密测试==============================");
-        //byte[] data = "加解密测试".getBytes();
-        byte[] data = Streams.file2bytes(MavenProjects.getMainJavaFile(RSACryptor.class));
-        System.out.println("原文：");
-        System.out.println(Bytes.hexDump(ArrayUtils.subarray(data, 0, 100)));
-        byte[] encodedData = RSACryptor.encrypt(data, publicKey);
-        System.out.println("密文：");
-        System.out.println(Bytes.hexDump(ArrayUtils.subarray(encodedData, 0, 100)));
-        System.out.println("解密：");
-        System.out.println(Bytes.hexDump(ArrayUtils.subarray(RSACryptor.decrypt(encodedData, privateKey), 0, 100)));
-
-        System.out.println("===========================签名测试=========================");
-        data = Base64.getDecoder().decode("");
-        byte[] signed = RSACryptor.signSha1(data, privateKey);
-        System.out.println("签名数据：len->" + signed.length + " ， b64->" + Base64.getEncoder().encodeToString(signed));
-        System.out.println("验签结果：" + RSACryptor.verifySha1(data, publicKey, signed));
-
-        System.out.println("cost time: " + (System.currentTimeMillis() - i));
-    }
 }

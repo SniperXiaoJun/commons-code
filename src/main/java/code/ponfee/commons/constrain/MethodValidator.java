@@ -29,7 +29,7 @@ import code.ponfee.commons.util.ObjectUtils;
  *    2.编写子类：
  *        `@Component
  *        `@Aspect
- *        public class TestMethodValidator extends MethodConstraint {
+ *        public class TestMethodValidator extends MethodValidator {
  *            `@Around(value = "execution(public * code.ponfee.xxx.service.impl.*Impl.*(..)) && `@annotation(cst)", argNames = "pjp,cst")
  *            public `@Override Object constrain(ProceedingJoinPoint pjp, Constraints cst) throws Throwable {
  *                return super.constrain(pjp, cst);
@@ -40,9 +40,9 @@ import code.ponfee.commons.util.ObjectUtils;
  * 参数校验
  * @author fupf
  */
-public class MethodConstraint extends FieldConstraint {
+public abstract class MethodValidator extends FieldValidator {
 
-    private static Logger logger = LoggerFactory.getLogger(MethodConstraint.class);
+    private static Logger logger = LoggerFactory.getLogger(MethodValidator.class);
 
     /**
      * @param joinPoint
@@ -56,7 +56,8 @@ public class MethodConstraint extends FieldConstraint {
             return joinPoint.proceed();
         }
 
-        MethodSignature ms = (MethodSignature) joinPoint.getSignature(); // Method method = mSign.getMethod();
+        // Method method = mSign.getMethod();
+        MethodSignature ms = (MethodSignature) joinPoint.getSignature();
         Method method = joinPoint.getTarget().getClass().getMethod(ms.getName(), ms.getParameterTypes());
         String methodSign = ClassUtils.getMethodSignature(method);
         String[] argsName = METHOD_SIGN_CACHE.get(methodSign);

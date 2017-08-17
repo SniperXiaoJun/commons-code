@@ -26,9 +26,9 @@ import code.ponfee.commons.util.ObjectUtils;
  * 
  * @author fupf
  */
-public class ParamsConstraint extends FieldConstraint {
+public abstract class ParamsValidator extends FieldValidator {
 
-    private static Logger logger = LoggerFactory.getLogger(ParamsConstraint.class);
+    private static Logger logger = LoggerFactory.getLogger(ParamsValidator.class);
 
     /**
      * @param joinPoint

@@ -7,9 +7,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <pre>
- * 如果是日志入库，则不能用于service的只读事务方法
- * </pre>
+ * 如果是日志入库，则无法用在service的只读事务方法上
+ * 需要新开启嵌套的事务
+ * <p>
  * 
  * 日志注解
  * @author fupf
@@ -23,7 +23,8 @@ public @interface LogAnnotation {
     String desc() default "";
 
     enum LogType {
-        UNDEFINED(0x0, null), ADD(0x1, "新增"), UPDATE(0x2, "更新"), DELETE(0x3, "删除"), QUERY(0x4, "查询");
+        UNDEFINED(0x0, null), ADD(0x1, "新增"), UPDATE(0x2, "更新"), 
+        DELETE(0x3, "删除"), QUERY(0x4, "查询");
 
         private int type;
 

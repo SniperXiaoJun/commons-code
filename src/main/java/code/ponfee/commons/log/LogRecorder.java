@@ -17,7 +17,7 @@ import code.ponfee.commons.util.ObjectUtils;
  *   2.编写子类：
  *     `@Component
  *     `@Aspect
- *     public class TestLogger extends LoggerAspect {
+ *     public class TestLogger extends LogRecorder {
  *         `@Around(value = "execution(public * cn.xxx.service.impl.*Impl.*(..)) && @annotation(log)", argNames = "pjp,log")
  *         `@Override
  *         public Object around(ProceedingJoinPoint pjp, LogAnnotation log) throws Throwable {
@@ -29,16 +29,16 @@ import code.ponfee.commons.util.ObjectUtils;
  * 日志管理切面处理
  * @author fupf
  */
-public abstract class LoggerAspect {
+public abstract class LogRecorder {
 
-    private static Logger logger = LoggerFactory.getLogger(LoggerAspect.class);
+    private static Logger logger = LoggerFactory.getLogger(LogRecorder.class);
     private final int alarmThresholdMillis; // 告警阀值
 
-    public LoggerAspect() {
+    public LogRecorder() {
         this(2000); // default 2000ms
     }
 
-    public LoggerAspect(int alarmThresholdMillis) {
+    public LogRecorder(int alarmThresholdMillis) {
         this.alarmThresholdMillis = alarmThresholdMillis < 0 ? 1 : alarmThresholdMillis;
     }
 
