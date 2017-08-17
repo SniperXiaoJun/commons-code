@@ -70,7 +70,6 @@ public class Captchas {
      * @param code
      */
     public static void generate(int width, int height, OutputStream out, String code) {
-        int verifySize = code.length();
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2 = image.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -113,13 +112,14 @@ public class Captchas {
 
         g2.setColor(getRandColor(100, 160));
         int fontSize = height - 12;
-        Font font = new Font("Algerian", Font.ITALIC, fontSize);
-        g2.setFont(font);
+        g2.setFont(new Font("Algerian", Font.ITALIC, fontSize));
         char[] chars = code.toCharArray();
+        int verifySize = code.length();
         for (int i = 0; i < verifySize; i++) {
             AffineTransform affine = new AffineTransform();
-            affine.setToRotation(Math.PI / 4 * ThreadLocalRandom.current().nextDouble() * (ThreadLocalRandom.current().nextBoolean() ? 1 : -1), (width
-                / verifySize) * i + fontSize / 2, height / 2);
+            affine.setToRotation(Math.PI / 4 * ThreadLocalRandom.current().nextDouble() * 
+                                 (ThreadLocalRandom.current().nextBoolean() ? 1 : -1), 
+                                 (width / verifySize) * i + fontSize / 2, height / 2);
             g2.setTransform(affine);
             g2.drawChars(chars, i, 1, ((width - 10) / verifySize) * i + 5, height / 2 + fontSize / 2 - 10);
         }
@@ -127,8 +127,7 @@ public class Captchas {
         g2.dispose();
 
         try {
-            JPEGCodec.createJPEGEncoder(out).encode(image);
-            //ImageIO.write(image, "JPEG", os);
+            JPEGCodec.createJPEGEncoder(out).encode(image); // ImageIO.write(image, "JPEG", os);
         } catch (ImageFormatException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -185,7 +184,6 @@ public class Captchas {
 
     private static void shearY(Graphics g, int w1, int h1, Color color) {
         int period = ThreadLocalRandom.current().nextInt(40) + 10; // 50;
-
         boolean borderGap = true;
         double frames = 20, phase = 7;
         for (int d, i = 0; i < w1; i++) {

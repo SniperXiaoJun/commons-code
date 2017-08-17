@@ -19,8 +19,8 @@ import javax.crypto.spec.DHParameterSpec;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * Diffie-Hellman加解密组件
- * 一般用于密钥交换
+ * Diffie-Hellman加解密组件（一般用于密钥交换）
+ * @author fupf
  */
 public abstract class DHCryptor {
     private static final String ALGORITHM = "DH";

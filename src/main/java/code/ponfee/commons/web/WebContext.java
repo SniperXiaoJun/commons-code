@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
- * 线程级的web上下文持有类
+ * 本地线程级的web上下文持有类
  * @author fupf
  */
 public final class WebContext {

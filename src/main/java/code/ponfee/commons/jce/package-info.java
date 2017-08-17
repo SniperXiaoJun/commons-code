@@ -41,5 +41,7 @@
  *    RIPEMD-160：哈希加密算法，用于替代128 位哈希函数 MD4、MD5 和 RIPEMD
  * 
  * 8、密码安全：BCrypt、SCrypt、PBKDF2
+ * 
+ * @author fupf
  */
 package code.ponfee.commons.jce;

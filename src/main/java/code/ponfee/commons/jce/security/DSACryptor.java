@@ -17,8 +17,8 @@ import com.google.common.collect.ImmutableMap;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
- * DSA签名/验签
- * 只用于数字签名
+ * DSA签名/验签（只用于数字签名）
+ * @author fupf
  */
 public abstract class DSACryptor {
 

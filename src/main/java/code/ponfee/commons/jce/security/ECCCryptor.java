@@ -23,8 +23,8 @@ import sun.security.ec.ECPrivateKeyImpl;
 import sun.security.ec.ECPublicKeyImpl;
 
 /**
- * 基于椭圆曲线算法的非对称加解密
- * 未实现
+ * 基于椭圆曲线算法的非对称加解密（未实现）
+ * @author fupf
  */
 @SuppressWarnings("restriction")
 public abstract class ECCCryptor {

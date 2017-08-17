@@ -80,31 +80,32 @@ public final class Bytes {
     }
 
     /**
-     * byte[]转HEX
+     * byte[]转hex
      * @param str
      * @return
      */
     public static String hexEncode(byte[] bytes) {
         //new BigInteger(1, bytes).toString(16);
         StringBuilder builder = new StringBuilder(bytes.length * 2);
-        // 将字节数组中每个字节拆解成2位16进制整数
-        for (int i = 0; i < bytes.length; i++) {
-            builder.append(HEX_CODES.charAt((bytes[i] & 0xf0) >> 4));
-            builder.append(HEX_CODES.charAt((bytes[i] & 0x0f) >> 0));
+        // one byte -> two hex
+        for (int n = bytes.length, i = 0; i < n; i++) {
+            builder.append(HEX_CODES.charAt((bytes[i] & 0xf0) >> 4))
+                   .append(HEX_CODES.charAt((bytes[i] & 0x0f) >> 0));
         }
         return builder.toString();
     }
 
     /**
-     * HEX转byte[]
+     * hex转byte[]
      * @param hex
      * @return
      */
     public static byte[] hexDecode(String hex) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(hex.length() / 2);
-        // 将每2位16进制整数组装成一个字节
+        // two hex -> one byte
         for (int i = 0, n = hex.length(); i < n; i += 2) {
-            baos.write(HEX_CODES.indexOf(hex.charAt(i)) << 4 | HEX_CODES.indexOf(hex.charAt(i + 1)));
+            baos.write(HEX_CODES.indexOf(hex.charAt(i)) << 4 | 
+                       HEX_CODES.indexOf(hex.charAt(i + 1)));
         }
         return baos.toByteArray();
     }
@@ -145,17 +146,17 @@ public final class Bytes {
 
     /**
      * random byte[] array by SecureRandom
-     * @param numBytes
+     * @param numOfByte
      * @return
      */
-    public static byte[] randomBytes(int numBytes) {
-        byte[] bytes = new byte[numBytes];
+    public static byte[] randomBytes(int numOfByte) {
+        byte[] bytes = new byte[numOfByte];
         RANDOM.nextBytes(bytes);
         return bytes;
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println(hexDump(randomBytes(40)));
+        System.out.println(hexDump(randomBytes(457)));
 
         System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes(20)));
         System.out.println(org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(randomBytes(20)));
