@@ -15,6 +15,7 @@ import code.ponfee.commons.util.Bytes;
  * @author fupf
  */
 public final class SymmetricCryptorBuilder {
+    private SymmetricCryptorBuilder() {}
 
     private Algorithm algorithm; // 加密算法
     private byte[] key; // 密钥
@@ -22,8 +23,6 @@ public final class SymmetricCryptorBuilder {
     private Padding padding; // 填充
     private IvParameterSpec iv; // 填充向量
     private Provider provider; // 加密服务提供方
-
-    private SymmetricCryptorBuilder() {};
 
     public static SymmetricCryptorBuilder newBuilder(Algorithm algorithm) {
         SymmetricCryptorBuilder builder = new SymmetricCryptorBuilder();
@@ -62,6 +61,10 @@ public final class SymmetricCryptorBuilder {
     }
 
     public SymmetricCryptor build() {
+        if (mode != null && padding == null) {
+            throw new IllegalArgumentException("padding cannot be null in mode encrypt.");
+        }
+
         SecretKey secretKey;
         if (key == null) {
             try {

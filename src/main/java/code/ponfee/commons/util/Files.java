@@ -15,9 +15,11 @@ import org.apache.commons.lang3.StringUtils;
 import sun.security.action.GetPropertyAction;
 
 @SuppressWarnings("restriction")
-public class Files {
+public final class Files {
+    private Files() {}
 
-    private static final String[] FILE_SIZE_UNITS = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+    private static final String[] FILE_UNITS = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+
     public static final int EOF = -1;
     public static final String LINE_SEPARATOR;
     static {
@@ -30,17 +32,22 @@ public class Files {
      * 获取带单位的文件名，单位会自动显示为合适的值，如B、KB、MB等 
      * @param size 文件字节大小 
      */
-    public static String readableFileSize(long size) {
+    public static String human(long size) {
         if (size <= 0) return "0";
         int digit = (int) (Math.log10(size) / Math.log10(1024));
-        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digit)) + FILE_SIZE_UNITS[digit];
+        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digit)) + FILE_UNITS[digit];
     }
 
-    public static CharSequence readFile(String file) {
-        return readFile(new File(file));
+    /**
+     * 读取文件为字序列
+     * @param file
+     * @return
+     */
+    public static CharSequence read(String file) {
+        return read(new File(file));
     }
 
-    public static CharSequence readFile(File file) {
+    public static CharSequence read(File file) {
         FileChannel channel = null;
         try (FileInputStream in = new FileInputStream(file)) {
             channel = in.getChannel();
@@ -51,8 +58,8 @@ public class Files {
         } finally {
             if (channel != null) try {
                 channel.close();
-            } catch (IOException e) {
-                // ignored
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
         }
     }
@@ -74,7 +81,7 @@ public class Files {
         if (!file.exists()) {
             file.mkdirs();
         } else if (file.isFile()) {
-            throw new IllegalArgumentException("file [" + file.getAbsolutePath() + "] not a dir");
+            throw new IllegalStateException("file [" + file.getAbsolutePath() + "] not a dir");
         }
         return file;
     }
@@ -101,17 +108,18 @@ public class Files {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
             }
         } else if (file.isDirectory()) {
-            throw new IllegalArgumentException("dir [" + file.getAbsolutePath() + "] not a file");
+            throw new IllegalStateException("dir [" + file.getAbsolutePath() + "] not a file");
         }
         return file;
     }
 
     public static void main(String[] args) {
-        System.out.println(readableFileSize(1456125000l));
+        System.out.println(human(1456125000l));
         System.out.println(LINE_SEPARATOR);
-        touch(new File("D:\\test"));
+        touch(new File("D:\\test1"));
+        System.out.println(read(MavenProjects.getMainJavaFile(Files.class)));
     }
 }
