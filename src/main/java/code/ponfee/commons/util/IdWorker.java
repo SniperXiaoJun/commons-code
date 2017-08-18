@@ -103,7 +103,7 @@ public final class IdWorker {
      * 根据IP地址作为workerId
      * @return
      */
-    public static IdWorker getSimpleInstance() {
+    public static IdWorker localIpWorker() {
         IdWorker worker = new IdWorker(0);
         long maxWorkerId = Networks.ipReduce("255.255.255.255");
 
@@ -125,7 +125,7 @@ public final class IdWorker {
     }
 
     public static void main(String[] args) {
-        final IdWorker idWorker = getSimpleInstance();
+        final IdWorker idWorker = localIpWorker();
         final Set<Long> set = new HashSet<>();
         long id;
         for (int i = 0; i < 100000000; i++) {

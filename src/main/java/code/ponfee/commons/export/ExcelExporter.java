@@ -250,14 +250,14 @@ public class ExcelExporter extends AbstractExporter {
         anchor.setAnchorType(AnchorType.DONT_MOVE_AND_RESIZE);
         drawing.createPicture(anchor, workbook.addPicture(imageBytes, XSSFWorkbook.PICTURE_TYPE_PNG));
 
-        /*int pictureIdx = workbook.addPicture(imageBytes, Workbook.PICTURE_TYPE_PNG);  
-        CreationHelper helper = workbook.getCreationHelper();  
-        Drawing drawing = sheet.createDrawingPatriarch();  
-        ClientAnchor anchor = helper.createClientAnchor();  
-        anchor.setCol1(0);  
+        /*int pictureIdx = workbook.addPicture(imageBytes, Workbook.PICTURE_TYPE_PNG);
+        CreationHelper helper = workbook.getCreationHelper();
+        Drawing drawing = sheet.createDrawingPatriarch();
+        ClientAnchor anchor = helper.createClientAnchor();
+        anchor.setCol1(0);
         anchor.setRow1(sheet.getLastRowNum());
-        Picture pict = drawing.createPicture(anchor, pictureIdx);  
-        pict.resize(1); */
+        Picture pict = drawing.createPicture(anchor, pictureIdx);
+        pict.resize(1);*/
     }
 
     /**

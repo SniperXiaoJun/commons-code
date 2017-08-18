@@ -32,14 +32,21 @@ import code.ponfee.commons.util.ObjectUtils;
 public abstract class LogRecorder {
 
     private static Logger logger = LoggerFactory.getLogger(LogRecorder.class);
+
     private final int alarmThresholdMillis; // 告警阀值
+    private final FrequencyLimiter freqLimiter;
 
     public LogRecorder() {
         this(2000); // default 2000ms
     }
 
     public LogRecorder(int alarmThresholdMillis) {
+        this(alarmThresholdMillis, null);
+    }
+
+    public LogRecorder(int alarmThresholdMillis, FrequencyLimiter freqLimiter) {
         this.alarmThresholdMillis = alarmThresholdMillis < 0 ? 1 : alarmThresholdMillis;
+        this.freqLimiter = freqLimiter;
     }
 
     /**
@@ -63,6 +70,13 @@ public abstract class LogRecorder {
         MethodSignature m = (MethodSignature) pjp.getSignature();
         Method method = pjp.getTarget().getClass().getMethod(m.getName(), m.getParameterTypes());
         String methodName = ClassUtils.getMethodSignature(method);
+
+        // request frequency limit
+        if (log != null && log.isLimit() && freqLimiter != null
+            && !freqLimiter.checkAndTrace(methodName)) {
+            throw new IllegalStateException("request rejection");
+        }
+
         LogInfo logInfo = new LogInfo(methodName);
         if (log != null) {
             logInfo.setType(log.type());
@@ -92,7 +106,7 @@ public abstract class LogRecorder {
             cost = (int) (System.currentTimeMillis() - start);
             logger.error("[exec-throwing]-[{}]{}-{}", methodName, logs, ObjectUtils.toString(logInfo.getArgs()), e);
             logInfo.setException(ExceptionTracker.peekStackTrace(e));
-            throw e;
+            throw e; // 向外抛
         } finally {
             logInfo.setCostTime(cost);
             try {

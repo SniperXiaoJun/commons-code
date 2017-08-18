@@ -39,6 +39,17 @@ public final class AsyncBatchConsumer<T> extends Thread {
     }
 
     /**
+     * @param factory  消费线程工厂
+     */
+    public AsyncBatchConsumer(RunnableFactory<T> factory, int thresholdPeriod, int thresholdChunk) {
+        this(factory, new ThreadPoolExecutor(1, 10, 300, TimeUnit.SECONDS, 
+                                             new SynchronousQueue<Runnable>(), // 超过则让调用方线程处理
+                                             new ThreadPoolExecutor.CallerRunsPolicy()), 
+             thresholdPeriod, thresholdChunk);
+        needDestroyWhenEnd = true;
+    }
+
+    /**
      * @param factory          消费线程工厂
      * @param executor         线程执行器
      * @param thresholdPeriod  消费周期阀值

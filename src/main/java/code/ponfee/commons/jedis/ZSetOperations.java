@@ -62,6 +62,25 @@ public class ZSetOperations extends JedisOperations {
     }
 
     /**
+     * 批量添加
+     * @param key           byte array of key
+     * @param scoreMembers  byte array member
+     * @param seconds       expire in spec seconds
+     * @return
+     */
+    public long zadd(final byte[] key, final Map<byte[], Double> scoreMembers, final Integer seconds) {
+        return hook(shardedJedis -> {
+            long rtn = shardedJedis.zadd(key, scoreMembers);
+            expireForce(shardedJedis, key, seconds);
+            return rtn;
+        }, 0L, key, scoreMembers, seconds);
+    }
+
+    public long zadd(final byte[] key, final Map<byte[], Double> scoreMembers) {
+        return this.zadd(key, scoreMembers, null);
+    }
+
+    /**
      * <pre>
      *  返回有序集 key 中，成员 member 的 score 值。
      *  如果 member 元素不是有序集 key 的成员，或 key 不存在，返回 nil 。

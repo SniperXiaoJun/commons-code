@@ -4,6 +4,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,7 +37,7 @@ import code.ponfee.commons.reflect.Fields;
 public final class ObjectUtils {
 
     // 不区分大小写，去掉了1,0,i,o几个容易混淆的字符
-    private static final String[] CASE_SENSITIVE = {
+    public static final String[] CASE_SENSITIVE = {
         "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l",
         "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
         "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
@@ -45,7 +46,7 @@ public final class ObjectUtils {
         "Y", "Z" };
 
     // 纯大写字母加数字
-    private static final String[] CASE_IGNORE = {
+    public static final String[] CASE_IGNORE = {
         "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", 
         "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", 
         "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
@@ -394,15 +395,17 @@ public final class ObjectUtils {
         return target;
     }
 
+    /**
+     * short uuid
+     * @param len
+     * @return
+     */
     public static String uuid(int len) {
-        return uuid(len, false);
-    }
-
-    public static String uuid(int len, boolean caseSensitive) {
-        return uuid(len, caseSensitive ? CASE_SENSITIVE : CASE_IGNORE);
+        return uuid(len, URL_SAFE_BASE64_CODES);
     }
 
     /**
+     * short uuid
      * should between 3 (inclusive) and 32 (exclusive)
      * @param len
      * @param chars
@@ -418,12 +421,26 @@ public final class ObjectUtils {
         return builder.toString();
     }
 
+    /**
+     * uuid 32 string
+     * @return
+     */
     public static String uuid32() {
-        return uuid36().replace("-", "");
+        UUID uuid = UUID.randomUUID();
+        return Long.toHexString(uuid.getMostSignificantBits())
+             + Long.toHexString(uuid.getLeastSignificantBits());
     }
 
-    public static String uuid36() {
-        return UUID.randomUUID().toString();
+    /**
+     * uuid byte araay
+     * @return
+     */
+    public static byte[] uuid() {
+        UUID uuid = UUID.randomUUID();
+        return ByteBuffer.wrap(new byte[16])
+                         .putLong(uuid.getMostSignificantBits())
+                         .putLong(uuid.getLeastSignificantBits())
+                         .array();
     }
 
     /**
@@ -489,7 +506,7 @@ public final class ObjectUtils {
         }
 
         System.out.println(toString(Strings.slice("6f2e8fb0df2a4cf29abd382a08ef329e", 33)));
-        System.out.println(uuid(8, true));
+        System.out.println(uuid(8));
 
         String[] s1 = { "1" };
         String[] s2 = { "2" };

@@ -18,17 +18,21 @@ import code.ponfee.commons.util.ObjectUtils;
 /**
  * <pre>
  * 方法参数校验：拦截参数中包含@ConstrainParam注解的方法
- *  `@Around(value = "execution(public * code.ponfee.xxx.service.impl.*Impl.*(@code.ponfee.commons.constrain.ConstrainParam (*)))")
- *  public Object constrain(ProceedingJoinPoint joinPoint) throws Throwable {
- *      return new ParameterConstraint().constrain(joinPoint);
- *  }
+ * `@Component
+ * `@Aspect
+ * public class TestParamValidator extends ParamValidator {
+ *    `@Around(value = "execution(public * code.ponfee.xxx.service.impl.*Impl.*(@code.ponfee.commons.constrain.ConstrainParam (*)))")
+ *    public `@Override Object constrain(ProceedingJoinPoint joinPoint) throws Throwable {
+ *      return super.constrain(joinPoint);
+ *    }
+ * }
  * </pre>
  * 
  * @author fupf
  */
-public abstract class ParamsValidator extends FieldValidator {
+public abstract class ParamValidator extends FieldValidator {
 
-    private static Logger logger = LoggerFactory.getLogger(ParamsValidator.class);
+    private static Logger logger = LoggerFactory.getLogger(ParamValidator.class);
 
     /**
      * @param joinPoint

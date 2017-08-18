@@ -103,7 +103,7 @@ public class Cache<T> {
         this.set(key, value, now() + aliveInMillis);
     }
 
-    public void set(Comparable<?> key, long expireTimeMillis) {
+    public void setWithNull(Comparable<?> key, long expireTimeMillis) {
         set(key, null, expireTimeMillis);
     }
 
@@ -286,7 +286,7 @@ public class Cache<T> {
                 public void run() {
                     while (true) {
                         if (cache.isDestroy()) break;
-                        cache.set(ObjectUtils.uuid(8, true), null, dateProvider.now() + random.nextInt(3000));
+                        cache.set(ObjectUtils.uuid(8), null, dateProvider.now() + random.nextInt(3000));
                     }
                 }
             }.start();
