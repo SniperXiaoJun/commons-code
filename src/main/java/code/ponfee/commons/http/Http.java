@@ -3,6 +3,8 @@ package code.ponfee.commons.http;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,15 +18,12 @@ import java.util.Map;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.JavaType;
 
 import code.ponfee.commons.json.Jsons;
-import net.sf.jmimemagic.Magic;
-import net.sf.jmimemagic.MagicMatchNotFoundException;
 
 /**
  * <pre>
@@ -374,29 +373,8 @@ public final class Http {
             request.send(data);
         }
 
-        if (parts != null && !parts.isEmpty()) {
-            byte[] data;
-            InputStream stream;
-            String contentType = null;
-            try {
-                for (MimePart part : parts) {
-                    if (byte[].class.isInstance(part.mime)) {
-                        data = (byte[]) part.mime;
-                        stream = new ByteArrayInputStream(data);
-                    } else {
-                        stream = (InputStream) part.mime;
-                        data = IOUtils.toByteArray(stream);
-                    }
-                    try {
-                        contentType = Magic.getMagicMatch(data).getMimeType();
-                    } catch (MagicMatchNotFoundException e) {
-                        //contentType = "text/plain";
-                    }
-                    request.part(part.name, part.filename, contentType, stream);
-                }
-            } catch (Exception e) {
-                throw new HttpException(e);
-            }
+        for (MimePart part : parts) {
+            request.part(part.name, part.filename, null, part.stream);
         }
 
         return request;
@@ -421,29 +399,42 @@ public final class Http {
      * 文件
      */
     private static final class MimePart {
-        private String name;
-        private String filename;
-        private Object mime;
+
+        private String name;     // 表单域字段名
+        private String filename; // 文件名
+        private InputStream stream; // 文件流
 
         MimePart(String name, String filename, Object mime) {
-            if (mime instanceof InputStream || mime instanceof byte[]) {
-                this.mime = mime;
-            } else if (mime instanceof Byte[]) {
-                this.mime = ArrayUtils.toPrimitive((Byte[]) mime);
-            } else {
-                throw new IllegalArgumentException("mime must be InputStream or byte[].");
+            try {
+                if (mime instanceof byte[]) {
+                    this.stream = new ByteArrayInputStream((byte[]) mime);
+                } else if (mime instanceof CharSequence) {
+                    this.stream = new FileInputStream(((CharSequence) mime).toString());
+                } else if (mime instanceof File) {
+                    this.stream = new FileInputStream((File) mime);
+                } else if (mime instanceof InputStream) {
+                    this.stream = (InputStream) mime;
+                } else if (mime instanceof Byte[]) {
+                    this.stream = new ByteArrayInputStream(ArrayUtils.toPrimitive((Byte[]) mime));
+                } else {
+                    throw new IllegalArgumentException("mime must be a file data.");
+                }
+            } catch (FileNotFoundException e) {
+                throw new IllegalArgumentException(e);
             }
             this.name = name;
             this.filename = filename;
         }
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws Exception {
         //System.out.println(Bytes.hexDump(Http.get("http://www.apachelounge.com/download/VC14/binaries/httpd-2.4.25-win64-VC14.zip").download()));
-        Http.get("https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.zip").download(new FileOutputStream("d:/elasticsearch-5.5.1.zip"));
+        //Http.get("https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.zip").download(new FileOutputStream("d:/elasticsearch-5.5.1.zip"));
         System.out.println("\r\n");
         //System.out.println(Bytes.hexDump(Http.get("http://www.stockstar.com").download()));
         System.out.println("\r\n");
         //Http.get("http://www.baidu.com").download("d:/baidu.html");
+        //System.out.println(Http.get("http://localhost:8081/audit/getImg").data(ImmutableMap.of("imgPath", "imgPath")).request());
+        System.out.println(Http.get("http://localhost:8081/audit/uploadFile").part("file", "abc.png", "d:/test/2.png").request());
     }
 }
