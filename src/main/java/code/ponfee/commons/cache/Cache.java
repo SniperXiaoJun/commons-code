@@ -264,7 +264,7 @@ public class Cache<T> {
      * @return
      */
     private Comparable<?> getEffectiveKey(Comparable<?> key) {
-        if (CharSequence.class.isInstance(key)) {
+        if (key instanceof CharSequence) {
             if (!caseSensitiveKey) {
                 key = key.toString().toLowerCase(); // 不区分大小写（转小写）
             }

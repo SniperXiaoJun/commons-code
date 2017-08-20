@@ -32,7 +32,7 @@ public class FreqTester {
     @Test
     public void test1() throws InterruptedException {
         FrequencyLimiter f = new FrequencyLimiter(jedisClient, 1, 5);
-        f.setLimitQtyInMinutes("abc", 5000);
+        f.setLimitQtyInMinutes("abc", 50000000);
         for (int i = 0; i < 200; i++) {
             new Thread(){
                 @Override
@@ -52,7 +52,7 @@ public class FreqTester {
                 
             }.start();
         }
-        Thread.sleep(1000000);
+        Thread.sleep(10000);
         
     }
 }

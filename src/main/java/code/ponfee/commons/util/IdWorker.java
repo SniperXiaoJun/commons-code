@@ -126,7 +126,7 @@ public final class IdWorker {
 
     public static void main(String[] args) {
         final IdWorker idWorker = localIpWorker();
-        final Set<Long> set = new HashSet<>();
+        final Set<Long> set = new HashSet<>(81920000);
         long id;
         for (int i = 0; i < 100000000; i++) {
             id = idWorker.nextId();

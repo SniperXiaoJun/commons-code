@@ -31,18 +31,14 @@ public final class AsyncBatchConsumer<T> extends Thread {
      * @param factory  消费线程工厂
      */
     public AsyncBatchConsumer(RunnableFactory<T> factory) {
-        this(factory, new ThreadPoolExecutor(1, 10, 300, TimeUnit.SECONDS, 
-                                             new SynchronousQueue<Runnable>(), // 超过则让调用方线程处理
-                                             new ThreadPoolExecutor.CallerRunsPolicy()), 
-             1000, 200);
-        needDestroyWhenEnd = true;
+        this(factory, 1000, 200);
     }
 
     /**
      * @param factory  消费线程工厂
      */
     public AsyncBatchConsumer(RunnableFactory<T> factory, int thresholdPeriod, int thresholdChunk) {
-        this(factory, new ThreadPoolExecutor(1, 10, 300, TimeUnit.SECONDS, 
+        this(factory, new ThreadPoolExecutor(0, 10, 300, TimeUnit.SECONDS, 
                                              new SynchronousQueue<Runnable>(), // 超过则让调用方线程处理
                                              new ThreadPoolExecutor.CallerRunsPolicy()), 
              thresholdPeriod, thresholdChunk);
@@ -90,7 +86,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
             if (!queue.isEmpty()) {
                 for (int n = thresholdChunk - list.size(), i = 0; i < n; i++) {
                     T t = queue.poll();
-                    if (t == null) break; // break for loop
+                    if (t == null) break; // break inner for loop
                     list.add(t);
                 }
             }

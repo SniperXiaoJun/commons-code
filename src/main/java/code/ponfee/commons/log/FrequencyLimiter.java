@@ -28,30 +28,25 @@ public class FrequencyLimiter {
 
     private final JedisClient jedisClient;
     private final JedisLock lock;
-    private final ScheduledExecutorService executor;
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final AsyncBatchConsumer<Trace> consumer;
     private final int clearBeforeMillis;
     private final IdWorker idWorker = IdWorker.localIpWorker(); 
-    private final Cache<Long> localCache = CacheBuilder.newBuilder().keepaliveInMillis(60000L)
-                                                       .autoReleaseInSeconds(60).build();
+    private final Cache<Long> localCache = CacheBuilder.newBuilder().keepaliveInMillis(300000L) // 5 minutes of cache alive
+                                                       .autoReleaseInSeconds(300).build(); // 5 minutes to release expire cache
 
     public FrequencyLimiter(JedisClient jedisClient, int clearBeforeHours, int autoClearInSeconds) {
         this.jedisClient = jedisClient;
-        this.lock = new JedisLock(jedisClient, TRACE_KEY_PREFIX + "clear", autoClearInSeconds);
-        this.executor = Executors.newSingleThreadScheduledExecutor();
         this.clearBeforeMillis = (int) TimeUnit.HOURS.toMillis(clearBeforeHours);
 
-        // 定时清除记录（zrem range by score）
+        // 定时清除记录(zrem range by score)
+        this.lock = new JedisLock(jedisClient, TRACE_KEY_PREFIX + "clear", autoClearInSeconds / 2);
         this.executor.scheduleAtFixedRate(() -> {
-            if (!lock.tryLock()) return;
-
-            try {
+            if (this.lock.tryLock()) { // 不用释放锁，让其自动超时
                 long now = System.currentTimeMillis();
                 for (String key : jedisClient.keysOps().keys(TRACE_KEY_PREFIX + "*")) {
                     jedisClient.zsetOps().zremrangeByScore(key, 0, now - clearBeforeMillis);
                 }
-            } finally {
-                lock.unlock();
             }
         }, autoClearInSeconds, autoClearInSeconds, TimeUnit.SECONDS);
 
@@ -90,12 +85,15 @@ public class FrequencyLimiter {
             return false; // 禁止访问
         }
 
-        long currentQtyLastMinutes = countByLastMinutes(key, 1);
-        if (currentQtyLastMinutes > limitQtyInMinutes) {
+        if (limitQtyInMinutes < countByLastMinutes(key, 1)) {
             return false; // 超过频率
         } else {
             return consumer.add(new Trace(key, System.currentTimeMillis()));
         }
+    }
+
+    public long countByLastHours(String key, int hours) {
+        return countByLastMinutes(key, hours * 60);
     }
 
     public long countByLastMinutes(String key, int minutes) {
@@ -104,8 +102,7 @@ public class FrequencyLimiter {
 
     public long countByLastSeconds(String key, int seconds) {
         long now = System.currentTimeMillis();
-        long fromMillis = now - TimeUnit.SECONDS.toMillis(seconds);
-        return countByRangeMillis(key, fromMillis, now);
+        return countByRangeMillis(key, now - TimeUnit.SECONDS.toMillis(seconds), now);
     }
 
     public long countByBeforeRangeHours(String key, int beforeFromHours, int beforeToHours) {
@@ -117,9 +114,6 @@ public class FrequencyLimiter {
     }
 
     public long countByBeforeRangeSeconds(String key, int beforeFromSeconds, int beforeToSeconds) {
-        Preconditions.checkState(beforeFromSeconds > beforeToSeconds, 
-                                 "before from must be greater than before to.");
-
         long now = System.currentTimeMillis();
         long fromMillis = now - TimeUnit.SECONDS.toMillis(beforeFromSeconds);
         long toMillis = now - TimeUnit.SECONDS.toMillis(beforeToSeconds);
@@ -130,11 +124,10 @@ public class FrequencyLimiter {
      * 设置一分钟的访问频率
      * @param key
      * @param qty
-     * @return
+     * @return 是否设置成功：true是；false否；
      */
     public boolean setLimitQtyInMinutes(String key, long qty) {
-        boolean flag = jedisClient.valueOps().setLong(QTY_KEY_PREFIX + key, 
-                                                      qty, EXPIRE_SECONDS);
+        boolean flag = jedisClient.valueOps().setLong(QTY_KEY_PREFIX + key, qty, EXPIRE_SECONDS);
         if (flag) {
             localCache.getAndRemove(key); // remove this key
         }
@@ -152,14 +145,31 @@ public class FrequencyLimiter {
         if (qty == null) {
             qty = jedisClient.valueOps().getLong(QTY_KEY_PREFIX + key, EXPIRE_SECONDS);
             if (qty == null) {
-                qty = -1L;
+                qty = -1L; // -1表示无限制
             }
             localCache.set(key, qty);
         }
         return qty;
     }
 
+    /**
+     * 销毁
+     */
+    public void destory() {
+        localCache.destroy();
+        executor.isShutdown();
+
+    }
+
+    /**
+     * 查询指定时间段的访问次数
+     * @param key
+     * @param fromMillis
+     * @param toMillis
+     * @return  the qty of this time range
+     */
     private long countByRangeMillis(String key, long fromMillis, long toMillis) {
+        Preconditions.checkState(fromMillis < toMillis, "from time must be less than to time.");
         return jedisClient.zsetOps().zcount(TRACE_KEY_PREFIX + key, fromMillis, toMillis);
     }
 
@@ -176,6 +186,5 @@ public class FrequencyLimiter {
     public static void main(String[] args) {
         System.out.println(System.currentTimeMillis());
         System.out.println(System.nanoTime());
-        System.out.println(TRACE_KEY_PREFIX.substring(0, TRACE_KEY_PREFIX.length() - 1));
     }
 }
