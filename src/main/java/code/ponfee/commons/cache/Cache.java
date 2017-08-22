@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.google.common.base.Preconditions;
+
 import code.ponfee.commons.jce.hash.HashUtils;
 import code.ponfee.commons.util.ObjectUtils;
 
@@ -37,6 +39,9 @@ public class Cache<T> {
     private ScheduledExecutorService executor;
 
     Cache(boolean caseSensitiveKey, boolean compressKey, long keepAliveInMillis, int autoReleaseInSeconds) {
+        Preconditions.checkArgument(keepAliveInMillis >= 0);
+        Preconditions.checkArgument(autoReleaseInSeconds >= 0);
+
         this.caseSensitiveKey = caseSensitiveKey;
         this.compressKey = compressKey;
         this.keepAliveInMillis = keepAliveInMillis;

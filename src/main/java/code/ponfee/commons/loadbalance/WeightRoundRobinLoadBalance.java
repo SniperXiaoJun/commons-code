@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author fupf
  */
 public class WeightRoundRobinLoadBalance extends AbstractLoadBalance {
+
     private final AtomicLong pos = new AtomicLong(0);
     private final List<String> servers;
 
