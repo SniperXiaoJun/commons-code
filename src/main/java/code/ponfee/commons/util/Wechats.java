@@ -68,7 +68,7 @@ public class Wechats {
         params.put("code", code);
         params.put("grant_type", "authorization_code");
         Map<String, String> result = Http.post("https://api.weixin.qq.com/sns/oauth2/access_token")
-                                         .params(params).request(Map.class);
+                                         .data(params).request(Map.class);
         if (result.containsKey("errcode")) {
             throw new RuntimeException(Jsons.NORMAL.stringify(result));
         }
@@ -119,7 +119,7 @@ public class Wechats {
         params.put("openid", openid);
         params.put("lang", "zh_CN");
         Map<String, String> result = Http.post("https://api.weixin.qq.com/sns/userinfo")
-                                         .params(params).request(Map.class);
+                                         .data(params).request(Map.class);
         if (result.containsKey("errcode")) {
             throw new RuntimeException(Jsons.NORMAL.stringify(result));
         }
@@ -140,7 +140,7 @@ public class Wechats {
         params.put("appid", appid);
         params.put("secret", secret);
         Map<String, Object> result = Http.post("https://api.weixin.qq.com/cgi-bin/token")
-                                         .params(params).request(Map.class);
+                                         .data(params).request(Map.class);
         return getString(result, "access_token");
     }
 
@@ -166,7 +166,7 @@ public class Wechats {
         params.put("access_token", token);
         params.put("type", type);
         Map<String, Object> result = Http.post("https://api.weixin.qq.com/cgi-bin/ticket/getticket")
-                                         .params(params).request(Map.class);
+                                         .data(params).request(Map.class);
         return getString(result, "ticket");
     }
 

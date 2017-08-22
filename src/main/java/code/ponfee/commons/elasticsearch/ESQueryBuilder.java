@@ -1,5 +1,6 @@
 package code.ponfee.commons.elasticsearch;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -13,8 +14,6 @@ import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 
-import com.google.common.collect.Lists;
-
 /**
  * 查询条件构建
  * @author fupf
@@ -24,8 +23,8 @@ public class ESQueryBuilder {
     private String[] indices;
     private String[] types;
     private BoolQueryBuilder boolQuery;
-    private List<SortBuilder<?>> sorts = Lists.newArrayList();
-    private List<AggregationBuilder> aggs = Lists.newArrayList();
+    private List<SortBuilder<?>> sorts = new ArrayList<>();
+    private List<AggregationBuilder> aggs = new ArrayList<>();
     private String[] fields;
 
     private ESQueryBuilder(String[] indices, String[] types) {
@@ -56,7 +55,7 @@ public class ESQueryBuilder {
      * @param term
      * @return
      */
-    public ESQueryBuilder must(String name, Object term) {
+    public ESQueryBuilder mustEquals(String name, Object term) {
         if (this.boolQuery == null) {
             this.boolQuery = QueryBuilders.boolQuery();
         }
@@ -70,11 +69,11 @@ public class ESQueryBuilder {
      * @param items  
      * @return
      */
-    public ESQueryBuilder must(String name, List<Object> items) {
+    public ESQueryBuilder mustIn(String name, List<Object> items) {
         if (this.boolQuery == null) {
             this.boolQuery = QueryBuilders.boolQuery();
         }
-        this.boolQuery.must(QueryBuilders.termQuery(name, items));
+        this.boolQuery.must(QueryBuilders.termsQuery(name, items));
         return this;
     }
 
@@ -84,11 +83,11 @@ public class ESQueryBuilder {
      * @param items  
      * @return
      */
-    public ESQueryBuilder must(String name, Object... items) {
+    public ESQueryBuilder mustIn(String name, Object... items) {
         if (this.boolQuery == null) {
             this.boolQuery = QueryBuilders.boolQuery();
         }
-        this.boolQuery.must(QueryBuilders.termQuery(name, items));
+        this.boolQuery.must(QueryBuilders.termsQuery(name, items));
         return this;
     }
 
@@ -109,7 +108,7 @@ public class ESQueryBuilder {
     }
 
     /**
-     * exists(name) && name not null && name not empty
+     * EXISTS(name) && name IS NOT NULL && name IS NOT EMPTY
      * @param name
      * @return
      */
@@ -122,7 +121,20 @@ public class ESQueryBuilder {
     }
 
     /**
-     * name like 'prefix%'
+     * NOT EXISTS(name) && name IS NULL && name IS EMPTY
+     * @param name
+     * @return
+     */
+    public ESQueryBuilder mustNotExists(String name) {
+        if (this.boolQuery == null) {
+            this.boolQuery = QueryBuilders.boolQuery();
+        }
+        this.boolQuery.mustNot(QueryBuilders.existsQuery(name));
+        return this;
+    }
+
+    /**
+     * name LIKE 'prefix%'
      * @param name
      * @param prefix
      * @return
@@ -132,6 +144,63 @@ public class ESQueryBuilder {
             this.boolQuery = QueryBuilders.boolQuery();
         }
         this.boolQuery.must(QueryBuilders.prefixQuery(name, prefix));
+        return this;
+    }
+
+    /**
+     * ? !=term
+     * @param name
+     * @param term
+     * @return
+     */
+    public ESQueryBuilder mustNotEquals(String name, Object term) {
+        if (this.boolQuery == null) {
+            this.boolQuery = QueryBuilders.boolQuery();
+        }
+        this.boolQuery.mustNot(QueryBuilders.termQuery(name, term));
+        return this;
+    }
+
+    /**
+     * ? NOT IN(item1,item2,..,itemn)
+     * @param name
+     * @param items
+     * @return
+     */
+    public ESQueryBuilder mustNotIn(String name, Object... items) {
+        if (this.boolQuery == null) {
+            this.boolQuery = QueryBuilders.boolQuery();
+        }
+        this.boolQuery.mustNot(QueryBuilders.termsQuery(name, items));
+        return this;
+    }
+
+    /**
+     * !(BETWEEN from AND to)
+     * @param name
+     * @param from
+     * @param to
+     * @return
+     */
+    public ESQueryBuilder mustNotRange(String name, Object from, Object to) {
+        if (this.boolQuery == null) {
+            this.boolQuery = QueryBuilders.boolQuery();
+        }
+        this.boolQuery.mustNot(QueryBuilders.rangeQuery(name).from(from).to(to));
+        return this;
+    }
+
+    /**
+     * name NOT LIKE 'prefix%'
+     * @param name
+     * @param prefix
+     * @return
+     */
+    public ESQueryBuilder mustNotPrefix(String name, String prefix) {
+        if (this.boolQuery == null) {
+            this.boolQuery = QueryBuilders.boolQuery();
+        }
+        this.boolQuery.mustNot(QueryBuilders.prefixQuery(name, prefix));
         return this;
     }
 
@@ -145,7 +214,7 @@ public class ESQueryBuilder {
      * @param term 
      * @return
      */
-    public ESQueryBuilder should(String name, Object term) {
+    public ESQueryBuilder shouldEquals(String name, Object term) {
         if (this.boolQuery == null) {
             this.boolQuery = QueryBuilders.boolQuery();
         }
@@ -159,7 +228,7 @@ public class ESQueryBuilder {
      * @param items
      * @return
      */
-    public ESQueryBuilder should(String name, List<Object> items) {
+    public ESQueryBuilder shouldIn(String name, List<Object> items) {
         if (this.boolQuery == null) {
             this.boolQuery = QueryBuilders.boolQuery();
         }
@@ -173,7 +242,7 @@ public class ESQueryBuilder {
      * @param items
      * @return
      */
-    public ESQueryBuilder should(String name, Object... items) {
+    public ESQueryBuilder shouldIn(String name, Object... items) {
         if (this.boolQuery == null) {
             this.boolQuery = QueryBuilders.boolQuery();
         }
@@ -194,50 +263,6 @@ public class ESQueryBuilder {
             this.boolQuery = QueryBuilders.boolQuery();
         }
         this.boolQuery.should(QueryBuilders.rangeQuery(name).from(from).to(to));
-        return this;
-    }
-    
-    // ----------------------------------must not---------------------------------- //
-    /**
-     * ? <>term
-     * @param name
-     * @param term
-     * @return
-     */
-    public ESQueryBuilder mustNot(String name, Object term) {
-        if (this.boolQuery == null) {
-            this.boolQuery = QueryBuilders.boolQuery();
-        }
-        this.boolQuery.mustNot(QueryBuilders.termQuery(name, term));
-        return this;
-    }
-    
-    /**
-     * ? NOT IN(item1,item2,..,itemn)
-     * @param name
-     * @param items
-     * @return
-     */
-    public ESQueryBuilder mustNot(String name, Object... items) {
-        if (this.boolQuery == null) {
-            this.boolQuery = QueryBuilders.boolQuery();
-        }
-        this.boolQuery.mustNot(QueryBuilders.termsQuery(name, items));
-        return this;
-    }
-    
-    /**
-     * !(BETWEEN from AND to)
-     * @param name
-     * @param from
-     * @param to
-     * @return
-     */
-    public ESQueryBuilder mustNot(String name, Object from, Object to) {
-        if (this.boolQuery == null) {
-            this.boolQuery = QueryBuilders.boolQuery();
-        }
-        this.boolQuery.mustNot(QueryBuilders.rangeQuery(name).from(from).to(to));
         return this;
     }
 

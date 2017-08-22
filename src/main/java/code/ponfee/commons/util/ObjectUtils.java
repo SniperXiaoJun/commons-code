@@ -36,28 +36,41 @@ import code.ponfee.commons.reflect.Fields;
  */
 public final class ObjectUtils {
 
-    // 不区分大小写，去掉了1,0,i,o几个容易混淆的字符
-    public static final String[] CASE_SENSITIVE = {
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l",
-        "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
-        "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
-        "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X",
-        "Y", "Z" };
-
-    // 纯大写字母加数字
-    public static final String[] CASE_IGNORE = {
-        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", 
-        "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", 
-        "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
-
-    public static final String[] URL_SAFE_BASE64_CODES = {
-        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-        "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
-        "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "_", "."
+    public static final char[] URL_SAFE_BASE64_CODES = {
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '_', '.'
     };
+
+    /**
+     * long值压缩
+     * @param i
+     * @return
+     */
+    public static String reduce(long i) {
+        int radix = URL_SAFE_BASE64_CODES.length;
+        char[] buf = new char[65];
+        int charPos = 64;
+        boolean negative = (i < 0);
+
+        if (!negative) {
+            i = -i;
+        }
+
+        while (i <= -radix) {
+            buf[charPos--] = URL_SAFE_BASE64_CODES[(int)(-(i % radix))];
+            i = i / radix;
+        }
+        buf[charPos] = URL_SAFE_BASE64_CODES[(int)(-i)];
+
+        if (negative) {
+            buf[--charPos] = '-';
+        }
+
+        return new String(buf, charPos, (65 - charPos));
+    }
 
     /**
      * 对象toString
@@ -411,12 +424,13 @@ public final class ObjectUtils {
      * @param chars
      * @return
      */
-    public static String uuid(int len, String[] chars) {
+    public static String uuid(int len, char[] chars) {
         int size = chars.length;
         StringBuilder builder = new StringBuilder(len);
         for (String str : Strings.slice(uuid32(), len)) {
-            if (isEmpty(str)) continue;
-            builder.append(chars[(int) (Long.parseLong(str, 16) % size)]);
+            if (StringUtils.isNotEmpty(str)) {
+                builder.append(chars[(int) (Long.parseLong(str, 16) % size)]);
+            }
         }
         return builder.toString();
     }
@@ -495,10 +509,15 @@ public final class ObjectUtils {
     }
 
     public static void main(String[] args) throws IOException {
+        System.out.println(Long.parseLong("ff", 16));
+        System.out.println(Long.MAX_VALUE);
+        System.out.println(Long.toString(Long.MAX_VALUE, 36));
+        System.out.println(reduce(Long.MAX_VALUE));
+        System.out.println(reduce(Long.MIN_VALUE));
         int len = 8;
         Set<String> set = new HashSet<>();
         String uuid;
-        for (int i = 0; i < 99; i++) {
+        for (int i = 0; i < 9999999; i++) {
             uuid = uuid(len, URL_SAFE_BASE64_CODES);
             if (!set.add(uuid)) {
                 System.err.println(uuid);

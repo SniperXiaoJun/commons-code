@@ -3,18 +3,15 @@ package code.ponfee.commons.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.Charset;
-import java.security.AccessController;
 import java.text.DecimalFormat;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.io.output.StringBuilderWriter;
 
-import sun.security.action.GetPropertyAction;
-
-@SuppressWarnings("restriction")
 public final class Files {
     private Files() {}
 
@@ -23,9 +20,14 @@ public final class Files {
     public static final int EOF = -1;
     public static final String LINE_SEPARATOR;
     static {
-        String separator = (String) AccessController.doPrivileged(new GetPropertyAction("line.separator"));
+        /*String separator = (String) AccessController.doPrivileged(new GetPropertyAction("line.separator"));
         if (StringUtils.isEmpty(separator)) separator = System.getProperty("line.separator", "/n");
-        LINE_SEPARATOR = separator;
+        LINE_SEPARATOR = separator;*/
+        final StringBuilderWriter buf = new StringBuilderWriter(4);
+        final PrintWriter out = new PrintWriter(buf);
+        out.println();
+        LINE_SEPARATOR = buf.toString();
+        out.close();
     }
 
     /** 

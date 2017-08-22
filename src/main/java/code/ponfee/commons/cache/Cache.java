@@ -34,7 +34,7 @@ public class Cache<T> {
     private volatile boolean isDestroy = false; // 是否被销毁
     private DateProvider dateProvider = DateProvider.SYSTEM;
     private final Lock lock = new ReentrantLock(); // 定时清理加锁
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService executor;
 
     Cache(boolean caseSensitiveKey, boolean compressKey, long keepAliveInMillis, int autoReleaseInSeconds) {
         this.caseSensitiveKey = caseSensitiveKey;
@@ -43,7 +43,7 @@ public class Cache<T> {
 
         if (autoReleaseInSeconds > 0) {
             // 定时清理
-            executor.scheduleAtFixedRate(() -> {
+            (executor = Executors.newSingleThreadScheduledExecutor()).scheduleAtFixedRate(() -> {
                 if (!lock.tryLock()) return;
                 try {
                     long now = now();
@@ -250,7 +250,9 @@ public class Cache<T> {
      */
     public void destroy() {
         isDestroy = true;
-        executor.shutdown();
+        if (executor != null) {
+            executor.shutdown();
+        }
         cache.clear();
     }
 

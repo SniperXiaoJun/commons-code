@@ -126,10 +126,15 @@ public final class IdWorker {
 
     public static void main(String[] args) {
         final IdWorker idWorker = localIpWorker();
-        final Set<Long> set = new HashSet<>(81920000);
-        long id;
-        for (int i = 0; i < 100000000; i++) {
-            id = idWorker.nextId();
+        final Set<String> set = new HashSet<>(81920000);
+        System.out.println(Long.toHexString(-1456153131));
+        System.out.println(Long.toString(-1456153131, 36));
+        System.out.println(Long.toUnsignedString(-1456153131, 36));
+        String id;
+        for (int i = 0; i < 1; i++) {
+            id = Long.toHexString(idWorker.nextId());
+            //id = Long.toString(idWorker.nextId(), 32);
+            //id = Long.toUnsignedString(idWorker.nextId());
             if (!set.add(id)) System.err.println(id);
         }
     }

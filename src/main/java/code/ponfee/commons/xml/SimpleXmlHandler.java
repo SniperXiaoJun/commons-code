@@ -24,8 +24,6 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.SAXValidator;
 import org.dom4j.util.XMLErrorHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
@@ -33,7 +31,6 @@ import org.xml.sax.SAXException;
  * @author fupf
  */
 public class SimpleXmlHandler {
-    private static Logger logger = LoggerFactory.getLogger(SimpleXmlHandler.class);
 
     /**
      * <pre>
@@ -133,7 +130,7 @@ public class SimpleXmlHandler {
             if (xml != null) try {
                 xml.close();
             } catch (IOException e) {
-                logger.error("关闭文件流异常", e);
+                e.printStackTrace();
             }
         }
     }
@@ -166,6 +163,17 @@ public class SimpleXmlHandler {
             validator.validate(new SAXReader().read(xml)); // 校验
         } catch (ParserConfigurationException | SAXException | DocumentException e) {
             throw new IllegalStateException(e);
+        } finally {
+            if (xsd != null) try {
+                xsd.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (xml != null) try {
+                xml.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         // 如果没有错误信息，说明校验成功

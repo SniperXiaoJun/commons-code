@@ -46,14 +46,12 @@ public class Result<T> implements java.io.Serializable {
     }
 
     // -----------------------------static methods/failure methods
-    public static <T> Result<T> failure(Enum<?> e) {
-        int code = (int) Fields.get(e, "code");
-        String msg = (String) Fields.get(e, "msg");
-        return failure(code, msg, null);
+    public static <T> Result<T> failure(Enum<?> em) {
+        return failure((int) Fields.get(em, "code"), (String) Fields.get(em, "msg"), null);
     }
 
-    public static <T> Result<T> failure(ResultCode rc) {
-        return failure(rc.getCode(), rc.getMsg(), null);
+    public static <T> Result<T> failure(ResultCode code) {
+        return failure(code.getCode(), code.getMsg(), null);
     }
 
     public static <T> Result<T> failure(int code, String msg) {

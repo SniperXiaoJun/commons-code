@@ -664,7 +664,7 @@ public class ElasticSearchClient implements DisposableBean {
         return client.connectedNodes().size() > 0;
     }
 
-    // --------------------------------------script-----------------------------------------
+    // --------------------------------------scripts-----------------------------------------
     /**
      * 使用脚本更新文档
      * @param index

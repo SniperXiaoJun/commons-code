@@ -29,7 +29,7 @@ public class Captchas {
     private static final String CODES = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
     private static final SecureRandom RANDOM = new SecureRandom();
     static {
-        RANDOM.setSeed(new SecureRandom(ObjectUtils.uuid32().getBytes()).generateSeed(20));
+        RANDOM.setSeed(new SecureRandom(ObjectUtils.uuid()).generateSeed(20));
     }
 
     private static final Color[] COLOR_SPACES = { Color.RED, Color.CYAN, Color.GRAY, Color.LIGHT_GRAY,

@@ -21,7 +21,7 @@ public @interface LogAnnotation {
 
     LogType type() default LogType.UNDEFINED;
 
-    boolean isLimit() default false; // 是否限制频率
+    boolean limit() default false; // 是否限制频率
 
     String desc() default "";
 

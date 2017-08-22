@@ -72,7 +72,7 @@ public abstract class LogRecorder {
         String methodName = ClassUtils.getMethodSignature(method);
 
         // request frequency limit
-        if (log != null && log.isLimit() && freqLimiter != null
+        if (log != null && log.limit() && freqLimiter != null
             && !freqLimiter.checkAndTrace(methodName)) {
             throw new IllegalStateException("request rejection");
         }
@@ -128,9 +128,9 @@ public abstract class LogRecorder {
     private String getLogs(LogAnnotation log) {
         if (log == null) return "";
 
-        StringBuilder builder = new StringBuilder("-[").append(log.type());
-        builder.append(log.desc() != null ? "," + log.desc() : "");
-        return builder.append("]").toString();
+        return new StringBuilder("-[").append(log.type())
+                                      .append(log.desc() != null ? "," + log.desc() : "")
+                                      .append("]").toString();
     }
 
 }

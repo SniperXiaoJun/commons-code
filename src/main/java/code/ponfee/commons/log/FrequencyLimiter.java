@@ -39,7 +39,7 @@ public class FrequencyLimiter {
         this.jedisClient = jedisClient;
         this.clearBeforeMillis = (int) TimeUnit.HOURS.toMillis(clearBeforeHours);
 
-        // 定时清除记录(zrem range by score)
+        // 定时清除记录(zrem range by score)，jedis:lock:freq:trace:clear
         this.lock = new JedisLock(jedisClient, TRACE_KEY_PREFIX + "clear", autoClearInSeconds / 2);
         this.executor.scheduleAtFixedRate(() -> {
             if (this.lock.tryLock()) { // 不用释放锁，让其自动超时
@@ -61,7 +61,7 @@ public class FrequencyLimiter {
                         map.put(trace.key, batch);
                     }
                     // ObjectUtils.uuid(16)
-                    batch.put(Long.toString(idWorker.nextId()), (double) trace.timeMillis);
+                    batch.put(Long.toString(idWorker.nextId(), Character.MAX_RADIX), (double) trace.timeMillis);
                 }
                 for (Entry<String, Map<String, Double>> entry : map.entrySet()) {
                     jedisClient.zsetOps().zadd(TRACE_KEY_PREFIX + entry.getKey(), entry.getValue());
