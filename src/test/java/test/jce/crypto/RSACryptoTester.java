@@ -1,19 +1,6 @@
 package test.jce.crypto;
 
-import static code.ponfee.commons.jce.security.RSACryptor.extractPublicKey;
-import static code.ponfee.commons.jce.security.RSACryptor.fromEncryptedPkcs8PemPrivateKey;
-import static code.ponfee.commons.jce.security.RSACryptor.fromPkcs1PemPrivateKey;
-import static code.ponfee.commons.jce.security.RSACryptor.fromPkcs1PrivateKey;
-import static code.ponfee.commons.jce.security.RSACryptor.fromPkcs1PublicKey;
-import static code.ponfee.commons.jce.security.RSACryptor.fromPkcs8PemPublicKey;
-import static code.ponfee.commons.jce.security.RSACryptor.fromPkcs8PrivateKey;
-import static code.ponfee.commons.jce.security.RSACryptor.fromPkcs8PublicKey;
 import static code.ponfee.commons.jce.security.RSACryptor.genRSAKeyPair;
-import static code.ponfee.commons.jce.security.RSACryptor.toEncryptedPkcs8PemPrivateKey;
-import static code.ponfee.commons.jce.security.RSACryptor.toPkcs1PemPrivateKey;
-import static code.ponfee.commons.jce.security.RSACryptor.toPkcs1PrivateKey;
-import static code.ponfee.commons.jce.security.RSACryptor.toPkcs8PemPublicKey;
-import static code.ponfee.commons.jce.security.RSACryptor.toPkcs8PrivateKey;
 
 import java.io.IOException;
 import java.security.interfaces.RSAPrivateKey;
@@ -24,6 +11,8 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSACryptor.RSAKeyPair;
+import code.ponfee.commons.jce.security.RSAPrivateKeys;
+import code.ponfee.commons.jce.security.RSAPublicKeys;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.Streams;
@@ -32,23 +21,23 @@ public class RSACryptoTester {
 
     public static void main(String[] args) throws Exception {
         RSAKeyPair keyPair = genRSAKeyPair(1024);
-        test(keyPair.getPrivateKey(), extractPublicKey(keyPair.getPrivateKey()));
+        test(keyPair.getPrivateKey(), RSAPrivateKeys.extractPublicKey(keyPair.getPrivateKey()));
         
-        test(fromPkcs1PemPrivateKey(toPkcs1PemPrivateKey(fromPkcs1PrivateKey(keyPair.getPkcs1PrivateKey()))),
-             fromPkcs8PemPublicKey(toPkcs8PemPublicKey(fromPkcs1PublicKey(keyPair.getPkcs1PublicKey()))));
+        test(RSAPrivateKeys.fromPkcs1Pem(RSAPrivateKeys.toPkcs1Pem(RSAPrivateKeys.fromPkcs1(keyPair.getPkcs1PrivateKey()))),
+             RSAPublicKeys.fromPkcs8Pem(RSAPublicKeys.toPkcs8Pem(RSAPublicKeys.fromPkcs1(keyPair.getPkcs1PublicKey()))));
         
-        test(fromPkcs1PrivateKey(toPkcs1PrivateKey(keyPair.getPrivateKey())),
-             fromPkcs1PublicKey(keyPair.getPkcs1PublicKey()));
+        test(RSAPrivateKeys.fromPkcs1(RSAPrivateKeys.toPkcs1(keyPair.getPrivateKey())),
+             RSAPublicKeys.fromPkcs1(keyPair.getPkcs1PublicKey()));
 
-        test(fromPkcs8PrivateKey(keyPair.getPkcs8PrivateKey()),
-             fromPkcs8PublicKey(keyPair.getPkcs8PublicKey()));
+        test(RSAPrivateKeys.fromPkcs8(keyPair.getPkcs8PrivateKey()),
+             RSAPublicKeys.fromPkcs8(keyPair.getPkcs8PublicKey()));
 
-        System.out.println(fromEncryptedPkcs8PemPrivateKey(toEncryptedPkcs8PemPrivateKey(keyPair.getPrivateKey(),"123"), "123"));
+        System.out.println(RSAPrivateKeys.fromEncryptedPkcs8Pem(RSAPrivateKeys.toEncryptedPkcs8Pem(keyPair.getPrivateKey(),"123"), "123"));
 
-        System.out.println(toPkcs1PrivateKey(keyPair.getPrivateKey()));
-        System.out.println(toPkcs8PrivateKey(keyPair.getPrivateKey()));
-        System.out.println(toPkcs1PemPrivateKey(keyPair.getPrivateKey()));
-        System.out.println(toEncryptedPkcs8PemPrivateKey(keyPair.getPrivateKey(), "1234"));
+        System.out.println(RSAPrivateKeys.toPkcs1(keyPair.getPrivateKey()));
+        System.out.println(RSAPrivateKeys.toPkcs8(keyPair.getPrivateKey()));
+        System.out.println(RSAPrivateKeys.toPkcs1Pem(keyPair.getPrivateKey()));
+        System.out.println(RSAPrivateKeys.toEncryptedPkcs8Pem(keyPair.getPrivateKey(), "1234"));
     }
 
     private  static void test(RSAPrivateKey privateKey, RSAPublicKey publicKey) throws IOException {

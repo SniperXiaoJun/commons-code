@@ -6,11 +6,12 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 
 import code.ponfee.commons.jce.crypto.Algorithm;
-import code.ponfee.commons.jce.crypto.SymmetricCryptor;
-import code.ponfee.commons.jce.crypto.SymmetricCryptorBuilder;
 import code.ponfee.commons.jce.crypto.Mode;
 import code.ponfee.commons.jce.crypto.Padding;
+import code.ponfee.commons.jce.crypto.SymmetricCryptor;
+import code.ponfee.commons.jce.crypto.SymmetricCryptorBuilder;
 import code.ponfee.commons.jce.security.RSACryptor;
+import code.ponfee.commons.jce.security.RSAPrivateKeys;
 
 /**
  * 加解密服务提供
@@ -96,8 +97,8 @@ public abstract class CryptoProvider {
      * RSA加/解密
      */
     public static final CryptoProvider RSA_CRYPTO = new CryptoProvider() {
-        private final RSAPrivateKey priKey = RSACryptor.fromPkcs8PrivateKey("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
-        private final RSAPublicKey pubKey = RSACryptor.extractPublicKey(priKey);
+        private final RSAPrivateKey priKey = RSAPrivateKeys.fromPkcs8("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
+        private final RSAPublicKey pubKey = RSAPrivateKeys.extractPublicKey(priKey);
 
         @Override
         public byte[] encrypt(byte[] original) {
