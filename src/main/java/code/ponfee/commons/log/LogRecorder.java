@@ -31,17 +31,22 @@ import code.ponfee.commons.util.ObjectUtils;
  */
 public abstract class LogRecorder {
 
+    private static final int DEFAULT_ALARM_THRESHOLD_MILLIS = 2000;
     private static Logger logger = LoggerFactory.getLogger(LogRecorder.class);
 
     private final int alarmThresholdMillis; // 告警阀值
-    private final FrequencyLimiter freqLimiter;
+    private final FrequencyLimiter freqLimiter; // 访问频率限制
 
     public LogRecorder() {
-        this(2000); // default 2000ms
+        this(DEFAULT_ALARM_THRESHOLD_MILLIS);
     }
 
     public LogRecorder(int alarmThresholdMillis) {
         this(alarmThresholdMillis, null);
+    }
+
+    public LogRecorder(FrequencyLimiter freqLimiter) {
+        this(DEFAULT_ALARM_THRESHOLD_MILLIS, freqLimiter);
     }
 
     public LogRecorder(int alarmThresholdMillis, FrequencyLimiter freqLimiter) {

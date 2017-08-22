@@ -24,7 +24,7 @@ import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
  * PKCS#8加密：BEGIN ENCRYPTED PRIVATE KEY
  * 
  * RSA Public Key convert
- * @author 01367825
+ * @author fupf
  */
 public final class RSAPublicKeys {
     private RSAPublicKeys() {}

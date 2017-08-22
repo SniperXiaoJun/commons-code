@@ -45,8 +45,8 @@ public enum X509CertInfo {
         this(null, desc);
     }
 
-    X509CertInfo(String name, String desc) {
-        this.attr = name;
+    X509CertInfo(String attr, String desc) {
+        this.attr = attr;
         this.desc = desc;
     }
 
