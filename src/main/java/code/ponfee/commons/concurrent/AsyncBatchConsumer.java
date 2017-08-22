@@ -84,10 +84,14 @@ public final class AsyncBatchConsumer<T> extends Thread {
 
             // 尽量不要使用queue.size()，时间复杂度O(n)
             if (!queue.isEmpty()) {
+                T t;
                 for (int n = thresholdChunk - list.size(), i = 0; i < n; i++) {
-                    T t = queue.poll();
-                    if (t == null) break; // break inner for loop
-                    list.add(t);
+                    t = queue.poll();
+                    if (t == null) {
+                        break; // break inner for loop
+                    } else {
+                        list.add(t);
+                    }
                 }
             }
 

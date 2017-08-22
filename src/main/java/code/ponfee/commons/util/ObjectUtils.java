@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -37,11 +38,14 @@ import code.ponfee.commons.reflect.Fields;
 public final class ObjectUtils {
 
     public static final char[] URL_SAFE_BASE64_CODES = {
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '_', '.'
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+        'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+        'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+        'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+        'w', 'x', 'y', 'z', '0', '1', '2', '3',
+        '4', '5', '6', '7', '8', '9', '-', '_'
     };
 
     /**
@@ -409,6 +413,36 @@ public final class ObjectUtils {
     }
 
     /**
+     * uuid byte array
+     * @return
+     */
+    public static byte[] uuid() {
+        UUID uuid = UUID.randomUUID();
+        return ByteBuffer.wrap(new byte[16])
+                         .putLong(uuid.getMostSignificantBits())
+                         .putLong(uuid.getLeastSignificantBits())
+                         .array();
+    }
+
+    /**
+     * uuid 32 string
+     * @return
+     */
+    public static String uuid32() {
+        UUID uuid = UUID.randomUUID();
+        return Long.toHexString(uuid.getMostSignificantBits())
+             + Long.toHexString(uuid.getLeastSignificantBits());
+    }
+
+    /**
+     * 22位uuid
+     * @return
+     */
+    public static String uuid22() {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(uuid());
+    }
+
+    /**
      * short uuid
      * @param len
      * @return
@@ -433,28 +467,6 @@ public final class ObjectUtils {
             }
         }
         return builder.toString();
-    }
-
-    /**
-     * uuid 32 string
-     * @return
-     */
-    public static String uuid32() {
-        UUID uuid = UUID.randomUUID();
-        return Long.toHexString(uuid.getMostSignificantBits())
-             + Long.toHexString(uuid.getLeastSignificantBits());
-    }
-
-    /**
-     * uuid byte araay
-     * @return
-     */
-    public static byte[] uuid() {
-        UUID uuid = UUID.randomUUID();
-        return ByteBuffer.wrap(new byte[16])
-                         .putLong(uuid.getMostSignificantBits())
-                         .putLong(uuid.getLeastSignificantBits())
-                         .array();
     }
 
     /**
@@ -509,6 +521,9 @@ public final class ObjectUtils {
     }
 
     public static void main(String[] args) throws IOException {
+        for (int i = 0 ; i < 1000; i++) {
+            System.out.println(uuid22());
+        }
         System.out.println(Long.parseLong("ff", 16));
         System.out.println(Long.MAX_VALUE);
         System.out.println(Long.toString(Long.MAX_VALUE, 36));

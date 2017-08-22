@@ -1,18 +1,13 @@
 package code.ponfee.commons.jce.security;
 
 import java.math.BigInteger;
-import java.security.KeyFactory;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECFieldF2m;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
-import java.security.spec.ECPrivateKeySpec;
-import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,6 +63,14 @@ public abstract class ECCCryptor {
         return keyMap;
     }
 
+    public static byte[] boByteArray(ECPrivateKey priKey) throws Exception {
+        return priKey.getEncoded();
+    }
+
+    public static byte[] boByteArray(ECPublicKey pubKey) throws Exception {
+        return pubKey.getEncoded();
+    }
+
     /**
      * 解密<br>
      * 用私钥解密
@@ -77,20 +80,12 @@ public abstract class ECCCryptor {
      * @return
      * @throws Exception
      */
-    public static byte[] decrypt(byte[] data, byte[] keyBytes) throws Exception {
-        // 取得私钥
-        PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
-
-        ECPrivateKey priKey = (ECPrivateKey) keyFactory.generatePrivate(pkcs8KeySpec);
-
-        ECPrivateKeySpec ecPrivateKeySpec = new ECPrivateKeySpec(priKey.getS(), priKey.getParams());
-
+    public static byte[] decrypt(byte[] data, ECPrivateKey priKey) throws Exception {
         // 对数据解密
         // TODO Chipher不支持EC算法 未能实现
         Cipher cipher = new NullCipher();
         // Cipher.getInstance(ALGORITHM, keyFactory.getProvider());
-        cipher.init(Cipher.DECRYPT_MODE, priKey, ecPrivateKeySpec.getParams());
+        cipher.init(Cipher.DECRYPT_MODE, priKey, priKey.getParams());
 
         return cipher.doFinal(data);
     }
@@ -104,20 +99,12 @@ public abstract class ECCCryptor {
      * @return
      * @throws Exception
      */
-    public static byte[] encrypt(byte[] data, byte[] keyBytes) throws Exception {
-        // 取得公钥
-        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
-
-        ECPublicKey pubKey = (ECPublicKey) keyFactory.generatePublic(x509KeySpec);
-
-        ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(pubKey.getW(), pubKey.getParams());
-
+    public static byte[] encrypt(byte[] data, ECPublicKey pubKey) throws Exception {
         // 对数据加密
         // TODO Chipher不支持EC算法 未能实现
         Cipher cipher = new NullCipher();
         // Cipher.getInstance(ALGORITHM, keyFactory.getProvider());
-        cipher.init(Cipher.ENCRYPT_MODE, pubKey, ecPublicKeySpec.getParams());
+        cipher.init(Cipher.ENCRYPT_MODE, pubKey, pubKey.getParams());
 
         return cipher.doFinal(data);
     }
@@ -149,9 +136,9 @@ public abstract class ECCCryptor {
 
         Map<String, ECKey> keyMap = ECCCryptor.initKey();
 
-        byte[] encodedData = ECCCryptor.encrypt(data, ECCCryptor.getPublicKey(keyMap).getEncoded());
+        byte[] encodedData = ECCCryptor.encrypt(data, ECCCryptor.getPublicKey(keyMap));
 
-        byte[] decodedData = ECCCryptor.decrypt(encodedData, ECCCryptor.getPrivateKey(keyMap).getEncoded());
+        byte[] decodedData = ECCCryptor.decrypt(encodedData, ECCCryptor.getPrivateKey(keyMap));
 
         System.out.println(new String(data));
         System.out.println(new String(encodedData));
