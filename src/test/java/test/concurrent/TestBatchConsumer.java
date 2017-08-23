@@ -38,7 +38,7 @@ public class TestBatchConsumer {
             thread.setDaemon(true);
             thread.start();
         }
-        Thread.sleep(10000);
+        Thread.sleep(5000);
         flag.set(false);
         Thread.sleep(2000);
         consumer.end();

@@ -10,6 +10,8 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Preconditions;
+
 /**
  * 异步批量消费
  * @author fupf
@@ -21,8 +23,9 @@ public final class AsyncBatchConsumer<T> extends Thread {
     private final ExecutorService executor; // 线程池执行器
     private final int thresholdPeriod; // 消费周期阀值
     private final int thresholdChunk; // 消费数量阀值
+    private final int sleepTimeMillis; // 休眠时间
     private final Queue<T> queue = new ConcurrentLinkedQueue<>();
-    private boolean needDestroyWhenEnd = false;
+    private final boolean needDestroyWhenEnd;
 
     private volatile long lastProcessTimeMillis = System.currentTimeMillis();
     private volatile boolean isEnd = false;
@@ -38,11 +41,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
      * @param factory  消费线程工厂
      */
     public AsyncBatchConsumer(RunnableFactory<T> factory, int thresholdPeriod, int thresholdChunk) {
-        this(factory, new ThreadPoolExecutor(0, 10, 300, TimeUnit.SECONDS, 
-                                             new SynchronousQueue<Runnable>(), // 超过则让调用方线程处理
-                                             new ThreadPoolExecutor.CallerRunsPolicy()), 
-             thresholdPeriod, thresholdChunk);
-        needDestroyWhenEnd = true;
+        this(factory, null, thresholdPeriod, thresholdChunk);
     }
 
     /**
@@ -53,9 +52,20 @@ public final class AsyncBatchConsumer<T> extends Thread {
      */
     public AsyncBatchConsumer(RunnableFactory<T> factory, ExecutorService executor,
                               int thresholdPeriod, int thresholdChunk) {
+        Preconditions.checkArgument(thresholdPeriod > 0);
+        Preconditions.checkArgument(thresholdChunk > 0);
+        if (executor == null) {
+            this.executor = new ThreadPoolExecutor(0, 10, 300, TimeUnit.SECONDS, 
+                                                   new SynchronousQueue<Runnable>(), // 超过则让调用方线程处理
+                                                   new ThreadPoolExecutor.CallerRunsPolicy());
+            this.needDestroyWhenEnd = true;
+        } else {
+            this.executor = executor;
+            this.needDestroyWhenEnd = false;
+        }
         this.factory = factory;
-        this.executor = executor;
         this.thresholdPeriod = thresholdPeriod;
+        this.sleepTimeMillis = thresholdPeriod < 9 ? thresholdPeriod : 9;
         this.thresholdChunk = thresholdChunk;
         super.setName("async-batch-consumer-" + Integer.toHexString(hashCode()));
         super.setDaemon(true);
@@ -71,7 +81,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
     public void run() {
         List<T> list = null;
         for (;;) {
-            if (isEnd && queue.isEmpty()) {
+            if (isEnd && queue.isEmpty() && isRefresh()) {
                 if (needDestroyWhenEnd) {
                     executor.shutdown();
                 }
@@ -95,16 +105,15 @@ public final class AsyncBatchConsumer<T> extends Thread {
                 }
             }
 
-            if (list.size() > thresholdChunk
-                || (!list.isEmpty() && (isEnd || System.currentTimeMillis() - lastProcessTimeMillis > thresholdPeriod))) {
+            if (list.size() == thresholdChunk || (!list.isEmpty() && (isEnd || isRefresh()))) {
                 // task抛异常后： execute会输出错误信息，线程结束，后续任务会创建新线程执行
                 //            submit不会输出错误信息，线程继续分配执行其它任务
                 executor.submit(factory.create(list, isEnd && queue.isEmpty())); // 提交到异步处理
                 list = null;
-                lastProcessTimeMillis = System.currentTimeMillis();
+                refresh();
             } else {
                 try {
-                    TimeUnit.MILLISECONDS.sleep(9); // sleep 9 millis seconds
+                    TimeUnit.MILLISECONDS.sleep(this.sleepTimeMillis); // sleep
                 } catch (InterruptedException ignored) {
                     ignored.printStackTrace();
                 }
@@ -147,6 +156,15 @@ public final class AsyncBatchConsumer<T> extends Thread {
 
     public void end() {
         isEnd = true;
+        refresh();
+    }
+
+    private void refresh() {
+        lastProcessTimeMillis = System.currentTimeMillis();
+    }
+
+    private boolean isRefresh() {
+        return System.currentTimeMillis() - lastProcessTimeMillis > thresholdPeriod;
     }
 
 }
