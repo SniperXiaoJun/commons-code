@@ -49,34 +49,6 @@ public final class ObjectUtils {
     };
 
     /**
-     * long值压缩
-     * @param i
-     * @return
-     */
-    public static String reduce(long i) {
-        int radix = URL_SAFE_BASE64_CODES.length;
-        char[] buf = new char[65];
-        int charPos = 64;
-        boolean negative = (i < 0);
-
-        if (!negative) {
-            i = -i;
-        }
-
-        while (i <= -radix) {
-            buf[charPos--] = URL_SAFE_BASE64_CODES[(int)(-(i % radix))];
-            i = i / radix;
-        }
-        buf[charPos] = URL_SAFE_BASE64_CODES[(int)(-i)];
-
-        if (negative) {
-            buf[--charPos] = '-';
-        }
-
-        return new String(buf, charPos, (65 - charPos));
-    }
-
-    /**
      * 对象toString
      * @param obj
      * @return
@@ -174,6 +146,12 @@ public final class ObjectUtils {
         //return list.toArray((T[]) Array.newInstance(list.get(0).getClass(), list.size())); // list.get(0) may be null
     }
 
+    /**
+     * byte array merge
+     * @param first
+     * @param rest
+     * @return
+     */
     public static byte[] concat(byte[] first, byte[]... rest) {
         if (first == null) {
             throw new IllegalArgumentException("the first array must be non null");
@@ -431,7 +409,7 @@ public final class ObjectUtils {
     public static String uuid32() {
         UUID uuid = UUID.randomUUID();
         return Long.toHexString(uuid.getMostSignificantBits())
-             + Long.toHexString(uuid.getLeastSignificantBits());
+            + Long.toHexString(uuid.getLeastSignificantBits());
     }
 
     /**
@@ -501,7 +479,8 @@ public final class ObjectUtils {
         }
 
         StackTraceElement trace = traces[deep];
-        return new StringBuilder(trace.getClassName()).append("#").append(trace.getMethodName()).append("(").append(trace.getLineNumber()).append(")").toString();
+        return new StringBuilder(trace.getClassName()).append("#").append(trace.getMethodName())
+                              .append("(").append(trace.getLineNumber()).append(")").toString();
     }
 
     /**
@@ -521,14 +500,12 @@ public final class ObjectUtils {
     }
 
     public static void main(String[] args) throws IOException {
-        for (int i = 0 ; i < 1000; i++) {
+        for (int i = 0; i < 1000; i++) {
             System.out.println(uuid22());
         }
         System.out.println(Long.parseLong("ff", 16));
         System.out.println(Long.MAX_VALUE);
         System.out.println(Long.toString(Long.MAX_VALUE, 36));
-        System.out.println(reduce(Long.MAX_VALUE));
-        System.out.println(reduce(Long.MIN_VALUE));
         int len = 8;
         Set<String> set = new HashSet<>();
         String uuid;

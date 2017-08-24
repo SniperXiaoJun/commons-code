@@ -72,7 +72,7 @@ public class JedisLock implements Lock, java.io.Serializable {
     private final transient JedisClient jedisClient;
     private final String lockKey;
     private final int timeoutSeconds; // 锁的超时时间，防止死锁
-    private final long timeoutNanos;
+    private final long timeoutMillis;
     private final long sleepMillis;
 
     public JedisLock(JedisClient jedisClient, String lockKey) {
@@ -100,7 +100,7 @@ public class JedisLock implements Lock, java.io.Serializable {
             timeoutSeconds = MIN_TOMEOUT_SECONDS;
         }
         this.timeoutSeconds = timeoutSeconds;
-        this.timeoutNanos = TimeUnit.SECONDS.toNanos(timeoutSeconds);
+        this.timeoutMillis = TimeUnit.SECONDS.toMillis(timeoutSeconds);
         this.sleepMillis = sleepMillis < MIN_SLEEP_MILLIS ? MIN_SLEEP_MILLIS : sleepMillis;
     }
 
@@ -152,7 +152,7 @@ public class JedisLock implements Lock, java.io.Serializable {
                 if (value == null) {
                     jedis.unwatch();
                     return tryLock(); // 锁被释放，重新获取
-                } else if (System.nanoTime() <= parseValue(value)) {
+                } else if (System.currentTimeMillis() <= parseValue(value)) {
                     jedis.unwatch();
                     return false; // 锁未超时
                 } else {
@@ -262,8 +262,8 @@ public class JedisLock implements Lock, java.io.Serializable {
      * @return
      */
     private String buildValue() {
-        String value = new StringBuilder(ObjectUtils.uuid32()).append(SEPARATOR)
-                           .append(System.nanoTime() + timeoutNanos).toString();
+        String value = new StringBuilder(ObjectUtils.uuid22()).append(SEPARATOR)
+                 .append(System.currentTimeMillis() + timeoutMillis).toString();
         LOCK_VALUE.set(value);
         return value;
     }

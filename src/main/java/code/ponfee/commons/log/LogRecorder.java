@@ -1,9 +1,7 @@
 package code.ponfee.commons.log;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.time.StopWatch;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
@@ -96,10 +94,10 @@ public abstract class LogRecorder {
             logger.info("[exec-before]-[{}]{}-{}", methodName, logs, ObjectUtils.toString(logInfo.getArgs()));
         }
         int cost = 0;
-        StopWatch watch = StopWatch.createStarted();
+        long start = System.currentTimeMillis();
         try {
             Object retVal = pjp.proceed();
-            cost = (int) watch.getTime(TimeUnit.MILLISECONDS);
+            cost = (int) (System.currentTimeMillis() - start);
             logInfo.setRetVal(retVal);
             if (cost > alarmThresholdMillis && logger.isWarnEnabled()) {
                 // 执行时间告警
@@ -110,12 +108,11 @@ public abstract class LogRecorder {
             }
             return retVal;
         } catch (Throwable e) {
-            cost = (int) watch.getTime(TimeUnit.MILLISECONDS);
+            cost = (int) (System.currentTimeMillis() - start);
             logger.error("[exec-throwing]-[{}]{}-{}", methodName, logs, ObjectUtils.toString(logInfo.getArgs()), e);
             logInfo.setException(ExceptionTracker.peekStackTrace(e));
             throw e; // 向外抛
         } finally {
-            watch.stop();
             logInfo.setCostTime(cost);
             try {
                 log(logInfo);
