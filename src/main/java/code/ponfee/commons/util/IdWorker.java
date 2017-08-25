@@ -103,15 +103,16 @@ public final class IdWorker {
      * 根据IP地址作为workerId
      * @return
      */
-    public static IdWorker localIpWorker() {
+    private static interface LocalIPWorker { IdWorker get(); }
+    public static final IdWorker LOCAL_IP_WORKER = ((LocalIPWorker) () -> {
         IdWorker worker = new IdWorker(0);
-        long maxWorkerId = Networks.ipReduce("255.255.255.255");
+        long maxWorkerId = Networks.ipReduce("255.255.255.255"); // 1068
 
         Fields.put(worker, "sequenceBits", 10L); // 10位
         Fields.put(worker, "sequenceMask", -1L ^ (-1L << worker.sequenceBits));
 
         Fields.put(worker, "workerIdBits", (long) Long.toBinaryString(maxWorkerId).length()); // 11位
-        Fields.put(worker, "maxWorkerId", maxWorkerId); // max 1068
+        Fields.put(worker, "maxWorkerId", maxWorkerId);
 
         Fields.put(worker, "datacenterIdBits", 0L); // 0位
         Fields.put(worker, "maxDatacenterId", -1L ^ (-1L << worker.datacenterIdBits)); // 0
@@ -122,16 +123,16 @@ public final class IdWorker {
         Fields.put(worker, "timestampMask", -1L ^ (-1L << (MAX_SIZE - worker.timestampShift)));
         Fields.put(worker, "workerId", (long) Networks.ipReduce());
         return worker;
-    }
+    }).get();
 
     public static void main(String[] args) {
-        final IdWorker idWorker = localIpWorker();
+        final IdWorker idWorker = LOCAL_IP_WORKER;
         final Set<String> set = new HashSet<>(81920000);
         System.out.println(Long.toHexString(-1456153131));
         System.out.println(Long.toString(-1456153131, 36));
         System.out.println(Long.toUnsignedString(-1456153131, 36));
         String id;
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 9999999; i++) {
             id = Long.toHexString(idWorker.nextId());
             //id = Long.toString(idWorker.nextId(), 32);
             //id = Long.toUnsignedString(idWorker.nextId());

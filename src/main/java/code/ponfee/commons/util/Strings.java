@@ -339,6 +339,16 @@ public class Strings {
         return toStringArray(Collections.list(enumeration));
     }
 
+    /**
+     * 判断是否为空字符串
+     * @param value
+     * @return
+     */
+    public static boolean isEmpty(Object value) {
+        return CharSequence.class.isInstance(value)
+            && StringUtils.isEmpty((CharSequence) value);
+    }
+
     /** 
      * 转换为下划线 
      * @param camelCaseName 下划线名

@@ -31,7 +31,6 @@ public class FrequencyLimiter {
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final AsyncBatchConsumer<Trace> consumer;
     private final int clearBeforeMillis;
-    private final IdWorker idWorker = IdWorker.localIpWorker(); 
     private final Cache<Long> localCache = CacheBuilder.newBuilder().keepaliveInMillis(300000L) // 5 minutes of cache alive
                                                        .autoReleaseInSeconds(300).build(); // 5 minutes to release expire cache
 
@@ -43,9 +42,9 @@ public class FrequencyLimiter {
         this.lock = new JedisLock(jedisClient, TRACE_KEY_PREFIX + "clear", autoClearInSeconds / 2);
         this.executor.scheduleAtFixedRate(() -> {
             if (this.lock.tryLock()) { // 不用释放锁，让其自动超时
-                long now = System.currentTimeMillis();
+                long beforeTimeMillis = System.currentTimeMillis() - clearBeforeMillis;
                 for (String key : jedisClient.keysOps().keys(TRACE_KEY_PREFIX + "*")) {
-                    jedisClient.zsetOps().zremrangeByScore(key, 0, now - clearBeforeMillis);
+                    jedisClient.zsetOps().zremrangeByScore(key, 0, beforeTimeMillis);
                 }
             }
         }, autoClearInSeconds, autoClearInSeconds, TimeUnit.SECONDS);
@@ -61,7 +60,7 @@ public class FrequencyLimiter {
                         map.put(trace.key, batch);
                     }
                     // ObjectUtils.uuid(16)
-                    batch.put(Long.toString(idWorker.nextId(), Character.MAX_RADIX), (double) trace.timeMillis);
+                    batch.put(Long.toString(IdWorker.LOCAL_IP_WORKER.nextId(), Character.MAX_RADIX), (double) trace.timeMillis);
                 }
                 for (Entry<String, Map<String, Double>> entry : map.entrySet()) {
                     jedisClient.zsetOps().zadd(TRACE_KEY_PREFIX + entry.getKey(), entry.getValue());

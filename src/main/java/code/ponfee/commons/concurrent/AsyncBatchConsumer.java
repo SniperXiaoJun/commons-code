@@ -127,6 +127,8 @@ public final class AsyncBatchConsumer<T> extends Thread {
      * @return
      */
     public boolean add(T t) {
+        Preconditions.checkState(!isEnd);
+
         return queue.offer(t);
     }
 
@@ -136,6 +138,8 @@ public final class AsyncBatchConsumer<T> extends Thread {
      * @return
      */
     public boolean add(@SuppressWarnings("unchecked") T... t) {
+        Preconditions.checkState(!isEnd);
+
         return add(Arrays.asList(t));
     }
 
@@ -145,6 +149,8 @@ public final class AsyncBatchConsumer<T> extends Thread {
      * @return
      */
     public boolean add(List<T> list) {
+        Preconditions.checkState(!isEnd);
+
         boolean flag = true;
         for (T t : list) {
             if (!queue.offer(t)) {
@@ -156,7 +162,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
 
     public void end() {
         isEnd = true;
-        refresh();
+        this.refresh();
     }
 
     private void refresh() {

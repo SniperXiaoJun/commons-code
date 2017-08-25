@@ -133,42 +133,18 @@ public final class ObjectUtils {
         List<T> list = new ArrayList<>();
         Class<?> type = null;
         for (T[] array : arrays) {
-            if (array == null) continue;
-            if (type == null) {
-                type = array.getClass().getComponentType();
+            if (array != null) {
+                if (type == null) {
+                    type = array.getClass().getComponentType();
+                }
+                list.addAll(Arrays.asList(array));
             }
-            list.addAll(Arrays.asList(array));
         }
         if (type == null) return null;
 
         return list.toArray((T[]) Array.newInstance(type, list.size()));
         //return list.toArray((T[]) new Object[list.size()]); // [Ljava.lang.Object; cannot be cast to [Ljava.lang.String;
         //return list.toArray((T[]) Array.newInstance(list.get(0).getClass(), list.size())); // list.get(0) may be null
-    }
-
-    /**
-     * byte array merge
-     * @param first
-     * @param rest
-     * @return
-     */
-    public static byte[] concat(byte[] first, byte[]... rest) {
-        if (first == null) {
-            throw new IllegalArgumentException("the first array must be non null");
-        }
-        int totalLength = first.length;
-        for (byte[] array : rest) {
-            if (array == null) continue;
-            totalLength += array.length;
-        }
-        byte[] result = Arrays.copyOf(first, totalLength);
-        int offset = first.length;
-        for (byte[] array : rest) {
-            if (array == null) continue;
-            System.arraycopy(array, 0, result, offset, array.length);
-            offset += array.length;
-        }
-        return result;
     }
 
     /**
@@ -192,16 +168,6 @@ public final class ObjectUtils {
         } else {
             return false;
         }
-    }
-
-    /**
-     * 判断是否为空字符串
-     * @param value
-     * @return
-     */
-    public static boolean isEmptyString(Object value) {
-        return CharSequence.class.isInstance(value)
-            && StringUtils.isEmpty((CharSequence) value);
     }
 
     public static Object nullValue(Object obj) {
@@ -228,9 +194,9 @@ public final class ObjectUtils {
                     Object value = map.get(name);
                     Class<?> type = prop.getPropertyType();
 
-                    if ((value == null || isEmptyString(value)) && type.isPrimitive()) {
+                    if ((value == null || Strings.isEmpty(value)) && type.isPrimitive()) {
                         continue; // 原始类型跳过
-                    } else if (isEmptyString(value) && ClassUtils.isPrimitiveWrapper(type)) {
+                    } else if (Strings.isEmpty(value) && ClassUtils.isPrimitiveWrapper(type)) {
                         value = null; // 包装类型则设置为null
                     }
 
@@ -366,7 +332,7 @@ public final class ObjectUtils {
         List<Object[]> list = map2array(page.getRows());
 
         Fields.put(page, "rows", list);
-        Result<Page<Object[]>> target = new Result<Page<Object[]>>(source.getCode(), source.getMsg(), null);
+        Result<Page<Object[]>> target = new Result<>(source.getCode(), source.getMsg(), null);
         Fields.put(target, "data", page);
         return target;
     }
@@ -385,7 +351,7 @@ public final class ObjectUtils {
         }
 
         Fields.put(page, "rows", list);
-        Result<Page<Object[]>> target = new Result<Page<Object[]>>(source.getCode(), source.getMsg(), null);
+        Result<Page<Object[]>> target = new Result<>(source.getCode(), source.getMsg(), null);
         Fields.put(target, "data", page);
         return target;
     }

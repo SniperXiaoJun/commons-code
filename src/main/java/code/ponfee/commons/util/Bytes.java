@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Formatter;
 
@@ -241,6 +242,31 @@ public final class Bytes {
         byte[] bytes = new byte[numOfByte];
         RANDOM.nextBytes(bytes);
         return bytes;
+    }
+
+    /**
+     * merge byte array
+     * @param first
+     * @param rest
+     * @return
+     */
+    public static byte[] merge(byte[] first, byte[]... rest) {
+        if (first == null) {
+            throw new IllegalArgumentException("the first array must be non null");
+        }
+        int totalLength = first.length;
+        for (byte[] array : rest) {
+            if (array == null) continue;
+            totalLength += array.length;
+        }
+        byte[] result = Arrays.copyOf(first, totalLength);
+        int offset = first.length;
+        for (byte[] array : rest) {
+            if (array == null) continue;
+            System.arraycopy(array, 0, result, offset, array.length);
+            offset += array.length;
+        }
+        return result;
     }
 
     public static void main(String[] args) throws Exception {

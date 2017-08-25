@@ -18,7 +18,7 @@ public final class Numbers {
     private static final String[] CN_UPPER_NUMBER = { "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖" };
 
     private static final String[] CN_UPPER_MONETRAY_UNIT = { "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
-        "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
+                                                             "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
 
     /**
      * 数字精度化
@@ -180,6 +180,34 @@ public final class Numbers {
     }
 
     /**
+     * long值压缩
+     * @param i
+     * @return
+     */
+    public static String reduce(long i) {
+        int radix = ObjectUtils.URL_SAFE_BASE64_CODES.length;
+        char[] buf = new char[65];
+        int charPos = 64;
+        boolean negative = (i < 0);
+
+        if (!negative) {
+            i = -i;
+        }
+
+        while (i <= -radix) {
+            buf[charPos--] = ObjectUtils.URL_SAFE_BASE64_CODES[(int) (-(i % radix))];
+            i = i / radix;
+        }
+        buf[charPos] = ObjectUtils.URL_SAFE_BASE64_CODES[(int) (-i)];
+
+        if (negative) {
+            buf[--charPos] = '-';
+        }
+
+        return new String(buf, charPos, (65 - charPos));
+    }
+
+    /**
      * 金额汉化
      * @param amount
      * @return
@@ -268,5 +296,11 @@ public final class Numbers {
         System.out.println(new BigDecimal(0).signum());
         System.out.println(new BigDecimal(1).signum());
         System.out.println(new BigDecimal(-1).signum());
+
+        System.out.println(Long.toString(Long.MIN_VALUE, 36));
+        System.out.println(reduce(Long.MIN_VALUE));
+        
+        System.out.println(Long.toString(1L, 36));
+        System.out.println(reduce(1L));
     }
 }
