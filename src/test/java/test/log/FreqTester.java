@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import code.ponfee.commons.jedis.JedisClient;
-import code.ponfee.commons.log.FrequencyLimiter;
+import code.ponfee.commons.log.RedisFrequencyLimiter;
 import code.ponfee.commons.serial.JdkSerializer;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -31,7 +31,7 @@ public class FreqTester {
     
     @Test
     public void test1() throws InterruptedException {
-        FrequencyLimiter f = new FrequencyLimiter(jedisClient, 1, 5);
+        RedisFrequencyLimiter f = new RedisFrequencyLimiter(jedisClient, 1, 5);
         f.setLimitQtyInMinutes("abc", 50000000);
         for (int i = 0; i < 200; i++) {
             new Thread(){
