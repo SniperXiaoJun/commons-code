@@ -18,7 +18,7 @@ import code.ponfee.commons.util.IdWorker;
 import code.ponfee.commons.util.Numbers;
 
 /**
- * 访问频率控制器
+ * Redis访问频率控制器
  * @author fupf
  */
 public class RedisFrequencyLimiter implements FrequencyLimiter {

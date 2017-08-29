@@ -89,7 +89,7 @@ public class ElasticSearchClient implements DisposableBean {
                 int port = Integer.parseInt(substringAfterLast(clusterNode, ":"));
                 client.addTransportAddress(new InetSocketTransportAddress(hostName, port));
             } catch (UnknownHostException e) {
-                logger.error("unconnect ElasticSearch node {} {}", clusterName, clusterNode, e);
+                logger.error("cannot connect ElasticSearch node {} {}", clusterName, clusterNode, e);
             }
         }
 

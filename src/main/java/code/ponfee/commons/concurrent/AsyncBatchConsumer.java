@@ -80,6 +80,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
     @Override
     public void run() {
         List<T> list = null;
+        T t;
         for (;;) {
             if (isEnd && queue.isEmpty() && isRefresh()) {
                 if (needDestroyWhenEnd) {
@@ -94,7 +95,6 @@ public final class AsyncBatchConsumer<T> extends Thread {
 
             // 尽量不要使用queue.size()，时间复杂度O(n)
             if (!queue.isEmpty()) {
-                T t;
                 for (int n = thresholdChunk - list.size(), i = 0; i < n; i++) {
                     t = queue.poll();
                     if (t == null) {
@@ -107,7 +107,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
 
             if (list.size() == thresholdChunk || (!list.isEmpty() && (isEnd || isRefresh()))) {
                 // task抛异常后： execute会输出错误信息，线程结束，后续任务会创建新线程执行
-                //            submit不会输出错误信息，线程继续分配执行其它任务
+                //               submit不会输出错误信息，线程继续分配执行其它任务
                 executor.submit(factory.create(list, isEnd && queue.isEmpty())); // 提交到异步处理
                 list = null;
                 refresh();

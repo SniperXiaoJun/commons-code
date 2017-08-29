@@ -113,7 +113,7 @@ public class Cache<T> {
     }
 
     public void set(Comparable<?> key, T value, long expireTimeMillis) {
-        if (isDestroy) return;
+        Preconditions.checkState(!isDestroy);
 
         if (expireTimeMillis == KEEPALIVE_FOREVER || expireTimeMillis > now()) {
             cache.put(getEffectiveKey(key), new CacheBean<T>(value, expireTimeMillis));
@@ -245,7 +245,7 @@ public class Cache<T> {
      * clear all
      */
     public void clear() {
-        if (isDestroy) return;
+        Preconditions.checkState(!isDestroy);
 
         cache.clear();
     }
