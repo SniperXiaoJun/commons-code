@@ -21,6 +21,7 @@ import code.ponfee.commons.ws.adapter.model.MapItemArray;
  * @param <K>
  * @param <V>
  */
+//@XmlSeeAlso({ Object[][].class }) 在@WebService注解的接口中加上此注解
 @SuppressWarnings("unchecked")
 public abstract class ListMapAdapter<K, V> extends XmlAdapter<MapItemArray, List<Map<K, V>>> {
 
