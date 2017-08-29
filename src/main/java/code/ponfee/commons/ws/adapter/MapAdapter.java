@@ -22,8 +22,8 @@ public abstract class MapAdapter<K, V> extends XmlAdapter<MapEntry[], Map<K, V>>
     protected final Class<V> vtype;
 
     protected MapAdapter() {
-        ktype = GenericUtils.getClassGenricType(this.getClass(), 0);
-        vtype = GenericUtils.getClassGenricType(this.getClass(), 1);
+        ktype = GenericUtils.getActualTypeArgument(this.getClass(), 0);
+        vtype = GenericUtils.getActualTypeArgument(this.getClass(), 1);
     }
 
     public @Override MapEntry<K, V>[] marshal(Map<K, V> map) throws Exception {

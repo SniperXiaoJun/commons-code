@@ -76,7 +76,7 @@ public final class PageBoundsResolver {
     public static PageBounds resolve(int pageNum, int pageSize, long totalCounts) {
         List<PageBounds> list = resolve(pageNum, pageSize, new long[] { totalCounts });
 
-        if (list == null) return null;
+        if (list == null || list.isEmpty()) return null;
         else return list.get(0);
     }
 

@@ -27,7 +27,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
     private final Queue<T> queue = new ConcurrentLinkedQueue<>();
     private final boolean needDestroyWhenEnd;
 
-    private volatile long lastProcessTimeMillis = System.currentTimeMillis();
+    private volatile long lastConsumeTimeMillis = System.currentTimeMillis();
     private volatile boolean isEnd = false;
 
     /**
@@ -166,11 +166,11 @@ public final class AsyncBatchConsumer<T> extends Thread {
     }
 
     private void refresh() {
-        lastProcessTimeMillis = System.currentTimeMillis();
+        lastConsumeTimeMillis = System.currentTimeMillis();
     }
 
     private boolean isRefresh() {
-        return System.currentTimeMillis() - lastProcessTimeMillis > thresholdPeriod;
+        return System.currentTimeMillis() - lastConsumeTimeMillis > thresholdPeriod;
     }
 
 }

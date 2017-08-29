@@ -19,7 +19,7 @@ public abstract class ResultPageAdapter<T> extends XmlAdapter<Result<TransitPage
     protected final Class<T> type;
 
     protected ResultPageAdapter() {
-        type = GenericUtils.getClassGenricType(this.getClass());
+        type = GenericUtils.getActualTypeArgument(this.getClass());
     }
 
     @Override

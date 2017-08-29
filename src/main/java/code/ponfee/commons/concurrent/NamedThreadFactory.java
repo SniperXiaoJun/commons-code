@@ -27,7 +27,7 @@ public class NamedThreadFactory implements ThreadFactory {
         this.prefix = prefix + "-thread-";
         this.daemo = daemo;
         SecurityManager s = System.getSecurityManager();
-        group = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
+        this.group = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
     }
 
     @Override

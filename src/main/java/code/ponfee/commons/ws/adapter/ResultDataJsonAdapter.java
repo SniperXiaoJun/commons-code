@@ -18,7 +18,7 @@ public abstract class ResultDataJsonAdapter<T> extends XmlAdapter<Result<String>
     protected final Class<T> type;
 
     protected ResultDataJsonAdapter() {
-        type = GenericUtils.getClassGenricType(this.getClass());
+        type = GenericUtils.getActualTypeArgument(this.getClass());
     }
 
     @Override

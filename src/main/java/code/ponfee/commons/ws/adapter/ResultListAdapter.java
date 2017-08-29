@@ -23,7 +23,7 @@ public abstract class ResultListAdapter<T> extends XmlAdapter<Result<ArrayItem<T
     protected final Class<T> type;
 
     protected ResultListAdapter() {
-        type = GenericUtils.getClassGenricType(this.getClass());
+        type = GenericUtils.getActualTypeArgument(this.getClass());
     }
 
     @Override

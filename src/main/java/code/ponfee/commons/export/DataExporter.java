@@ -7,7 +7,7 @@ package code.ponfee.commons.export;
 public interface DataExporter extends AutoCloseable {
 
     /** 提示无结果 */
-    String TIP_NO_RESULT = "no data found";
+    String TIP_NO_RESULT = "data not found";
 
     /**
      * 构建表格

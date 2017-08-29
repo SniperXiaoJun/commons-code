@@ -19,7 +19,6 @@ import code.ponfee.commons.util.ObjectUtils;
  * @author fupf
  */
 public final class GenericUtils {
-
     private GenericUtils() {}
 
     /**
@@ -37,70 +36,79 @@ public final class GenericUtils {
     }
 
     /**
-     * 获取泛化参数类型
+     * 获取泛型的实际类型参数
      * @param clazz
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T> Class<T> getClassGenricType(final Class<?> clazz) {
-        return getClassGenricType(clazz, 0);
+    public static <T> Class<T> getActualTypeArgument(final Class<?> clazz) {
+        return getActualTypeArgument(clazz, 0);
     }
 
     /**
-     * 获取泛化参数类型
+     * getActualTypeArgument(public class ResultPageMapNormalAdapter extends ResultPageMapAdapter<String, Object>, 0) -> String.class
+     * 获取泛型的实际类型参数
      * @param clazz
-     * @param index
+     * @param genericArgsIndex
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static Class getClassGenricType(final Class<?> clazz, final int index) {
+    public static Class getActualTypeArgument(Class<?> clazz, int genericArgsIndex) {
         Type genType = clazz.getGenericSuperclass();
         if (!(genType instanceof ParameterizedType)) {
             return Object.class;
         }
         Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
-        if (index >= params.length || index < 0) {
+        if (genericArgsIndex >= params.length || genericArgsIndex < 0) {
             return Object.class;
-        } else if (params[index] instanceof ParameterizedType) {
-            return (Class<?>) ((ParameterizedType) params[index]).getRawType();
-        } else if (params[index] instanceof GenericArrayType) {
-            Type type = ((GenericArrayType) params[index]).getGenericComponentType();
+        } else if (params[genericArgsIndex] instanceof ParameterizedType) {
+            return (Class<?>) ((ParameterizedType) params[genericArgsIndex]).getRawType();
+        } else if (params[genericArgsIndex] instanceof GenericArrayType) {
+            Type type = ((GenericArrayType) params[genericArgsIndex]).getGenericComponentType();
             return Array.newInstance((Class<?>) ((ParameterizedType) type).getRawType(), 0).getClass();
-        } else if (params[index] instanceof Class<?>) {
-            return (Class<?>) params[index];
+        } else if (params[genericArgsIndex] instanceof Class<?>) {
+            return (Class<?>) params[genericArgsIndex];
         } else {
             return Object.class;
         }
     }
 
+    public static Class<?> getActualTypeArgument(Method method, int methodParamsIndex) {
+        return getActualTypeArgument(method, methodParamsIndex, 0);
+    }
+
     /**
-     * 获取泛型参数的实际类型
-     * @param method
-     * @param methodParamsIndex
-     * @param genericParamsIndex
+     * 获取泛型的实际类型参数
+     * @param method            方法对象
+     * @param methodParamsIndex 方法参数索引号
+     * @param genericArgsIndex  泛型参数索引号
      * @return
      */
-    public static Class<?> getActualTypeArgument(Method method, int methodParamsIndex, int genericParamsIndex) {
+    public static Class<?> getActualTypeArgument(Method method, int methodParamsIndex, int genericArgsIndex) {
         Type type = method.getGenericParameterTypes()[methodParamsIndex];
-        return getParameterType(((ParameterizedType) type).getActualTypeArguments()[genericParamsIndex]);
+        return getActualTypeArgument(((ParameterizedType) type).getActualTypeArguments()[genericArgsIndex]);
+    }
+
+    public static Class<?> getActualTypeArgument(Field field) {
+        return getActualTypeArgument(field, 0);
     }
 
     /**
      * private List<test.ClassA> data; -> test.ClassA
-     * 获取泛型参数的实际类型
+     * 获取泛型的实际类型参数
      * @param field
-     * @param genericParamsIndex
+     * @param genericArgsIndex
      * @return
      */
-    public static Class<?> getActualTypeArgument(Field field, int genericParamsIndex) {
+    public static Class<?> getActualTypeArgument(Field field, int genericArgsIndex) {
         Type type = field.getGenericType();
         //type.getTypeName(); -> java.util.List<test.ClassA>
         //((ParameterizedType) type).getRawType(); // interface java.util.List
         //((ParameterizedType) type).getOwnerType(); // null
-        return getParameterType(((ParameterizedType) type).getActualTypeArguments()[genericParamsIndex]);
+        return getActualTypeArgument(((ParameterizedType) type).getActualTypeArguments()[genericArgsIndex]);
     }
 
-    private static Class<?> getParameterType(Type type) {
+    private static Class<?> getActualTypeArgument(Type type) {
         if (type instanceof Class<?>) {
             return (Class<?>) type;
         } else if (type instanceof WildcardType) {

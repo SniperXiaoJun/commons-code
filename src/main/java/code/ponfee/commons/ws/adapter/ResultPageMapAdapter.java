@@ -29,8 +29,8 @@ public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<Trans
     protected final Class<V> vtype;
 
     protected ResultPageMapAdapter() {
-        ktype = GenericUtils.getClassGenricType(this.getClass(), 0);
-        vtype = GenericUtils.getClassGenricType(this.getClass(), 1);
+        ktype = GenericUtils.getActualTypeArgument(this.getClass(), 0);
+        vtype = GenericUtils.getActualTypeArgument(this.getClass(), 1);
     }
 
     @Override

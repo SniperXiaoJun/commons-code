@@ -28,8 +28,8 @@ public abstract class ListMapAdapter<K, V> extends XmlAdapter<MapItemArray, List
     protected final Class<V> vtype;
 
     protected ListMapAdapter() {
-        ktype = GenericUtils.getClassGenricType(this.getClass(), 0);
-        vtype = GenericUtils.getClassGenricType(this.getClass(), 1);
+        ktype = GenericUtils.getActualTypeArgument(this.getClass(), 0);
+        vtype = GenericUtils.getActualTypeArgument(this.getClass(), 1);
     }
 
     @Override

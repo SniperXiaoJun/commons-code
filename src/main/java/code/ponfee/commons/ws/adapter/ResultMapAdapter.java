@@ -24,8 +24,8 @@ public abstract class ResultMapAdapter<K, V> extends XmlAdapter<Result<MapItem>,
     protected final Class<V> vtype;
 
     protected ResultMapAdapter() {
-        ktype = GenericUtils.getClassGenricType(this.getClass(), 0);
-        vtype = GenericUtils.getClassGenricType(this.getClass(), 1);
+        ktype = GenericUtils.getActualTypeArgument(this.getClass(), 0);
+        vtype = GenericUtils.getActualTypeArgument(this.getClass(), 1);
     }
 
     public @Override Result<Map<K, V>> unmarshal(Result<MapItem> v) throws Exception {

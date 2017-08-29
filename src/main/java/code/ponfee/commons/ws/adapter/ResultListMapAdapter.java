@@ -29,8 +29,8 @@ public abstract class ResultListMapAdapter<K, V> extends XmlAdapter<Result<MapIt
     protected final Class<V> vtype;
 
     protected ResultListMapAdapter() {
-        ktype = GenericUtils.getClassGenricType(this.getClass(), 0);
-        vtype = GenericUtils.getClassGenricType(this.getClass(), 1);
+        ktype = GenericUtils.getActualTypeArgument(this.getClass(), 0);
+        vtype = GenericUtils.getActualTypeArgument(this.getClass(), 1);
     }
 
     @Override
