@@ -103,7 +103,7 @@ public final class IdWorker {
      * 根据IP地址作为workerId
      * @return
      */
-    private static interface LocalIPWorker { IdWorker get(); }
+    private @FunctionalInterface static interface LocalIPWorker { IdWorker get(); }
     public static final IdWorker LOCAL_IP_WORKER = ((LocalIPWorker) () -> {
         IdWorker worker = new IdWorker(0);
         long maxWorkerId = Networks.ipReduce("255.255.255.255"); // 1068

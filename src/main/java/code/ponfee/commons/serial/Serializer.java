@@ -53,7 +53,8 @@ public abstract class Serializer {
      * @param isCompress 是否被压缩：true是；false否；
      * @return 反序例化后的对象
      */
-    public abstract <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress);
+    public abstract <T extends Object> T deserialize(byte[] data, 
+                             Class<T> clazz, boolean isCompress);
 
     /**
      * 流数据反序例化为对象

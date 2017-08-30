@@ -170,10 +170,6 @@ public final class ObjectUtils {
         }
     }
 
-    public static Object nullValue(Object obj) {
-        return nullValue(obj, "");
-    }
-
     public static Object nullValue(Object obj, Object nullDefault) {
         return obj == null ? nullDefault : obj;
     }
@@ -268,7 +264,7 @@ public final class ObjectUtils {
     public static Object[] map2array(Map<String, Object> map, String... fields) {
         Object[] array = new Object[fields.length];
         for (int i = 0; i < fields.length; i++) {
-            array[i] = nullValue(map.get(fields[i]));
+            array[i] = nullValue(map.get(fields[i]), "");
         }
         return array;
     }
@@ -301,7 +297,7 @@ public final class ObjectUtils {
         Object[] results = new Object[data.size()];
         int i = 0;
         for (Entry<String, Object> entry : data.entrySet()) {
-            results[i++] = nullValue(entry.getValue());
+            results[i++] = nullValue(entry.getValue(), "");
         }
         return results;
     }

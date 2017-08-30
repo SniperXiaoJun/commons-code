@@ -10,15 +10,17 @@ import java.io.StringWriter;
 public final class ExceptionTracker {
     private ExceptionTracker() {}
 
+    /**
+     * 查看错误信息
+     * @param e
+     * @return
+     */
     public static String peekStackTrace(Throwable e) {
         if (e == null) return null;
 
-        StringPrintWriter writer = new StringPrintWriter();
-        try {
+        try (StringPrintWriter writer = new StringPrintWriter()) {
             e.printStackTrace(writer);
             return writer.getString();
-        } finally {
-            writer.close();
         }
     }
 

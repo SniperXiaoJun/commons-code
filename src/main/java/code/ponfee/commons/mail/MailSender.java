@@ -145,7 +145,7 @@ public class MailSender {
     }
 
     public boolean send(MailEnvelope envlop) {
-        return send0(ObjectUtils.uuid32(), envlop, this.retryTimes);
+        return send0(ObjectUtils.uuid22(), envlop, this.retryTimes);
     }
 
     private boolean send0(String logid, MailEnvelope envlop, int retries) {

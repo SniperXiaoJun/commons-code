@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import code.ponfee.commons.util.Numbers;
 import code.ponfee.commons.util.ObjectUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Transaction;
@@ -101,7 +102,7 @@ public class JedisLock implements Lock, java.io.Serializable {
         }
         this.timeoutSeconds = timeoutSeconds;
         this.timeoutMillis = TimeUnit.SECONDS.toMillis(timeoutSeconds);
-        this.sleepMillis = sleepMillis < MIN_SLEEP_MILLIS ? MIN_SLEEP_MILLIS : sleepMillis;
+        this.sleepMillis = Numbers.bounds(sleepMillis, MIN_SLEEP_MILLIS, (int) timeoutMillis);
     }
 
     /**

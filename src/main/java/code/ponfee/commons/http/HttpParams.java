@@ -153,7 +153,7 @@ public class HttpParams {
      */
     public static String buildForm(String url, Map<String, String> params) {
         StringBuilder form = new StringBuilder();
-        String formName = ObjectUtils.uuid32();
+        String formName = ObjectUtils.uuid22();
         form.append("<form action=\"").append(url).append("\" name=\"")
             .append(formName).append("\" method=\"POST\">");
         for (Map.Entry<String, String> param : params.entrySet()) {

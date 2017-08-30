@@ -76,9 +76,9 @@ public class BasicException extends RuntimeException {
     }
 
     /**
-     * @param code                错误编码
-     * @param message             detail msg
-     * @param cause               the cause
+     * @param code     error code
+     * @param message  detail msg
+     * @param cause    the cause
      * @param enableSuppression
      * @param writableStackTrace
      */

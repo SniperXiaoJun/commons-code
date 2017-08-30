@@ -35,8 +35,6 @@ import org.bouncycastle.jce.provider.X509CRLParser;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.util.Store;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 证书工具类
@@ -45,7 +43,6 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "deprecation" })
 public class X509CertUtils {
 
-    private static Logger logger = LoggerFactory.getLogger(X509CertUtils.class);
     private static final String X509 = "X.509";
     private static final char ENDBOUNDARY[] = "-----END".toCharArray();
     private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -94,8 +91,8 @@ public class X509CertUtils {
             } finally {
                 if (input != null) try {
                     input.close();
-                } catch (IOException ex) {
-                    logger.error("关闭证书文件流失败", e);
+                } catch (IOException ignored) {
+                    ignored.printStackTrace();
                 }
             }
         }

@@ -220,7 +220,7 @@ public class ZipUtils {
 
         if (new File(destFilePath).exists()) {
             destFilePath = destFilePath.substring(0, destFilePath.lastIndexOf(SUFFIX))
-                           + "[" + ObjectUtils.uuid32() + "]" + SUFFIX;
+                           + "[" + ObjectUtils.uuid22() + "]" + SUFFIX;
         }
         return destFilePath;
     }

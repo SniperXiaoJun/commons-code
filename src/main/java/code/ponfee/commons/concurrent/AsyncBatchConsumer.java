@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Preconditions;
 
+import code.ponfee.commons.util.Numbers;
+
 /**
  * 异步批量消费
  * @author fupf
@@ -27,7 +29,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
     private final Queue<T> queue = new ConcurrentLinkedQueue<>();
     private final boolean needDestroyWhenEnd;
 
-    private volatile long lastConsumeTimeMillis = System.currentTimeMillis();
+    private long lastConsumeTimeMillis = System.currentTimeMillis();
     private volatile boolean isEnd = false;
 
     /**
@@ -65,7 +67,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
         }
         this.factory = factory;
         this.thresholdPeriod = thresholdPeriod;
-        this.sleepTimeMillis = thresholdPeriod < 9 ? thresholdPeriod : 9;
+        this.sleepTimeMillis = Numbers.bounds(thresholdPeriod, 9, thresholdPeriod);
         this.thresholdChunk = thresholdChunk;
         super.setName("async-batch-consumer-" + Integer.toHexString(hashCode()));
         super.setDaemon(true);
