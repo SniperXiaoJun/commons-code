@@ -126,7 +126,7 @@ public class JavacJavaSource extends JavaSource {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        String s = Files.read("d:/TT.java").toString();
+        String s = Files.toString("d:/TT.java");
         System.out.println(s);
         JavaSource source = new JavacJavaSource(s);
         System.out.println(source.getFullyQualifiedName());

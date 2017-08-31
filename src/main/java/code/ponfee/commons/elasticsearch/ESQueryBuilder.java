@@ -10,6 +10,7 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -20,12 +21,12 @@ import org.elasticsearch.search.sort.SortOrder;
  */
 public class ESQueryBuilder {
 
-    private String[] indices;
-    private String[] types;
-    private BoolQueryBuilder boolQuery;
-    private List<SortBuilder<?>> sorts = new ArrayList<>();
-    private List<AggregationBuilder> aggs = new ArrayList<>();
-    private String[] fields;
+    private String[] indices; // 索引
+    private String[] types; // 类型
+    private BoolQueryBuilder boolQuery; // bool筛选条件
+    private String[] fields; // 查询的字段
+    private final List<SortBuilder<?>> sorts = new ArrayList<>(); // 排序
+    private final List<AggregationBuilder> aggs = new ArrayList<>(); // 分组聚合
 
     private ESQueryBuilder(String[] indices, String[] types) {
         this.indices = indices;
@@ -313,6 +314,12 @@ public class ESQueryBuilder {
         return search.get();
     }
 
+    Aggregations aggregation(TransportClient client) {
+        SearchRequestBuilder search = build(client, 0);
+        search.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+        return search.get().getAggregations();
+    }
+
     // --------------------------private methods-------------------------
     private SearchRequestBuilder build(TransportClient client, int size) {
         SearchRequestBuilder search = client.prepareSearch(indices);
@@ -325,18 +332,13 @@ public class ESQueryBuilder {
         if (boolQuery != null) {
             search.setQuery(boolQuery);
         }
-        if (sorts != null) {
-            for (SortBuilder<?> sort : sorts) {
-                search.addSort(sort);
-            }
+        for (SortBuilder<?> sort : sorts) {
+            search.addSort(sort);
         }
-        if (aggs != null) {
-            for (AggregationBuilder agg : aggs) {
-                search.addAggregation(agg);
-            }
+        for (AggregationBuilder agg : aggs) {
+            search.addAggregation(agg);
         }
-        search.setSize(size);
-        return search;
+        return search.setSize(size);
     }
 
 }

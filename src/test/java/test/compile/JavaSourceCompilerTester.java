@@ -1,8 +1,12 @@
 
 package test.compile;
 
+import java.nio.charset.Charset;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+
+import com.google.common.io.Files;
 
 import $._.a.b.n323c23.$._.CompilerSource;
 import code.ponfee.commons.compile.impl.JdkCompiler;
@@ -10,7 +14,6 @@ import code.ponfee.commons.compile.model.JavaSource;
 import code.ponfee.commons.compile.model.JavacJavaSource;
 import code.ponfee.commons.compile.model.RegexJavaSource;
 import code.ponfee.commons.util.MavenProjects;
-import code.ponfee.commons.util.Streams;
 import test.concurrent.TestThread;
 
 public class JavaSourceCompilerTester {
@@ -19,7 +22,7 @@ public class JavaSourceCompilerTester {
     public void testComplex() throws Exception {
         //Class<?> _clazz = JavaSourceCompilerTester.class;
         Class<?> _clazz = CompilerSource.class;
-        String sourceCode = Streams.file2string(MavenProjects.getTestJavaFile(_clazz));
+        String sourceCode = Files.asCharSource(MavenProjects.getTestJavaFile(_clazz), Charset.forName("UTF-8")).read();
         
         //JavaSource javaSource = new JavacJavaSource(sourceCode);
         JavaSource javaSource = new RegexJavaSource(sourceCode);
@@ -39,7 +42,7 @@ public class JavaSourceCompilerTester {
     
     
     public @Test void test2() throws Exception {
-        String sourceCode = Streams.file2string(MavenProjects.getTestJavaFile(TestThread.class));
+        String sourceCode = Files.asCharSource(MavenProjects.getTestJavaFile(TestThread.class), Charset.forName("UTF-8")).read();
         JavaSource javaSource = new JavacJavaSource(sourceCode);
         System.out.println(javaSource.getFullyQualifiedName());
 

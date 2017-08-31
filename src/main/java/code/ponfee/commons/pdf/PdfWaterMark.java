@@ -1,11 +1,13 @@
 package code.ponfee.commons.pdf;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.google.common.io.Files;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -16,8 +18,6 @@ import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfGState;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
-
-import code.ponfee.commons.util.Streams;
 
 /**
  * pdf加水印
@@ -112,7 +112,7 @@ public class PdfWaterMark {
     }
 
     public static void main(String[] args) throws Exception {
-        ByteArrayInputStream input = new ByteArrayInputStream(Streams.file2bytes("d:/test/213.pdf"));
+        ByteArrayInputStream input = new ByteArrayInputStream(Files.toByteArray(new File("d:/test/213.pdf")));
         //waterImgMark(input, Streams.file2bytes("d:/test/2.png"), new FileOutputStream("d:/test/image.pdf"));
         waterWordMark(input, "1234", new FileOutputStream("d:/test/word.pdf"));
     }

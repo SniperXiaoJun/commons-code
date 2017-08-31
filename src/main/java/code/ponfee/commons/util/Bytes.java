@@ -111,17 +111,31 @@ public final class Bytes {
         return baos.toByteArray();
     }
 
-    /**
-     * base64 encode
-     * @param data
-     * @return
-     */
-    /*private static final char[] BASE64_ENCODE_CHARS = {
+    // ----------------------------------------------base64 encode/decode-------------------------------------- //
+    private static final char[] BASE64_ENCODE_CHARS = {
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
         'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
         'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
         'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
     };
+    private static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
+    private static final byte[] BASE64_DECODE_CHARS = {
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
+        52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
+        -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+        18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28,
+        29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
+        46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1
+    };
+    /**
+     * base64 encode
+     * @param data
+     * @return 
+     * @deprecated {@code Base64.getEncoder().encodeToString(data)}
+     */
+    @Deprecated
     public static String base64Encode(byte[] data) {
         StringBuilder builder = new StringBuilder(data.length * 4 / 3);
         for (int i = 0, len = data.length, b1, b2, b3; i < len;) {
@@ -147,40 +161,30 @@ public final class Bytes {
             builder.append(BASE64_ENCODE_CHARS[b3 & 0x3f]);
         }
         return builder.toString();
-    }*/
-
+    }
     /**
-     * base64 decode
+     * base64转byte[]
      * @param b64
      * @return
+     * @deprecated {@code Base64.getDecoder().decode(data)}
      */
-    /*private static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
-    private static final byte[] BASE64_DECODE_CHARS = {
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
-        52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
-        -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
-        18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28,
-        29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
-        46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1
-    };
+    @Deprecated
     public static byte[] base64Decode(String b64) {
         byte[] data = b64.getBytes(US_ASCII);
         StringBuilder builder = new StringBuilder(data.length * 3 / 4);
         for (int i = 0, len = data.length, b1, b2, b3, b4; i < len;) {
-             b1 
+            /* b1 */
             do {
                 b1 = BASE64_DECODE_CHARS[data[i++]];
             } while (i < len && b1 == -1);
             if (b1 == -1) break;
-             b2 
+            /* b2 */
             do {
                 b2 = BASE64_DECODE_CHARS[data[i++]];
             } while (i < len && b2 == -1);
             if (b2 == -1) break;
             builder.append((char) ((b1 << 2) | ((b2 & 0x30) >>> 4)));
-             b3 
+            /* b3 */
             do {
                 b3 = data[i++];
                 if (b3 == 61) return builder.toString().getBytes(ISO_8859_1);
@@ -188,7 +192,7 @@ public final class Bytes {
             } while (i < len && b3 == -1);
             if (b3 == -1) break;
             builder.append((char) (((b2 & 0x0f) << 4) | ((b3 & 0x3c) >>> 2)));
-             b4 
+            /* b4 */
             do {
                 b4 = data[i++];
                 if (b4 == 61) return builder.toString().getBytes(ISO_8859_1);
@@ -199,15 +203,28 @@ public final class Bytes {
         }
         return builder.toString().getBytes(ISO_8859_1);
     }
+    /**
+     * @param data
+     * @return
+     * @Deprecated {@code Base64.getUrlEncoder()[.withoutPadding()].encodeToString(data)}
+     */
+    @Deprecated
     public static String base64EncodeUrlSafe(byte[] data) {
         String str = base64Encode(data);
         return StringUtils.replaceEach(str, new String[] { "+", "/", "=" }, new String[] { "-", "_", "" });
     }
+    /**
+     * @param b64
+     * @return
+     * @Deprecated {@code Base64.getUrlDecoder().decode(data)}
+     */
+    @Deprecated
     public static byte[] base64DecodeUrlSafe(String b64) {
         b64 = StringUtils.replaceEach(b64, new String[] { "-", "_" }, new String[] { "+", "/" });
         b64 += StringUtils.leftPad("", (4 - b64.length() % 4) % 4, '=');
         return base64Decode(b64);
-    }*/
+    }
+    // ----------------------------------------------base64 encode/decode-------------------------------------- //
 
     public static char[] bytes2chars(byte[] bytes) {
         return bytes2chars(bytes, US_ASCII.name());

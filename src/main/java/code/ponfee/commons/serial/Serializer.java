@@ -25,7 +25,7 @@ import code.ponfee.commons.util.Files;
  */
 public abstract class Serializer {
 
-    static final int BUFF_SIZE = 4096; // 4KB
+    static final int BUFF_SIZE = 8192; // 8KB
 
     private static Logger logger = LoggerFactory.getLogger(Serializer.class);
 
@@ -96,26 +96,16 @@ public abstract class Serializer {
      * @param output
      */
     public static void compress(InputStream input, OutputStream output) {
-        GZIPOutputStream gzout = null;
-        try {
-            gzout = new ExtendedGZIPOutputStream(output);
+        try (GZIPOutputStream gzout = new ExtendedGZIPOutputStream(output)) {
             byte[] buffer = new byte[BUFF_SIZE];
             int len;
             while ((len = input.read(buffer)) != Files.EOF) {
                 gzout.write(buffer, 0, len);
             }
-            gzout.finish();
             gzout.flush();
-            gzout.close();
-            gzout = null;
+            gzout.finish();
         } catch (IOException e) {
             throw new SerializationException(e);
-        } finally {
-            if (gzout != null) try {
-                gzout.close();
-            } catch (IOException e) {
-                logger.error("close GZIPOutputStream exception", e);
-            }
         }
     }
 
@@ -136,25 +126,17 @@ public abstract class Serializer {
      * @param output
      */
     public static void decompress(InputStream input, OutputStream output) {
-        GZIPInputStream gzin = null;
-        try {
-            gzin = new GZIPInputStream(input);
+        try (GZIPInputStream gzin = new GZIPInputStream(input)) {
             IOUtils.copy(gzin, output);
         } catch (IOException e) {
             throw new SerializationException(e);
-        } finally {
-            if (gzin != null) try {
-                gzin.close();
-            } catch (IOException e) {
-                logger.error("close GZIPInputStream exception", e);
-            }
         }
     }
 
     /**
      * 扩展自GZIPOutputStream
      */
-    static class ExtendedGZIPOutputStream extends GZIPOutputStream {
+    public static class ExtendedGZIPOutputStream extends GZIPOutputStream {
         ExtendedGZIPOutputStream(OutputStream out) throws IOException {
             this(out, Deflater.DEFAULT_COMPRESSION);
         }

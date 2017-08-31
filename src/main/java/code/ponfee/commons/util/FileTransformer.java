@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +31,8 @@ public class FileTransformer {
     private static final int FIX_LENGTH = 55;
 
     private String includeFileExtensions = "(?i)^(.+\\.)(" + StringUtils.join(new String[] { "java", "txt",
-        "properties", "xml", "sql", "html", "htm", "jsp", "css", "js", "log", "bak", "ini" }, "|") + ")$";
+         "properties", "xml", "sql", "html", "htm", "jsp", "css", "js", "log", "bak", "ini" }, "|") + ")$";
+
     private final File source;
     private final String sourcePath;
     private final File target;
@@ -114,9 +114,9 @@ public class FileTransformer {
      * @param target
      */
     public static void transform(File source, File target) {
-        try ( RandomAccessFile sourceFile = new RandomAccessFile(source, "r");
+        try ( FileInputStream sourceFile = new FileInputStream(source);
               FileChannel sourceChannel = sourceFile.getChannel();
-              RandomAccessFile targetFile = new RandomAccessFile(target, "rw");
+              FileOutputStream targetFile = new FileOutputStream(target);
               FileChannel targetChannel = targetFile.getChannel();
         ) {
             sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
@@ -132,16 +132,16 @@ public class FileTransformer {
      * @param replacementList  the Strings to replace them with, no-op if null
      */
     public static void transform(File source, File target, String[] searchList, String[] replacementList) {
-        try ( FileInputStream fis = new FileInputStream(source);
-              InputStreamReader isr = new InputStreamReader(fis);
-              BufferedReader in = new BufferedReader(isr);
-              FileOutputStream fos = new FileOutputStream(target);
-              OutputStreamWriter osw = new OutputStreamWriter(fos);
-              PrintWriter out = new PrintWriter(osw);
+        try (FileInputStream fis = new FileInputStream(source);
+             InputStreamReader isr = new InputStreamReader(fis);
+             BufferedReader in = new BufferedReader(isr);
+             FileOutputStream fos = new FileOutputStream(target);
+             OutputStreamWriter osw = new OutputStreamWriter(fos);
+             PrintWriter out = new PrintWriter(osw);
         ) {
             String line;
             while ((line = in.readLine()) != null) {
-                if (!ObjectUtils.isEmpty(searchList)) {
+                if (searchList != null && searchList.length > 0) {
                     line = StringUtils.replaceEach(line, searchList, replacementList);
                 }
                 out.println(line);
@@ -161,16 +161,16 @@ public class FileTransformer {
      */
     public static void transform(File source, File target, String fromCharset,
         String toCharset, String[] searchList, String[] replacementList) {
-        try ( FileInputStream fis = new FileInputStream(source); 
-              InputStreamReader isr = new InputStreamReader(fis, fromCharset); 
-              BufferedReader in = new BufferedReader(isr);
-              FileOutputStream fos = new FileOutputStream(target); 
-              OutputStreamWriter osw = new OutputStreamWriter(fos, toCharset); 
-              PrintWriter out = new PrintWriter(osw)
+        try (FileInputStream fis = new FileInputStream(source); 
+             InputStreamReader isr = new InputStreamReader(fis, fromCharset); 
+             BufferedReader in = new BufferedReader(isr);
+             FileOutputStream fos = new FileOutputStream(target); 
+             OutputStreamWriter osw = new OutputStreamWriter(fos, toCharset); 
+             PrintWriter out = new PrintWriter(osw)
         ) {
             String line;
             while ((line = in.readLine()) != null) {
-                if (!ObjectUtils.isEmpty(searchList)) {
+                if (searchList != null && searchList.length > 0) {
                     line = StringUtils.replaceEach(line, searchList, replacementList);
                 }
                 out.println(line);

@@ -1,7 +1,9 @@
 package code.ponfee.commons.util;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
@@ -16,7 +18,7 @@ public final class Files {
     private Files() {}
 
     private static final String[] FILE_UNITS = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-
+    private static final byte[] WITH_BOM = { (byte) 0xEF, (byte) 0XBB, (byte) 0XBF };
     public static final int EOF = -1;
     public static final String LINE_SEPARATOR;
     static {
@@ -38,32 +40,6 @@ public final class Files {
         if (size <= 0) return "0";
         int digit = (int) (Math.log10(size) / Math.log10(1024));
         return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digit)) + FILE_UNITS[digit];
-    }
-
-    /**
-     * 读取文件为字序列
-     * @param file
-     * @return
-     */
-    public static CharSequence read(String file) {
-        return read(new File(file));
-    }
-
-    public static CharSequence read(File file) {
-        FileChannel channel = null;
-        try (FileInputStream in = new FileInputStream(file)) {
-            channel = in.getChannel();
-            ByteBuffer buffer = channel.map(MapMode.READ_ONLY, 0, channel.size());
-            return Charset.defaultCharset().decode(buffer);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (channel != null) try {
-                channel.close();
-            } catch (IOException ignored) {
-                ignored.printStackTrace();
-            }
-        }
     }
 
     /**
@@ -118,10 +94,140 @@ public final class Files {
         return file;
     }
 
+    /**
+     * 读取文件为字序列
+     * @param file
+     * @return
+     */
+    public static String toString(String file) {
+        return toString(new File(file));
+    }
+
+    public static String toString(File file) {
+        try (FileInputStream in = new FileInputStream(file); 
+             FileChannel channel = in.getChannel();
+        ) {
+            ByteBuffer buffer = channel.map(MapMode.READ_ONLY, 0, channel.size());
+            return Charset.defaultCharset().decode(buffer).toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * read file to byte array
+     * @param file
+     * @return
+     */
+    public static byte[] toByteArray(File file) {
+        try (FileInputStream in = new FileInputStream(file); 
+             FileChannel channel = in.getChannel();
+        ) {
+            ByteBuffer buffer = channel.map(MapMode.READ_ONLY, 0, channel.size());
+            return buffer.array();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 增加BOM
+     * @param filepath
+     */
+    public static void addBOM(String filepath) {
+        addBOM(new File(filepath));
+    }
+
+    public static void addBOM(File file) {
+        FileOutputStream output = null;
+        BufferedOutputStream bos = null;
+        try (FileInputStream input = new FileInputStream(file)) {
+            int length = input.available();
+            byte[] bytes1, bytes2;
+            if (length >= 3) {
+                bytes1 = new byte[3];
+                input.read(bytes1);
+                if (ObjectUtils.equals(WITH_BOM, bytes1)) {
+                    return;
+                }
+                bytes2 = new byte[length - 3];
+                input.read(bytes2);
+            } else {
+                bytes1 = new byte[0];
+                bytes2 = new byte[length];
+                input.read(bytes2);
+            }
+            output = new FileOutputStream(file);
+            bos = new BufferedOutputStream(output);
+            bos.write(WITH_BOM);
+            bos.write(bytes1);
+            bos.write(bytes2);
+            bos.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (bos != null) try {
+                bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (output != null) try {
+                output.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 移除BOM
+     * @param filepath
+     */
+    public static void removeBOM(String filepath) {
+        removeBOM(new File(filepath));
+    }
+
+    public static void removeBOM(File file) {
+        FileOutputStream output = null;
+        BufferedOutputStream bos = null;
+        try (FileInputStream input = new FileInputStream(file)) {
+            int length = input.available();
+            if (length < 3) return;
+
+            byte[] bytes = new byte[3];
+            input.read(bytes);
+            if (!ObjectUtils.equals(bytes, WITH_BOM)) return;
+
+            bytes = new byte[length - 3];
+            input.read(bytes);
+            output = new FileOutputStream(file);
+            bos = new BufferedOutputStream(output);
+            //bos.write(bytes, 3, bytes.length - 3);
+            bos.write(bytes);
+            bos.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (bos != null) try {
+                bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (output != null) try {
+                output.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static void main(String[] args) {
-        System.out.println(human(1456125000l));
+        /*System.out.println(human(1456125000l));
         System.out.println(LINE_SEPARATOR);
         touch(new File("D:\\test1"));
-        System.out.println(read(MavenProjects.getMainJavaFile(Files.class)));
+        System.out.println(toString(MavenProjects.getMainJavaFile(Files.class)));*/
+
+        removeBOM("d:/编辑6.txt");
+        addBOM("d:/编辑6.txt");
     }
 }

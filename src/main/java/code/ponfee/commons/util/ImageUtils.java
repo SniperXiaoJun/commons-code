@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -15,6 +16,8 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.swing.ImageIcon;
 
+import com.google.common.io.Files;
+
 /**
  * 图片工具类
  * @author fupf
@@ -23,10 +26,10 @@ public class ImageUtils {
 
     public static void main(String[] args) throws IOException {
         List<byte[]> list = new ArrayList<>();
-        list.add(Streams.file2bytes("D:\\imgs\\fox(01-19-16-51-28)(4).png"));
-        list.add(Streams.file2bytes("D:\\imgs\\fox(01-19-16-51-28)(6).png"));
-        list.add(Streams.file2bytes("D:\\imgs\\fox(01-19-16-51-28)(7).png"));
-        Streams.bytes2file(mergeVertical(list, "PNG"), "d:/out.png");
+        list.add(Files.toByteArray(new File("D:\\imgs\\fox(01-19-16-51-28)(4).png")));
+        list.add(Files.toByteArray(new File("D:\\imgs\\fox(01-19-16-51-28)(6).png")));
+        list.add(Files.toByteArray(new File("D:\\imgs\\fox(01-19-16-51-28)(7).png")));
+        Files.write(mergeVertical(list, "PNG"), new File("d:/out.png"));
     }
 
     /**

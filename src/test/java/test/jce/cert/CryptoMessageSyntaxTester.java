@@ -7,13 +7,14 @@ import java.security.cert.X509Certificate;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.junit.Test;
 
+import com.google.common.io.Files;
+
 import code.ponfee.commons.http.Http;
 import code.ponfee.commons.jce.pkcs.CryptoMessageSyntax;
 import code.ponfee.commons.jce.pkcs.PKCS7Signature;
 import code.ponfee.commons.jce.security.KeyStoreResolver;
 import code.ponfee.commons.jce.security.KeyStoreResolver.KeyStoreType;
 import code.ponfee.commons.util.MavenProjects;
-import code.ponfee.commons.util.Streams;
 
 public class CryptoMessageSyntaxTester {
 
@@ -44,7 +45,7 @@ public class CryptoMessageSyntaxTester {
         KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.PKCS12, new FileInputStream("d:/test/subject.pfx"), "123456");
         X509Certificate[] certChain = resolver.getX509CertChain();
         PrivateKey privateKey = resolver.getPrivateKey("123456");
-        byte[] data = Streams.file2bytes(MavenProjects.getTestJavaFile(CryptoMessageSyntaxTester.class));
+        byte[] data = Files.toByteArray(MavenProjects.getTestJavaFile(CryptoMessageSyntaxTester.class));
         System.out.println("origin len------------" + data.length);
         byte[] signed = CryptoMessageSyntax.sign(data, privateKey, certChain);
         System.out.println("signed len------------" + signed.length);
@@ -56,7 +57,7 @@ public class CryptoMessageSyntaxTester {
         KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.PKCS12, new FileInputStream("d:/test/cas_test.pfx"), "1234");
         X509Certificate[] certChain = resolver.getX509CertChain();
         PrivateKey privateKey = resolver.getPrivateKey("1234");
-        byte[] data = Streams.file2bytes(MavenProjects.getTestJavaFile(CryptoMessageSyntaxTester.class));
+        byte[] data = Files.toByteArray(MavenProjects.getTestJavaFile(CryptoMessageSyntaxTester.class));
         System.out.println("origin len------------" + data.length);
         byte[] signed = PKCS7Signature.sign(privateKey, certChain[0], data, true);
         System.out.println("signed len------------" + signed.length);

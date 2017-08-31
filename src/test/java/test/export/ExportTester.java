@@ -22,7 +22,7 @@ import code.ponfee.commons.export.Tmeta;
 import code.ponfee.commons.export.Tmeta.Align;
 import code.ponfee.commons.export.Tmeta.Type;
 import code.ponfee.commons.util.FileTransformer;
-import code.ponfee.commons.util.Streams;
+import code.ponfee.commons.util.Files;
 
 public class ExportTester {
 
@@ -111,8 +111,8 @@ public class ExportTester {
         builder.build(table);
 
         System.out.println(builder.setName("报表").export());
-        Streams.string2file((String)csv.export(), "d:/csv.csv");
-        Streams.addBOM("d:/csv.csv");
+        IOUtils.write((String) csv.export(), new FileOutputStream("d://csv.csv"), "UTF-8");
+        Files.addBOM("d:/csv.csv");
     }
 
     @Test
@@ -204,8 +204,8 @@ public class ExportTester {
 
         // ------------------------------------------
         excel.setName("图表");
-        ((ExcelExporter)excel).insertImage(Streams.file2bytes("d:/test/2.png"));
-        ((ExcelExporter)excel).insertImage(Streams.file2bytes("d:/test/2.png"));
+        ((ExcelExporter)excel).insertImage(com.google.common.io.Files.toByteArray(new File("d:/test/2.png")));
+        ((ExcelExporter)excel).insertImage(com.google.common.io.Files.toByteArray(new File("d:/test/2.png")));
         
         IOUtils.write((byte[]) excel.export(), new FileOutputStream("d:/abc.xlsx"));
         excel.close();
@@ -213,8 +213,8 @@ public class ExportTester {
         
         CsvExporter csv = new CsvExporter();
         csv.build(table);
-        Streams.string2file(csv.export().toString(), "d://csv.csv");
-        Streams.addBOM(new File("d://csv.csv"));
+        IOUtils.write(csv.export().toString(), new FileOutputStream("d://csv.csv"), "UTF-8");
+        Files.addBOM(new File("d://csv.csv"));
     }
 
     @Test

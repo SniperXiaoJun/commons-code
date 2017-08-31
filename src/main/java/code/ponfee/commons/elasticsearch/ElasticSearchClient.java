@@ -44,6 +44,7 @@ import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -641,6 +642,20 @@ public class ElasticSearchClient implements DisposableBean {
     public void scrollingSearch(SearchRequestBuilder search, int scrollSize, ScrollSearchCallback callback) {
         SearchResponse scrollResp = search.setSize(scrollSize).setScroll(SCROLL_TIMEOUT).get();
         this.scrollingSearch(scrollResp, scrollSize, callback);
+    }
+
+    // ---------------------------------------------聚合汇总-------------------------------------------
+    public Aggregations aggregationSearch(ESQueryBuilder query) {
+        return query.aggregation(client);
+    }
+
+    /**
+     * 聚合汇总查询
+     * @param search
+     * @return
+     */
+    public Aggregations aggregationSearch(SearchRequestBuilder search) {
+        return search.setSize(0).get().getAggregations();
     }
 
     /**

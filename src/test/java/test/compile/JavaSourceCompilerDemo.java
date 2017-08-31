@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,12 +14,13 @@ import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.ToolProvider;
 
+import com.google.common.io.Files;
+
 import $._.a.b.n323c23.$._.CompilerSource;
 import code.ponfee.commons.compile.model.JavaSource;
 import code.ponfee.commons.compile.model.RegexJavaSource;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.util.MavenProjects;
-import code.ponfee.commons.util.Streams;
 
 /**
  * 源码编译
@@ -26,7 +28,7 @@ import code.ponfee.commons.util.Streams;
  */
 public class JavaSourceCompilerDemo {
     public static void main(String[] args) throws Exception {
-        compile(Streams.file2string(MavenProjects.getTestJavaFile(CompilerSource.class)));
+        compile(Files.asCharSource(MavenProjects.getTestJavaFile(CompilerSource.class), Charset.forName("UTF-8")).read());
     }
 
     @SuppressWarnings({ "unchecked", "resource", "rawtypes" })

@@ -2,11 +2,14 @@ package code.ponfee.commons.pdf.aspose;
 
 import java.awt.Color;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+
+import org.apache.commons.io.IOUtils;
 
 import com.aspose.words.Document;
 import com.aspose.words.FontSettings;
@@ -17,10 +20,10 @@ import com.aspose.words.MemoryFontSource;
 import com.aspose.words.NodeType;
 import com.aspose.words.PdfSaveOptions;
 import com.aspose.words.Table;
+import com.google.common.io.Files;
 
 import code.ponfee.commons.resource.Resource;
 import code.ponfee.commons.resource.ResourceLoaderFacade;
-import code.ponfee.commons.util.Streams;
 
 /**
  * 依赖
@@ -43,7 +46,8 @@ public final class Word2Pdf {
         FONTS = new FontSourceBase[list.size()];
         for (int n = list.size(), i = 0; i < n; i++) {
             try {
-                FONTS[i] = new MemoryFontSource(Streams.input2bytes(list.get(i).getStream()));
+                FONTS[i] = new MemoryFontSource(IOUtils.toByteArray(list.get(i).getStream()));
+                IOUtils.closeQuietly(list.get(i).getStream());
             } catch (IOException ignored) {
                 ignored.printStackTrace();
             }
@@ -81,7 +85,7 @@ public final class Word2Pdf {
     }
 
     public static void main(String[] args) throws IOException {
-        ByteArrayInputStream input = new ByteArrayInputStream(Streams.file2bytes("d:/test/CDR中关于对象选择.doc"));
+        ByteArrayInputStream input = new ByteArrayInputStream(Files.toByteArray(new File("d:/test/CDR中关于对象选择.doc")));
         convert(input, new FileOutputStream("d:/test/testpdf.pdf"));
     }
 }

@@ -9,13 +9,14 @@ import java.util.Base64;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.google.common.io.Files;
+
 import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSACryptor.RSAKeyPair;
 import code.ponfee.commons.jce.security.RSAPrivateKeys;
 import code.ponfee.commons.jce.security.RSAPublicKeys;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
-import code.ponfee.commons.util.Streams;
 
 public class RSACryptoTester {
 
@@ -44,7 +45,7 @@ public class RSACryptoTester {
         long i = System.currentTimeMillis();
         System.out.println("=============================加密测试==============================");
         //byte[] data = "加解密测试".getBytes();
-        byte[] data = Streams.file2bytes(MavenProjects.getMainJavaFile(RSACryptor.class));
+        byte[] data = Files.toByteArray(MavenProjects.getMainJavaFile(RSACryptor.class));
         System.out.println("原文：");
         System.out.println(Bytes.hexDump(ArrayUtils.subarray(data, 0, 100)));
         byte[] encodedData = RSACryptor.encrypt(data, publicKey);

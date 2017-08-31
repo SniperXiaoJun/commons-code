@@ -27,13 +27,12 @@ import code.ponfee.commons.jce.pkcs.PKCS1Signature;
 import code.ponfee.commons.jce.security.KeyStoreResolver;
 import code.ponfee.commons.jce.security.KeyStoreResolver.KeyStoreType;
 import code.ponfee.commons.resource.ResourceLoaderFacade;
-import code.ponfee.commons.util.Streams;
 
 public class PdfP7Sign {
     
     private static void sign(String src, String dest)
         throws Exception {
-        byte[] img = Streams.input2bytes(ResourceLoaderFacade.getResource("2.png").getStream());
+        byte[] img = IOUtils.toByteArray(ResourceLoaderFacade.getResource("2.png").getStream());
 
         // ------------------------------------------------------------------//
         // 1、用户上传自己的证书到服务器，从服务器上拿取待签名文件的hash数据
