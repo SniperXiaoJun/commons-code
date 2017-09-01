@@ -1,5 +1,6 @@
 package code.ponfee.commons.log;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -71,7 +72,7 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
                 map.clear();
                 list.clear();
             };
-        }, 100, 2000); // 100毫秒间隔，2000量数/批次
+        }, 50, 2000); // 50毫秒间隔，2000量数/批次
     }
 
     /**
@@ -107,19 +108,8 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
         return countByRangeMillis(key, now - TimeUnit.SECONDS.toMillis(seconds), now);
     }
 
-    public long countByBeforeRangeHours(String key, int beforeFromHours, int beforeToHours) {
-        return countByBeforeRangeSeconds(key, beforeFromHours * 60 * 60, beforeToHours * 60 * 60);
-    }
-
-    public long countByBeforeRangeMinutes(String key, int beforeFromMinutes, int beforeToMinutes) {
-        return countByBeforeRangeSeconds(key, beforeFromMinutes * 60, beforeToMinutes * 60);
-    }
-
-    public long countByBeforeRangeSeconds(String key, int beforeFromSeconds, int beforeToSeconds) {
-        long now = System.currentTimeMillis();
-        long fromMillis = now - TimeUnit.SECONDS.toMillis(beforeFromSeconds);
-        long toMillis = now - TimeUnit.SECONDS.toMillis(beforeToSeconds);
-        return countByRangeMillis(key, fromMillis, toMillis);
+    public long countByRange(String key, Date from, Date to) {
+        return countByRangeMillis(key, from.getTime(), to.getTime());
     }
 
     /**

@@ -17,7 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import code.ponfee.commons.util.Files;
+import code.ponfee.commons.io.Files;
 
 /**
  * 序例化抽象类

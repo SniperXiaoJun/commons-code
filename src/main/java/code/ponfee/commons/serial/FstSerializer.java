@@ -17,7 +17,7 @@ import code.ponfee.commons.reflect.ClassUtils;
 public class FstSerializer extends Serializer {
 
     private static final ThreadLocal<FSTConfiguration> FST_CFG = new ThreadLocal<FSTConfiguration>() {
-        public synchronized FSTConfiguration initialValue() {
+        public @Override FSTConfiguration initialValue() {
             return FSTConfiguration.createDefaultConfiguration();
         }
     };

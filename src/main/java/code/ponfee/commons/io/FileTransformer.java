@@ -1,4 +1,4 @@
-package code.ponfee.commons.util;
+package code.ponfee.commons.io;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -14,6 +14,7 @@ import java.nio.channels.FileChannel;
 
 import org.apache.commons.lang3.StringUtils;
 
+import code.ponfee.commons.util.ObjectUtils;
 import info.monitorenter.cpdetector.io.ASCIIDetector;
 import info.monitorenter.cpdetector.io.ByteOrderMarkDetector;
 import info.monitorenter.cpdetector.io.CodepageDetectorProxy;

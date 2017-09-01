@@ -40,7 +40,7 @@ public class TestBatchConsumer {
         }
         Thread.sleep(5000);
         flag.set(false);
-        Thread.sleep(2000);
+        Thread.sleep(1000);
         consumer.end();
         System.out.println(increment.get());
     }

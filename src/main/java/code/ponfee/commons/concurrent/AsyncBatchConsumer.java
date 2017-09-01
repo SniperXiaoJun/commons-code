@@ -74,13 +74,10 @@ public final class AsyncBatchConsumer<T> extends Thread {
         super.start();
     }
 
-    @Override
-    public synchronized void start() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void run() {
+    /**
+     * thread run, don't to direct call into the code
+     */
+    public @Override void run() {
         List<T> list = null;
         T t;
         for (;;) {
@@ -173,6 +170,26 @@ public final class AsyncBatchConsumer<T> extends Thread {
 
     private boolean isRefresh() {
         return System.currentTimeMillis() - lastConsumeTimeMillis > thresholdPeriod;
+    }
+
+    public @Override void interrupt() {
+        throw new UnsupportedOperationException();
+    }
+
+    public @Override void destroy() {
+        throw new UnsupportedOperationException();
+    }
+
+    public @Override void setContextClassLoader(ClassLoader cl) {
+        throw new UnsupportedOperationException();
+    }
+
+    public @Override void setUncaughtExceptionHandler(UncaughtExceptionHandler eh) {
+        throw new UnsupportedOperationException();
+    }
+
+    public @Override synchronized void start() {
+        throw new UnsupportedOperationException();
     }
 
 }

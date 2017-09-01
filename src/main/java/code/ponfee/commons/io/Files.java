@@ -1,4 +1,4 @@
-package code.ponfee.commons.util;
+package code.ponfee.commons.io;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -13,6 +13,8 @@ import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 
 import org.apache.commons.io.output.StringBuilderWriter;
+
+import code.ponfee.commons.util.ObjectUtils;
 
 public final class Files {
     private Files() {}

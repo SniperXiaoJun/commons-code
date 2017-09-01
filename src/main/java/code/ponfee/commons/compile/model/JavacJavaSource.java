@@ -19,7 +19,7 @@ import com.sun.tools.javac.parser.ParserFactory;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 import com.sun.tools.javac.util.Context;
 
-import code.ponfee.commons.util.Files;
+import code.ponfee.commons.io.Files;
 
 /**
  * <pre>

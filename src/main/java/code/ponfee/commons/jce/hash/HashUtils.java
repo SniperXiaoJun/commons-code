@@ -8,8 +8,8 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.util.Bytes;
-import code.ponfee.commons.util.Files;
 
 /**
  * hash算法封装
