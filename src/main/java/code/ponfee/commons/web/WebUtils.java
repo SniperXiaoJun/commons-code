@@ -151,8 +151,9 @@ public final class WebUtils {
      * 允许跨站
      * @param resp
      */
-    public static void cors(HttpServletResponse resp) {
-        resp.setHeader("Access-Control-Allow-Origin", "*");
+    public static void cors(HttpServletRequest req, HttpServletResponse resp) {
+        //resp.setHeader("Access-Control-Allow-Origin", "*");
+        resp.setHeader("Access-Control-Allow-Origin",  req.getHeader("Origin"));
         resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
         resp.setHeader("Access-Control-Max-Age", "0");
         resp.setHeader("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, "
@@ -175,8 +176,9 @@ public final class WebUtils {
         if (PATTERN_SUFFIX.matcher(url).find()) {
             String[] spEndUrl = endUrl.split("\\?");
             return spEndUrl[0].split("\\.")[1];
+        } else {
+            return endUrl.split("\\.")[1];
         }
-        return endUrl.split("\\.")[1];
     }
 
     /**

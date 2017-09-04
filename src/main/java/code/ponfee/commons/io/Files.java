@@ -35,7 +35,7 @@ public final class Files {
     }
 
     /** 
-     * 获取带单位的文件名，单位会自动显示为合适的值，如B、KB、MB等 
+     * 文件大小可读化（attach unit）：B、KB、MB
      * @param size 文件字节大小 
      */
     public static String human(long size) {
@@ -97,7 +97,7 @@ public final class Files {
     }
 
     /**
-     * 读取文件为字序列
+     * read file as string
      * @param file
      * @return
      */
@@ -133,7 +133,7 @@ public final class Files {
     }
 
     /**
-     * 增加BOM
+     * add file bom head
      * @param filepath
      */
     public static void addBOM(String filepath) {
@@ -182,7 +182,7 @@ public final class Files {
     }
 
     /**
-     * 移除BOM
+     * remove file bom head
      * @param filepath
      */
     public static void removeBOM(String filepath) {
@@ -223,13 +223,4 @@ public final class Files {
         }
     }
 
-    public static void main(String[] args) {
-        /*System.out.println(human(1456125000l));
-        System.out.println(LINE_SEPARATOR);
-        touch(new File("D:\\test1"));
-        System.out.println(toString(MavenProjects.getMainJavaFile(Files.class)));*/
-
-        removeBOM("d:/编辑6.txt");
-        addBOM("d:/编辑6.txt");
-    }
 }
