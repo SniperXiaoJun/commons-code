@@ -106,11 +106,15 @@ public final class Files {
     }
 
     public static String toString(File file) {
+        return toString(file, Charset.defaultCharset().name());
+    }
+
+    public static String toString(File file, String charset) {
         try (FileInputStream in = new FileInputStream(file); 
              FileChannel channel = in.getChannel();
         ) {
             ByteBuffer buffer = channel.map(MapMode.READ_ONLY, 0, channel.size());
-            return Charset.defaultCharset().decode(buffer).toString();
+            return Charset.forName(charset).decode(buffer).toString();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -126,7 +130,9 @@ public final class Files {
              FileChannel channel = in.getChannel();
         ) {
             ByteBuffer buffer = channel.map(MapMode.READ_ONLY, 0, channel.size());
-            return buffer.array();
+            byte[] bytes = new byte[buffer.capacity()];
+            buffer.get(bytes, 0, bytes.length);
+            return bytes;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -204,7 +210,6 @@ public final class Files {
             input.read(bytes);
             output = new FileOutputStream(file);
             bos = new BufferedOutputStream(output);
-            //bos.write(bytes, 3, bytes.length - 3);
             bos.write(bytes);
             bos.flush();
         } catch (IOException e) {

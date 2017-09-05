@@ -1,7 +1,5 @@
 package code.ponfee.commons.ws.adapter;
 
-import java.util.List;
-
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import code.ponfee.commons.model.Page;
@@ -30,19 +28,17 @@ public abstract class ResultPageAdapter<T> extends XmlAdapter<Result<TransitPage
             return new Result<>(v.getCode(), v.getMsg(), new Page<T>());
         }
 
-        return new Result<>(v.getCode(), v.getMsg(), TransitPage.unmarshal(v.getData()));
+        return new Result<>(v.getCode(), v.getMsg(), TransitPage.recover(v.getData()));
     }
 
     public @Override Result<TransitPage<T>> marshal(Result<Page<T>> v) throws Exception {
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
-        }
-
-        List<T> data = v.getData().getRows();
-        if (data == null) {
+        } else if (v.getData().getRows() == null) {
             return new Result<>(v.getCode(), v.getMsg(), new TransitPage<T>());
         }
-        return new Result<>(v.getCode(), v.getMsg(), TransitPage.marshal(type, v.getData()));
+
+        return new Result<>(v.getCode(), v.getMsg(), TransitPage.transform(v.getData(), type));
     }
 
 }

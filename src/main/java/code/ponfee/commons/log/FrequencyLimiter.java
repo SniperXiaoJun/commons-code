@@ -9,7 +9,7 @@ import java.util.Date;
 public interface FrequencyLimiter {
 
     /**
-     * 校验并跟踪
+     * 校验并追踪
      * @param key
      * @return
      */
@@ -30,12 +30,12 @@ public interface FrequencyLimiter {
      * @param qty
      * @return
      */
-    boolean setLimitQtyInMinutes(String key, long qty);
+    boolean setLimitsInMinute(String key, long qty);
 
     /**
      * 获取配置的访问量
      * @param key
      * @return
      */
-    long getLimitQtyInMinutes(String key);
+    long getLimitsInMinute(String key);
 }

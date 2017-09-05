@@ -32,7 +32,7 @@ public class FreqTester {
     @Test
     public void test1() throws InterruptedException {
         RedisFrequencyLimiter f = new RedisFrequencyLimiter(jedisClient, 1, 5);
-        f.setLimitQtyInMinutes("abc", 50000000);
+        f.setLimitsInMinute("abc", 50000000);
         for (int i = 0; i < 200; i++) {
             new Thread(){
                 @Override

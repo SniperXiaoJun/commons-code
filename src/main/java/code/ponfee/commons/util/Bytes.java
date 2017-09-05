@@ -11,6 +11,8 @@ import java.util.Formatter;
 
 import org.apache.commons.lang3.StringUtils;
 
+import code.ponfee.commons.io.Files;
+
 /**
  * byte[]
  * @author fupf
@@ -40,7 +42,7 @@ public final class Bytes {
     public static String hexDump(byte[] bytes, int block, int chunk) {
         Formatter fmt = new Formatter();
         for (int i, j = 0, wid = block * chunk; j * wid < bytes.length; j++) {
-            fmt.format("%05X: ", j * wid); // 输出行号：“00000: ”
+            fmt.format("%09x: ", j * wid); // 输出行号：“00000: ”
 
             Formatter text = new Formatter(); // 右边文本
             for (i = 0; i < wid && (i + j * wid) < bytes.length; i++) {
@@ -70,6 +72,7 @@ public final class Bytes {
         }
 
         try {
+            fmt.flush();
             return fmt.toString();
         } finally {
             fmt.close();
@@ -287,7 +290,7 @@ public final class Bytes {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println(hexDump(randomBytes(457)));
+        System.out.println(hexDump(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class))));
 
         System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes(20)));
         System.out.println(org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(randomBytes(20)));

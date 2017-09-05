@@ -176,44 +176,19 @@ public class TransitPage<T> {
         this.navigateLastPage = navigateLastPage;
     }
 
-    public static <T> TransitPage<T> marshal(Page<?> page, T[] t) {
+    @SuppressWarnings("unchecked")
+    public static <T> TransitPage<T> transform(Page<T> page, Class<?> type) {
+        return transform(page, page.getRows().toArray((T[]) Array.newInstance(type, page.getRows().size())));
+    }
+
+    public static <T> TransitPage<T> transform(Page<?> page, T[] t) {
         TransitPage<T> transit = new TransitPage<>();
         transit.setRows(new ArrayItem<T>(t));
         copy(transit, page);
         return transit;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> TransitPage<T> marshal(Class<?> type, Page<T> page) {
-        TransitPage<T> transit = new TransitPage<>();
-        List<T> data = page.getRows();
-        T[] array = data.toArray((T[]) Array.newInstance(type, data.size()));
-        transit.setRows(new ArrayItem<T>(array));
-        copy(transit, page);
-        return transit;
-    }
-
-    private static void copy(TransitPage<?> transit, Page<?> page) {
-        transit.setPageNum(page.getPageNum());
-        transit.setPageSize(page.getPageSize());
-        transit.setSize(page.getSize());
-        transit.setStartRow(page.getStartRow());
-        transit.setEndRow(page.getEndRow());
-        transit.setTotal(page.getTotal());
-        transit.setPages(page.getPages());
-        transit.setPrePage(page.getPrePage());
-        transit.setNextPage(page.getNextPage());
-        transit.setFirstPage(page.isFirstPage());
-        transit.setLastPage(page.isLastPage());
-        transit.setHasPreviousPage(page.isHasPreviousPage());
-        transit.setHasNextPage(page.isHasNextPage());
-        transit.setNavigatePages(page.getNavigatePages());
-        transit.setNavigatepageNums(page.getNavigatepageNums());
-        transit.setNavigateFirstPage(page.getNavigateFirstPage());
-        transit.setNavigateLastPage(page.getNavigateLastPage());
-    }
-
-    public static <T> Page<T> unmarshal(TransitPage<T> transit) {
+    public static <T> Page<T> recover(TransitPage<T> transit) {
         Page<T> page = new Page<>();
         List<T> list = new ArrayList<>();
         for (T t : transit.getRows().getItem()) {
@@ -238,5 +213,25 @@ public class TransitPage<T> {
         page.setNavigateFirstPage(transit.getNavigateFirstPage());
         page.setNavigateLastPage(transit.getNavigateLastPage());
         return page;
+    }
+
+    private static void copy(TransitPage<?> transit, Page<?> page) {
+        transit.setPageNum(page.getPageNum());
+        transit.setPageSize(page.getPageSize());
+        transit.setSize(page.getSize());
+        transit.setStartRow(page.getStartRow());
+        transit.setEndRow(page.getEndRow());
+        transit.setTotal(page.getTotal());
+        transit.setPages(page.getPages());
+        transit.setPrePage(page.getPrePage());
+        transit.setNextPage(page.getNextPage());
+        transit.setFirstPage(page.isFirstPage());
+        transit.setLastPage(page.isLastPage());
+        transit.setHasPreviousPage(page.isHasPreviousPage());
+        transit.setHasNextPage(page.isHasNextPage());
+        transit.setNavigatePages(page.getNavigatePages());
+        transit.setNavigatepageNums(page.getNavigatepageNums());
+        transit.setNavigateFirstPage(page.getNavigateFirstPage());
+        transit.setNavigateLastPage(page.getNavigateLastPage());
     }
 }

@@ -24,7 +24,7 @@ import code.ponfee.commons.util.Numbers;
  */
 public class RedisFrequencyLimiter implements FrequencyLimiter {
 
-    private static final int EXPIRE_SECONDS = (int) TimeUnit.DAYS.toSeconds(30); // key的失效日期
+    private static final int EXPIRE_SECONDS = (int) TimeUnit.DAYS.toSeconds(30) + 1; // key的失效日期
     private static final String TRACE_KEY_PREFIX = "freq:trace:"; // 频率缓存key前缀
     private static final String QTY_KEY_PREFIX = "freq:qty:"; // 次数缓存key前缀
 
@@ -62,7 +62,6 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
                         map.put(trace.key, batch);
                     }
                     // ObjectUtils.uuid(16)
-                    // Numbers.reduce(IdWorker.LOCAL_IP_WORKER.nextId())
                     batch.put(Long.toString(IdWorker.LOCAL_IP_WORKER.nextId(), Character.MAX_RADIX), 
                               (double) trace.timeMillis);
                 }
@@ -81,31 +80,23 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
      * @return 是否频繁访问：true是；false否；
      */
     public @Override boolean checkAndTrace(String key) {
-        long limitQtyInMinutes = getLimitQtyInMinutes(key);
+        long limitQtyInMinutes = getLimitsInMinute(key);
         if (limitQtyInMinutes < 0) {
             return true; // 小于0表示无限制
         } else if (limitQtyInMinutes == 0) {
             return false; // 禁止访问
         }
 
-        if (limitQtyInMinutes < countByLastMinutes(key, 1)) {
+        if (limitQtyInMinutes < countByLastTime(key, 1, TimeUnit.MINUTES)) {
             return false; // 超过频率
         } else {
             return consumer.add(new Trace(key, System.currentTimeMillis()));
         }
     }
 
-    public long countByLastHours(String key, int hours) {
-        return countByLastMinutes(key, hours * 60);
-    }
-
-    public long countByLastMinutes(String key, int minutes) {
-        return countByLastSeconds(key, minutes * 60);
-    }
-
-    public long countByLastSeconds(String key, int seconds) {
+    public long countByLastTime(String key, int time, TimeUnit unit) {
         long now = System.currentTimeMillis();
-        return countByRangeMillis(key, now - TimeUnit.SECONDS.toMillis(seconds), now);
+        return countByRangeMillis(key, now - unit.toMillis(time), now);
     }
 
     public long countByRange(String key, Date from, Date to) {
@@ -118,10 +109,10 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
      * @param qty
      * @return 是否设置成功：true是；false否；
      */
-    public @Override boolean setLimitQtyInMinutes(String key, long qty) {
+    public @Override boolean setLimitsInMinute(String key, long qty) {
         boolean flag = jedisClient.valueOps().setLong(QTY_KEY_PREFIX + key, qty, EXPIRE_SECONDS);
         if (flag) {
-            localCache.getAndRemove(key); // remove this key
+            localCache.getAndRemove(key); // remove from local cache
         }
 
         return flag;
@@ -132,14 +123,14 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
      * @param key
      * @return
      */
-    public @Override long getLimitQtyInMinutes(String key) {
+    public @Override long getLimitsInMinute(String key) {
         Long qty = localCache.get(key);
         if (qty == null) {
             qty = jedisClient.valueOps().getLong(QTY_KEY_PREFIX + key, EXPIRE_SECONDS);
             if (qty == null) {
                 qty = -1L; // -1表示无限制
             }
-            localCache.set(key, qty);
+            localCache.set(key, qty); // put into local cache
         }
         return qty;
     }

@@ -303,7 +303,7 @@ public class ESQueryBuilder {
     SearchResponse pagination(TransportClient client, int from, int size) {
         SearchRequestBuilder search = build(client, size);
         search.setSearchType(SearchType.DFS_QUERY_THEN_FETCH); // 深度分布
-        search.setFrom(from).setExplain(true);
+        search.setFrom(from).setExplain(false);
         return search.get();
     }
 

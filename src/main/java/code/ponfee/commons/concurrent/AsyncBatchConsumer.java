@@ -172,6 +172,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
         return System.currentTimeMillis() - lastConsumeTimeMillis > thresholdPeriod;
     }
 
+    // -------------------------------------unsupported methods------------------------------------
     public @Override void interrupt() {
         throw new UnsupportedOperationException();
     }
