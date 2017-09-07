@@ -136,7 +136,7 @@ public class HtmlExporter extends AbstractExporter {
                 builder.append("</td></tr>");
 
                 if (hasTfoot) {
-                    html.insert(html.lastIndexOf("</tfoot>"), builder);
+                    html.insert(html.length() - "</tfoot>".length(), builder);
                 } else {
                     html.append("<tfoot>").append(builder).append("</tfoot>");
                 }

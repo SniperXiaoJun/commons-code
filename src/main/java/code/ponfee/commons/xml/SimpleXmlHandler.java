@@ -42,9 +42,9 @@ public class SimpleXmlHandler {
      *
      *  <span>xml文件</span>
      *  <?xml version="1.0" encoding="UTF-8"?>
-     *  <encryptors xmlns="http://xxx.com.cn/encryptor" 
+     *  <encryptors xmlns="http://code.ponfee/encryptor" 
      *      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-     *      xsi:schemaLocation="http://xxx.com.cn/encryptor encryptor.xsd">
+     *      xsi:schemaLocation="http://code.ponfee/encryptor encryptor.xsd">
      *    <encryptor>
      *      <!-- require -->
      *      <encryptorId>1</encryptorId>
@@ -66,10 +66,10 @@ public class SimpleXmlHandler {
      *  <span>xsd文件</span>
      *  <?xml version="1.0" encoding="UTF-8" standalone="no"?>
      *  <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-     *      xmlns:tns="http://xxx.com.cn/encryptor" 
+     *      xmlns:tns="http://code.ponfee/encryptor" 
      *      attributeFormDefault="unqualified" 
      *      elementFormDefault="qualified" 
-     *      targetNamespace="http://xxx.com.cn/encryptor">
+     *      targetNamespace="http://code.ponfee/encryptor">
      *    <element name="encryptors">
      *      <complexType>
      *        <sequence>

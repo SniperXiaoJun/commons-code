@@ -22,6 +22,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.JavaType;
+import com.google.common.collect.ImmutableMap;
 
 import code.ponfee.commons.json.Jsons;
 
@@ -65,7 +66,7 @@ public final class Http {
     private String contentCharset; // 请求内容编码
     private String accept; // 接收类型
     private final List<MimePart> parts = new ArrayList<>(); // 上传的文件
-    private SSLSocketFactory sslSocketFactory; // 信任的SSL
+    private SSLSocketFactory sslSocketFactory; // 走SSL/TSL通道
 
     private Http(String url) {
         this.url = url;
@@ -129,9 +130,8 @@ public final class Http {
 
     // ----------------------------params--------------------------
     /**
-     * 设置请求参数：经使用有点问题，慎用
      * 最终是拼接成queryString的形式追加到url（即作为get的http请求参数）
-     * {@link #data(Map)}
+     * get方式会有编码等问题，推荐使用data方式传参数：{@link #data(Map)}
      * @param params
      * @return
      */
@@ -142,14 +142,12 @@ public final class Http {
 
     // ----------------------------data--------------------------
     /**
-     * 发送到服务器的查询字符串：name=value&name2=value2
-     * 最终是以HttpURLConnection.getOutputStream().write(data)的形式发送
-     * @param data
+     * 发送到服务器的数据
+     * @param params
      * @return
      */
-    public Http data(String data) {
-        this.data = data;
-        return this;
+    public Http data(Map<String, ?> params) {
+        return data(params, HttpRequest.CHARSET_UTF8);
     }
 
     /**
@@ -159,17 +157,18 @@ public final class Http {
      * @return
      */
     public Http data(Map<String, ?> params, String charset) {
-        this.data = HttpParams.buildParams(params, charset);
-        return this;
+        return data(HttpParams.buildParams(params, charset));
     }
 
     /**
-     * 发送到服务器的数据
-     * @param params
+     * 发送到服务器的查询字符串：name=value&name2=value2
+     * 最终是以HttpURLConnection.getOutputStream().write(data)的形式发送
+     * @param data
      * @return
      */
-    public Http data(Map<String, ?> params) {
-        return data(params, HttpRequest.CHARSET_UTF8);
+    public Http data(String data) {
+        this.data = data;
+        return this;
     }
 
     // ----------------------------part--------------------------
@@ -435,6 +434,8 @@ public final class Http {
         System.out.println("\r\n");
         //Http.get("http://www.baidu.com").download("d:/baidu.html");
         //System.out.println(Http.get("http://localhost:8081/audit/getImg").data(ImmutableMap.of("imgPath", "imgPath")).request());
-        System.out.println(Http.get("http://localhost:8081/audit/uploadFile").part("file", "abc.png", "d:/test/2.png").request());
+        //System.out.println(Http.get("http://localhost:8081/audit/uploadFile").part("file", "abc.png", "d:/test/2.png").request());
+        String[] params = new String[]{"{\"analyze_type\":\"mine_all_cust\",\"date_type\":4,\"class_name\":\"\"}", "{\"analyze_type\":\"mine_all_cust\",\"date_type\":4,\"class_name\":\"衬衫\"}"};
+        Http.post("http://10.118.58.156:8080/market/custgroup/kanban/count/recommend").data(ImmutableMap.of("conditions[]", params)).request();
     }
 }

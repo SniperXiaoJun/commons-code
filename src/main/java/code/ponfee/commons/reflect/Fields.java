@@ -44,8 +44,24 @@ public final class Fields {
      * @param value 字段值
      */
     public static void putIfNull(Object target, String name, Object value) {
-        if (get(target, name) != null) {
-            put(target, name, value);
+        Field field;
+        try {
+            field = ClassUtils.getField(target.getClass(), name);
+            putIfNull(target, field, value);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * put field to target object if value is null
+     * @param target
+     * @param field
+     * @param value
+     */
+    public static void putIfNull(Object target, Field field, Object value) {
+        if (get(target, field) == null) {
+            put(target, field, value);
         }
     }
 
@@ -78,18 +94,6 @@ public final class Fields {
             UNSAFE.putFloat(target, fieldOffset, (float) value);
         } else {
             UNSAFE.putObject(target, fieldOffset, value);
-        }
-    }
-
-    /**
-     * put field to target object if value is null
-     * @param target
-     * @param field
-     * @param value
-     */
-    public static void putIfNull(Object target, Field field, Object value) {
-        if (get(target, field) != null) {
-            put(target, field, value);
         }
     }
 
@@ -134,6 +138,38 @@ public final class Fields {
             return UNSAFE.getFloat(target, fieldOffset);
         } else {
             return UNSAFE.getObject(target, fieldOffset);
+        }
+    }
+
+    /**
+     * put of volatile
+     * @param target
+     * @param field
+     * @param value
+     */
+    public static void putVolatile(Object target, Field field, Object value) {
+        field.setAccessible(true);
+        long fieldOffset = UNSAFE.objectFieldOffset(field);
+
+        Class<?> type = field.getType();
+        if (Boolean.TYPE.equals(type)) {
+            UNSAFE.putBooleanVolatile(target, fieldOffset, (boolean) value);
+        } else if (Byte.TYPE.equals(type)) {
+            UNSAFE.putByteVolatile(target, fieldOffset, (byte) value);
+        } else if (Character.TYPE.equals(type)) {
+            UNSAFE.putCharVolatile(target, fieldOffset, (char) value);
+        } else if (Short.TYPE.equals(type)) {
+            UNSAFE.putShortVolatile(target, fieldOffset, (short) value);
+        } else if (Integer.TYPE.equals(type)) {
+            UNSAFE.putIntVolatile(target, fieldOffset, (int) value);
+        } else if (Long.TYPE.equals(type)) {
+            UNSAFE.putLongVolatile(target, fieldOffset, (long) value);
+        } else if (Double.TYPE.equals(type)) {
+            UNSAFE.putDoubleVolatile(target, fieldOffset, (double) value);
+        } else if (Float.TYPE.equals(type)) {
+            UNSAFE.putFloatVolatile(target, fieldOffset, (float) value);
+        } else {
+            UNSAFE.putObjectVolatile(target, fieldOffset, value);
         }
     }
 

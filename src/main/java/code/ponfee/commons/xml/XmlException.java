@@ -23,7 +23,8 @@ public class XmlException extends RuntimeException {
         super(cause);
     }
 
-    protected XmlException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected XmlException(String message, Throwable cause, 
+        boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

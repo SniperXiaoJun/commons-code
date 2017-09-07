@@ -103,8 +103,8 @@ public final class GenericUtils {
     public static Class<?> getActualTypeArgument(Field field, int genericArgsIndex) {
         Type type = field.getGenericType();
         //type.getTypeName(); -> java.util.List<test.ClassA>
-        //((ParameterizedType) type).getRawType(); // interface java.util.List
-        //((ParameterizedType) type).getOwnerType(); // null
+        //((ParameterizedType) type).getRawType(); -> interface java.util.List
+        //((ParameterizedType) type).getOwnerType(); -> null
         return getActualTypeArgument(((ParameterizedType) type).getActualTypeArguments()[genericArgsIndex]);
     }
 

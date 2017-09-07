@@ -3,7 +3,6 @@ package code.ponfee.commons.jce.pkcs;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.PrivateKey;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import javax.crypto.Cipher;
@@ -124,7 +123,7 @@ public final class PKCS7Envelope {
      * @param privateKey
      * @return
      */
-    public static byte[] unenvelop(byte envelopeddata[], Certificate cert, PrivateKey privateKey) {
+    public static byte[] unenvelop(byte envelopeddata[], X509Certificate cert, PrivateKey privateKey) {
         FastPkcs7 fastPkcs7 = new FastPkcs7();
         if (!fastPkcs7.pkcs7Data(envelopeddata)) {
             throw new SecurityException("can't decode PKCS7Envlope object");
@@ -142,9 +141,7 @@ public final class PKCS7Envelope {
         item = iasn.getIssuer();
         /*byte ss[] = new byte[item.length];
         ss = DerUtil.getItemDataAndTag(envelopeddata, item);*/
-        String sn = iasn.getSerialNumber().getSerialNumber().toString(10);
-        String certSN = ((X509Certificate) cert).getSerialNumber().toString(10);
-        if (!certSN.equals(sn)) {
+        if (!cert.getSerialNumber().equals(iasn.getSerialNumber().getSerialNumber())) {
             throw new SecurityException("certificate is not match");
         }
 
@@ -191,7 +188,7 @@ public final class PKCS7Envelope {
             if (input != null) try {
                 input.close();
             } catch (IOException ignored) {
-                // ignore
+                ignored.printStackTrace();
             }
         }
     }

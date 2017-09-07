@@ -90,21 +90,24 @@ public final class ClassUtils {
      * @return
      */
     public static String getMethodSignature(final Method method) {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append(Modifier.toString(method.getModifiers() & Modifier.methodModifiers())).append(" ");
-        builder.append(getClassName(method.getReturnType())).append(" ");
-
-        builder.append(getClassName(method.getDeclaringClass())).append(".");
-        builder.append(method.getName()).append("(");
-        List<String> params = new ArrayList<>();
         String[] names = getMethodParamNames(method);
         Class<?>[] types = method.getParameterTypes();
+
+        List<String> params = new ArrayList<>();
         for (int i = 0; i < types.length; i++) {
             params.add(getClassName(types[i]) + " " + names[i]);
         }
-        builder.append(StringUtils.join(params.toArray(), ", ")).append(")");
-        return builder.toString();
+
+        return new StringBuilder(Modifier.toString(method.getModifiers() & Modifier.methodModifiers()))
+                    .append(" ")
+                    .append(getClassName(method.getReturnType()))
+                    .append(" ")
+                    .append(getClassName(method.getDeclaringClass()))
+                    .append(".")
+                    .append(method.getName())
+                    .append("(")
+                    .append(StringUtils.join(params.toArray(), ", "))
+                    .append(")").toString();
     }
 
     /**
@@ -163,6 +166,7 @@ public final class ClassUtils {
     public static String getPackagePath(Class<?> clazz) {
         String className = getClassName(clazz);
         if (className.indexOf('.') < 0) return ""; // none package name
+
         return getPackagePath(className.substring(0, className.lastIndexOf('.')));
     }
 

@@ -137,16 +137,16 @@ public class ExcelExporter extends AbstractExporter {
      */
     @Override
     public void build(Table table) {
-        // 1校验表头是否为空
+        // 1、校验表头是否为空
         if (ObjectUtils.isEmpty(table.getThead())) {
             throw new IllegalArgumentException("thead can't be null");
         }
 
         String name = this.getName();
-        // 2获取或创建工作簿
+        // 2、获取或创建工作簿
         XSSFSheet sheet = getOrCreateSheet(name);
 
-        // 3判断工作簿是否已创建过行数据
+        // 3、判断工作簿是否已创建过行数据
         CursorRow cursorRow = new CursorRow(sheet.getLastRowNum());
         if (cursorRow.get() > 0) {
             // 创建两行空白行
@@ -163,17 +163,17 @@ public class ExcelExporter extends AbstractExporter {
             sheet.addMergedRegion(new CellRangeAddress(i, j, 0, MARGIN_ROW_CELL_SIZE - 1));
         }
 
-        // 4构建复合表头
+        // 4、构建复合表头
         buildComplexThead(table, sheet, cursorRow);
 
-        // 5冻结窗口配置
+        // 5、冻结窗口配置
         if (freezes.get(name) != null) {
             freezes.get(name).disable();
         } else {
             freezes.put(name, new Freeze(1, cursorRow.get()));
         }
 
-        // 6判断是否有数据
+        // 6、判断是否有数据
         if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
             createCell(TIP_NO_RESULT, sheet, tipStyle, cursorRow, table.getTotalLeafCount());
         } else {
@@ -181,7 +181,7 @@ public class ExcelExporter extends AbstractExporter {
             List<XSSFCellStyle> styles = createStyles(table.getThead());
             XSSFRow row;
 
-            // 7处理tbody数据
+            // 7、处理tbody数据
             if (!ObjectUtils.isEmpty(table.getTobdy())) {
                 Object[] data;
                 List<Object[]> tbody = table.getTobdy();
@@ -196,7 +196,7 @@ public class ExcelExporter extends AbstractExporter {
                 }
             }
 
-            // 8处理tfoot数据
+            // 8、处理tfoot数据
             if (!ObjectUtils.isEmpty(table.getTfoot())) {
                 int rowNum = cursorRow.getAndIncrement();
                 row = sheet.createRow(rowNum);
@@ -219,6 +219,7 @@ public class ExcelExporter extends AbstractExporter {
                 }
             }
 
+            // 9、文字注释
             if (StringUtils.isNotBlank(table.getComment())) {
                 createCell(table.getComment(), sheet, tipStyle, cursorRow, table.getTotalLeafCount());
             }

@@ -30,8 +30,10 @@ public final class WebContext {
     /** HTTP请求与响应 */
     private static ThreadLocal<HttpServletRequest> request = new ThreadLocal<>();
     private static ThreadLocal<HttpServletResponse> response = new ThreadLocal<>();
+    
+    /** 用于非用户访问请求：程序内部反射调用controller方法 */
     private static ThreadLocal<Map<String, String[]>> custparams = new ThreadLocal<Map<String, String[]>>() {
-        public @Override synchronized Map<String, String[]> initialValue() {
+        public @Override Map<String, String[]> initialValue() {
             return new HashMap<String, String[]>();
         }
     };
@@ -54,29 +56,37 @@ public final class WebContext {
         if (null != getRequest()) {
             return getRequest().getParameter(name);
         } else {
-            String[] values = custparams.get().get(name);
-            //custparams.get().remove(name);
+            String[] values = custparams.get().get(name); // custparams.get().remove(name)
             return (values == null || values.length == 0) ? null : values[0];
         }
     }
 
+    /**
+     * 设置参数
+     * @param name
+     * @param value
+     */
     public static void setParameter(String name, String value) {
         String[] values = custparams.get().get(name);
         if (values == null || values.length == 0) {
             values = new String[] { value };
         } else {
-            values = ObjectUtils.concat(values, new String[] { value });
+            values = ObjectUtils.concat(new String[] { value }, values);
         }
         custparams.get().put(name, values);
     }
 
     /**
      * 获取参数
-     * @param paramName
+     * @param name
      * @return
      */
-    public static String[] getParamValues(String paramName) {
-        return getRequest().getParameterValues(paramName);
+    public static String[] getParameterValues(String name) {
+        if (null != getRequest()) {
+            return getRequest().getParameterValues(name);
+        } else {
+            return custparams.get().get(name);
+        }
     }
 
     /**
@@ -132,11 +142,10 @@ public final class WebContext {
     @WebFilter(filterName = "code.ponfee.commons.web.WebContext$WebContextFilter", urlPatterns = "/*")
     public static class WebContextFilter implements Filter {
 
-        @Override
-        public void destroy() {}
+        public @Override void init(FilterConfig cfg) throws ServletException {}
 
-        @Override
-        public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
+        public @Override void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) 
+                                                             throws IOException, ServletException { 
             try {
                 WebContext.setRequest((HttpServletRequest) req);
                 WebContext.setResponse((HttpServletResponse) resp);
@@ -147,8 +156,7 @@ public final class WebContext {
             }
         }
 
-        @Override
-        public void init(FilterConfig cfg) throws ServletException {}
+        public @Override void destroy() {}
     }
 
 }
