@@ -55,8 +55,8 @@ public class X509CertGenerator {
      * @param notAfter
      * @return
      */
-    public static X509Certificate createRootCert(Integer sn, String issuer, RSASignAlgorithm sigAlg,
-                                                 PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
+    public static X509Certificate createRootCert(Integer sn, String issuer, RSASignAlgorithm sigAlg, PrivateKey privateKey, 
+                                                 PublicKey publicKey, Date notBefore, Date notAfter) {
         PKCS10 pkcs10 = createPkcs10(issuer, privateKey, publicKey, sigAlg);
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(true));
         return signSelf(privateKey, sigAlg, certInfo);
@@ -64,7 +64,8 @@ public class X509CertGenerator {
 
     // ---------------------------------create subject cert of ca sign ------------------------------
     public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, String subject,
-        RSASignAlgorithm sigAlg, PrivateKey privateKey, PublicKey publicKey, Date notBefore, Date notAfter) {
+                                                    RSASignAlgorithm sigAlg, PrivateKey privateKey, 
+                                                    PublicKey publicKey, Date notBefore, Date notAfter) {
         return createSubjectCert(caCert, caKey, null, subject, sigAlg, privateKey, publicKey, notBefore, notAfter);
     }
 
@@ -82,7 +83,7 @@ public class X509CertGenerator {
      * @return
      */
     public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, Integer sn,
-        String subject, RSASignAlgorithm sigAlg, PrivateKey privateKey,
+                                                    String subject, RSASignAlgorithm sigAlg, PrivateKey privateKey,
         PublicKey publicKey, Date notBefore, Date notAfter) {
         PKCS10 pkcs10 = createPkcs10(subject, privateKey, publicKey, sigAlg);
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(false));
@@ -105,7 +106,7 @@ public class X509CertGenerator {
      * @return
      */
     public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, Integer sn,
-        PKCS10 pkcs10, Date notBefore, Date notAfter) {
+                                                    PKCS10 pkcs10, Date notBefore, Date notAfter) {
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(false));
         return signCert(caCert, caKey, certInfo);
     }
@@ -185,8 +186,8 @@ public class X509CertGenerator {
      * @param extensions
      * @return
      */
-    private static X509CertInfo createCertInfo(Integer sn, PKCS10 pkcs10,
-        Date notBefore, Date notAfter, CertificateExtensions extensions) {
+    private static X509CertInfo createCertInfo(Integer sn, PKCS10 pkcs10, Date notBefore, 
+                                               Date notAfter, CertificateExtensions extensions) {
         if (sn == null) sn = ThreadLocalRandom.current().nextInt() & Integer.MAX_VALUE;
         try {
             // 验证pkcs10
@@ -256,9 +257,7 @@ public class X509CertGenerator {
         String userData = "Digital Signature, Non-Repudiation, Key Encipherment, Data Encipherment (f0)";
         byte[] b1 = userData.getBytes();
         byte[] b2 = new byte[userData.length()];
-        for (int i = 0; i < b2.length; i++) {
-            b2[i] = (byte) userData.charAt(i);
-        }
+        System.arraycopy(b1, 0, b2, 0, b1.length);
         System.out.println(ObjectUtils.equals(b1, b2));
         b2[15] = 1;
         System.out.println(ObjectUtils.equals(b1, b2));

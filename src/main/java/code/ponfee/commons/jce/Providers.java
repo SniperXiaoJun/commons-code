@@ -18,15 +18,14 @@ public interface Providers {
     static Provider get(Class<? extends Provider> type) {
         Provider provider = ProvidersHolder.HOLDER.get(type);
         if (provider != null) {
-            return provider;
-        } else if (ProvidersHolder.HOLDER.containsKey(type)) {
-            return null;
+            return (provider instanceof NullProvider) ? null : provider;
         }
 
         try {
             provider = type.getDeclaredConstructor().newInstance();
             Security.addProvider(provider);
         } catch (Exception ignored) {
+            provider = NullProvider.INSTANCE;
             ignored.printStackTrace();
         }
         ProvidersHolder.HOLDER.put(type, provider);
@@ -46,6 +45,9 @@ public interface Providers {
     Providers SunPCSC =    () -> get(sun.security.smartcardio.SunPCSC.class);
     Providers SunMSCAPI =  () -> get(sun.security.mscapi.SunMSCAPI.class);
 
+    /**
+     * provider holder
+     */
     static final class ProvidersHolder {
         private static final Map<Class<? extends Provider>, Provider> HOLDER = new ConcurrentHashMap<>(16);
         static {
@@ -55,6 +57,18 @@ public interface Providers {
                     HOLDER.put(provider.getClass(), provider);
                 }
             }
+        }
+    }
+
+    /**
+     * The NullProvider representing the not exists provider
+     */
+    static final class NullProvider extends Provider {
+        private static final long serialVersionUID = 7420890884380155994L;
+        private static final Provider INSTANCE = new NullProvider();
+
+        private NullProvider() {
+            super("Null", 1.0D, "null");
         }
     }
 

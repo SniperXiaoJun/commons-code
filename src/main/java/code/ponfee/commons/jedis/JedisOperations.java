@@ -22,7 +22,7 @@ abstract class JedisOperations {
     static final String SUCCESS_MSG = "OK"; // 返回成功信息
     static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
 
-    static final ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 20, 60, TimeUnit.SECONDS, // 最大100个线程
+    static final ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 20, 60, TimeUnit.SECONDS, // 最大20个线程
                                                                    new SynchronousQueue<>(), // 同步队列，超过数量让调用线程处理
                                                                    new NamedThreadFactory("redis-mget-furture", true));
     static {

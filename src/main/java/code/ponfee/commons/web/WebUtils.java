@@ -277,7 +277,7 @@ public final class WebUtils {
      * 会话跟踪
      */
     public static void setSessionTrace(String token) {
-        int maxAge = token == null ? 0 : 24 * 60 * 60;
+        int maxAge = (token == null) ? 0 : 24 * 60 * 60;
         HttpServletResponse resp = getResponse();
         //result.setAuthToken(token); // to parame
         WebUtils.addCookie(resp, SESSION_TRACE_COOKIE, token, "/", maxAge); // to cookie

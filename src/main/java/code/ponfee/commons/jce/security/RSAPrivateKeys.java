@@ -58,7 +58,7 @@ public final class RSAPrivateKeys {
         try {
             RSAPrivateCrtKey key = (RSAPrivateCrtKey) privateKey;
             RSAPublicKeySpec keySpec = new RSAPublicKeySpec(key.getModulus(), key.getPublicExponent());
-            return (RSAPublicKey) KeyFactory.getInstance(RSACryptor.ALG_RSA).generatePublic(keySpec);
+            return (RSAPublicKey) KeyFactory.getInstance(key.getAlgorithm()).generatePublic(keySpec);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new SecurityException(e);
         }
@@ -231,15 +231,15 @@ public final class RSAPrivateKeys {
      * <p>
      * 
      * convert private key to encrypted pem format
-     * normal pbeWithSHAAnd3_KeyTripleDES_CBC to encrypt
+     * default pbeWithSHAAnd3_KeyTripleDES_CBC algorithm for encrypt
      * @param privateKey
      * @param password
      * @return
      */
     public static String toEncryptedPkcs8Pem(RSAPrivateKey privateKey, String password) {
         try {
-            ASN1ObjectIdentifier s = PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC;
-            JcePKCSPBEOutputEncryptorBuilder encryptorBuilder = new JcePKCSPBEOutputEncryptorBuilder(s);
+            ASN1ObjectIdentifier alg = PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC;
+            JcePKCSPBEOutputEncryptorBuilder encryptorBuilder = new JcePKCSPBEOutputEncryptorBuilder(alg);
             return toEncryptedPkcs8Pem(privateKey, password, encryptorBuilder.build(password.toCharArray()));
         } catch (OperatorCreationException e) {
             throw new SecurityException(e);

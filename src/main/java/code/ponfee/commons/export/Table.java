@@ -184,7 +184,8 @@ public class Table implements Serializable {
         for (Thead cell : thead) {
             if (cell.getNodeLevel() > level) {
                 level = cell.getNodeLevel(); // 遍历到下一层级节点，左叶子节点个数重新设置基准值
-                leftLeafCount = maps.get(cell.getPorder()).getLeftLeafCount(); // 获取其父节点的左子节点数量
+                // 获取其父节点的左子节点数量
+                leftLeafCount = maps.get(cell.getPorder()).getLeftLeafCount();
             }
             cell.setLeftLeafCount(leftLeafCount);
             leftLeafCount += cell.getChildLeafCount(); // 累加上节点本身占用的子节点个数

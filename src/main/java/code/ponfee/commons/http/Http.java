@@ -382,8 +382,8 @@ public final class Http {
     private void disconnect(HttpRequest request) {
         if (request != null) try {
             request.disconnect();
-        } catch (Exception e) {
-            // ignored
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
     }
 
