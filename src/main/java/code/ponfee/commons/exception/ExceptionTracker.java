@@ -1,7 +1,6 @@
 package code.ponfee.commons.exception;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import code.ponfee.commons.io.StringPrintWriter;
 
 /**
  * 异常追踪
@@ -21,26 +20,6 @@ public final class ExceptionTracker {
         try (StringPrintWriter writer = new StringPrintWriter()) {
             e.printStackTrace(writer);
             return writer.getString();
-        }
-    }
-
-    private static final class StringPrintWriter extends PrintWriter {
-        StringPrintWriter() {
-            super(new StringWriter());
-        }
-
-        StringPrintWriter(int initialSize) {
-            super(new StringWriter(initialSize));
-        }
-
-        public String getString() {
-            flush();
-            return this.out.toString();
-        }
-
-        @Override
-        public String toString() {
-            return getString();
         }
     }
 

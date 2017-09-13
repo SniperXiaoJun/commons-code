@@ -1,11 +1,9 @@
 package code.ponfee.commons.jedis;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import code.ponfee.commons.concurrent.NamedThreadFactory;
+import code.ponfee.commons.concurrent.ExecuteServiceCreator;
 import code.ponfee.commons.util.Numbers;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
@@ -22,9 +20,7 @@ abstract class JedisOperations {
     static final String SUCCESS_MSG = "OK"; // 返回成功信息
     static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
 
-    static final ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 20, 60, TimeUnit.SECONDS, // 最大20个线程
-                                                                   new SynchronousQueue<>(), // 同步队列，超过数量让调用线程处理
-                                                                   new NamedThreadFactory("redis-mget-furture", true));
+    static final ExecutorService EXECUTOR = ExecuteServiceCreator.create(0, 20, 60, 0, "redis-mget-furture");
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(EXECUTOR::shutdown));
     }

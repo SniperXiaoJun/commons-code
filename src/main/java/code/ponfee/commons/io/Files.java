@@ -40,6 +40,7 @@ public final class Files {
      */
     public static String human(long size) {
         if (size <= 0) return "0";
+
         int digit = (int) (Math.log10(size) / Math.log10(1024));
         return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digit)) + FILE_UNITS[digit];
     }

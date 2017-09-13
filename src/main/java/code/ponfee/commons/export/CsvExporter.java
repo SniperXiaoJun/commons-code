@@ -26,8 +26,8 @@ public class CsvExporter extends AbstractExporter {
             throw new IllegalArgumentException("thead can't be null");
         }
 
-        // thead
-        buildComplexThead(table.getThead(), table.getMaxTheadLevel());
+        // build table thead
+        buildThead(table.getThead(), table.getMaxTheadLevel());
 
         if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
             csv.append(TIP_NO_RESULT);
@@ -72,8 +72,7 @@ public class CsvExporter extends AbstractExporter {
         csv = null;
     }
 
-    // 复合表头
-    private void buildComplexThead(List<Thead> thead, int maxTheadLevel) {
+    private void buildThead(List<Thead> thead, int maxTheadLevel) {
         for (Thead cell : thead) {
             if (cell.isLeaf()) {
                 csv.append(cell.getName()).append(",");

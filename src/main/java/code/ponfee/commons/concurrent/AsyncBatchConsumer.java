@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Preconditions;
@@ -57,9 +55,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
         Preconditions.checkArgument(thresholdPeriod > 0);
         Preconditions.checkArgument(thresholdChunk > 0);
         if (executor == null) {
-            this.executor = new ThreadPoolExecutor(0, 10, 300, TimeUnit.SECONDS, 
-                                                   new SynchronousQueue<Runnable>(), // 超过则让调用方线程处理
-                                                   new ThreadPoolExecutor.CallerRunsPolicy());
+            this.executor = ExecuteServiceCreator.create(0, 10, 300, 0, "async-batch-consumer");
             this.needDestroyWhenEnd = true;
         } else {
             this.executor = executor;

@@ -7,12 +7,11 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import code.ponfee.commons.concurrent.ExecuteServiceCreator;
 
 /**
  * 邮件发送多线程池
@@ -21,9 +20,7 @@ import org.slf4j.LoggerFactory;
 public class ThreadPoolMailSender {
 
     private static Logger logger = LoggerFactory.getLogger(ThreadPoolMailSender.class);
-    private static final ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 10, 300, TimeUnit.SECONDS, 
-                                                                           new SynchronousQueue<Runnable>(), 
-                                                                           new ThreadPoolExecutor.CallerRunsPolicy());
+    private static final ExecutorService EXECUTOR = ExecuteServiceCreator.create(0, 20, 120, 0, "mail-sender");
 
     public static boolean send(MailSender mailSender, MailEnvelope envlop) {
         return send(mailSender, envlop, true);

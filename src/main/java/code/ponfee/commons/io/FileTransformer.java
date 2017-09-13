@@ -39,7 +39,7 @@ public class FileTransformer {
     private final File target;
     private final String targetPath;
     private final String encoding;
-    private final StringBuilder logger = new StringBuilder();
+    private final StringBuilder logger = new StringBuilder(4096);
     private String[] searchList;
     private String[] replacementList;
 
@@ -141,11 +141,14 @@ public class FileTransformer {
              PrintWriter out = new PrintWriter(osw);
         ) {
             String line;
-            while ((line = in.readLine()) != null) {
-                if (searchList != null && searchList.length > 0) {
-                    line = StringUtils.replaceEach(line, searchList, replacementList);
+            if (searchList != null && searchList.length > 0) {
+                while ((line = in.readLine()) != null) {
+                    out.println(StringUtils.replaceEach(line, searchList, replacementList));
                 }
-                out.println(line);
+            } else {
+                while ((line = in.readLine()) != null) {
+                    out.println(line);
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -170,11 +173,14 @@ public class FileTransformer {
              PrintWriter out = new PrintWriter(osw)
         ) {
             String line;
-            while ((line = in.readLine()) != null) {
-                if (searchList != null && searchList.length > 0) {
-                    line = StringUtils.replaceEach(line, searchList, replacementList);
+            if (searchList != null && searchList.length > 0) {
+                while ((line = in.readLine()) != null) {
+                    out.println(StringUtils.replaceEach(line, searchList, replacementList));
                 }
-                out.println(line);
+            } else {
+                while ((line = in.readLine()) != null) {
+                    out.println(line);
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

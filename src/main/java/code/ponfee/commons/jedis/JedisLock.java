@@ -179,8 +179,8 @@ public class JedisLock implements Lock, java.io.Serializable {
         long startTime = System.nanoTime();
         for (;;) {
             if (Thread.interrupted()) throw new InterruptedException();
-            if (System.nanoTime() - startTime > timeout) return false; // 等待超时则返回
             if (tryLock()) return true;
+            if (System.nanoTime() - startTime > timeout) return false; // 等待超时则返回
             TimeUnit.MILLISECONDS.sleep(sleepMillis);
         }
     }

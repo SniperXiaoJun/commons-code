@@ -301,7 +301,7 @@ public class ExcelExporter extends AbstractExporter {
         if (workbook != null) try {
             workbook.close();
         } catch (IOException e) {
-            logger.error(null, e);
+            logger.error("closing XSSFWorkbook occur error", e);
         }
         workbook = null;
     }
@@ -346,6 +346,7 @@ public class ExcelExporter extends AbstractExporter {
 
     // 复合表头
     private void buildComplexThead(Table table, XSSFSheet sheet, CursorRow cursorRow) {
+        // create caption
         createCell(table.getCaption(), sheet, titleStyle, cursorRow, table.getTotalLeafCount());
 
         // 约定非叶子节点不能跨行
@@ -381,10 +382,10 @@ public class ExcelExporter extends AbstractExporter {
                 createCell(colRow, b, headStyle, null);
             }
             for (int a = cursorRow.get() + 1; a <= endRow; a++) { // 行
-                if (rows.add(a)) {
-                    colRow = sheet.createRow(a); // 还未创建该行
+                if (rows.add(a)) { // 行未创建
+                    colRow = sheet.createRow(a);
                     colRow.setHeight(DEFAULT_HEIGHT);
-                } else {
+                } else { // 行已创建
                     colRow = sheet.getRow(a);
                 }
 
@@ -427,12 +428,12 @@ public class ExcelExporter extends AbstractExporter {
      * @param style
      * @param tmeta
      * @param value
-     * @param i
-     * @param j
+     * @param r
+     * @param c
      * @param options
      */
-    private void createCell(XSSFRow row, int colIndex, XSSFCellStyle style,
-        Tmeta tmeta, Object value, int i, int j, Map<String, Object> options) {
+    private void createCell(XSSFRow row, int colIndex, XSSFCellStyle style, Tmeta tmeta, 
+                              Object value, int r, int c, Map<String, Object> options) {
         XSSFCell cell = row.createCell(colIndex);
         // 设置单元格格式
         if (tmeta != null && tmeta.getType() == Type.NUMERIC) {
@@ -461,7 +462,7 @@ public class ExcelExporter extends AbstractExporter {
         }
         cell.setCellStyle(style);
 
-        processOptions(cell, i, j, options);
+        processOptions(cell, r, c, options);
     }
 
     /**
