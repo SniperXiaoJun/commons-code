@@ -1,7 +1,6 @@
 package code.ponfee.commons.concurrent;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -14,34 +13,34 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * 执行服务创建类
+ * 线程池执行服务创建类
  * @author Ponfee
  */
-public final class ExecuteServiceCreator {
+public final class ThreadPoolExecutors {
 
     private static final RejectedExecutionHandler DEFAULT_HANDLER = new CallerRunsPolicy();
 
-    public static ExecutorService create(int corePoolSize, int maximumPoolSize, long keepAliveTime) {
+    public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime) {
         return create(corePoolSize, maximumPoolSize, keepAliveTime, 0, null, DEFAULT_HANDLER);
     }
 
-    public static ExecutorService create(int corePoolSize, int maximumPoolSize, 
-                                         long keepAliveTime, int queueCapacity) {
+    public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, 
+                                            long keepAliveTime, int queueCapacity) {
         return create(corePoolSize, maximumPoolSize, keepAliveTime, queueCapacity, null, DEFAULT_HANDLER);
     }
 
-    public static ExecutorService create(int corePoolSize, int maximumPoolSize, long keepAliveTime, 
-                                         int queueCapacity, RejectedExecutionHandler rejectedHandler) {
+    public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime, 
+                                            int queueCapacity, RejectedExecutionHandler rejectedHandler) {
         return create(corePoolSize, maximumPoolSize, keepAliveTime, queueCapacity, null, rejectedHandler);
     }
 
-    public static ExecutorService create(int corePoolSize, int maximumPoolSize, 
-                                         long keepAliveTime, int queueCapacity, String threadName) {
+    public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, 
+                                            long keepAliveTime, int queueCapacity, String threadName) {
         return create(corePoolSize, maximumPoolSize, keepAliveTime, queueCapacity, threadName, null);
     }
 
-    public static ExecutorService create(int corePoolSize, int maximumPoolSize, long keepAliveTime, int queueCapacity, 
-                                         String threadName, RejectedExecutionHandler rejectedHandler) {
+    public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime, int queueCapacity, 
+                                            String threadName, RejectedExecutionHandler rejectedHandler) {
         // BlockingQueue<Runnable> queue
         BlockingQueue<Runnable> workQueue;
         if (queueCapacity > 0) {

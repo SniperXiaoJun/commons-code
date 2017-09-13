@@ -3,11 +3,12 @@ package test.jce.crypto;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import code.ponfee.commons.jce.crypto.Algorithm;
-import code.ponfee.commons.jce.crypto.SymmetricCryptor;
-import code.ponfee.commons.jce.crypto.SymmetricCryptorBuilder;
 import code.ponfee.commons.jce.crypto.Mode;
 import code.ponfee.commons.jce.crypto.Padding;
+import code.ponfee.commons.jce.crypto.SymmetricCryptor;
+import code.ponfee.commons.jce.crypto.SymmetricCryptorBuilder;
 import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.SecureRandoms;
 
 public class EncryptTester {
 
@@ -29,7 +30,7 @@ public class EncryptTester {
         //coder = EncryptorBuilder.newBuilder(Algorithm.DESede).key(randomBytes(16)).provider(bc).build();
         //coder = EncryptorBuilder.newBuilder(Algorithm.DESede).key(randomBytes(24)).mode(Mode.CBC).padding(Padding.PKCS5Padding).ivParameter(randomBytes(8)).build();
         //coder = EncryptorBuilder.newBuilder(Algorithm.DESede).key(Bytes.randomBytes(16)).mode(Mode.ECB).padding(Padding.PKCS5Padding).provider(bc).build();
-        coder = SymmetricCryptorBuilder.newBuilder(Algorithm.DESede).key(Bytes.randomBytes(16)).mode(Mode.CBC).padding(Padding.PKCS5Padding).ivParameter(Bytes.randomBytes(8)).provider(bc).build();
+        coder = SymmetricCryptorBuilder.newBuilder(Algorithm.DESede).key(SecureRandoms.nextBytes(16)).mode(Mode.CBC).padding(Padding.PKCS5Padding).ivParameter(SecureRandoms.nextBytes(8)).provider(bc).build();
 
         byte[] encrypted = coder.encrypt("12345678".getBytes()); // 加密
         byte[] origin = coder.decrypt(encrypted); // 解密

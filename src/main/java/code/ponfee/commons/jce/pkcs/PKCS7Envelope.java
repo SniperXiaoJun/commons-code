@@ -30,7 +30,7 @@ import org.bjca.jce.fastparser.Item;
 import org.bjca.jce.fastparser.RecipientInfo;
 import org.bouncycastle.jce.X509Principal;
 
-import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.SecureRandoms;
 
 /**
  * 数字信封（不带签名）
@@ -64,7 +64,7 @@ public final class PKCS7Envelope {
             byte encKey[] = cipher.doFinal(key.getEncoded());
 
             // 对称密钥对原文加密
-            DERObject iv = alg.ivLen > 0 ? new DEROctetString(Bytes.randomBytes(alg.ivLen)) : null;
+            DERObject iv = alg.ivLen > 0 ? new DEROctetString(SecureRandoms.nextBytes(alg.ivLen)) : null;
             AlgorithmIdentifier derAlg = new AlgorithmIdentifier(new DERObjectIdentifier(alg.oid), iv);
             DEROctetString derParam = (DEROctetString) derAlg.getParameters();
             cipher = Cipher.getInstance(alg.transform);

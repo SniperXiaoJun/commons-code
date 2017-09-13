@@ -4,9 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Formatter;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,12 +20,6 @@ public final class Bytes {
     private static final char SINGLE_SPACE = ' ';
     private static final String HEX_CODES = "0123456789abcdef";
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
-
-    /** 随机数 */
-    private static final SecureRandom RANDOM = new SecureRandom();
-    static {
-        RANDOM.setSeed(new SecureRandom(ObjectUtils.uuid()).generateSeed(20));
-    }
 
     /**
      * dump byte array
@@ -254,17 +246,6 @@ public final class Bytes {
     }
 
     /**
-     * random byte[] array by SecureRandom
-     * @param numOfByte
-     * @return
-     */
-    public static byte[] randomBytes(int numOfByte) {
-        byte[] bytes = new byte[numOfByte];
-        RANDOM.nextBytes(bytes);
-        return bytes;
-    }
-
-    /**
      * merge byte array
      * @param first
      * @param rest
@@ -291,8 +272,5 @@ public final class Bytes {
 
     public static void main(String[] args) throws Exception {
         System.out.println(hexDump(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class))));
-
-        System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes(20)));
-        System.out.println(org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(randomBytes(20)));
     }
 }

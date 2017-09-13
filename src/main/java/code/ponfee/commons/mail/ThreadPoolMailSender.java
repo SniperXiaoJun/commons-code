@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import code.ponfee.commons.concurrent.ExecuteServiceCreator;
+import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 
 /**
  * 邮件发送多线程池
@@ -20,7 +20,7 @@ import code.ponfee.commons.concurrent.ExecuteServiceCreator;
 public class ThreadPoolMailSender {
 
     private static Logger logger = LoggerFactory.getLogger(ThreadPoolMailSender.class);
-    private static final ExecutorService EXECUTOR = ExecuteServiceCreator.create(0, 20, 120, 0, "mail-sender");
+    private static final ExecutorService EXECUTOR = ThreadPoolExecutors.create(0, 20, 120, 0, "mail-sender");
 
     public static boolean send(MailSender mailSender, MailEnvelope envlop) {
         return send(mailSender, envlop, true);

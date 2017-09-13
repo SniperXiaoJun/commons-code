@@ -11,7 +11,7 @@ import org.apache.commons.text.RandomStringGenerator;
 
 import com.sun.crypto.provider.SunJCE;
 
-import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.SecureRandoms;
 
 /**
  * <pre>
@@ -57,7 +57,7 @@ public class PBECryptor extends SymmetricCryptor {
      * @param key
      */
     public PBECryptor(String algName, char[] key) {
-        this(algName, key, Bytes.randomBytes(24));
+        this(algName, key, SecureRandoms.nextBytes(24));
     }
 
     /**

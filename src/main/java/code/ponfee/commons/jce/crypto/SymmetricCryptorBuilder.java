@@ -8,7 +8,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.SecureRandoms;
 
 /**
  * 加密构建类
@@ -36,7 +36,7 @@ public final class SymmetricCryptorBuilder {
     }
 
     public SymmetricCryptorBuilder key(int keySize) {
-        this.key = Bytes.randomBytes(keySize);
+        this.key = SecureRandoms.nextBytes(keySize);
         return this;
     }
 

@@ -55,7 +55,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
         Preconditions.checkArgument(thresholdPeriod > 0);
         Preconditions.checkArgument(thresholdChunk > 0);
         if (executor == null) {
-            this.executor = ExecuteServiceCreator.create(0, 10, 300, 0, "async-batch-consumer");
+            this.executor = ThreadPoolExecutors.create(0, 10, 300, 0, "async-batch-consumer");
             this.needDestroyWhenEnd = true;
         } else {
             this.executor = executor;

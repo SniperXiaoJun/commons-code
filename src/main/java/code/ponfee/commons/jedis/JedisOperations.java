@@ -3,7 +3,7 @@ package code.ponfee.commons.jedis;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import code.ponfee.commons.concurrent.ExecuteServiceCreator;
+import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 import code.ponfee.commons.util.Numbers;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
@@ -20,7 +20,7 @@ abstract class JedisOperations {
     static final String SUCCESS_MSG = "OK"; // 返回成功信息
     static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
 
-    static final ExecutorService EXECUTOR = ExecuteServiceCreator.create(0, 20, 60, 0, "redis-mget-furture");
+    static final ExecutorService EXECUTOR = ThreadPoolExecutors.create(0, 20, 60, 0, "redis-mget-furture");
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(EXECUTOR::shutdown));
     }
