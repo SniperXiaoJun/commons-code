@@ -16,7 +16,6 @@ import code.ponfee.commons.concurrent.AsyncBatchConsumer;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.JedisLock;
 import code.ponfee.commons.util.IdWorker;
-import code.ponfee.commons.util.Numbers;
 
 /**
  * Redis访问频率控制器
@@ -61,9 +60,8 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
                         batch = new HashMap<>();
                         map.put(trace.key, batch);
                     }
-                    // ObjectUtils.uuid(16)
-                    batch.put(Long.toString(IdWorker.LOCAL_IP_WORKER.nextId(), Character.MAX_RADIX), 
-                              (double) trace.timeMillis);
+                    // ObjectUtils.uuid22(), Character.MAX_RADIX
+                    batch.put(Long.toString(IdWorker.LOCAL_WORKER.nextId(), 36), trace.timeMillis);
                 }
                 for (Entry<String, Map<String, Double>> entry : map.entrySet()) {
                     jedisClient.zsetOps().zadd(TRACE_KEY_PREFIX + entry.getKey(), entry.getValue());
@@ -158,7 +156,7 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
 
     private static class Trace {
         final String key;
-        final long timeMillis;
+        final double timeMillis;
 
         public Trace(String key, long timeMillis) {
             this.key = key;
@@ -166,12 +164,4 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(System.currentTimeMillis());
-        System.out.println(System.nanoTime());
-        for (int i = 0 ; i < 999999; i++) {
-            long l = IdWorker.LOCAL_IP_WORKER.nextId();
-            System.out.println(l +" -> "+Long.toString(l, Character.MAX_RADIX) + "  " + Numbers.reduce(l));
-        }
-    }
 }

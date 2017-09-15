@@ -8,6 +8,7 @@ import java.io.StringWriter;
  * @author Ponfee
  */
 public class StringPrintWriter extends PrintWriter {
+
     public StringPrintWriter() {
         super(new StringWriter());
     }
@@ -18,11 +19,12 @@ public class StringPrintWriter extends PrintWriter {
 
     public String getString() {
         flush();
-        return this.out.toString();
+        return super.out.toString();
     }
 
     @Override
     public String toString() {
         return getString();
     }
+
 }

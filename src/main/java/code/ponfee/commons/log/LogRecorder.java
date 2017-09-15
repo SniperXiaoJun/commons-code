@@ -116,8 +116,8 @@ public abstract class LogRecorder {
             logInfo.setCostTime(cost);
             try {
                 log(logInfo);
-            } catch (Throwable ignored) {
-                ignored.printStackTrace();
+            } catch (Throwable ex) {
+                logger.error("log info error", ex);
             }
         }
     }

@@ -80,7 +80,7 @@ public abstract class CryptoProvider {
      */
     public static final CryptoProvider AES_CRYPTO = new CryptoProvider() {
         private final SymmetricCryptor key = SymmetricCryptorBuilder.newBuilder(Algorithm.AES).key("z]_5Fi!X$ed4OY8j".getBytes()).mode(Mode.CBC)
-                                                      .padding(Padding.PKCS5Padding).ivParameter("SVE<r[)qK`n%zQ'o".getBytes()).build();
+                                                                    .padding(Padding.PKCS5Padding).ivParameter("SVE<r[)qK`n%zQ'o".getBytes()).build();
 
         @Override
         public byte[] encrypt(byte[] original) {

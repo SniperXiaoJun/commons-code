@@ -399,27 +399,28 @@ public final class Http {
      */
     private static final class MimePart {
 
-        private String name;     // 表单域字段名
-        private String filename; // 文件名
+        private String name;        // 表单域字段名
+        private String filename;    // 文件名
         private InputStream stream; // 文件流
 
         MimePart(String name, String filename, Object mime) {
-            try {
-                if (mime instanceof byte[]) {
-                    this.stream = new ByteArrayInputStream((byte[]) mime);
-                } else if (mime instanceof CharSequence) {
-                    this.stream = new FileInputStream(((CharSequence) mime).toString());
-                } else if (mime instanceof File) {
-                    this.stream = new FileInputStream((File) mime);
-                } else if (mime instanceof InputStream) {
-                    this.stream = (InputStream) mime;
-                } else if (mime instanceof Byte[]) {
-                    this.stream = new ByteArrayInputStream(ArrayUtils.toPrimitive((Byte[]) mime));
-                } else {
-                    throw new IllegalArgumentException("mime must be a file data.");
+            if (mime instanceof byte[]) {
+                this.stream = new ByteArrayInputStream((byte[]) mime);
+            } else if (mime instanceof Byte[]) {
+                this.stream = new ByteArrayInputStream(ArrayUtils.toPrimitive((Byte[]) mime));
+            } else if (mime instanceof String || mime instanceof File) {
+                File file = mime instanceof File 
+                            ? (File) mime
+                            : new File((String) mime);
+                try {
+                    this.stream = new FileInputStream(file);
+                } catch (FileNotFoundException e) {
+                    throw new IllegalArgumentException(e);
                 }
-            } catch (FileNotFoundException e) {
-                throw new IllegalArgumentException(e);
+            } else if (mime instanceof InputStream) {
+                this.stream = (InputStream) mime;
+            } else {
+                throw new IllegalArgumentException("mime must be a file data.");
             }
             this.name = name;
             this.filename = filename;

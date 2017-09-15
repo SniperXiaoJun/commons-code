@@ -23,6 +23,7 @@ import code.ponfee.commons.reflect.Fields;
  * @author fupf
  */
 public final class IdWorker {
+
     private static final int MAX_SIZE = Long.toBinaryString(Long.MAX_VALUE).length();
     private final long twepoch = 1451577600000L; // 起始标记时间点，作为基准
 
@@ -104,7 +105,7 @@ public final class IdWorker {
      * @return
      */
     private @FunctionalInterface static interface LocalIPWorker { IdWorker get(); }
-    public static final IdWorker LOCAL_IP_WORKER = ((LocalIPWorker) () -> {
+    public static final IdWorker LOCAL_WORKER = ((LocalIPWorker) () -> {
         IdWorker worker = new IdWorker(0);
         long maxWorkerId = Networks.ipReduce("255.255.255.255"); // 1068
 
@@ -121,12 +122,13 @@ public final class IdWorker {
         Fields.put(worker, "datacenterIdShift", worker.sequenceBits + worker.workerIdBits); // 左移21位（wid11位+seq10位）
         Fields.put(worker, "workerIdShift", worker.sequenceBits); // 左移10位（seq10位）
         Fields.put(worker, "timestampMask", -1L ^ (-1L << (MAX_SIZE - worker.timestampShift)));
-        Fields.put(worker, "workerId", (long) Networks.ipReduce());
+
+        Fields.put(worker, "workerId", Networks.ipReduce());
         return worker;
     }).get();
 
     public static void main(String[] args) {
-        final IdWorker idWorker = LOCAL_IP_WORKER;
+        final IdWorker idWorker = LOCAL_WORKER;
         final Set<String> set = new HashSet<>(81920000);
         System.out.println(Long.toHexString(-1456153131));
         System.out.println(Long.toString(-1456153131, 36));

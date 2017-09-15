@@ -11,23 +11,28 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 
 /**
- * 文件缓冲写入包装类
+ * 包装文件缓冲写入（decorator）
  * @author Ponfee
  */
-public class BufferedWriteWrapper extends Writer {
+public class WrappedBufferedWriter extends Writer {
 
     private OutputStream outer;
     private OutputStreamWriter writer;
     private BufferedWriter buffer;
 
-    public BufferedWriteWrapper(File file) throws FileNotFoundException {
+    public WrappedBufferedWriter(File file) throws FileNotFoundException {
         this(file, Charset.defaultCharset());
     }
 
-    public BufferedWriteWrapper(File file, Charset charset) throws FileNotFoundException {
-        this.outer = new FileOutputStream(file);
+    public WrappedBufferedWriter(File file, Charset charset) throws FileNotFoundException {
+        this(new FileOutputStream(file), charset);
+    }
+
+    public WrappedBufferedWriter(OutputStream outer, Charset charset) {
+        super();
+        this.outer = outer;
         this.writer = new OutputStreamWriter(outer, charset);
-        this.buffer = new BufferedWriter(writer, 8192);
+        this.buffer = new BufferedWriter(writer, 4096);
     }
 
     @Override

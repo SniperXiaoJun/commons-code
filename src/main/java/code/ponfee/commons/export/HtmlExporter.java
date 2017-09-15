@@ -22,7 +22,7 @@ public class HtmlExporter extends AbstractExporter {
     private static final String REPORT = "report";
     private static final String TEMPLATE;
     static {
-        StringBuilder builder = new StringBuilder(2048);
+        StringBuilder builder = new StringBuilder(4096);
         builder.append("<!DOCTYPE html>                                                                                                       \n");
         builder.append("<html>                                                                                                                \n");
         builder.append("  <head lang=\"en\">                                                                                                  \n");
@@ -53,7 +53,7 @@ public class HtmlExporter extends AbstractExporter {
     private StringBuilder html;
 
     public HtmlExporter() {
-        this.html = new StringBuilder(0x1000); // 初始容量4096
+        this.html = new StringBuilder(0x2000); // 初始容量8192
     }
 
     public HtmlExporter(String initHtml) {
