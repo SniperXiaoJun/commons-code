@@ -21,7 +21,7 @@ public class JdkSerializer extends Serializer {
         GZIPOutputStream gzout = null;
         ObjectOutputStream oos = null;
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(BYTE_SIZE);
             if (isCompress) {
                 gzout = new ExtendedGZIPOutputStream(baos);
                 oos = new ObjectOutputStream(gzout);

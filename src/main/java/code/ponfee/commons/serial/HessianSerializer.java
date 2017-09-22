@@ -28,7 +28,7 @@ public class HessianSerializer extends Serializer {
         GZIPOutputStream gzout = null;
         HessianSerializerOutput hessian = null;
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(BYTE_SIZE);
             if (isCompress) {
                 gzout = new ExtendedGZIPOutputStream(baos);
                 hessian = new HessianSerializerOutput(gzout);

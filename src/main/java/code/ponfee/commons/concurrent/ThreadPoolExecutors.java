@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * 线程池执行服务创建类
+ * 线程池执行器创建
  * @author Ponfee
  */
 public final class ThreadPoolExecutors {

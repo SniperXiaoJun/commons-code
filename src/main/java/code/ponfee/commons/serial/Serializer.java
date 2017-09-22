@@ -26,6 +26,7 @@ import code.ponfee.commons.io.Files;
 public abstract class Serializer {
 
     static final int BUFF_SIZE = 8192; // 8KB
+    static final int BYTE_SIZE = 512;
 
     private static Logger logger = LoggerFactory.getLogger(Serializer.class);
 
@@ -85,7 +86,7 @@ public abstract class Serializer {
      * @return
      */
     public static byte[] compress(byte[] data) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(BYTE_SIZE);
         compress(new ByteArrayInputStream(data), baos);
         return baos.toByteArray();
     }
@@ -115,7 +116,7 @@ public abstract class Serializer {
      * @return
      */
     public static byte[] decompress(byte[] data) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(BYTE_SIZE);
         decompress(new ByteArrayInputStream(data), baos);
         return baos.toByteArray();
     }

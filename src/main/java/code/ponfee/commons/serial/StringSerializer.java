@@ -14,7 +14,11 @@ public class StringSerializer extends Serializer {
     private final Charset charset;
 
     public StringSerializer() {
-        this(Charset.forName("UTF8"));
+        this(Charset.defaultCharset());
+    }
+
+    public StringSerializer(String charset) {
+        this(Charset.forName(charset));
     }
 
     public StringSerializer(Charset charset) {
@@ -24,17 +28,15 @@ public class StringSerializer extends Serializer {
         this.charset = charset;
     }
 
-    public StringSerializer(String charset) {
-        this.charset = Charset.forName(charset);
-    }
-
     @Override
     public <T> byte[] serialize(T t, boolean isCompress) {
         if (t == null) {
             return null;
         } else if (t instanceof String) {
             byte[] data = ((String) t).getBytes(charset);
-            if (isCompress) data = compress(data);
+            if (isCompress) {
+                data = compress(data);
+            }
             return data;
         } else {
             throw new SerializationException("object must be java.lang.String type, but it's "
@@ -50,9 +52,13 @@ public class StringSerializer extends Serializer {
                                                  + ClassUtils.getClassName(clazz) + ".class");
         }
 
-        if (data == null) return null;
+        if (data == null) {
+            return null;
+        }
 
-        if (isCompress) data = decompress(data);
+        if (isCompress) {
+            data = decompress(data);
+        }
         return (T) new String(data, charset);
     }
 

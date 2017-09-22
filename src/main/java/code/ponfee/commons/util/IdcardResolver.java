@@ -2,7 +2,6 @@ package code.ponfee.commons.util;
 
 import static java.util.Calendar.YEAR;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +23,6 @@ public class IdcardResolver {
 
     private static final Pattern PASSPORT_REGEX = Pattern.compile("^1[45][0-9]{7}|G[0-9]{8}|P[0-9]{7}|S[0-9]{7,8}|D[0-9]+$");
     private static final Date ORIGIN_DATE = Dates.toDate("1950-01-01 00:00:00", "yyyy-MM-dd HH:mm:ss");
-    private static final Random RANDOM = new SecureRandom();
 
     /**
      * 证件类型
@@ -53,11 +52,12 @@ public class IdcardResolver {
      * @return
      */
     public static String generate() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(AREA_CODE_LIST.get(RANDOM.nextInt(AREA_CODE_LIST.size())));
-        builder.append(Dates.format(Dates.random(ORIGIN_DATE), "yyyyMMdd"));
-        builder.append(StringUtils.leftPad(String.valueOf(RANDOM.nextInt(1000)), 3, '0'));
-        builder.append(genPowerSum(builder.toString().toCharArray()));
+        Random random = ThreadLocalRandom.current();
+        StringBuilder builder = new StringBuilder(18);
+        builder.append(AREA_CODE_LIST.get(random.nextInt(AREA_CODE_LIST.size()))); // 行政区号：6位
+        builder.append(Dates.format(Dates.random(ORIGIN_DATE), "yyyyMMdd")); // 生日：8位
+        builder.append(StringUtils.leftPad(String.valueOf(random.nextInt(1000)), 3, '0')); // 当地派出所在该日期的出生顺序号：3位，其中17位（倒数第二位）男为单数，女为双数
+        builder.append(genPowerSum(builder.toString().toCharArray())); // 校验码：1位
         return builder.toString();
     }
 
