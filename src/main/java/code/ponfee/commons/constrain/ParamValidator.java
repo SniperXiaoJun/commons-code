@@ -110,7 +110,7 @@ public abstract class ParamValidator extends FieldValidator {
             Constructor<?> c = method.getReturnType().getConstructor(int.class, String.class);
             return c.newInstance(ILLEGAL_ARGS.getCode(), ILLEGAL_ARGS.getMsg() + ": " + errMsg);
         } catch (Exception e) {
-            throw new IllegalArgumentException(errMsg);
+            throw new IllegalArgumentException(errMsg, e);
         }
     }
 }

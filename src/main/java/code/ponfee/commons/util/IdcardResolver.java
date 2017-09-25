@@ -183,7 +183,7 @@ public class IdcardResolver {
             sum = sum + Integer.valueOf(c) * iflag;
             iflag--;
         }
-        return (sum % 10 == 0 ? 0 : (10 - sum % 10)) == Integer.valueOf(end);
+        return (10 - sum % 10) % 10 == Integer.parseInt(end);
     }
 
     /**
@@ -219,7 +219,7 @@ public class IdcardResolver {
         if (end.toUpperCase().equals("A")) {
             sum = sum + 10;
         } else {
-            sum = sum + Integer.valueOf(end);
+            sum = sum + Integer.parseInt(end);
         }
 
         return sum % 11 == 0;

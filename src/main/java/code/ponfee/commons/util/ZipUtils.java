@@ -20,7 +20,6 @@ import net.lingala.zip4j.util.Zip4jConstants;
  */
 public class ZipUtils {
 
-    private static final String SEPARATOR = "/";
     private static final String SUFFIX = ".zip";
 
     // -----------------------------------压缩-----------------------------------
@@ -30,7 +29,19 @@ public class ZipUtils {
      * @return 最终的压缩文件存放的绝对路径
      */
     public static String zip(String src) throws ZipException {
-        return zip(src, null);
+        File srcFile = new File(src);
+        if (!srcFile.exists()) {
+            throw new IllegalArgumentException("source file not found: " + src);
+        }
+
+        String dest = srcFile.getParent() + File.separator;
+        if (srcFile.isFile()) {
+            dest += FilenameUtils.getBaseName(srcFile.getName()); // 文件名去除后缀
+        } else {
+            dest += srcFile.getName(); // 以目录名作为文件名
+        }
+
+        return zip(src, dest + SUFFIX);
     }
 
     /**
@@ -66,11 +77,24 @@ public class ZipUtils {
      * @return 最终的压缩文件存放的绝对路径
      */
     public static String zip(String src, String dest, boolean recursion,
-        String passwd, String comment) throws ZipException {
-        File srcFile = new File(Strings.cleanPath(src));
-        if (!srcFile.exists()) return null;
+                   String passwd, String comment) throws ZipException {
+        // validate source file
+        File srcFile = new File(src);
+        if (!srcFile.exists()) {
+            throw new IllegalArgumentException("source file not found: " + src);
+        }
 
-        dest = buildDestFilePath(srcFile, Strings.cleanPath(dest));
+        // validate dest file
+        if (StringUtils.isEmpty(dest)) {
+            throw new IllegalArgumentException("dest file canot be null");
+        }
+        File destFile = new File(dest);
+        if (destFile.exists()) {
+            throw new IllegalArgumentException("dest file exists: " + dest);
+        }
+        Files.mkdir(destFile.getParent()); // 创建父路径（如果不存在）
+
+        // create zip parameters
         ZipParameters parameters = new ZipParameters();
         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE); // 压缩方式
         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL); // 压缩级别
@@ -83,7 +107,7 @@ public class ZipUtils {
         }
 
         // 开始压缩
-        ZipFile zipFile = new ZipFile(dest);
+        ZipFile zipFile = new ZipFile(destFile);
         if (srcFile.isFile()) { // 压缩文件
             zipFile.addFile(srcFile, parameters);
         } else { // 压缩目录
@@ -103,7 +127,7 @@ public class ZipUtils {
         if (comment != null) {
             zipFile.setComment(comment);
         }
-        return dest;
+        return destFile.getAbsolutePath();
     }
 
     // -----------------------------------解压缩-----------------------------------
@@ -113,12 +137,18 @@ public class ZipUtils {
      * @return 解压后文件数组
      * @throws ZipException
      */
-    public static File[] unzip(String zipFile) throws ZipException {
-        String dest = zipFile;
-        if (dest.toLowerCase().endsWith(SUFFIX)) {
-            dest = dest.substring(0, dest.toLowerCase().indexOf(SUFFIX));
+    public static String unzip(String zipFile) throws ZipException {
+        if (StringUtils.isBlank(zipFile)) {
+            throw new IllegalArgumentException("zip file canot be null");
         }
-        return unzip(zipFile, dest);
+        String dest;
+        if (zipFile.toLowerCase().endsWith(SUFFIX)) {
+            dest = zipFile.substring(0, zipFile.toLowerCase().indexOf(SUFFIX));
+        } else {
+            throw new IllegalStateException("the zip file name must be end with .zip");
+        }
+        unzip(zipFile, dest);
+        return dest;
     }
 
     /**
@@ -156,18 +186,29 @@ public class ZipUtils {
      * @throws ZipException 压缩文件有损坏或者解压缩失败抛出
      */
     @SuppressWarnings("unchecked")
-    public static File[] unzip(File zipFile, String dest, String passwd, String charset) throws ZipException {
-        if (StringUtils.isEmpty(dest)) {
-            throw new IllegalArgumentException("dest path can't be null");
+    public static File[] unzip(File zipFile, String dest, String passwd, 
+                                  String charset) throws ZipException {
+        // validate zip file
+        if (!zipFile.exists()) {
+            throw new IllegalArgumentException("zip file not found: " + zipFile.getAbsolutePath());
         }
-        Files.mkdir(dest); // 校验并创建解压缩存放目录
-
         ZipFile zFile = new ZipFile(zipFile);
-        if (!StringUtils.isEmpty(charset)) {
-            zFile.setFileNameCharset(charset);
-        }
         if (!zFile.isValidZipFile()) {
             throw new ZipException("invalid zip file.");
+        }
+
+        // validate dest file path
+        if (StringUtils.isEmpty(dest)) {
+            throw new IllegalArgumentException("dest file path can't be null");
+        } else if (new File(dest).exists()) {
+            throw new IllegalStateException("dest file is exists: " + dest);
+        } else {
+            Files.mkdir(dest); // 校验并创建解压缩存放目录
+        }
+
+        // unpack zip file
+        if (!StringUtils.isEmpty(charset)) {
+            zFile.setFileNameCharset(charset);
         }
         if (zFile.isEncrypted()) {
             if (StringUtils.isEmpty(passwd)) {
@@ -177,53 +218,13 @@ public class ZipUtils {
             }
         }
         zFile.extractAll(dest);
-
-        List<FileHeader> headerList = zFile.getFileHeaders();
-        List<File> extractedFileList = new ArrayList<File>();
-        for (FileHeader fileHeader : headerList) {
+        List<File> fileEntries = new ArrayList<>();
+        for (FileHeader fileHeader : (List<FileHeader>) zFile.getFileHeaders()) {
             if (!fileHeader.isDirectory()) {
-                extractedFileList.add(new File(dest, fileHeader.getFileName()));
+                fileEntries.add(new File(dest, fileHeader.getFileName()));
             }
         }
-        return extractedFileList.toArray(new File[extractedFileList.size()]);
-    }
-
-    /**
-     * 构建压缩文件存放路径，如果不存在将会创建
-     * 传入的可能是文件名或者目录，也可能不传，此方法用以转换最终压缩文件的存放路径
-     * @param srcFile 源文件
-     * @param destFilePath 压缩目标路径
-     * @return 正确的压缩文件存放路径
-     */
-    private static String buildDestFilePath(File srcFile, String destFilePath) {
-        if (StringUtils.isEmpty(destFilePath)) {
-            destFilePath = srcFile.getParent() + SEPARATOR; // 为上一级目录
-        }
-
-        String parentPath;
-        if (destFilePath.endsWith(SEPARATOR)) {
-            parentPath = destFilePath; // 路径为目录
-            if (srcFile.isDirectory()) {
-                destFilePath += srcFile.getName(); // 以目录名作为文件名
-            } else {
-                destFilePath += FilenameUtils.getBaseName(srcFile.getName()); // 文件名去除后缀
-            }
-        } else {
-            // 获取父路径
-            parentPath = destFilePath.substring(0, destFilePath.lastIndexOf(SEPARATOR));
-        }
-
-        Files.mkdir(new File(parentPath)); // 创建父路径（如果不存在）
-
-        if (!destFilePath.toLowerCase().endsWith(SUFFIX)) {
-            destFilePath += SUFFIX;
-        }
-
-        if (new File(destFilePath).exists()) {
-            destFilePath = destFilePath.substring(0, destFilePath.lastIndexOf(SUFFIX))
-                           + "[" + ObjectUtils.uuid22() + "]" + SUFFIX;
-        }
-        return destFilePath;
+        return fileEntries.toArray(new File[fileEntries.size()]);
     }
 
     public static void main(String[] args) throws Exception {
@@ -237,7 +238,9 @@ public class ZipUtils {
         //zip("D:\\guiminer", null, true, null, "abc");
         //unzip("D:\\guiminer.zip");
         //unzip(new File("d:/aaa.zip"), "d://aaa", "123", "UTF-8");
-        
-        zip(MavenProjects.getProjectBaseDir(), null, "123");
+
+        //zip(MavenProjects.getProjectBaseDir(), null, "123");
+        //unzip("d:/abc.zip");
+        zip("D:\\abc.txt");
     }
 }

@@ -200,7 +200,7 @@ public class FieldValidator {
 
         // 是否不能为null
         if (c.notNull() && v == null) {
-            return n + "{" + v + "}：不能为null;";
+            return n + "{null}：不能为null;";
         }
 
         // 正则校验

@@ -32,7 +32,7 @@ public class WrappedBufferedWriter extends Writer {
         super();
         this.outer = outer;
         this.writer = new OutputStreamWriter(outer, charset);
-        this.buffer = new BufferedWriter(writer, 4096);
+        this.buffer = new BufferedWriter(writer, 8192);
     }
 
     @Override
