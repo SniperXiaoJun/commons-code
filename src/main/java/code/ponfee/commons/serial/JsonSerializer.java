@@ -32,7 +32,7 @@ public class JsonSerializer extends Serializer {
         try {
             byte[] data = mapper.writeValueAsBytes(t);
             if (isCompress) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(BYTE_SIZE);
                 gzout = new ExtendedGZIPOutputStream(baos);
                 gzout.write(data, 0, data.length);
                 gzout.finish();

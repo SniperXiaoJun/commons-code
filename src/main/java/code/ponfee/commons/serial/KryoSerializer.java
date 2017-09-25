@@ -43,7 +43,7 @@ public class KryoSerializer extends Serializer {
         Kryo kryo = null;
         try {
             kryo = this.getKryo();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(BYTE_SIZE);
             if (isCompress) {
                 gzout = new ExtendedGZIPOutputStream(baos);
                 output = new ByteBufferOutput(gzout, BUFF_SIZE);

@@ -273,7 +273,7 @@ public final class Http {
      * @return
      */
     public String request() {
-        HttpRequest request = _request();
+        HttpRequest request = request0();
         try {
             return request.body();
         } finally {
@@ -286,7 +286,7 @@ public final class Http {
      * @param output
      */
     public void download(OutputStream output) {
-        HttpRequest request = _request();
+        HttpRequest request = request0();
         BufferedOutputStream bos = null;
         try {
             if (request.ok()) {
@@ -324,7 +324,7 @@ public final class Http {
     }
 
     // ----------------------------private methods--------------------------
-    private HttpRequest _request() {
+    private HttpRequest request0() {
         HttpRequest request;
         switch (method) {
             case GET:
