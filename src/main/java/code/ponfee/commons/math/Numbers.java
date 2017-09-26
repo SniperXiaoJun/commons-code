@@ -1,4 +1,4 @@
-package code.ponfee.commons.util;
+package code.ponfee.commons.math;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -7,9 +7,11 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
 
+import code.ponfee.commons.util.ObjectUtils;
+
 /**
  * 数字工具类
- * @author fupf
+ * @author Ponfee
  */
 public final class Numbers {
 
@@ -20,6 +22,48 @@ public final class Numbers {
     private static final String[] CN_UPPER_MONETRAY_UNIT = { "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
                                                              "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
 
+    public static int toInt(Object obj) {
+        return toInt(obj, 0);
+    }
+
+    /**
+     * convert to int
+     * @param obj
+     * @param defaultVal
+     * @return
+     */
+    public static int toInt(Object obj, int defaultVal) {
+        return ((Double) toDouble(obj, defaultVal)).intValue();
+    }
+
+    public static long toLong(Object obj, long defaultVal) {
+        return ((Double) toDouble(obj, defaultVal)).longValue();
+    }
+
+    public static float toFloat(Object obj, float defaultVal) {
+        return ((Double) toDouble(obj, defaultVal)).floatValue();
+    }
+
+    public static double toDouble(Object obj) {
+        return toDouble(obj, 0.0D);
+    }
+
+    public static double toDouble(Object obj, double defaultVal) {
+        if (obj == null) {
+            return defaultVal;
+        }
+
+        if (Number.class.isInstance(obj)) {
+            return ((Number) obj).doubleValue();
+        }
+
+        try {
+            return Double.parseDouble(obj.toString());
+        } catch (final NumberFormatException nfe) {
+            return defaultVal;
+        }
+    }
+
     /**
      * 数字精度化
      * @param value
@@ -27,11 +71,13 @@ public final class Numbers {
      * @return
      */
     public static double scale(Object value, int scale) {
-        if (value == null) return 0;
-        if (scale < 0) Double.parseDouble(value.toString());
+        Double val = toDouble(value);
 
-        BigDecimal b = new BigDecimal(value.toString());
-        return b.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+        if (scale < 0) {
+            return val;
+        }
+
+        return new BigDecimal(val).setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     /**
@@ -41,8 +87,8 @@ public final class Numbers {
      * @return
      */
     public static double lower(double value, int scale) {
-        BigDecimal b = new BigDecimal(value / Math.pow(10, scale));
-        return b.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return new BigDecimal(value / Math.pow(10, scale))
+                     .setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     /**
@@ -63,7 +109,10 @@ public final class Numbers {
      * @return
      */
     public static String percent(double numerator, double denominator, int scale) {
-        if (denominator == 0) return "--";
+        if (denominator == 0) {
+            return "--";
+        }
+
         return percent(numerator / denominator, scale);
     }
 
@@ -181,24 +230,24 @@ public final class Numbers {
 
     /**
      * long值压缩
-     * @param i
+     * @param num
      * @return
      */
-    public static String reduce(long i) {
+    public static String reduce(long num) {
         int radix = ObjectUtils.URL_SAFE_BASE64_CODES.length;
         char[] buf = new char[65];
         int charPos = 64;
-        boolean negative = (i < 0);
+        boolean negative = (num < 0);
 
         if (!negative) {
-            i = -i;
+            num = -num;
         }
 
-        while (i <= -radix) {
-            buf[charPos--] = ObjectUtils.URL_SAFE_BASE64_CODES[(int) (-(i % radix))];
-            i = i / radix;
+        while (num <= -radix) {
+            buf[charPos--] = ObjectUtils.URL_SAFE_BASE64_CODES[(int) (-(num % radix))];
+            num = num / radix;
         }
-        buf[charPos] = ObjectUtils.URL_SAFE_BASE64_CODES[(int) (-i)];
+        buf[charPos] = ObjectUtils.URL_SAFE_BASE64_CODES[(int) (-num)];
 
         if (negative) {
             buf[--charPos] = '-';

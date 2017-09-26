@@ -145,7 +145,7 @@ public final class HashUtils {
      * @return
      */
     private static byte[] digest(InputStream input, String algorithm) {
-        /*try { // 4G文件47秒
+        /*try {
             byte[] buffer = new byte[BUF_SIZE];
             MessageDigest md = MessageDigest.getInstance(algorithm);
             int len;
@@ -164,7 +164,7 @@ public final class HashUtils {
         }*/
 
         DigestInputStream digestInput = null;
-        try { // 4G文件46秒
+        try {
             MessageDigest md = MessageDigest.getInstance(algorithm);
             digestInput = new DigestInputStream(input, md);
             byte[] buffer = new byte[BUF_SIZE];

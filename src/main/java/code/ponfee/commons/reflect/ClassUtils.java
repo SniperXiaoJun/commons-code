@@ -99,15 +99,10 @@ public final class ClassUtils {
         }
 
         return new StringBuilder(Modifier.toString(method.getModifiers() & Modifier.methodModifiers()))
-                    .append(" ")
-                    .append(getClassName(method.getReturnType()))
-                    .append(" ")
-                    .append(getClassName(method.getDeclaringClass()))
-                    .append(".")
-                    .append(method.getName())
-                    .append("(")
-                    .append(StringUtils.join(params.toArray(), ", "))
-                    .append(")").toString();
+                    .append(" ").append(getClassName(method.getReturnType()))
+                    .append(" ").append(getClassName(method.getDeclaringClass()))
+                    .append(".").append(method.getName())
+                    .append("(").append(StringUtils.join(params.toArray(), ", ")).append(")").toString();
     }
 
     /**

@@ -7,7 +7,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import code.ponfee.commons.exception.ExceptionTracker;
+import code.ponfee.commons.exception.Throwables;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.util.ObjectUtils;
 
@@ -110,7 +110,7 @@ public abstract class LogRecorder {
         } catch (Throwable e) {
             cost = (int) (System.currentTimeMillis() - start);
             logger.error("[exec-throwing]-[{}]{}-{}", methodName, logs, ObjectUtils.toString(logInfo.getArgs()), e);
-            logInfo.setException(ExceptionTracker.peekStackTrace(e));
+            logInfo.setException(Throwables.getStackTrace(e));
             throw e; // 向外抛
         } finally {
             logInfo.setCostTime(cost);

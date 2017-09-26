@@ -5,12 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Preconditions;
 
-import code.ponfee.commons.util.Numbers;
+import code.ponfee.commons.math.Numbers;
 
 /**
  * 异步批量消费
@@ -20,7 +20,7 @@ import code.ponfee.commons.util.Numbers;
 public final class AsyncBatchConsumer<T> extends Thread {
 
     private final RunnableFactory<T> factory; // 线程工厂
-    private final ExecutorService executor; // 线程池执行器
+    private final ThreadPoolExecutor executor; // 线程池执行器
     private final int thresholdPeriod; // 消费周期阀值
     private final int thresholdChunk; // 消费数量阀值
     private final int sleepTimeMillis; // 休眠时间
@@ -50,7 +50,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
      * @param thresholdPeriod  消费周期阀值
      * @param thresholdChunk   消费数量阀值
      */
-    public AsyncBatchConsumer(RunnableFactory<T> factory, ExecutorService executor,
+    public AsyncBatchConsumer(RunnableFactory<T> factory, ThreadPoolExecutor executor,
                               int thresholdPeriod, int thresholdChunk) {
         Preconditions.checkArgument(thresholdPeriod > 0);
         Preconditions.checkArgument(thresholdChunk > 0);

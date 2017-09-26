@@ -26,6 +26,7 @@ public interface DataExporter extends AutoCloseable {
 
     /**
      * 关闭资源
+     * not throw Exception
      */
     @Override void close();
 }

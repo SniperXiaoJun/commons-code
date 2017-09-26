@@ -80,7 +80,8 @@ public class MailSender {
      * @param password 密码
      * @param smtpHost 主机地址
      */
-    MailSender(String user, String password, String smtpHost, boolean authRequire, Integer connTimeout, Integer readTimeout) {
+    MailSender(String user, String password, String smtpHost, 
+               boolean authRequire, Integer connTimeout, Integer readTimeout) {
         if (!RegexUtils.isEmail(user)) {
             throw new IllegalArgumentException("illegal sender email: " + user);
         }

@@ -22,10 +22,10 @@ public interface FrequencyLimiter {
      * @param to
      * @return
      */
-    public long countByRange(String key, Date from, Date to);
+    long countByRange(String key, Date from, Date to);
 
     /**
-     * 设置一分钟的访问量
+     * 设置一分钟的访问限制量
      * @param key
      * @param qty
      * @return

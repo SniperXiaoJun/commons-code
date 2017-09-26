@@ -16,6 +16,7 @@ import code.ponfee.commons.jce.security.RSACryptor.RSAKeyPair;
 import code.ponfee.commons.jce.security.RSAPrivateKeys;
 import code.ponfee.commons.jce.security.RSAPublicKeys;
 import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.IdcardResolver;
 import code.ponfee.commons.util.MavenProjects;
 
 public class RSACryptoTester {
@@ -42,10 +43,9 @@ public class RSACryptoTester {
     }
 
     private  static void test(RSAPrivateKey privateKey, RSAPublicKey publicKey) throws IOException {
-        long i = System.currentTimeMillis();
+        byte[] data = Files.toByteArray(MavenProjects.getMainJavaFile(IdcardResolver.class));
         System.out.println("=============================加密测试==============================");
-        //byte[] data = "加解密测试".getBytes();
-        byte[] data = Files.toByteArray(MavenProjects.getMainJavaFile(RSACryptor.class));
+        long i = System.currentTimeMillis();
         System.out.println("原文：");
         System.out.println(Bytes.hexDump(ArrayUtils.subarray(data, 0, 100)));
         byte[] encodedData = RSACryptor.encrypt(data, publicKey);
@@ -53,6 +53,16 @@ public class RSACryptoTester {
         System.out.println(Bytes.hexDump(ArrayUtils.subarray(encodedData, 0, 100)));
         System.out.println("解密：");
         System.out.println(Bytes.hexDump(ArrayUtils.subarray(RSACryptor.decrypt(encodedData, privateKey), 0, 100)));
+        
+        System.out.println("=============================加密测试==============================");
+        i = System.currentTimeMillis();
+        System.out.println("原文：");
+        System.out.println(Bytes.hexDump(ArrayUtils.subarray(data, 0, 100)));
+        encodedData = RSACryptor.encrypt(data, privateKey);
+        System.out.println("密文：");
+        System.out.println(Bytes.hexDump(ArrayUtils.subarray(encodedData, 0, 100)));
+        System.out.println("解密：");
+        System.out.println(Bytes.hexDump(ArrayUtils.subarray(RSACryptor.decrypt(encodedData, publicKey), 0, 100)));
 
         System.out.println("===========================签名测试=========================");
         data = Base64.getDecoder().decode("");

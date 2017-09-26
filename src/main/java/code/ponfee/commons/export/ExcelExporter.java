@@ -72,9 +72,9 @@ public class ExcelExporter extends AbstractExporter {
     private final XSSFCellStyle tipStyle; // 无样式
     private final XSSFDataFormat dataFormat; // 数据格式
 
-    private final Map<String, XSSFSheet> sheets = new HashMap<String, XSSFSheet>();
-    private final Map<String, Integer> images = new HashMap<>();
-    private final Map<String, Freeze> freezes = new HashMap<String, Freeze>();
+    private final Map<String, XSSFSheet> sheets = new HashMap<>();
+    private final Map<String, Integer> images   = new HashMap<>();
+    private final Map<String, Freeze> freezes   = new HashMap<>();
 
     public ExcelExporter() {
         workbook = new XSSFWorkbook();
@@ -333,7 +333,7 @@ public class ExcelExporter extends AbstractExporter {
         }
     }
 
-    // 简单表头
+    // 创建简单表头
     /*private void buildSimpleThead(String title, XSSFSheet sheet, CursorRow cursorRow, String[] theadName) {
         createCell(title, sheet, titleStyle, cursorRow, theadName.length);
         XSSFRow row = sheet.createRow(cursorRow.getAndIncrement());

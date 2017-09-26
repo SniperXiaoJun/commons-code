@@ -1,6 +1,10 @@
 package code.ponfee.commons.jce.security;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.security.Key;
 import java.security.KeyPair;
@@ -12,6 +16,7 @@ import java.security.interfaces.RSAPublicKey;
 
 import javax.crypto.Cipher;
 
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jce.RSASignAlgorithm;
 
 /**
@@ -106,23 +111,9 @@ public final class RSACryptor {
      * @return
      */
     public static <T extends Key & RSAKey> byte[] encrypt(byte[] data, T key) {
-        try {
-            Cipher cipher = Cipher.getInstance(key.getAlgorithm());
-            cipher.init(Cipher.ENCRYPT_MODE, key);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            int inputLen = data.length, modLen = key.getModulus().bitLength() / 8 - 11;
-            byte[] block;
-            for (int len, i = 0, offSet = 0; inputLen - offSet > 0; i++, offSet = i * modLen) {
-                // 对数据分段加密
-                len = (inputLen - offSet > modLen) ? modLen : inputLen - offSet;
-                block = cipher.doFinal(data, offSet, len);
-                out.write(block, 0, block.length);
-            }
-            out.flush();
-            return out.toByteArray();
-        } catch (Exception e) {
-            throw new SecurityException(e);
-        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream(data.length);
+        docrypt(new ByteArrayInputStream(data), key, out, Cipher.ENCRYPT_MODE);
+        return out.toByteArray();
     }
 
     /**
@@ -132,25 +123,33 @@ public final class RSACryptor {
      * @return
      */
     public static <T extends Key & RSAKey> byte[] decrypt(byte[] encrypted, T key) {
-        try {
-            Cipher cipher = Cipher.getInstance(key.getAlgorithm());
-            cipher.init(Cipher.DECRYPT_MODE, key);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            int inputLen = encrypted.length, modLen = key.getModulus().bitLength() / 8;
-            byte[] block;
-            for (int len, i = 0, offSet = 0; inputLen - offSet > 0; i++, offSet = i * modLen) {
-                // 对数据分段解密
-                len = (inputLen - offSet > modLen) ? modLen : inputLen - offSet;
-                block = cipher.doFinal(encrypted, offSet, len);
-                out.write(block, 0, block.length);
-            }
-            out.flush();
-            return out.toByteArray();
-        } catch (Exception e) {
-            throw new SecurityException(e);
-        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream(encrypted.length);
+        docrypt(new ByteArrayInputStream(encrypted), key, out, Cipher.DECRYPT_MODE);
+        return out.toByteArray();
     }
 
+    private static <T extends Key & RSAKey> void docrypt(InputStream input, T key, 
+                                                         OutputStream out, int mode) {
+        try {
+            int length = key.getModulus().bitLength() / 8;
+            byte[] buffer = new byte[mode == Cipher.ENCRYPT_MODE ? length - 11 : length];
+
+            Cipher cipher = Cipher.getInstance(key.getAlgorithm());
+            cipher.init(mode, key);
+            for (int len; (len = input.read(buffer)) != Files.EOF;) {
+                out.write(cipher.doFinal(buffer, 0, len));
+            }
+            out.flush();
+        } catch (Exception e) {
+            throw new SecurityException(e);
+        } finally {
+            if (input != null) try {
+                input.close();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
+            }
+        }
+    }
     // -------------------------------private methods-------------------------------
     /**
      * 数据签名
@@ -171,7 +170,7 @@ public final class RSACryptor {
     }
 
     /**
-     * 验签
+     * 验证签名
      * @param data
      * @param publicKey
      * @param signed

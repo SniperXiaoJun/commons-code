@@ -11,7 +11,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import code.ponfee.commons.exception.ExceptionTracker;
+import code.ponfee.commons.exception.Throwables;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.util.ObjectUtils;
 
@@ -79,7 +79,7 @@ public abstract class ParamValidator extends FieldValidator {
             builder.append(e.getMessage());
         } catch (Exception e) {
             logger.error("reflect exception", e);
-            builder.append(ExceptionTracker.peekStackTrace(e));
+            builder.append(Throwables.getStackTrace(e));
         }
 
         if (builder.length() == 0) { // 校验成功

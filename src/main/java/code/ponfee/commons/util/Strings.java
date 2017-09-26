@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
 
+import code.ponfee.commons.math.Numbers;
+
 /**
  * 字符串工具类
  * @author fupf

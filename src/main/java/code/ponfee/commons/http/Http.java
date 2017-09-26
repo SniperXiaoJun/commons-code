@@ -140,6 +140,11 @@ public final class Http {
         return this;
     }
 
+    public <T extends Object> Http param(String name, T value) {
+        this.params.put(name, value);
+        return this;
+    }
+
     // ----------------------------data--------------------------
     /**
      * 发送到服务器的数据

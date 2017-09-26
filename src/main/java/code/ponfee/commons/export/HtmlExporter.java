@@ -7,8 +7,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.export.Tmeta.Type;
+import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.util.ExtendedMessageFormat;
-import code.ponfee.commons.util.Numbers;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
@@ -174,7 +174,7 @@ public class HtmlExporter extends AbstractExporter {
         return this;
     }
 
-    // 简单表头
+    // 创建简单表头
     /*private void buildSimpleThead(String[] theadName) {
         html.append("<thead><tr>");
         for (String th : theadName) {

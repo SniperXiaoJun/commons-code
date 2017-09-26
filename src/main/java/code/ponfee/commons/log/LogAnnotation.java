@@ -19,7 +19,6 @@ import java.lang.annotation.Target;
  * error级别只记录系统逻辑出错、异常等重要的错误信息。如非必要，请不要在此场景打出error级别
  * <p>
  * 
- * 
  * 日志注解
  * @author fupf
  */

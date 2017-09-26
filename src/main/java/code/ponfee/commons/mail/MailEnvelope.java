@@ -35,8 +35,8 @@ public class MailEnvelope implements Serializable {
     /** 正文图片：key为content-id，正文应包含：<img src="cid:content-id" /> */
     private final Map<String, DataSource> contentImages = new HashMap<>();
 
-    private MailEnvelope(MailType type, String[] to, String subject, Object content,
-        String[] cc, String[] bcc) {
+    private MailEnvelope(MailType type, String[] to, String subject, 
+                         Object content, String[] cc, String[] bcc) {
         this.type = type;
         this.to = to;
         this.subject = subject;
