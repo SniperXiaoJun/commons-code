@@ -5,7 +5,7 @@ import java.util.Date;
 
 /**
  * 周期计算
- * @author 01367825
+ * @author Ponfee
  */
 public class DatePeriodCalculator {
 

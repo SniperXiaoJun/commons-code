@@ -53,7 +53,7 @@ import code.ponfee.commons.util.Bytes;
 public final class Http {
 
     private final String url; // url
-    private HttpMethod method = HttpMethod.GET; // 请求方法
+    private final HttpMethod method; // 请求方法
 
     private final Map<String, String> headers = new HashMap<>();       // http头
     private final Map<String, Object> params = Collections.emptyMap(); // http参数
@@ -68,42 +68,38 @@ public final class Http {
     private String accept; // 接收类型
     private SSLSocketFactory sslSocketFactory; // 走SSL/TSL通道
 
-    private Http(String url) {
+    private Http(String url, HttpMethod method) {
         this.url = url;
-    }
-
-    private Http method(HttpMethod method) {
         this.method = method;
-        return this;
     }
 
     // ----------------------------method--------------------------
     public static Http get(String url) {
-        return new Http(url);
+        return new Http(url, HttpMethod.GET);
     }
 
     public static Http post(String url) {
-        return new Http(url).method(HttpMethod.POST);
+        return new Http(url, HttpMethod.POST);
     }
 
     public static Http put(String url) {
-        return new Http(url).method(HttpMethod.PUT);
+        return new Http(url, HttpMethod.PUT);
     }
 
     public static Http head(String url) {
-        return new Http(url).method(HttpMethod.HEAD);
+        return new Http(url, HttpMethod.HEAD);
     }
 
     public static Http delete(String url) {
-        return new Http(url).method(HttpMethod.DELETE);
+        return new Http(url, HttpMethod.DELETE);
     }
 
     public static Http trace(String url) {
-        return new Http(url).method(HttpMethod.TRACE);
+        return new Http(url, HttpMethod.TRACE);
     }
 
     public static Http options(String url) {
-        return new Http(url).method(HttpMethod.OPTIONS);
+        return new Http(url, HttpMethod.OPTIONS);
     }
 
     // ----------------------------header--------------------------
