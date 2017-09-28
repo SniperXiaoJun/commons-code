@@ -93,7 +93,7 @@ public abstract class LogRecorder {
         if (logger.isInfoEnabled()) {
             logger.info("[exec-before]-[{}]{}-{}", methodName, logs, ObjectUtils.toString(logInfo.getArgs()));
         }
-        int cost = 0;
+        Integer cost = null;
         long start = System.currentTimeMillis();
         try {
             Object retVal = pjp.proceed();
@@ -108,7 +108,9 @@ public abstract class LogRecorder {
             }
             return retVal;
         } catch (Throwable e) {
-            cost = (int) (System.currentTimeMillis() - start);
+            if (cost == null) {
+                cost = (int) (System.currentTimeMillis() - start);
+            }
             logger.error("[exec-throwing]-[{}]{}-{}", methodName, logs, ObjectUtils.toString(logInfo.getArgs()), e);
             logInfo.setException(Throwables.getStackTrace(e));
             throw e; // 向外抛

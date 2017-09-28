@@ -19,9 +19,7 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 
 /**
- * PKCS#1格式：BEGIN RSA PRIVATE KEY
- * PKCS#8格式：BEGIN PRIVATE KEY
- * PKCS#8加密：BEGIN ENCRYPTED PRIVATE KEY
+ * PKCS#8 PEM：PUBLIC KEY
  * 
  * RSA Public Key convert
  * @author fupf

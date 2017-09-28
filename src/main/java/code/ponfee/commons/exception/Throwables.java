@@ -32,13 +32,13 @@ public final class Throwables {
     }
 
     /**
-     * ignore the throwable, if {@code consolable} is true then will be 
+     * ignore the throwable, if {@code console} is true then will be 
      * print the throwable stack trace to console
      * @param ignored
-     * @param consolable
+     * @param console
      */
-    public static void ignore(Throwable ignored, boolean consolable) {
-        if (consolable) {
+    public static void ignore(Throwable ignored, boolean console) {
+        if (console) {
             ignored.printStackTrace();
         }
     }
@@ -62,16 +62,17 @@ public final class Throwables {
 
         Throwable cause;
         while ((cause = throwable.getCause()) != null) {
-          throwable = cause;
+            throwable = cause;
 
-          if (throwable == slowPointer) {
-            throw new IllegalArgumentException("Loop in causal chain detected @ " + throwable);
-          }
-          if (advanceSlowPointer) {
-            slowPointer = slowPointer.getCause();
-          }
-          advanceSlowPointer = !advanceSlowPointer; // only advance every other iteration
+            if (throwable == slowPointer) {
+                throw new IllegalArgumentException("Loop in causal chain detected @ " + throwable);
+            }
+            if (advanceSlowPointer) {
+                slowPointer = slowPointer.getCause();
+            }
+            advanceSlowPointer = !advanceSlowPointer; // only advance every other iteration
         }
+
         return throwable;
-      }
+    }
 }

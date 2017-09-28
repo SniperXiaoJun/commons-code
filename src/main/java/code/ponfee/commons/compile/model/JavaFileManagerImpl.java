@@ -80,9 +80,9 @@ public class JavaFileManagerImpl extends ForwardingJavaFileManager<JavaFileManag
     public Iterable<JavaFileObject> list(Location location, String packageName, Set<Kind> kinds, boolean recurse) throws IOException {
         Iterable<JavaFileObject> result = super.list(location, packageName, kinds, recurse);
 
-        ArrayList<JavaFileObject> files = new ArrayList<JavaFileObject>();
+        ArrayList<JavaFileObject> files = new ArrayList<>();
 
-        /*List<URL> urlList = new ArrayList<URL>();
+        /*List<URL> urlList = new ArrayList<>();
         Enumeration<URL> e = Thread.currentThread().getContextClassLoader().getResources(basePath);
         while (e.hasMoreElements()) {
             urlList.add(e.nextElement());

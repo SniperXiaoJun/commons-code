@@ -297,7 +297,7 @@ public class MailSender {
     private Address[] verifyEmails(String[] emails) throws AddressException {
         if (emails == null || emails.length < 1) return null;
 
-        List<Address> addresses = new ArrayList<Address>();
+        List<Address> addresses = new ArrayList<>();
         for (String email : emails) {
             if (StringUtils.isBlank(email)) {
                 continue;

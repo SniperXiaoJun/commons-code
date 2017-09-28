@@ -1,6 +1,5 @@
 package test.http;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -23,10 +21,10 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 
 @SuppressWarnings("deprecation")
-public class TestHttp {
+public class HttpPostTester {
 
     @SuppressWarnings("resource")
-    public String post(String reqURL, Map<String, String> params) throws Exception {
+    public static String post(String reqURL, Map<String, String> params) throws Exception {
         HttpPost httpPost = new HttpPost(reqURL);
         if (params != null) {
             List<BasicNameValuePair> nvps = new ArrayList<>();
@@ -64,7 +62,6 @@ public class TestHttp {
     }
 
     public static void main(String[] args) {
-        TestHttp obj = new TestHttp();
         Map<String, String> params = new HashMap<String, String>();
         params.put("appid", "12345");
         params.put("title", "顶顶顶");
@@ -73,7 +70,7 @@ public class TestHttp {
 
         String res;
         try {
-            res = obj.post("http://commentapi.datagrand.com/bad_comment/meituan", params);
+            res = post("http://commentapi.datagrand.com/bad_comment/meituan", params);
             System.out.println(res);
         } catch (Exception e) {
 

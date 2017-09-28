@@ -340,14 +340,14 @@ public class X509CertUtils {
     @SuppressWarnings("unchecked")
     public static Map<String, Object> parseP7(byte[] p7bytes) {
         try {
-            Map<String, Object> result = new HashMap<String, Object>();
+            Map<String, Object> result = new HashMap<>();
             CMSSignedData cms = new CMSSignedData(p7bytes);
             result.put("content", cms.getSignedContent().getContent()); // 原文
 
             Store<?> certStore = cms.getCertificates();
             SignerInformationStore signerStore = cms.getSignerInfos();
             Collection<SignerInformation> signers = signerStore.getSigners();
-            //List<X509CertificateObject> certs = new ArrayList<X509CertificateObject>(); // 报错
+            //List<X509CertificateObject> certs = new ArrayList<>(); // 报错
             X509CertificateObject[] certs = new X509CertificateObject[signers.size()];
             int i = 0;
             for (SignerInformation signer : signers) {

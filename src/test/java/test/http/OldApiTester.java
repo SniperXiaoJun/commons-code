@@ -17,7 +17,7 @@ import code.ponfee.commons.http.Http;
 import code.ponfee.commons.http.HttpParams;
 import code.ponfee.commons.jce.hash.HashUtils;
 
-public class Old12308ApiTester {
+public class OldApiTester {
     private static final String URL = "http://192.168.1.49:8080/service-webapp";
 
     private static final String SECRET = "abc";
@@ -35,7 +35,7 @@ public class Old12308ApiTester {
         params.put("abc", "123");
         params.put("sign", buildSign(params, KEY));
 
-        String resp = Http.post(URL + "/city/getStartCityList.srv").params(params).headers(headers).request();
+        String resp = Http.post(URL + "/city/getStartCityList.srv").addParam(params).addHeader(headers).request();
         System.out.println(resp);
     }
 
@@ -55,7 +55,7 @@ public class Old12308ApiTester {
         params.put("realName", "realNamecde");
         params.put("sign", buildSign(params, KEY));
 
-        String resp = Http.post(URL + "/user/carrychildrenaddorupd.srv").params(params).headers(headers).request();
+        String resp = Http.post(URL + "/user/carrychildrenaddorupd.srv").addParam(params).addHeader(headers).request();
         System.out.println(resp);
     }
 
@@ -74,7 +74,7 @@ public class Old12308ApiTester {
         params.put("id", "2");
         params.put("sign", buildSign(params, KEY));
 
-        String resp = Http.post(URL + "/user/carrychildrendel.srv").params(params).headers(headers).request();
+        String resp = Http.post(URL + "/user/carrychildrendel.srv").addParam(params).addHeader(headers).request();
         System.out.println(resp);
     }
 
@@ -92,7 +92,7 @@ public class Old12308ApiTester {
         params.put("userId", userId);
         params.put("sign", buildSign(params, KEY));
 
-        String resp = Http.post(URL + "/user/carrychildrenlist.srv").params(params).headers(headers).request();
+        String resp = Http.post(URL + "/user/carrychildrenlist.srv").addParam(params).addHeader(headers).request();
         System.out.println(resp);
     }
 
@@ -110,7 +110,7 @@ public class Old12308ApiTester {
         params.put("userId", userId);
         params.put("sign", buildSign(params, KEY));
 
-        String resp = Http.post(URL + "/user/getUserInfo.srv").params(params).headers(headers).request();
+        String resp = Http.post(URL + "/user/getUserInfo.srv").addParam(params).addHeader(headers).request();
         System.out.println(resp);
     }
 
@@ -127,7 +127,7 @@ public class Old12308ApiTester {
         params.put("clientIp", "127.0.0.1");
         params.put("sign", buildSign(params, KEY));
 
-        String resp = Http.post(URL + "/sys/activeAdvert.srv").params(params).headers(headers).request();
+        String resp = Http.post(URL + "/sys/activeAdvert.srv").addParam(params).addHeader(headers).request();
         System.out.println(resp);
     }
 

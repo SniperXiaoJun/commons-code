@@ -43,7 +43,7 @@ public class ResourceScanner {
     private static Logger logger = LoggerFactory.getLogger(ResourceScanner.class);
     private static final String DEFAULT_CHARSET = "UTF-8";
 
-    private List<String> scanPaths = new LinkedList<String>();
+    private List<String> scanPaths = new LinkedList<>();
 
     /**
      * @param paths 扫描路径
@@ -74,10 +74,10 @@ public class ResourceScanner {
      */
     @SuppressWarnings("unchecked")
     public Set<Class<?>> scan4class(Class<? extends Annotation>... annotations) {
-        Set<Class<?>> classSet = new HashSet<Class<?>>();
+        Set<Class<?>> classSet = new HashSet<>();
         if (this.scanPaths.isEmpty()) return classSet;
 
-        List<TypeFilter> typeFilters = new LinkedList<TypeFilter>();
+        List<TypeFilter> typeFilters = new LinkedList<>();
         if (annotations != null) {
             for (Class<? extends Annotation> annotation : annotations) {
                 typeFilters.add(new AnnotationTypeFilter(annotation, false));
@@ -124,7 +124,7 @@ public class ResourceScanner {
      */
     public Map<String, byte[]> scan4binary(String wildcard) {
         if (wildcard == null) wildcard = "*";
-        Map<String, byte[]> result = new HashMap<String, byte[]>();
+        Map<String, byte[]> result = new HashMap<>();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         for (String path : this.scanPaths) {
             try {
@@ -167,7 +167,7 @@ public class ResourceScanner {
      * @return
      */
     public Map<String, String> scan4text(String wildcard, String charset) {
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
         for (Entry<String, byte[]> entry : scan4binary(wildcard).entrySet()) {
             try {
                 result.put(entry.getKey(), new String(entry.getValue(), charset));

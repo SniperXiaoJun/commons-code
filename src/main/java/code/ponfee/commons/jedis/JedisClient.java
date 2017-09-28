@@ -27,6 +27,7 @@ import redis.clients.util.Pool;
  * @author fupf
  */
 public class JedisClient implements DisposableBean {
+
     private final static String SEPARATOR = ";";
     private final static int DEFAULT_TIMEOUT_MILLIS = 2000; // default 2000 millis timeout
     private static final int MAX_BYTE_LEN = 40; // max bytes length
@@ -49,11 +50,13 @@ public class JedisClient implements DisposableBean {
         this(poolCfg, hosts, DEFAULT_TIMEOUT_MILLIS, null);
     }
 
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String hosts, int timeout) {
+    public JedisClient(final GenericObjectPoolConfig poolCfg, 
+                       String hosts, int timeout) {
         this(poolCfg, hosts, timeout, null);
     }
 
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String hosts, Serializer serializer) {
+    public JedisClient(final GenericObjectPoolConfig poolCfg, 
+                       String hosts, Serializer serializer) {
         this(poolCfg, hosts, DEFAULT_TIMEOUT_MILLIS, serializer);
     }
 
@@ -69,7 +72,8 @@ public class JedisClient implements DisposableBean {
      * @param timeout
      * @param serializer
      */
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String hosts, int timeout, Serializer serializer) {
+    public JedisClient(final GenericObjectPoolConfig poolCfg, String hosts, 
+                       int timeout, Serializer serializer) {
         List<JedisShardInfo> infos = new ArrayList<>();
         for (String str : hosts.split(SEPARATOR)) {
             if (StringUtils.isBlank(str)) continue;
@@ -104,19 +108,23 @@ public class JedisClient implements DisposableBean {
     }
 
     // -----------------------------------ShardedJedisSentinelPool（哨兵+分片）-----------------------------------
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String masters, String sentinels) {
+    public JedisClient(final GenericObjectPoolConfig poolCfg, 
+                       String masters, String sentinels) {
         this(poolCfg, masters, sentinels, DEFAULT_TIMEOUT_MILLIS, null, null);
     }
 
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String masters, String sentinels, int timeout) {
+    public JedisClient(final GenericObjectPoolConfig poolCfg, String masters, 
+                       String sentinels, int timeout) {
         this(poolCfg, masters, sentinels, timeout, null, null);
     }
 
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String masters, String sentinels, Serializer serializer) {
+    public JedisClient(final GenericObjectPoolConfig poolCfg, String masters, 
+                       String sentinels, Serializer serializer) {
         this(poolCfg, masters, sentinels, DEFAULT_TIMEOUT_MILLIS, null, serializer);
     }
 
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String masters, String sentinels, String password) {
+    public JedisClient(final GenericObjectPoolConfig poolCfg, String masters, 
+                       String sentinels, String password) {
         this(poolCfg, masters, sentinels, DEFAULT_TIMEOUT_MILLIS, password, null);
     }
 
@@ -136,9 +144,17 @@ public class JedisClient implements DisposableBean {
         init(new ShardedJedisSentinelPool(master, sentinel, poolCfg, timeout, password), serializer);
     }
 
+    /**
+     * init sharded jedis
+     * @param shardedJedisPool
+     * @param serializer
+     */
     private void init(Pool<ShardedJedis> shardedJedisPool, Serializer serializer) {
+        this.serializer = (serializer != null) 
+                          ? serializer 
+                          : new FstSerializer();
+
         this.shardedJedisPool = shardedJedisPool;
-        this.serializer = serializer != null ? serializer : new FstSerializer();
         this.keysOps = new KeysOperations(this);
         this.valueOps = new ValueOperations(this);
         this.hashOps = new HashOperations(this);

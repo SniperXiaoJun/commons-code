@@ -53,7 +53,7 @@ public class JdkCompileTask<T> {
 
         this.classLoader = classLoader;
         ClassLoader loader = classLoader.getParent();
-        diagnostics = new DiagnosticCollector<JavaFileObject>();
+        diagnostics = new DiagnosticCollector<>();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null);
 
         if (loader instanceof URLClassLoader
@@ -86,7 +86,7 @@ public class JdkCompileTask<T> {
         if (diagnosticsList != null) {
             diagnostics = diagnosticsList;
         } else {
-            diagnostics = new DiagnosticCollector<JavaFileObject>();
+            diagnostics = new DiagnosticCollector<>();
         }
 
         Map<String, CharSequence> classes = new HashMap<>(1);

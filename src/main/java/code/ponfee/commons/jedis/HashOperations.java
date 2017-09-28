@@ -35,7 +35,8 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 返回值：true设置一个新域；false覆盖一个旧域；
      */
-    public boolean hset(final String key, final String field, final String value, final Integer seconds) {
+    public boolean hset(final String key, final String field, 
+                        final String value, final Integer seconds) {
         if (value == null) return false;
 
         return hook(shardedJedis -> {

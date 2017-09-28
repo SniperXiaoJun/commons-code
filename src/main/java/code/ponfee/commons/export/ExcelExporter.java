@@ -306,7 +306,7 @@ public class ExcelExporter extends AbstractExporter {
         workbook = null;
     }
 
-    //--private methods------------------------------------------------------------------
+    //--protected methods------------------------------------------------------------------
     protected XSSFSheet getOrCreateSheet(String name) {
         XSSFSheet sheet = sheets.get(name);
         if (sheet == null) {
@@ -350,7 +350,7 @@ public class ExcelExporter extends AbstractExporter {
         createCell(table.getCaption(), sheet, titleStyle, cursorRow, table.getTotalLeafCount());
 
         // 约定非叶子节点不能跨行
-        Set<Integer> rows = new HashSet<Integer>();
+        Set<Integer> rows = new HashSet<>();
         int beginCol, endRow, endCol, nodeLevel = 1;
         for (int n = table.getThead().size(), i = 0; i < n; i++) {
             Thead cell = table.getThead().get(i);
@@ -433,7 +433,7 @@ public class ExcelExporter extends AbstractExporter {
      * @param options
      */
     private void createCell(XSSFRow row, int colIndex, XSSFCellStyle style, Tmeta tmeta, 
-                              Object value, int r, int c, Map<String, Object> options) {
+                            Object value, int r, int c, Map<String, Object> options) {
         XSSFCell cell = row.createCell(colIndex);
         // 设置单元格格式
         if (tmeta != null && tmeta.getType() == Type.NUMERIC) {

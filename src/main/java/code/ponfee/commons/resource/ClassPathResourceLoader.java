@@ -85,7 +85,8 @@ final class ClassPathResourceLoader {
                             if (fileName.indexOf("/") != -1) {
                                 fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
                             }
-                            return new Resource(URLDecoder.decode(url.getFile(), encoding), fileName, transform(jar.getInputStream(entry)));
+                            return new Resource(URLDecoder.decode(url.getFile(), encoding), 
+                                                fileName, transform(jar.getInputStream(entry)));
                         }
                         jar.close();
                         jar = null;
@@ -116,7 +117,8 @@ final class ClassPathResourceLoader {
                             if (fileName.indexOf("/") != -1) {
                                 fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
                             }
-                            return new Resource(URLDecoder.decode(url.getFile(), encoding), fileName, transform(zip.getInputStream(entry)));
+                            return new Resource(URLDecoder.decode(url.getFile(), encoding), 
+                                                fileName, transform(zip.getInputStream(entry)));
                         }
                         zip.close();
                         zip = null;
@@ -143,8 +145,9 @@ final class ClassPathResourceLoader {
         }
     }
 
-    List<Resource> listResources(String directory, String[] extensions, boolean recursive, Class<?> contextClass, String encoding) {
-        List<Resource> list = new ArrayList<Resource>();
+    List<Resource> listResources(String directory, String[] extensions, 
+                                 boolean recursive, Class<?> contextClass, String encoding) {
+        List<Resource> list = new ArrayList<>();
         JarFile jar = null;
         ZipFile zip = null;
         Enumeration<URL> dirs;
@@ -188,10 +191,14 @@ final class ClassPathResourceLoader {
                             // 1、全目录匹配 或 当可递归时子目录
                             // 2、匹配后缀
                             int idx = name.lastIndexOf('/');
-                            boolean isDir = (idx != -1 && name.substring(0, idx).equals(directory)) || (recursive && name.startsWith(directory));
-                            boolean isSufx = isEmpty(extensions) || name.toLowerCase().matches("^(.+\\.)(" + join(extensions, "|") + ")$");
+                            boolean isDir = (idx != -1 && name.substring(0, idx).equals(directory)) 
+                                            || (recursive && name.startsWith(directory));
+                            boolean isSufx = isEmpty(extensions) 
+                                             || name.toLowerCase().matches("^(.+\\.)(" + join(extensions, "|") + ")$");
                             if (isDir && isSufx) {
-                                list.add(new Resource(URLDecoder.decode(url.getFile(), encoding), entry.getName(), transform(jar.getInputStream(entry))));
+                                list.add(new Resource(URLDecoder.decode(url.getFile(), encoding), 
+                                                      entry.getName(), 
+                                                      transform(jar.getInputStream(entry))));
                             }
                         }
                         jar.close();
@@ -219,10 +226,14 @@ final class ClassPathResourceLoader {
                             int idx = name.lastIndexOf('/');
                             // 1、全目录匹配 或 当可递归时子目录
                             // 2、匹配后缀
-                            boolean isDir = (idx != -1 && name.substring(0, idx).equals(directory)) || (recursive && name.startsWith(directory));
-                            boolean isSufx = isEmpty(extensions) || name.toLowerCase().matches("^(.+\\.)(" + join(extensions, "|") + ")$");
+                            boolean isDir = (idx != -1 && name.substring(0, idx).equals(directory)) 
+                                            || (recursive && name.startsWith(directory));
+                            boolean isSufx = isEmpty(extensions) 
+                                             || name.toLowerCase().matches("^(.+\\.)(" + join(extensions, "|") + ")$");
                             if (isDir && isSufx) {
-                                list.add(new Resource(URLDecoder.decode(url.getFile(), encoding), entry.getName(), transform(zip.getInputStream(entry))));
+                                list.add(new Resource(URLDecoder.decode(url.getFile(), encoding), 
+                                                      entry.getName(), 
+                                                      transform(zip.getInputStream(entry))));
                             }
                         }
                         zip.close();
@@ -257,9 +268,12 @@ final class ClassPathResourceLoader {
      * @return
      * @throws IOException
      */
-    private static boolean checkWithinClass(Class<?> contextClass, String filepath, String encoding) throws IOException {
+    private static boolean checkWithinClass(Class<?> contextClass, 
+            String filepath, String encoding) throws IOException {
         if (contextClass == null) return true;
-        String destPath = URLDecoder.decode(contextClass.getProtectionDomain().getCodeSource().getLocation().getFile(), encoding);
+
+        String destPath = contextClass.getProtectionDomain().getCodeSource().getLocation().getFile();
+        destPath = URLDecoder.decode(destPath, encoding);
         return new File(destPath).getCanonicalFile().equals(new File(filepath).getCanonicalFile());
     }
 

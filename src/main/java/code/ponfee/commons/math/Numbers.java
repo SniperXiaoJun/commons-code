@@ -59,7 +59,7 @@ public final class Numbers {
 
         try {
             return Double.parseDouble(obj.toString());
-        } catch (final NumberFormatException nfe) {
+        } catch (NumberFormatException ignored) {
             return defaultVal;
         }
     }
@@ -160,7 +160,7 @@ public final class Numbers {
     }
 
     /**
-     * 加法
+     * 两数相加
      * @param num1
      * @param num2
      * @return

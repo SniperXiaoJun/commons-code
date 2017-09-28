@@ -15,7 +15,7 @@ import javax.tools.JavaFileObject;
  */
 public final class JdkCompilerClassLoader extends ClassLoader {
 
-    private final Map<String, JavaFileObject> classes = new HashMap<String, JavaFileObject>();
+    private final Map<String, JavaFileObject> classes = new HashMap<>();
 
     public JdkCompilerClassLoader(ClassLoader parentClassLoader){
         super(parentClassLoader);

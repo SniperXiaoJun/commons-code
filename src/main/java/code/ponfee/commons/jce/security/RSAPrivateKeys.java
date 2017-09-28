@@ -38,9 +38,31 @@ import org.bouncycastle.pkcs.jcajce.JcePKCSPBEOutputEncryptorBuilder;
 import code.ponfee.commons.jce.Providers;
 
 /**
- * PKCS#1格式：BEGIN RSA PRIVATE KEY
- * PKCS#8格式：BEGIN PRIVATE KEY
- * PKCS#8加密：BEGIN ENCRYPTED PRIVATE KEY
+ * <pre>
+ *   PEM格式：
+ *    PKCS#1：RSA PRIVATE KEY
+ *    PKCS#8：PRIVATE KEY
+ *    PKCS#8加密：ENCRYPTED PRIVATE KEY
+ * 
+ *   {@link org.bouncycastle.openssl.PEMParser}
+ *   ("CERTIFICATE REQUEST",      new PKCS10CertificationRequestParser());
+ *   ("NEW CERTIFICATE REQUEST",  new PKCS10CertificationRequestParser());
+ *   ("CERTIFICATE",              new X509CertificateParser());
+ *   ("TRUSTED CERTIFICATE",      new X509TrustedCertificateParser());
+ *   ("X509 CERTIFICATE",         new X509CertificateParser());
+ *   ("X509 CRL",                 new X509CRLParser());
+ *   ("PKCS7",                    new PKCS7Parser());
+ *   ("CMS",                      new PKCS7Parser());
+ *   ("ATTRIBUTE CERTIFICATE",    new X509AttributeCertificateParser());
+ *   ("EC PARAMETERS",            new ECCurveParamsParser());
+ *   ("PUBLIC KEY",               new PublicKeyParser());
+ *   ("RSA PUBLIC KEY",           new RSAPublicKeyParser());
+ *   ("RSA PRIVATE KEY",          new KeyPairParser(new RSAKeyPairParser()));
+ *   ("DSA PRIVATE KEY",          new KeyPairParser(new DSAKeyPairParser()));
+ *   ("EC PRIVATE KEY",           new KeyPairParser(new ECDSAKeyPairParser()));
+ *   ("ENCRYPTED PRIVATE KEY",    new EncryptedPrivateKeyParser());
+ *   ("PRIVATE KEY",              new PrivateKeyParser());
+ * </pre>
  * 
  * RSA Private Key Convert
  * @author fupf

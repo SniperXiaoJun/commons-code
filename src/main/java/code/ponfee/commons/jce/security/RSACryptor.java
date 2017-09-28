@@ -1,6 +1,5 @@
 package code.ponfee.commons.jce.security;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +14,8 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 import javax.crypto.Cipher;
+
+import org.apache.commons.lang3.math.NumberUtils;
 
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jce.RSASignAlgorithm;
@@ -111,9 +112,11 @@ public final class RSACryptor {
      * @return
      */
     public static <T extends Key & RSAKey> byte[] encrypt(byte[] data, T key) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream(data.length);
-        docrypt(new ByteArrayInputStream(data), key, out, Cipher.ENCRYPT_MODE);
-        return out.toByteArray();
+        return docrypt(data, key, Cipher.ENCRYPT_MODE);
+    }
+
+    public static <T extends Key & RSAKey> void encrypt(InputStream input, T key, OutputStream out) {
+        docrypt(input, key, out, Cipher.ENCRYPT_MODE);
     }
 
     /**
@@ -123,19 +126,23 @@ public final class RSACryptor {
      * @return
      */
     public static <T extends Key & RSAKey> byte[] decrypt(byte[] encrypted, T key) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream(encrypted.length);
-        docrypt(new ByteArrayInputStream(encrypted), key, out, Cipher.DECRYPT_MODE);
-        return out.toByteArray();
+        return docrypt(encrypted, key, Cipher.DECRYPT_MODE);
     }
 
-    private static <T extends Key & RSAKey> void docrypt(InputStream input, T key, 
-                                                         OutputStream out, int mode) {
-        try {
-            int length = key.getModulus().bitLength() / 8;
-            byte[] buffer = new byte[mode == Cipher.ENCRYPT_MODE ? length - 11 : length];
+    public static <T extends Key & RSAKey> void decrypt(InputStream input, T key, OutputStream out) {
+        docrypt(input, key, out, Cipher.DECRYPT_MODE);
+    }
 
+    // -----------------------------------private methods-------------------------------------
+    private static <T extends Key & RSAKey> void docrypt(InputStream input, T key, 
+                                                         OutputStream out, int cryptMode) {
+        int bolckSize = (cryptMode == Cipher.ENCRYPT_MODE)
+                        ? key.getModulus().bitLength() / 8 - 11
+                        : key.getModulus().bitLength() / 8;
+        try {
             Cipher cipher = Cipher.getInstance(key.getAlgorithm());
-            cipher.init(mode, key);
+            cipher.init(cryptMode, key);
+            byte[] buffer = new byte[bolckSize];
             for (int len; (len = input.read(buffer)) != Files.EOF;) {
                 out.write(cipher.doFinal(buffer, 0, len));
             }
@@ -150,7 +157,27 @@ public final class RSACryptor {
             }
         }
     }
-    // -------------------------------private methods-------------------------------
+
+    private static <T extends Key & RSAKey> byte[] docrypt(byte[] data, T key, int cryptMode) {
+        int bolckSize = (cryptMode == Cipher.ENCRYPT_MODE)
+                        ? key.getModulus().bitLength() / 8 - 11
+                        : key.getModulus().bitLength() / 8;
+        try {
+            Cipher cipher = Cipher.getInstance(key.getAlgorithm());
+            cipher.init(cryptMode, key);
+            ByteArrayOutputStream out = new ByteArrayOutputStream(data.length);
+            byte[] block;
+            for (int offSet = 0, len = data.length; offSet < len; offSet += bolckSize) {
+                block = cipher.doFinal(data, offSet, NumberUtils.min(bolckSize, len - offSet));
+                out.write(block, 0, block.length);
+            }
+            out.flush();
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new SecurityException(e);
+        }
+    }
+
     /**
      * 数据签名
      * @param data
@@ -177,7 +204,8 @@ public final class RSACryptor {
      * @param algId
      * @return
      */
-    private static boolean verify(byte[] data, RSAPublicKey publicKey, byte[] signed, RSASignAlgorithm alg) {
+    private static boolean verify(byte[] data, RSAPublicKey publicKey, 
+                                  byte[] signed, RSASignAlgorithm alg) {
         try {
             Signature signature = Signature.getInstance(alg.name());
             signature.initVerify(publicKey);

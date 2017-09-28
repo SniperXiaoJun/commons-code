@@ -218,10 +218,16 @@ public class MailEnvelope implements Serializable {
 
     @Override
     public String toString() {
-        String cont = content == null ? "" : content.toString();
-        return "[type=" + type + ", subject=" + substr(subject) + ", content=" + substr(cont)
-            + ", to=" + arraystr(to) + ", cc=" + arraystr(cc) + ", bcc=" + arraystr(bcc)
-            + ", attachments=" + substr(attachments) + ", contentImages=" + substr(contentImages) + "]";
+        return new StringBuilder(255)
+                .append("{type=").append(type)
+                .append(", subject=").append(substr(subject))
+                .append(", content=").append(substr(content))
+                .append(", to=").append(arraystr(to))
+                .append(", cc=").append(arraystr(cc))
+                .append(", bcc=").append(arraystr(bcc))
+                .append(", attachments=").append(substr(attachments))
+                .append(", contentImages=").append(substr(contentImages))
+                .append("}").toString();
     }
 
     private String arraystr(String[] array) {

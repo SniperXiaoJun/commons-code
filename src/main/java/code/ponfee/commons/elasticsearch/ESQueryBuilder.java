@@ -149,6 +149,49 @@ public class ESQueryBuilder {
     }
 
     /**
+     * regexp query
+     * @param name
+     * @param regexp
+     * @return
+     */
+    public ESQueryBuilder mustRegexp(String name, String regexp) {
+        if (this.boolQuery == null) {
+            this.boolQuery = QueryBuilders.boolQuery();
+        }
+        this.boolQuery.must(QueryBuilders.regexpQuery(name, regexp));
+        return this;
+    }
+
+    /**
+     * like query
+     * name LIKE '*wildcard*'
+     * @param name
+     * @param wildcard
+     * @return
+     */
+    public ESQueryBuilder mustLike(String name, String wildcard) {
+        if (this.boolQuery == null) {
+            this.boolQuery = QueryBuilders.boolQuery();
+        }
+        this.boolQuery.must(QueryBuilders.wildcardQuery(name, wildcard));
+        return this;
+    }
+
+    /**
+     * not like
+     * @param name  before or after or both here with *
+     * @param wildcard
+     * @return
+     */
+    public ESQueryBuilder mustNotLike(String name, String wildcard) {
+        if (this.boolQuery == null) {
+            this.boolQuery = QueryBuilders.boolQuery();
+        }
+        this.boolQuery.mustNot(QueryBuilders.wildcardQuery(name, wildcard));
+        return this;
+    }
+
+    /**
      * ? !=term
      * @param name
      * @param term

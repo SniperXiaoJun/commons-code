@@ -43,7 +43,7 @@ final class WebappResourceLoader {
     }
 
     List<Resource> listResources(String directory, String[] extensions, boolean recursive, String encoding) {
-        List<Resource> list = new ArrayList<Resource>();
+        List<Resource> list = new ArrayList<>();
         try {
             File fileDir = new File(servletContext.getRealPath(directory));
             Collection<File> files = FileUtils.listFiles(fileDir, extensions, recursive);

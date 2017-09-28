@@ -20,35 +20,31 @@ public class HtmlExporter extends AbstractExporter {
     private static final String HORIZON = "<hr style=\"border:3 double #b0c4de; with: 95%; margin: 20px 0;\" />";
     private static final String TITLE = "title";
     private static final String REPORT = "report";
-    private static final String TEMPLATE;
-    static {
-        StringBuilder builder = new StringBuilder(4096);
-        builder.append("<!DOCTYPE html>                                                                                                       \n");
-        builder.append("<html>                                                                                                                \n");
-        builder.append("  <head lang=\"en\">                                                                                                  \n");
-        builder.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />                                         \n");
-        builder.append("    <title>#{" + TITLE + "}</title>                                                                                   \n");
-        builder.append("    <style>                                                                                                           \n");
-        builder.append("      * '{font-family: Microsoft YaHei;}'                                                                             \n");
-        builder.append("      div.grid '{overflow-x: auto;background-color: #fff;color: #555;}'                                               \n");
-        builder.append("      div.grid table '{width: 100%;font-size: 12px;border-collapse: collapse;border-style: hidden;}'                  \n");
-        builder.append("      div.grid table, div.grid table caption, div.grid table tr '{border: 1px solid #6d6d6d;}'                        \n");
-        builder.append("      div.grid table tr td, div.grid table tr th '{border: 1px solid #6d6d6d;}'                                       \n");
-        builder.append("      div.grid table caption '{font-size:14px;padding:5px;background:#e6e6fa;font-weight:bolder;border-bottom:none;}' \n");
-        builder.append("      div.grid table thead th '{padding: 5px;background: #ccc;}'                                                      \n");
-        builder.append("      div.grid table tbody td '{text-align: center;padding: 3px;}'                                                    \n");
-        builder.append("      div.grid table tfoot th '{padding: 5px;}'                                                                       \n");
-        builder.append("      div.grid table tr:nth-child(odd) td'{background:#fff;}'                                                         \n");
-        builder.append("      div.grid table tr:nth-child(even) td'{background: #e8e8e8}'                                                     \n");
-        builder.append("      div.grid p.remark '{font-size: 14px;}'                                                                          \n");
-        builder.append("      div.grid .nowrap '{white-space: nowrap;word-break: keep-all;overflow: hidden;text-overflow: ellipsis;}'         \n");
-        builder.append("    </style>                                                                                                          \n");
-        builder.append("  </head>                                                                                                             \n");
-        builder.append("  <body>#{" + REPORT + "}</body>                                                                                      \n");
-        builder.append("</html>                                                                                                               \n");
-        TEMPLATE = builder.toString();
-        builder.setLength(0);
-    }
+    private static final String TEMPLATE = new StringBuilder(4096) 
+       .append("<!DOCTYPE html>                                                                                                       \n")
+       .append("<html>                                                                                                                \n")
+       .append("  <head lang=\"en\">                                                                                                  \n")
+       .append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />                                         \n")
+       .append("    <title>#{" + TITLE + "}</title>                                                                                   \n")
+       .append("    <style>                                                                                                           \n")
+       .append("      * '{font-family: Microsoft YaHei;}'                                                                             \n")
+       .append("      div.grid '{overflow-x: auto;background-color: #fff;color: #555;}'                                               \n")
+       .append("      div.grid table '{width: 100%;font-size: 12px;border-collapse: collapse;border-style: hidden;}'                  \n")
+       .append("      div.grid table, div.grid table caption, div.grid table tr '{border: 1px solid #6d6d6d;}'                        \n")
+       .append("      div.grid table tr td, div.grid table tr th '{border: 1px solid #6d6d6d;}'                                       \n")
+       .append("      div.grid table caption '{font-size:14px;padding:5px;background:#e6e6fa;font-weight:bolder;border-bottom:none;}' \n")
+       .append("      div.grid table thead th '{padding: 5px;background: #ccc;}'                                                      \n")
+       .append("      div.grid table tbody td '{text-align: center;padding: 3px;}'                                                    \n")
+       .append("      div.grid table tfoot th '{padding: 5px;}'                                                                       \n")
+       .append("      div.grid table tr:nth-child(odd) td'{background:#fff;}'                                                         \n")
+       .append("      div.grid table tr:nth-child(even) td'{background: #e8e8e8}'                                                     \n")
+       .append("      div.grid p.remark '{font-size: 14px;}'                                                                          \n")
+       .append("      div.grid .nowrap '{white-space: nowrap;word-break: keep-all;overflow: hidden;text-overflow: ellipsis;}'         \n")
+       .append("    </style>                                                                                                          \n")
+       .append("  </head>                                                                                                             \n")
+       .append("  <body>#{" + REPORT + "}</body>                                                                                      \n")
+       .append("</html>                                                                                                               \n")
+       .toString();
 
     private StringBuilder html;
 

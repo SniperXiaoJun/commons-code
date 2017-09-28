@@ -73,7 +73,7 @@ public class IdcardResolver {
      * @return
      */
     private boolean resolve(String idcard) {
-        return isFirst(idcard) || isSecond(idcard)
+        return isSecond(idcard) || isFirst(idcard) 
             || isHkMacTw(idcard) || isPassport(idcard);
     }
 
@@ -177,9 +177,8 @@ public class IdcardResolver {
         String end = idCard.substring(9, 10);
         Integer iStart = TW_FIRST_CODE.get(start);
         Integer sum = iStart / 10 + (iStart % 10) * 9;
-        char[] chars = mid.toCharArray();
         Integer iflag = 8;
-        for (char c : chars) {
+        for (char c : mid.toCharArray()) {
             sum = sum + Integer.valueOf(c) * iflag;
             iflag--;
         }
@@ -209,9 +208,8 @@ public class IdcardResolver {
         }
         String mid = card.substring(1, 7);
         String end = card.substring(7, 8);
-        char[] chars = mid.toCharArray();
         Integer iflag = 7;
-        for (char c : chars) {
+        for (char c : mid.toCharArray()) {
             sum = sum + Integer.valueOf(c) * iflag;
             iflag--;
         }

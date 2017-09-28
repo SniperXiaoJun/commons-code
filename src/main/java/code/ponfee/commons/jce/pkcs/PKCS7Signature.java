@@ -20,7 +20,7 @@ import sun.security.x509.X500Name;
 @SuppressWarnings("restriction")
 public class PKCS7Signature {
 
-    /*private static final Map<String, String> HASH_SIGN_ALG = new HashMap<String, String>() {
+    /*private static final Map<String, String> HASH_SIGN_ALG = new HashMap<>() {
         private static final long serialVersionUID = 8252202658190109593L;
         {
             put("1.2.840.113549.1.1.4", "MD5");

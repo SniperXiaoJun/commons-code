@@ -19,7 +19,7 @@ public abstract class CertSignedVerifier {
     protected final X509CRL crl; // 吊销列表
     protected X509Certificate[] subjects; // 多人签名证书
     protected byte[] info; // 原文信息
-    protected List<byte[]> signedInfos = new ArrayList<byte[]>(); // 签名数据
+    protected List<byte[]> signedInfos = new ArrayList<>(); // 签名数据
 
     private boolean isVerifySigned = true;
 

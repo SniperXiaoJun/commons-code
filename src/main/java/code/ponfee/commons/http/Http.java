@@ -22,9 +22,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.google.common.collect.ImmutableMap;
 
 import code.ponfee.commons.json.Jsons;
+import code.ponfee.commons.util.Bytes;
 
 /**
  * <pre>
@@ -55,8 +55,9 @@ public final class Http {
     private final String url; // url
     private HttpMethod method = HttpMethod.GET; // 请求方法
 
-    private final Map<String, String> headers = new HashMap<>(); // http头
+    private final Map<String, String> headers = new HashMap<>();       // http头
     private final Map<String, Object> params = Collections.emptyMap(); // http参数
+    private final List<MimePart> parts = new ArrayList<>();            // 上传文件
 
     private String data; // 请求data
     private int connectTimeout = 1000 * 5; // 连接超时时间
@@ -65,7 +66,6 @@ public final class Http {
     private String contentType; // 请求内容类型
     private String contentCharset; // 请求内容编码
     private String accept; // 接收类型
-    private final List<MimePart> parts = new ArrayList<>(); // 上传的文件
     private SSLSocketFactory sslSocketFactory; // 走SSL/TSL通道
 
     private Http(String url) {
@@ -113,7 +113,7 @@ public final class Http {
      * @param value
      * @return
      */
-    public Http header(String name, String value) {
+    public Http addHeader(String name, String value) {
         this.headers.put(name, value);
         return this;
     }
@@ -123,7 +123,7 @@ public final class Http {
      * @param headers
      * @return
      */
-    public Http headers(Map<String, String> headers) {
+    public Http addHeader(Map<String, String> headers) {
         this.headers.putAll(headers);
         return this;
     }
@@ -135,13 +135,26 @@ public final class Http {
      * @param params
      * @return
      */
-    public Http params(Map<String, ? extends Object> params) {
+    public Http addParam(Map<String, ? extends Object> params) {
         this.params.putAll(params);
         return this;
     }
 
-    public <T extends Object> Http param(String name, T value) {
+    public <T extends Object> Http addParam(String name, T value) {
         this.params.put(name, value);
+        return this;
+    }
+
+    // ----------------------------part--------------------------
+    /**
+     * 文件上传
+     * @param name
+     * @param filename
+     * @param mime
+     * @return
+     */
+    public Http addPart(String name, String filename, Object mime) {
+        this.parts.add(new MimePart(name, filename, mime));
         return this;
     }
 
@@ -173,19 +186,6 @@ public final class Http {
      */
     public Http data(String data) {
         this.data = data;
-        return this;
-    }
-
-    // ----------------------------part--------------------------
-    /**
-     * 文件上传
-     * @param name
-     * @param filename
-     * @param mime
-     * @return
-     */
-    public Http part(String name, String filename, Object mime) {
-        this.parts.add(new MimePart(name, filename, mime));
         return this;
     }
 
@@ -286,9 +286,23 @@ public final class Http {
         }
     }
 
+    public void download(String filepath) {
+        try (OutputStream out = new FileOutputStream(filepath)) {
+            download(out);
+        } catch (IOException e) {
+            throw new HttpException("download error: " + filepath, e);
+        }
+    }
+
+    public byte[] download() {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        download(output);
+        return output.toByteArray();
+    }
+
     /**
      * http下载
-     * @param output
+     * @param output    output to stream of response data
      */
     public void download(OutputStream output) {
         HttpRequest request = request0();
@@ -304,28 +318,10 @@ public final class Http {
             disconnect(request);
             if (bos != null) try {
                 bos.close();
-            } catch (IOException e) {
-                // ignore
+            } catch (IOException ignore) {
+                ignore.printStackTrace();
             }
         }
-    }
-
-    public void download(String filepath) {
-        try (OutputStream out = new FileOutputStream(filepath)) {
-            download(out);
-        } catch (IOException e) {
-            throw new HttpException("download error: " + filepath, e);
-        }
-    }
-
-    /**
-     * 下载文件
-     * @return
-     */
-    public byte[] download() {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        download(output);
-        return output.toByteArray();
     }
 
     // ----------------------------private methods--------------------------
@@ -403,10 +399,9 @@ public final class Http {
      * 文件
      */
     private static final class MimePart {
-
-        private String name;        // 表单域字段名
-        private String filename;    // 文件名
-        private InputStream stream; // 文件流
+        private final String name;        // 表单域字段名
+        private final String filename;    // 文件名
+        private final InputStream stream; // 文件流
 
         MimePart(String name, String filename, Object mime) {
             if (mime instanceof byte[]) {
@@ -435,13 +430,11 @@ public final class Http {
     public static void main(String[] args) throws Exception {
         //System.out.println(Bytes.hexDump(Http.get("http://www.apachelounge.com/download/VC14/binaries/httpd-2.4.25-win64-VC14.zip").download()));
         //Http.get("https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.zip").download(new FileOutputStream("d:/elasticsearch-5.5.1.zip"));
-        System.out.println("\r\n");
-        //System.out.println(Bytes.hexDump(Http.get("http://www.stockstar.com").download()));
-        System.out.println("\r\n");
+        System.out.println(Bytes.hexDump(Http.get("http://www.stockstar.com").download()));
         //Http.get("http://www.baidu.com").download("d:/baidu.html");
         //System.out.println(Http.get("http://localhost:8081/audit/getImg").data(ImmutableMap.of("imgPath", "imgPath")).request());
         //System.out.println(Http.get("http://localhost:8081/audit/uploadFile").part("file", "abc.png", "d:/test/2.png").request());
-        String[] params = new String[]{"{\"analyze_type\":\"mine_all_cust\",\"date_type\":4,\"class_name\":\"\"}", "{\"analyze_type\":\"mine_all_cust\",\"date_type\":4,\"class_name\":\"衬衫\"}"};
-        Http.post("http://10.118.58.156:8080/market/custgroup/kanban/count/recommend").data(ImmutableMap.of("conditions[]", params)).request();
+        //String[] params = new String[]{"{\"analyze_type\":\"mine_all_cust\",\"date_type\":4,\"class_name\":\"\"}", "{\"analyze_type\":\"mine_all_cust\",\"date_type\":4,\"class_name\":\"衬衫\"}"};
+        //Http.post("http://10.118.58.156:8080/market/custgroup/kanban/count/recommend").data(ImmutableMap.of("conditions[]", params)).request();
     }
 }

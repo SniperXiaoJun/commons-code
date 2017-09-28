@@ -44,7 +44,7 @@ public class HttpTester {
         params.put("nickName", "厚大司考等哈说11");
         params.put("authToken", "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ2aHg0amVkekRsNGUrZElOOWh0RnhIaG5vcnV0UmpyV1YySmFRdWVWODRvPSIsImV4cCI6MTQ4MTQ1MTQ2OCwicmZoIjoxNDc4OTQ1ODY4fQ.kg17ETWHUFbdJVlJnEUgYPC-34PxYnp9eCVvJt3X4ZfM8-FmM112M799Q8vTRyTnG637pfJJfU2PcrB18Xf1MQ");
 
-        String resp = Http.post(url).part("photo", "photo.jpg", IOUtils.toByteArray(new FileInputStream("D:\\photo.jpg"))).params(params).request();
+        String resp = Http.post(url).addPart("photo", "photo.jpg", IOUtils.toByteArray(new FileInputStream("D:\\photo.jpg"))).addParam(params).request();
         //String resp = Http.post(url).part("photo", "photo.jpg", new Byte[]{123,34}).params(params).request();
         System.out.println(resp);
     }
@@ -59,7 +59,7 @@ public class HttpTester {
         params.put("nickName", "厚大司考等哈说11");
         params.put("authToken", "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ2aHg0amVkekRsNGUrZElOOWh0RnhIaG5vcnV0UmpyV1YySmFRdWVWODRvPSIsImV4cCI6MTQ4MTQ1MTQ2OCwicmZoIjoxNDc4OTQ1ODY4fQ.kg17ETWHUFbdJVlJnEUgYPC-34PxYnp9eCVvJt3X4ZfM8-FmM112M799Q8vTRyTnG637pfJJfU2PcrB18Xf1MQ");
 
-        String resp = Http.post(url).params(params).request();
+        String resp = Http.post(url).addParam(params).request();
         System.out.println(resp);
     }
 
@@ -80,7 +80,7 @@ public class HttpTester {
     @Test
     public void test2() throws IOException {
         String url = "http://10.118.58.156:8080/express/risk/outeridentify.html";
-        String resp = Http.post(url).part("file", "import.txt", IOUtils.toByteArray(new FileInputStream("D:\\miwen1.txt"))).request();        
+        String resp = Http.post(url).addPart("file", "import.txt", IOUtils.toByteArray(new FileInputStream("D:\\miwen1.txt"))).request();        
         System.out.println(resp);
     }
 
