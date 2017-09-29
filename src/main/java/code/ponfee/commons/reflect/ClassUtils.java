@@ -136,7 +136,9 @@ public final class ClassUtils {
      */
     public static String getClassName(Class<?> clazz) {
         String name = clazz.getCanonicalName();
-        if (name == null) name = clazz.getName();
+        if (name == null) {
+            name = clazz.getName();
+        }
 
         return name;
     }

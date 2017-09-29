@@ -116,7 +116,7 @@ public class Cache<T> {
         Preconditions.checkState(!isDestroy);
 
         if (expireTimeMillis == KEEPALIVE_FOREVER || expireTimeMillis > now()) {
-            cache.put(getEffectiveKey(key), new CacheBean<T>(value, expireTimeMillis));
+            cache.put(getEffectiveKey(key), new CacheBean<>(value, expireTimeMillis));
         }
     }
 

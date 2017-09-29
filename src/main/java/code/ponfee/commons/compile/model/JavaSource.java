@@ -10,9 +10,13 @@ public abstract class JavaSource implements Serializable {
 
     private static final long serialVersionUID = 5643697448853377651L;
 
-    protected String sourceCode; // 源码
+    protected final String sourceCode; // 源码
     protected String packageName; // 包名
     protected String publicClass; // public修饰的类名
+
+    public JavaSource(String sourceCode) {
+        this.sourceCode = sourceCode;
+    }
 
     public String getSourceCode() {
         return sourceCode;
@@ -28,14 +32,14 @@ public abstract class JavaSource implements Serializable {
 
     /**
      * 获取类的全限定名
-     * @return
+     * @return class canonical name of packageName + "." + className.
+     *         the same to {@code Class#getCanonicalName()}
+     * @see {@link Class#getCanonicalName()}
      */
     public String getFullyQualifiedName() {
-        return (isEmpty(packageName) ? "" : packageName + ".") + publicClass;
-    }
-
-    static boolean isEmpty(String str) {
-        return str == null || str.isEmpty();
+        String name = (packageName == null || packageName.isEmpty()) 
+                      ? "" : packageName + ".";
+        return name + publicClass;
     }
 
 }

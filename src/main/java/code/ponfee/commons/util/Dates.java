@@ -58,7 +58,11 @@ public class Dates {
      * @return
      */
     public static long millis() {
-        return now().getTime();
+        return millis(now());
+    }
+
+    public static long millis(Date date) {
+        return date.getTime();
     }
 
     /**
@@ -66,7 +70,11 @@ public class Dates {
      * @return
      */
     public static long seconds() {
-        return millis() / 1000;
+        return seconds(now());
+    }
+
+    public static long seconds(Date date) {
+        return millis(date) / 1000;
     }
 
     /**

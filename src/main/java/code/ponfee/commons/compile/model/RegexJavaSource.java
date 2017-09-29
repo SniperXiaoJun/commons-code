@@ -17,7 +17,7 @@ public class RegexJavaSource extends JavaSource {
     private static final Pattern PUBLIC_CLASS = Pattern.compile("(?m)^\\s*public(((\\s+strictfp)?(\\s+(final|abstract))?)|((\\s+(final|abstract))?(\\s+strictfp)?))\\s+class\\s+\\b([a-zA-Z_$][a-zA-Z0-9_$]*)\\b(\\s+extends\\s+\\b([a-zA-Z_$][a-zA-Z0-9_$]*)\\b)?(\\s+implements\\s+\\b([a-zA-Z_$][a-zA-Z0-9_$]*)\\b(\\s*,\\s*\\b([a-zA-Z_$][a-zA-Z0-9_$]*)\\b\\s*)*)?\\s*\\{");
 
     public RegexJavaSource(String sourceCode) {
-        super.sourceCode = sourceCode;
+        super(sourceCode);
 
         /*// 通过嵌入式标志表达式 (?s) 也可以启用 dotall 模式（s 是 "single-line" 模式的助记符，在 Perl中也使用它）
         // X*?  X，零次或多次（懒汉模式）
@@ -42,7 +42,4 @@ public class RegexJavaSource extends JavaSource {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(new RegexJavaSource("public class a {}").getPublicClass());
-    }
 }

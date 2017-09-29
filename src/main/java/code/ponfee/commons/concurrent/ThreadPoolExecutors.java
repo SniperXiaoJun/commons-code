@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author Ponfee
  */
 public final class ThreadPoolExecutors {
+    private ThreadPoolExecutors() {}
 
     private static final RejectedExecutionHandler DEFAULT_HANDLER = new CallerRunsPolicy();
 

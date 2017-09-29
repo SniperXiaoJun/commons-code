@@ -3,8 +3,8 @@ package code.ponfee.commons.compile.model;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.STRICTFP;
 
-import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +19,7 @@ import com.sun.tools.javac.parser.ParserFactory;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 import com.sun.tools.javac.util.Context;
 
+import code.ponfee.commons.compile.impl.JdkCompiler;
 import code.ponfee.commons.io.Files;
 
 /**
@@ -38,36 +39,17 @@ public class JavacJavaSource extends JavaSource {
     private static final long serialVersionUID = 8020419352084840057L;
 
     public JavacJavaSource(String sourceCode) {
-        this.sourceCode = sourceCode;
-        new JavaSourceParser().parse(this);
-        if (isEmpty(this.publicClass)) {
+        super(sourceCode);
+
+        Context context = new Context();
+        JavacFileManager.preRegister(context);
+        Parser parser = ParserFactory.instance(context).newParser(sourceCode, true, false, true);
+        JCCompilationUnit unit = parser.parseCompilationUnit();
+
+        super.packageName = unit.getPackageName().toString();
+        new SourceVisitor().visitCompilationUnit(unit, this);
+        if (super.publicClass == null || super.publicClass.isEmpty()) {
             throw new IllegalArgumentException("illegal source code, public class not found.");
-        }
-    }
-
-    /**
-     * java源码解析类
-     */
-    private static final class JavaSourceParser {
-        private ParserFactory factory;
-
-        JavaSourceParser() {
-            Context context = new Context();
-            JavacFileManager.preRegister(context);
-            factory = ParserFactory.instance(context);
-        }
-
-        /*public JavaSource parse(String sourceCode) {
-            JavaSource source = new JavaSource(sourceCode);
-            this.parse(source);
-            return source;
-        }*/
-
-        public void parse(JavaSource source) {
-            Parser parser = factory.newParser(source.getSourceCode(), true, false, true);
-            JCCompilationUnit unit = parser.parseCompilationUnit();
-            source.packageName = unit.getPackageName().toString();
-            source.publicClass = new SourceVisitor().visitCompilationUnit(unit, source);
         }
     }
 
@@ -108,27 +90,26 @@ public class JavacJavaSource extends JavaSource {
      * </pre>
      * 源码访问类
      */
-    private static class SourceVisitor extends TreeScanner<String, JavaSource> {
-        private static final List<Modifier> MODIFIERS = Arrays.asList(PUBLIC, FINAL, ABSTRACT);
+    private static class SourceVisitor extends TreeScanner<Void, JavaSource> {
+        private static final List<Modifier> MODIFIERS = Arrays.asList(PUBLIC, FINAL, ABSTRACT, STRICTFP);
 
         @Override
-        public String visitClass(ClassTree classtree, JavaSource source) {
+        public Void visitClass(ClassTree classtree, JavaSource source) {
             super.visitClass(classtree, source);
             Set<Modifier> modifiers = classtree.getModifiers().getFlags();
-            // public [final|abstract] class A {}
-            if (modifiers.contains(PUBLIC) && modifiers.size() <= 2
+            if (modifiers.contains(PUBLIC) && modifiers.size() <= 3
                 && MODIFIERS.containsAll(modifiers)) {
-                return classtree.getSimpleName().toString();
-            } else {
-                return null;
+                source.publicClass = classtree.getSimpleName().toString();
             }
+            return null;
         }
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-        String s = Files.toString("d:/TT.java");
-        System.out.println(s);
-        JavaSource source = new JavacJavaSource(s);
-        System.out.println(source.getFullyQualifiedName());
+    public static void main(String[] args) throws Exception {
+        JavaSource javaSource = new JavacJavaSource(Files.toString("d:/CompilerSource.java"));
+        System.out.println(javaSource.getFullyQualifiedName());
+        Class<?> clazz = new JdkCompiler().compile(javaSource);
+        System.out.println(clazz);
+        clazz.getMethod("say").invoke(clazz);
     }
 }

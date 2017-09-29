@@ -100,8 +100,8 @@ public final class Bytes {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(hex.length() / 2);
         // two hex -> one byte
         for (int i = 0, n = hex.length(); i < n; i += 2) {
-            baos.write(HEX_CODES.indexOf(hex.charAt(i)) << 4 | 
-                       HEX_CODES.indexOf(hex.charAt(i + 1)));
+            baos.write(HEX_CODES.indexOf(hex.charAt(i)) << 4 
+                       | HEX_CODES.indexOf(hex.charAt(i + 1)));
         }
         return baos.toByteArray();
     }
