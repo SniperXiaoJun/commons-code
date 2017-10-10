@@ -1,6 +1,10 @@
 package code.ponfee.commons.export;
 
+import java.io.Closeable;
+
 /**
+ * {@link Closeable#close()} 要求幂等
+ * {@link AutoCloseable#close()} 不要求幂等
  * 数据导出
  * @author fupf
  */

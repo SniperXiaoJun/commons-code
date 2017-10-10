@@ -21,7 +21,7 @@ public abstract class CertSignedVerifier {
     protected byte[] info; // 原文信息
     protected List<byte[]> signedInfos = new ArrayList<>(); // 签名数据
 
-    private boolean isVerifySigned = true;
+    private boolean verifySigned = true;
 
     protected CertSignedVerifier(X509Certificate rootCert, X509CRL crl) {
         this.rootCert = rootCert;
@@ -51,7 +51,7 @@ public abstract class CertSignedVerifier {
             }
 
             // 签名验证
-            if (isVerifySigned) verifySigned();
+            if (verifySigned) verifySigned();
         } catch (IOException e) {
             throw new SecurityException("获取证书主题异常", e);
         }
@@ -129,8 +129,8 @@ public abstract class CertSignedVerifier {
         return this.signedInfos;
     }
 
-    public void setVerifySigned(boolean isVerifySigned) {
-        this.isVerifySigned = isVerifySigned;
+    public void setVerifySigned(boolean verifySigned) {
+        this.verifySigned = verifySigned;
     }
 
 }

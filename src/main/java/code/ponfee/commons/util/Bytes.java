@@ -63,8 +63,8 @@ public final class Bytes {
             text.close();
         }
 
+        fmt.flush();
         try {
-            fmt.flush();
             return fmt.toString();
         } finally {
             fmt.close();

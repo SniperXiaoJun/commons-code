@@ -36,7 +36,8 @@ public class JavaFileManagerImpl extends ForwardingJavaFileManager<JavaFileManag
     }
 
     @Override
-    public FileObject getFileForInput(Location location, String packageName, String relativeName) throws IOException {
+    public FileObject getFileForInput(Location location, String packageName, 
+                                      String relativeName) throws IOException {
         FileObject o = fileObjects.get(uri(location, packageName, relativeName));
 
         if (o != null) {
@@ -46,7 +47,8 @@ public class JavaFileManagerImpl extends ForwardingJavaFileManager<JavaFileManag
         return super.getFileForInput(location, packageName, relativeName);
     }
 
-    public void putFileForInput(StandardLocation location, String packageName, String relativeName, JavaFileObject file) {
+    public void putFileForInput(StandardLocation location, String packageName, 
+                                String relativeName, JavaFileObject file) {
         fileObjects.put(uri(location, packageName, relativeName), file);
     }
 
@@ -55,7 +57,8 @@ public class JavaFileManagerImpl extends ForwardingJavaFileManager<JavaFileManag
     }
 
     @Override
-    public JavaFileObject getJavaFileForOutput(Location location, String qualifiedName, Kind kind, FileObject outputFile)
+    public JavaFileObject getJavaFileForOutput(Location location, String qualifiedName, 
+                                               Kind kind, FileObject outputFile)
         throws IOException {
         JavaFileObject file = new JavaFileObjectImpl(qualifiedName, kind);
         classLoader.add(qualifiedName, file);
@@ -77,7 +80,8 @@ public class JavaFileManagerImpl extends ForwardingJavaFileManager<JavaFileManag
     }
 
     @Override
-    public Iterable<JavaFileObject> list(Location location, String packageName, Set<Kind> kinds, boolean recurse) throws IOException {
+    public Iterable<JavaFileObject> list(Location location, String packageName, 
+                                         Set<Kind> kinds, boolean recurse) throws IOException {
         Iterable<JavaFileObject> result = super.list(location, packageName, kinds, recurse);
 
         ArrayList<JavaFileObject> files = new ArrayList<>();

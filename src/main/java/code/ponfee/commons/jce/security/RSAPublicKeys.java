@@ -38,8 +38,8 @@ public final class RSAPublicKeys {
      * @return
      */
     public static String toPkcs1(RSAPublicKey publicKey) {
+        SubjectPublicKeyInfo spkInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
         try {
-            SubjectPublicKeyInfo spkInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
             return Base64.getEncoder().encodeToString(spkInfo.parsePublicKey().getEncoded());
         } catch (IOException e) {
             throw new SecurityException(e);

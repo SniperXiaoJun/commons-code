@@ -19,6 +19,7 @@ import com.google.common.cache.LoadingCache;
  * @author fupf
  */
 public final class RegexUtils {
+
     private static final Pattern PATTERN_MOBILE = Pattern.compile("^\\s*(((\\+)?86)|(\\((\\+)?86\\)))?1\\d{10}\\s*$");
     private static final Pattern PATTERN_EMAIL = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$");
     private static final Pattern PATTERN_IP = Pattern.compile("((?:(?:25[0-5]|2[0-4]\\d|((1\\d{2})|([1-9]?\\d)))\\.){3}(?:25[0-5]|2[0-4]\\d|((1\\d{2})|([1-9]?\\d))))");

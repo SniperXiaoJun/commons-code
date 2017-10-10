@@ -54,22 +54,27 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
         this.consumer = new AsyncBatchConsumer<>((list, isEnd) -> {
             return () -> {
                 Map<String, Map<String, Double>> map = new HashMap<>();
+                Map<String, Double> batch;
                 for (Trace trace : list) {
-                    Map<String, Double> batch = map.get(trace.key);
+                    batch = map.get(trace.key);
                     if (batch == null) {
                         batch = new HashMap<>();
                         map.put(trace.key, batch);
                     }
-                    // ObjectUtils.uuid22(), Character.MAX_RADIX
-                    batch.put(Long.toString(IdWorker.LOCAL_WORKER.nextId(), 36), trace.timeMillis);
+                    // ObjectUtils.uuid22()
+                    batch.put(Long.toString(IdWorker.LOCAL_WORKER.nextId(), Character.MAX_RADIX), 
+                              trace.timeMillis);
                 }
                 for (Entry<String, Map<String, Double>> entry : map.entrySet()) {
-                    jedisClient.zsetOps().zadd(TRACE_KEY_PREFIX + entry.getKey(), entry.getValue());
+                    // TRACE_KEY_PREFIX + trace.key
+                    jedisClient.zsetOps().zadd(TRACE_KEY_PREFIX + entry.getKey(), 
+                                               entry.getValue(), EXPIRE_SECONDS);
                 }
                 map.clear();
+                map = null;
                 list.clear();
             };
-        }, 50, 2000); // 50毫秒间隔，2000量数/批次
+        }, 100, 2000); // 100毫秒间隔，2000量数/批次
     }
 
     /**

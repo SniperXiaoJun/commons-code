@@ -1,11 +1,11 @@
 package code.ponfee.commons.model;
 
-import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Map;
 
 import com.github.pagehelper.PageHelper;
 
+import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.reflect.Fields;
 
 /**
@@ -15,14 +15,16 @@ import code.ponfee.commons.reflect.Fields;
  */
 public final class PageHandler {
 
-    public static final PageHandler NORMAL = new PageHandler("pageNum", "pageSize", "offset", "limit");
+    public static final PageHandler NORMAL = new PageHandler("pageNum", "pageSize", 
+                                                             "offset", "limit");
 
     private final String paramPageNum;
     private final String paramPageSize;
     private final String paramOffset;
     private final String paramLimit;
 
-    public PageHandler(String paramPageNum, String paramPageSize, String paramOffset, String paramLimit) {
+    public PageHandler(String paramPageNum, String paramPageSize, 
+                       String paramOffset, String paramLimit) {
         this.paramPageNum = paramPageNum;
         this.paramPageSize = paramPageSize;
         this.paramOffset = paramOffset;
@@ -70,16 +72,23 @@ public final class PageHandler {
         PageHelper.offsetPage(offset, limit);
     }
 
+    /**
+     * get page number from java bean or map or dictionary
+     * @param params
+     * @param name
+     * @return
+     */
     private static <T> Integer getInt(T params, String name) {
         try {
             Object value = null;
-            if (Map.class.isInstance(params) || Dictionary.class.isInstance(params)) {
-                Method get = params.getClass().getMethod("get", Object.class);
-                value = get.invoke(params, name);
+            if (Map.class.isInstance(params) 
+                || Dictionary.class.isInstance(params)) {
+                value = params.getClass().getMethod("get", Object.class)
+                                         .invoke(params, name);
             } else {
                 value = Fields.get(params, name);
             }
-            return Integer.parseInt(String.valueOf(value));
+            return Numbers.toInt(value);
         } catch (Exception e) {
             return null;
         }

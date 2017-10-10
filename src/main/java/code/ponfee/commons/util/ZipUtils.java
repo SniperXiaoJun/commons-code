@@ -77,7 +77,7 @@ public class ZipUtils {
      * @return 最终的压缩文件存放的绝对路径
      */
     public static String zip(String src, String dest, boolean recursion,
-                   String passwd, String comment) throws ZipException {
+                             String passwd, String comment) throws ZipException {
         // validate source file
         File srcFile = new File(src);
         if (!srcFile.exists()) {
@@ -187,7 +187,7 @@ public class ZipUtils {
      */
     @SuppressWarnings("unchecked")
     public static File[] unzip(File zipFile, String dest, String passwd, 
-                                  String charset) throws ZipException {
+                               String charset) throws ZipException {
         // validate zip file
         if (!zipFile.exists()) {
             throw new IllegalArgumentException("zip file not found: " + zipFile.getAbsolutePath());

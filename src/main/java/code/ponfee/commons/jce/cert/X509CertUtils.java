@@ -365,8 +365,7 @@ public class X509CertUtils {
     }
 
     // --------------以下是解析Base64(pem)格式证书所用到的方法 start----------------- //
-    private static boolean isBase64(InputStream inputstream)
-        throws IOException {
+    private static boolean isBase64(InputStream inputstream) throws IOException {
         try {
             if (!inputstream.markSupported()) {
                 byte abyte0[] = getTotalBytes(new BufferedInputStream(inputstream));
@@ -412,8 +411,7 @@ public class X509CertUtils {
         return baos.toByteArray();
     }
 
-    private static byte[] base64ToBinary(InputStream inputstream)
-        throws IOException {
+    private static byte[] base64ToBinary(InputStream inputstream) throws IOException {
         try {
             long l = 0L;
             inputstream.mark(inputstream.available());

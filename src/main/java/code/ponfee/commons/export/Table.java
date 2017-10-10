@@ -31,11 +31,12 @@ public class Table implements Serializable {
     }
 
     public Table(String[] thead) {
-        List<Thead> _thead = new ArrayList<>();
-        for (int i = 1; i <= thead.length; i++) {
-            _thead.add(new Thead(thead[i], i, 0)); // porder set 0
+        this.thead = new ArrayList<>();
+        for (int i = 0; i < thead.length; i++) {
+            // set porder 0
+            this.thead.add(new Thead(thead[i], i + 1, 0));
         }
-        resolveThead(this.thead = _thead);
+        resolveThead(this.thead);
     }
 
     public String getCaption() {

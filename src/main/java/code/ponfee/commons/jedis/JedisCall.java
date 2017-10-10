@@ -21,7 +21,7 @@ public interface JedisCall {
         try (ShardedJedis shardedJedis = jedisClient.getShardedJedis()) {
             this.call(shardedJedis);
         } catch (Exception e) {
-            jedisClient.exception(e);
+            jedisClient.exception(e, args);
         }
     }
 }

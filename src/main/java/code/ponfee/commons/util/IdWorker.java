@@ -123,7 +123,7 @@ public final class IdWorker {
         Fields.put(worker, "workerIdShift", worker.sequenceBits); // 左移10位（seq10位）
         Fields.put(worker, "timestampMask", -1L ^ (-1L << (MAX_SIZE - worker.timestampShift)));
 
-        Fields.put(worker, "workerId", Networks.ipReduce());
+        Fields.put(worker, "workerId", (long) Networks.ipReduce());
         return worker;
     }).get();
 

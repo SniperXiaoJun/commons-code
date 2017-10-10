@@ -90,8 +90,8 @@ public class X509CertGenerator {
         return signCert(caCert, caKey, certInfo);
     }
 
-    public static X509Certificate createSubjectCert(X509Certificate caCert,
-        PrivateKey caKey, PKCS10 pkcs10, Date notBefore, Date notAfter) {
+    public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, 
+                                                    PKCS10 pkcs10, Date notBefore, Date notAfter) {
         return createSubjectCert(caCert, caKey, null, pkcs10, notBefore, notAfter);
     }
 
@@ -121,7 +121,7 @@ public class X509CertGenerator {
      * @return
      */
     public static PKCS10 createPkcs10(String subject, PrivateKey privateKey,
-        PublicKey publicKey, RSASignAlgorithm sigAlg) {
+                                      PublicKey publicKey, RSASignAlgorithm sigAlg) {
         try {
             PKCS10 pkcs10 = new PKCS10(publicKey);
             Signature signature = Signature.getInstance(sigAlg.name());

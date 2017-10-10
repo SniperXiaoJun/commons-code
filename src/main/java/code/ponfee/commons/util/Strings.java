@@ -421,12 +421,12 @@ public class Strings {
     }
 
     /**
-     * 如果为空则重置
+     * 如果为空则设置默认
      * @param str
      * @param defaultStr
      * @return
      */
-    public static String resetIfEmpty(String str, String defaultStr) {
+    public static String setIfEmpty(String str, String defaultStr) {
         return StringUtils.isEmpty(str) ? defaultStr : str;
     }
 
