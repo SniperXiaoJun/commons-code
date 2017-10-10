@@ -47,11 +47,12 @@ public final class Word2Pdf {
         for (int n = list.size(), i = 0; i < n; i++) {
             try {
                 FONTS[i] = new MemoryFontSource(IOUtils.toByteArray(list.get(i).getStream()));
-                IOUtils.closeQuietly(list.get(i).getStream());
             } catch (IOException ignored) {
                 ignored.printStackTrace();
             }
+            IOUtils.closeQuietly(list.get(i).getStream());
         }
+        FontSettings.setFontsSources(FONTS);
 
         // 加载license
         try (InputStream input = ResourceLoaderFacade.getResource("license.xml", Word2Pdf.class).getStream()) {
@@ -69,7 +70,6 @@ public final class Word2Pdf {
     public static void convert(InputStream words, OutputStream out) {
         try {
             Document doc = new Document(words);
-            FontSettings.setFontsSources(FONTS);
             PdfSaveOptions pso = new PdfSaveOptions();
             pso.setEmbedFullFonts(false);
 

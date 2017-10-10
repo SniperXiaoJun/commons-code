@@ -51,28 +51,4 @@ public final class Throwables {
         ignored.printStackTrace();
     }
 
-    /**
-     * get the root cause of throwable
-     * @param throwable
-     * @return
-     */
-    public static Throwable getRootCause(Throwable throwable) {
-        Throwable slowPointer = throwable;
-        boolean advanceSlowPointer = false;
-
-        Throwable cause;
-        while ((cause = throwable.getCause()) != null) {
-            throwable = cause;
-
-            if (throwable == slowPointer) {
-                throw new IllegalArgumentException("Loop in causal chain detected @ " + throwable);
-            }
-            if (advanceSlowPointer) {
-                slowPointer = slowPointer.getCause();
-            }
-            advanceSlowPointer = !advanceSlowPointer; // only advance every other iteration
-        }
-
-        return throwable;
-    }
 }

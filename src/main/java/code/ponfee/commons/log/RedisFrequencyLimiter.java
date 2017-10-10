@@ -74,7 +74,7 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
                 map = null;
                 list.clear();
             };
-        }, 100, 2000); // 100毫秒间隔，2000量数/批次
+        }, 100, 2000); // 100毫秒间隔，2000条∕次
     }
 
     /**

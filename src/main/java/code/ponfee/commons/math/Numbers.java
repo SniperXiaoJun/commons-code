@@ -150,9 +150,9 @@ public final class Numbers {
         if (obj instanceof CharSequence) {
             String str = obj.toString().replaceAll(",", "");
             if (str.endsWith("%")) {
-                return formatter.format(Double.valueOf(str.substring(0, str.length() - 1))) + "%";
+                return formatter.format(Double.parseDouble(str.substring(0, str.length() - 1))) + "%";
             } else {
-                return formatter.format(Double.valueOf(str));
+                return formatter.format(Double.parseDouble(str));
             }
         } else {
             return formatter.format(obj);

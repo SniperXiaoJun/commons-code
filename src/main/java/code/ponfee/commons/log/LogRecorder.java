@@ -7,6 +7,8 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 import code.ponfee.commons.exception.Throwables;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.util.ObjectUtils;
@@ -50,7 +52,8 @@ public abstract class LogRecorder {
     }
 
     public LogRecorder(int alarmThresholdMillis, FrequencyLimiter freqLimiter) {
-        this.alarmThresholdMillis = alarmThresholdMillis < 0 ? 1 : alarmThresholdMillis;
+        Preconditions.checkArgument(alarmThresholdMillis > 0);
+        this.alarmThresholdMillis = alarmThresholdMillis;
         this.freqLimiter = freqLimiter;
     }
 
