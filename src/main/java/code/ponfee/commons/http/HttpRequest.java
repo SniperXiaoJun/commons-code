@@ -1612,8 +1612,7 @@ public class HttpRequest {
 
     /**
      * Get status message of the response
-     *
-     * @return message
+     * @return message   OK
      * @throws HttpRequestException
      */
     public String message() throws HttpRequestException {

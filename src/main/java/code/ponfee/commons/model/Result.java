@@ -2,6 +2,8 @@ package code.ponfee.commons.model;
 
 import java.beans.Transient;
 
+import com.google.common.base.Preconditions;
+
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.reflect.Fields;
 
@@ -16,8 +18,8 @@ public class Result<T> implements java.io.Serializable {
     public static final Result<Void> SUCCESS = new SuccessResult();
 
     private Integer code; // 状态码
-    private String msg; // 返回信息
-    private T data; // 结果数据
+    private String msg;   // 返回信息
+    private T data;       // 结果数据
 
     // -----------------------constructor methods
     public Result() {} // code is null
@@ -47,7 +49,8 @@ public class Result<T> implements java.io.Serializable {
 
     // -----------------------------static methods/failure methods
     public static <T> Result<T> failure(Enum<?> em) {
-        return failure((int) Fields.get(em, "code"), (String) Fields.get(em, "msg"), null);
+        return failure((int) Fields.get(em, "code"), 
+                       (String) Fields.get(em, "msg"), null);
     }
 
     public static <T> Result<T> failure(ResultCode code) {
@@ -59,9 +62,8 @@ public class Result<T> implements java.io.Serializable {
     }
 
     public static <T> Result<T> failure(int code, String msg, T data) {
-        if (code == SUCCESS.getCode()) {
-            throw new IllegalStateException("invalid failure code: " + code);
-        }
+        Preconditions.checkState(code != SUCCESS.getCode(), 
+                                 "invalid failure code: " + code);
         return new Result<>(code, msg, data);
     }
 

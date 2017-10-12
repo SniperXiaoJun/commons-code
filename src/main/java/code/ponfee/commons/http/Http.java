@@ -405,9 +405,7 @@ public final class Http {
             } else if (mime instanceof Byte[]) {
                 this.stream = new ByteArrayInputStream(ArrayUtils.toPrimitive((Byte[]) mime));
             } else if (mime instanceof String || mime instanceof File) {
-                File file = mime instanceof File 
-                            ? (File) mime
-                            : new File((String) mime);
+                File file = (mime instanceof File) ? (File) mime : new File((String) mime);
                 try {
                     this.stream = new FileInputStream(file);
                 } catch (FileNotFoundException e) {

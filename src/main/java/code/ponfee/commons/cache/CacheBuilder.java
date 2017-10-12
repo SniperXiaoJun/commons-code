@@ -22,12 +22,12 @@ public final class CacheBuilder {
         return this;
     }
 
-    public CacheBuilder autoReleaseInSeconds(Integer autoReleaseInSeconds) {
+    public CacheBuilder autoReleaseInSeconds(int autoReleaseInSeconds) {
         this.autoReleaseInSeconds = autoReleaseInSeconds;
         return this;
     }
 
-    public CacheBuilder keepaliveInMillis(Long keepaliveInMillis) {
+    public CacheBuilder keepaliveInMillis(long keepaliveInMillis) {
         this.keepaliveInMillis = keepaliveInMillis;
         return this;
     }

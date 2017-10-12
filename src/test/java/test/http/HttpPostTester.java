@@ -1,5 +1,7 @@
 package test.http;
 
+import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,20 +12,21 @@ import java.util.Set;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.NoHttpResponseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpRequestRetryHandler;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
-@SuppressWarnings("deprecation")
 public class HttpPostTester {
 
-    @SuppressWarnings("resource")
     public static String post(String reqURL, Map<String, String> params) throws Exception {
         HttpPost httpPost = new HttpPost(reqURL);
         if (params != null) {
@@ -38,11 +41,34 @@ public class HttpPostTester {
         httpPost.setHeader("User-Agent", "datagrand/datareport/java sdk v1.0.0");
         httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
-        HttpClient httpClient = new DefaultHttpClient();
-        HttpParams httpParams = httpClient.getParams();
-        HttpConnectionParams.setSoTimeout(httpParams, 60 * 1000);
-        HttpConnectionParams.setConnectionTimeout(httpParams, 60 * 1000);
-
+        // 设置默认时间 
+        RequestConfig config = RequestConfig.custom().setConnectTimeout(3000)
+                                            .setConnectionRequestTimeout(1000).setSocketTimeout(4000)
+                                            .setExpectContinueEnabled(true).build();
+        PoolingHttpClientConnectionManager pccm = new PoolingHttpClientConnectionManager();
+        pccm.setMaxTotal(300); // 连接池最大并发连接数
+        pccm.setDefaultMaxPerRoute(50); // 单路由最大并发数
+        HttpRequestRetryHandler retryHandler = new HttpRequestRetryHandler() {
+            public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+                if (executionCount > 3) {
+                    return false;
+                }
+                if (exception instanceof NoHttpResponseException) {
+                    System.out.println("[NoHttpResponseException has retry request:" + context.toString() 
+                                     + "][executionCount:" + executionCount + "]");
+                    return true;
+                } else if (exception instanceof SocketException) {
+                    System.out.println("[SocketException has retry request:" + context.toString() 
+                                     + "][executionCount:" + executionCount + "]");
+                    return true;
+                }
+                return false;
+            }
+        };
+        HttpClient httpClient = HttpClients.custom().setConnectionManager(pccm)
+                                           .setDefaultRequestConfig(config)
+                                           .setRetryHandler(retryHandler).build();
+        
         HttpResponse response = httpClient.execute(httpPost);
         StatusLine status = response.getStatusLine();
         if (status.getStatusCode() >= HttpStatus.SC_MULTIPLE_CHOICES) {
@@ -64,9 +90,9 @@ public class HttpPostTester {
     public static void main(String[] args) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("appid", "12345");
-        params.put("title", "顶顶顶");
-        params.put("textid", "435386945382932");
-        params.put("text", "3m每天百分之1利息，60元起步，有需要可以联系我，Q49663537，或者关注百度贴吧，老马平台吧！");
+        params.put("title", "abc");
+        params.put("textid", "123456778");
+        params.put("text", "abcdefg");
 
         String res;
         try {

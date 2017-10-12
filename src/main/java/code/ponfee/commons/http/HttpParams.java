@@ -122,7 +122,9 @@ public class HttpParams {
     }
 
     public static String buildSigning(Map<String, String> params, String wrapChar, String[] excludes) {
-        List<String> filter = ObjectUtils.isEmpty(excludes) ? Collections.emptyList() : Arrays.asList(excludes);
+        List<String> filter = ObjectUtils.isEmpty(excludes) 
+                              ? Collections.emptyList() 
+                              : Arrays.asList(excludes);
 
         // 过滤参数
         Map<String, String> signingMap = new TreeMap<>();
@@ -160,14 +162,16 @@ public class HttpParams {
             form.append("<input type=\"hidden\" name=\"").append(param.getKey()).append("\" value=\"")
                 .append(StringUtils.defaultString(param.getValue())).append("\" />");
         }
+
         form.append("<input type=\"submit\" style=\"display:none;\" />")
             .append("</form>")
             .append("<script>document.forms['").append(formName)
             .append("'].submit();</script>");
+
         return form.toString();
     }
 
-    // -------------private method
+    // --------------------------------------private method-----------------------------------
     private static void parseParams(Map<String, String[]> map, byte[] queryString, String encoding) {
         if (queryString == null || queryString.length == 0) return;
 

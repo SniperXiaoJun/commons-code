@@ -21,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class IdcardResolver {
 
-    private static final Pattern PASSPORT_REGEX = Pattern.compile("^1[45][0-9]{7}|G[0-9]{8}|P[0-9]{7}|S[0-9]{7,8}|D[0-9]+$");
     private static final Date ORIGIN_DATE = Dates.toDate("1950-01-01 00:00:00", "yyyy-MM-dd HH:mm:ss");
 
     /**
@@ -73,8 +72,8 @@ public class IdcardResolver {
      * @return
      */
     private boolean resolve(String idcard) {
-        return isSecond(idcard) || isFirst(idcard) 
-            || isHkMacTw(idcard) || isPassport(idcard);
+        return isSecond(idcard) || isFirst(idcard) || 
+             isHkMacTw(idcard) || isPassport(idcard);
     }
 
     /**
@@ -82,8 +81,9 @@ public class IdcardResolver {
      * @param idCard 身份编码
      * @return 是否合法
      */
+    private static final Pattern FIRST = Pattern.compile("^[0-9]{15}$");
     private boolean isFirst(String idcard) {
-        if (!idcard.matches("^[0-9]{15}$")) return false;
+        if (FIRST.matcher(idcard).matches()) return false;
 
         // 转成18位
         idcard = idcard.substring(0, 6) + "19" + idcard.substring(6);
@@ -98,8 +98,9 @@ public class IdcardResolver {
      * @param idCard 身份编码
      * @return 是否合法
      */
+    private static final Pattern SECOND = Pattern.compile("^[0-9]{17}[0-9X]$");
     private boolean isSecond(String idcard) {
-        if (!idcard.matches("^[0-9]{17}[0-9X]$")) return false;
+        if (SECOND.matcher(idcard).matches()) return false;
 
         // 城市验证
         this.province = CITY_CODES.get(idcard.substring(0, 2));
@@ -132,18 +133,21 @@ public class IdcardResolver {
      * @param idCard 身份编码
      * @return 身份证信息数组
      */
+    private static final Pattern HONGKONG = Pattern.compile("^[A-Z]{1,2}[0-9]{6}\\(?[0-9A]\\)?$");
+    private static final Pattern MACO = Pattern.compile("^[1|5|7][0-9]{6}\\(?[0-9A-Z]\\)?$");
+    private static final Pattern TAIWAN = Pattern.compile("^[a-zA-Z][0-9]{9}$");
     private boolean isHkMacTw(String idcard) {
         idcard = idcard.replaceAll("[\\(|\\)]", "");
 
-        if (idcard.matches("^[A-Z]{1,2}[0-9]{6}\\(?[0-9A]\\)?$")) { // 香港
+        if (HONGKONG.matcher(idcard).matches()) { // 香港
             this.type = CertType.HONGKONG;
             this.sex = Sex.N;
             return validateHKCard(idcard);
-        } else if (idcard.matches("^[1|5|7][0-9]{6}\\(?[0-9A-Z]\\)?$")) { // 澳门
+        } else if (MACO.matcher(idcard).matches()) { // 澳门
             this.type = CertType.MACAO;
             this.sex = Sex.N;
             return true;
-        } else if (idcard.matches("^[a-zA-Z][0-9]{9}$")) { // 台湾
+        } else if (TAIWAN.matcher(idcard).matches()) { // 台湾
             this.type = CertType.TAIWAN;
             String sex = idcard.substring(1, 2);
             if ("1".equals(sex)) this.sex = Sex.M;
@@ -160,6 +164,7 @@ public class IdcardResolver {
      * @param idcard
      * @return
      */
+    private static final Pattern PASSPORT_REGEX = Pattern.compile("^1[45][0-9]{7}|G[0-9]{8}|P[0-9]{7}|S[0-9]{7,8}|D[0-9]+$");
     private boolean isPassport(String idcard) {
         boolean flag = PASSPORT_REGEX.matcher(idcard).matches();
         if (flag) this.type = CertType.PASSPORT;
@@ -187,10 +192,10 @@ public class IdcardResolver {
 
     /**
      * <pre>
-     * 验证香港身份证号码(存在bug，部份特殊身份证无法校验)
-     * 身份证前2位为英文字符，如果只出现一个英文字符则表示第一位是空格，对应数字58 
-     * 前2位英文字符A-Z分别对应数字10-35 最后一位校验码为0-9的数字加上字符"A"，"A"代表10
-     * 将身份证号码全部转换为数字，分别对应乘9-1相加的总和，整除11则证件号码有效
+     *   验证香港身份证号码(存在bug，部份特殊身份证无法校验)
+     *   身份证前2位为英文字符，如果只出现一个英文字符则表示第一位是空格，对应数字58 
+     *   前2位英文字符A-Z分别对应数字10-35 最后一位校验码为0-9的数字加上字符"A"，"A"代表10
+     *   将身份证号码全部转换为数字，分别对应乘9-1相加的总和，整除11则证件号码有效
      * </pre>
      * 
      * @param idCard 身份证号码

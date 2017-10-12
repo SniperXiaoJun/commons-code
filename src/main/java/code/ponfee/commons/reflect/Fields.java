@@ -2,7 +2,6 @@ package code.ponfee.commons.reflect;
 
 import java.lang.reflect.Field;
 
-import code.ponfee.commons.model.Result;
 import sun.misc.Unsafe;
 
 /**
@@ -217,32 +216,4 @@ public final class Fields {
         }
     }
 
-    public static void main(String[] args) {
-        Result<?> result = Result.SUCCESS;
-        System.out.println(get(result, "code"));
-
-        Test a = new Test();
-        System.out.println(get(a, "i"));
-        System.out.println(get(a, "_i"));
-        System.out.println(get(a, "c"));
-        System.out.println(get(a, "_c"));
-        System.out.println(get(a, "b"));
-        System.out.println(get(a, "_b"));
-
-        put(a, "i", 12);
-        put(a, "_i", 14);
-
-        System.out.println(get(a, "i"));
-        System.out.println(get(a, "_i"));
-    }
-
-    @SuppressWarnings("unused")
-    private static class Test {
-        private int _i;
-        private Integer i = 0;
-        private char _c;
-        private Character c;
-        private boolean _b;
-        private Boolean b;
-    }
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.activation.DataSource;
@@ -30,7 +31,7 @@ public class MailEnvelope implements Serializable {
     private String[] reply; // 回复
 
     /** 邮件附件：key为邮件附件名 */
-    private final Map<String, DataSource> attachments = new HashMap<>();
+    private final Map<String, DataSource> attachments = new LinkedHashMap<>();
 
     /** 正文图片：key为content-id，正文应包含：<img src="cid:content-id" /> */
     private final Map<String, DataSource> contentImages = new HashMap<>();
@@ -77,8 +78,8 @@ public class MailEnvelope implements Serializable {
         return newMimeInstance(to, subject, content, null, null);
     }
 
-    public static MailEnvelope newMimeInstance(String[] to, String subject, Object content,
-        String[] cc, String[] bcc) {
+    public static MailEnvelope newMimeInstance(String[] to, String subject, 
+                                               Object content, String[] cc, String[] bcc) {
         return new MailEnvelope(MailType.MIME, to, subject, content, cc, bcc);
     }
 

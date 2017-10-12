@@ -11,8 +11,8 @@ import java.security.cert.X509Certificate;
  */
 public class CertPKCS1Verifier extends CertSignedVerifier {
 
-    public CertPKCS1Verifier(X509Certificate rootCert, X509CRL crl,
-        X509Certificate subject, byte[] info, byte[] signedInfo) {
+    public CertPKCS1Verifier(X509Certificate rootCert, X509CRL crl, 
+                             X509Certificate subject, byte[] info, byte[] signedInfo) {
         super(rootCert, crl);
         try {
             this.subjects = new X509Certificate[] { subject };

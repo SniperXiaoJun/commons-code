@@ -36,22 +36,22 @@ public class Strings {
      * 遮掩
      * @param text
      * @param start
-     * @param num
+     * @param len
      * @return
      */
-    public static String mask(String text, int start, int num) {
-        if (num < 1 || StringUtils.isEmpty(text) || text.length() < start) {
+    public static String mask(String text, int start, int len) {
+        if (len < 1 || StringUtils.isEmpty(text) || text.length() < start) {
             return text;
         }
         if (start < 0) {
             start = 0;
         }
-        if (text.length() < start + num) {
-            num = text.length() - start;
+        if (text.length() < start + len) {
+            len = text.length() - start;
         }
-        int end = text.length() - start - num;
-        String regex = "(\\w{" + start + "})\\w{" + num + "}(\\w{" + end + "})";
-        return mask(text, regex, "$1" + StringUtils.repeat("*", num) + "$2");
+        int end = text.length() - start - len;
+        String regex = "(\\w{" + start + "})\\w{" + len + "}(\\w{" + end + "})";
+        return mask(text, regex, "$1" + StringUtils.repeat("*", len) + "$2");
     }
 
     /**

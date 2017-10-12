@@ -82,7 +82,7 @@ public abstract class LogRecorder {
         // request frequency limit
         if (log != null && log.limit() && freqLimiter != null
             && !freqLimiter.checkAndTrace(methodName)) {
-            throw new IllegalStateException("request rejection");
+            throw new IllegalStateException("request denied");
         }
 
         LogInfo logInfo = new LogInfo(methodName);

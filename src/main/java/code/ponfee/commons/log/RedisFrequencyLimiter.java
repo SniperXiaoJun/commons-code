@@ -155,7 +155,7 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
      * @return  the qty of this time range
      */
     private long countByRangeMillis(String key, long fromMillis, long toMillis) {
-        Preconditions.checkState(fromMillis < toMillis, "from time must be less than to time.");
+        Preconditions.checkArgument(fromMillis < toMillis, "from time must before to time.");
         return jedisClient.zsetOps().zcount(TRACE_KEY_PREFIX + key, fromMillis, toMillis);
     }
 

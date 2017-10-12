@@ -261,7 +261,7 @@ public final class Numbers {
      * @param amount
      * @return
      */
-    public static String amountChinese(BigDecimal amount) {
+    public static String chinesize(BigDecimal amount) {
         StringBuilder builder = new StringBuilder();
         int signum = amount.signum(); // 正负数：0,1,-1
         if (signum == 0) {
@@ -339,7 +339,7 @@ public final class Numbers {
         System.out.println(ObjectUtils.toString(sharding(10, 20)));
 
         double money = 2020004.01;
-        String s = amountChinese(new BigDecimal(money));
+        String s = chinesize(new BigDecimal(money));
         System.out.println("[" + money + "]   ->   [" + s.toString() + "]");
 
         System.out.println(new BigDecimal(0).signum());
