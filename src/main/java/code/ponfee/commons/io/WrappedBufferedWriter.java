@@ -16,7 +16,7 @@ import java.nio.charset.Charset;
  */
 public class WrappedBufferedWriter extends Writer {
 
-    private OutputStream outer;
+    private OutputStream output;
     private OutputStreamWriter writer;
     private BufferedWriter buffer;
 
@@ -28,10 +28,10 @@ public class WrappedBufferedWriter extends Writer {
         this(new FileOutputStream(file), charset);
     }
 
-    public WrappedBufferedWriter(OutputStream outer, Charset charset) {
+    public WrappedBufferedWriter(OutputStream output, Charset charset) {
         super();
-        this.outer = outer;
-        this.writer = new OutputStreamWriter(outer, charset);
+        this.output = output;
+        this.writer = new OutputStreamWriter(output, charset);
         this.buffer = new BufferedWriter(writer, 8192);
     }
 
@@ -74,7 +74,7 @@ public class WrappedBufferedWriter extends Writer {
     public void flush() throws IOException {
         buffer.flush();
         writer.flush();
-        outer.flush();
+        output.flush();
     }
 
     @Override
@@ -93,12 +93,12 @@ public class WrappedBufferedWriter extends Writer {
         }
         writer = null;
 
-        if (outer != null) try {
-            outer.close();
+        if (output != null) try {
+            output.close();
         } catch (IOException ignored) {
             ignored.printStackTrace();
         }
-        outer = null;
+        output = null;
     }
 
     @Override

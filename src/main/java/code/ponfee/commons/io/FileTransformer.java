@@ -39,7 +39,7 @@ public class FileTransformer {
     private final File target;
     private final String targetPath;
     private final String encoding;
-    private final StringBuilder logger = new StringBuilder(4096);
+    private final StringBuilder log = new StringBuilder(4096);
     private String[] searchList;
     private String[] replacementList;
 
@@ -76,37 +76,36 @@ public class FileTransformer {
     }
 
     public String getTransformLog() {
-        return logger.toString();
+        return log.toString();
     }
 
     private void transform(File file) {
-        if (file == null) return;
-
-        if (file.isDirectory()) {
+        if (file == null) {
+            // nothing to do
+        } else if (file.isDirectory()) {
             File[] subfiles = file.listFiles();
             if (subfiles != null) {
                 for (File sub : subfiles) {
                     transform(sub);
                 }
             }
-            return;
-        }
-
-        String filepath = file.getAbsolutePath(), charset;
-        File dest = Files.touch(targetPath + filepath.substring(sourcePath.length()));
-        boolean isMatch = file.getName().matches(includeFileExtensions);
-        if (StringUtils.isNotEmpty(encoding) && isMatch && (charset = guessEncoding(filepath)) != null
-            && !"void".equalsIgnoreCase(charset) && !encoding.equalsIgnoreCase(charset)) {
-            logger.append("**转换").append("  ").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("  -->  ");
-            transform(file, dest, charset, encoding, searchList, replacementList);
-        } else if (!ObjectUtils.isEmpty(searchList) && isMatch) {
-            logger.append("--复制").append("  ").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("  -->  ");
-            transform(file, dest, searchList, replacementList);
         } else {
-            logger.append("==复制").append("  ").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("  -->  ");
-            transform(file, dest);
+            String filepath = file.getAbsolutePath(), charset;
+            File dest = Files.touch(targetPath + filepath.substring(sourcePath.length()));
+            boolean isMatch = file.getName().matches(includeFileExtensions);
+            if (StringUtils.isNotEmpty(encoding) && isMatch && (charset = guessEncoding(filepath)) != null
+                && !"void".equalsIgnoreCase(charset) && !encoding.equalsIgnoreCase(charset)) {
+                log.append("**转换").append("  ").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("  -->  ");
+                transform(file, dest, charset, encoding, searchList, replacementList);
+            } else if (!ObjectUtils.isEmpty(searchList) && isMatch) {
+                log.append("--复制").append("  ").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("  -->  ");
+                transform(file, dest, searchList, replacementList);
+            } else {
+                log.append("==复制").append("  ").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("  -->  ");
+                transform(file, dest);
+            }
+            log.append(dest.getAbsolutePath()).append("\n");
         }
-        logger.append(dest.getAbsolutePath()).append("\n");
     }
 
     /**

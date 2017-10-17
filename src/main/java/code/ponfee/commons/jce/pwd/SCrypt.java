@@ -17,8 +17,10 @@ import javax.crypto.spec.SecretKeySpec;
  * An implementation of the <a href="http://www.tarsnap.com/scrypt/scrypt.pdf"/>scrypt</a> key derivation function. This class will attempt to load a native
  * library containing the optimized C implementation from <a href="http://www.tarsnap.com/scrypt.html">http://www.tarsnap.com/scrypt.html</a> and fall back to
  * the pure Java version if that fails.
+ * 参考自网络
+ * 
  * @author Will Glozer
- * 参考自网络 fupf
+ * @author Ponfee
  */
 public class SCrypt {
 

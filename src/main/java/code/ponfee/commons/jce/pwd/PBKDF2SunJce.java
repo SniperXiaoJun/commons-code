@@ -17,7 +17,10 @@ import javax.crypto.spec.PBEKeySpec;
  * The OpenJDK implementation does only provide a PBKDF2HmacSHA1Factory.java which has the "HmacSHA1" 
  * digest harcoded. As far as I tested, the Oracle JDK is not different in that sense.
  * 
- * 参考自网络 fupf
+ * 参考自网络
+ * 
+ * @author havoc AT defuse.ca
+ * @author Ponfee
  */
 public class PBKDF2SunJce {
 

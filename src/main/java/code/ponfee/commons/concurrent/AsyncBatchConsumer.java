@@ -40,7 +40,8 @@ public final class AsyncBatchConsumer<T> extends Thread {
     /**
      * @param factory  消费线程工厂
      */
-    public AsyncBatchConsumer(RunnableFactory<T> factory, int thresholdPeriod, int thresholdChunk) {
+    public AsyncBatchConsumer(RunnableFactory<T> factory, 
+                              int thresholdPeriod, int thresholdChunk) {
         this(factory, null, thresholdPeriod, thresholdChunk);
     }
 

@@ -24,13 +24,10 @@ import code.ponfee.commons.util.ObjectUtils;
  */
 public final class WebContext {
 
-    private static final Pattern PATTERN_MOBILE = Pattern.compile("\\b(ip(hone|od)|android|opera m(ob|in)i|windows (phone|ce)|blackberry|s(ymbian|eries60|amsung)|p(laybook|alm|rofile/midp|laystation portable)|nokia|fennec|htc[-_]|mobile|up.browser|[1-4][0-9]{2}x[1-4][0-9]{2})\\b", Pattern.CASE_INSENSITIVE);
-    private static final Pattern PATTERN_IPAD = Pattern.compile("\\b(ipad|tablet|(Nexus 7)|up.browser|[1-4][0-9]{2}x[1-4][0-9]{2})\\b", Pattern.CASE_INSENSITIVE);
-
     /** HTTP请求与响应 */
     private static ThreadLocal<HttpServletRequest> request = new ThreadLocal<>();
     private static ThreadLocal<HttpServletResponse> response = new ThreadLocal<>();
-    
+
     /** 用于非用户访问请求：程序内部反射调用controller方法 */
     private static ThreadLocal<Map<String, String[]>> custparams = new ThreadLocal<Map<String, String[]>>() {
         public @Override Map<String, String[]> initialValue() {
@@ -53,8 +50,9 @@ public final class WebContext {
      * @return
      */
     public static String getParameter(String name) {
-        if (null != getRequest()) {
-            return getRequest().getParameter(name);
+        HttpServletRequest request = getRequest();
+        if (null != request) {
+            return request.getParameter(name);
         } else {
             String[] values = custparams.get().get(name); // custparams.get().remove(name)
             return (values == null || values.length == 0) ? null : values[0];
@@ -82,8 +80,9 @@ public final class WebContext {
      * @return
      */
     public static String[] getParameterValues(String name) {
-        if (null != getRequest()) {
-            return getRequest().getParameterValues(name);
+        HttpServletRequest request = getRequest();
+        if (null != request) {
+            return request.getParameterValues(name);
         } else {
             return custparams.get().get(name);
         }
@@ -101,6 +100,8 @@ public final class WebContext {
      * 获取客户端设备类型
      * @return
      */
+    private static final Pattern PATTERN_MOBILE = Pattern.compile("\\b(ip(hone|od)|android|opera m(ob|in)i|windows (phone|ce)|blackberry|s(ymbian|eries60|amsung)|p(laybook|alm|rofile/midp|laystation portable)|nokia|fennec|htc[-_]|mobile|up.browser|[1-4][0-9]{2}x[1-4][0-9]{2})\\b", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_IPAD = Pattern.compile("\\b(ipad|tablet|(Nexus 7)|up.browser|[1-4][0-9]{2}x[1-4][0-9]{2})\\b", Pattern.CASE_INSENSITIVE);
     public static String getClientDevice() {
         /*Device device = new LiteDeviceResolver().resolveDevice(getRequest());
         String type = null;
@@ -144,8 +145,8 @@ public final class WebContext {
 
         public @Override void init(FilterConfig cfg) throws ServletException {}
 
-        public @Override void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) 
-                                                             throws IOException, ServletException { 
+        public @Override void doFilter(ServletRequest req, ServletResponse resp, 
+                                       FilterChain chain) throws IOException, ServletException { 
             try {
                 WebContext.setRequest((HttpServletRequest) req);
                 WebContext.setResponse((HttpServletResponse) resp);

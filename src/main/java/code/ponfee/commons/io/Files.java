@@ -5,23 +5,31 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 import org.apache.commons.io.output.StringBuilderWriter;
 
 import code.ponfee.commons.util.ObjectUtils;
 
+/**
+ * 文件工具类
+ * @author Ponfee
+ */
 public final class Files {
     private Files() {}
 
-    private static final String[] FILE_UNITS = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-    private static final byte[] WITH_BOM = { (byte) 0xEF, (byte) 0XBB, (byte) 0XBF };
     public static final int EOF = -1;
+    public static final String SEPARATOR = "/";
+    public static final int BUFF_SIZE = 4096;
     public static final String LINE_SEPARATOR;
     static {
         /*String separator = (String) AccessController.doPrivileged(new GetPropertyAction("line.separator"));
@@ -38,6 +46,7 @@ public final class Files {
      * 文件大小可读化（attach unit）：B、KB、MB
      * @param size 文件字节大小 
      */
+    private static final String[] FILE_UNITS = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
     public static String human(long size) {
         if (size <= 0) return "0";
 
@@ -140,9 +149,39 @@ public final class Files {
     }
 
     /**
+     * 读取文件全部行数据
+     * @param input
+     * @return
+     */
+    public static List<String> readLines(InputStream input) {
+        return readLines(input, null);
+    }
+
+    /**
+     * 读取文件全部行数据
+     * @param input
+     * @param charset
+     * @return
+     */
+    public static List<String> readLines(InputStream input, String charset) {
+        List<String> list = new ArrayList<>();
+        try (Scanner scanner = (charset == null) 
+            ? new Scanner(input) 
+            : new Scanner(input, charset)
+        ) {
+            while (scanner.hasNextLine()) {
+                list.add(scanner.nextLine());
+            }
+        }
+        return list;
+    }
+
+    // -------------------------------------windows file bom head-------------------------------------
+    /**
      * add file bom head
      * @param filepath
      */
+    private static final byte[] WITH_BOM = { (byte) 0xEF, (byte) 0XBB, (byte) 0XBF };
     public static void addBOM(String filepath) {
         addBOM(new File(filepath));
     }

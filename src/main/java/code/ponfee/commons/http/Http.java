@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,9 +54,9 @@ public final class Http {
     private final String url; // url
     private final HttpMethod method; // 请求方法
 
-    private final Map<String, String> headers = new HashMap<>();       // http头
-    private final Map<String, Object> params = Collections.emptyMap(); // http参数
-    private final List<MimePart> parts = new ArrayList<>();            // 上传文件
+    private final Map<String, String> headers = new HashMap<>();   // http头
+    private final Map<String, Object> params  = new HashMap<>();   // http参数
+    private final List<MimePart> parts        = new ArrayList<>(); // 上传文件
 
     private String data; // 请求data
     private int connectTimeout = 1000 * 5; // 连接超时时间
@@ -370,7 +369,7 @@ public final class Http {
         }
 
         for (MimePart part : parts) {
-            request.part(part.name, part.filename, null, part.stream);
+            request.part(part.name, part.fileName, null, part.stream);
         }
 
         return request;
@@ -396,10 +395,10 @@ public final class Http {
      */
     private static final class MimePart {
         private final String name;        // 表单域字段名
-        private final String filename;    // 文件名
+        private final String fileName;    // 文件名
         private final InputStream stream; // 文件流
 
-        MimePart(String name, String filename, Object mime) {
+        MimePart(String name, String fileName, Object mime) {
             if (mime instanceof byte[]) {
                 this.stream = new ByteArrayInputStream((byte[]) mime);
             } else if (mime instanceof Byte[]) {
@@ -414,10 +413,10 @@ public final class Http {
             } else if (mime instanceof InputStream) {
                 this.stream = (InputStream) mime;
             } else {
-                throw new IllegalArgumentException("mime must be a file data.");
+                throw new IllegalArgumentException("mime allow file path or file or byte array or input stream.");
             }
             this.name = name;
-            this.filename = filename;
+            this.fileName = fileName;
         }
     }
 
@@ -427,8 +426,18 @@ public final class Http {
         System.out.println(Bytes.hexDump(Http.get("http://www.stockstar.com").download()));
         //Http.get("http://www.baidu.com").download("d:/baidu.html");
         //System.out.println(Http.get("http://localhost:8081/audit/getImg").data(ImmutableMap.of("imgPath", "imgPath")).request());
-        //System.out.println(Http.get("http://localhost:8081/audit/uploadFile").part("file", "abc.png", "d:/test/2.png").request());
         //String[] params = new String[]{"{\"analyze_type\":\"mine_all_cust\",\"date_type\":4,\"class_name\":\"\"}", "{\"analyze_type\":\"mine_all_cust\",\"date_type\":4,\"class_name\":\"衬衫\"}"};
         //Http.post("http://10.118.58.156:8080/market/custgroup/kanban/count/recommend").data(ImmutableMap.of("conditions[]", params)).request();
+        @SuppressWarnings("unchecked") 
+        Map<String, Object> resp = Http.post("http://10.118.58.74:8080/uploaded/file")
+                                       .addParam("param1", "test1213")
+                                       .addPart("uploadFile", "abc.pdf", new File("d:/test/abc.pdf"))
+                                       .addPart("uploadFile", "word.pdf", new File("d:/test/word.pdf"))
+                                       .contentType("multipart/form-data", "UTF-8") // <input type="file" name="upload" />
+                                       //.contentType("application/json", "UTF-8") // @RequestBody
+                                       //.contentType("application/x-www-form-urlencoded", "UTF-8") // form data
+                                       .accept("application/json") // @ResponseBody
+                                       .request(Map.class);
+        System.out.println(resp);
     }
 }

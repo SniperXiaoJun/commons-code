@@ -14,8 +14,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * An implementation of the Password-Based Key Derivation Function as specified in RFC 2898.
+ * 参考自网络
+ *  
  * @author Will Glozer
- * 参考自网络 fupf
+ * @author Ponfee
  */
 public class PBKDF2 {
     /**

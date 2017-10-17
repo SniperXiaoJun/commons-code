@@ -57,25 +57,27 @@ import java.security.SecureRandom;
 * each increment is twice as much work. The default log_rounds is
 * 10, and the valid range is 4 to 30.
 *
- * <pre>
- *  // Hash a password for the first time
- *  String hashed = BCrypt.hashpw(password, BCrypt.gensalt());
- *  
- *  // gensalt's log_rounds parameter determines the complexity
- *  // the work factor is pow(2,log_rounds), and the default is 10
- *  String hashed = BCrypt.hashpw(password, BCrypt.gensalt(12));
- *  
- *  // Check that an unencrypted password matches one that has
- *  // previously been hashed
- *  if (BCrypt.checkpw(candidate, hashed))
- *      System.out.println("It matches");
- *  else
- *      System.out.println("It does not match");
- * </pre>
-* @author Damien Miller
-* @version 0.4
+* <pre>
+*  // Hash a password for the first time
+*  String hashed = BCrypt.hashpw(password, BCrypt.gensalt());
+*  
+*  // gensalt's log_rounds parameter determines the complexity
+*  // the work factor is pow(2,log_rounds), and the default is 10
+*  String hashed = BCrypt.hashpw(password, BCrypt.gensalt(12));
+*  
+*  // Check that an unencrypted password matches one that has
+*  // previously been hashed
+*  if (BCrypt.checkpw(candidate, hashed))
+*      System.out.println("It matches");
+*  else
+*      System.out.println("It does not match");
+* </pre>
 * 
-* 参考自网络 fupf
+* 参考自网络
+* 
+* @author Damien Miller
+* @author Ponfee
+* @version 0.4
 */
 public final class BCrypt {
     // BCrypt parameters

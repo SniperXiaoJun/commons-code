@@ -104,7 +104,8 @@ import javax.net.ssl.X509TrustManager;
  * 
  * 更改自github开源项目：https://github.com/kevinsawicki/http-request
  * 
- * @author fupf
+ * @author Kevin Sawicki
+ * @author Ponfee
  */
 public class HttpRequest {
 
@@ -677,7 +678,7 @@ public class HttpRequest {
          */
         protected abstract void done() throws IOException;
 
-        public V call() throws HttpRequestException {
+        public @Override final V call() throws HttpRequestException {
             boolean thrown = false;
             try {
                 return run();
@@ -691,7 +692,9 @@ public class HttpRequest {
                 try {
                     done();
                 } catch (IOException e) {
-                    if (!thrown) throw new HttpRequestException(e);
+                    if (!thrown) {
+                        throw new HttpRequestException(e);
+                    }
                 }
             }
         }
@@ -730,8 +733,8 @@ public class HttpRequest {
             if (ignoreCloseExceptions) {
                 try {
                     closeable.close();
-                } catch (IOException e) {
-                    // Ignored
+                } catch (IOException ignored) {
+                    ignored.printStackTrace(); // ignored
                 }
             } else {
                 closeable.close();
@@ -2601,14 +2604,22 @@ public class HttpRequest {
      */
     protected HttpRequest closeOutput() throws IOException {
         progress(null);
-        if (output == null) return this;
-        if (multipart) output.write(CRLF + "--" + BOUNDARY + "--" + CRLF);
-        if (ignoreCloseExceptions) try {
-            output.close();
-        } catch (IOException ignored) {
-            // Ignored
+
+        if (output == null) {
+            return this;
         }
-        else output.close();
+        if (multipart) {
+            output.write(CRLF + "--" + BOUNDARY + "--" + CRLF);
+        }
+        if (ignoreCloseExceptions) {
+            try {
+                output.close();
+            } catch (IOException ignored) {
+                ignored.printStackTrace(); // ignored
+            }
+        } else {
+            output.close();
+        }
         output = null;
         return this;
     }
