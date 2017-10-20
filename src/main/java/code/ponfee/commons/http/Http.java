@@ -54,9 +54,9 @@ public final class Http {
     private final String url; // url
     private final HttpMethod method; // 请求方法
 
-    private final Map<String, String> headers = new HashMap<>();   // http头
-    private final Map<String, Object> params  = new HashMap<>();   // http参数
-    private final List<MimePart> parts        = new ArrayList<>(); // 上传文件
+    private final Map<String, String> headers = new HashMap<>();   // http请求头
+    private final Map<String, Object> params  = new HashMap<>();   // http请求参数
+    private final List<MimePart> parts        = new ArrayList<>(); // http文件上传
 
     private String data; // 请求data
     private int connectTimeout = 1000 * 5; // 连接超时时间
@@ -140,19 +140,6 @@ public final class Http {
         return this;
     }
 
-    // ----------------------------part--------------------------
-    /**
-     * 文件上传
-     * @param name
-     * @param filename
-     * @param mime
-     * @return
-     */
-    public Http addPart(String name, String filename, Object mime) {
-        this.parts.add(new MimePart(name, filename, mime));
-        return this;
-    }
-
     // ----------------------------data--------------------------
     /**
      * 发送到服务器的数据
@@ -181,6 +168,19 @@ public final class Http {
      */
     public Http data(String data) {
         this.data = data;
+        return this;
+    }
+
+    // ----------------------------part--------------------------
+    /**
+     * 文件上传
+     * @param name
+     * @param filename
+     * @param mime
+     * @return
+     */
+    public Http addPart(String name, String filename, Object mime) {
+        this.parts.add(new MimePart(name, filename, mime));
         return this;
     }
 
@@ -348,20 +348,12 @@ public final class Http {
                 throw new UnsupportedOperationException("unsupported http method " + method.name());
         }
 
-        request.trustAllCerts().trustAllHosts();
-        request.connectTimeout(connectTimeout).readTimeout(readTimeout);
-        request.headers(headers).acceptGzipEncoding().decompress(true);
-
         if (!StringUtils.isEmpty(contentType)) {
             request.contentType(contentType, contentCharset);
         }
 
         if (!StringUtils.isEmpty(accept)) {
             request.accept(accept);
-        }
-
-        if (this.sslSocketFactory != null) {
-            request.setSSLSocketFactory(this.sslSocketFactory);
         }
 
         if (!StringUtils.isEmpty(data)) {
@@ -372,10 +364,18 @@ public final class Http {
             request.part(part.name, part.fileName, null, part.stream);
         }
 
+        if (this.sslSocketFactory != null) {
+            request.setSSLSocketFactory(this.sslSocketFactory);
+        } else {
+            request.trustAllCerts();
+        }
+
+        request.connectTimeout(connectTimeout).readTimeout(readTimeout)
+               .trustAllHosts().headers(headers).acceptGzipEncoding().decompress(true);
         return request;
     }
 
-    private void disconnect(HttpRequest request) {
+    private static void disconnect(HttpRequest request) {
         if (request != null) try {
             request.disconnect();
         } catch (Exception ignored) {
@@ -413,7 +413,7 @@ public final class Http {
             } else if (mime instanceof InputStream) {
                 this.stream = (InputStream) mime;
             } else {
-                throw new IllegalArgumentException("mime allow file path or file or byte array or input stream.");
+                throw new IllegalArgumentException("mime must be file path or file or byte array or input stream.");
             }
             this.name = name;
             this.fileName = fileName;
@@ -437,6 +437,7 @@ public final class Http {
                                        //.contentType("application/json", "UTF-8") // @RequestBody
                                        //.contentType("application/x-www-form-urlencoded", "UTF-8") // form data
                                        .accept("application/json") // @ResponseBody
+                                       //.setSSLSocketFactory(factory) // client cert
                                        .request(Map.class);
         System.out.println(resp);
     }

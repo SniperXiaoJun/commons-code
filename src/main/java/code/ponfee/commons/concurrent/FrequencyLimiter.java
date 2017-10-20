@@ -1,4 +1,4 @@
-package code.ponfee.commons.log;
+package code.ponfee.commons.concurrent;
 
 import java.util.Date;
 
@@ -14,6 +14,14 @@ public interface FrequencyLimiter {
      * @return
      */
     boolean checkAndTrace(String key);
+
+    /**
+     * 校验并追踪
+     * @param key
+     * @param limit
+     * @return
+     */
+    boolean checkAndTrace(String key, long limit);
 
     /**
      * 按区间统计

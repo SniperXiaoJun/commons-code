@@ -154,7 +154,7 @@ public class HttpParams {
      * @return
      */
     public static String buildForm(String url, Map<String, String> params) {
-        StringBuilder form = new StringBuilder();
+        StringBuilder form = new StringBuilder(128);
         String formName = ObjectUtils.uuid22();
         form.append("<form action=\"").append(url).append("\" name=\"")
             .append(formName).append("\" method=\"POST\">");
@@ -202,7 +202,7 @@ public class HttpParams {
                     queryString[(ox++)] = 32;
                     break;
                 case '%':
-                    queryString[(ox++)] = (byte) ((convertHexDigit(queryString[(ix++)]) << 4) + convertHexDigit(queryString[(ix++)]));
+                    queryString[(ox++)] = (byte) ((decodeHex(queryString[(ix++)]) << 4) + decodeHex(queryString[(ix++)]));
                     break;
                 default:
                     queryString[(ox++)] = c;
@@ -230,7 +230,7 @@ public class HttpParams {
         map.put(name, newValues);
     }
 
-    private static byte convertHexDigit(byte b) {
+    private static byte decodeHex(byte b) {
         if ((b >= 48) && (b <= 57)) return (byte) (b - 48);
         if ((b >= 97) && (b <= 102)) return (byte) (b - 97 + 10);
         if ((b >= 65) && (b <= 70)) return (byte) (b - 65 + 10);

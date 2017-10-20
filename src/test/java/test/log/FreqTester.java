@@ -3,8 +3,8 @@ package test.log;
 import org.junit.Before;
 import org.junit.Test;
 
+import code.ponfee.commons.concurrent.RedisFrequencyLimiter;
 import code.ponfee.commons.jedis.JedisClient;
-import code.ponfee.commons.log.RedisFrequencyLimiter;
 import code.ponfee.commons.serial.JdkSerializer;
 import redis.clients.jedis.JedisPoolConfig;
 

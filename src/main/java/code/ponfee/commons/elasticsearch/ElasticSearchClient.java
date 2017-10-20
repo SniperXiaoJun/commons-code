@@ -66,6 +66,7 @@ import code.ponfee.commons.util.ObjectUtils;
 public class ElasticSearchClient implements DisposableBean {
 
     static final TimeValue SCROLL_TIMEOUT = TimeValue.timeValueSeconds(120); // 2 minutes
+    private static final int SCROLL_SIZE = 500; // 默认滚动数据量
     private static Logger logger = LoggerFactory.getLogger(ElasticSearchClient.class);
     private final TransportClient client; // ES集群客户端
 
@@ -495,14 +496,9 @@ public class ElasticSearchClient implements DisposableBean {
      * @param id     document id
      * @return return the documens of specific id
      */
-    @SuppressWarnings("unchecked")
     public <T> T getDoc(String index, String type, Class<T> clazz, String id) {
         GetResponse response = client.prepareGet(index, type, id).get();
-        if (Map.class.isAssignableFrom(clazz)) {
-            return (T) response.getSource();
-        } else {
-            return ObjectUtils.map2bean(response.getSource(), clazz);
-        }
+        return convertMap(response.getSource(), clazz);
     }
 
     /**
@@ -513,21 +509,16 @@ public class ElasticSearchClient implements DisposableBean {
      * @param ids
      * @return return the documents of specific id array
      */
-    @SuppressWarnings("unchecked")
     public <T> List<T> getDocs(String index, String type, Class<T> clazz, String... ids) {
         MultiGetResponse multiResp = client.prepareMultiGet().add(index, type, ids).get();
-        List<T> lists = new ArrayList<>();
+        List<T> result = new ArrayList<>();
         for (MultiGetItemResponse itemResp : multiResp) {
             GetResponse response = itemResp.getResponse();
-            if (!response.isExists()) continue;
-
-            if (Map.class.isAssignableFrom(clazz)) {
-                lists.add((T) response.getSource());
-            } else {
-                lists.add(ObjectUtils.map2bean(response.getSource(), clazz));
+            if (response.isExists()) {
+                result.add(convertMap(response.getSource(), clazz));
             }
         }
-        return lists;
+        return result;
     }
 
     // ------------------------------------------------分页搜索---------------------------------------
@@ -644,6 +635,41 @@ public class ElasticSearchClient implements DisposableBean {
         this.scrollingSearch(scrollResp, scrollSize, callback);
     }
 
+    // ---------------------------------------------查询数据-------------------------------------------
+    /**
+     * 查询数据
+     * @param query
+     * @param clazz
+     * @return
+     */
+    public <T> List<T> selectSearch(ESQueryBuilder query, Class<T> clazz) {
+        List<T> result = new ArrayList<>(SCROLL_SIZE);
+        SearchResponse scrollResp = query.scrolling(client, SCROLL_SIZE);
+        this.scrollingSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecord, totalPage, pageNo) -> {
+            for (SearchHit hit : searchHits.getHits()) {
+                result.add(convertMap(hit.getSource(), clazz));
+            }
+        });
+        return result;
+    }
+
+    /**
+     * 查询数据
+     * @param search
+     * @param clazz
+     * @return
+     */
+    public <T> List<T> selectSearch(SearchRequestBuilder search, Class<T> clazz) {
+        List<T> result = new ArrayList<>(SCROLL_SIZE);
+        SearchResponse scrollResp = search.setSize(SCROLL_SIZE).setScroll(SCROLL_TIMEOUT).get();
+        this.scrollingSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecord, totalPage, pageNo) -> {
+            for (SearchHit hit : searchHits.getHits()) {
+                result.add(convertMap(hit.getSource(), clazz));
+            }
+        });
+        return result;
+    }
+
     // ---------------------------------------------聚合汇总-------------------------------------------
     public Aggregations aggregationSearch(ESQueryBuilder query) {
         return query.aggregation(client);
@@ -710,17 +736,12 @@ public class ElasticSearchClient implements DisposableBean {
      * @param clazz
      * @return
      */
-    @SuppressWarnings("unchecked")
     private <T> Page<T> buildPage(SearchResponse searchResp, int from, int pageNo, int pageSize, Class<T> clazz) {
         SearchHits hits = searchResp.getHits();
         long total = hits.getTotalHits();
         List<T> result = new ArrayList<>();
         for (SearchHit hit : hits) {
-            if (Map.class.isAssignableFrom(clazz)) {
-                result.add((T) hit.getSource());
-            } else {
-                result.add(ObjectUtils.map2bean(hit.getSource(), clazz));
-            }
+            result.add(convertMap(hit.getSource(), clazz));
         }
         Page<T> page = new Page<>(result);
         page.setTotal(total);
@@ -759,6 +780,15 @@ public class ElasticSearchClient implements DisposableBean {
             }
         } finally {
             client.prepareClearScroll().addScrollId(scrollResp.getScrollId()).get(); // 清除
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T convertMap(Map<String, Object> data, Class<T> clazz) {
+        if (clazz.isAssignableFrom(clazz)) {
+            return (T) data;
+        } else {
+            return ObjectUtils.map2bean(data, clazz);
         }
     }
 

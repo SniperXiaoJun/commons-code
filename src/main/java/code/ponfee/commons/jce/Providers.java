@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * provider getter
+ * security provider
  * @author fupf
  */
 @SuppressWarnings("restriction")
@@ -18,7 +18,7 @@ public interface Providers {
     static Provider get(Class<? extends Provider> type) {
         Provider provider = ProvidersHolder.HOLDER.get(type);
         if (provider != null) {
-            return (provider instanceof NullProvider) ? null : provider;
+            return NullProvider.INSTANCE.equals(provider) ? null : provider;
         }
 
         try {

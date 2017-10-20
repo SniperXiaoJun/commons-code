@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  *      `@Constraint(field = "type", series = { 1, 2 })
  *  })
  *  
- *  或
+ *  or
  *  
  *  `@Constraint(notBlank = true, maxLen = 64)
  *  private String name;

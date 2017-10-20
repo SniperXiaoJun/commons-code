@@ -3,6 +3,7 @@ package code.ponfee.commons.io;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,11 +14,18 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 import org.apache.commons.io.output.StringBuilderWriter;
+import org.apache.commons.lang3.ArrayUtils;
 
+import com.google.common.collect.ImmutableMap;
+
+import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
@@ -148,6 +156,14 @@ public final class Files {
         }
     }
 
+    public static List<String> readLines(File file) throws FileNotFoundException {
+        return readLines(new FileInputStream(file), null);
+    }
+
+    public static List<String> readLines(File file, String charset) throws FileNotFoundException {
+        return readLines(new FileInputStream(file), charset);
+    }
+
     /**
      * 读取文件全部行数据
      * @param input
@@ -166,8 +182,8 @@ public final class Files {
     public static List<String> readLines(InputStream input, String charset) {
         List<String> list = new ArrayList<>();
         try (Scanner scanner = (charset == null) 
-            ? new Scanner(input) 
-            : new Scanner(input, charset)
+                               ? new Scanner(input) 
+                               : new Scanner(input, charset)
         ) {
             while (scanner.hasNextLine()) {
                 list.add(scanner.nextLine());
@@ -268,4 +284,83 @@ public final class Files {
         }
     }
 
+    // ------------------------file type---------------------------------
+    private static final int SUB_PREFIX = 64;
+    public static final Map<String, String> FILE_TYPE_MAGIC;
+    static {
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        builder.put("jpg", "FFD8FF"); // JPEG (jpg)
+        builder.put("png", "89504E47"); // PNG (png)
+        builder.put("gif", "47494638"); // GIF (gif)
+        builder.put("tif", "49492A00"); // TIFF (tif)
+        builder.put("bmp", "424D"); // Windows Bitmap (bmp)
+        builder.put("dwg", "41433130"); // CAD (dwg)
+        builder.put("html","68746D6C3E"); // HTML (html)
+        builder.put("rtf", "7B5C727466"); // Rich Text Format (rtf)
+        builder.put("xml", "3C3F786D6C");
+        builder.put("zip", "504B0304");
+        builder.put("rar", "52617221");
+        builder.put("psd", "38425053"); // Photoshop (psd)
+        builder.put("eml", "44656C69766572792D646174653A"); // Email [thorough only] (eml)
+        builder.put("dbx", "CFAD12FEC5FD746F"); // Outlook Express (dbx)
+        builder.put("pst", "2142444E"); // Outlook (pst)
+        builder.put("xls", "D0CF11E0"); // MS Word
+        builder.put("doc", "D0CF11E0"); // MS Excel 注意：word 和 excel的文件头一样
+        builder.put("mdb", "5374616E64617264204A"); // MS Access (mdb)
+        builder.put("wpd", "FF575043"); // WordPerfect (wpd)
+        builder.put("eps", "252150532D41646F6265");
+        builder.put("ps",  "252150532D41646F6265");
+        builder.put("pdf", "255044462D312E"); // Adobe Acrobat (pdf)
+        builder.put("qdf", "AC9EBD8F"); // Quicken (qdf)
+        builder.put("pwl", "E3828596"); // Windows Password (pwl)
+        builder.put("wav", "57415645"); // Wave (wav)
+        builder.put("avi", "41564920");
+        builder.put("ram", "2E7261FD"); // Real Audio (ram)
+        builder.put("rm", "2E524D46"); // Real Media (rm)
+        builder.put("mpg", "000001BA");
+        builder.put("mov", "6D6F6F76"); // Quicktime (mov)
+        builder.put("asf", "3026B2758E66CF11"); // Windows Media (asf)
+        builder.put("mid", "4D546864"); // MIDI (mid)
+        FILE_TYPE_MAGIC = builder.build();
+    }
+
+    /**
+     * 猜测文件类型
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public static String guessFileType(File file) throws IOException {
+        try (InputStream input = new FileInputStream(file)) {
+            int count = input.available();
+            count = count < SUB_PREFIX ? count : SUB_PREFIX;
+            byte[] array = new byte[count];
+            input.read(array);
+            return guessFileType(array);
+        }
+    }
+
+    public static String guessFileType(byte[] array) {
+        if (array.length > SUB_PREFIX) {
+            array = ArrayUtils.subarray(array, 0, SUB_PREFIX);
+        }
+
+        String hex = Bytes.hexEncode(array).toUpperCase();
+        for (Iterator<Entry<String, String>> ite = FILE_TYPE_MAGIC.entrySet().iterator(); ite.hasNext();) {
+            Entry<String, String> entry = ite.next();
+            if (hex.startsWith(entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+
+        try {
+            return net.sf.jmimemagic.Magic.getMagicMatch(array).getExtension();
+        } catch (Exception e) {
+            return null; // contentType = "text/plain";
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        System.out.println(guessFileType(new File("d:/代码走查问题表.xlsx")));
+    }
 }

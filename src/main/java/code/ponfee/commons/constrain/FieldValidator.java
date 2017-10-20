@@ -169,10 +169,10 @@ public class FieldValidator {
     }
 
     private boolean isEmptiable(Class<?> type) {
-        return CharSequence.class.isAssignableFrom(type) || 
-               Collection.class.isAssignableFrom(type) || 
-               type.isArray() || Map.class.isAssignableFrom(type) || 
-               Dictionary.class.isAssignableFrom(type);
+        return CharSequence.class.isAssignableFrom(type) 
+               || Collection.class.isAssignableFrom(type) 
+               || type.isArray() || Map.class.isAssignableFrom(type) 
+               || Dictionary.class.isAssignableFrom(type);
     }
 
     /**

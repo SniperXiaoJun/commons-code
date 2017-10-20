@@ -147,20 +147,42 @@ public class SimpleXmlHandler {
      * 通过Schema验证xml文件
      */
     public static void validateByXsd(InputStream xsd, InputStream xml) {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setValidating(true);
-        factory.setNamespaceAware(true);
-        XMLErrorHandler errorHandler = new XMLErrorHandler();
         try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setValidating(true);
+            factory.setNamespaceAware(true);
             SAXParser parser = factory.newSAXParser();
             parser.setProperty(JAXPConstants.JAXP_SCHEMA_LANGUAGE, JAXPConstants.W3C_XML_SCHEMA);
             //parser.setProperty(JAXPConstants.JAXP_SCHEMA_SOURCE, "file:" + xsdPath);
             parser.setProperty(JAXPConstants.JAXP_SCHEMA_SOURCE, xsd);
-            if (!parser.isValidating()) throw new IllegalStateException("invalid xsd defination");
+            if (!parser.isValidating()) {
+                throw new IllegalStateException("invalid xsd defination");
+            }
 
+            XMLErrorHandler errorHandler = new XMLErrorHandler();
             SAXValidator validator = new SAXValidator(parser.getXMLReader());
             validator.setErrorHandler(errorHandler);
             validator.validate(new SAXReader().read(xml)); // 校验
+
+            if (errorHandler.getErrors().hasContent()) { // 校验失败
+                // 校验失败则打印错误信息
+                StringBuilder errors = new StringBuilder(128);
+                Set<String> exists = new HashSet<>();
+                for (Object obj : errorHandler.getErrors().elements()) {
+                    Element e = (Element) obj;
+                    String position = e.attributeValue("line") + "#" + e.attributeValue("column");
+                    if (!exists.add(position)) {
+                        continue;
+                    }
+                    errors.append(position).append(":").append(e.getTextTrim()).append("\n");
+                }
+
+                if (errors.length() > 1000) {
+                    errors.setLength(997);
+                    errors.append("...");
+                }
+                throw new IllegalStateException(errors.toString());
+            }
         } catch (ParserConfigurationException | SAXException | DocumentException e) {
             throw new IllegalStateException(e);
         } finally {
@@ -175,25 +197,6 @@ public class SimpleXmlHandler {
                 e.printStackTrace();
             }
         }
-
-        // 如果没有错误信息，说明校验成功
-        if (!errorHandler.getErrors().hasContent()) return;
-
-        // 校验失败则打印错误信息
-        StringBuilder errors = new StringBuilder();
-        Set<String> exists = new HashSet<>();
-        for (Object obj : errorHandler.getErrors().elements()) {
-            Element e = (Element) obj;
-            String position = e.attributeValue("line") + "#" + e.attributeValue("column");
-            if (!exists.add(position)) continue;
-            errors.append(position).append(":").append(e.getTextTrim()).append("\n");
-        }
-
-        if (errors.length() > 3000) {
-            errors.setLength(2997);
-            errors.append("...");
-        }
-        throw new IllegalStateException(errors.toString());
     }
 
     public static void validateByXsd(byte[] xsd, byte[] xml) {

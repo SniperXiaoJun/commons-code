@@ -221,11 +221,11 @@ public final class Bytes {
     }
     // ----------------------------------------------base64 encode/decode-------------------------------------- //
 
-    public static char[] bytes2chars(byte[] bytes) {
-        return bytes2chars(bytes, US_ASCII.name());
+    public static char[] toCharArray(byte[] bytes) {
+        return toCharArray(bytes, US_ASCII.name());
     }
 
-    public static char[] bytes2chars(byte[] bytes, String charset) {
+    public static char[] toCharArray(byte[] bytes, String charset) {
         //return new String(bytes, Charset.forName(charset)).toCharArray();
         ByteBuffer buff = ByteBuffer.allocate(bytes.length);
         buff.put(bytes);
@@ -233,11 +233,11 @@ public final class Bytes {
         return Charset.forName(charset).decode(buff).array();
     }
 
-    public static byte[] chars2bytes(char[] chars) {
-        return chars2bytes(chars, US_ASCII.name());
+    public static byte[] fromCharArray(char[] chars) {
+        return fromCharArray(chars, US_ASCII.name());
     }
 
-    public static byte[] chars2bytes(char[] chars, String charset) {
+    public static byte[] fromCharArray(char[] chars, String charset) {
         //return new String(chars).getBytes(Charset.forName(charset));
         CharBuffer cb = CharBuffer.allocate(chars.length);
         cb.put(chars);

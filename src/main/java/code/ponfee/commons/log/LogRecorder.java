@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
+import code.ponfee.commons.concurrent.FrequencyLimiter;
 import code.ponfee.commons.exception.Throwables;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.util.ObjectUtils;

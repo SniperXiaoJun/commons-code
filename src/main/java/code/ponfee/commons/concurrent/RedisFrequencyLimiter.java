@@ -1,4 +1,4 @@
-package code.ponfee.commons.log;
+package code.ponfee.commons.concurrent;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -51,28 +51,27 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
         }, autoClearInSeconds, autoClearInSeconds, TimeUnit.SECONDS);
 
         // 批量记录
-        this.consumer = new AsyncBatchConsumer<>((list, isEnd) -> {
+        this.consumer = new AsyncBatchConsumer<>((traces, isEnd) -> {
             return () -> {
-                Map<String, Map<String, Double>> map = new HashMap<>();
+                Map<String, Map<String, Double>> groups = new HashMap<>();
                 Map<String, Double> batch;
-                for (Trace trace : list) {
-                    batch = map.get(trace.key);
+                for (Trace trace : traces) {
+                    batch = groups.get(trace.key);
                     if (batch == null) {
                         batch = new HashMap<>();
-                        map.put(trace.key, batch);
+                        groups.put(trace.key, batch);
                     }
                     // ObjectUtils.uuid22()
                     batch.put(Long.toString(IdWorker.LOCAL_WORKER.nextId(), Character.MAX_RADIX), 
                               trace.timeMillis);
                 }
-                for (Entry<String, Map<String, Double>> entry : map.entrySet()) {
+                for (Entry<String, Map<String, Double>> entry : groups.entrySet()) {
                     // TRACE_KEY_PREFIX + trace.key
                     jedisClient.zsetOps().zadd(TRACE_KEY_PREFIX + entry.getKey(), 
                                                entry.getValue(), EXPIRE_SECONDS);
                 }
-                map.clear();
-                map = null;
-                list.clear();
+                groups.clear();
+                traces.clear();
             };
         }, 100, 2000); // 100毫秒间隔，2000条∕次
     }
@@ -83,7 +82,10 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
      * @return 是否频繁访问：true是；false否；
      */
     public @Override boolean checkAndTrace(String key) {
-        long limitQtyInMinutes = getLimitsInMinute(key);
+        return checkAndTrace(key, getLimitsInMinute(key));
+    }
+
+    public @Override boolean checkAndTrace(String key, long limitQtyInMinutes) {
         if (limitQtyInMinutes < 0) {
             return true; // 小于0表示无限制
         } else if (limitQtyInMinutes == 0) {

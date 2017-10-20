@@ -30,7 +30,7 @@ public class ZSetOperations extends JedisOperations {
      * @return 被成功添加的新成员的数量，不包括那些被更新的、已经存在的成员
      */
     public long zadd(final String key, final double score,
-        final String member, final Integer seconds) {
+                     final String member, final Integer seconds) {
         return hook(shardedJedis -> {
             long rtn = shardedJedis.zadd(key, score, member);
             expireForce(shardedJedis, key, seconds);
@@ -49,7 +49,8 @@ public class ZSetOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public long zadd(final String key, final Map<String, Double> scoreMembers, final Integer seconds) {
+    public long zadd(final String key, final Map<String, Double> scoreMembers, 
+                     final Integer seconds) {
         return hook(shardedJedis -> {
             long rtn = shardedJedis.zadd(key, scoreMembers);
             expireForce(shardedJedis, key, seconds);
@@ -68,7 +69,8 @@ public class ZSetOperations extends JedisOperations {
      * @param seconds       expire in spec seconds
      * @return
      */
-    public long zadd(final byte[] key, final Map<byte[], Double> scoreMembers, final Integer seconds) {
+    public long zadd(final byte[] key, final Map<byte[], Double> scoreMembers, 
+                     final Integer seconds) {
         return hook(shardedJedis -> {
             long rtn = shardedJedis.zadd(key, scoreMembers);
             expireForce(shardedJedis, key, seconds);
@@ -91,7 +93,8 @@ public class ZSetOperations extends JedisOperations {
      * @param seconds
      * @return member 成员的 score 值，以字符串形式表示。
      */
-    public Double zscore(final String key, final String member, final Integer seconds) {
+    public Double zscore(final String key, final String member, 
+                         final Integer seconds) {
         return hook(shardedJedis -> {
             Double score = shardedJedis.zscore(key, member);
             expire(shardedJedis, key, seconds);
@@ -169,7 +172,8 @@ public class ZSetOperations extends JedisOperations {
         }, null, key, max, min, offset, count, seconds);
     }
 
-    public Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min, int offset, int count) {
+    public Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min, 
+                                                 int offset, int count) {
         return this.zrevrangeByScoreWithScores(key, max, min, offset, count, null);
     }
 
@@ -216,7 +220,8 @@ public class ZSetOperations extends JedisOperations {
         }, null, key, min, max, offset, count, seconds);
     }
 
-    public Set<Tuple> zrangeByScoreWithScores(String key, double min, double max, int offset, int count) {
+    public Set<Tuple> zrangeByScoreWithScores(String key, double min, double max, 
+                                              int offset, int count) {
         return this.zrangeByScoreWithScores(key, min, max, offset, count, null);
     }
 

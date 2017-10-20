@@ -188,7 +188,7 @@ public class SetOpertions extends JedisOperations {
      * @return 集合中的所有成员。
      */
     public <T extends Object> Set<T> smembers(final byte[] key, final Class<T> clazz,
-        final boolean isCompress, final Integer seconds) {
+                                              final boolean isCompress, final Integer seconds) {
         return hook(shardedJedis -> {
             Set<byte[]> datas = shardedJedis.smembers(key);
             Set<T> result = new HashSet<>();
@@ -205,11 +205,13 @@ public class SetOpertions extends JedisOperations {
         }, null, key, clazz, isCompress, seconds);
     }
 
-    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz, boolean isCompress) {
+    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz, 
+                                              boolean isCompress) {
         return this.smembers(key, clazz, isCompress, null);
     }
 
-    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz, Integer seconds) {
+    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz, 
+                                              Integer seconds) {
         return this.smembers(key, clazz, true, seconds);
     }
 
@@ -250,7 +252,8 @@ public class SetOpertions extends JedisOperations {
      * @param seconds
      * @return 只提供 key 参数时，返回一个元素；如果集合为空，返回 nil；如果提供了 count 参数，那么返回一个数组；如果集合为空，返回空数组。
      */
-    public List<String> srandmember(final String key, final int count, final Integer seconds) {
+    public List<String> srandmember(final String key, final int count, 
+                                    final Integer seconds) {
         return hook(shardedJedis -> {
             List<String> result = shardedJedis.srandmember(key, count);
             if (result != null && !result.isEmpty()) {
@@ -288,8 +291,8 @@ public class SetOpertions extends JedisOperations {
      * @return 只提供 key 参数时，返回一个元素；如果集合为空，返回 nil；如果提供了 count 参数，那么返回一个数组；如果集合为空，返回空数组。
      */
     @SuppressWarnings("unchecked")
-    public <T extends Object> List<T> srandmember(final byte[] key, final Class<T> clazz,
-        final boolean isCompress, final int count, final Integer seconds) {
+    public <T extends Object> List<T> srandmember(byte[] key, Class<T> clazz,
+                                                  boolean isCompress, int count, Integer seconds) {
         return hook(shardedJedis -> {
             List<byte[]> datas = shardedJedis.srandmember(key, count);
             List<T> result = new ArrayList<>();

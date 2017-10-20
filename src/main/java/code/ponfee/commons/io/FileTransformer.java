@@ -29,7 +29,7 @@ import info.monitorenter.cpdetector.io.UnicodeDetector;
  */
 public class FileTransformer {
 
-    private static final int FIX_LENGTH = 55;
+    private static final int FIX_LENGTH = 85;
 
     private String includeFileExtensions = "(?i)^(.+\\.)(" + StringUtils.join(new String[] { "java", "txt",
          "properties", "xml", "sql", "html", "htm", "jsp", "css", "js", "log", "bak", "ini" }, "|") + ")$";
@@ -95,16 +95,18 @@ public class FileTransformer {
             boolean isMatch = file.getName().matches(includeFileExtensions);
             if (StringUtils.isNotEmpty(encoding) && isMatch && (charset = guessEncoding(filepath)) != null
                 && !"void".equalsIgnoreCase(charset) && !encoding.equalsIgnoreCase(charset)) {
-                log.append("**转换").append("  ").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("  -->  ");
+                log.append("转换　[" + charset + "]").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("　-->　");
                 transform(file, dest, charset, encoding, searchList, replacementList);
+                log.append("[").append(encoding).append("]").append(dest.getAbsolutePath()).append("\n");
             } else if (!ObjectUtils.isEmpty(searchList) && isMatch) {
-                log.append("--复制").append("  ").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("  -->  ");
+                log.append("替换　").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("　-->　");
                 transform(file, dest, searchList, replacementList);
+                log.append(dest.getAbsolutePath()).append("\n");
             } else {
-                log.append("==复制").append("  ").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("  -->  ");
+                log.append("复制　").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("　-->　");
                 transform(file, dest);
+                log.append(dest.getAbsolutePath()).append("\n");
             }
-            log.append(dest.getAbsolutePath()).append("\n");
         }
     }
 
@@ -162,8 +164,8 @@ public class FileTransformer {
      * @param searchList  the Strings to search for, no-op if null
      * @param replacementList  the Strings to replace them with, no-op if null
      */
-    public static void transform(File source, File target, String fromCharset,
-        String toCharset, String[] searchList, String[] replacementList) {
+    public static void transform(File source, File target, String fromCharset, String toCharset, 
+                                 String[] searchList, String[] replacementList) {
         try (FileInputStream fis = new FileInputStream(source); 
              InputStreamReader isr = new InputStreamReader(fis, fromCharset); 
              BufferedReader in = new BufferedReader(isr);
@@ -228,6 +230,7 @@ public class FileTransformer {
      */
     private static ICodepageDetector buildDetector() {
         CodepageDetectorProxy detector = CodepageDetectorProxy.getInstance();
+
         // ParsingDetector可用于检查HTML、XML等文件或字符流的编码,构造方法中的参数用于
         // 指示是否显示探测过程的详细信息，为false不显示。
         detector.add(new ParsingDetector(false));
