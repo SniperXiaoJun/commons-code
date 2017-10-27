@@ -3,6 +3,11 @@ package code.ponfee.commons.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.BeanUtils;
 
 /**
  * 参考guthub开源的mybatis分页工具
@@ -296,6 +301,32 @@ public class Page<T> implements Serializable {
 
     public void setNavigateLastPage(int navigateLastPage) {
         this.navigateLastPage = navigateLastPage;
+    }
+
+    /**
+     * 处理
+     * @param action
+     */
+    public void process(Consumer<T> action) {
+        if (rows == null || rows.isEmpty() || action == null) {
+            return;
+        }
+        rows.stream().forEach(action);
+    }
+
+    /**
+     * 转换
+     * @param transer
+     * @return
+     */
+    public <E> Page<E> transform(Function<T, E> mapper) {
+        Page<E> page = new Page<>();
+        BeanUtils.copyProperties(this, page);
+        if (rows == null || rows.isEmpty() || mapper == null) {
+            return page;
+        }
+        page.setRows(rows.stream().map(mapper).collect(Collectors.toList()));
+        return page;
     }
 
     @Override

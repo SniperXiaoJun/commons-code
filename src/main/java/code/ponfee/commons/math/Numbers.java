@@ -22,22 +22,25 @@ public final class Numbers {
     private static final String[] CN_UPPER_MONETRAY_UNIT = { "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
                                                              "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
 
+    // -----------------------------------to primary number------------------------------
     public static int toInt(Object obj) {
         return toInt(obj, 0);
     }
 
-    /**
-     * convert to int
-     * @param obj
-     * @param defaultVal
-     * @return
-     */
     public static int toInt(Object obj, int defaultVal) {
         return ((Double) toDouble(obj, defaultVal)).intValue();
     }
 
+    public static long toLong(Object obj) {
+        return toLong(obj, 0L);
+    }
+
     public static long toLong(Object obj, long defaultVal) {
         return ((Double) toDouble(obj, defaultVal)).longValue();
+    }
+
+    public static float toFloat(Object obj) {
+        return toFloat(obj, 0.0F);
     }
 
     public static float toFloat(Object obj, float defaultVal) {
@@ -49,6 +52,58 @@ public final class Numbers {
     }
 
     public static double toDouble(Object obj, double defaultVal) {
+        if (obj == null) {
+            return defaultVal;
+        }
+
+        if (Number.class.isInstance(obj)) {
+            return ((Number) obj).doubleValue();
+        }
+
+        try {
+            return Double.parseDouble(obj.toString());
+        } catch (NumberFormatException ignored) {
+            return defaultVal;
+        }
+    }
+
+    // -----------------------------------to wrapper number------------------------------
+    public static Double toWrapDouble(Number value) {
+        return value == null ? null : value.doubleValue();
+    }
+
+    public static Integer toWrapInt(Object obj) {
+        return toWrapInt(obj, null);
+    }
+
+    public static Integer toWrapInt(Object obj, Integer defaultVal) {
+        Double value = toWrapDouble(obj, toWrapDouble(defaultVal));
+        return value == null ? null : value.intValue();
+    }
+
+    public static Long toWrapLong(Object obj) {
+        return toWrapLong(obj, null);
+    }
+
+    public static Long toWrapLong(Object obj, Long defaultVal) {
+        Double value = toWrapDouble(obj, toWrapDouble(defaultVal));
+        return value == null ? null : value.longValue();
+    }
+
+    public static Float toWrapFloat(Object obj) {
+        return toWrapFloat(obj, null);
+    }
+
+    public static Float toWrapFloat(Object obj, Float defaultVal) {
+        Double value = toWrapDouble(obj, toWrapDouble(defaultVal));
+        return value == null ? null : value.floatValue();
+    }
+
+    public static Double toWrapDouble(Object obj) {
+        return toWrapDouble(obj, null);
+    }
+
+    public static Double toWrapDouble(Object obj, Double defaultVal) {
         if (obj == null) {
             return defaultVal;
         }
@@ -88,7 +143,7 @@ public final class Numbers {
      */
     public static double lower(double value, int scale) {
         return new BigDecimal(value / Math.pow(10, scale))
-                     .setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+               .setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     /**

@@ -106,12 +106,21 @@ public class Dates {
     }
 
     /**
-     * 生成时间
+     * java（毫秒）时间戳
      * @param millis 毫秒
      * @return 日期
      */
-    public static Date toDate(long millis) {
+    public static Date millis(long millis) {
         return new DateTime(millis).toDate();
+    }
+
+    /**
+     * unix时间戳
+     * @param seconds 秒
+     * @return
+     */
+    public static Date seconds(long seconds) {
+        return new DateTime(seconds * 1000).toDate();
     }
 
     /**
@@ -427,7 +436,7 @@ public class Dates {
     }
 
     public static Date random() {
-        return random(toDate(0), now());
+        return random(millis(0), now());
     }
 
     public static void main(String[] args) {

@@ -163,8 +163,7 @@ public class HttpParams {
                 .append(StringUtils.defaultString(param.getValue())).append("\" />");
         }
 
-        form.append("<input type=\"submit\" style=\"display:none;\" />")
-            .append("</form>")
+        form.append("</form>")
             .append("<script>document.forms['").append(formName)
             .append("'].submit();</script>");
 

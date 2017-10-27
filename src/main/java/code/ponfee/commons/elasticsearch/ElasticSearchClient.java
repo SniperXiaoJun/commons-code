@@ -587,6 +587,7 @@ public class ElasticSearchClient implements DisposableBean {
         return buildPage(search.get(), from, pageNo, pageSize, clazz);
     }
 
+    // -----------------------------------------------查询前面top条数据-----------------------------------------------
     /**
      * 查询top rank
      * @param search
@@ -635,14 +636,14 @@ public class ElasticSearchClient implements DisposableBean {
         this.scrollingSearch(scrollResp, scrollSize, callback);
     }
 
-    // ---------------------------------------------查询数据-------------------------------------------
+    // ---------------------------------------------查询全部数据-------------------------------------------
     /**
-     * 查询数据
+     * 查询全部数据
      * @param query
      * @param clazz
      * @return
      */
-    public <T> List<T> selectSearch(ESQueryBuilder query, Class<T> clazz) {
+    public <T> List<T> fullSearch(ESQueryBuilder query, Class<T> clazz) {
         List<T> result = new ArrayList<>(SCROLL_SIZE);
         SearchResponse scrollResp = query.scrolling(client, SCROLL_SIZE);
         this.scrollingSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecord, totalPage, pageNo) -> {
@@ -654,12 +655,12 @@ public class ElasticSearchClient implements DisposableBean {
     }
 
     /**
-     * 查询数据
+     * 查询全部数据
      * @param search
      * @param clazz
      * @return
      */
-    public <T> List<T> selectSearch(SearchRequestBuilder search, Class<T> clazz) {
+    public <T> List<T> fullSearch(SearchRequestBuilder search, Class<T> clazz) {
         List<T> result = new ArrayList<>(SCROLL_SIZE);
         SearchResponse scrollResp = search.setSize(SCROLL_SIZE).setScroll(SCROLL_TIMEOUT).get();
         this.scrollingSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecord, totalPage, pageNo) -> {
@@ -739,7 +740,7 @@ public class ElasticSearchClient implements DisposableBean {
     private <T> Page<T> buildPage(SearchResponse searchResp, int from, int pageNo, int pageSize, Class<T> clazz) {
         SearchHits hits = searchResp.getHits();
         long total = hits.getTotalHits();
-        List<T> result = new ArrayList<>();
+        List<T> result = new ArrayList<>(pageSize);
         for (SearchHit hit : hits) {
             result.add(convertMap(hit.getSource(), clazz));
         }

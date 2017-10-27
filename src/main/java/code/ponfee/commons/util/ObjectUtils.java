@@ -27,6 +27,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.model.Page;
 import code.ponfee.commons.model.Result;
 import code.ponfee.commons.reflect.Fields;
@@ -203,8 +204,24 @@ public final class ObjectUtils {
 
                     // 原始或包装类型
                     if (value != null && ClassUtils.isPrimitiveOrWrapper(type)) {
-                        type = ClassUtils.primitiveToWrapper(type); // 转包装类型
-                        if (!type.isAssignableFrom(value.getClass())) {
+                        if (int.class == type) {
+                            value = Numbers.toInt(value);
+                        } else if (Integer.class == type) {
+                            value = Numbers.toWrapInt(value);
+                        } else if (long.class == type) {
+                            value = Numbers.toLong(value);
+                        } else if (Long.class == type) {
+                            value = Numbers.toWrapLong(value);
+                        } else if (float.class == type) {
+                            value = Numbers.toFloat(value);
+                        } else if (Float.class == type) {
+                            value = Numbers.toWrapFloat(value);
+                        } else if (double.class == type) {
+                            value = Numbers.toDouble(value);
+                        } else if (Double.class == type) {
+                            value = Numbers.toWrapDouble(value);
+                        } else if (!type.isAssignableFrom(value.getClass())) {
+                            type = ClassUtils.primitiveToWrapper(type); // 转包装类型
                             value = type.getConstructor(String.class).newInstance(value.toString()); // 字符串值转包装类型
                         }
                     }
@@ -434,15 +451,16 @@ public final class ObjectUtils {
      * @param deep
      * @return
      */
-    public static String getStackTrace(int deep) {
+    public static String getStackTrace(int deepPath) {
         StackTraceElement[] traces = Thread.currentThread().getStackTrace();
-        if (traces.length <= deep) {
+        if (traces.length <= deepPath) {
             return "warning: out of stack trace.";
         }
 
-        StackTraceElement trace = traces[deep];
-        return new StringBuilder(trace.getClassName()).append("#").append(trace.getMethodName())
-                              .append("(").append(trace.getLineNumber()).append(")").toString();
+        StackTraceElement trace = traces[deepPath];
+        return new StringBuilder(trace.getClassName()).append("#")
+                      .append(trace.getMethodName()).append(":")
+                      .append(trace.getLineNumber()).toString();
     }
 
     /**
@@ -459,6 +477,10 @@ public final class ObjectUtils {
             map.put((String) kv[i], kv[i + 1]);
         }
         return map;
+    }
+
+    public static <T> T[] toArray(@SuppressWarnings("unchecked") T... args) {
+        return args;
     }
 
     public static void main(String[] args) throws IOException {

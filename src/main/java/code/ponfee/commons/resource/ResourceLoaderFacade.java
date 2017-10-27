@@ -17,7 +17,7 @@ import code.ponfee.commons.util.Strings;
  *     <li>
  *      <span>classpath:</span>
  *        filePath默认为""<p>
- *        当以“/”开头时contextClass只起到jar包定位的作用<p>
+ *        当以“/”开头时contextClass只起到jar包定位的作用（且会去掉“/”）<p>
  *        不以“/”开头时contextClass还起到package相对路径的作用<p>
  *     </li>
  *     <li>webapp:</li>
@@ -76,6 +76,7 @@ public final class ResourceLoaderFacade {
             return WEB_LOADER.getResource(path, encoding);
         } else {
             // 内部用的classLoader加载，不能以“/”开头，XX.class.getResourceAsStream("/com/x/file/myfile.xml")才能以“/”开头
+            // "/"开头表示取根路径，非"/"开头则加上contextClass的包路径（如果contextClass不为空）
             path = resolveClasspath(path, contextClass);
             return CP_LOADER.getResource(path, contextClass, encoding); // 默认为classpath
         }
@@ -111,24 +112,11 @@ public final class ResourceLoaderFacade {
             return WEB_LOADER.listResources(path, extensions, recursive, encoding);
         } else {
             // 内部用的classLoader加载，不能以“/”开头，XX.class.getResourceAsStream("/com/x/file/myfile.xml")才能以“/”开头
+            // "/"开头表示取根路径，非"/"开头则加上contextClass的包路径（如果contextClass不为空）
             path = resolveClasspath(path, contextClass);
             return CP_LOADER.listResources(path, extensions, recursive, contextClass, encoding); // default classpath
         }
     }
-
-    /*public static File resolveDir(String dir) {
-        if (dir == null) dir = "";
-        String tmp = cleanPath(dir);
-        if (dir.startsWith(WEB_PREFIX)) {
-            dir = WEB_LOADER.getServletContext().getRealPath(tmp);
-        } else if (dir.startsWith(CP_PREFIX)) {
-            String basic = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-            dir = Urls.decodeURI(basic, DEFAULT_ENCODING) + tmp;
-        } else {
-            dir = tmp;
-        }
-        return Streams.makeDir(dir);
-    }*/
 
     private static String resolveClasspath(String path, Class<?> contextClass) {
         if (path.startsWith("/")) {

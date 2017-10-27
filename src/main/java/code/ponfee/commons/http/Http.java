@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -259,6 +260,10 @@ public final class Http {
         return this;
     }
 
+    public Http setSSLContext(SSLContext sslContext) {
+        return setSSLSocketFactory(sslContext.getSocketFactory());
+    }
+
     // --------------------------------request------------------------------
     public <T> T request(JavaType type) {
         return Jsons.NORMAL.parse(request(), type);
@@ -437,7 +442,7 @@ public final class Http {
                                        //.contentType("application/json", "UTF-8") // @RequestBody
                                        //.contentType("application/x-www-form-urlencoded", "UTF-8") // form data
                                        .accept("application/json") // @ResponseBody
-                                       //.setSSLSocketFactory(factory) // client cert
+                                       //.setSSLSocketFactory(factory) // trust certs store
                                        .request(Map.class);
         System.out.println(resp);
     }

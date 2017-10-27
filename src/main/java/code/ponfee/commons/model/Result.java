@@ -18,8 +18,8 @@ public class Result<T> implements java.io.Serializable {
     public static final Result<Void> SUCCESS = new SuccessResult();
 
     private Integer code; // 状态码
-    private String msg;   // 返回信息
-    private T data;       // 结果数据
+    private String  msg;  // 返回信息
+    private T       data; // 结果数据
 
     // -----------------------constructor methods
     public Result() {} // code is null

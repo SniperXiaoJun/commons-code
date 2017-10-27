@@ -76,8 +76,7 @@ public class WSClientTester {
         URL url = new URL("http://112.95.149.106:8088/SystemPadServices.svc?wsdl");
         QName qName = new QName("http://tempuri.org/", "SystemPadService");
         Service service = Service.create(url, qName);
-        Dispatch<SOAPMessage> dispatch =
-            service.createDispatch(new QName("http://www.tyky.com.cn/cMashup/", "SystemPadServicePort"), SOAPMessage.class, Service.Mode.MESSAGE);
+        Dispatch<SOAPMessage> dispatch = service.createDispatch(new QName("http://www.tyky.com.cn/cMashup/", "SystemPadServicePort"), SOAPMessage.class, Service.Mode.MESSAGE);
         SOAPMessage msg = dispatch.invoke(message);
         System.out.println(msg.getSOAPBody().getElementsByTagName("addResult").item(0).getTextContent());
     }

@@ -70,7 +70,7 @@ public class ESQueryBuilder {
      * @param items  
      * @return
      */
-    public ESQueryBuilder mustIn(String name, List<Object> items) {
+    public <T> ESQueryBuilder mustIn(String name, List<T> items) {
         if (this.boolQuery == null) {
             this.boolQuery = QueryBuilders.boolQuery();
         }
@@ -272,7 +272,7 @@ public class ESQueryBuilder {
      * @param items
      * @return
      */
-    public ESQueryBuilder shouldIn(String name, List<Object> items) {
+    public <T> ESQueryBuilder shouldIn(String name, List<T> items) {
         if (this.boolQuery == null) {
             this.boolQuery = QueryBuilders.boolQuery();
         }

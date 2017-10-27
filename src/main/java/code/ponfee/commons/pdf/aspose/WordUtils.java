@@ -92,12 +92,6 @@ public final class WordUtils {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            if (out != null) try {
-                out.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -117,12 +111,6 @@ public final class WordUtils {
             doc.save(out, pso);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            if (out != null) try {
-                out.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
