@@ -66,8 +66,9 @@ import code.ponfee.commons.util.ObjectUtils;
 public class ElasticSearchClient implements DisposableBean {
 
     static final TimeValue SCROLL_TIMEOUT = TimeValue.timeValueSeconds(120); // 2 minutes
-    private static final int SCROLL_SIZE = 500; // 默认滚动数据量
+    private static final int SCROLL_SIZE = 5000; // 默认滚动数据量
     private static Logger logger = LoggerFactory.getLogger(ElasticSearchClient.class);
+
     private final TransportClient client; // ES集群客户端
 
     /**
@@ -714,7 +715,7 @@ public class ElasticSearchClient implements DisposableBean {
      * @param id
      * @param source
      */
-    public void updateByScripted(String index, String type, String id, Map<String, Object> source) {
+    public void updateByScript(String index, String type, String id, Map<String, Object> source) {
         UpdateRequestBuilder req = client.prepareUpdate().setIndex(index).setType(type).setId(id);
         req.setScript(new Script(ScriptType.INLINE, "groovy", type, source)).get();
     }

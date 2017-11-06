@@ -420,6 +420,22 @@ public class Dates {
         return new DateTime(startOfDay(date)).withDayOfYear(day).toDate();
     }
 
+    public static int dayOfYear(Date date) {
+        return new DateTime(date).getDayOfYear();
+    }
+
+    public static int dayOfMonth(Date date) {
+        return new DateTime(date).getDayOfMonth();
+    }
+
+    public static int dayOfWeek(Date date) {
+        return new DateTime(date).getDayOfWeek();
+    }
+
+    public static int hourOfDay(Date date) {
+        return new DateTime(date).getHourOfDay();
+    }
+
     /**
      * 日期随机
      * @param begin  开发日期

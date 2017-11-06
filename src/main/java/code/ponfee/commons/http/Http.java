@@ -175,13 +175,13 @@ public final class Http {
     // ----------------------------part--------------------------
     /**
      * 文件上传
-     * @param name
-     * @param filename
-     * @param mime
+     * @param formName  表单名称
+     * @param fileName  文件名称
+     * @param mimePart  上传数据
      * @return
      */
-    public Http addPart(String name, String filename, Object mime) {
-        this.parts.add(new MimePart(name, filename, mime));
+    public Http addPart(String formName, String fileName, Object mimePart) {
+        this.parts.add(new MimePart(formName, fileName, mimePart));
         return this;
     }
 

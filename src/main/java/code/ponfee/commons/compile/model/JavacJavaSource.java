@@ -107,9 +107,9 @@ public class JavacJavaSource extends JavaSource {
 
     public static void main(String[] args) throws Exception {
         JavaSource javaSource = new JavacJavaSource(Files.toString("d:/CompilerSource.java"));
-        System.out.println(javaSource.getFullyQualifiedName());
+        //JavaSource javaSource = new JavacJavaSource(Files.toString(MavenProjects.getMainJavaFile(HttpRequest.class)));
         Class<?> clazz = new JdkCompiler().compile(javaSource);
         System.out.println(clazz);
-        clazz.getMethod("say").invoke(clazz);
+        //clazz.getMethod("say").invoke(clazz);
     }
 }

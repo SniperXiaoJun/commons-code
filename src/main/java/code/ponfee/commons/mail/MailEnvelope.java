@@ -219,7 +219,7 @@ public class MailEnvelope implements Serializable {
 
     @Override
     public String toString() {
-        return new StringBuilder(255)
+        return new StringBuilder(256)
                 .append("{type=").append(type)
                 .append(", subject=").append(substr(subject))
                 .append(", content=").append(substr(content))

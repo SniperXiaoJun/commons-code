@@ -44,7 +44,7 @@ public final class WebUtils {
      */
     public static Map<String, String> getReqParams(HttpServletRequest request) {
         Map<String, String[]> requestParams = request.getParameterMap();
-        Map<String, String> params = new TreeMap<String, String>();
+        Map<String, String> params = new TreeMap<>();
         for (Entry<String, String[]> entry : requestParams.entrySet()) {
             params.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
         }

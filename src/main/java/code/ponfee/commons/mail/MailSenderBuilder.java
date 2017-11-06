@@ -85,15 +85,16 @@ public final class MailSenderBuilder {
 
     public static void main(String[] args) throws Exception {
         MailSenderBuilder builder = MailSenderBuilder.newBuilder("fupengfei163@163.com", "");
-        builder.nickname("张三").connTimeout(5000).readTimeout(5000).charset("UTF-8").retryTimes(2).validateTimes(0).authRequire(false);
+        builder.nickname("张三").connTimeout(5000).readTimeout(5000).charset("UTF-8")
+                               .retryTimes(2).validateTimes(0).authRequire(false);
         MailSender sender = builder.build();
-        MailEnvelope evp = MailEnvelope.newMimeInstance("fupengfei163@163.com", "图片", "你好，看附件：<hr/><img src=\"cid:contentid123\" />");
-        evp.setCc(new String[] { "395191357@qq.com", "fdsaewfdfa@fdsa.com" });
-        evp.setBcc(new String[] { "fdsaewfdfa@test.com" });
+        MailEnvelope evp = MailEnvelope.newMimeInstance("fupengfei163@163.com", "图片", "<img src=\"cid:contentid123\" />");
+        evp.setCc(new String[] { "395191357@qq.com", "unkonwn@fdsa.com" });
+        evp.setBcc(new String[] { "unkonwn@test.com" });
         //evp.addContentImage("contentid123", "d:/QQ图片20170320235130.png");
         //evp.addAttachment("名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长.xlsx", "d:/abc.xlsx");
         //evp.addAttachment("百度名字有点长魂牵梦萦脍少朝秦暮楚脍塔顶地额外负担要暮云春树工奇巧魂牵梦萦地魂牵梦萦城.txt", "d:/baidu.html");
-        //evp.addAttachment("QQ图片20170320235130字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名.png", IOUtils.toByteArray(new FileInputStream("D:\\QQ图片20170320235130.png")));
+        //evp.addAttachment("字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名.png", IOUtils.toByteArray(new FileInputStream("D:\\图片.png")));
 
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1; i++) {

@@ -22,12 +22,12 @@ public final class ThreadPoolExecutors {
     private static final RejectedExecutionHandler DEFAULT_HANDLER = new CallerRunsPolicy();
 
     public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime) {
-        return create(corePoolSize, maximumPoolSize, keepAliveTime, 0, null, DEFAULT_HANDLER);
+        return create(corePoolSize, maximumPoolSize, keepAliveTime, 0, null, null);
     }
 
     public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, 
                                             long keepAliveTime, int queueCapacity) {
-        return create(corePoolSize, maximumPoolSize, keepAliveTime, queueCapacity, null, DEFAULT_HANDLER);
+        return create(corePoolSize, maximumPoolSize, keepAliveTime, queueCapacity, null, null);
     }
 
     public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime, 
@@ -40,6 +40,16 @@ public final class ThreadPoolExecutors {
         return create(corePoolSize, maximumPoolSize, keepAliveTime, queueCapacity, threadName, null);
     }
 
+    /**
+     * 线程池创建器
+     * @param corePoolSize     核心线程数
+     * @param maximumPoolSize  最大线程数
+     * @param keepAliveTime    线程存活时间
+     * @param queueCapacity    队列长度
+     * @param threadName       线程名称
+     * @param rejectedHandler  拒绝策略
+     * @return a ThreadPoolExecutor instance
+     */
     public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime, 
                                             int queueCapacity, String threadName, 
                                             RejectedExecutionHandler rejectedHandler) {

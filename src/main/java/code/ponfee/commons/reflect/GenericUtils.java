@@ -35,6 +35,7 @@ public final class GenericUtils {
         return target;
     }
 
+    // ----------------------------------------------------------------------------
     /**
      * 获取泛型的实际类型参数
      * @param clazz
@@ -73,12 +74,14 @@ public final class GenericUtils {
         }
     }
 
+    // ----------------------------------------------------------------------------
     public static Class<?> getActualTypeArgument(Method method, int methodParamsIndex) {
         return getActualTypeArgument(method, methodParamsIndex, 0);
     }
 
     /**
      * 获取泛型的实际类型参数
+     * getActualTypeArgument(ClassUtils.class.getMethod("getField", Class.class, String.class), 0)  --> java.lang.Object
      * @param method            方法对象
      * @param methodParamsIndex 方法参数索引号
      * @param genericArgsIndex  泛型参数索引号
@@ -89,6 +92,7 @@ public final class GenericUtils {
         return getActualTypeArgument(((ParameterizedType) type).getActualTypeArguments()[genericArgsIndex]);
     }
 
+    // ----------------------------------------------------------------------------
     public static Class<?> getActualTypeArgument(Field field) {
         return getActualTypeArgument(field, 0);
     }
@@ -108,6 +112,7 @@ public final class GenericUtils {
         return getActualTypeArgument(((ParameterizedType) type).getActualTypeArguments()[genericArgsIndex]);
     }
 
+    // --------------------------------------private methods----------------------------------
     private static Class<?> getActualTypeArgument(Type type) {
         if (type instanceof Class<?>) {
             return (Class<?>) type;
@@ -125,4 +130,7 @@ public final class GenericUtils {
         }
     }
 
+    public static void main(String[] args) throws Exception {
+        System.out.println(getActualTypeArgument(ClassUtils.class.getMethod("getField", Class.class, String.class), 0));
+    }
 }
