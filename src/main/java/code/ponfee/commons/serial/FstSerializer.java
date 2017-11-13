@@ -1,6 +1,5 @@
 package code.ponfee.commons.serial;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.nustaq.serialization.FSTConfiguration;
@@ -49,7 +48,8 @@ public class FstSerializer extends Serializer {
         //Serializer serializer = new JsonSerializer();
         //Serializer serializer = new HessianSerializer();
         byte[] data = serializer.serialize(map);
-        map = serializer.deserialize(data, HashMap.class);
+        //map = serializer.deserialize(data, HashMap.class);
+        map = serializer.deserialize(data, Map.class);
         System.out.println(map.getClass());
     }
 

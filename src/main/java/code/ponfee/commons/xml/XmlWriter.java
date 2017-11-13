@@ -101,7 +101,11 @@ public final class XmlWriter {
         }
     }
 
-    public abstract static class E<T> {
+    /**
+     * 元素抽象类
+     * @param <T>
+     */
+    public static abstract class E<T> {
         protected final String name;
         protected final T value;
 
@@ -124,6 +128,9 @@ public final class XmlWriter {
         protected abstract String value();
     }
 
+    /**
+     * 文本元素类
+     */
     public static class TextE extends E<String> {
         public TextE(String name, String content) {
             super(name, content);
@@ -135,6 +142,9 @@ public final class XmlWriter {
         }
     }
 
+    /**
+     * 数值元素类
+     */
     public static class NumberE extends E<Number> {
         public NumberE(String name, Number value) {
             super(name, value);
@@ -146,6 +156,9 @@ public final class XmlWriter {
         }
     }
 
+    /**
+     * 节点元素类
+     */
     public static class NodeE extends E<List<E<?>>> {
         public NodeE(String name, List<E<?>> nodes) {
             super(name, nodes);

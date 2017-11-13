@@ -12,8 +12,6 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -23,7 +21,7 @@ import org.w3c.dom.NodeList;
  * @author fupf
  */
 public final class XmlReader {
-    private static Logger logger = LoggerFactory.getLogger(XmlReader.class);
+
     private static final DocumentBuilder BUILDER;
     static {
         try {
@@ -61,8 +59,8 @@ public final class XmlReader {
         } finally {
             if (inputStream != null) try {
                 inputStream.close();
-            } catch (IOException e) {
-                logger.error(null, e);
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
         }
     }
@@ -84,8 +82,7 @@ public final class XmlReader {
         try {
             return this.xpath.evaluate(xpathExp, document);
         } catch (XPathExpressionException e) {
-            logger.error("xpath evaluate exception", e);
-            return null;
+            throw new RuntimeException("xpath evaluate error", e);
         }
     }
 

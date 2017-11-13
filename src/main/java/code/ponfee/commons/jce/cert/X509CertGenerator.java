@@ -84,7 +84,7 @@ public class X509CertGenerator {
      */
     public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, Integer sn,
                                                     String subject, RSASignAlgorithm sigAlg, PrivateKey privateKey,
-        PublicKey publicKey, Date notBefore, Date notAfter) {
+                                                    PublicKey publicKey, Date notBefore, Date notAfter) {
         PKCS10 pkcs10 = createPkcs10(subject, privateKey, publicKey, sigAlg);
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(false));
         return signCert(caCert, caKey, certInfo);
@@ -164,11 +164,11 @@ public class X509CertGenerator {
             }
             extensions.set(KeyUsageExtension.NAME, keyUsage);
 
-            // 版本号：v1、v2、v3，此扩展信息必须是v3版本，生成一个extension对象参数分别为oid，是否关键扩展，byte[]型的内容值
-            //ObjectIdentifier oid = new ObjectIdentifier(new int[] { 1, 22 }); // 扩展域:第1位最大为2，第2位最大为39，后续不明
-            //userData = ObjectUtils.concat(new byte[] { 0x04, (byte) userData.length }, userData); // flag,data length, data
+            /*// 版本号：v1、v2、v3，此扩展信息必须是v3版本，生成一个extension对象参数分别为oid，是否关键扩展，byte[]型的内容值
+            ObjectIdentifier oid = new ObjectIdentifier(new int[] { 1, 22 }); // 扩展域:第1位最大为2，第2位最大为39，后续不明
+            userData = ObjectUtils.concat(new byte[] { 0x04, (byte) userData.length }, userData); // flag,data length, data
             // PKCS7Signature验证签名会报错：java.security.SignatureException: Certificate has unsupported critical extension(s)
-            //extensions.set("UserData", new sun.security.x509.Extension(oid, true, userData)); 
+            extensions.set("UserData", new sun.security.x509.Extension(oid, true, userData)); */
 
             return extensions;
         } catch (IOException e) {

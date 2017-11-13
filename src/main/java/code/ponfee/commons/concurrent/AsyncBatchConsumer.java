@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Preconditions;
 
@@ -66,6 +65,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
         this.thresholdPeriod = thresholdPeriod;
         this.sleepTimeMillis = Numbers.bounds(thresholdPeriod, 9, thresholdPeriod);
         this.thresholdChunk = thresholdChunk;
+
         super.setName("async-batch-consumer-" + Integer.toHexString(hashCode()));
         super.setDaemon(true);
         super.start();
@@ -104,12 +104,12 @@ public final class AsyncBatchConsumer<T> extends Thread {
             if (list.size() == thresholdChunk || (!list.isEmpty() && (isEnd || isRefresh()))) {
                 // task抛异常后： execute会输出错误信息，线程结束，后续任务会创建新线程执行
                 //               submit不会输出错误信息，线程继续分配执行其它任务
-                executor.submit(factory.create(list, isEnd && queue.isEmpty())); // 提交到异步处理
+                executor.submit(factory.create(list, isEnd && queue.isEmpty())); // 提交到异步批量处理
                 list = null;
                 refresh();
             } else {
                 try {
-                    TimeUnit.MILLISECONDS.sleep(this.sleepTimeMillis); // sleep
+                    Thread.sleep(this.sleepTimeMillis); // to sleep for prevent endless loop
                 } catch (InterruptedException ignored) {
                     ignored.printStackTrace();
                 }
@@ -118,33 +118,33 @@ public final class AsyncBatchConsumer<T> extends Thread {
     }
 
     /**
-     * add one
+     * put one
      * @param t
      * @return
      */
-    public boolean add(T t) {
+    public boolean put(T t) {
         Preconditions.checkState(!isEnd);
 
         return queue.offer(t);
     }
 
     /**
-     * batch add {@link #add(List)}
+     * batch put {@link #add(List)}
      * @param t
      * @return
      */
-    public boolean add(@SuppressWarnings("unchecked") T... t) {
+    public boolean put(@SuppressWarnings("unchecked") T... t) {
         Preconditions.checkState(!isEnd);
 
-        return add(Arrays.asList(t));
+        return put(Arrays.asList(t));
     }
 
     /**
-     * batch add
+     * batch put
      * @param list
      * @return
      */
-    public boolean add(List<T> list) {
+    public boolean put(List<T> list) {
         Preconditions.checkState(!isEnd);
 
         boolean flag = true;

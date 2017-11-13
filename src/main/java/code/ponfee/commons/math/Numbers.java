@@ -17,11 +17,6 @@ public final class Numbers {
 
     public static final Integer INTEGER_ZERO = Integer.valueOf(0);
 
-    private static final String[] CN_UPPER_NUMBER = { "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖" };
-
-    private static final String[] CN_UPPER_MONETRAY_UNIT = { "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
-                                                             "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
-
     // -----------------------------------to primary number------------------------------
     public static int toInt(Object obj) {
         return toInt(obj, 0);
@@ -311,13 +306,15 @@ public final class Numbers {
         return new String(buf, charPos, (65 - charPos));
     }
 
+    private static final String[] CN_UPPER_NUMBER = { "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖" };
+    private static final String[] CN_UPPER_MONETRAY_UNIT = { "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
+                                                             "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
     /**
      * 金额汉化
      * @param amount
      * @return
      */
     public static String chinesize(BigDecimal amount) {
-        StringBuilder builder = new StringBuilder();
         int signum = amount.signum(); // 正负数：0,1,-1
         if (signum == 0) {
             return "零元整"; // 零元整的情况
@@ -325,12 +322,10 @@ public final class Numbers {
 
         // 这里会进行金额的四舍五入
         long number = amount.movePointRight(2).setScale(0, 4).abs().longValue();
-        // 得到小数点后两位值
-        long scale = number % 100;
-        int numUnit = 0, numIndex = 0;
+        long scale = number % 100; // 得到小数点后两位值
+        int numIndex = 0;
         boolean getZero = false;
-        // 判断最后两位数，一共有四中情况：00 = 0, 01 = 1, 10, 11
-        if (scale <= 0) {
+        if (scale <= 0) { // 判断最后两位数，一共有四中情况：00 = 0, 01 = 1, 10, 11
             numIndex = 2;
             number = number / 100;
             getZero = true;
@@ -340,10 +335,9 @@ public final class Numbers {
             number = number / 10;
             getZero = true;
         }
-        int zeroSize = 0;
-        while (number > 0) {
-            // 每次获取到最后一个数
-            numUnit = (int) (number % 10);
+        StringBuilder builder = new StringBuilder();
+        for (int zeroSize = 0, numUnit = 0; number > 0; number = number / 10, ++numIndex) {
+            numUnit = (int) (number % 10); // 每次获取到最后一个数
             if (numUnit > 0) {
                 if ((numIndex == 9) && (zeroSize >= 3)) {
                     builder.insert(0, CN_UPPER_MONETRAY_UNIT[6]);
@@ -357,7 +351,7 @@ public final class Numbers {
                 zeroSize = 0;
             } else {
                 ++zeroSize;
-                if (!(getZero)) {
+                if (!getZero) {
                     builder.insert(0, CN_UPPER_NUMBER[numUnit]);
                 }
                 if (numIndex == 2) {
@@ -369,10 +363,8 @@ public final class Numbers {
                 }
                 getZero = true;
             }
-            // 让number每次都去掉最后一个数
-            number = number / 10;
-            ++numIndex;
         }
+
         // 如果signum == -1，则说明输入的数字为负数，就在最前面追加特殊字符：负
         if (signum == -1) {
             builder.insert(0, "负");
@@ -385,21 +377,14 @@ public final class Numbers {
     }
 
     public static void main(String[] args) {
-        System.out.println(((double) 15 / 2));
-        System.out.println(Math.pow(10, 2));
         System.out.println(lower(441656, 2));
         System.out.println(percent(0.00241, 1));
-        System.out.println(add(0.00241, 1d));
 
         System.out.println(ObjectUtils.toString(sharding(10, 20)));
 
         double money = 2020004.01;
         String s = chinesize(new BigDecimal(money));
         System.out.println("[" + money + "]   ->   [" + s.toString() + "]");
-
-        System.out.println(new BigDecimal(0).signum());
-        System.out.println(new BigDecimal(1).signum());
-        System.out.println(new BigDecimal(-1).signum());
 
         System.out.println(Long.toString(Long.MIN_VALUE, 36));
         System.out.println(reduce(Long.MIN_VALUE));

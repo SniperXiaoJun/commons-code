@@ -430,6 +430,30 @@ public class Strings {
         return StringUtils.isEmpty(str) ? defaultStr : str;
     }
 
+    /**
+     * <p>Escapes the characters in a <code>String</code> to be suitable to pass to
+     * an SQL query.</p>
+     *
+     * <p>For example,
+     *  statement.executeQuery("SELECT * FROM MOVIES WHERE TITLE='" + 
+     *  StringEscapeUtils.escapeSql("McHale's Navy") +  "'");
+     * </p>
+     *
+     * <p>At present, this method only turns single-quotes into doubled single-quotes
+     * (<code>"McHale's Navy"</code> => <code>"McHale''s Navy"</code>). It does not
+     * handle the cases of percent (%) or underscore (_) for use in LIKE clauses.</p>
+     *
+     * see http://www.jguru.com/faq/view.jsp?EID=8881
+     * @param str  the string to escape, may be null
+     * @return a new String, escaped for SQL, <code>null</code> if null string input
+     */
+    public static String escapeSql(String str) {
+        if (str == null) {
+            return null;
+        }
+        return StringUtils.replace(str, "'", "''");
+    }
+
     public static void main(String[] args) {
         System.out.println(deleteAny("hello world", "eo"));
         System.out.println(ObjectUtils.toString(split("hello world", "l", "eo")));

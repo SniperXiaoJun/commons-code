@@ -122,13 +122,13 @@ public class X509CertUtils {
      * certpem = "-----BEGIN CERTIFICATE-----\n" +
      *           toBase64Encoded(chain[0].getEncoded())) +
      *           "\n-----END CERTIFICATE-----\n";
-     * certificate export to pem format
+     * certificate export to pem format text
      * @param cert
      * @return
      */
     public static String exportToPem(java.security.cert.Certificate cert) {
         try (StringWriter writer = new StringWriter(); 
-            // X509Certificate,X509CRL,KeyPair,PrivateKey,PublicKey
+             // X509Certificate,X509CRL,KeyPair,PrivateKey,PublicKey
              JcaPEMWriter pemWriter = new JcaPEMWriter(writer);
         ) {
             pemWriter.writeObject(cert);

@@ -59,7 +59,7 @@ public final class ResourceLoaderFacade {
 
     /**
      * 文件资源加载
-     * @param filePath        "/"表示根路径开始，其它为相对路径
+     * @param filePath      "/"表示根路径开始，其它为相对路径
      * @param contextClass
      * @param encoding
      * @return
@@ -96,7 +96,7 @@ public final class ResourceLoaderFacade {
 
     /**
      * 路径匹配过滤加载
-     * @param dir             "/"表示根路径开始，其它为相对路径
+     * @param dir         "/"表示根路径开始，其它为相对路径
      * @param extensions
      * @param recursive
      * @param contextClass

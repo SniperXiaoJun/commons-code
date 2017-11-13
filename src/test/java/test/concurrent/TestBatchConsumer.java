@@ -32,7 +32,7 @@ public class TestBatchConsumer {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    consumer.add(increment.getAndIncrement());
+                    consumer.put(increment.getAndIncrement());
                 }
             });
             thread.setDaemon(true);

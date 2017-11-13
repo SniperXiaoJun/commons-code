@@ -37,12 +37,14 @@ public class KryoSerializer extends Serializer {
     }
 
     public <T extends Object> byte[] serialize(T t, boolean isCompress) {
-        if (t == null) return null;
+        if (t == null) {
+            return null;
+        }
+
         GZIPOutputStream gzout = null;
         Output output = null;
         Kryo kryo = null;
         try {
-            kryo = this.getKryo();
             ByteArrayOutputStream baos = new ByteArrayOutputStream(BYTE_SIZE);
             if (isCompress) {
                 gzout = new ExtendedGZIPOutputStream(baos);
@@ -50,7 +52,7 @@ public class KryoSerializer extends Serializer {
             } else {
                 output = new ByteBufferOutput(baos, BUFF_SIZE);
             }
-            kryo.writeObject(output, t);
+            (kryo = getKryo()).writeObject(output, t);
             output.flush();
             output.close();
             output = null;
@@ -71,20 +73,21 @@ public class KryoSerializer extends Serializer {
     }
 
     public <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
-        if (data == null) return null;
+        if (data == null) {
+            return null;
+        }
 
         GZIPInputStream gzin = null;
         Input input = null;
         Kryo kryo = null;
         try {
-            kryo = this.getKryo();
             if (isCompress) {
                 gzin = new GZIPInputStream(new ByteArrayInputStream(data));
                 input = new ByteBufferInput(gzin);
             } else {
                 input = new ByteBufferInput(data);
             }
-            return kryo.readObject(input, clazz);
+            return (kryo = getKryo()).readObject(input, clazz);
         } catch (IOException e) {
             throw new SerializationException(e);
         } finally {

@@ -787,7 +787,7 @@ public class ElasticSearchClient implements DisposableBean {
 
     @SuppressWarnings("unchecked")
     private static <T> T convertMap(Map<String, Object> data, Class<T> clazz) {
-        if (clazz.isAssignableFrom(clazz)) {
+        if (Map.class.isAssignableFrom(clazz)) {
             return (T) data;
         } else {
             return ObjectUtils.map2bean(data, clazz);
@@ -795,6 +795,8 @@ public class ElasticSearchClient implements DisposableBean {
     }
 
     public static void main(String[] args) throws IOException {
+        System.out.println(Map.class.isAssignableFrom(Map.class));
+
         XContentBuilder mapping = XContentFactory.jsonBuilder()
             .startObject() // {
               .startObject("user_mapping") // "user":{ // type name

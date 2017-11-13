@@ -52,8 +52,10 @@ public class Cache<T> {
                 if (!lock.tryLock()) return;
                 try {
                     long now = now();
+                    Entry<Comparable<?>, CacheBean<T>> entry;
                     for (Iterator<Entry<Comparable<?>, CacheBean<T>>> t = cache.entrySet().iterator(); t.hasNext();) {
-                        if (t.next().getValue().isExpire(now)) {
+                        entry = t.next();
+                        if (entry.getValue().isExpire(now)) {
                             t.remove();
                         }
                     }
@@ -223,8 +225,10 @@ public class Cache<T> {
         int size = 0;
         long now = now();
 
+        Entry<Comparable<?>, CacheBean<T>> entry;
         for (Iterator<Entry<Comparable<?>, CacheBean<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
-            if (iter.next().getValue().isAlive(now)) {
+            entry = iter.next();
+            if (entry.getValue().isAlive(now)) {
                 size++;
             } else {
                 iter.remove();

@@ -40,7 +40,7 @@ public class SymmetricCryptor {
     private final SecretKey secretKey;
 
     protected SymmetricCryptor(SecretKey secretKey, Mode mode, Padding padding,
-                        AlgorithmParameterSpec parameter, Provider provider) {
+                               AlgorithmParameterSpec parameter, Provider provider) {
         this.secretKey = secretKey;
         this.mode = mode;
         this.padding = padding;

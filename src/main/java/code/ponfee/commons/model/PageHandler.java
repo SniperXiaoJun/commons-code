@@ -15,8 +15,7 @@ import code.ponfee.commons.reflect.Fields;
  */
 public final class PageHandler {
 
-    public static final PageHandler NORMAL = new PageHandler("pageNum", "pageSize", 
-                                                             "offset", "limit");
+    public static final PageHandler NORMAL = new PageHandler("pageNum", "pageSize", "offset", "limit");
 
     private final String paramPageNum;
     private final String paramPageSize;
@@ -32,10 +31,7 @@ public final class PageHandler {
     }
 
     public <T> void handle(T params) {
-        Integer pageNum = getInt(params, paramPageNum);
         Integer pageSize = getInt(params, paramPageSize);
-
-        Integer offset = getInt(params, paramOffset);
         Integer limit = getInt(params, paramLimit);
 
         // 默认通过pageSize查询
@@ -44,8 +40,11 @@ public final class PageHandler {
         }
 
         // 分页处理
-        if (pageSize == null) offsetPage(offset, limit);
-        else startPage(pageNum, pageSize);
+        if (pageSize != null) {
+            startPage(getInt(params, paramPageNum), pageSize);
+        } else {
+            offsetPage(getInt(params, paramOffset), limit);
+        }
     }
 
     /**
@@ -55,8 +54,12 @@ public final class PageHandler {
      * @param pageSize
      */
     public static void startPage(Integer pageNum, Integer pageSize) {
-        if (pageNum == null || pageNum < 1) pageNum = 1;
-        if (pageSize < 0) pageSize = 0;
+        if (pageNum == null || pageNum < 1) {
+            pageNum = 1;
+        }
+        if (pageSize < 0) {
+            pageSize = 0;
+        }
         PageHelper.startPage(pageNum, pageSize);
     }
 
@@ -67,8 +70,12 @@ public final class PageHandler {
      * @param limit
      */
     public static void offsetPage(Integer offset, Integer limit) {
-        if (offset == null || offset < 0) offset = 0;
-        if (limit < 0) limit = 0;
+        if (offset == null || offset < 0) {
+            offset = 0;
+        }
+        if (limit == null || limit < 0) {
+            limit = 0;
+        }
         PageHelper.offsetPage(offset, limit);
     }
 
@@ -81,14 +88,12 @@ public final class PageHandler {
     private static <T> Integer getInt(T params, String name) {
         try {
             Object value = null;
-            if (Map.class.isInstance(params) 
-                || Dictionary.class.isInstance(params)) {
-                value = params.getClass().getMethod("get", Object.class)
-                                         .invoke(params, name);
+            if (Map.class.isInstance(params) || Dictionary.class.isInstance(params)) {
+                value = params.getClass().getMethod("get", Object.class).invoke(params, name);
             } else {
                 value = Fields.get(params, name);
             }
-            return Numbers.toInt(value);
+            return Numbers.toWrapInt(value);
         } catch (Exception e) {
             return null;
         }

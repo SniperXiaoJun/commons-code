@@ -40,7 +40,7 @@ public class Result<T> implements java.io.Serializable {
     }
 
     public static <T> Result<T> success(T data) {
-        return success("SUCCESS", data);
+        return success("OK", data);
     }
 
     public static <T> Result<T> success(String msg, T data) {
@@ -67,7 +67,7 @@ public class Result<T> implements java.io.Serializable {
         return new Result<>(code, msg, data);
     }
 
-    // -----------------------------getter/setter methods
+    // -----------------------------getter/setter methods----------------------------- //
     public int getCode() {
         return code;
     }

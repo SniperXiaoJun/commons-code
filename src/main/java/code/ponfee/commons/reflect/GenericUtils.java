@@ -27,7 +27,10 @@ public final class GenericUtils {
      * @return
      */
     public static Map<String, String> covariant(Map<String, ?> origin) {
-        if (origin == null) return null;
+        if (origin == null) {
+            return null;
+        }
+
         Map<String, String> target = new HashMap<>();
         for (Entry<String, ?> entry : origin.entrySet()) {
             target.put(entry.getKey(), Objects.toString(entry.getValue(), null));
@@ -59,6 +62,7 @@ public final class GenericUtils {
         if (!(genType instanceof ParameterizedType)) {
             return Object.class;
         }
+
         Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
         if (genericArgsIndex >= params.length || genericArgsIndex < 0) {
             return Object.class;

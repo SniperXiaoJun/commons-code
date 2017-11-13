@@ -95,7 +95,7 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
         if (limitQtyInMinutes < countByLastTime(key, 1, TimeUnit.MINUTES)) {
             return false; // 超过频率
         } else {
-            return consumer.add(new Trace(key, System.currentTimeMillis()));
+            return consumer.put(new Trace(key, System.currentTimeMillis()));
         }
     }
 

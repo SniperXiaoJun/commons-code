@@ -34,7 +34,7 @@ public class BulkProcessorConfiguration {
     }
 
     public BulkProcessor build(final Client client) {
-        return BulkProcessor.builder(client, listener).setName(options.getName())
+        return BulkProcessor.builder(client, listener)
                             .setConcurrentRequests(options.getConcurrentRequests())
                             .setBulkActions(options.getBulkActions()).setBulkSize(options.getBulkSize())
                             .setFlushInterval(options.getFlushInterval()).setBackoffPolicy(options.getBackoffPolicy()).build();

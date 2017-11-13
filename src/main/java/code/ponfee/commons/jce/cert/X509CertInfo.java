@@ -23,21 +23,21 @@ package code.ponfee.commons.jce.cert;
  */
 public enum X509CertInfo {
 
-    SUBJECT_DN("主题"), ISSUER_DN("颁发者主题"),
-    CERT_SN("序列号"), VERSION("版本"), ALG_NAME("算法名称"),
-    START_TM("生效时间(格式：yyyy-MM-dd'T'HH:mm:ss.SSSZ)"),
-    END_TM("失效时间(格式：yyyy-MM-dd'T'HH:mm:ss.SSSZ)"),
-    USAGE("密钥用法(signature签名，encipherment加密)"),
-    PUBLIC_KEY("公钥(base64编码)"),
+    SUBJECT_DN("主题"), ISSUER_DN("颁发者主题"), //
+    CERT_SN("序列号"), VERSION("版本"), ALG_NAME("算法名称"), //
+    START_TM("生效时间(格式：yyyy-MM-dd'T'HH:mm:ss.SSSZ)"), //
+    END_TM("失效时间(格式：yyyy-MM-dd'T'HH:mm:ss.SSSZ)"), //
+    USAGE("密钥用法(signature签名，encipherment加密)"), //
+    PUBLIC_KEY("公钥(base64编码)"), //
 
-    SUBJECT_CN("CN", "证书主体(CN)"), SUBJECT_O("O", "证书主体(O)"), 
-    SUBJECT_OU("OU", "证书主体(OU)"), SUBJECT_L("L", "证书主体(L)"), 
-    SUBJECT_ST("ST", "证书主体(ST)"), SUBJECT_C("C", "证书主体(C)"),
+    SUBJECT_CN("CN", "证书主体(CN)"), SUBJECT_O("O", "证书主体(O)"), //
+    SUBJECT_OU("OU", "证书主体(OU)"), SUBJECT_L("L", "证书主体(L)"), //
+    SUBJECT_ST("ST", "证书主体(ST)"), SUBJECT_C("C", "证书主体(C)"), //
 
-    ISSUER_CN("CN", "证书颁发者(CN)"), ISSUER_O("O", "证书颁发者(O)"), 
-    ISSUER_OU("OU", "证书颁发者(OU)"), ISSUER_L("L", "证书颁发者(L)"), 
-    ISSUER_ST("ST", "证书颁发者(ST)"), ISSUER_C("C", "证书颁发者(C)");
-    
+    ISSUER_CN("CN", "证书颁发者(CN)"), ISSUER_O("O", "证书颁发者(O)"), //
+    ISSUER_OU("OU", "证书颁发者(OU)"), ISSUER_L("L", "证书颁发者(L)"), //
+    ISSUER_ST("ST", "证书颁发者(ST)"), ISSUER_C("C", "证书颁发者(C)"); //
+
     private final String attr;
     private final String desc;
 
