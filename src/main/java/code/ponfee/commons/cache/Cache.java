@@ -31,7 +31,7 @@ public class Cache<T> {
     private final boolean caseSensitiveKey; // 是否忽略大小写（只针对String）
     private final boolean compressKey; // 是否压缩key（只针对String）
     private final long keepAliveInMillis; // 默认的数据保存的时间
-    private final Map<Comparable<?>, CacheBean<T>> cache = new ConcurrentHashMap<>(); // 缓存容器
+    private final Map<Comparable<?>, CacheValue<T>> cache = new ConcurrentHashMap<>(); // 缓存容器
 
     private volatile boolean isDestroy = false; // 是否被销毁
     private DateProvider dateProvider = DateProvider.SYSTEM;
@@ -52,8 +52,8 @@ public class Cache<T> {
                 if (!lock.tryLock()) return;
                 try {
                     long now = now();
-                    Entry<Comparable<?>, CacheBean<T>> entry;
-                    for (Iterator<Entry<Comparable<?>, CacheBean<T>>> t = cache.entrySet().iterator(); t.hasNext();) {
+                    Entry<Comparable<?>, CacheValue<T>> entry;
+                    for (Iterator<Entry<Comparable<?>, CacheValue<T>>> t = cache.entrySet().iterator(); t.hasNext();) {
                         entry = t.next();
                         if (entry.getValue().isExpire(now)) {
                             t.remove();
@@ -118,7 +118,7 @@ public class Cache<T> {
         Preconditions.checkState(!isDestroy);
 
         if (expireTimeMillis == KEEPALIVE_FOREVER || expireTimeMillis > now()) {
-            cache.put(getEffectiveKey(key), new CacheBean<>(value, expireTimeMillis));
+            cache.put(getEffectiveKey(key), new CacheValue<>(value, expireTimeMillis));
         }
     }
 
@@ -131,14 +131,14 @@ public class Cache<T> {
         if (isDestroy) return null;
 
         key = getEffectiveKey(key);
-        CacheBean<T> cacheBean = cache.get(key);
-        if (cacheBean == null) {
+        CacheValue<T> cacheValue = cache.get(key);
+        if (cacheValue == null) {
             return null;
-        } else if (cacheBean.isExpire(now())) {
+        } else if (cacheValue.isExpire(now())) {
             cache.remove(key);
             return null;
         } else {
-            return cacheBean.getValue();
+            return cacheValue.getValue();
         }
     }
 
@@ -149,8 +149,8 @@ public class Cache<T> {
     public T getAndRemove(Comparable<?> key) {
         if (isDestroy) return null;
 
-        CacheBean<T> cacheBean = cache.remove(getEffectiveKey(key));
-        return cacheBean == null ? null : cacheBean.getValue();
+        CacheValue<T> cacheValue = cache.remove(getEffectiveKey(key));
+        return cacheValue == null ? null : cacheValue.getValue();
     }
 
     /**
@@ -161,10 +161,10 @@ public class Cache<T> {
         if (isDestroy) return false;
 
         key = getEffectiveKey(key);
-        CacheBean<T> cacheBean = cache.get(key);
-        if (cacheBean == null) {
+        CacheValue<T> cacheValue = cache.get(key);
+        if (cacheValue == null) {
             return false;
-        } else if (cacheBean.isExpire(now())) {
+        } else if (cacheValue.isExpire(now())) {
             cache.remove(key);
             return false;
         } else {
@@ -180,8 +180,8 @@ public class Cache<T> {
     public boolean containsValue(T value) {
         if (isDestroy) return false;
 
-        Entry<Comparable<?>, CacheBean<T>> entry;
-        for (Iterator<Entry<Comparable<?>, CacheBean<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
+        Entry<Comparable<?>, CacheValue<T>> entry;
+        for (Iterator<Entry<Comparable<?>, CacheValue<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
             entry = iter.next();
             if (entry.getValue().isAlive(now())) {
                 if ((value == null && entry.getValue().getValue() == null) ||
@@ -203,8 +203,8 @@ public class Cache<T> {
         if (isDestroy) return Collections.emptyList();
 
         Collection<T> values = new ArrayList<>();
-        Entry<Comparable<?>, CacheBean<T>> entry;
-        for (Iterator<Entry<Comparable<?>, CacheBean<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
+        Entry<Comparable<?>, CacheValue<T>> entry;
+        for (Iterator<Entry<Comparable<?>, CacheValue<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
             entry = iter.next();
             if (entry.getValue().isAlive(now())) {
                 values.add(entry.getValue().getValue());
@@ -225,8 +225,8 @@ public class Cache<T> {
         int size = 0;
         long now = now();
 
-        Entry<Comparable<?>, CacheBean<T>> entry;
-        for (Iterator<Entry<Comparable<?>, CacheBean<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
+        Entry<Comparable<?>, CacheValue<T>> entry;
+        for (Iterator<Entry<Comparable<?>, CacheValue<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
             entry = iter.next();
             if (entry.getValue().isAlive(now)) {
                 size++;

@@ -54,7 +54,6 @@ public class ThreadPoolMailSender {
             }
             for (int number = envlops.size(); number > 0; number--) {
                 try {
-                    //future.isDone(); // 是否完成
                     if (!service.take().get()) {
                         flag = false;
                     }

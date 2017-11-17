@@ -1,7 +1,8 @@
 package code.ponfee.commons.ws.adapter.model;
 
 /**
- * 不能加泛型：ParameterizedTypeImpl cannot be cast to TypeVariable
+ * can not add generic like as <code>MapItem<K,V></code>
+ * ParameterizedTypeImpl cannot be cast to TypeVariable
  * @author fupf
  */
 @SuppressWarnings("rawtypes")

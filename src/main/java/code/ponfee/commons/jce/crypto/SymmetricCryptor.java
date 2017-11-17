@@ -65,16 +65,13 @@ public class SymmetricCryptor {
     private byte[] docrypt(byte[] bytes, int cryptMode) {
         StringBuilder transformation = new StringBuilder(getAlgorithm());
         if (mode != null) {
-            transformation.append("/").append(mode.name());
-            transformation.append("/").append(padding.name());
+            transformation.append("/").append(mode.name())
+                          .append("/").append(padding.name());
         }
         try {
-            Cipher cipher = null;
-            if (provider == null) {
-                cipher = Cipher.getInstance(transformation.toString());
-            } else {
-                cipher = Cipher.getInstance(transformation.toString(), provider);
-            }
+            Cipher cipher = (provider == null) 
+                            ? Cipher.getInstance(transformation.toString())
+                            : Cipher.getInstance(transformation.toString(), provider);
             cipher.init(cryptMode, secretKey, parameter);
             return cipher.doFinal(bytes);
         } catch (GeneralSecurityException e) {

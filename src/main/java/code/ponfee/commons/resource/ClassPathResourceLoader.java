@@ -243,8 +243,10 @@ final class ClassPathResourceLoader {
                         throw new UnsupportedOperationException("un supported process " + url.getProtocol());
                 }
             }
+            return list;
         } catch (IOException e) {
             logger.error("load resource from jar file occur error", e);
+            return list;
         } finally {
             if (jar != null) try {
                 jar.close();
@@ -257,7 +259,6 @@ final class ClassPathResourceLoader {
                 e.printStackTrace();
             }
         }
-        return list;
     }
 
     /**

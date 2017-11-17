@@ -22,7 +22,7 @@ public final class Bytes {
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
 
     /**
-     * dump byte array
+     * dump byte array like as these 
      * @see org.apache.commons.io.HexDump#dump(byte[], long, java.io.OutputStream, int)
      * @see sun.misc.HexDumpEncoder#encode(byte[], java.io.OutputStream);
      * 
@@ -32,26 +32,27 @@ public final class Bytes {
      * @return
      */
     public static String hexDump(byte[] bytes, int block, int chunk) {
-        Formatter fmt = new Formatter();
-        for (int i, j = 0, wid = block * chunk; j * wid < bytes.length; j++) {
-            fmt.format("%09x: ", j * wid); // 输出行号：“00000: ”
+        Formatter fmt = new Formatter(), text;
 
-            Formatter text = new Formatter(); // 右边文本
+        for (int i, j = 0, wid = block * chunk; j * wid < bytes.length; j++) {
+            fmt.format("%06x: ", j * wid); // 输出行号：“00000: ”
+
+            text = new Formatter(); // 右边文本
             for (i = 0; i < wid && (i + j * wid) < bytes.length; i++) {
                 byte b = bytes[i + j * wid];
-
                 fmt.format("%02X ", b); // 输出hex：“B1 ”
                 if ((i + 1) % block == 0 || i + 1 == wid) {
                     fmt.format("%s", SINGLE_SPACE); // block与block间加一个空格
                 }
-
-                if (b >= 0x21 && b <= 0x7e) text.format("%c", b);
-                else text.format("%c", '.'); // 非ascii码则输出“.”
+                if (b >= 0x21 && b <= 0x7e) {
+                    text.format("%c", b);
+                } else {
+                    text.format("%c", '.'); // 非ascii码则输出“.”
+                }
             }
 
             if (i < wid) { // 最后一行空格补全：i为该行的byte数
                 fmt.format("%s", StringUtils.repeat(SINGLE_SPACE, (wid - i) * 3)); // 补全byte位
-
                 for (int k = i + 1; k <= wid; k += block) {
                     fmt.format("%s", SINGLE_SPACE); // 补全block与block间的空格
                 }

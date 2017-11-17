@@ -26,10 +26,9 @@ public final class UrlCoder {
      */
     public static String encodeURI(String url, String charset) {
         StringBuilder builder = new StringBuilder(url.length() * 3 / 2);
-        char c;
         byte[] b;
         for (int n = url.length(), i = 0; i < n; i++) {
-            c = url.charAt(i);
+            char c = url.charAt(i);
             if (c >= 0 && c <= 255) {
                 builder.append(c);
             } else {
@@ -38,9 +37,11 @@ public final class UrlCoder {
                 } catch (Exception ex) {
                     b = new byte[0];
                 }
-                for (int j = 0; j < b.length; j++) {
-                    int k = b[j];
-                    if (k < 0) k += 256;
+                for (int k, j = 0; j < b.length; j++) {
+                    k = b[j];
+                    if (k < 0) {
+                        k += 256;
+                    }
                     builder.append("%" + Integer.toHexString(k).toUpperCase());
                 }
             }

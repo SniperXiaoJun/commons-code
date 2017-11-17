@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.core.LogEventListener;
 
 import code.ponfee.commons.reflect.ClassUtils;
@@ -145,9 +144,9 @@ public final class ResourceLoaderFacade {
     }
 
     public static void main(String[] args) throws IOException {
-        System.out.println(ResourceLoaderFacade.getResource("Log4j-config.xsd"));
-        System.out.println(IOUtils.toString(ResourceLoaderFacade.getResource("Log4j-config.xsd").getStream(), "UTF-8"));
-        System.out.println(IOUtils.toString(ResourceLoaderFacade.getResource("/Log4j-config.xsd", LogEventListener.class).getStream(), "UTF-8"));
+        System.out.println(ResourceLoaderFacade.getResource("Log4j-config.xsd", ResourceLoaderFacade.class)); // null
+        System.out.println(ResourceLoaderFacade.getResource("/Log4j-config.xsd", LogEventListener.class));
+        System.out.println(ResourceLoaderFacade.getResource("/log4j2.xml"));
         System.out.println(ResourceLoaderFacade.getResource("log4j2.xml"));
     }
 }

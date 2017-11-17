@@ -4,21 +4,16 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import code.ponfee.commons.concurrent.AsyncBatchConsumer;
+import code.ponfee.commons.concurrent.AsyncBatchTransmitter;
 
-public class TestBatchConsumer {
+public class TestBatchTransmitter {
 
     public static void main(String[] args) throws InterruptedException {
-        final AsyncBatchConsumer<Integer> consumer = new AsyncBatchConsumer<>((list, isEnd) -> {
+        final AsyncBatchTransmitter<Integer> transmitter = new AsyncBatchTransmitter<>((list, isEnd) -> {
             return () -> {
-                try {
-                    Thread.sleep(10000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
                 System.out.println(list.size() + "==" + Thread.currentThread().getId()
                     + "-" + Thread.currentThread().getName() + ", " + isEnd);
-                System.out.println(1 / 0); // submit方式不会打印异常
+                //System.out.println(1 / 0); // submit方式不会打印异常
             };
         });
 
@@ -32,7 +27,7 @@ public class TestBatchConsumer {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    consumer.put(increment.getAndIncrement());
+                    transmitter.put(increment.getAndIncrement());
                 }
             });
             thread.setDaemon(true);
@@ -41,7 +36,8 @@ public class TestBatchConsumer {
         Thread.sleep(5000);
         flag.set(false);
         Thread.sleep(1000);
-        consumer.end();
+        transmitter.end();
         System.out.println(increment.get());
+        Thread.sleep(1000);
     }
 }

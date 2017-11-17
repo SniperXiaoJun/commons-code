@@ -12,7 +12,7 @@ import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.cache.Cache;
 import code.ponfee.commons.cache.CacheBuilder;
-import code.ponfee.commons.concurrent.AsyncBatchConsumer;
+import code.ponfee.commons.concurrent.AsyncBatchTransmitter;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.JedisLock;
 import code.ponfee.commons.util.IdWorker;
@@ -30,7 +30,7 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
     private final JedisClient jedisClient;
     private final JedisLock lock;
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    private final AsyncBatchConsumer<Trace> consumer;
+    private final AsyncBatchTransmitter<Trace> transmitter;
     private final int clearBeforeMillis;
     private final Cache<Long> localCache = CacheBuilder.newBuilder().keepaliveInMillis(300000L) // 5 minutes of cache alive
                                                        .autoReleaseInSeconds(300).build(); // 5 minutes to release expire cache
@@ -51,7 +51,7 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
         }, autoClearInSeconds, autoClearInSeconds, TimeUnit.SECONDS);
 
         // 批量记录
-        this.consumer = new AsyncBatchConsumer<>((traces, isEnd) -> {
+        this.transmitter = new AsyncBatchTransmitter<>((traces, isEnd) -> {
             return () -> {
                 Map<String, Map<String, Double>> groups = new HashMap<>();
                 Map<String, Double> batch;
@@ -95,7 +95,7 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
         if (limitQtyInMinutes < countByLastTime(key, 1, TimeUnit.MINUTES)) {
             return false; // 超过频率
         } else {
-            return consumer.put(new Trace(key, System.currentTimeMillis()));
+            return transmitter.put(new Trace(key, System.currentTimeMillis()));
         }
     }
 

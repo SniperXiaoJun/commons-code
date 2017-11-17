@@ -53,7 +53,7 @@ public final class ThreadPoolExecutors {
     public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime, 
                                             int queueCapacity, String threadName, 
                                             RejectedExecutionHandler rejectedHandler) {
-        // BlockingQueue<Runnable> queue
+        // work queue
         BlockingQueue<Runnable> workQueue;
         if (queueCapacity > 0) {
             workQueue = new LinkedBlockingQueue<>(queueCapacity);

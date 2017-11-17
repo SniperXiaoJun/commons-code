@@ -1,18 +1,18 @@
 package code.ponfee.commons.cache;
 
 /**
- * 缓存Bean
+ * 缓存值
  * @author fupf
  * @param <T>
  */
-class CacheBean<T> implements java.io.Serializable {
+class CacheValue<T> implements java.io.Serializable {
 
     private static final long serialVersionUID = 4266458031910874821L;
 
     private long expireTimeMillis; // 失效时间
     private T value; // 值
 
-    CacheBean(T value, long expireTimeMillis) {
+    CacheValue(T value, long expireTimeMillis) {
         this.value = value;
         this.expireTimeMillis = expireTimeMillis;
     }

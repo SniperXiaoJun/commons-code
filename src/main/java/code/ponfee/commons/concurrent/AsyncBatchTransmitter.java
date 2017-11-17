@@ -12,11 +12,11 @@ import com.google.common.base.Preconditions;
 import code.ponfee.commons.math.Numbers;
 
 /**
- * 异步批量消费
+ * 异步批量数据中转站
  * @author fupf
  * @param <T>
  */
-public final class AsyncBatchConsumer<T> extends Thread {
+public final class AsyncBatchTransmitter<T> extends Thread {
 
     private final RunnableFactory<T> factory; // 线程工厂
     private final ThreadPoolExecutor executor; // 线程池执行器
@@ -32,14 +32,14 @@ public final class AsyncBatchConsumer<T> extends Thread {
     /**
      * @param factory  消费线程工厂
      */
-    public AsyncBatchConsumer(RunnableFactory<T> factory) {
+    public AsyncBatchTransmitter(RunnableFactory<T> factory) {
         this(factory, 1000, 200);
     }
 
     /**
      * @param factory  消费线程工厂
      */
-    public AsyncBatchConsumer(RunnableFactory<T> factory, 
+    public AsyncBatchTransmitter(RunnableFactory<T> factory, 
                               int thresholdPeriod, int thresholdChunk) {
         this(factory, null, thresholdPeriod, thresholdChunk);
     }
@@ -50,12 +50,12 @@ public final class AsyncBatchConsumer<T> extends Thread {
      * @param thresholdPeriod  消费周期阀值
      * @param thresholdChunk   消费数量阀值
      */
-    public AsyncBatchConsumer(RunnableFactory<T> factory, ThreadPoolExecutor executor,
+    public AsyncBatchTransmitter(RunnableFactory<T> factory, ThreadPoolExecutor executor,
                               int thresholdPeriod, int thresholdChunk) {
         Preconditions.checkArgument(thresholdPeriod > 0);
         Preconditions.checkArgument(thresholdChunk > 0);
         if (executor == null) {
-            this.executor = ThreadPoolExecutors.create(0, 10, 300, 0, "async-batch-consumer");
+            this.executor = ThreadPoolExecutors.create(0, 10, 300, 0, "async-batch-transmitter");
             this.needDestroyWhenEnd = true;
         } else {
             this.executor = executor;
@@ -66,27 +66,24 @@ public final class AsyncBatchConsumer<T> extends Thread {
         this.sleepTimeMillis = Numbers.bounds(thresholdPeriod, 9, thresholdPeriod);
         this.thresholdChunk = thresholdChunk;
 
-        super.setName("async-batch-consumer-" + Integer.toHexString(hashCode()));
+        super.setName("async-batch-transmitter-" + Integer.toHexString(hashCode()));
         super.setDaemon(true);
         super.start();
     }
 
     /**
      * thread run, don't to direct call into the code
+     * it is a thread and the alone thread
      */
     public @Override void run() {
-        List<T> list = null;
         T t;
+        List<T> list = new ArrayList<>(thresholdChunk);
         for (;;) {
             if (isEnd && queue.isEmpty() && isRefresh()) {
                 if (needDestroyWhenEnd) {
                     executor.shutdown();
                 }
                 break; // exit while loop when end
-            }
-
-            if (list == null) {
-                list = new ArrayList<>(thresholdChunk);
             }
 
             // 尽量不要使用queue.size()，时间复杂度O(n)
@@ -105,7 +102,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
                 // task抛异常后： execute会输出错误信息，线程结束，后续任务会创建新线程执行
                 //               submit不会输出错误信息，线程继续分配执行其它任务
                 executor.submit(factory.create(list, isEnd && queue.isEmpty())); // 提交到异步批量处理
-                list = null;
+                list = new ArrayList<>(thresholdChunk);
                 refresh();
             } else {
                 try {
@@ -157,6 +154,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
     }
 
     public void end() {
+        this.refresh();
         isEnd = true;
         this.refresh();
     }
@@ -169,7 +167,7 @@ public final class AsyncBatchConsumer<T> extends Thread {
         return System.currentTimeMillis() - lastConsumeTimeMillis > thresholdPeriod;
     }
 
-    // -------------------------------------unsupported methods------------------------------------
+    // ---------------------------unsupported methods of Thread class--------------------------
     public @Override void interrupt() {
         throw new UnsupportedOperationException();
     }

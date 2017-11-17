@@ -29,8 +29,7 @@ public final class Fields {
      */
     public static void put(Object target, String name, Object value) {
         try {
-            Field field = ClassUtils.getField(target.getClass(), name);
-            put(target, field, value);
+            put(target, ClassUtils.getField(target.getClass(), name), value);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -43,10 +42,8 @@ public final class Fields {
      * @param value 字段值
      */
     public static void putIfNull(Object target, String name, Object value) {
-        Field field;
         try {
-            field = ClassUtils.getField(target.getClass(), name);
-            putIfNull(target, field, value);
+            putIfNull(target, ClassUtils.getField(target.getClass(), name), value);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
