@@ -55,7 +55,8 @@ public class IdcardResolver {
         StringBuilder builder = new StringBuilder(18);
         builder.append(AREA_CODE_LIST.get(random.nextInt(AREA_CODE_LIST.size()))); // 行政区号：6位
         builder.append(Dates.format(Dates.random(ORIGIN_DATE), "yyyyMMdd")); // 生日：8位
-        builder.append(StringUtils.leftPad(String.valueOf(random.nextInt(1000)), 3, '0')); // 当地派出所在该日期的出生顺序号：3位，其中17位（倒数第二位）男为单数，女为双数
+        // 当地派出所在该日期的出生顺序号：3位，其中17位（倒数第二位）男为单数，女为双数
+        builder.append(StringUtils.leftPad(String.valueOf(random.nextInt(1000)), 3, '0'));
         builder.append(genPowerSum(builder.toString().toCharArray())); // 校验码：1位
         return builder.toString();
     }

@@ -20,7 +20,7 @@ import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 public class ThreadPoolMailSender {
 
     private static Logger logger = LoggerFactory.getLogger(ThreadPoolMailSender.class);
-    private static final ExecutorService EXECUTOR = ThreadPoolExecutors.create(0, 20, 120, 0, "mail-sender");
+    private static final ExecutorService EXECUTOR = ThreadPoolExecutors.create(0, 20, 120, 40, "mail-sender");
 
     public static boolean send(MailSender mailSender, MailEnvelope envlop) {
         return send(mailSender, envlop, true);
@@ -71,8 +71,8 @@ public class ThreadPoolMailSender {
      * 异步发送
      */
     private static final class Sender implements Callable<Boolean> {
-        MailSender mailSender;
-        MailEnvelope envlop;
+        final MailSender mailSender;
+        final MailEnvelope envlop;
 
         Sender(MailSender mailSender, MailEnvelope envlop) {
             this.mailSender = mailSender;

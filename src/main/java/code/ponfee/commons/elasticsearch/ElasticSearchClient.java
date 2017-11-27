@@ -499,7 +499,7 @@ public class ElasticSearchClient implements DisposableBean {
      */
     public <T> T getDoc(String index, String type, Class<T> clazz, String id) {
         GetResponse response = client.prepareGet(index, type, id).get();
-        return convertMap(response.getSource(), clazz);
+        return convertFromMap(response.getSource(), clazz);
     }
 
     /**
@@ -516,7 +516,7 @@ public class ElasticSearchClient implements DisposableBean {
         for (MultiGetItemResponse itemResp : multiResp) {
             GetResponse response = itemResp.getResponse();
             if (response.isExists()) {
-                result.add(convertMap(response.getSource(), clazz));
+                result.add(convertFromMap(response.getSource(), clazz));
             }
         }
         return result;
@@ -649,7 +649,7 @@ public class ElasticSearchClient implements DisposableBean {
         SearchResponse scrollResp = query.scrolling(client, SCROLL_SIZE);
         this.scrollingSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecord, totalPage, pageNo) -> {
             for (SearchHit hit : searchHits.getHits()) {
-                result.add(convertMap(hit.getSource(), clazz));
+                result.add(convertFromMap(hit.getSource(), clazz));
             }
         });
         return result;
@@ -666,7 +666,7 @@ public class ElasticSearchClient implements DisposableBean {
         SearchResponse scrollResp = search.setSize(SCROLL_SIZE).setScroll(SCROLL_TIMEOUT).get();
         this.scrollingSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecord, totalPage, pageNo) -> {
             for (SearchHit hit : searchHits.getHits()) {
-                result.add(convertMap(hit.getSource(), clazz));
+                result.add(convertFromMap(hit.getSource(), clazz));
             }
         });
         return result;
@@ -743,7 +743,7 @@ public class ElasticSearchClient implements DisposableBean {
         long total = hits.getTotalHits();
         List<T> result = new ArrayList<>(pageSize);
         for (SearchHit hit : hits) {
-            result.add(convertMap(hit.getSource(), clazz));
+            result.add(convertFromMap(hit.getSource(), clazz));
         }
         Page<T> page = new Page<>(result);
         page.setTotal(total);
@@ -786,8 +786,10 @@ public class ElasticSearchClient implements DisposableBean {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T convertMap(Map<String, Object> data, Class<T> clazz) {
-        if (Map.class.isAssignableFrom(clazz)) {
+    private static <T> T convertFromMap(Map<String, Object> data, Class<T> clazz) {
+        if (data == null) {
+            return null;
+        } else if (clazz.isAssignableFrom(data.getClass())) {
             return (T) data;
         } else {
             return ObjectUtils.map2bean(data, clazz);

@@ -3,17 +3,17 @@ package code.ponfee.commons.jedis;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import code.ponfee.commons.math.Numbers;
-import code.ponfee.commons.util.ObjectUtils;
+import code.ponfee.commons.util.Bytes;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Transaction;
 
@@ -263,10 +263,7 @@ public class JedisLock implements Lock, java.io.Serializable {
      * @return
      */
     private long parseValue(byte[] value) {
-        ByteBuffer buffer = ByteBuffer.allocate(8);
-        buffer.put(value, 16, 8); // long value after 16 byte uuid
-        buffer.flip();
-        return buffer.getLong();
+        return Bytes.toLong(value, 16); // long value after 16 byte uuid
     }
 
     /**
@@ -274,10 +271,24 @@ public class JedisLock implements Lock, java.io.Serializable {
      * @return
      */
     private byte[] buildValue() {
-        ByteBuffer buffer = ByteBuffer.allocate(8);
-        buffer.putLong(0, System.currentTimeMillis() + timeoutMillis);
-        byte[] value = ArrayUtils.addAll(ObjectUtils.uuid(), buffer.array());
+        UUID uuid = UUID.randomUUID();
+        byte[] value = ByteBuffer.allocate(24)
+                                 .putLong(uuid.getMostSignificantBits()) // 8 byte
+                                 .putLong(uuid.getLeastSignificantBits()) // 8 byte
+                                 .putLong(System.currentTimeMillis() + timeoutMillis) // 8 byte
+                                 .array();
         LOCK_VALUE.set(value);
         return value;
+    }
+
+    public static void main(String[] args) {
+        UUID uuid = UUID.randomUUID();
+        long n = System.currentTimeMillis();
+        ByteBuffer buffer = ByteBuffer.allocate(24);
+        buffer.putLong(uuid.getMostSignificantBits()); // 8 byte
+        buffer.putLong(uuid.getLeastSignificantBits()); // 8 byte
+        buffer.putLong(n);
+        byte[] value = buffer.array();
+        System.out.println(n == Bytes.toLong(value, 16));
     }
 }

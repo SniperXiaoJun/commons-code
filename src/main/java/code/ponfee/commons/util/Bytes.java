@@ -9,8 +9,6 @@ import java.util.Formatter;
 
 import org.apache.commons.lang3.StringUtils;
 
-import code.ponfee.commons.io.Files;
-
 /**
  * byte[]
  * @author fupf
@@ -228,10 +226,10 @@ public final class Bytes {
 
     public static char[] toCharArray(byte[] bytes, String charset) {
         //return new String(bytes, Charset.forName(charset)).toCharArray();
-        ByteBuffer buff = ByteBuffer.allocate(bytes.length);
-        buff.put(bytes);
-        buff.flip();
-        return Charset.forName(charset).decode(buff).array();
+        ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+        buffer.put(bytes);
+        buffer.flip();
+        return Charset.forName(charset).decode(buffer).array();
     }
 
     public static byte[] fromCharArray(char[] chars) {
@@ -240,10 +238,18 @@ public final class Bytes {
 
     public static byte[] fromCharArray(char[] chars, String charset) {
         //return new String(chars).getBytes(Charset.forName(charset));
-        CharBuffer cb = CharBuffer.allocate(chars.length);
-        cb.put(chars);
-        cb.flip();
-        return Charset.forName(charset).encode(cb).array();
+        CharBuffer buffer = CharBuffer.allocate(chars.length);
+        buffer.put(chars);
+        buffer.flip();
+        return Charset.forName(charset).encode(buffer).array();
+    }
+
+    public static byte[] fromLong(long number) {
+        return ByteBuffer.allocate(8).putLong(number).array();
+    }
+
+    public static long toLong(byte[] bytes, int fromIdx) {
+        return ((ByteBuffer) ByteBuffer.allocate(8).put(bytes, fromIdx, 8).flip()).getLong();
     }
 
     /**
@@ -272,6 +278,6 @@ public final class Bytes {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println(hexDump(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class))));
+        //System.out.println(hexDump(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class))));
     }
 }

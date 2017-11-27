@@ -31,8 +31,12 @@ public class DatePeriodCalculator {
      * @return
      */
     public Date[] calculate(int quantity, int next) {
-        if (quantity < 1) throw new IllegalArgumentException("quantity must be positive number");
-        if (starting.after(target)) throw new IllegalArgumentException("starting canot after target date");
+        if (quantity < 1) {
+            throw new IllegalArgumentException("quantity must be positive number");
+        }
+        if (starting.after(target)) {
+            throw new IllegalArgumentException("starting canot after target date");
+        }
 
         Calendar c1 = Calendar.getInstance();
         Calendar c2 = Calendar.getInstance();

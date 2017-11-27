@@ -375,7 +375,7 @@ public final class ObjectUtils {
      */
     public static byte[] uuid() {
         UUID uuid = UUID.randomUUID();
-        return ByteBuffer.wrap(new byte[16])
+        return ByteBuffer.allocate(16) // wrap(new byte[16])
                          .putLong(uuid.getMostSignificantBits())
                          .putLong(uuid.getLeastSignificantBits())
                          .array();
@@ -388,7 +388,7 @@ public final class ObjectUtils {
     public static String uuid32() {
         UUID uuid = UUID.randomUUID();
         return Long.toHexString(uuid.getMostSignificantBits())
-            + Long.toHexString(uuid.getLeastSignificantBits());
+             + Long.toHexString(uuid.getLeastSignificantBits());
     }
 
     /**

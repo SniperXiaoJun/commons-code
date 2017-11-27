@@ -22,6 +22,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.JavaType;
+import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.util.Bytes;
@@ -168,6 +169,7 @@ public final class Http {
      * @return
      */
     public Http data(String data) {
+        Preconditions.checkState(data == null, "data only set once");
         this.data = data;
         return this;
     }
