@@ -741,7 +741,7 @@ public class ElasticSearchClient implements DisposableBean {
     private <T> Page<T> buildPage(SearchResponse searchResp, int from, int pageNo, int pageSize, Class<T> clazz) {
         SearchHits hits = searchResp.getHits();
         long total = hits.getTotalHits();
-        List<T> result = new ArrayList<>(pageSize);
+        List<T> result = new ArrayList<>(hits.getHits().length);
         for (SearchHit hit : hits) {
             result.add(convertFromMap(hit.getSource(), clazz));
         }
@@ -797,8 +797,6 @@ public class ElasticSearchClient implements DisposableBean {
     }
 
     public static void main(String[] args) throws IOException {
-        System.out.println(Map.class.isAssignableFrom(Map.class));
-
         XContentBuilder mapping = XContentFactory.jsonBuilder()
             .startObject() // {
               .startObject("user_mapping") // "user":{ // type name

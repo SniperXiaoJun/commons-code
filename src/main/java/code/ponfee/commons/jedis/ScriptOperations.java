@@ -7,7 +7,9 @@ import java.util.List;
  * @author fupf
  */
 public class ScriptOperations extends JedisOperations {
-    public static final String JEDIS_SCRIPT_OPS = "jedis-script-ops";
+
+     public static final String JEDIS_SCRIPT_OPS = "jedis-script-ops";
+     private static final byte[] JEDIS_SCRIPT_OPS_BYTES = JEDIS_SCRIPT_OPS.getBytes();
 
     ScriptOperations(JedisClient jedisClient) {
         super(jedisClient);
@@ -20,7 +22,7 @@ public class ScriptOperations extends JedisOperations {
      */
     public Object eval(String script, List<String> keys, List<String> args) {
         return hook(shardedJedis -> {
-            return getShard(shardedJedis, JEDIS_SCRIPT_OPS).eval(script, keys, args);
+            return getShard(shardedJedis, JEDIS_SCRIPT_OPS_BYTES).eval(script, keys, args);
         }, null, script, keys, args);
     }
 
@@ -31,7 +33,7 @@ public class ScriptOperations extends JedisOperations {
      */
     public String scriptLoad(String script) {
         return hook(shardedJedis -> {
-            return getShard(shardedJedis, JEDIS_SCRIPT_OPS).scriptLoad(script);
+            return getShard(shardedJedis, JEDIS_SCRIPT_OPS_BYTES).scriptLoad(script);
         }, null, script);
     }
 
@@ -44,7 +46,7 @@ public class ScriptOperations extends JedisOperations {
      */
     public Object evalsha(String sha1, List<String> keys, List<String> args) {
         return hook(shardedJedis -> {
-            return getShard(shardedJedis, JEDIS_SCRIPT_OPS).evalsha(sha1, keys, args);
+            return getShard(shardedJedis, JEDIS_SCRIPT_OPS_BYTES).evalsha(sha1, keys, args);
         }, null, sha1, keys, args);
     }
 

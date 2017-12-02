@@ -48,7 +48,7 @@ import code.ponfee.commons.reflect.Fields;
  *         </plugin>
  *     </plugins>
  * </configuration>
- * @author 01367825
+ * @author Ponfee
  */
 @Intercepts({ @Signature(type = StatementHandler.class, method = "prepare", args = { Connection.class, Integer.class }) })
 public class PagePlugin implements Interceptor {

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -140,7 +141,18 @@ public final class WebContext {
     /**
      * 过滤器
      */
-    @WebFilter(filterName = "code.ponfee.commons.web.WebContext$WebContextFilter", urlPatterns = "/*")
+    @WebFilter(
+       filterName = "code.ponfee.commons.web.WebContext$WebContextFilter",
+       dispatcherTypes = {
+            DispatcherType.REQUEST,
+            DispatcherType.FORWARD,
+            DispatcherType.INCLUDE,
+            DispatcherType.ASYNC,
+            DispatcherType.ERROR
+        }, 
+        urlPatterns = { "/*" }, 
+        asyncSupported = true // 支持异步Servlet
+    )
     public static class WebContextFilter implements Filter {
 
         public @Override void init(FilterConfig cfg) throws ServletException {}

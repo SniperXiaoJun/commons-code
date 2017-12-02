@@ -71,9 +71,10 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
                                                entry.getValue(), EXPIRE_SECONDS);
                 }
                 groups.clear();
+                groups = null;
                 traces.clear();
             };
-        }, 100, 2000); // 100毫秒间隔，2000条∕次
+        }, 100, 5000); // 100毫秒间隔，5000条∕次
     }
 
     /**

@@ -50,11 +50,12 @@ public final class Files {
         out.close();
     }
 
+    private static final String[] FILE_UNITS = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
     /** 
      * 文件大小可读化（attach unit）：B、KB、MB
      * @param size 文件字节大小 
+     * @return
      */
-    private static final String[] FILE_UNITS = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
     public static String human(long size) {
         if (size <= 0) return "0";
 
@@ -65,6 +66,7 @@ public final class Files {
     /**
      * 创建目录
      * @param path
+     * @return
      */
     public static File mkdir(String path) {
         return mkdir(new File(path));
@@ -96,6 +98,7 @@ public final class Files {
     /**
      * 创建文件
      * @param file
+     * @return
      */
     public static File touch(File file) {
         if (!file.exists()) {

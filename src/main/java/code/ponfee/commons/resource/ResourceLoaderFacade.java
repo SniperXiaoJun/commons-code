@@ -1,29 +1,32 @@
 package code.ponfee.commons.resource;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.ServletContext;
-
-import org.apache.logging.log4j.core.LogEventListener;
 
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.util.Strings;
 
 /**
- * <pre>
- *   <ul>
- *     <li>
- *      <span>classpath:</span>
- *        filePath默认为""<p>
- *        当以“/”开头时contextClass只起到jar包定位的作用（且会去掉“/”）<p>
- *        不以“/”开头时contextClass还起到package相对路径的作用<p>
- *     </li>
- *     <li>webapp:</li>
- *     <li>file:</li>
- *   </ul>
- *   <p>default classpath:</p>
- * </pre>
+ * <ul>
+ *   <li>
+ *    <span>classpath:</span>
+ *      filePath默认为""<p>
+ *      当以“/”开头时contextClass只起到jar包定位的作用（且会去掉“/”）<p>
+ *      不以“/”开头时contextClass还起到package相对路径的作用<p>
+ *   </li>
+ *   <li>webapp:</li>
+ *   <li>file:</li>
+ * </ul>
+ * <p>default classpath:</p>
+ *
+ * <p>
+ * ResourceLoaderFacade.getResource("StringUtils.class", StringUtils.class);
+ * ResourceLoaderFacade.getResource("Log4j-config.xsd", ResourceLoaderFacade.class); // null
+ * ResourceLoaderFacade.getResource("/Log4j-config.xsd", LogEventListener.class);
+ * ResourceLoaderFacade.getResource("/log4j2.xml");
+ * ResourceLoaderFacade.getResource("log4j2.xml");
+ * ResourceLoaderFacade.getResource("file:d:/import.txt")
  * 
  * 资源文件加载门面类
  * @author fupf
@@ -130,7 +133,7 @@ public final class ResourceLoaderFacade {
         if (path.startsWith(WEB_PREFIX)) {
             path = Strings.cleanPath(path.substring(WEB_PREFIX.length()));
             if (!path.startsWith("/")) {
-                path = (new StringBuilder()).append("/").append(path).toString();
+                path = "/" + path;
             }
         } else if (path.startsWith(FS_PREFIX)) {
             path = Strings.cleanPath(path.substring(FS_PREFIX.length()));
@@ -143,10 +146,4 @@ public final class ResourceLoaderFacade {
         return path;
     }
 
-    public static void main(String[] args) throws IOException {
-        System.out.println(ResourceLoaderFacade.getResource("Log4j-config.xsd", ResourceLoaderFacade.class)); // null
-        System.out.println(ResourceLoaderFacade.getResource("/Log4j-config.xsd", LogEventListener.class));
-        System.out.println(ResourceLoaderFacade.getResource("/log4j2.xml"));
-        System.out.println(ResourceLoaderFacade.getResource("log4j2.xml"));
-    }
 }

@@ -61,6 +61,10 @@ abstract class JedisOperations {
         return shardedJedis.getShard(key);
     }
 
+    public static final Jedis getShard(ShardedJedis shardedJedis, byte[] key) {
+        return shardedJedis.getShard(key);
+    }
+
     static int getActualExpire(int seconds) {
         if (seconds > MAX_EXPIRE_SECONDS) {
             seconds = MAX_EXPIRE_SECONDS;

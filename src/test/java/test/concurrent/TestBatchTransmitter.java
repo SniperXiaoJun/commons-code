@@ -22,18 +22,18 @@ public class TestBatchTransmitter {
         for (int i = 0; i < 100; i++) {
             Thread thread = new Thread(() -> {
                 while (flag.get()) {
+                    transmitter.put(increment.getAndIncrement());
                     try {
-                        Thread.sleep(85 + ThreadLocalRandom.current().nextInt(850));
+                        Thread.sleep(211 + ThreadLocalRandom.current().nextInt(1611));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    transmitter.put(increment.getAndIncrement());
                 }
             });
             thread.setDaemon(true);
             thread.start();
         }
-        Thread.sleep(5000);
+        Thread.sleep(15000);
         flag.set(false);
         Thread.sleep(1000);
         transmitter.end();

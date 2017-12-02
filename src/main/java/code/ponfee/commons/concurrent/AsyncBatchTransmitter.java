@@ -40,7 +40,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
      * @param factory  消费线程工厂
      */
     public AsyncBatchTransmitter(RunnableFactory<T> factory, 
-                              int thresholdPeriod, int thresholdChunk) {
+                                 int thresholdPeriod, int thresholdChunk) {
         this(factory, null, thresholdPeriod, thresholdChunk);
     }
 
@@ -51,7 +51,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
      * @param thresholdChunk   消费数量阀值
      */
     public AsyncBatchTransmitter(RunnableFactory<T> factory, ThreadPoolExecutor executor,
-                              int thresholdPeriod, int thresholdChunk) {
+                                 int thresholdPeriod, int thresholdChunk) {
         Preconditions.checkArgument(thresholdPeriod > 0);
         Preconditions.checkArgument(thresholdChunk > 0);
         if (executor == null) {
