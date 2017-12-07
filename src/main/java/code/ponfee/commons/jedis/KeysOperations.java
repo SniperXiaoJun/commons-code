@@ -22,7 +22,7 @@ public class KeysOperations extends JedisOperations {
      * @param key
      * @return
      */
-    public Long ttl(final String key) {
+    public Long ttl(String key) {
         return ((JedisHook<Long>) sjedis -> sjedis.ttl(key)).hook(jedisClient, null, key);
     }
 
@@ -31,7 +31,7 @@ public class KeysOperations extends JedisOperations {
      * @param key
      * @return
      */
-    public Long pttl(final String key) {
+    public Long pttl(String key) {
         return hook(sjedis -> sjedis.pttl(key), null, key);
     }
 
@@ -40,7 +40,7 @@ public class KeysOperations extends JedisOperations {
      * @param keyWildcard
      * @return
      */
-    public Set<String> keys(final String keyWildcard) {
+    public Set<String> keys(String keyWildcard) {
         return hook(shardedJedis -> {
             Set<String> keys = new HashSet<>();
             for (Jedis jedis : shardedJedis.getAllShards()) {
@@ -56,7 +56,7 @@ public class KeysOperations extends JedisOperations {
      * @param seconds
      * @return 是否设置成功
      */
-    public boolean expire(final String key, final int seconds) {
+    public boolean expire(String key, int seconds) {
         return hook(shardedJedis -> {
             return JedisOperations.expire(shardedJedis, key, seconds);
         }, false, key, seconds);
@@ -68,7 +68,7 @@ public class KeysOperations extends JedisOperations {
      * @param milliseconds
      * @return 是否设置成功
      */
-    public boolean pexpire(final String key, final int milliseconds) {
+    public boolean pexpire(String key, int milliseconds) {
         return hook(shardedJedis -> {
             return JedisOperations.pexpire(shardedJedis, key, milliseconds);
         }, false, key, milliseconds);
@@ -79,7 +79,7 @@ public class KeysOperations extends JedisOperations {
      * @param key
      * @return
      */
-    public boolean exists(final String key) {
+    public boolean exists(String key) {
         return hook(shardedJedis -> {
             return shardedJedis.exists(key);
         }, false, key);
@@ -90,7 +90,7 @@ public class KeysOperations extends JedisOperations {
      * @param key
      * @return 被删除 key 的数量
      */
-    public Long del(final String key) {
+    public Long del(String key) {
         return hook(shardedJedis -> {
             return shardedJedis.del(key);
         }, null, key);
@@ -101,7 +101,7 @@ public class KeysOperations extends JedisOperations {
      * @param key
      * @return 被删除 key 的数量
      */
-    public Long del(final byte[] key) {
+    public Long del(byte[] key) {
         return hook(shardedJedis -> {
             return shardedJedis.del(key);
         }, null, key);
@@ -112,13 +112,15 @@ public class KeysOperations extends JedisOperations {
      * @param keyWildcard
      * @return 被删除 key 的数量
      */
-    public long dels(final String keyWildcard) {
+    public long dels(String keyWildcard) {
         return hook(shardedJedis -> {
             long delCounts = 0;
+            Set<String> keys;
             for (Jedis jedis : shardedJedis.getAllShards()) {
-                Set<String> keys = jedis.keys(keyWildcard);
+                keys = jedis.keys(keyWildcard);
                 if (keys != null && keys.size() > 0) {
                     delCounts += jedis.del(keys.toArray(new String[keys.size()]));
+                    keys.clear();
                 }
             }
             return delCounts;
@@ -128,9 +130,9 @@ public class KeysOperations extends JedisOperations {
     /**
      * 返回 key 所储存的值的类型。
      * @param key
-     * @return none (key不存在)；string (字符串)；list (列表)；set (集合)；zset (有序集)；hash (哈希表)
+     * @return none (key不存在)；string (字符串)；list (列表)；set (集合)；zset (有序集)；hash (哈希表)；
      */
-    public String type(final String key) {
+    public String type(String key) {
         return hook(shardedJedis -> {
             return shardedJedis.type(key);
         }, null, key);

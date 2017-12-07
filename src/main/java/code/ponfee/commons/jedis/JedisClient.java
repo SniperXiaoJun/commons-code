@@ -229,7 +229,7 @@ public class JedisClient implements DisposableBean {
         call.call(this, args);
     }
 
-    final void exception(Exception e, Object... args) {
+    static final void exception(Exception e, Object... args) {
         //StackTraceElement[] st = Thread.currentThread().getStackTrace();
         //builder.append(st[p].getClassName()).append(".").append(st[p].getMethodName()).append("(");
         StringBuilder builder = new StringBuilder("redis operation occur error, args(");
@@ -264,7 +264,7 @@ public class JedisClient implements DisposableBean {
         logger.error(builder.append(")").toString(), e);
     }
 
-    private String toString(byte[] bytes) {
+    private static String toString(byte[] bytes) {
         if (bytes.length > MAX_BYTE_LEN) {
             bytes = ArrayUtils.subarray(bytes, 0, MAX_BYTE_LEN);
         }

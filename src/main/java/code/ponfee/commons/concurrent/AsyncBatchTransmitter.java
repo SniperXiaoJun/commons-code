@@ -91,7 +91,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
                 for (int n = thresholdChunk - list.size(), i = 0; i < n; i++) {
                     t = queue.poll();
                     if (t == null) {
-                        break; // break inner for loop
+                        break; // break inner loop
                     } else {
                         list.add(t);
                     }

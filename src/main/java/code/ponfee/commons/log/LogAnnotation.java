@@ -30,7 +30,7 @@ public @interface LogAnnotation {
 
     LogType type() default LogType.UNDEFINED;
 
-    boolean limit() default false; // 是否限制频率
+    boolean enabled() default false; // 是否开启熔断
 
     String desc() default "";
 

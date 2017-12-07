@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import code.ponfee.commons.concurrent.FrequencyLimiter;
+import code.ponfee.commons.concurrent.CircuitBreaker;
 import code.ponfee.commons.exception.Throwables;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.util.ObjectUtils;
@@ -38,7 +38,7 @@ public abstract class LogRecorder {
     private static Logger logger = LoggerFactory.getLogger(LogRecorder.class);
 
     private final int alarmThresholdMillis; // 告警阀值
-    private final FrequencyLimiter freqLimiter; // 访问频率限制
+    private final CircuitBreaker circuitBreaker; // 访问频率限制
 
     public LogRecorder() {
         this(DEFAULT_ALARM_THRESHOLD_MILLIS);
@@ -48,14 +48,14 @@ public abstract class LogRecorder {
         this(alarmThresholdMillis, null);
     }
 
-    public LogRecorder(FrequencyLimiter freqLimiter) {
-        this(DEFAULT_ALARM_THRESHOLD_MILLIS, freqLimiter);
+    public LogRecorder(CircuitBreaker circuitBreaker) {
+        this(DEFAULT_ALARM_THRESHOLD_MILLIS, circuitBreaker);
     }
 
-    public LogRecorder(int alarmThresholdMillis, FrequencyLimiter freqLimiter) {
+    public LogRecorder(int alarmThresholdMillis, CircuitBreaker circuitBreaker) {
         Preconditions.checkArgument(alarmThresholdMillis > 0);
         this.alarmThresholdMillis = alarmThresholdMillis;
-        this.freqLimiter = freqLimiter;
+        this.circuitBreaker = circuitBreaker;
     }
 
     /**
@@ -80,9 +80,9 @@ public abstract class LogRecorder {
         Method method = pjp.getTarget().getClass().getMethod(m.getName(), m.getParameterTypes());
         String methodName = ClassUtils.getMethodSignature(method);
 
-        // request frequency limit
-        if (log != null && log.limit() && freqLimiter != null
-            && !freqLimiter.checkAndTrace(methodName)) {
+        // request volume threshold
+        if (log != null && log.enabled() && circuitBreaker != null
+            && !circuitBreaker.checkAndTrace(methodName)) {
             throw new IllegalStateException("request denied");
         }
 

@@ -3,10 +3,10 @@ package code.ponfee.commons.concurrent;
 import java.util.Date;
 
 /**
- * 访问频率控制
+ * 熔断处理
  * @author fupf
  */
-public interface FrequencyLimiter {
+public interface CircuitBreaker {
 
     /**
      * 校验并追踪
@@ -18,10 +18,10 @@ public interface FrequencyLimiter {
     /**
      * 校验并追踪
      * @param key
-     * @param limit
+     * @param requestThreshold
      * @return
      */
-    boolean checkAndTrace(String key, long limit);
+    boolean checkAndTrace(String key, long requestThreshold);
 
     /**
      * 按区间统计
@@ -33,17 +33,17 @@ public interface FrequencyLimiter {
     long countByRange(String key, Date from, Date to);
 
     /**
-     * 设置一分钟的访问限制量
+     * 设置一分钟（60s）的访问限制量
      * @param key
-     * @param qty
+     * @param threshold
      * @return
      */
-    boolean setLimitsInMinute(String key, long qty);
+    boolean setRequestThreshold(String key, long threshold);
 
     /**
      * 获取配置的访问量
      * @param key
      * @return
      */
-    long getLimitsInMinute(String key);
+    long getRequestThreshold(String key);
 }

@@ -3,7 +3,7 @@ package test.log;
 import org.junit.Before;
 import org.junit.Test;
 
-import code.ponfee.commons.concurrent.RedisFrequencyLimiter;
+import code.ponfee.commons.concurrent.RedisCircuitBreaker;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.serial.JdkSerializer;
 import redis.clients.jedis.JedisPoolConfig;
@@ -31,8 +31,8 @@ public class FreqTester {
     
     @Test
     public void test1() throws InterruptedException {
-        RedisFrequencyLimiter f = new RedisFrequencyLimiter(jedisClient, 1, 5);
-        f.setLimitsInMinute("abc", 50000000);
+        RedisCircuitBreaker f = new RedisCircuitBreaker(jedisClient, 1, 5);
+        f.setRequestThreshold("abc", 50000000);
         for (int i = 0; i < 200; i++) {
             new Thread(){
                 @Override

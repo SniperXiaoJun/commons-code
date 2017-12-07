@@ -30,11 +30,6 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         HOLDER.add(c);
     }
 
-    @Override
-    public void destroy() throws Exception {
-        HOLDER.clear();
-    }
-
     /**
      * 通过名称获取bean
      * @param name
@@ -46,13 +41,14 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         for (ApplicationContext c : HOLDER) {
             try {
                 Object bean = c.getBean(name);
-                if (bean != null) return bean;
+                if (bean != null) {
+                    return bean;
+                }
             } catch (BeansException e) {
                 ex = e;
             }
         }
-        if (ex == null) return null;
-        else throw ex;
+        return throwOrReturn(ex, null);
     }
 
     /**
@@ -66,13 +62,14 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         for (ApplicationContext c : HOLDER) {
             try {
                 T bean = c.getBean(clszz);
-                if (bean != null) return bean;
+                if (bean != null) {
+                    return bean;
+                }
             } catch (BeansException e) {
                 ex = e;
             }
         }
-        if (ex == null) return null;
-        else throw ex;
+        return throwOrReturn(ex, null);
     }
 
     /**
@@ -93,8 +90,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
                 ex = e;
             }
         }
-        if (ex == null) return null;
-        else throw ex;
+        return throwOrReturn(ex, null);
     }
 
     /**
@@ -105,7 +101,9 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
     public static boolean containsBean(String name) {
         assertContextInjected();
         for (ApplicationContext c : HOLDER) {
-            if (c.containsBean(name)) return true;
+            if (c.containsBean(name)) {
+                return true;
+            }
         }
         return false;
     }
@@ -125,8 +123,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
                 ex = e;
             }
         }
-        if (ex == null) return false;
-        else throw ex;
+        return throwOrReturn(ex, false);
     }
 
     /**
@@ -146,8 +143,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
                 ex = e;
             }
         }
-        if (ex == null) return null;
-        else throw ex;
+        return throwOrReturn(ex, null);
     }
 
     /**
@@ -159,11 +155,26 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         assertContextInjected();
         for (ApplicationContext c : HOLDER) {
             String[] aliases = c.getAliases(name);
-            if (aliases != null) return aliases;
+            if (aliases != null) {
+                return aliases;
+            }
         }
+
         return null;
     }
 
+    @Override
+    public void destroy() throws Exception {
+        HOLDER.clear();
+    }
+
+    private static <T> T throwOrReturn(BeansException ex, T t) {
+        if (ex == null) {
+            return t;
+        } else {
+            throw ex;
+        }
+    }
     /**
      * 检查ApplicationContext不为空.
      */

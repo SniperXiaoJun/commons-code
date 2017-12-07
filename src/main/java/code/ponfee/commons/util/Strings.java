@@ -347,8 +347,10 @@ public class Strings {
      * @return
      */
     public static boolean isEmpty(Object value) {
+        if (value == null) return true;
+
         return CharSequence.class.isInstance(value)
-            && StringUtils.isEmpty((CharSequence) value);
+               && StringUtils.isEmpty((CharSequence) value);
     }
 
     /** 

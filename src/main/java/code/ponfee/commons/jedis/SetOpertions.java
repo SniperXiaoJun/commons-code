@@ -27,7 +27,7 @@ public class SetOpertions extends JedisOperations {
      * @param members
      * @return 被添加到集合中的新元素的数量，不包括被忽略的元素。
      */
-    public Long sadd(final String key, final Integer seconds, final String... members) {
+    public Long sadd(String key, Integer seconds, String... members) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.sadd(key, members);
             expireForce(shardedJedis, key, seconds);
@@ -51,8 +51,8 @@ public class SetOpertions extends JedisOperations {
      * @param members
      * @return 被添加到集合中的新元素的数量，不包括被忽略的元素。
      */
-    public <T extends Object> Long sadd(final byte[] key, final boolean isCompress,
-        final Integer seconds, final T[] members) {
+    public <T extends Object> Long sadd(byte[] key, boolean isCompress,
+                                        Integer seconds, T[] members) {
         return hook(shardedJedis -> {
             byte[][] data = new byte[members.length][];
             for (int i = 0; i < members.length; i++) {
@@ -86,7 +86,7 @@ public class SetOpertions extends JedisOperations {
      * @param seconds
      * @return 被移除的随机元素。当 key 不存在或 key 是空集时，返回 nil 。
      */
-    public String spop(final String key, final Integer seconds) {
+    public String spop(String key, Integer seconds) {
         return hook(shardedJedis -> {
             String result = shardedJedis.spop(key);
             if (result != null) {
@@ -110,8 +110,8 @@ public class SetOpertions extends JedisOperations {
      * @param seconds
      * @return 被移除的随机元素。当 key 不存在或 key 是空集时，返回 nil 。
      */
-    public <T extends Object> T spop(final byte[] key, final Class<T> clazz,
-        final boolean isCompress, final Integer seconds) {
+    public <T extends Object> T spop(byte[] key, Class<T> clazz,
+                                     boolean isCompress, Integer seconds) {
         return hook(shardedJedis -> {
             byte[] data = shardedJedis.spop(key);
             T t = jedisClient.deserialize(data, clazz, isCompress);
@@ -141,7 +141,7 @@ public class SetOpertions extends JedisOperations {
      * @param seconds
      * @return 如果 member 元素是集合的成员，返回 true 。如果 member 元素不是集合的成员，或 key 不存在，返回 false 。
      */
-    public boolean sismember(final String key, final String member, final Integer seconds) {
+    public boolean sismember(String key, String member, Integer seconds) {
         return hook(shardedJedis -> {
             boolean result = shardedJedis.sismember(key, member);
             expire(shardedJedis, key, seconds);
@@ -163,7 +163,7 @@ public class SetOpertions extends JedisOperations {
      * @param seconds
      * @return 集合中的所有成员。
      */
-    public Set<String> smembers(final String key, final Integer seconds) {
+    public Set<String> smembers(String key, Integer seconds) {
         return hook(shardedJedis -> {
             Set<String> result = shardedJedis.smembers(key);
             if (result != null && !result.isEmpty()) {
@@ -187,8 +187,8 @@ public class SetOpertions extends JedisOperations {
      * @param seconds
      * @return 集合中的所有成员。
      */
-    public <T extends Object> Set<T> smembers(final byte[] key, final Class<T> clazz,
-                                              final boolean isCompress, final Integer seconds) {
+    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz,
+                                              boolean isCompress, Integer seconds) {
         return hook(shardedJedis -> {
             Set<byte[]> datas = shardedJedis.smembers(key);
             Set<T> result = new HashSet<>();
@@ -205,13 +205,11 @@ public class SetOpertions extends JedisOperations {
         }, null, key, clazz, isCompress, seconds);
     }
 
-    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz, 
-                                              boolean isCompress) {
+    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz, boolean isCompress) {
         return this.smembers(key, clazz, isCompress, null);
     }
 
-    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz, 
-                                              Integer seconds) {
+    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz, Integer seconds) {
         return this.smembers(key, clazz, true, seconds);
     }
 
@@ -225,7 +223,7 @@ public class SetOpertions extends JedisOperations {
      * @param seconds
      * @return 集合的基数。当 key 不存在时，返回 0 。
      */
-    public Long scard(final String key, final Integer seconds) {
+    public Long scard(String key, Integer seconds) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.scard(key);
             if (rtn != null && rtn > 0) {
@@ -252,8 +250,7 @@ public class SetOpertions extends JedisOperations {
      * @param seconds
      * @return 只提供 key 参数时，返回一个元素；如果集合为空，返回 nil；如果提供了 count 参数，那么返回一个数组；如果集合为空，返回空数组。
      */
-    public List<String> srandmember(final String key, final int count, 
-                                    final Integer seconds) {
+    public List<String> srandmember(String key, int count, Integer seconds) {
         return hook(shardedJedis -> {
             List<String> result = shardedJedis.srandmember(key, count);
             if (result != null && !result.isEmpty()) {
@@ -328,7 +325,7 @@ public class SetOpertions extends JedisOperations {
      * @param seconds
      * @return 被成功移除的元素的数量，不包括被忽略的元素。
      */
-    public Long srem(final String key, final String member, final Integer seconds) {
+    public Long srem(String key, String member, Integer seconds) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.srem(key, member);
             expire(shardedJedis, key, seconds);

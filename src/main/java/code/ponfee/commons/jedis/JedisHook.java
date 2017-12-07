@@ -23,7 +23,7 @@ public interface JedisHook<T> {
         try (ShardedJedis shardedJedis = jedisClient.getShardedJedis()) {
             return this.hook(shardedJedis);
         } catch (Exception e) {
-            jedisClient.exception(e, args);
+            JedisClient.exception(e, args);
             return occurErrorRtnVal;
         }
     }

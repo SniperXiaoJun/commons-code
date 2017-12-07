@@ -38,7 +38,7 @@ import code.ponfee.commons.reflect.Fields;
  */
 public final class ObjectUtils {
 
-    public static final char[] URL_SAFE_BASE64_CODES = {
+    private static final char[] URL_SAFE_BASE64_CODES = {
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
         'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
         'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -181,54 +181,55 @@ public final class ObjectUtils {
      * @param bean
      */
     public static <T> void map2bean(Map<String, ?> map, T bean) {
-        String name;
         try {
+            String name;
+            Object value;
+            Class<?> type;
             for (PropertyDescriptor prop : Introspector.getBeanInfo(bean.getClass()).getPropertyDescriptors()) {
                 name = prop.getName();
-                if ("class".equals(name)) continue;
-
-                if (map.containsKey(name) || map.containsKey(name = Strings.underscoreName(name))) {
-                    Object value = map.get(name);
-                    Class<?> type = prop.getPropertyType();
-
-                    if ((value == null || Strings.isEmpty(value)) && type.isPrimitive()) {
-                        continue; // 原始类型跳过
-                    } else if (Strings.isEmpty(value) && ClassUtils.isPrimitiveWrapper(type)) {
-                        value = null; // 包装类型则设置为null
-                    }
-
-                    // 字符序列转换
-                    if (CharSequence.class.isAssignableFrom(type) && value != null && !type.isInstance(value)) {
-                        value = type.getConstructor(String.class).newInstance(value.toString());
-                    }
-
-                    // 原始或包装类型
-                    if (value != null && ClassUtils.isPrimitiveOrWrapper(type)) {
-                        if (int.class == type) {
-                            value = Numbers.toInt(value);
-                        } else if (Integer.class == type) {
-                            value = Numbers.toWrapInt(value);
-                        } else if (long.class == type) {
-                            value = Numbers.toLong(value);
-                        } else if (Long.class == type) {
-                            value = Numbers.toWrapLong(value);
-                        } else if (float.class == type) {
-                            value = Numbers.toFloat(value);
-                        } else if (Float.class == type) {
-                            value = Numbers.toWrapFloat(value);
-                        } else if (double.class == type) {
-                            value = Numbers.toDouble(value);
-                        } else if (Double.class == type) {
-                            value = Numbers.toWrapDouble(value);
-                        } else if (!type.isAssignableFrom(value.getClass())) {
-                            type = ClassUtils.primitiveToWrapper(type); // 转包装类型
-                            value = type.getConstructor(String.class).newInstance(value.toString()); // 字符串值转包装类型
-                        }
-                    }
-
-                    // setter value into bean field
-                    prop.getWriteMethod().invoke(bean, value);
+                if ("class".equals(name) || 
+                    (!map.containsKey(name) && !map.containsKey(name = Strings.underscoreName(name)))
+                ) {
+                    continue;
                 }
+
+                value = map.get(name);
+                type = prop.getPropertyType();
+
+                if (type.isPrimitive() && Strings.isEmpty(value)) {
+                    continue; // 原始类型跳过
+                }
+
+                if (ClassUtils.isPrimitiveWrapper(type) && Strings.isEmpty(value)) {
+                    value = null; // 包装类型则设置为null
+                } else if (ClassUtils.isPrimitiveOrWrapper(type)) {
+                    // 原始或包装类型
+                    if (int.class == type) {
+                        value = Numbers.toInt(value);
+                    } else if (Integer.class == type) {
+                        value = Numbers.toWrapInt(value);
+                    } else if (long.class == type) {
+                        value = Numbers.toLong(value);
+                    } else if (Long.class == type) {
+                        value = Numbers.toWrapLong(value);
+                    } else if (float.class == type) {
+                        value = Numbers.toFloat(value);
+                    } else if (Float.class == type) {
+                        value = Numbers.toWrapFloat(value);
+                    } else if (double.class == type) {
+                        value = Numbers.toDouble(value);
+                    } else if (Double.class == type) {
+                        value = Numbers.toWrapDouble(value);
+                    } else if (!type.isAssignableFrom(value.getClass())) {
+                        type = ClassUtils.primitiveToWrapper(type); // 转包装类型
+                        value = type.getConstructor(String.class).newInstance(value.toString()); // 字符串值转包装类型
+                    }
+                } else if (CharSequence.class.isAssignableFrom(type) && !type.isInstance(value)) {
+                    value = type.getConstructor(String.class).newInstance(value.toString()); // 字符序列转换
+                }
+
+                // set value into bean field
+                prop.getWriteMethod().invoke(bean, value);
             }
         } catch (Exception e) {
             throw new IllegalStateException(e);

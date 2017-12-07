@@ -35,13 +35,13 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 返回值：true设置一个新域；false覆盖一个旧域；
      */
-    public boolean hset(final String key, final String field, 
-                        final String value, final Integer seconds) {
+    public boolean hset(String key, String field, 
+                        String value, Integer seconds) {
         if (value == null) return false;
 
         return hook(shardedJedis -> {
             boolean flag = Numbers.equals(shardedJedis.hset(key, field, value), 1);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return flag;
         }, false, key, field, value, seconds);
     }
@@ -57,7 +57,7 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 给定域的值。当给定域不存在或是给定 key 不存在时，返回 nil 。
      */
-    public String hget(final String key, final String field, final Integer seconds) {
+    public String hget(String key, String field, Integer seconds) {
         return hook(shardedJedis -> {
             String result = shardedJedis.hget(key, field);
             if (result != null) {
@@ -81,7 +81,7 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 以map形式返回哈希表的域和域的值
      */
-    public Map<String, String> hgetAll(final String key, final Integer seconds) {
+    public Map<String, String> hgetAll(String key, Integer seconds) {
         return hook(shardedJedis -> {
             Map<String, String> result = shardedJedis.hgetAll(key);
             if (result != null && !result.isEmpty()) {
@@ -102,7 +102,7 @@ public class HashOperations extends JedisOperations {
      * @param isCompress
      * @return 一个包含哈希表中所有值的表
      */
-    public List<String> hvals(final String key, final Integer seconds) {
+    public List<String> hvals(String key, Integer seconds) {
         return hook(shardedJedis -> {
             List<String> result = shardedJedis.hvals(key);
             if (result != null && !result.isEmpty()) {
@@ -110,7 +110,6 @@ public class HashOperations extends JedisOperations {
             }
             return result;
         }, null, key, seconds);
-
     }
 
     public List<String> hvals(String key) {
@@ -131,14 +130,14 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 返回值：true设置一个新域；false覆盖一个旧域；
      */
-    public <T extends Object> boolean hsetObject(final byte[] key, final byte[] field,
-        final T t, final boolean isCompress, final Integer seconds) {
+    public <T extends Object> boolean hsetObject(byte[] key, byte[] field, T t, 
+                                                 boolean isCompress, Integer seconds) {
         if (t == null) return false;
 
         return hook(shardedJedis -> {
             byte[] data = jedisClient.serialize(t, isCompress);
             boolean flag = Numbers.equals(shardedJedis.hset(key, field, data), 1);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return flag;
         }, false, key, field, t, isCompress, seconds);
     }
@@ -164,8 +163,8 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public <T extends Object> T hgetObject(final byte[] key, final byte[] field,
-        final Class<T> clazz, final boolean isCompress, final Integer seconds) {
+    public <T extends Object> T hgetObject(byte[] key, byte[] field, Class<T> clazz, 
+                                           boolean isCompress, Integer seconds) {
         return hook(shardedJedis -> {
             byte[] data = shardedJedis.hget(key, field);
             T t = jedisClient.deserialize(data, clazz, isCompress);
@@ -176,8 +175,7 @@ public class HashOperations extends JedisOperations {
         }, null, key, field, clazz, isCompress, seconds);
     }
 
-    public <T extends Object> T hgetObject(byte[] key, byte[] field, Class<T> clazz,
-        boolean isCompress) {
+    public <T extends Object> T hgetObject(byte[] key, byte[] field, Class<T> clazz, boolean isCompress) {
         return this.hgetObject(key, field, clazz, isCompress, null);
     }
 
@@ -201,8 +199,8 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 以map形式返回哈希表的域和域的值
      */
-    public <T extends Object> Map<byte[], T> hgetAllObject(final byte[] key,
-        final Class<T> clazz, final boolean isCompress, final Integer seconds) {
+    public <T extends Object> Map<byte[], T> hgetAllObject(byte[] key, Class<T> clazz, 
+                                                           boolean isCompress, Integer seconds) {
         return hook(shardedJedis -> {
             Map<byte[], byte[]> datas = shardedJedis.hgetAll(key);
             Map<byte[], T> result = new HashMap<>();
@@ -238,8 +236,8 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 一个包含哈希表中所有值的表
      */
-    public <T extends Object> List<T> hvalsObject(final byte[] key,
-        final Class<T> clazz, final boolean isCompress, final Integer seconds) {
+    public <T extends Object> List<T> hvalsObject(byte[] key, Class<T> clazz, 
+                                                  boolean isCompress, Integer seconds) {
         return hook(shardedJedis -> {
             List<T> list = new ArrayList<>();
             for (byte[] data : shardedJedis.hvals(key)) {
@@ -277,8 +275,8 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 返回值：true成功；false失败；
      */
-    public <T extends Object> boolean hmsetObjects(final byte[] key, final Map<byte[], T> map,
-        final boolean isCompress, final Integer seconds) {
+    public <T extends Object> boolean hmsetObjects(byte[] key, Map<byte[], T> map,
+                                                   boolean isCompress, Integer seconds) {
         return hook(shardedJedis -> {
             Map<byte[], byte[]> data = new HashMap<>();
             for (Entry<byte[], T> entry : map.entrySet()) {
@@ -286,7 +284,7 @@ public class HashOperations extends JedisOperations {
             }
 
             String rtn = shardedJedis.hmset(key, data);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return SUCCESS_MSG.equalsIgnoreCase(rtn);
         }, false, key, map, isCompress, seconds);
     }
@@ -317,8 +315,8 @@ public class HashOperations extends JedisOperations {
      * @param fields
      * @return 一个包含多个给定域的关联值的表，表值的排列顺序和给定域参数的请求顺序一样。
      */
-    public <T extends Object> List<T> hmgetObjects(final byte[] key, final Class<T> clazz,
-        final boolean isCompress, final Integer seconds, final byte[]... fields) {
+    public <T extends Object> List<T> hmgetObjects(byte[] key, Class<T> clazz, boolean isCompress, 
+                                                   Integer seconds, byte[]... fields) {
         return hook(shardedJedis -> {
             List<byte[]> datas = shardedJedis.hmget(key, fields);
             if (datas == null || datas.isEmpty()) return null;
@@ -360,11 +358,10 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 执行 HINCRBY 命令之后，哈希表 key 中域 field 的值
      */
-    public Long hincrBy(final String key, final String field,
-        final int value, final Integer seconds) {
+    public Long hincrBy(String key, String field, int value, Integer seconds) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.hincrBy(key, field, value);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return rtn;
         }, null, key, field, value, seconds);
     }
@@ -385,12 +382,12 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 返回值：true成功；false失败；
      */
-    public boolean hmset(final String key, final Map<String, String> map, final Integer seconds) {
+    public boolean hmset(String key, Map<String, String> map, Integer seconds) {
         if (map == null || map.isEmpty()) return false;
 
         return hook(shardedJedis -> {
             String rtn = shardedJedis.hmset(key, map);
-            expire(shardedJedis, key, seconds);
+            expireForce(shardedJedis, key, seconds);
             return SUCCESS_MSG.equalsIgnoreCase(rtn);
         }, false, key, map, seconds);
     }
@@ -411,7 +408,7 @@ public class HashOperations extends JedisOperations {
      * @param fields
      * @return 一个包含多个给定域的关联值的表，表值的排列顺序和给定域参数的请求顺序一样。
      */
-    public List<String> hmget(final String key, final Integer seconds, final String... fields) {
+    public List<String> hmget(String key, Integer seconds, String... fields) {
         return hook(shardedJedis -> {
             List<String> list = shardedJedis.hmget(key, fields);
             expire(shardedJedis, key, seconds);
@@ -430,7 +427,7 @@ public class HashOperations extends JedisOperations {
      * @param fields
      * @return 被成功移除的域的数量，不包括被忽略的域
      */
-    public Long hdel(final String key, final Integer seconds, final String... fields) {
+    public Long hdel(String key, Integer seconds, String... fields) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.hdel(key, fields);
             expire(shardedJedis, key, seconds);
@@ -448,7 +445,7 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 哈希表中域的数量，当 key 不存在时，返回 0 。
      */
-    public Long hlen(final String key, final Integer seconds) {
+    public Long hlen(String key, Integer seconds) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.hlen(key);
             if (rtn != null && rtn != 0) {
@@ -470,7 +467,7 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 返回值：true哈希表含有给定域；false哈希表不含有给定域（或key）不存在；
      */
-    public boolean hexists(final String key, final String field, final Integer seconds) {
+    public boolean hexists(String key, String field, Integer seconds) {
         return hook(shardedJedis -> {
             boolean result = shardedJedis.hexists(key, field);
             expire(shardedJedis, key, seconds);
@@ -484,7 +481,7 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 一个包含哈希表中所有域的表。当 key 不存在时，返回一个空表。
      */
-    public Set<String> hkeys(final String key, final Integer seconds) {
+    public Set<String> hkeys(String key, Integer seconds) {
         return hook(shardedJedis -> {
             Set<String> keys = shardedJedis.hkeys(key);
             if (keys != null && !keys.isEmpty()) {
@@ -500,8 +497,11 @@ public class HashOperations extends JedisOperations {
      * @param queryParams
      * @return
      */
-    public List<Object> hmget(final Map<String, String[]> queryParams) {
-        if (queryParams == null || queryParams.isEmpty()) return null;
+    public List<Object> hmget(Map<String, String[]> queryParams) {
+        if (queryParams == null || queryParams.isEmpty()) {
+            return null;
+        }
+
         return hook(shardedJedis -> {
             ShardedJedisPipeline pipeline = shardedJedis.pipelined();
             //Map<String, Response<List<String>>> result = new HashMap<>();

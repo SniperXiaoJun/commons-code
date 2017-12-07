@@ -49,7 +49,7 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return 是否设置成功
      */
-    public boolean set(final String key, final String value, final int seconds) {
+    public boolean set(String key, String value, int seconds) {
         return hook(shardedJedis -> {
             String rtn = shardedJedis.setex(key, getActualExpire(seconds), value);
             return SUCCESS_MSG.equalsIgnoreCase(rtn);
@@ -58,7 +58,6 @@ public class ValueOperations extends JedisOperations {
 
     public String get(String key) {
         return get(key, null);
-
     }
 
     /***
@@ -67,7 +66,7 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public String get(final String key, final Integer seconds) {
+    public String get(String key, Integer seconds) {
         return hook(shardedJedis -> {
             String value = shardedJedis.get(key);
             if (value != null) {
@@ -83,12 +82,12 @@ public class ValueOperations extends JedisOperations {
      * @param keyWildcard
      * @return
      */
-    public List<String> gets(final String keyWildcard) {
+    public List<String> gets(String keyWildcard) {
         return hook(shardedJedis -> {
             CompletionService<List<String>> service = new ExecutorCompletionService<>(EXECUTOR);
             int number = 0;
-            for (final Jedis jedis : shardedJedis.getAllShards()) {
-                final Set<String> keys = jedis.keys(keyWildcard);
+            for (Jedis jedis : shardedJedis.getAllShards()) {
+                Set<String> keys = jedis.keys(keyWildcard);
                 if (keys == null || keys.isEmpty()) continue;
 
                 service.submit(new Callable<List<String>>() {
@@ -132,7 +131,7 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public boolean setLong(final String key, final long value, final int seconds) {
+    public boolean setLong(String key, long value, int seconds) {
         return hook(shardedJedis -> {
             String rtn = shardedJedis.setex(key, getActualExpire(seconds), String.valueOf(value));
             return SUCCESS_MSG.equalsIgnoreCase(rtn);
@@ -148,7 +147,7 @@ public class ValueOperations extends JedisOperations {
         return getLong(key, null);
     }
 
-    public Long getLong(final String key, final Integer seconds) {
+    public Long getLong(String key, Integer seconds) {
         return hook(shardedJedis -> {
             Long number = null;
             String value = shardedJedis.get(key);
@@ -171,7 +170,7 @@ public class ValueOperations extends JedisOperations {
         return getSet(key, value, DEFAULT_EXPIRE_SECONDS);
     }
 
-    public String getSet(final String key, final String value, final int seconds) {
+    public String getSet(String key, String value, int seconds) {
         return hook(shardedJedis -> {
             String oldValue = shardedJedis.getSet(key, value);
             expireForce(shardedJedis, key, seconds);
@@ -190,7 +189,7 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public boolean setnx(final String key, final String value, final int seconds) {
+    public boolean setnx(String key, String value, int seconds) {
         return hook(shardedJedis -> {
             Long result = shardedJedis.setnx(key, value);
             if (Numbers.equals(result, 1)) {
@@ -218,7 +217,7 @@ public class ValueOperations extends JedisOperations {
         return incrBy(key, step, null);
     }
 
-    public Long incrBy(final String key, final int step, final Integer seconds) {
+    public Long incrBy(String key, int step, Integer seconds) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.incrBy(key, step);
             expireForce(shardedJedis, key, seconds);
@@ -236,7 +235,7 @@ public class ValueOperations extends JedisOperations {
         return incrByFloat(key, step, null);
     }
 
-    public Double incrByFloat(final String key, final double step, final Integer seconds) {
+    public Double incrByFloat(String key, double step, Integer seconds) {
         return hook(shardedJedis -> {
             Double rtn = shardedJedis.incrByFloat(key, step);
             expireForce(shardedJedis, key, seconds);
@@ -257,7 +256,7 @@ public class ValueOperations extends JedisOperations {
         return decrBy(key, step, null);
     }
 
-    public Long decrBy(final String key, final int step, final Integer seconds) {
+    public Long decrBy(String key, int step, Integer seconds) {
         return hook(shardedJedis -> {
             Long rtn = shardedJedis.decrBy(key, step);
             expireForce(shardedJedis, key, seconds);
@@ -273,8 +272,8 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public <T extends Object> boolean setObject(final byte[] key, final T t,
-        final boolean isCompress, final int seconds) {
+    public <T extends Object> boolean setObject(byte[] key, T t,
+                                                boolean isCompress, int seconds) {
         if (t == null) return false;
 
         return hook(shardedJedis -> {
@@ -304,8 +303,8 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public <T extends Object> T getObject(final byte[] key,
-        final Class<T> clazz, final boolean isCompress, final Integer seconds) {
+    public <T extends Object> T getObject(byte[] key,
+        Class<T> clazz, boolean isCompress, Integer seconds) {
         return hook(shardedJedis -> {
             T t = jedisClient.deserialize(shardedJedis.get(key), clazz, isCompress);
             if (t != null) {
@@ -336,11 +335,10 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public boolean set(final byte[] key, final byte[] value,
-        final boolean isCompress, final int seconds) {
+    public boolean set(byte[] key, byte[] value, boolean isCompress, int seconds) {
         if (value == null || key == null) return false;
 
-        final byte[] _value;
+        byte[] _value;
         if (!isCompress) _value = value;
         else _value = Serializer.compress(value);
 
@@ -361,7 +359,7 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public byte[] get(final byte[] key, final boolean isCompress, final Integer seconds) {
+    public byte[] get(byte[] key, boolean isCompress, Integer seconds) {
         if (key == null) return null;
 
         return hook(shardedJedis -> {
@@ -389,7 +387,7 @@ public class ValueOperations extends JedisOperations {
      * @param keys
      * @return
      */
-    public Map<String, String> mget(final String... keys) {
+    public Map<String, String> mget(String... keys) {
         if (keys == null) return null;
 
         return hook(shardedJedis -> {
@@ -401,7 +399,7 @@ public class ValueOperations extends JedisOperations {
                 resultMap = new ConcurrentHashMap<>();
                 CompletionService<List<String>> service = new ExecutorCompletionService<>(EXECUTOR);
                 int number = jedisList.size();
-                for (final Jedis jedis : jedisList) {
+                for (Jedis jedis : jedisList) {
                     service.submit(new Callable<List<String>>() {
                         @Override
                         public List<String> call() throws Exception {
@@ -442,7 +440,7 @@ public class ValueOperations extends JedisOperations {
      * @param keys
      * @return
      */
-    public Map<byte[], byte[]> mget(final boolean isCompress, final byte[]... keys) {
+    public Map<byte[], byte[]> mget(boolean isCompress, byte[]... keys) {
         if (keys == null) return null;
 
         return hook(shardedJedis -> {
@@ -454,7 +452,7 @@ public class ValueOperations extends JedisOperations {
                 resultMap = new ConcurrentHashMap<>();
                 CompletionService<List<byte[]>> service = new ExecutorCompletionService<>(EXECUTOR);
                 int number = jedisList.size();
-                for (final Jedis jedis : jedisList) {
+                for (Jedis jedis : jedisList) {
                     service.submit(new Callable<List<byte[]>>() {
                         @Override
                         public List<byte[]> call() throws Exception {
@@ -497,7 +495,7 @@ public class ValueOperations extends JedisOperations {
         }, null, isCompress, keys);
     }
 
-    public Map<byte[], byte[]> mget(final byte[]... keys) {
+    public Map<byte[], byte[]> mget(byte[]... keys) {
         return this.mget(true, keys);
     }
 

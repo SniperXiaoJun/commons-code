@@ -18,14 +18,14 @@ import code.ponfee.commons.jedis.JedisLock;
 import code.ponfee.commons.util.IdWorker;
 
 /**
- * Redis访问频率控制器
+ * Redis熔断控制器
  * @author fupf
  */
-public class RedisFrequencyLimiter implements FrequencyLimiter {
+public class RedisCircuitBreaker implements CircuitBreaker {
 
     private static final int EXPIRE_SECONDS = (int) TimeUnit.DAYS.toSeconds(30) + 1; // key的失效日期
     private static final String TRACE_KEY_PREFIX = "freq:trace:"; // 频率缓存key前缀
-    private static final String QTY_KEY_PREFIX = "freq:qty:"; // 次数缓存key前缀
+    private static final String THRESHOLD_KEY_PREFIX = "freq:threshold:"; // 次数缓存key前缀
 
     private final JedisClient jedisClient;
     private final JedisLock lock;
@@ -35,7 +35,7 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
     private final Cache<Long> localCache = CacheBuilder.newBuilder().keepaliveInMillis(300000L) // 5 minutes of cache alive
                                                        .autoReleaseInSeconds(300).build(); // 5 minutes to release expire cache
 
-    public RedisFrequencyLimiter(JedisClient jedisClient, int clearBeforeHours, int autoClearInSeconds) {
+    public RedisCircuitBreaker(JedisClient jedisClient, int clearBeforeHours, int autoClearInSeconds) {
         this.jedisClient = jedisClient;
         this.clearBeforeMillis = (int) TimeUnit.HOURS.toMillis(clearBeforeHours);
 
@@ -83,17 +83,17 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
      * @return 是否频繁访问：true是；false否；
      */
     public @Override boolean checkAndTrace(String key) {
-        return checkAndTrace(key, getLimitsInMinute(key));
+        return checkAndTrace(key, getRequestThreshold(key));
     }
 
-    public @Override boolean checkAndTrace(String key, long limitQtyInMinutes) {
-        if (limitQtyInMinutes < 0) {
+    public @Override boolean checkAndTrace(String key, long requestThreshold) {
+        if (requestThreshold < 0) {
             return true; // 小于0表示无限制
-        } else if (limitQtyInMinutes == 0) {
+        } else if (requestThreshold == 0) {
             return false; // 禁止访问
         }
 
-        if (limitQtyInMinutes < countByLastTime(key, 1, TimeUnit.MINUTES)) {
+        if (requestThreshold < countByLastTime(key, 1, TimeUnit.MINUTES)) {
             return false; // 超过频率
         } else {
             return transmitter.put(new Trace(key, System.currentTimeMillis()));
@@ -112,11 +112,11 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
     /**
      * 限制一分钟的访问频率
      * @param key
-     * @param qty
+     * @param threshold
      * @return 是否设置成功：true是；false否；
      */
-    public @Override boolean setLimitsInMinute(String key, long qty) {
-        boolean flag = jedisClient.valueOps().setLong(QTY_KEY_PREFIX + key, qty, EXPIRE_SECONDS);
+    public @Override boolean setRequestThreshold(String key, long threshold) {
+        boolean flag = jedisClient.valueOps().setLong(THRESHOLD_KEY_PREFIX + key, threshold, EXPIRE_SECONDS);
         if (flag) {
             localCache.getAndRemove(key); // remove from local cache
         }
@@ -129,16 +129,16 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
      * @param key
      * @return
      */
-    public @Override long getLimitsInMinute(String key) {
-        Long qty = localCache.get(key);
-        if (qty == null) {
-            qty = jedisClient.valueOps().getLong(QTY_KEY_PREFIX + key, EXPIRE_SECONDS);
-            if (qty == null) {
-                qty = -1L; // -1表示无限制
+    public @Override long getRequestThreshold(String key) {
+        Long threshold = localCache.get(key);
+        if (threshold == null) {
+            threshold = jedisClient.valueOps().getLong(THRESHOLD_KEY_PREFIX + key, EXPIRE_SECONDS);
+            if (threshold == null) {
+                threshold = -1L; // -1表示无限制
             }
-            localCache.set(key, qty); // put into local cache
+            localCache.set(key, threshold); // put into local cache
         }
-        return qty;
+        return threshold;
     }
 
     /**
@@ -147,7 +147,6 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
     public void destory() {
         localCache.destroy();
         executor.isShutdown();
-
     }
 
     /**
@@ -155,7 +154,7 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
      * @param key
      * @param fromMillis
      * @param toMillis
-     * @return  the qty of this time range
+     * @return  the threshold of this time range
      */
     private long countByRangeMillis(String key, long fromMillis, long toMillis) {
         Preconditions.checkArgument(fromMillis < toMillis, "from time must before to time.");

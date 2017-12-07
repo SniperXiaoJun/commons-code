@@ -15,13 +15,13 @@ import code.ponfee.commons.util.Bytes;
 public class RequestLimiter {
 
     private static final String CHECK_FREQ_KEY = "req:limit:freq:";
-    private static final String CHECK_QTY_KEY = "req:limit:qty:";
+    private static final String CHECK_THRE_KEY = "req:limit:thre:";
 
     private static final String CACHE_CAPTCHA_KEY = "req:cache:captcha:";
     private static final String CHECK_CAPTCHA_KEY = "req:check:captcha:";
 
-    private static final String INCR_ACTION_KEY = "req:incr:action";
-    private static final String COUNT_ACTION_KEY = "req:count:action";
+    private static final String INCR_ACTION_KEY = "req:incr:action:";
+    private static final String COUNT_ACTION_KEY = "req:count:action:";
 
     private final JedisClient client;
 
@@ -29,16 +29,27 @@ public class RequestLimiter {
         this.client = client;
     }
 
+    public RequestLimiter limitFrequency(String key, int period)
+        throws RequestLimitException {
+        return this.limitFrequency(key, period, "请求频繁，请" + period + "秒后再试！");
+    }
+
     /**
-     * 访问频率限制：一个周期内最多允许访问1次
+     * 访问频率限制：一个周期内最多允许访问1次<p>
+     * 比如短信60秒内只能发送一次
      * @param key
      * @param period
      * @throws RequestLimitException 
      */
-    public RequestLimiter limitFreq(String key, int period, String message)
+    public RequestLimiter limitFrequency(String key, int period, String message)
         throws RequestLimitException {
         checkLimit(CHECK_FREQ_KEY + key, period, 1, message);
         return this;
+    }
+
+    public RequestLimiter limitThreshold(String key, int period, int limit)
+        throws RequestLimitException {
+        return limitThreshold(CHECK_THRE_KEY + key, period, limit, "请求超限，请" + period + "秒后再试！");
     }
 
     /**
@@ -48,9 +59,9 @@ public class RequestLimiter {
      * @param limit
      * @throws RequestLimitException 
      */
-    public RequestLimiter limitQty(String key, int period, int limit, String message)
+    public RequestLimiter limitThreshold(String key, int period, int limit, String message)
         throws RequestLimitException {
-        checkLimit(CHECK_QTY_KEY + key, period, limit, message);
+        checkLimit(CHECK_THRE_KEY + key, period, limit, message);
         return this;
     }
 
@@ -132,12 +143,12 @@ public class RequestLimiter {
     /**
      * 生成nonce str校验码（返回到用户端）
      * @param captcha
-     * @param text
+     * @param salt
      * @return
      */
-    public static String buildNonce(String captcha, String text) {
+    public static String buildNonce(String captcha, String salt) {
         // new Random(long seed).nextLong() 第一个nextLong值是固定的
-        return HmacUtils.sha1Hex(Bytes.fromLong(new Random(captcha.hashCode()).nextLong()), text.getBytes());
+        return HmacUtils.sha1Hex(Bytes.fromLong(new Random(captcha.hashCode()).nextLong()), salt.getBytes());
     }
 
     /**
@@ -147,8 +158,8 @@ public class RequestLimiter {
      * @param text
      * @return
      */
-    public static boolean verifyNonce(String nonce, String captcha, String text) {
-        return StringUtils.isNotEmpty(nonce) && nonce.equals(buildNonce(captcha, text));
+    public static boolean verifyNonce(String nonce, String captcha, String salt) {
+        return StringUtils.isNotEmpty(nonce) && nonce.equals(buildNonce(captcha, salt));
     }
 
     // -------------------------------------private methods----------------------------------

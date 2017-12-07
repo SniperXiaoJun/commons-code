@@ -475,5 +475,8 @@ public class Dates {
         System.out.println(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         System.out.println(ZonedDateTime.now().format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
         System.out.println(Dates.format(now(), "yyyy-MM-dd'T'HH:mm:ss.SSS"));
+
+        System.out.println(Dates.startOfDay(Dates.toDate("2017-12-07", "yyyy-MM-dd")).getTime()-
+                           Dates.endOfDay(Dates.toDate("2017-12-06", "yyyy-MM-dd")).getTime());
     }
 }

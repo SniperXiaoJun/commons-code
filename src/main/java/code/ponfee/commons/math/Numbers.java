@@ -278,34 +278,6 @@ public final class Numbers {
         return (a == b) || (a != null && a.equals(b));
     }
 
-    /**
-     * long值压缩
-     * @param num
-     * @return
-     */
-    public static String reduce(long num) {
-        int radix = ObjectUtils.URL_SAFE_BASE64_CODES.length;
-        char[] buf = new char[65];
-        int charPos = 64;
-        boolean negative = (num < 0);
-
-        if (!negative) {
-            num = -num;
-        }
-
-        while (num <= -radix) {
-            buf[charPos--] = ObjectUtils.URL_SAFE_BASE64_CODES[(int) (-(num % radix))];
-            num = num / radix;
-        }
-        buf[charPos] = ObjectUtils.URL_SAFE_BASE64_CODES[(int) (-num)];
-
-        if (negative) {
-            buf[--charPos] = '-';
-        }
-
-        return new String(buf, charPos, (65 - charPos));
-    }
-
     private static final String[] CN_UPPER_NUMBER = { "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖" };
     private static final String[] CN_UPPER_MONETRAY_UNIT = { "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
                                                              "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
@@ -385,11 +357,5 @@ public final class Numbers {
         double money = 2020004.01;
         String s = chinesize(new BigDecimal(money));
         System.out.println("[" + money + "]   ->   [" + s.toString() + "]");
-
-        System.out.println(Long.toString(Long.MIN_VALUE, 36));
-        System.out.println(reduce(Long.MIN_VALUE));
-        
-        System.out.println(Long.toString(1L, 36));
-        System.out.println(reduce(1L));
     }
 }

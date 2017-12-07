@@ -43,7 +43,7 @@ public class IdcardResolver {
     private String province; // 省份
     private String district; // 市县
     private Date birthday; // 生日
-    private int age; // 年龄
+    private Integer age; // 年龄
     private Sex sex; // 性别
 
     /**
@@ -84,14 +84,17 @@ public class IdcardResolver {
      */
     private static final Pattern FIRST = Pattern.compile("^[0-9]{15}$");
     private boolean isFirst(String idcard) {
-        if (FIRST.matcher(idcard).matches()) return false;
+        if (!FIRST.matcher(idcard).matches()) return false;
 
         // 转成18位
         idcard = idcard.substring(0, 6) + "19" + idcard.substring(6);
         idcard += genPowerSum(idcard.toCharArray());
-        boolean flag = isSecond(idcard);
-        if (flag) this.type = CertType.FIRST;
-        return flag;
+        if (isSecond(idcard)) {
+            this.type = CertType.FIRST;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -101,7 +104,7 @@ public class IdcardResolver {
      */
     private static final Pattern SECOND = Pattern.compile("^[0-9]{17}[0-9X]$");
     private boolean isSecond(String idcard) {
-        if (SECOND.matcher(idcard).matches()) return false;
+        if (!SECOND.matcher(idcard).matches()) return false;
 
         // 城市验证
         this.province = CITY_CODES.get(idcard.substring(0, 2));
@@ -151,9 +154,13 @@ public class IdcardResolver {
         } else if (TAIWAN.matcher(idcard).matches()) { // 台湾
             this.type = CertType.TAIWAN;
             String sex = idcard.substring(1, 2);
-            if ("1".equals(sex)) this.sex = Sex.M;
-            else if ("2".equals(sex)) this.sex = Sex.F;
-            else this.sex = Sex.N;
+            if ("1".equals(sex)) {
+                this.sex = Sex.M;
+            } else if ("2".equals(sex)) {
+                this.sex = Sex.F;
+            } else {
+                this.sex = Sex.N;
+            }
             return validateTWCard(idcard);
         } else {
             return false;
@@ -167,9 +174,12 @@ public class IdcardResolver {
      */
     private static final Pattern PASSPORT_REGEX = Pattern.compile("^1[45][0-9]{7}|G[0-9]{8}|P[0-9]{7}|S[0-9]{7,8}|D[0-9]+$");
     private boolean isPassport(String idcard) {
-        boolean flag = PASSPORT_REGEX.matcher(idcard).matches();
-        if (flag) this.type = CertType.PASSPORT;
-        return flag;
+        if (PASSPORT_REGEX.matcher(idcard).matches()) {
+            this.type = CertType.PASSPORT;
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -181,12 +191,11 @@ public class IdcardResolver {
         String start = idCard.substring(0, 1);
         String mid = idCard.substring(1, 9);
         String end = idCard.substring(9, 10);
-        Integer iStart = TW_FIRST_CODE.get(start);
-        Integer sum = iStart / 10 + (iStart % 10) * 9;
-        Integer iflag = 8;
+        int iStart = TW_FIRST_CODE.get(start);
+        int sum = iStart / 10 + (iStart % 10) * 9;
+        int iteration = 8;
         for (char c : mid.toCharArray()) {
-            sum = sum + Integer.valueOf(c) * iflag;
-            iflag--;
+            sum = sum + Integer.valueOf(c) * iteration--;
         }
         return (10 - sum % 10) % 10 == Integer.parseInt(end);
     }
@@ -204,7 +213,7 @@ public class IdcardResolver {
      */
     private boolean validateHKCard(String idCard) {
         String card = idCard.replaceAll("[\\(|\\)]", "");
-        Integer sum = 0;
+        int sum = 0;
         if (card.length() == 9) {
             sum = (Integer.valueOf(card.substring(0, 1).toUpperCase().toCharArray()[0]) - 55) * 9
                 + (Integer.valueOf(card.substring(1, 2).toUpperCase().toCharArray()[0]) - 55) * 8;
@@ -214,10 +223,9 @@ public class IdcardResolver {
         }
         String mid = card.substring(1, 7);
         String end = card.substring(7, 8);
-        Integer iflag = 7;
+        int iteration = 7;
         for (char c : mid.toCharArray()) {
-            sum = sum + Integer.valueOf(c) * iflag;
-            iflag--;
+            sum = sum + Integer.valueOf(c) * iteration--;
         }
 
         if (end.toUpperCase().equals("A")) {
@@ -260,7 +268,9 @@ public class IdcardResolver {
     private boolean verifyBirthday(String date) {
         try {
             this.birthday = Dates.toDate(date, "yyyyMMdd");
-            if (this.birthday.after(new Date())) return false;
+            if (this.birthday.after(new Date())) {
+                return false;
+            }
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(this.birthday);
             this.age = Calendar.getInstance().get(YEAR) - calendar.get(YEAR);
@@ -304,8 +314,9 @@ public class IdcardResolver {
 
     @Override
     public String toString() {
-        return "IdcardResolver [idcard=" + idcard + ", isValid=" + isValid + ", type=" + type + ", province=" + province
-            + ", district=" + district + ", birthday=" + birthday + ", age=" + age + ", sex=" + sex + "]";
+        return "IdcardResolver [idcard=" + idcard + ", isValid=" + isValid + ", type=" + type 
+             + ", province=" + province + ", district=" + district + ", birthday=" + birthday 
+             + ", age=" + age + ", sex=" + sex + "]";
     }
 
     /** 每位加权因子 */
