@@ -588,27 +588,27 @@ public class ElasticSearchClient implements DisposableBean {
         return buildPage(search.get(), from, pageNo, pageSize, clazz);
     }
 
-    // -----------------------------------------------查询前面top条数据-----------------------------------------------
+    // -----------------------------------------------排名搜索-----------------------------------------------
     /**
-     * 查询top rank
+     * 排名搜索
      * @param search
-     * @param top
+     * @param ranking
      * @return
      */
-    public List<Map<String, Object>> topRankSearch(SearchRequestBuilder search, int top) {
-        return paginationSearch(search, 1, top).getRows();
+    public List<Map<String, Object>> rankingSearch(SearchRequestBuilder search, int ranking) {
+        return paginationSearch(search, 1, ranking).getRows();
     }
 
-    public <T> List<T> topRankSearch(SearchRequestBuilder search, int top, Class<T> clazz) {
-        return paginationSearch(search, 1, top, clazz).getRows();
+    public <T> List<T> rankingSearch(SearchRequestBuilder search, int ranking, Class<T> clazz) {
+        return paginationSearch(search, 1, ranking, clazz).getRows();
     }
 
-    public List<Map<String, Object>> topRankSearch(ESQueryBuilder query, int top) {
-        return paginationSearch(query, 1, top).getRows();
+    public List<Map<String, Object>> rankingSearch(ESQueryBuilder query, int ranking) {
+        return paginationSearch(query, 1, ranking).getRows();
     }
 
-    public <T> List<T> topRankSearch(ESQueryBuilder query, int top, Class<T> clazz) {
-        return paginationSearch(query, 1, top, clazz).getRows();
+    public <T> List<T> rankingSearch(ESQueryBuilder query, int ranking, Class<T> clazz) {
+        return paginationSearch(query, 1, ranking, clazz).getRows();
     }
 
     // -----------------------------------------------滚动搜索---------------------------------------
@@ -753,6 +753,12 @@ public class ElasticSearchClient implements DisposableBean {
         page.setSize(result.size());
         page.setStartRow(from);
         page.setEndRow(from + result.size());
+        page.setFirstPage(pageNo == 1);
+        page.setLastPage(pageNo == page.getPages());
+        page.setHasNextPage(pageNo > 1);
+        page.setHasNextPage(pageNo < page.getPages());
+        page.setPrePage(pageNo - 1);
+        page.setNextPage(pageNo + 1);
         return page;
     }
 

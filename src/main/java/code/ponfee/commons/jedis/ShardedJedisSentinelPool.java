@@ -18,6 +18,8 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Objects;
+
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
@@ -46,52 +48,42 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
     private volatile List<HostAndPort> currentHostMasters;
 
     public ShardedJedisSentinelPool(List<String> masters, Set<String> sentinels) {
-        this(masters, sentinels, new GenericObjectPoolConfig(), 
-             Protocol.DEFAULT_TIMEOUT, null, Protocol.DEFAULT_DATABASE);
+        this(new GenericObjectPoolConfig(), masters, sentinels, 
+             null, Protocol.DEFAULT_TIMEOUT, Protocol.DEFAULT_DATABASE);
     }
 
-    public ShardedJedisSentinelPool(List<String> masters, Set<String> sentinels, String password) {
-        this(masters, sentinels, new GenericObjectPoolConfig(), Protocol.DEFAULT_TIMEOUT, password);
+    public ShardedJedisSentinelPool(GenericObjectPoolConfig poolConfig, List<String> masters, 
+                                    Set<String> sentinels, String password) {
+        this(poolConfig, masters, sentinels, password, 
+             Protocol.DEFAULT_TIMEOUT, Protocol.DEFAULT_DATABASE);
     }
 
-    public ShardedJedisSentinelPool(GenericObjectPoolConfig poolConfig, 
-                                    List<String> masters, Set<String> sentinels) {
-        this(masters, sentinels, poolConfig, Protocol.DEFAULT_TIMEOUT, null, Protocol.DEFAULT_DATABASE);
+    public ShardedJedisSentinelPool(GenericObjectPoolConfig poolConfig, List<String> masters,
+                                    Set<String> sentinels, String password, int timeout) {
+        this(poolConfig, masters, sentinels, password, timeout, Protocol.DEFAULT_DATABASE);
     }
 
-    public ShardedJedisSentinelPool(List<String> masters, Set<String> sentinels,
-                                    GenericObjectPoolConfig poolConfig, int timeout, String password) {
-        this(masters, sentinels, poolConfig, timeout, password, Protocol.DEFAULT_DATABASE);
-    }
-
-    public ShardedJedisSentinelPool(List<String> masters, Set<String> sentinels,
-                                    GenericObjectPoolConfig poolConfig, int timeout) {
-        this(masters, sentinels, poolConfig, timeout, null, Protocol.DEFAULT_DATABASE);
-    }
-
-    public ShardedJedisSentinelPool(List<String> masters, Set<String> sentinels,
-                                    GenericObjectPoolConfig poolConfig, String password) {
-        this(masters, sentinels, poolConfig, Protocol.DEFAULT_TIMEOUT, password);
-    }
-
-    public ShardedJedisSentinelPool(List<String> masters, Set<String> sentinels, 
-                                    GenericObjectPoolConfig poolConfig, int timeout, String password, int database) {
+    public ShardedJedisSentinelPool(GenericObjectPoolConfig poolConfig, List<String> masters, 
+                                    Set<String> sentinels, String password, int timeout, int database) {
         this.poolConfig = poolConfig;
         this.timeout = timeout;
         this.password = password;
         this.database = database;
 
-        List<HostAndPort> masterList = initSentinels(sentinels, masters);
-        initPool(masterList);
+        initPool(initSentinels(sentinels, masters));
     }
 
     @Override
     public ShardedJedis getResource() {
-        ShardedJedis resource = super.getResource();
-        resource.setDataSource(this);
-        return resource;
+        ShardedJedis jedis = super.getResource();
+        jedis.setDataSource(this);
+        return jedis;
     }
 
+    /**
+     * @deprecated starting from Jedis 3.0 this method will not be exposed. Resource cleanup should be
+     *             done using @see {@link redis.clients.jedis.Jedis#close()}
+     */
     @Override
     public void returnBrokenResource(final ShardedJedis resource) {
         if (resource != null) {
@@ -99,14 +91,19 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
         }
     }
 
+    /**
+     * @deprecated starting from Jedis 3.0 this method will not be exposed. Resource cleanup should be
+     *             done using @see {@link redis.clients.jedis.Jedis#close()}
+     */
     @Override
     public void returnResource(final ShardedJedis resource) {
         if (resource != null) {
             resource.resetState();
-            resource.close();
+            super.returnResourceObject(resource);
         }
     }
 
+    @Override
     public void destroy() {
         for (MasterListener m : masterListeners) {
             m.shutdown();
@@ -128,21 +125,23 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
             }
             logger.info("Created ShardedJedisPool to master at [{}]", builder.toString());
             List<JedisShardInfo> shardMasters = makeShardInfoList(masters);
-            initPool(poolConfig, new ShardedJedisFactory(shardMasters, Hashing.MURMUR_HASH, null));
+            super.initPool(poolConfig, new ShardedJedisFactory(shardMasters, Hashing.MURMUR_HASH, null));
             currentHostMasters = masters;
         }
     }
 
     private boolean equals(List<HostAndPort> currentShardMasters, List<HostAndPort> shardMasters) {
-        if (currentShardMasters != null && shardMasters != null) {
-            if (currentShardMasters.size() == shardMasters.size()) {
-                for (int i = 0; i < currentShardMasters.size(); i++) {
-                    if (!currentShardMasters.get(i).equals(shardMasters.get(i))) return false;
-                }
-                return true;
+        if (currentShardMasters == null || shardMasters == null
+            || currentShardMasters.size() != shardMasters.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < currentShardMasters.size(); i++) {
+            if (!Objects.equal(currentShardMasters.get(i), shardMasters.get(i))) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private List<JedisShardInfo> makeShardInfoList(List<HostAndPort> masters) {

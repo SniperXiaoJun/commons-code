@@ -1,31 +1,35 @@
 package test.jedis;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 
+import javax.annotation.Resource;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import code.ponfee.commons.io.WrappedBufferedReader;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.JedisLock;
-import code.ponfee.commons.serial.JdkSerializer;
-import redis.clients.jedis.JedisPoolConfig;
+import code.ponfee.commons.util.MavenProjects;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "classpath:jedis-cfg.xml" })
 public class JedisLockTester {
     private static final String name = UUID.randomUUID().toString().substring(0, 3);
-    private JedisClient jedisClient;
+    private @Resource JedisClient jedisClient;
 
     @Before
     public void setup() {
-        JedisPoolConfig poolCfg = new JedisPoolConfig();
+        /*JedisPoolConfig poolCfg = new JedisPoolConfig();
         poolCfg.setMaxTotal(100);
         poolCfg.setMaxIdle(200);
         poolCfg.setMinIdle(100);
@@ -36,8 +40,8 @@ public class JedisLockTester {
         poolCfg.setNumTestsPerEvictionRun(-1);
         poolCfg.setMinEvictableIdleTimeMillis(60000);
         poolCfg.setTimeBetweenEvictionRunsMillis(30000);
-        //jedisClient = new JedisClient(poolCfg, "local1:127.0.0.1:6379", new KryoSerializer());
-        jedisClient = new JedisClient(poolCfg, "127.0.0.1:6379;127.0.0.1:6380;", new JdkSerializer());
+        jedisClient = new JedisClient(poolCfg, "local1:127.0.0.1:6379", new KryoSerializer());*/
+        //jedisClient = new JedisClient(poolCfg, "127.0.0.1:6379;127.0.0.1:6380;", new JdkSerializer());
     }
 
     @After
@@ -47,65 +51,70 @@ public class JedisLockTester {
 
     @Test
     public void test1() throws IOException, InterruptedException {
-        BufferedReader reader = read();
+        WrappedBufferedReader reader = new WrappedBufferedReader(MavenProjects.getTestJavaFile(this.getClass()));
         final Printer printer = new Printer(new JedisLock(jedisClient, "testLock1", 5));
         final AtomicInteger num = new AtomicInteger(0);
         String line = null;
+        List<Thread> threads = new ArrayList<>();
+        System.out.println("\n=========================START========================");
         while ((line = reader.readLine()) != null) {
             final String _line = line;
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    printer.output(name + "-" + num.getAndIncrement() + "\t" + _line + "\n");
-                }
-            }).start();
+            Thread thread = new Thread(() -> {
+                printer.output(name + "-" + num.getAndIncrement() + "\t" + _line + "\n");
+            });
+            thread.start();
+            threads.add(thread);
         }
         reader.close();
-        Thread.sleep(99999);
+        for (Thread thread : threads) {
+            thread.join();
+        }
+        System.out.println("=========================END========================\n");
     }
 
     @Test
     public void test2() throws IOException, InterruptedException {
-        BufferedReader reader = read();
+        WrappedBufferedReader reader = new WrappedBufferedReader(MavenProjects.getTestJavaFile(this.getClass()));
         final Lock lock = new JedisLock(jedisClient, "testLock1", 5);
         final AtomicInteger num = new AtomicInteger(0);
         String line = null;
+        List<Thread> threads = new ArrayList<>();
+        System.out.println("\n=========================START========================");
         while ((line = reader.readLine()) != null) {
             final String _line = line;
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    new Printer(lock).output(name + "-" + num.getAndIncrement() + "\t" + _line + "\n");
-                }
-            }).start();
+            Thread thread = new Thread(() -> {
+                new Printer(lock).output(name + "-" + num.getAndIncrement() + "\t" + _line + "\n");
+            });
+            thread.start();
+            threads.add(thread);
         }
         reader.close();
-        Thread.sleep(99999);
+        for (Thread thread : threads) {
+            thread.join();
+        }
+        System.out.println("=========================END========================\n");
     }
 
     @Test
     public void test3() throws IOException, InterruptedException {
-        BufferedReader reader = read();
+        WrappedBufferedReader reader = new WrappedBufferedReader(MavenProjects.getTestJavaFile(this.getClass()));
         final AtomicInteger num = new AtomicInteger(0);
         String line = null;
+        List<Thread> threads = new ArrayList<>();
+        System.out.println("\n=========================START========================");
         while ((line = reader.readLine()) != null) {
             final String _line = line;
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    new Printer(new JedisLock(jedisClient, "testLock2", 5)).output(name + "-" + num.getAndIncrement() + "\t" + _line + "\n");
-                }
-            }).start();
+            Thread thread = new Thread(() -> {
+                new Printer(new JedisLock(jedisClient, "testLock2", 5)).output(name + "-" + num.getAndIncrement() + "\t" + _line + "\n");
+            });
+            thread.start();
+            threads.add(thread);
         }
         reader.close();
-        Thread.sleep(99999);
-    }
-
-    private BufferedReader read() throws FileNotFoundException {
-        String path = Thread.currentThread().getContextClassLoader().getResource("").getFile();
-        path = new File(path).getParentFile().getParentFile().getPath() + "/src/test/java/";
-        path += this.getClass().getCanonicalName().replace('.', '/') + ".java";
-        return new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+        for (Thread thread : threads) {
+            thread.join();
+        }
+        System.out.println("=========================END========================\n");
     }
 
     private static class Printer {

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.DisposableBean;
 
 import code.ponfee.commons.serial.FstSerializer;
 import code.ponfee.commons.serial.Serializer;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
@@ -46,17 +47,15 @@ public class JedisClient implements DisposableBean {
     private MQOperations mqOps;
 
     // -----------------------------------ShardedJedisPool（分片模式）-----------------------------------
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String hosts) {
+    public JedisClient(GenericObjectPoolConfig poolCfg, String hosts) {
         this(poolCfg, hosts, DEFAULT_TIMEOUT_MILLIS, null);
     }
 
-    public JedisClient(final GenericObjectPoolConfig poolCfg, 
-                       String hosts, int timeout) {
+    public JedisClient(GenericObjectPoolConfig poolCfg, String hosts, int timeout) {
         this(poolCfg, hosts, timeout, null);
     }
 
-    public JedisClient(final GenericObjectPoolConfig poolCfg, 
-                       String hosts, Serializer serializer) {
+    public JedisClient(GenericObjectPoolConfig poolCfg, String hosts, Serializer serializer) {
         this(poolCfg, hosts, DEFAULT_TIMEOUT_MILLIS, serializer);
     }
 
@@ -72,7 +71,7 @@ public class JedisClient implements DisposableBean {
      * @param timeout
      * @param serializer
      */
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String hosts, 
+    public JedisClient(GenericObjectPoolConfig poolCfg, String hosts, 
                        int timeout, Serializer serializer) {
         List<JedisShardInfo> infos = new ArrayList<>();
         for (String str : hosts.split(SEPARATOR)) {
@@ -98,50 +97,57 @@ public class JedisClient implements DisposableBean {
             if (StringUtils.isNotBlank(password)) {
                 info.setPassword(password);
             }
-            infos.add(info);
+            if (testJedis(info)) {
+                infos.add(info);
+            }
         }
         if (infos.isEmpty()) {
             throw new IllegalArgumentException("invalid hosts config[" + hosts + "]");
         }
 
-        init(new ShardedJedisPool(poolCfg, infos), serializer);
+        initClient(new ShardedJedisPool(poolCfg, infos), serializer);
     }
 
     // -----------------------------------ShardedJedisSentinelPool（哨兵+分片）-----------------------------------
-    public JedisClient(final GenericObjectPoolConfig poolCfg, 
+    public JedisClient(GenericObjectPoolConfig poolCfg, 
                        String masters, String sentinels) {
-        this(poolCfg, masters, sentinels, DEFAULT_TIMEOUT_MILLIS, null, null);
+        this(poolCfg, masters, sentinels, null, DEFAULT_TIMEOUT_MILLIS, null);
     }
 
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String masters, 
+    public JedisClient(GenericObjectPoolConfig poolCfg, String masters, 
                        String sentinels, int timeout) {
-        this(poolCfg, masters, sentinels, timeout, null, null);
+        this(poolCfg, masters, sentinels, null, timeout, null);
     }
 
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String masters, 
+    public JedisClient(GenericObjectPoolConfig poolCfg, String masters, 
                        String sentinels, Serializer serializer) {
-        this(poolCfg, masters, sentinels, DEFAULT_TIMEOUT_MILLIS, null, serializer);
+        this(poolCfg, masters, sentinels, null, DEFAULT_TIMEOUT_MILLIS, serializer);
     }
 
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String masters, 
+    public JedisClient(GenericObjectPoolConfig poolCfg, String masters, 
                        String sentinels, String password) {
-        this(poolCfg, masters, sentinels, DEFAULT_TIMEOUT_MILLIS, password, null);
+        this(poolCfg, masters, sentinels, password, DEFAULT_TIMEOUT_MILLIS, null);
+    }
+
+    public JedisClient(GenericObjectPoolConfig poolCfg, String masters,
+                       String sentinels, String password, Serializer serializer) {
+        this(poolCfg, masters, sentinels, password, DEFAULT_TIMEOUT_MILLIS, serializer);
     }
 
     /**
      * @param poolCfg    连接池
      * @param masters    哨兵mastername名称，多个以“;”分隔，如：sen_redis_master1:sen_redis_master2
      * @param sentinels  哨兵服务器ip及端口，多个以“;”分隔，如：127.0.0.1:16379;127.0.0.1:16380;
-     * @param timeout    超时时间
      * @param password   密码
+     * @param timeout    超时时间
      * @param serializer 序列化对象
      */
-    public JedisClient(final GenericObjectPoolConfig poolCfg, String masters,
-        String sentinels, int timeout, String password, Serializer serializer) {
+    public JedisClient(GenericObjectPoolConfig poolCfg, String masters, String sentinels, 
+                       String password, int timeout, Serializer serializer) {
         List<String> master = Arrays.asList(masters.split(SEPARATOR));
         Set<String> sentinel = new HashSet<>(Arrays.asList(sentinels.split(SEPARATOR)));
 
-        init(new ShardedJedisSentinelPool(master, sentinel, poolCfg, timeout, password), serializer);
+        initClient(new ShardedJedisSentinelPool(poolCfg, master, sentinel, password, timeout), serializer);
     }
 
     /**
@@ -149,7 +155,7 @@ public class JedisClient implements DisposableBean {
      * @param shardedJedisPool
      * @param serializer
      */
-    private void init(Pool<ShardedJedis> shardedJedisPool, Serializer serializer) {
+    private void initClient(Pool<ShardedJedis> shardedJedisPool, Serializer serializer) {
         this.serializer = (serializer != null) 
                           ? serializer 
                           : new FstSerializer();
@@ -269,6 +275,23 @@ public class JedisClient implements DisposableBean {
             bytes = ArrayUtils.subarray(bytes, 0, MAX_BYTE_LEN);
         }
         return "b64:" + Base64.getEncoder().encodeToString(bytes);
+    }
+
+    private boolean testJedis(JedisShardInfo jedisInfo) {
+        Jedis jedis = null;
+        try {
+            jedis = jedisInfo.createResource();
+            jedis.connect();
+            return true;
+        } catch (Exception e) {
+            logger.error("jedis can not connect", e);
+            return false;
+        } finally {
+            if (jedis != null) {
+                jedis.disconnect();
+                jedis.close();
+            }
+        }
     }
 
     /*void closeShardedJedis(ShardedJedis shardedJedis) {
