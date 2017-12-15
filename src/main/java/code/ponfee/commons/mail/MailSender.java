@@ -228,7 +228,7 @@ public class MailSender {
             message.setSentDate(new Date());
             message.saveChanges();
 
-            //Transport.send(message); // new SmtpAuth(user, password)
+            //Transport.send(message);
             transport = session.getTransport("smtp");
             transport.connect(smtpHost, user, password);
             transport.sendMessage(message, message.getAllRecipients());

@@ -67,12 +67,12 @@ public class ElasticSearchClient implements DisposableBean {
 
     static final TimeValue SCROLL_TIMEOUT = TimeValue.timeValueSeconds(120); // 2 minutes
     private static final int SCROLL_SIZE = 5000; // 默认滚动数据量
+
     private static Logger logger = LoggerFactory.getLogger(ElasticSearchClient.class);
 
     private final TransportClient client; // ES集群客户端
 
     /**
-     * @param enable       是否启用：true|false
      * @param clusterName  集群名称：es-cluster
      * @param clusterNodes 集群节点列表：ip1:port1,ip2:port2
      */
@@ -85,21 +85,21 @@ public class ElasticSearchClient implements DisposableBean {
                                               .build();
         client = new PreBuiltTransportClient(settings);
 
-        logger.info("=======init ElasticSearch client clusterName:{} clusterNodes:{} start=======", clusterName, clusterNodes);
+        logger.info("Init ElasticSearch Client Start: {}, {}", clusterName, clusterNodes);
         for (String clusterNode : split(clusterNodes, ",")) {
             try {
                 InetAddress hostName = InetAddress.getByName(substringBeforeLast(clusterNode, ":"));
                 int port = Integer.parseInt(substringAfterLast(clusterNode, ":"));
                 client.addTransportAddress(new InetSocketTransportAddress(hostName, port));
             } catch (UnknownHostException e) {
-                logger.error("cannot connect ElasticSearch node {} {}", clusterName, clusterNode, e);
+                logger.error("Cannot Connect ElasticSearch Node: {}, {}", clusterName, clusterNode, e);
             }
         }
 
         for (DiscoveryNode node : client.connectedNodes()) {
-            logger.info("connected node {}", node.getHostAddress());
+            logger.info("Connected ElasticSearch Node: {}", node.getHostAddress());
         }
-        logger.info("========init ElasticSearch client clusterName:{} clusterNodes:{} end=======", clusterName, clusterNodes);
+        logger.info("Init ElasticSearch Client End: {}, {}", clusterName, clusterNodes);
     }
 
     /**
@@ -611,6 +611,27 @@ public class ElasticSearchClient implements DisposableBean {
         return paginationSearch(query, 1, ranking, clazz).getRows();
     }
 
+    // -----------------------------------------------顶部搜索---------------------------------------
+    public Map<String, Object> topSearch(SearchRequestBuilder query) {
+        List<Map<String, Object>> list = rankingSearch(query, 1);
+        return (list == null || list.isEmpty()) ? null : list.get(0);
+    }
+
+    public <T> T topSearch(SearchRequestBuilder query, Class<T> clazz) {
+        List<T> list = rankingSearch(query, 1, clazz);
+        return (list == null || list.isEmpty()) ? null : list.get(0);
+    }
+
+    public Map<String, Object> topSearch(ESQueryBuilder query) {
+        List<Map<String, Object>> list = rankingSearch(query, 1);
+        return (list == null || list.isEmpty()) ? null : list.get(0);
+    }
+
+    public <T> T topSearch(ESQueryBuilder query, Class<T> clazz) {
+        List<T> list = rankingSearch(query, 1, clazz);
+        return (list == null || list.isEmpty()) ? null : list.get(0);
+    }
+
     // -----------------------------------------------滚动搜索---------------------------------------
     /**
      * 滚动搜索（游标查询，针对大数据量甚至是全表查询时使用）
@@ -637,7 +658,12 @@ public class ElasticSearchClient implements DisposableBean {
         this.scrollingSearch(scrollResp, scrollSize, callback);
     }
 
-    // ---------------------------------------------查询全部数据-------------------------------------------
+    // ---------------------------------------------全部搜索-------------------------------------------
+    @SuppressWarnings("rawtypes")
+    public List<Map> fullSearch(ESQueryBuilder query) {
+        return fullSearch(query, Map.class);
+    }
+
     /**
      * 查询全部数据
      * @param query
@@ -647,12 +673,17 @@ public class ElasticSearchClient implements DisposableBean {
     public <T> List<T> fullSearch(ESQueryBuilder query, Class<T> clazz) {
         List<T> result = new ArrayList<>(SCROLL_SIZE);
         SearchResponse scrollResp = query.scrolling(client, SCROLL_SIZE);
-        this.scrollingSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecord, totalPage, pageNo) -> {
+        this.scrollingSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecords, totalPages, pageNo) -> {
             for (SearchHit hit : searchHits.getHits()) {
                 result.add(convertFromMap(hit.getSource(), clazz));
             }
         });
         return result;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public List<Map> fullSearch(SearchRequestBuilder search) {
+        return fullSearch(search, Map.class);
     }
 
     /**
@@ -664,7 +695,7 @@ public class ElasticSearchClient implements DisposableBean {
     public <T> List<T> fullSearch(SearchRequestBuilder search, Class<T> clazz) {
         List<T> result = new ArrayList<>(SCROLL_SIZE);
         SearchResponse scrollResp = search.setSize(SCROLL_SIZE).setScroll(SCROLL_TIMEOUT).get();
-        this.scrollingSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecord, totalPage, pageNo) -> {
+        this.scrollingSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecords, totalPages, pageNo) -> {
             for (SearchHit hit : searchHits.getHits()) {
                 result.add(convertFromMap(hit.getSource(), clazz));
             }
@@ -703,8 +734,8 @@ public class ElasticSearchClient implements DisposableBean {
      * 判断集群是否有可用节点
      * @return true or false
      */
-    public boolean isValid() {
-        return client.connectedNodes().size() > 0;
+    public boolean isAvailable() {
+        return client != null && client.connectedNodes().size() > 0;
     }
 
     // --------------------------------------scripts-----------------------------------------
@@ -715,7 +746,7 @@ public class ElasticSearchClient implements DisposableBean {
      * @param id
      * @param source
      */
-    public void updateByScript(String index, String type, String id, Map<String, Object> source) {
+    public void updateByGroovy(String index, String type, String id, Map<String, Object> source) {
         UpdateRequestBuilder req = client.prepareUpdate().setIndex(index).setType(type).setId(id);
         req.setScript(new Script(ScriptType.INLINE, "groovy", type, source)).get();
     }
@@ -771,18 +802,19 @@ public class ElasticSearchClient implements DisposableBean {
     private void scrollingSearch(SearchResponse scrollResp, int scrollSize, ScrollSearchCallback callback) {
         try {
             SearchHits searchHits = scrollResp.getHits();
-            int totalRecord = (int) searchHits.getTotalHits(); // 总记录数
+            long totalRecords = searchHits.getTotalHits(); // 总记录数
+            int totalPages = (int) ((totalRecords + scrollSize - 1) / scrollSize); // 总页数
 
-            int totalPage = (totalRecord + scrollSize - 1) / scrollSize; // 总页数
-            String caller = ObjectUtils.getStackTrace(4);
-            logger.info("scrolling search: {} total[{}-{}]", caller, totalPage, totalRecord);
-            if (totalRecord == 0) {
+            if (logger.isInfoEnabled()) {
+                logger.info("scrolling search: {} total[{}-{}]", ObjectUtils.getStackTrace(4), totalPages, totalRecords);
+            }
+
+            if (totalRecords == 0) {
                 callback.noResult();
             } else {
                 int pageNo = 1;
                 do {
-                    logger.info("scrolling search: {} page[{}-{}]", caller, pageNo, searchHits.getHits().length);
-                    callback.nextPage(searchHits, totalRecord, totalPage, pageNo++);
+                    callback.nextPage(searchHits, totalRecords, totalPages, pageNo++);
                     scrollResp = client.prepareSearchScroll(scrollResp.getScrollId()).setScroll(SCROLL_TIMEOUT).get();
                 } while ((searchHits = scrollResp.getHits()).getHits().length != 0);
             }

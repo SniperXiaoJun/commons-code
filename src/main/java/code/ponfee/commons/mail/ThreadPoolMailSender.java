@@ -58,7 +58,7 @@ public class ThreadPoolMailSender {
                         flag = false;
                     }
                 } catch (InterruptedException | ExecutionException e) {
-                    logger.error("thread send mail error", e);
+                    logger.error("thread pool send mail occur error", e);
                     flag = false;
                 }
             }

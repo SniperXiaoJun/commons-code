@@ -82,11 +82,11 @@ public class RedisCircuitBreaker implements CircuitBreaker {
      * @param key
      * @return 是否频繁访问：true是；false否；
      */
-    public @Override boolean checkAndTrace(String key) {
-        return checkAndTrace(key, getRequestThreshold(key));
+    public @Override boolean checkpoint(String key) {
+        return checkpoint(key, getRequestThreshold(key));
     }
 
-    public @Override boolean checkAndTrace(String key, long requestThreshold) {
+    public @Override boolean checkpoint(String key, long requestThreshold) {
         if (requestThreshold < 0) {
             return true; // 小于0表示无限制
         } else if (requestThreshold == 0) {

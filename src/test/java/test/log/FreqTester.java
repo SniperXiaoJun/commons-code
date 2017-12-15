@@ -38,7 +38,7 @@ public class FreqTester {
                 @Override
                 public void run() {
                     while (true) {
-                        if (!f.checkAndTrace("abc")) {
+                        if (!f.checkpoint("abc")) {
                             System.err.println("error" + Thread.currentThread());
                         }
 

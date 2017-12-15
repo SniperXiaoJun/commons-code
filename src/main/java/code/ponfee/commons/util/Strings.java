@@ -22,6 +22,8 @@ import code.ponfee.commons.math.Numbers;
  */
 public class Strings {
 
+    public static final char SPACE_SEPARATOR = '\u0000';
+
     private static final String FOLDER_SEPARATOR = "/";
     private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
     private static final String TOP_PATH = "..";

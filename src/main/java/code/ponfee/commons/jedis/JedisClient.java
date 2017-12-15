@@ -97,7 +97,7 @@ public class JedisClient implements DisposableBean {
             if (StringUtils.isNotBlank(password)) {
                 info.setPassword(password);
             }
-            if (testJedis(info)) {
+            if (testConnectJedis(info)) {
                 infos.add(info);
             }
         }
@@ -136,7 +136,7 @@ public class JedisClient implements DisposableBean {
 
     /**
      * @param poolCfg    连接池
-     * @param masters    哨兵mastername名称，多个以“;”分隔，如：sen_redis_master1:sen_redis_master2
+     * @param masters    哨兵mastername名称，多个以“;”分隔，如：sen_redis_master1;sen_redis_master2
      * @param sentinels  哨兵服务器ip及端口，多个以“;”分隔，如：127.0.0.1:16379;127.0.0.1:16380;
      * @param password   密码
      * @param timeout    超时时间
@@ -277,7 +277,12 @@ public class JedisClient implements DisposableBean {
         return "b64:" + Base64.getEncoder().encodeToString(bytes);
     }
 
-    private boolean testJedis(JedisShardInfo jedisInfo) {
+    /**
+     * 测试连接jedis是否可用
+     * @param jedisInfo
+     * @return
+     */
+    private static boolean testConnectJedis(JedisShardInfo jedisInfo) {
         Jedis jedis = null;
         try {
             jedis = jedisInfo.createResource();
@@ -287,9 +292,11 @@ public class JedisClient implements DisposableBean {
             logger.error("jedis can not connect", e);
             return false;
         } finally {
-            if (jedis != null) {
+            if (jedis != null) try {
                 jedis.disconnect();
                 jedis.close();
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
             }
         }
     }

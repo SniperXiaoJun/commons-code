@@ -27,7 +27,7 @@ public class WrappedBigDecimal {
         decimal = decimal.remainder(divisor);
     }
 
-    public void abs(MathContext mc) {
+    public synchronized void abs(MathContext mc) {
         decimal = decimal.abs(mc);
     }
 

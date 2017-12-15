@@ -1,5 +1,7 @@
 package test.http;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -16,7 +18,7 @@ import code.ponfee.commons.ws.JAXWS;
 @ContextConfiguration(locations = { "classpath:spring/application-config.xml" })
 public abstract class BaseWebserviceTester<T> {
 
-    private static volatile boolean isPublished = false;
+    private static final AtomicBoolean IS_PUBLISHED = new AtomicBoolean(false);
 
     private T client;
     private final Class<T> clazz;
@@ -37,9 +39,9 @@ public abstract class BaseWebserviceTester<T> {
 
     @Before
     public final void setUp() {
-        if (!isPublished) {
+        if (!IS_PUBLISHED.get()) {
             JAXWS.publish(addressUrl, SpringContextHolder.getBean(clazz)); // 发布web service
-            isPublished = true;
+            IS_PUBLISHED.set(true);
         }
 
         /*JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();

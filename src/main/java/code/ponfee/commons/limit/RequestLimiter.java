@@ -14,14 +14,14 @@ import code.ponfee.commons.util.Bytes;
  */
 public class RequestLimiter {
 
-    private static final String CHECK_FREQ_KEY = "req:limit:freq:";
-    private static final String CHECK_THRE_KEY = "req:limit:thre:";
+    private static final String CHECK_FREQ_KEY = "req:lmt:fre:";
+    private static final String CHECK_THRE_KEY = "req:lmt:thr:";
 
-    private static final String CACHE_CAPTCHA_KEY = "req:cache:captcha:";
-    private static final String CHECK_CAPTCHA_KEY = "req:check:captcha:";
+    private static final String CACHE_CAPTCHA_KEY = "req:cah:cap:";
+    private static final String CHECK_CAPTCHA_KEY = "req:chk:cap:";
 
-    private static final String INCR_ACTION_KEY = "req:incr:action:";
-    private static final String COUNT_ACTION_KEY = "req:count:action:";
+    private static final String INCR_ACTION_KEY = "req:inc:act:";
+    private static final String COUNT_ACTION_KEY = "req:cnt:act:";
 
     private final JedisClient client;
 
@@ -54,6 +54,7 @@ public class RequestLimiter {
 
     /**
      * 访问次数限制：一个周期内最多允许访问limit次
+     * 比如一个手机号一天只能发10次
      * @param key
      * @param period
      * @param limit

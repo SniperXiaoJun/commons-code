@@ -37,8 +37,6 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import code.ponfee.commons.export.Tmeta.Type;
 import code.ponfee.commons.util.Colors;
@@ -50,7 +48,6 @@ import code.ponfee.commons.util.ObjectUtils;
  * @author fupf
  */
 public class ExcelExporter extends AbstractExporter {
-    private static Logger logger = LoggerFactory.getLogger(ExcelExporter.class);
 
     /** row and cell config，默认的列宽和行高大小 */
     private static final int DEFAULT_WIDTH = 3200;
@@ -301,7 +298,7 @@ public class ExcelExporter extends AbstractExporter {
         if (workbook != null) try {
             workbook.close();
         } catch (IOException e) {
-            logger.error("closing XSSFWorkbook occur error", e);
+            e.printStackTrace();
         }
         workbook = null;
     }

@@ -82,7 +82,7 @@ public abstract class LogRecorder {
 
         // request volume threshold
         if (log != null && log.enabled() && circuitBreaker != null
-            && !circuitBreaker.checkAndTrace(methodName)) {
+            && !circuitBreaker.checkpoint(methodName)) {
             throw new IllegalStateException("request denied");
         }
 
@@ -103,12 +103,11 @@ public abstract class LogRecorder {
             Object retVal = pjp.proceed();
             cost = (int) (System.currentTimeMillis() - start);
             logInfo.setRetVal(retVal);
-            if (cost > alarmThresholdMillis && logger.isWarnEnabled()) {
-                // 执行时间告警
-                logger.warn("[exec-time]-[{}]{}-[cost {}]", methodName, logs, cost);
-            }
             if (logger.isInfoEnabled()) {
                 logger.info("[exec-after]-[{}]{}-[{}]", methodName, logs, ObjectUtils.toString(retVal));
+            }
+            if (cost > alarmThresholdMillis) {
+                logger.warn("[exec-time]-[{}]{}-[cost {}]", methodName, logs, cost); // 执行时间告警
             }
             return retVal;
         } catch (Throwable e) {

@@ -13,7 +13,7 @@ public interface CircuitBreaker {
      * @param key
      * @return
      */
-    boolean checkAndTrace(String key);
+    boolean checkpoint(String key);
 
     /**
      * 校验并追踪
@@ -21,7 +21,7 @@ public interface CircuitBreaker {
      * @param requestThreshold
      * @return
      */
-    boolean checkAndTrace(String key, long requestThreshold);
+    boolean checkpoint(String key, long requestThreshold);
 
     /**
      * 按区间统计

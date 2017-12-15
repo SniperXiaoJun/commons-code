@@ -12,7 +12,7 @@ public class DefaultMailSentFailedLogger implements MailSentFailedLogger {
 
     @Override
     public void log(String logid, int retries, MailEnvelope envelope, Exception e) {
-        logger.error("mail sent fail [{}] - [{}] - {}", logid, retries, envelope.toString(), e);
+        logger.error("mail sent fail [{}] - [{}] - {}", logid, retries, envelope, e);
     }
 
 }
