@@ -31,7 +31,7 @@ public class RequestLimiter {
 
     public RequestLimiter limitFrequency(String key, int period)
         throws RequestLimitException {
-        return this.limitFrequency(key, period, "请求频繁，请" + period + "秒后再试！");
+        return this.limitFrequency(key, period, "请求频繁，请" + format(period) + "后再试！");
     }
 
     /**
@@ -49,7 +49,8 @@ public class RequestLimiter {
 
     public RequestLimiter limitThreshold(String key, int period, int limit)
         throws RequestLimitException {
-        return limitThreshold(CHECK_THRE_KEY + key, period, limit, "请求超限，请" + period + "秒后再试！");
+        return limitThreshold(CHECK_THRE_KEY + key, period, limit, 
+                              "请求超限，请" + format(period) + "后再试！");
     }
 
     /**
@@ -175,4 +176,50 @@ public class RequestLimiter {
         }
     }
 
+    /**
+     * 时间格式化
+     * @param seconds
+     * @return
+     */
+    public static String format(int seconds) {
+        int minutes, hours, days;
+        days = seconds / 86400;
+        if (days > 365) { // 年
+            return (days / 365 + ((days % 365) / 30 + 8) / 12) + "年";
+        }
+        if (days > 30) { // 月
+            return (days / 30 + (days % 30 + 20) / 30) + "个月";
+        }
+
+        seconds %= 86400;
+        hours = seconds / 3600;
+        if (days > 0) { // 日
+            return (days + (hours + 16) / 24) + "天";
+        }
+
+        seconds %= 3600;
+        minutes = seconds / 60;
+        if (hours > 0) { // 时
+            return (hours + (minutes + 40) / 60) + "小时";
+        }
+
+        seconds %= 60;
+        if (minutes > 0) { // 分
+            return (minutes + (seconds + 40) / 60) + "分钟";
+        }
+
+        return seconds + "秒钟"; // 秒
+    }
+
+    public static void main(String[] args) {
+        System.out.println(format(50000000));
+        System.out.println(format(10000000));
+        System.out.println(format(2000000));
+        System.out.println(format(400000));
+        System.out.println(format(80000));
+        System.out.println(format(16000));
+        System.out.println(format(4561));
+        System.out.println(format(1502));
+        System.out.println(format(40));
+    }
 }

@@ -3,7 +3,6 @@ package test.jedis;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 
@@ -20,11 +19,12 @@ import code.ponfee.commons.io.WrappedBufferedReader;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.JedisLock;
 import code.ponfee.commons.util.MavenProjects;
+import code.ponfee.commons.util.ObjectUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:jedis-cfg.xml" })
 public class JedisLockTester {
-    private static final String name = UUID.randomUUID().toString().substring(0, 3);
+    private static final String NAME = ObjectUtils.uuid(3);
     private @Resource JedisClient jedisClient;
 
     @Before
@@ -60,7 +60,7 @@ public class JedisLockTester {
         while ((line = reader.readLine()) != null) {
             final String _line = line;
             Thread thread = new Thread(() -> {
-                printer.output(name + "-" + num.getAndIncrement() + "\t" + _line + "\n");
+                printer.output(NAME + "-" + num.getAndIncrement() + "\t" + _line + "\n");
             });
             thread.start();
             threads.add(thread);
@@ -83,7 +83,7 @@ public class JedisLockTester {
         while ((line = reader.readLine()) != null) {
             final String _line = line;
             Thread thread = new Thread(() -> {
-                new Printer(lock).output(name + "-" + num.getAndIncrement() + "\t" + _line + "\n");
+                new Printer(lock).output(NAME + "-" + num.getAndIncrement() + "\t" + _line + "\n");
             });
             thread.start();
             threads.add(thread);
@@ -105,7 +105,7 @@ public class JedisLockTester {
         while ((line = reader.readLine()) != null) {
             final String _line = line;
             Thread thread = new Thread(() -> {
-                new Printer(new JedisLock(jedisClient, "testLock2", 5)).output(name + "-" + num.getAndIncrement() + "\t" + _line + "\n");
+                new Printer(new JedisLock(jedisClient, "testLock2", 5)).output(NAME + "-" + num.getAndIncrement() + "\t" + _line + "\n");
             });
             thread.start();
             threads.add(thread);

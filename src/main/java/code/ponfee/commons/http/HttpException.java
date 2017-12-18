@@ -5,6 +5,7 @@ package code.ponfee.commons.http;
  * @author fupf
  */
 public class HttpException extends RuntimeException {
+
     private static final long serialVersionUID = 7195686343121118928L;
 
     public HttpException() {
@@ -23,7 +24,8 @@ public class HttpException extends RuntimeException {
         super(cause);
     }
 
-    protected HttpException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected HttpException(String message, Throwable cause, boolean enableSuppression, 
+                            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

@@ -35,10 +35,13 @@ import code.ponfee.commons.util.ObjectUtils;
 public final class Files {
     private Files() {}
 
-    public static final int EOF = -1;
-    public static final String SEPARATOR = "/";
-    public static final int BUFF_SIZE = 4096;
-    public static final String LINE_SEPARATOR;
+    public static final int EOF = -1; // end of file read
+
+    public static final String FILE_SEPARATOR = "/"; // file path separator
+
+    public static final int BUFF_SIZE = 4096; // file buffer size
+
+    public static final String LINE_SEPARATOR; // line separator of file
     static {
         /*String separator = (String) AccessController.doPrivileged(new GetPropertyAction("line.separator"));
         if (StringUtils.isEmpty(separator)) separator = System.getProperty("line.separator", "/n");

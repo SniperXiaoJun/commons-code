@@ -7,7 +7,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +70,7 @@ public class JedisLock implements Lock, java.io.Serializable {
     private static final int MIN_SLEEP_MILLIS = 9; // 最小休眠时间为5毫秒
     private static final transient ThreadLocal<byte[]> LOCK_VALUE = new ThreadLocal<>();
 
-    private final Lock innerLock = new ReentrantLock(); // 内部锁
+    //private final Lock innerLock = new ReentrantLock(); // 内部锁
     private final transient JedisClient jedisClient;
     private final byte[] lockKey;
     private final int timeoutSeconds; // 锁的超时时间，防止死锁
@@ -138,38 +137,38 @@ public class JedisLock implements Lock, java.io.Serializable {
      * 尝试获取锁，成功返回true，失败返回false
      */
     public @Override boolean tryLock() {
-        innerLock.lock();
-        try {
-            return jedisClient.hook(shardedJedis -> {
-                Jedis jedis = shardedJedis.getShard(lockKey);
+        //innerLock.lock();
+        //try {
+        return jedisClient.hook(shardedJedis -> {
+            Jedis jedis = shardedJedis.getShard(lockKey);
 
-                // 仅当lockKey不存在才能设置成功并返回1，否则setnx不做任何动作返回0
-                Long result = jedis.setnx(lockKey, buildValue());
-                if (result != null && result.intValue() == 1) {
-                    jedis.expire(lockKey, timeoutSeconds); // 成功则需要设置失效期
-                    return true;
-                }
+            // 仅当lockKey不存在才能设置成功并返回1，否则setnx不做任何动作返回0
+            Long result = jedis.setnx(lockKey, buildValue());
+            if (result != null && result.intValue() == 1) {
+                jedis.expire(lockKey, timeoutSeconds); // 成功则需要设置失效期
+                return true;
+            }
 
-                jedis.watch(lockKey); // 监视lockKey
-                byte[] value = jedis.get(lockKey); // 获取当前锁值
-                if (value == null) {
-                    jedis.unwatch();
-                    return tryLock(); // 锁被释放，重新获取
-                } else if (System.currentTimeMillis() <= parseValue(value)) {
-                    jedis.unwatch();
-                    return false; // 锁未超时
-                } else {
-                    // 锁已超时，争抢锁（事务控制）
-                    Transaction tx = jedis.multi();
-                    tx.getSet(lockKey, buildValue());
-                    tx.expire(lockKey, JedisOperations.getActualExpire(timeoutSeconds));
-                    List<Object> exec = tx.exec(); // exec执行完后被监控的键会自动unwatch
-                    return exec != null && !exec.isEmpty() && Arrays.equals(value, (byte[]) exec.get(0));
-                }
-            }, false);
-        } finally {
-            innerLock.unlock();
-        }
+            jedis.watch(lockKey); // 监视lockKey
+            byte[] value = jedis.get(lockKey); // 获取当前锁值
+            if (value == null) {
+                jedis.unwatch();
+                return tryLock(); // 锁被释放，重新获取
+            } else if (System.currentTimeMillis() <= parseValue(value)) {
+                jedis.unwatch();
+                return false; // 锁未超时
+            } else {
+                // 锁已超时，争抢锁（事务控制）
+                Transaction tx = jedis.multi();
+                tx.getSet(lockKey, buildValue());
+                tx.expire(lockKey, JedisOperations.getActualExpire(timeoutSeconds));
+                List<Object> exec = tx.exec(); // exec执行完后被监控的键会自动unwatch
+                return exec != null && !exec.isEmpty() && Arrays.equals(value, (byte[]) exec.get(0));
+            }
+        }, false);
+        //} finally {
+        //    innerLock.unlock();
+        //}
     }
 
     /**
@@ -197,26 +196,26 @@ public class JedisLock implements Lock, java.io.Serializable {
      * 释放锁
      */
     public @Override void unlock() {
-        innerLock.lock();
-        try {
-            jedisClient.call(shardedJedis -> {
-                // 根据分片获取jedis
-                Jedis jedis = shardedJedis.getShard(lockKey);
-                jedis.watch(lockKey);
-                byte[] value = LOCK_VALUE.get(); // 获取当前线程保存的锁值
-                if (value == null || !Arrays.equals(value, jedis.get(lockKey))) {
-                    // 当前线程未获取过锁或锁已被其它线程获取
-                    jedis.unwatch();
-                } else {
-                    // 当前线程持有锁，需要释放锁
-                    Transaction tx = jedis.multi();
-                    tx.del(lockKey);
-                    tx.exec();
-                }
-            });
-        } finally {
-            innerLock.unlock();
-        }
+        //innerLock.lock();
+        //try {
+        jedisClient.call(shardedJedis -> {
+            // 根据分片获取jedis
+            Jedis jedis = shardedJedis.getShard(lockKey);
+            jedis.watch(lockKey);
+            byte[] value = LOCK_VALUE.get(); // 获取当前线程保存的锁值
+            if (value == null || !Arrays.equals(value, jedis.get(lockKey))) {
+                // 当前线程未获取过锁或锁已被其它线程获取
+                jedis.unwatch();
+            } else {
+                // 当前线程持有锁，需要释放锁
+                Transaction tx = jedis.multi();
+                tx.del(lockKey);
+                tx.exec();
+            }
+        });
+        //} finally {
+        //    innerLock.unlock();
+        //}
     }
 
     public @Override Condition newCondition() {

@@ -19,7 +19,9 @@ public class TestBatchTransmitter {
 
         AtomicBoolean flag = new AtomicBoolean(true);
         AtomicInteger increment = new AtomicInteger(0);
-        for (int i = 0; i < 100; i++) {
+        int n = 100;
+        Thread[] threads = new Thread[n];
+        for (int i = 0; i < n; i++) {
             Thread thread = new Thread(() -> {
                 while (flag.get()) {
                     transmitter.put(increment.getAndIncrement());
@@ -32,12 +34,14 @@ public class TestBatchTransmitter {
             });
             thread.setDaemon(true);
             thread.start();
+            threads[i] = thread;
         }
-        Thread.sleep(15000);
+        Thread.sleep(30000);
         flag.set(false);
-        Thread.sleep(1000);
         transmitter.end();
+        for (Thread thread : threads) {
+            thread.join();
+        }
         System.out.println(increment.get());
-        Thread.sleep(1000);
     }
 }

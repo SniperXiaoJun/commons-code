@@ -47,12 +47,11 @@ public final class WordUtils {
         // 加载字体
         List<FontSourceBase> fonts = new ArrayList<>();
         for (Resource resource : listResources(new String[] { "ttf" }, WordUtils.class)) {
-            try {
-                fonts.add(new MemoryFontSource(IOUtils.toByteArray(resource.getStream())));
+            try (InputStream input = resource.getStream()) {
+                fonts.add(new MemoryFontSource(IOUtils.toByteArray(input)));
             } catch (IOException ignored) {
                 ignored.printStackTrace();
             }
-            IOUtils.closeQuietly(resource.getStream());
         }
         if (!fonts.isEmpty()) {
             FontSettings.setFontsSources(fonts.toArray(new FontSourceBase[fonts.size()]));

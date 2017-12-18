@@ -10,12 +10,13 @@ import sun.misc.Unsafe;
  */
 @SuppressWarnings("restriction")
 public final class Fields {
-    private static final Unsafe UNSAFE/* = Unsafe.getUnsafe()*/;
+    private static final Unsafe UNSAFE/* = sun.misc.Unsafe.getUnsafe()*/;
     static {
         try {
             Field f = Unsafe.class.getDeclaredField("theUnsafe");
             f.setAccessible(true);
-            UNSAFE = (Unsafe) f.get(null);
+            UNSAFE = (Unsafe) f.get(null); // If the underlying field is a static field, 
+                                           // the {@code obj} argument is ignored; it may be null.
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException("failed to get unsafe instance", e);
         }

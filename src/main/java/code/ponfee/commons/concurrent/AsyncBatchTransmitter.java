@@ -1,7 +1,6 @@
 package code.ponfee.commons.concurrent;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -13,105 +12,34 @@ import code.ponfee.commons.math.Numbers;
 
 /**
  * 异步批量数据中转站
- * @author fupf
+ * @author Ponfee
  * @param <T>
  */
 public final class AsyncBatchTransmitter<T> extends Thread {
 
-    private final RunnableFactory<T> factory; // 线程工厂
-    private final ThreadPoolExecutor executor; // 线程池执行器
-    private final int thresholdPeriod; // 消费周期阀值
-    private final int thresholdChunk; // 消费数量阀值
-    private final int sleepTimeMillis; // 休眠时间
     private final Queue<T> queue = new ConcurrentLinkedQueue<>();
-    private final boolean needDestroyWhenEnd;
-
-    private long lastConsumeTimeMillis = System.currentTimeMillis();
+    private final AsyncBatchThread batch;
     private volatile boolean isEnd = false;
 
-    /**
-     * @param factory  消费线程工厂
-     */
     public AsyncBatchTransmitter(RunnableFactory<T> factory) {
         this(factory, 1000, 200);
     }
 
-    /**
-     * @param factory  消费线程工厂
-     */
     public AsyncBatchTransmitter(RunnableFactory<T> factory, 
                                  int thresholdPeriod, int thresholdChunk) {
-        this(factory, null, thresholdPeriod, thresholdChunk);
+        this(factory, thresholdPeriod, thresholdChunk, null);
     }
 
     /**
-     * @param factory          消费线程工厂
-     * @param executor         线程执行器
-     * @param thresholdPeriod  消费周期阀值
-     * @param thresholdChunk   消费数量阀值
+     * @param factory         消费线程工厂
+     * @param thresholdPeriod 消费周期阀值
+     * @param thresholdChunk  消费数量阀值
+     * @param executor        线程执行器
      */
-    public AsyncBatchTransmitter(RunnableFactory<T> factory, ThreadPoolExecutor executor,
-                                 int thresholdPeriod, int thresholdChunk) {
-        Preconditions.checkArgument(thresholdPeriod > 0);
-        Preconditions.checkArgument(thresholdChunk > 0);
-        if (executor == null) {
-            this.executor = ThreadPoolExecutors.create(0, 10, 300, 0, "async-batch-transmitter");
-            this.needDestroyWhenEnd = true;
-        } else {
-            this.executor = executor;
-            this.needDestroyWhenEnd = false;
-        }
-        this.factory = factory;
-        this.thresholdPeriod = thresholdPeriod;
-        this.sleepTimeMillis = Numbers.bounds(thresholdPeriod, 9, thresholdPeriod);
-        this.thresholdChunk = thresholdChunk;
-
-        super.setName("async-batch-transmitter-" + Integer.toHexString(hashCode()));
-        super.setDaemon(true);
-        super.start();
-    }
-
-    /**
-     * thread run, don't to direct call into the code
-     * it is a thread and the alone thread
-     */
-    public @Override void run() {
-        T t;
-        List<T> list = new ArrayList<>(thresholdChunk);
-        for (;;) {
-            if (isEnd && queue.isEmpty() && isRefresh()) {
-                if (needDestroyWhenEnd) {
-                    executor.shutdown();
-                }
-                break; // exit while loop when end
-            }
-
-            // 尽量不要使用queue.size()，时间复杂度O(n)
-            if (!queue.isEmpty()) {
-                for (int n = thresholdChunk - list.size(), i = 0; i < n; i++) {
-                    t = queue.poll();
-                    if (t == null) {
-                        break; // break inner loop
-                    } else {
-                        list.add(t);
-                    }
-                }
-            }
-
-            if (list.size() == thresholdChunk || (!list.isEmpty() && (isEnd || isRefresh()))) {
-                // task抛异常后： execute会输出错误信息，线程结束，后续任务会创建新线程执行
-                //               submit不会输出错误信息，线程继续分配执行其它任务
-                executor.submit(factory.create(list, isEnd && queue.isEmpty())); // 提交到异步批量处理
-                list = new ArrayList<>(thresholdChunk);
-                refresh();
-            } else {
-                try {
-                    Thread.sleep(this.sleepTimeMillis); // to sleep for prevent endless loop
-                } catch (InterruptedException ignored) {
-                    ignored.printStackTrace();
-                }
-            }
-        }
+    public AsyncBatchTransmitter(RunnableFactory<T> factory, int thresholdPeriod, 
+                                 int thresholdChunk, ThreadPoolExecutor executor) {
+        this.batch = new AsyncBatchThread(factory, thresholdPeriod, 
+                                          thresholdChunk, executor);
     }
 
     /**
@@ -120,9 +48,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
      * @return
      */
     public boolean put(T t) {
-        Preconditions.checkState(!isEnd);
-
-        return queue.offer(t);
+        return this.queue.offer(t);
     }
 
     /**
@@ -130,10 +56,16 @@ public final class AsyncBatchTransmitter<T> extends Thread {
      * @param t
      * @return
      */
-    public boolean put(@SuppressWarnings("unchecked") T... t) {
-        Preconditions.checkState(!isEnd);
+    public boolean put(@SuppressWarnings("unchecked") T... ts) {
+        if (ts == null || ts.length == 0) {
+            return false;
+        }
 
-        return put(Arrays.asList(t));
+        boolean flag = true;
+        for (T t : ts) {
+            flag &= this.queue.offer(t);
+        }
+        return flag;
     }
 
     /**
@@ -142,50 +74,116 @@ public final class AsyncBatchTransmitter<T> extends Thread {
      * @return
      */
     public boolean put(List<T> list) {
-        Preconditions.checkState(!isEnd);
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
 
         boolean flag = true;
         for (T t : list) {
-            if (!queue.offer(t)) {
-                flag = false;
-            }
+            flag &= this.queue.offer(t);
         }
         return flag;
     }
 
+    /**
+     * 结束
+     */
     public void end() {
-        this.refresh();
-        isEnd = true;
-        this.refresh();
+        this.batch.refresh();
+        this.isEnd = true;
     }
 
-    private void refresh() {
-        lastConsumeTimeMillis = System.currentTimeMillis();
-    }
+    /**
+     * asnyc batch consume into this alone thread
+     */
+    private class AsyncBatchThread extends Thread {
 
-    private boolean isRefresh() {
-        return System.currentTimeMillis() - lastConsumeTimeMillis > thresholdPeriod;
-    }
+        final RunnableFactory<T> factory; // 线程工厂
+        final int sleepTimeMillis; // 休眠时间
+        final int thresholdPeriod; // 消费周期阀值
+        final int thresholdChunk; // 消费数量阀值
+        final boolean needDestroyWhenEnd;
+        final ThreadPoolExecutor executor;
 
-    // ---------------------------unsupported methods of Thread class--------------------------
-    public @Override void interrupt() {
-        throw new UnsupportedOperationException();
-    }
+        long lastConsumeTimeMillis = System.currentTimeMillis(); // 最近刷新时间
 
-    public @Override void destroy() {
-        throw new UnsupportedOperationException();
-    }
+        /**
+         * @param factory          消费线程工厂
+         * @param executor         线程执行器
+         * @param thresholdPeriod  消费周期阀值
+         * @param thresholdChunk   消费数量阀值
+         */
+        AsyncBatchThread(RunnableFactory<T> factory,int thresholdPeriod, 
+                         int thresholdChunk, ThreadPoolExecutor executor) {
+            Preconditions.checkArgument(thresholdPeriod > 0);
+            Preconditions.checkArgument(thresholdChunk > 0);
 
-    public @Override void setContextClassLoader(ClassLoader cl) {
-        throw new UnsupportedOperationException();
-    }
+            this.factory = factory;
+            this.sleepTimeMillis = Numbers.bounds(thresholdPeriod, 9, thresholdPeriod);
+            this.thresholdPeriod = thresholdPeriod;
+            this.thresholdChunk = thresholdChunk;
+            if (executor == null) {
+                this.needDestroyWhenEnd = true;
+                this.executor = ThreadPoolExecutors.create(0, 10, 300, 0, "async-batch-transmitter");
+            } else {
+                this.needDestroyWhenEnd = false;
+                this.executor = executor;
+            }
+            super.setName("async-batch-transmitter-" + Integer.toHexString(hashCode()));
+            super.setDaemon(true);
+            super.start();
+        }
 
-    public @Override void setUncaughtExceptionHandler(UncaughtExceptionHandler eh) {
-        throw new UnsupportedOperationException();
-    }
+        /**
+         * thread run, don't to direct call into the code
+         * it is a thread and the alone thread
+         */
+        public @Override void run() {
+            T t;
+            List<T> list = new ArrayList<>(thresholdChunk);
+            for (;;) {
+                if (isEnd && queue.isEmpty() && isRefresh()) {
+                    if (needDestroyWhenEnd) {
+                        executor.shutdown();
+                    }
+                    break; // exit while loop when end
+                }
 
-    public @Override synchronized void start() {
-        throw new UnsupportedOperationException();
+                // 尽量不要使用queue.size()，时间复杂度O(n)
+                if (!queue.isEmpty()) {
+                    for (int n = thresholdChunk - list.size(), i = 0; i < n; i++) {
+                        t = queue.poll();
+                        if (t == null) {
+                            break; // break inner loop
+                        } else {
+                            list.add(t);
+                        }
+                    }
+                }
+
+                if (list.size() == thresholdChunk || (!list.isEmpty() && (isEnd || isRefresh()))) {
+                    // task抛异常后： execute会输出错误信息，线程结束，后续任务会创建新线程执行
+                    //            submit不会输出错误信息，线程继续分配执行其它任务
+                    executor.submit(factory.create(list, isEnd && queue.isEmpty())); // 提交到异步批量处理
+                    list = new ArrayList<>(thresholdChunk);
+                    refresh();
+                } else {
+                    try {
+                        Thread.sleep(sleepTimeMillis); // to sleep for prevent endless loop
+                    } catch (InterruptedException ignored) {
+                        ignored.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        void refresh() {
+            lastConsumeTimeMillis = System.currentTimeMillis();
+        }
+
+        boolean isRefresh() {
+            return System.currentTimeMillis() - lastConsumeTimeMillis > thresholdPeriod;
+        }
     }
 
 }
