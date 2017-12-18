@@ -39,7 +39,7 @@ public class FieldValidator {
     private static final String EMPTY = "";
     private static final Lock LOCK = new ReentrantLock();
     static final Cache<String[]> METHOD_SIGN_CACHE = CacheBuilder.newBuilder().compressKey(true).build();
-    private static final Cache<checkResult> META_CFG_CACHE = CacheBuilder.newBuilder().compressKey(true).build();
+    private static final Cache<CheckResult> META_CFG_CACHE = CacheBuilder.newBuilder().compressKey(true).build();
 
     public static FieldValidator newInstance() {
         return new FieldValidator();
@@ -79,17 +79,17 @@ public class FieldValidator {
     protected final String constrain(String name, String field, Object value, 
                                      Constraint cst, Class<?> type) {
         name += "@" + field;
-        checkResult result = META_CFG_CACHE.get(name);
+        CheckResult result = META_CFG_CACHE.get(name);
         if (result == null) {
             LOCK.lock();
             try {
                 if ((result = META_CFG_CACHE.get(name)) == null) {
                     try {
                         verifyMeta(field, cst, type);
-                        result = new checkResult(true);
+                        result = new CheckResult(true);
                         META_CFG_CACHE.set(name, result);
                     } catch (Exception e) {
-                        result = new checkResult(false, e.getMessage());
+                        result = new CheckResult(false, e.getMessage());
                         META_CFG_CACHE.set(name, result);
                         throw e;
                     }
@@ -272,16 +272,16 @@ public class FieldValidator {
         return EMPTY;
     }
 
-    private static final class checkResult {
+    private static final class CheckResult {
         private boolean flag;
         private String msg;
 
-        checkResult(boolean flag, String msg) {
+        CheckResult(boolean flag, String msg) {
             this.flag = flag;
             this.msg = msg;
         }
 
-        checkResult(boolean flag) {
+        CheckResult(boolean flag) {
             this.flag = flag;
         }
     }

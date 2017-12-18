@@ -149,8 +149,8 @@ public class RequestLimiter {
      * @return
      */
     public static String buildNonce(String captcha, String salt) {
-        // new Random(long seed).nextLong() 第一个nextLong值是固定的
-        return HmacUtils.sha1Hex(Bytes.fromLong(new Random(captcha.hashCode()).nextLong()), salt.getBytes());
+        long first = new Random(captcha.hashCode()).nextLong(); // 第一个nextLong值是固定的
+        return HmacUtils.sha1Hex(Bytes.fromLong(first), salt.getBytes());
     }
 
     /**

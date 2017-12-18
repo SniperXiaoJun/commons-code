@@ -97,28 +97,24 @@ public abstract class LogRecorder {
         if (logger.isInfoEnabled()) {
             logger.info("[exec-before]-[{}]{}-{}", methodName, logs, ObjectUtils.toString(logInfo.getArgs()));
         }
-        Integer cost = null;
         long start = System.currentTimeMillis();
         try {
             Object retVal = pjp.proceed();
-            cost = (int) (System.currentTimeMillis() - start);
+            logInfo.setCostTime((int) (System.currentTimeMillis() - start));
             logInfo.setRetVal(retVal);
             if (logger.isInfoEnabled()) {
                 logger.info("[exec-after]-[{}]{}-[{}]", methodName, logs, ObjectUtils.toString(retVal));
             }
-            if (cost > alarmThresholdMillis) {
-                logger.warn("[exec-time]-[{}]{}-[cost {}]", methodName, logs, cost); // 执行时间告警
+            if (logInfo.getCostTime() > alarmThresholdMillis) {
+                logger.warn("[exec-time]-[{}]{}-[cost {}]", methodName, logs, logInfo.getCostTime()); // 执行时间告警
             }
             return retVal;
         } catch (Throwable e) {
-            if (cost == null) {
-                cost = (int) (System.currentTimeMillis() - start);
-            }
             logger.error("[exec-throwing]-[{}]{}-{}", methodName, logs, ObjectUtils.toString(logInfo.getArgs()), e);
+            logInfo.setCostTime((int) (System.currentTimeMillis() - start));
             logInfo.setException(Throwables.getStackTrace(e));
             throw e; // 向外抛
         } finally {
-            logInfo.setCostTime(cost);
             try {
                 log(logInfo);
             } catch (Throwable ex) {
