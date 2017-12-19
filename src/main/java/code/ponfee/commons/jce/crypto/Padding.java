@@ -2,7 +2,7 @@ package code.ponfee.commons.jce.crypto;
 
 /**
  * encrypt padding
- * pkcs7Padding must be BouncyCastleProvider supprot
+ * pkcs7Padding must be has BouncyCastleProvider support
  * @author fupf
  */
 public enum Padding {

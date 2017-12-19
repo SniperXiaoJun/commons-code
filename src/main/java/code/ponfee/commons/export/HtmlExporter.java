@@ -77,7 +77,7 @@ public class HtmlExporter extends AbstractExporter {
         if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
             html.append("<tfoot><tr><td colspan=\"").append(table.getTotalLeafCount());
             html.append("\" style=\"color:red; padding: 3px;font-size: 14px;\">");
-            html.append(TIP_NO_RESULT).append("</td></tr></tfoot>");
+            html.append(NO_RESULT_TIP).append("</td></tr></tfoot>");
         } else {
             super.nonEmpty();
             // tbody

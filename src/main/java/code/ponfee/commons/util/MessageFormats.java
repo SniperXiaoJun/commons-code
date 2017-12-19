@@ -25,7 +25,7 @@ public final class MessageFormats {
         int i = 0;
         for (Entry<String, Object> entry : args.entrySet()) {
             text = text.replaceAll(PREFIX + entry.getKey() + SUFFIX, "{" + i++ + "}");
-            objs.add(String.valueOf(entry.getValue()));
+            objs.add(entry.getValue());
         }
         return MessageFormat.format(text, objs.toArray());
     }

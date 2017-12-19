@@ -172,7 +172,7 @@ public class ExcelExporter extends AbstractExporter {
 
         // 6、判断是否有数据
         if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
-            createCell(TIP_NO_RESULT, sheet, tipStyle, cursorRow, table.getTotalLeafCount());
+            createCell(NO_RESULT_TIP, sheet, tipStyle, cursorRow, table.getTotalLeafCount());
         } else {
             super.nonEmpty();
             List<XSSFCellStyle> styles = createStyles(table.getThead());

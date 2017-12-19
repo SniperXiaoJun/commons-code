@@ -11,7 +11,7 @@ import javax.crypto.spec.SecretKeySpec;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
- * 加密构建类
+ * 对称加密构建类
  * @author fupf
  */
 public final class SymmetricCryptorBuilder {

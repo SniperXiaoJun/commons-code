@@ -123,7 +123,7 @@ public class JedisLock implements Lock, java.io.Serializable {
             try {
                 TimeUnit.MILLISECONDS.sleep(sleepMillis);
             } catch (InterruptedException e) {
-                logger.error("jedis lock interrupted exception", e);
+                logger.error("jedis lock sleep occur interrupted exception", e);
             }
         }
     }

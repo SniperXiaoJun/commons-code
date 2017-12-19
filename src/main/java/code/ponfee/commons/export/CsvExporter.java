@@ -30,7 +30,7 @@ public class CsvExporter extends AbstractExporter {
         buildThead(table.getThead(), table.getMaxTheadLevel());
 
         if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
-            csv.append(TIP_NO_RESULT);
+            csv.append(NO_RESULT_TIP);
         } else {
             super.nonEmpty();
             // tbody

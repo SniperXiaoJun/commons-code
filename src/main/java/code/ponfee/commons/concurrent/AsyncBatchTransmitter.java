@@ -102,7 +102,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
         final int sleepTimeMillis; // 休眠时间
         final int thresholdPeriod; // 消费周期阀值
         final int thresholdChunk; // 消费数量阀值
-        final boolean needDestroyWhenEnd;
+        final boolean requireDestroyWhenEnd;
         final ThreadPoolExecutor executor;
 
         long lastConsumeTimeMillis = System.currentTimeMillis(); // 最近刷新时间
@@ -123,10 +123,10 @@ public final class AsyncBatchTransmitter<T> extends Thread {
             this.thresholdPeriod = thresholdPeriod;
             this.thresholdChunk = thresholdChunk;
             if (executor == null) {
-                this.needDestroyWhenEnd = true;
+                this.requireDestroyWhenEnd = true;
                 this.executor = ThreadPoolExecutors.create(0, 10, 300, 0, "async-batch-transmitter");
             } else {
-                this.needDestroyWhenEnd = false;
+                this.requireDestroyWhenEnd = false;
                 this.executor = executor;
             }
             super.setName("async-batch-transmitter-" + Integer.toHexString(hashCode()));
@@ -143,7 +143,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
             List<T> list = new ArrayList<>(thresholdChunk);
             for (;;) {
                 if (isEnd && queue.isEmpty() && isRefresh()) {
-                    if (needDestroyWhenEnd) {
+                    if (requireDestroyWhenEnd) {
                         executor.shutdown();
                     }
                     break; // exit while loop when end

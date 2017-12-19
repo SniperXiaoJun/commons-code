@@ -11,7 +11,7 @@ import java.io.Closeable;
 public interface DataExporter extends AutoCloseable {
 
     /** 提示无结果 */
-    String TIP_NO_RESULT = "data not found";
+    String NO_RESULT_TIP = "data not found";
 
     /**
      * 构建表格

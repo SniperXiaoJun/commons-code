@@ -177,7 +177,7 @@ public class RequestLimiter {
     }
 
     /**
-     * 时间格式化
+     * 时间格式化，5/6 rate
      * @param seconds
      * @return
      */
@@ -185,30 +185,30 @@ public class RequestLimiter {
         int minutes, hours, days;
         days = seconds / 86400;
         if (days > 365) { // 年
-            return (days / 365 + ((days % 365) / 30 + 8) / 12) + "年";
+            return (days / 365 + ((days % 365) / 30 + 10) / 12) + "年";
         }
         if (days > 30) { // 月
-            return (days / 30 + (days % 30 + 20) / 30) + "个月";
+            return (days / 30 + (days % 30 + 25) / 30) + "个月";
         }
 
         seconds %= 86400;
         hours = seconds / 3600;
         if (days > 0) { // 日
-            return (days + (hours + 16) / 24) + "天";
+            return (days + (hours + 20) / 24) + "天";
         }
 
         seconds %= 3600;
         minutes = seconds / 60;
         if (hours > 0) { // 时
-            return (hours + (minutes + 40) / 60) + "小时";
+            return (hours + (minutes + 50) / 60) + "小时";
         }
 
         seconds %= 60;
         if (minutes > 0) { // 分
-            return (minutes + (seconds + 40) / 60) + "分钟";
+            return (minutes + (seconds + 50) / 60) + "分钟";
         }
 
-        return seconds + "秒钟"; // 秒
+        return seconds + "秒"; // 秒
     }
 
     public static void main(String[] args) {

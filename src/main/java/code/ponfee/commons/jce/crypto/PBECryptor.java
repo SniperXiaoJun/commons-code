@@ -28,7 +28,7 @@ import code.ponfee.commons.util.SecureRandoms;
  *  |---------------------------------------|-------------------|---------------------------|
  * </pre>
  * 
- * PBE盐加密
+ * PBE salt encryption
  * @author fupf
  */
 @SuppressWarnings("restriction")

@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 
 /**
- * 邮件发送多线程池
+ * 邮件通过走线程池发送
  * @author fupf
  */
 public class ThreadPoolMailSender {
