@@ -257,17 +257,17 @@
         <dependency><!-- jackson -->
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.0</version>
+            <version>2.9.3</version>
         </dependency>
         <dependency><!-- hessian -->
             <groupId>com.caucho</groupId>
             <artifactId>hessian</artifactId>
-            <version>4.0.38</version>
+            <version>4.0.51</version>
         </dependency>
         <dependency><!-- fst -->
             <groupId>de.ruedigermoeller</groupId>
             <artifactId>fst</artifactId>
-            <version>2.52</version>
+            <version>2.56</version>
         </dependency>
         <!-- ====================序列化==================== -->
 
@@ -296,7 +296,7 @@
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>
-            <version>3.4.4</version>
+            <version>3.4.5</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis</groupId>
@@ -324,7 +324,7 @@
             <artifactId>itext-asian</artifactId>
             <version>5.2.0</version>
         </dependency> -->
-        
+
         <!-- world to pdf -->
         <dependency>
             <groupId>aspose</groupId>
@@ -438,7 +438,7 @@
             <systemPath>${pom.basedir}/lib/third-jce-1.0.0.jar</systemPath> -->
         </dependency>
         <!-- ====================加解密==================== -->
-        
+
         <!-- jdk源码动态编译 -->
         <dependency>
             <groupId>jdk-lib</groupId>
@@ -452,7 +452,7 @@
         <dependency>
             <groupId>org.zeroturnaround</groupId>
             <artifactId>zt-zip</artifactId>
-            <version>1.11</version>
+            <version>1.12</version>
             <type>jar</type>
         </dependency>
         <dependency>

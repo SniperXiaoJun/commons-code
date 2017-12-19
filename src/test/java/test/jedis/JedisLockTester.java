@@ -59,13 +59,14 @@ public class JedisLockTester {
         System.out.println("\n=========================START========================");
         while ((line = reader.readLine()) != null) {
             final String _line = line;
-            Thread thread = new Thread(() -> {
+            threads.add(new Thread(() -> {
                 printer.output(NAME + "-" + num.getAndIncrement() + "\t" + _line + "\n");
-            });
-            thread.start();
-            threads.add(thread);
+            }));
         }
         reader.close();
+        for (Thread thread : threads) {
+            thread.start();
+        }
         for (Thread thread : threads) {
             thread.join();
         }
@@ -75,20 +76,21 @@ public class JedisLockTester {
     @Test
     public void test2() throws IOException, InterruptedException {
         WrappedBufferedReader reader = new WrappedBufferedReader(MavenProjects.getTestJavaFile(this.getClass()));
-        final Lock lock = new JedisLock(jedisClient, "testLock1", 5);
+        final Lock lock = new JedisLock(jedisClient, "testLock2", 5);
         final AtomicInteger num = new AtomicInteger(0);
         String line = null;
         List<Thread> threads = new ArrayList<>();
         System.out.println("\n=========================START========================");
         while ((line = reader.readLine()) != null) {
             final String _line = line;
-            Thread thread = new Thread(() -> {
+            threads.add(new Thread(() -> {
                 new Printer(lock).output(NAME + "-" + num.getAndIncrement() + "\t" + _line + "\n");
-            });
-            thread.start();
-            threads.add(thread);
+            }));
         }
         reader.close();
+        for (Thread thread : threads) {
+            thread.start();
+        }
         for (Thread thread : threads) {
             thread.join();
         }
@@ -104,13 +106,14 @@ public class JedisLockTester {
         System.out.println("\n=========================START========================");
         while ((line = reader.readLine()) != null) {
             final String _line = line;
-            Thread thread = new Thread(() -> {
-                new Printer(new JedisLock(jedisClient, "testLock2", 5)).output(NAME + "-" + num.getAndIncrement() + "\t" + _line + "\n");
-            });
-            thread.start();
-            threads.add(thread);
+            threads.add(new Thread(() -> {
+                new Printer(new JedisLock(jedisClient, "testLock3", 5)).output(NAME + "-" + num.getAndIncrement() + "\t" + _line + "\n");
+            }));
         }
         reader.close();
+        for (Thread thread : threads) {
+            thread.start();
+        }
         for (Thread thread : threads) {
             thread.join();
         }

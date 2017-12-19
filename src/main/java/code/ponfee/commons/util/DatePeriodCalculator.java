@@ -85,7 +85,9 @@ public class DatePeriodCalculator {
                 tmp = (Calendar) c1.clone();
                 // 跨月问题，当前时间仍属于该周期内，则应减一个周期数，如：(2012-01-15 ~ 2012-02-14，当前时间为2012-02-14，则当前时间属于该周期，而不是下一周期)
                 tmp.add(Calendar.MONTH, cycleNum * quantity);
-                if (tmp.after(c2)) cycleNum -= 1;
+                if (tmp.after(c2)) {
+                    cycleNum -= 1;
+                }
                 cycleNum += next; // 上一个周期
                 c1.add(Calendar.MONTH, cycleNum * quantity);
                 startDate = c1.getTime(); // 本周期开始时间
@@ -109,13 +111,14 @@ public class DatePeriodCalculator {
         QUARTERLY("每季度"), // 
         HALF_YEARLY("每半年"), // 
         YEARLY("每年");
+
         private final String desc;
 
         Period(String desc) {
             this.desc = desc;
         }
 
-        public String desc() {
+        String desc() {
             return this.desc;
         }
     }

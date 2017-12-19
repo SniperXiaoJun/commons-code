@@ -193,7 +193,8 @@ public class Captchas {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        generate(100, (int) (100 * 0.618), new FileOutputStream("D:/a.jpg"), random(4));
+        int width = 80;
+        generate(width, (int) (width * 0.618), new FileOutputStream("D:/a.jpg"), random(4));
     }
 
 }

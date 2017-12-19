@@ -26,11 +26,32 @@ public final class SecureRandoms {
     }
 
     /**
-     * returns a pseudo random int
+     * returns a pseudo random int, between 0 and bound
      * @param bound
      * @return
      */
     public static int nextInt(int bound) {
         return RANDOM.nextInt(bound);
     }
+
+    public static int nextInt() {
+        return RANDOM.nextInt();
+    }
+
+    public static long nextLong() {
+        return RANDOM.nextLong();
+    }
+
+    public static float nextFloat() {
+        return RANDOM.nextFloat();
+    }
+
+    public static double nextDouble() {
+        return RANDOM.nextDouble();
+    }
+
+    public static boolean nextBoolean() {
+        return RANDOM.nextBoolean();
+    }
+
 }

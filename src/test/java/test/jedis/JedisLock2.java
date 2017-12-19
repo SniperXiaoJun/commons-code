@@ -7,7 +7,7 @@ import redis.clients.jedis.Jedis;
  * 
  * @author Alois Belaska <alois.belaska@gmail.com>
  */
-public class JedisLock {
+public class JedisLock2 {
 
     Jedis jedis;
 
@@ -35,7 +35,7 @@ public class JedisLock {
      * @param lockKey
      *            lock key (ex. account:1, ...)
      */
-    public JedisLock(Jedis jedis, String lockKey) {
+    public JedisLock2(Jedis jedis, String lockKey) {
         this.jedis = jedis;
         this.lockKey = lockKey;
     }
@@ -49,7 +49,7 @@ public class JedisLock {
      * @param timeoutSecs
      *            acquire timeout in miliseconds (default: 10000 msecs)
      */
-    public JedisLock(Jedis jedis, String lockKey, int timeoutMsecs) {
+    public JedisLock2(Jedis jedis, String lockKey, int timeoutMsecs) {
         this(jedis, lockKey);
         this.timeoutMsecs = timeoutMsecs;
     }
@@ -65,7 +65,7 @@ public class JedisLock {
      * @param expireMsecs
      *            lock expiration in miliseconds (default: 60000 msecs)
      */
-    public JedisLock(Jedis jedis, String lockKey, int timeoutMsecs, int expireMsecs) {
+    public JedisLock2(Jedis jedis, String lockKey, int timeoutMsecs, int expireMsecs) {
         this(jedis, lockKey, timeoutMsecs);
         this.expireMsecs = expireMsecs;
     }
@@ -76,7 +76,7 @@ public class JedisLock {
      * @param lockKey
      *            lock key (ex. account:1, ...)
      */
-    public JedisLock(String lockKey) {
+    public JedisLock2(String lockKey) {
         this(null, lockKey);
     }
 
@@ -88,7 +88,7 @@ public class JedisLock {
      * @param timeoutSecs
      *            acquire timeout in miliseconds (default: 10000 msecs)
      */
-    public JedisLock(String lockKey, int timeoutMsecs) {
+    public JedisLock2(String lockKey, int timeoutMsecs) {
         this(null, lockKey, timeoutMsecs);
     }
 
@@ -102,7 +102,7 @@ public class JedisLock {
      * @param expireMsecs
      *            lock expiration in miliseconds (default: 60000 msecs)
      */
-    public JedisLock(String lockKey, int timeoutMsecs, int expireMsecs) {
+    public JedisLock2(String lockKey, int timeoutMsecs, int expireMsecs) {
         this(null, lockKey, timeoutMsecs, expireMsecs);
     }
 

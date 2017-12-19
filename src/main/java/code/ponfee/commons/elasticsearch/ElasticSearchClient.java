@@ -433,7 +433,8 @@ public class ElasticSearchClient implements DisposableBean {
                 return Result.success();
             }
         } catch (IOException e) {
-            logger.error("add docs error, index:{}, type:{}, object:{}", index, type, Jsons.NORMAL.stringify(list), e);
+            logger.error("add docs error, index:{}, type:{}, object:{}", 
+                         index, type, Jsons.NORMAL.stringify(list), e);
             return Result.failure(ResultCode.SERVER_ERROR);
         }
     }
@@ -465,7 +466,8 @@ public class ElasticSearchClient implements DisposableBean {
             xcb.endObject();
             client.update(updateRequest.doc(xcb)).get();
         } catch (IOException | InterruptedException | ExecutionException e) {
-            logger.error("update docs error, index:{}, type:{}, id:{}, object:{}", index, type, id, Jsons.NORMAL.stringify(map), e);
+            logger.error("update docs error, index:{}, type:{}, id:{}, object:{}", 
+                         index, type, id, Jsons.NORMAL.stringify(map), e);
         }
     }
 
@@ -531,6 +533,14 @@ public class ElasticSearchClient implements DisposableBean {
      */
     public SearchRequestBuilder prepareSearch(String indexName, String typeName) {
         return client.prepareSearch(indexName).setTypes(typeName);
+    }
+
+    public SearchRequestBuilder prepareSearch(String indexName, String... typeNames) {
+        return client.prepareSearch(indexName).setTypes(typeNames);
+    }
+
+    public SearchRequestBuilder prepareSearch(String[] indexNames, String[] typeNames) {
+        return client.prepareSearch(indexNames).setTypes(typeNames);
     }
 
     /**
@@ -806,7 +816,8 @@ public class ElasticSearchClient implements DisposableBean {
             int totalPages = (int) ((totalRecords + scrollSize - 1) / scrollSize); // 总页数
 
             if (logger.isInfoEnabled()) {
-                logger.info("scrolling search: {} total[{}-{}]", ObjectUtils.getStackTrace(4), totalPages, totalRecords);
+                logger.info("scrolling search: {} total[{}-{}]", 
+                            ObjectUtils.getStackTrace(4), totalPages, totalRecords);
             }
 
             if (totalRecords == 0) {

@@ -1,9 +1,9 @@
 package test.jedis;
 
-import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 
@@ -14,8 +14,11 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
+import code.ponfee.commons.util.MavenProjects;
+import code.ponfee.commons.util.ObjectUtils;
+
 public class RedissonLockTester {
-    private static final String name = UUID.randomUUID().toString().substring(0, 3);
+    private static final String NAME = ObjectUtils.uuid(3);
 
     public RedissonClient redisson;
 
@@ -33,24 +36,24 @@ public class RedissonLockTester {
 
     @Test
     public void test() throws Exception {
-        String path = Thread.currentThread().getContextClassLoader().getResource("").getFile();
-        path = new File(path).getParentFile().getParentFile().getPath() + "/src/test/java/";
-        path += this.getClass().getCanonicalName().replace('.', '/') + ".java";
-        Scanner s = new Scanner(new FileInputStream(path));
+        Scanner s = new Scanner(new FileInputStream(MavenProjects.getTestJavaFile(this.getClass())));
         final AtomicInteger num = new AtomicInteger(0);
+        List<Thread> threads = new ArrayList<>();
         while (s.hasNextLine()) {
             final String line = s.nextLine();
             Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    new Printer(redisson.getLock("redisson:lock")).output(name + "-" + num.getAndIncrement() + "\t" + line + "\n");
+                    new Printer(redisson.getLock("redisson:lock")).output(NAME + "-" + num.getAndIncrement() + "\t" + line + "\n");
                 }
             });
             t.start();
-            //t.join();
+            threads.add(t);
         }
         s.close();
-        Thread.sleep(99999);
+        for (Thread thread : threads) {
+            thread.join();
+        }
     }
 
     private static class Printer {

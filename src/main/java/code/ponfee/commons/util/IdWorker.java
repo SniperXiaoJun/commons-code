@@ -76,7 +76,10 @@ public final class IdWorker {
         }
         lastTimestamp = timestamp;
 
-        return (((timestamp - twepoch) << timestampShift) & timestampMask) | (datacenterId << datacenterIdShift) | (workerId << workerIdShift) | sequence;
+        return (((timestamp - twepoch) << timestampShift) & timestampMask) 
+               | (datacenterId << datacenterIdShift) 
+               | (workerId << workerIdShift) 
+               | sequence;
     }
 
     protected long tilNextMillis(long lastTimestamp) {

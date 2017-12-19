@@ -9,6 +9,8 @@ import java.util.Formatter;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.base.Preconditions;
+
 /**
  * byte[]
  * @author fupf
@@ -258,26 +260,32 @@ public final class Bytes {
      * @param rest
      * @return
      */
-    public static byte[] merge(byte[] first, byte[]... rest) {
-        if (first == null) {
-            throw new IllegalArgumentException("the first array must be non null");
-        }
+    public static byte[] concat(byte[] first, byte[]... rest) {
+        Preconditions.checkArgument(first != null, "the first can not be null");
         int totalLength = first.length;
         for (byte[] array : rest) {
-            if (array == null) continue;
-            totalLength += array.length;
+            if (array != null) {
+                totalLength += array.length;
+            }
         }
+
         byte[] result = Arrays.copyOf(first, totalLength);
         int offset = first.length;
         for (byte[] array : rest) {
-            if (array == null) continue;
-            System.arraycopy(array, 0, result, offset, array.length);
-            offset += array.length;
+            if (array != null) {
+                System.arraycopy(array, 0, result, offset, array.length);
+                offset += array.length;
+            }
         }
         return result;
     }
 
     public static void main(String[] args) throws Exception {
-        //System.out.println(hexDump(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class))));
+        byte[] a = SecureRandoms.nextBytes(6);
+        byte[] b = SecureRandoms.nextBytes(8);
+        byte[] c = concat(a, b);
+        System.out.println(c.length);
+        System.out.println(hexDump(c));
     }
+
 }
