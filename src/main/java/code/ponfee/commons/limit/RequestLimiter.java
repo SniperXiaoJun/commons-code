@@ -25,8 +25,12 @@ public class RequestLimiter {
 
     private final JedisClient client;
 
-    public RequestLimiter(JedisClient client) {
+    private RequestLimiter(JedisClient client) {
         this.client = client;
+    }
+
+    public static RequestLimiter create(JedisClient client) {
+        return new RequestLimiter(client);
     }
 
     public RequestLimiter limitFrequency(String key, int period)
@@ -182,8 +186,7 @@ public class RequestLimiter {
      * @return
      */
     public static String format(int seconds) {
-        int minutes, hours, days;
-        days = seconds / 86400;
+        int days = seconds / 86400;
         if (days > 365) { // 年
             return (days / 365 + ((days % 365) / 30 + 10) / 12) + "年";
         }
@@ -192,13 +195,13 @@ public class RequestLimiter {
         }
 
         seconds %= 86400;
-        hours = seconds / 3600;
+        int hours = seconds / 3600;
         if (days > 0) { // 日
             return (days + (hours + 20) / 24) + "天";
         }
 
         seconds %= 3600;
-        minutes = seconds / 60;
+        int minutes = seconds / 60;
         if (hours > 0) { // 时
             return (hours + (minutes + 50) / 60) + "小时";
         }

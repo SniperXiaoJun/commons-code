@@ -29,7 +29,9 @@ public class HttpParams {
      */
     public static Map<String, String[]> parseParams(String queryString, String encoding) {
         Map<String, String[]> params = new HashMap<>();
-        if (queryString == null || queryString.length() <= 0) return params;
+        if (queryString == null || queryString.length() <= 0) {
+            return params;
+        }
 
         byte[] bytes = null;
         if (encoding == null) {
@@ -90,7 +92,9 @@ public class HttpParams {
      * @return
      */
     public static String buildUrlPath(String url, String encoding, Map<String, ?> params) {
-        if (params == null || params.isEmpty()) return url;
+        if (params == null || params.isEmpty()) {
+            return url;
+        }
 
         String queryString = buildParams(params, encoding);
         return url + (url.indexOf('?') < 0 ? '?' : '&') + queryString;
@@ -122,7 +126,7 @@ public class HttpParams {
     }
 
     public static String buildSigning(Map<String, String> params, String wrapChar, String[] excludes) {
-        List<String> filter = ObjectUtils.isEmpty(excludes) 
+        List<String> filter = (excludes == null || excludes.length == 0)
                               ? Collections.emptyList() 
                               : Arrays.asList(excludes);
 

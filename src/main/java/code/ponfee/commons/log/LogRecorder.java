@@ -81,7 +81,7 @@ public abstract class LogRecorder {
         String methodName = ClassUtils.getMethodSignature(method);
 
         // request volume threshold
-        if (log != null && log.enabled() && circuitBreaker != null
+        if (circuitBreaker != null && log != null && log.enabled()
             && !circuitBreaker.checkpoint(methodName)) {
             throw new IllegalStateException("request denied");
         }

@@ -43,13 +43,16 @@ public final class Files {
 
     public static final String LINE_SEPARATOR; // line separator of file
     static {
-        /*String separator = (String) AccessController.doPrivileged(new GetPropertyAction("line.separator"));
-        if (StringUtils.isEmpty(separator)) separator = System.getProperty("line.separator", "/n");
+        /*String separator = java.security.AccessController.doPrivileged(
+               new sun.security.action.GetPropertyAction("line.separator"));
+        if (StringUtils.isEmpty(separator)) {
+            separator = System.getProperty("line.separator", "/n");
+        }
         LINE_SEPARATOR = separator;*/
-        final StringBuilderWriter buf = new StringBuilderWriter(4);
-        final PrintWriter out = new PrintWriter(buf);
+        final StringBuilderWriter buffer = new StringBuilderWriter(4);
+        final PrintWriter out = new PrintWriter(buffer);
         out.println();
-        LINE_SEPARATOR = buf.toString();
+        LINE_SEPARATOR = buffer.toString();
         out.close();
     }
 

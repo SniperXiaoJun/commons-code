@@ -1,7 +1,6 @@
 package code.ponfee.commons.concurrent;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
@@ -9,8 +8,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * 线程池执行器创建
@@ -61,13 +58,8 @@ public final class ThreadPoolExecutors {
             workQueue = new SynchronousQueue<>();
         }
 
-        // thread factory
-        ThreadFactory threadFactory;
-        if (StringUtils.isEmpty(threadName)) {
-            threadFactory = Executors.defaultThreadFactory();
-        } else {
-            threadFactory = new NamedThreadFactory(threadName, true);
-        }
+        // thread factory, Executors.defaultThreadFactory()
+        ThreadFactory threadFactory = new NamedThreadFactory(threadName);
 
         // rejected Handler Strategy 
         if (rejectedHandler == null) {

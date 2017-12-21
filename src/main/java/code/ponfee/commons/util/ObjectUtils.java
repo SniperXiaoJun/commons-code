@@ -298,8 +298,9 @@ public final class ObjectUtils {
 
         List<Object[]> results = new ArrayList<>(data.size());
         for (Map<String, Object> row : data) {
-            if (isEmpty(row)) continue;
-            results.add(map2array(row, fields));
+            if (row != null && !row.isEmpty()) {
+                results.add(map2array(row, fields));
+            }
         }
         return results;
     }
@@ -330,8 +331,9 @@ public final class ObjectUtils {
 
         List<Object[]> results = new ArrayList<>(data.size());
         for (LinkedHashMap<String, Object> row : data) {
-            if (row == null) continue;
-            results.add(map2array(row));
+            if (row != null && !row.isEmpty()) {
+                results.add(map2array(row));
+            }
         }
         return results;
     }

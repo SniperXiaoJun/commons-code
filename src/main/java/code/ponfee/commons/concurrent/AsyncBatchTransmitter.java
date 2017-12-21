@@ -6,9 +6,9 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.math.NumberUtils;
 
-import code.ponfee.commons.math.Numbers;
+import com.google.common.base.Preconditions;
 
 /**
  * 异步批量数据中转站
@@ -119,7 +119,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
             Preconditions.checkArgument(thresholdChunk > 0);
 
             this.factory = factory;
-            this.sleepTimeMillis = Numbers.bounds(thresholdPeriod, 9, thresholdPeriod);
+            this.sleepTimeMillis = NumberUtils.max(9, thresholdPeriod / 2);
             this.thresholdPeriod = thresholdPeriod;
             this.thresholdChunk = thresholdChunk;
             if (executor == null) {

@@ -3,39 +3,51 @@ package code.ponfee.commons.concurrent;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * 线程工厂
  * @author fupf
  */
 public class NamedThreadFactory implements ThreadFactory {
+
     private static final AtomicInteger POOL_SEQ = new AtomicInteger(1);
 
     private final AtomicInteger threadNo = new AtomicInteger(1);
     private final String prefix;
-    private final boolean daemo;
+    private final boolean daemon;
     private final ThreadGroup group;
 
     public NamedThreadFactory() {
-        this("pool-" + POOL_SEQ.getAndIncrement(), false);
+        this(null, false);
     }
 
     public NamedThreadFactory(String prefix) {
         this(prefix, false);
     }
 
-    public NamedThreadFactory(String prefix, boolean daemo) {
-        this.prefix = prefix + "-thread-";
-        this.daemo = daemo;
+    public NamedThreadFactory(String prefix, boolean daemon) {
+        if (StringUtils.isBlank(prefix)) {
+            prefix = "pool-" + POOL_SEQ.getAndIncrement();
+        }
         SecurityManager s = System.getSecurityManager();
-        this.group = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
+
+        this.prefix = prefix + "-thread-";
+        this.daemon = daemon;
+        this.group = (s == null) 
+                     ? Thread.currentThread().getThreadGroup() 
+                     : s.getThreadGroup();
     }
 
     @Override
     public Thread newThread(Runnable runnable) {
         String name = prefix + threadNo.getAndIncrement();
-        Thread ret = new Thread(group, runnable, name, 0);
-        ret.setDaemon(daemo);
-        return ret;
+        Thread thread = new Thread(group, runnable, name, 0);
+        thread.setDaemon(daemon);
+        if (thread.getPriority() != Thread.NORM_PRIORITY) {
+            thread.setPriority(Thread.NORM_PRIORITY);
+        }
+        return thread;
     }
 
     public ThreadGroup getThreadGroup() {

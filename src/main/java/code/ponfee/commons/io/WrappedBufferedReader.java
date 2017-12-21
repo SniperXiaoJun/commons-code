@@ -12,7 +12,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
 /**
- * 包装文件缓冲读取（decorator）
+ * 包装文件/输入流缓冲读取（decorator）
  * @author Ponfee
  */
 public class WrappedBufferedReader extends Reader {
@@ -23,6 +23,10 @@ public class WrappedBufferedReader extends Reader {
 
     public WrappedBufferedReader(File file) throws FileNotFoundException {
         this(file, Charset.defaultCharset());
+    }
+
+    public WrappedBufferedReader(File file, String charset) throws FileNotFoundException {
+        this(new FileInputStream(file), Charset.forName(charset));
     }
 
     public WrappedBufferedReader(File file, Charset charset) throws FileNotFoundException {

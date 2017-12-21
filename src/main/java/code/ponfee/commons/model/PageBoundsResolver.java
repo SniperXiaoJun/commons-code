@@ -26,7 +26,9 @@ public final class PageBoundsResolver {
         for (long subTotalCount : subTotalCounts) {
             totalCounts += subTotalCount;
         }
-        if (totalCounts < 1) return null;
+        if (totalCounts < 1) {
+            return null;
+        }
 
         // pageSize小于1时表示查询全部
         if (pageSize < 1) {
@@ -39,7 +41,9 @@ public final class PageBoundsResolver {
         }
 
         // 合理化pageNum、offset的值
-        if (pageNum < 1) pageNum = 1;
+        if (pageNum < 1) {
+            pageNum = 1;
+        }
         long offset = (pageNum - 1) * pageSize;
         if (offset >= totalCounts) { // 超出总记录数，则取最后一页
             pageNum = (int) (totalCounts + pageSize - 1) / pageSize;
@@ -76,8 +80,11 @@ public final class PageBoundsResolver {
     public static PageBounds resolve(int pageNum, int pageSize, long totalCounts) {
         List<PageBounds> list = resolve(pageNum, pageSize, new long[] { totalCounts });
 
-        if (list == null || list.isEmpty()) return null;
-        else return list.get(0);
+        if (list == null || list.isEmpty()) {
+            return null;
+        } else {
+            return list.get(0);
+        }
     }
 
     /**

@@ -24,6 +24,7 @@ import code.ponfee.commons.util.Networks;
  * @author fupf
  */
 public final class WebUtils {
+
     private static final List<String> LOCAL_IP = Arrays.asList("127.0.0.1", "0:0:0:0:0:0:0:1");
     private final static Pattern PATTERN_SUFFIX = Pattern.compile("\\S*[?]\\S*");
 
@@ -103,7 +104,8 @@ public final class WebUtils {
      * @param text
      * @param charset
      */
-    public static void response(HttpServletResponse resp, String contentType, String text, String charset) {
+    public static void response(HttpServletResponse resp, String contentType, 
+                                String text, String charset) {
         resp.setContentType(contentType + ";charset=" + charset);
         resp.setCharacterEncoding(charset);
         PrintWriter out = null;
@@ -129,11 +131,13 @@ public final class WebUtils {
         respJson(resp, json, DEFAULT_CHARSET);
     }
 
-    public static void respJson(HttpServletResponse resp, String json, String charset) {
+    public static void respJson(HttpServletResponse resp, 
+                                String json, String charset) {
         response(resp, "application/json", json, charset);
     }
 
-    public static void respJsonp(HttpServletResponse response, String callback, String json) {
+    public static void respJsonp(HttpServletResponse response, 
+                                 String callback, String json) {
         respJsonp(response, callback, json, DEFAULT_CHARSET);
     }
 
@@ -144,7 +148,8 @@ public final class WebUtils {
      * @param json
      * @param charset
      */
-    public static void respJsonp(HttpServletResponse resp, String callback, String json, String charset) {
+    public static void respJsonp(HttpServletResponse resp, String callback, 
+                                 String json, String charset) {
         respJson(resp, callback + "(" + json + ");", charset);
     }
 
@@ -157,8 +162,10 @@ public final class WebUtils {
         resp.setHeader("Access-Control-Allow-Origin",  req.getHeader("Origin"));
         resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
         resp.setHeader("Access-Control-Max-Age", "0");
-        resp.setHeader("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, "
-                                                     + "Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With");
+        resp.setHeader("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, "
+                                                     + "If-Modified-Since, Pragma, Expires, "
+                                                     + "Last-Modified, Cache-Control, "
+                                                     + "Content-Type, X-E4M-With");
         resp.setHeader("Access-Control-Allow-Credentials", "true");
         resp.setHeader("XDomainRequestAllowed", "1");
     }
@@ -216,7 +223,8 @@ public final class WebUtils {
      * @param name
      * @param value
      */
-    public static void addCookie(HttpServletResponse response, String name, String value) {
+    public static void addCookie(HttpServletResponse response, 
+                                 String name, String value) {
         addCookie(response, name, value, "/", 24 * 60 * 60);
     }
 
@@ -228,7 +236,8 @@ public final class WebUtils {
      * @param path
      * @param maxAge
      */
-    public static void addCookie(HttpServletResponse resp, String name, String value, String path, int maxAge) {
+    public static void addCookie(HttpServletResponse resp, String name, 
+                                 String value, String path, int maxAge) {
         resp.addCookie(createCookie(name, value, path, maxAge));
     }
 
@@ -240,7 +249,8 @@ public final class WebUtils {
      * @param maxAge
      * @return
      */
-    public static Cookie createCookie(String name, String value, String path, int maxAge) {
+    public static Cookie createCookie(String name, String value, 
+                                      String path, int maxAge) {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath(path);
         cookie.setMaxAge(maxAge);
@@ -262,15 +272,18 @@ public final class WebUtils {
      * @return
      */
     public static HttpServletRequest getRequest() {
+        // <listener><listener-class>org.springframework.web.context.request.RequestContextListener</listener-class></listener>
         //return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         return WebContext.getRequest();
     }
 
     /**
+     * 
      * 获取response
      * @return
      */
     public static HttpServletResponse getResponse() {
+        // return ((ServletWebRequest)RequestContextHolder.getRequestAttributes()).getResponse();
         return WebContext.getResponse();
     }
 
@@ -285,12 +298,14 @@ public final class WebUtils {
         WebUtils.addHeader(resp, SESSION_TRACE_HEADER, token); // to header
     }
 
+    public static String getSessionTrace() {
+        return getSessionTrace(getRequest());
+    }
+
     /**
      * 会话跟踪
      */
-    public static String getSessionTrace() {
-        HttpServletRequest req = getRequest();
-
+    public static String getSessionTrace(HttpServletRequest req) {
         String authToken = req.getParameter(SESSION_TRACE_PARAME); // from parame
         if (authToken != null) return authToken;
 

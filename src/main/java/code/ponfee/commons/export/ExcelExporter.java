@@ -135,7 +135,7 @@ public class ExcelExporter extends AbstractExporter {
     @Override
     public void build(Table table) {
         // 1、校验表头是否为空
-        if (ObjectUtils.isEmpty(table.getThead())) {
+        if (table.getThead() == null || table.getThead().isEmpty()) {
             throw new IllegalArgumentException("thead can't be null");
         }
 
@@ -179,7 +179,7 @@ public class ExcelExporter extends AbstractExporter {
             XSSFRow row;
 
             // 7、处理tbody数据
-            if (!ObjectUtils.isEmpty(table.getTobdy())) {
+            if (table.getTobdy() != null && !table.getTobdy().isEmpty()) {
                 Object[] data;
                 List<Object[]> tbody = table.getTobdy();
                 Map<String, Object> options = table.getOptions();
@@ -194,7 +194,7 @@ public class ExcelExporter extends AbstractExporter {
             }
 
             // 8、处理tfoot数据
-            if (!ObjectUtils.isEmpty(table.getTfoot())) {
+            if (table.getTfoot() != null && table.getTfoot().length > 0) {
                 int rowNum = cursorRow.getAndIncrement();
                 row = sheet.createRow(rowNum);
                 row.setHeight(DEFAULT_HEIGHT);
@@ -233,7 +233,10 @@ public class ExcelExporter extends AbstractExporter {
      * excel.nestedImage(byte[] image, width, cheight);
      */
     public void insertImage(byte[] imageBytes, int width, int height) {
-        if (ObjectUtils.isEmpty(imageBytes)) return;
+        if (imageBytes == null || imageBytes.length == 0) {
+            return;
+        }
+
         super.nonEmpty();
 
         XSSFSheet sheet = getOrCreateSheet(getName());
@@ -471,10 +474,10 @@ public class ExcelExporter extends AbstractExporter {
      */
     @SuppressWarnings("unchecked")
     private void processOptions(XSSFCell cell, int row, int col, Map<String, Object> options) {
-        if (ObjectUtils.isEmpty(options)) return;
+        if (options == null || options.isEmpty()) return;
 
         // 单元格高亮显示
-        if (!ObjectUtils.isEmpty(options.get("highlight")) && row >= 0 && col >= 0) {
+        if (row >= 0 && col >= 0 && options.containsKey("highlight")) {
             Map<String, Object> highlight = (Map<String, Object>) options.get("highlight");
             for (List<Integer> c : (List<List<Integer>>) highlight.get("cells")) {
                 if (c.get(0).equals(row) && c.get(1).equals(col)) {
@@ -544,12 +547,12 @@ public class ExcelExporter extends AbstractExporter {
     private static final class CursorRow {
         int current;
 
-        CursorRow(int initValue) {
-            this.current = initValue;
+        CursorRow() {
+            this(0);
         }
 
-        CursorRow() {
-            this.current = 0;
+        CursorRow(int initValue) {
+            this.current = initValue;
         }
 
         int getAndIncrement() {

@@ -191,7 +191,7 @@ public class X509CertGenerator {
         if (sn == null) sn = ThreadLocalRandom.current().nextInt() & Integer.MAX_VALUE;
         try {
             // 验证pkcs10
-            Security.addProvider(Providers.BC.get());
+            Security.addProvider(Providers.BC);
             PKCS10CertificationRequest req = new PKCS10CertificationRequest(pkcs10.getEncoded());
             if (!req.verify()) throw new SecurityException("invalid pkcs10 data");
 

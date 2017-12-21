@@ -65,12 +65,12 @@ public final class CryptoMessageSyntax {
     public static byte[] sign(byte[] data, List<PrivateKey> keys, List<X509Certificate[]> certs) {
         try {
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
-            DigestCalculatorProvider dcp = new JcaDigestCalculatorProviderBuilder().setProvider(BC.get()).build();
+            DigestCalculatorProvider dcp = new JcaDigestCalculatorProviderBuilder().setProvider(BC).build();
             for (int i = 0; i < keys.size(); i++) {
                 gen.addCertificates(new JcaCertStore(Arrays.asList(certs.get(i))));
 
                 ContentSigner signer = new JcaContentSignerBuilder(certs.get(i)[0].getSigAlgName())
-                                                         .setProvider(BC.get()).build(keys.get(i));
+                                                         .setProvider(BC).build(keys.get(i));
                 JcaSignerInfoGeneratorBuilder jsBuilder = new JcaSignerInfoGeneratorBuilder(dcp);
                 gen.addSignerInfoGenerator(jsBuilder.build(signer, certs.get(i)[0]));
             }
@@ -93,7 +93,7 @@ public final class CryptoMessageSyntax {
                 SignerInformation signer = (SignerInformation) iter.next();
                 @SuppressWarnings("unchecked") Collection<?> certChain = store.getMatches(signer.getSID()); // 证书链
                 X509CertificateHolder cert = (X509CertificateHolder) certChain.iterator().next();
-                if (!signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC.get()).build(cert))) {
+                if (!signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert))) {
                     String certSN = cert.getSerialNumber().toString(16);
                     String certDN = cert.getSubject().toString();
                     throw new SecurityException("signature verify fail[" + certSN + ", " + certDN + "]");
@@ -123,8 +123,8 @@ public final class CryptoMessageSyntax {
             //添加数字信封
             CMSTypedData msg = new CMSProcessableByteArray(data);
             CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
-            edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(cert).setProvider(BC.get()));
-            CMSEnvelopedData ed = edGen.generate(msg, new JceCMSContentEncryptorBuilder(alg).setProvider(BC.get()).build());
+            edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(cert).setProvider(BC));
+            CMSEnvelopedData ed = edGen.generate(msg, new JceCMSContentEncryptorBuilder(alg).setProvider(BC).build());
             return ed.getEncoded();
         } catch (CertificateEncodingException | CMSException | IOException e) {
             throw new SecurityException(e);
@@ -145,7 +145,7 @@ public final class CryptoMessageSyntax {
             // 解密
             if (iter.hasNext()) {
                 RecipientInformation recipient = (RecipientInformation) iter.next();
-                return recipient.getContent(new JceKeyTransEnvelopedRecipient(privateKey).setProvider(BC.get()));
+                return recipient.getContent(new JceKeyTransEnvelopedRecipient(privateKey).setProvider(BC));
             } else {
                 return null;
             }

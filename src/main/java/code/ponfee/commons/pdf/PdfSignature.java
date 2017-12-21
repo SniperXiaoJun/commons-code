@@ -63,7 +63,7 @@ public class PdfSignature {
             String signAlg = ((X509Certificate) signer.getCertChain()[0]).getSigAlgName();
             String hashAlg = AlgorithmId.getDigAlgFromSigAlg(signAlg); // 获取摘要算法
             ExternalSignature signature = new PrivateKeySignature(signer.getPriKey(), hashAlg, 
-                                                                  Providers.BC.get().getName());
+                                                                  Providers.BC.getName());
 
             MakeSignature.signDetached(appearance, new BouncyCastleDigest(), signature, 
                                        signer.getCertChain(), null, null, null, 0, CryptoStandard.CMS);

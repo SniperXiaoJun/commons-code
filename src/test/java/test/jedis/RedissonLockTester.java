@@ -47,10 +47,12 @@ public class RedissonLockTester {
                     new Printer(redisson.getLock("redisson:lock")).output(NAME + "-" + num.getAndIncrement() + "\t" + line + "\n");
                 }
             });
-            t.start();
             threads.add(t);
         }
         s.close();
+        for (Thread thread : threads) {
+            thread.start();
+        }
         for (Thread thread : threads) {
             thread.join();
         }

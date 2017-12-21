@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -17,7 +16,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.jce.hash.HashUtils;
-import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * 缓存类
@@ -284,30 +282,6 @@ public class Cache<T> {
             }
         }
         return key;
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        Random random = new Random();
-        DateProvider dateProvider = DateProvider.SYSTEM;
-        Cache<Void> cache = CacheBuilder.newBuilder().caseSensitiveKey(false).compressKey(true)
-                                                     .autoReleaseInSeconds(2).build();
-        for (int i = 0; i < 10; i++) {
-            new Thread() {
-                @Override
-                public void run() {
-                    while (true) {
-                        if (cache.isDestroy()) break;
-                        cache.set(ObjectUtils.uuid(8), null, dateProvider.now() + random.nextInt(3000));
-                    }
-                }
-            }.start();
-        }
-
-        for (int i = 0; i < 5; i++) {
-            System.out.println(cache.size());
-            Thread.sleep(1000);
-        }
-        cache.destroy();
     }
 
 }

@@ -6,14 +6,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * security provider
+ * security providers
+ * there has not any method defined except a static method
  * @author fupf
  */
 @SuppressWarnings("restriction")
-@FunctionalInterface
 public interface Providers {
-
-    Provider get();
 
     static Provider get(Class<? extends Provider> type) {
         Provider provider = ProvidersHolder.HOLDER.get(type);
@@ -33,17 +31,17 @@ public interface Providers {
     }
 
     // BouncyCastleProvider.PROVIDER_NAME
-    Providers BC =         () -> get(org.bouncycastle.jce.provider.BouncyCastleProvider.class);
-    Providers SUN =        () -> get(sun.security.provider.Sun.class);
-    Providers SunRsaSign = () -> get(sun.security.rsa.SunRsaSign.class);
-    Providers SunEC =      () -> get(sun.security.ec.SunEC.class);
-    Providers SunJSSE =    () -> get(com.sun.net.ssl.internal.ssl.Provider.class);
-    Providers SunJCE =     () -> get(com.sun.crypto.provider.SunJCE.class);
-    Providers SunJGSS =    () -> get(sun.security.jgss.SunProvider.class);
-    Providers SunSASL =    () -> get(com.sun.security.sasl.Provider.class);
-    Providers XMLDSig =    () -> get(org.jcp.xml.dsig.internal.dom.XMLDSigRI.class);
-    Providers SunPCSC =    () -> get(sun.security.smartcardio.SunPCSC.class);
-    Providers SunMSCAPI =  () -> get(sun.security.mscapi.SunMSCAPI.class);
+    Provider BC =         Providers.get(org.bouncycastle.jce.provider.BouncyCastleProvider.class);
+    Provider SUN =        Providers.get(sun.security.provider.Sun.class);
+    Provider SunRsaSign = Providers.get(sun.security.rsa.SunRsaSign.class);
+    Provider SunEC =      Providers.get(sun.security.ec.SunEC.class);
+    Provider SunJSSE =    Providers.get(com.sun.net.ssl.internal.ssl.Provider.class);
+    Provider SunJCE =     Providers.get(com.sun.crypto.provider.SunJCE.class);
+    Provider SunJGSS =    Providers.get(sun.security.jgss.SunProvider.class);
+    Provider SunSASL =    Providers.get(com.sun.security.sasl.Provider.class);
+    Provider XMLDSig =    Providers.get(org.jcp.xml.dsig.internal.dom.XMLDSigRI.class);
+    Provider SunPCSC =    Providers.get(sun.security.smartcardio.SunPCSC.class);
+    Provider SunMSCAPI =  Providers.get(sun.security.mscapi.SunMSCAPI.class);
 
     /**
      * provider holder
@@ -65,7 +63,7 @@ public interface Providers {
      */
     static final class NullProvider extends Provider {
         private static final long serialVersionUID = 7420890884380155994L;
-        private static final Provider INSTANCE = new NullProvider();
+        private static final NullProvider INSTANCE = new NullProvider();
 
         private NullProvider() {
             super("Null", 1.0D, "null");
@@ -73,7 +71,6 @@ public interface Providers {
     }
 
     public static void main(String[] args) {
-        BC.get();
-        BC.get();
+        System.out.println(BC);
     }
 }

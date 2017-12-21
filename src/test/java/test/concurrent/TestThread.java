@@ -66,16 +66,16 @@ public class TestThread {
 
     public static void main(String[] args) throws InterruptedException {
         long start = System.currentTimeMillis();
-            int num = 5000;
-            CountDownLatch latch = new CountDownLatch(num);
-            for (int i = 0; i < num; i++) {
-                new Thread(() -> {
-                    loop(10);
-                    latch.countDown();
-                }).start();
-            }
-            latch.await();
-            System.out.println(lastTwoBatch);
+        int num = 5000;
+        CountDownLatch latch = new CountDownLatch(num);
+        for (int i = 0; i < num; i++) {
+            new Thread(() -> {
+                loop(10);
+                latch.countDown();
+            }).start();
+        }
+        latch.await();
+        System.out.println(lastTwoBatch);
         System.out.println(System.currentTimeMillis() - start);
     }
 }

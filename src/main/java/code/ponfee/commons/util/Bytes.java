@@ -281,8 +281,8 @@ public final class Bytes {
     }
 
     public static void main(String[] args) throws Exception {
-        byte[] a = SecureRandoms.nextBytes(6);
-        byte[] b = SecureRandoms.nextBytes(8);
+        byte[] a = SecureRandoms.nextBytes(1261);
+        byte[] b = SecureRandoms.nextBytes(8119);
         byte[] c = concat(a, b);
         System.out.println(c.length);
         System.out.println(hexDump(c));

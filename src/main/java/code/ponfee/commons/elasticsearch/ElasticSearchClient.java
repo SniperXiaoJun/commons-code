@@ -524,7 +524,6 @@ public class ElasticSearchClient implements DisposableBean {
         return result;
     }
 
-    // ------------------------------------------------分页搜索---------------------------------------
     /**
      * 获取搜索请求对象
      * @param indexName
@@ -539,10 +538,15 @@ public class ElasticSearchClient implements DisposableBean {
         return client.prepareSearch(indexName).setTypes(typeNames);
     }
 
+    public SearchRequestBuilder prepareSearch(String[] indexNames, String typeName) {
+        return client.prepareSearch(indexNames).setTypes(typeName);
+    }
+
     public SearchRequestBuilder prepareSearch(String[] indexNames, String[] typeNames) {
         return client.prepareSearch(indexNames).setTypes(typeNames);
     }
 
+    // ------------------------------------------------分页搜索---------------------------------------
     /**
      * 深分页查询（针对用户实时查询）
      * @param query

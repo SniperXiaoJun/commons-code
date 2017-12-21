@@ -1,20 +1,15 @@
 package code.ponfee.commons.io;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.nio.channels.FileChannel;
 
 import org.apache.commons.lang3.StringUtils;
 
-import code.ponfee.commons.util.ObjectUtils;
 import info.monitorenter.cpdetector.io.ASCIIDetector;
 import info.monitorenter.cpdetector.io.ByteOrderMarkDetector;
 import info.monitorenter.cpdetector.io.CodepageDetectorProxy;
@@ -93,19 +88,26 @@ public class FileTransformer {
             String filepath = file.getAbsolutePath(), charset;
             File dest = Files.touch(targetPath + filepath.substring(sourcePath.length()));
             boolean isMatch = file.getName().matches(includeFileExtensions);
+
             if (StringUtils.isNotEmpty(encoding) && isMatch && (charset = guessEncoding(filepath)) != null
                 && !"void".equalsIgnoreCase(charset) && !encoding.equalsIgnoreCase(charset)) {
+
                 log.append("转换　[" + charset + "]").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("　-->　");
                 transform(file, dest, charset, encoding, searchList, replacementList);
                 log.append("[").append(encoding).append("]").append(dest.getAbsolutePath()).append("\n");
-            } else if (!ObjectUtils.isEmpty(searchList) && isMatch) {
+
+            } else if (isMatch && searchList != null && searchList.length > 0) {
+
                 log.append("替换　").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("　-->　");
                 transform(file, dest, searchList, replacementList);
                 log.append(dest.getAbsolutePath()).append("\n");
+
             } else {
+
                 log.append("复制　").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("　-->　");
                 transform(file, dest);
                 log.append(dest.getAbsolutePath()).append("\n");
+
             }
         }
     }
@@ -133,22 +135,19 @@ public class FileTransformer {
      * @param searchList  the Strings to search for, no-op if null
      * @param replacementList  the Strings to replace them with, no-op if null
      */
-    public static void transform(File source, File target, String[] searchList, String[] replacementList) {
-        try (FileInputStream fis = new FileInputStream(source);
-             InputStreamReader isr = new InputStreamReader(fis);
-             BufferedReader in = new BufferedReader(isr);
-             FileOutputStream fos = new FileOutputStream(target);
-             OutputStreamWriter osw = new OutputStreamWriter(fos);
-             PrintWriter out = new PrintWriter(osw);
+    public static void transform(File source, File target, 
+                                 String[] searchList, String[] replacementList) {
+        try (WrappedBufferedReader reader = new WrappedBufferedReader(source);
+             WrappedBufferedWriter writer = new WrappedBufferedWriter(target);
         ) {
             String line;
             if (searchList != null && searchList.length > 0) {
-                while ((line = in.readLine()) != null) {
-                    out.println(StringUtils.replaceEach(line, searchList, replacementList));
+                while ((line = reader.readLine()) != null) {
+                    writer.writeln(StringUtils.replaceEach(line, searchList, replacementList));
                 }
             } else {
-                while ((line = in.readLine()) != null) {
-                    out.println(line);
+                while ((line = reader.readLine()) != null) {
+                    writer.writeln(line);
                 }
             }
         } catch (IOException e) {
@@ -166,21 +165,17 @@ public class FileTransformer {
      */
     public static void transform(File source, File target, String fromCharset, String toCharset, 
                                  String[] searchList, String[] replacementList) {
-        try (FileInputStream fis = new FileInputStream(source); 
-             InputStreamReader isr = new InputStreamReader(fis, fromCharset); 
-             BufferedReader in = new BufferedReader(isr);
-             FileOutputStream fos = new FileOutputStream(target); 
-             OutputStreamWriter osw = new OutputStreamWriter(fos, toCharset); 
-             PrintWriter out = new PrintWriter(osw)
+        try (WrappedBufferedReader reader = new WrappedBufferedReader(source, fromCharset);
+             WrappedBufferedWriter writer = new WrappedBufferedWriter(target, toCharset);
         ) {
             String line;
             if (searchList != null && searchList.length > 0) {
-                while ((line = in.readLine()) != null) {
-                    out.println(StringUtils.replaceEach(line, searchList, replacementList));
+                while ((line = reader.readLine()) != null) {
+                    writer.writeln(StringUtils.replaceEach(line, searchList, replacementList));
                 }
             } else {
-                while ((line = in.readLine()) != null) {
-                    out.println(line);
+                while ((line = reader.readLine()) != null) {
+                    writer.writeln(line);
                 }
             }
         } catch (IOException e) {
@@ -249,7 +244,7 @@ public class FileTransformer {
         //System.out.println(detectBytesCharset(Streams.file2bytes("D:\\test\\2.png")));
         //System.out.println(detectBytesCharset(Streams.file2bytes("D:\\test\\lib\\cache\\Cache.java")));
 
-        FileTransformer transformer = new FileTransformer("D:\\test\\origin", "d:\\test\\target", "GBK");
+        FileTransformer transformer = new FileTransformer("D:\\test\\origin", "d:\\test\\target", "UTF-8");
         transformer.setReplaceEach(new String[] { "code.ponfee.commons." }, new String[] { "commons.lib." });
         transformer.transform();
         System.out.println(transformer.getTransformLog());

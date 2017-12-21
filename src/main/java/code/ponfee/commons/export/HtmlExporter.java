@@ -61,7 +61,7 @@ public class HtmlExporter extends AbstractExporter {
      */
     @Override
     public void build(Table table) {
-        if (ObjectUtils.isEmpty(table.getThead())) {
+        if (table.getThead() == null || table.getThead().isEmpty()) {
             throw new IllegalArgumentException("thead can't be null");
         }
 
@@ -81,7 +81,7 @@ public class HtmlExporter extends AbstractExporter {
         } else {
             super.nonEmpty();
             // tbody
-            if (!ObjectUtils.isEmpty(table.getTobdy())) {
+            if (table.getTobdy() != null && !table.getTobdy().isEmpty()) {
                 html.append("<tbody>");
                 Object[] datas;
                 for (int n = table.getTobdy().size(), i = 0; i < n; i++) {
@@ -101,7 +101,7 @@ public class HtmlExporter extends AbstractExporter {
 
             // tfoot---------
             boolean hasTfoot = false;
-            if (!ObjectUtils.isEmpty(table.getTfoot())) {
+            if (table.getTfoot() != null && table.getTfoot().length > 0) {
                 hasTfoot = true;
                 html.append("<tfoot><tr>");
                 int merge = table.getTotalLeafCount() - table.getTfoot().length;
@@ -206,7 +206,7 @@ public class HtmlExporter extends AbstractExporter {
     }
 
     private String formatData(Object obj, Tmeta tmeta) {
-        if (ObjectUtils.isEmpty(obj)) {
+        if (obj == null) {
             return "";
         } else if (tmeta == null) {
             return obj.toString();
@@ -254,8 +254,8 @@ public class HtmlExporter extends AbstractExporter {
             }
         }
 
-        if (!ObjectUtils.isEmpty(options)) {
-            if (row >= 0 && col >= 0 && !ObjectUtils.isEmpty(options.get("highlight"))) {
+        if (options != null && !options.isEmpty()) {
+            if (row >= 0 && col >= 0 && options.containsKey("highlight")) {
                 Map<String, Object> highlight = (Map<String, Object>) options.get("highlight");
                 String color = "color: " + highlight.get("color") + ";font-weight: bold;";
                 List<List<Integer>> cells = (List<List<Integer>>) highlight.get("cells");

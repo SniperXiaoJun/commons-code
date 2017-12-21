@@ -1,5 +1,9 @@
 package test.log;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,27 +36,31 @@ public class FreqTester {
     @Test
     public void test1() throws InterruptedException {
         RedisCircuitBreaker f = new RedisCircuitBreaker(jedisClient, 1, 5);
-        f.setRequestThreshold("abc", 50000000);
-        for (int i = 0; i < 200; i++) {
-            new Thread(){
-                @Override
-                public void run() {
-                    while (true) {
-                        if (!f.checkpoint("abc")) {
-                            System.err.println("error" + Thread.currentThread());
-                        }
+        f.setRequestThreshold("abc", 70000);
+        List<Thread> list = new ArrayList<>();
+        AtomicBoolean flag = new AtomicBoolean(true);
+        for (int i = 0; i < 50; i++) {
+            list.add(new Thread(() -> {
+                while (flag.get()) {
+                    if (!f.checkpoint("abc")) {
+                        System.err.println("error" + Thread.currentThread());
+                    }
 
-                        try {
-                            Thread.sleep(1);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
-                
-            }.start();
+            }));
         }
-        Thread.sleep(10000);
-        
+        for (Thread thread : list) {
+            thread.start();
+        }
+        Thread.sleep(5000);
+        flag.set(false);
+        for (Thread thread : list) {
+            thread.join();
+        }
     }
 }
