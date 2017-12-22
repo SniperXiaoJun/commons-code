@@ -95,6 +95,8 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import code.ponfee.commons.util.ObjectUtils;
+
 /**
  * A fluid interface for making HTTP requests using an underlying
  * {@link HttpURLConnection} (or sub-class).
@@ -294,7 +296,7 @@ public class HttpRequest {
                         // Intentionally left blank
                     }
                 }
-            }, new SecureRandom());
+            }, new SecureRandom(new SecureRandom(ObjectUtils.uuid()).generateSeed(20)));
             TRUSTED_FACTORY = context.getSocketFactory();
         } catch (GeneralSecurityException e) {
             IOException ex = new IOException("Security exception configuring SSL context");

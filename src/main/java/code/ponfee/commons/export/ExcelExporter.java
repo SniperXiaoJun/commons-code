@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -182,7 +183,7 @@ public class ExcelExporter extends AbstractExporter {
             if (table.getTobdy() != null && !table.getTobdy().isEmpty()) {
                 Object[] data;
                 List<Object[]> tbody = table.getTobdy();
-                Map<String, Object> options = table.getOptions();
+                Map<CellStyleOptions, Object> options = table.getOptions();
                 for (int n = tbody.size(), i = 0; i < n; i++) {
                     data = tbody.get(i);
                     row = sheet.createRow(cursorRow.getAndIncrement());
@@ -301,7 +302,7 @@ public class ExcelExporter extends AbstractExporter {
         if (workbook != null) try {
             workbook.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         workbook = null;
     }
@@ -433,7 +434,7 @@ public class ExcelExporter extends AbstractExporter {
      * @param options
      */
     private void createCell(XSSFRow row, int colIndex, XSSFCellStyle style, Tmeta tmeta, 
-                            Object value, int r, int c, Map<String, Object> options) {
+                            Object value, int r, int c, Map<CellStyleOptions, Object> options) {
         XSSFCell cell = row.createCell(colIndex);
         // 设置单元格格式
         if (tmeta != null && tmeta.getType() == Type.NUMERIC) {
@@ -473,12 +474,12 @@ public class ExcelExporter extends AbstractExporter {
      * @param options
      */
     @SuppressWarnings("unchecked")
-    private void processOptions(XSSFCell cell, int row, int col, Map<String, Object> options) {
+    private void processOptions(XSSFCell cell, int row, int col, Map<CellStyleOptions, Object> options) {
         if (options == null || options.isEmpty()) return;
 
         // 单元格高亮显示
-        if (row >= 0 && col >= 0 && options.containsKey("highlight")) {
-            Map<String, Object> highlight = (Map<String, Object>) options.get("highlight");
+        Map<String, Object> highlight = (Map<String, Object>) options.get(CellStyleOptions.HIGHLIGHT);
+        if (highlight != null && !highlight.isEmpty()) {
             for (List<Integer> c : (List<List<Integer>>) highlight.get("cells")) {
                 if (c.get(0).equals(row) && c.get(1).equals(col)) {
                     XSSFFont font = workbook.createFont();
@@ -489,6 +490,12 @@ public class ExcelExporter extends AbstractExporter {
                     cell.setCellStyle(style);
                 }
             }
+        }
+
+        // 处理
+        Function<Object, String> processor = (Function<Object, String>) options.get(CellStyleOptions.CELL_PROCESS);
+        if (processor != null) {
+            processor.apply(new Object[] { cell, row, col });
         }
     }
 

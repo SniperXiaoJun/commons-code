@@ -79,8 +79,8 @@ public class HttpTester {
     
     @Test
     public void test2() throws IOException {
-        String url = "http://10.118.58.156:8080/express/risk/outeridentify.html";
-        String resp = Http.post(url).addPart("file", "import.txt", IOUtils.toByteArray(new FileInputStream("D:\\miwen1.txt"))).request();        
+        String url = "http://10.118.58.74:8080/express/risk/outeridentify.html";
+        String resp = Http.post(url).addPart("file", "import.txt", IOUtils.toByteArray(new FileInputStream("D:\\import.txt"))).request();
         System.out.println(resp);
     }
 

@@ -175,15 +175,21 @@ public final class Http {
     }
 
     // ----------------------------part--------------------------
+    public Http addPart(String formName, String fileName, Object mimePart) {
+        return this.addPart(formName, fileName, null, mimePart);
+    }
+
     /**
      * 文件上传
-     * @param formName  表单名称
-     * @param fileName  文件名称
-     * @param mimePart  上传数据
+     * @param formName 表单名称
+     * @param fileName 附件名称
+     * @param partType 附件类型
+     * @param mimePart 上传数据
      * @return
      */
-    public Http addPart(String formName, String fileName, Object mimePart) {
-        this.parts.add(new MimePart(formName, fileName, mimePart));
+    public Http addPart(String formName, String fileName, 
+                        String partType, Object mimePart) {
+        this.parts.add(new MimePart(formName, fileName, partType, mimePart));
         return this;
     }
 
@@ -355,6 +361,9 @@ public final class Http {
                 throw new UnsupportedOperationException("unsupported http method " + method.name());
         }
 
+        request.connectTimeout(connectTimeout).readTimeout(readTimeout)
+               .decompress(true).acceptGzipEncoding().headers(headers);
+
         if (!StringUtils.isEmpty(contentType)) {
             request.contentType(contentType, contentCharset);
         }
@@ -363,22 +372,21 @@ public final class Http {
             request.accept(accept);
         }
 
-        if (!StringUtils.isEmpty(data)) {
-            request.send(data);
-        }
-
-        for (MimePart part : parts) {
-            request.part(part.name, part.fileName, null, part.stream);
-        }
-
+        request.trustAllHosts();
         if (this.sslSocketFactory != null) {
             request.setSSLSocketFactory(this.sslSocketFactory);
         } else {
             request.trustAllCerts();
         }
 
-        request.connectTimeout(connectTimeout).readTimeout(readTimeout)
-               .trustAllHosts().headers(headers).acceptGzipEncoding().decompress(true);
+        if (!StringUtils.isEmpty(data)) {
+            request.send(data);
+        }
+
+        for (MimePart part : parts) {
+            request.part(part.formName, part.fileName, part.partType, part.stream);
+        }
+
         return request;
     }
 
@@ -401,11 +409,12 @@ public final class Http {
      * 文件
      */
     private static final class MimePart {
-        private final String name;        // 表单域字段名
+        private final String formName;    // 表单域字段名
         private final String fileName;    // 文件名
+        private final String partType;    // 附件类型
         private final InputStream stream; // 文件流
 
-        MimePart(String name, String fileName, Object mime) {
+        MimePart(String formName, String fileName, String partType, Object mime) {
             if (mime instanceof byte[]) {
                 this.stream = new ByteArrayInputStream((byte[]) mime);
             } else if (mime instanceof Byte[]) {
@@ -422,8 +431,10 @@ public final class Http {
             } else {
                 throw new IllegalArgumentException("mime must be file path or file or byte array or input stream.");
             }
-            this.name = name;
+
+            this.formName = formName;
             this.fileName = fileName;
+            this.partType = partType;
         }
     }
 

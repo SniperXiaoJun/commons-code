@@ -3,6 +3,7 @@ package code.ponfee.commons.export;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -221,8 +222,7 @@ public class HtmlExporter extends AbstractExporter {
         processMeta(value, tmeta, -1, -1, null);
     }
 
-    @SuppressWarnings("unchecked")
-    private void processMeta(Object value, Tmeta tmeta, int row, int col, Map<String, Object> options) {
+    private void processMeta(Object value, Tmeta tmeta, int row, int col, Map<CellStyleOptions, Object> options) {
         StringBuffer style = new StringBuffer();
         List<String> css = new ArrayList<>();
 
@@ -254,24 +254,34 @@ public class HtmlExporter extends AbstractExporter {
             }
         }
 
-        if (options != null && !options.isEmpty()) {
-            if (row >= 0 && col >= 0 && options.containsKey("highlight")) {
-                Map<String, Object> highlight = (Map<String, Object>) options.get("highlight");
-                String color = "color: " + highlight.get("color") + ";font-weight: bold;";
-                List<List<Integer>> cells = (List<List<Integer>>) highlight.get("cells");
-                for (List<Integer> cell : cells) {
-                    if (cell.get(0).equals(row) && cell.get(1).equals(col)) {
-                        style.append(color);
-                    }
-                }
-            }
-        }
+        processOptions(style, row, col, options);
 
         if (style.length() > 0) {
             html.append(" style=\"").append(style.toString()).append("\"");
         }
         if (!css.isEmpty()) {
             html.append(" class=\"").append(StringUtils.join(css.toArray(), " ")).append("\"");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void processOptions(StringBuffer style, int row, int col, Map<CellStyleOptions, Object> options) {
+        if (options == null || options.isEmpty()) return;
+
+        Map<String, Object> highlight = (Map<String, Object>) options.get(CellStyleOptions.HIGHLIGHT);
+        if (highlight != null && !highlight.isEmpty()) {
+            String color = "color: " + highlight.get("color") + ";font-weight: bold;";
+            List<List<Integer>> cells = (List<List<Integer>>) highlight.get("cells");
+            for (List<Integer> cell : cells) {
+                if (cell.get(0).equals(row) && cell.get(1).equals(col)) {
+                    style.append(color);
+                }
+            }
+        }
+
+        Function<Object, String> processor = (Function<Object, String>) options.get(CellStyleOptions.CELL_PROCESS);
+        if (processor != null) {
+            style.append(processor.apply(new Object[] { row, col }));
         }
     }
 

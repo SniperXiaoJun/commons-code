@@ -9,10 +9,7 @@ import java.security.SecureRandom;
 public final class SecureRandoms {
 
     /** 随机数 */
-    private static final SecureRandom RANDOM = new SecureRandom();
-    static {
-        RANDOM.setSeed(new SecureRandom(ObjectUtils.uuid()).generateSeed(20));
-    }
+    private static final SecureRandom RANDOM = new SecureRandom(new SecureRandom(ObjectUtils.uuid()).generateSeed(20));
 
     /**
      * random byte[] array by SecureRandom

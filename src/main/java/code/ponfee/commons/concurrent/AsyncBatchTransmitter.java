@@ -96,7 +96,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
     /**
      * asnyc batch consume into this alone thread
      */
-    private class AsyncBatchThread extends Thread {
+    private final class AsyncBatchThread extends Thread {
 
         final RunnableFactory<T> factory; // 线程工厂
         final int sleepTimeMillis; // 休眠时间
@@ -161,7 +161,9 @@ public final class AsyncBatchTransmitter<T> extends Thread {
                     }
                 }
 
-                if (list.size() == thresholdChunk || (!list.isEmpty() && (isEnd || isRefresh()))) {
+                if (list.size() == thresholdChunk 
+                    || ( !list.isEmpty() && (isEnd || isRefresh()) )
+                ) {
                     // task抛异常后： execute会输出错误信息，线程结束，后续任务会创建新线程执行
                     //            submit不会输出错误信息，线程继续分配执行其它任务
                     executor.submit(factory.create(list, isEnd && queue.isEmpty())); // 提交到异步批量处理

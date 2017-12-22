@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.util.Networks;
 
 /**
@@ -125,20 +126,19 @@ public final class WebUtils {
     /**
      * 响应json数据
      * @param resp
-     * @param json
+     * @param data
      */
-    public static void respJson(HttpServletResponse resp, String json) {
-        respJson(resp, json, DEFAULT_CHARSET);
+    public static void respJson(HttpServletResponse resp, Object data) {
+        respJson(resp, data, DEFAULT_CHARSET);
     }
 
-    public static void respJson(HttpServletResponse resp, 
-                                String json, String charset) {
-        response(resp, "application/json", json, charset);
+    public static void respJson(HttpServletResponse resp, Object data, String charset) {
+        response(resp, "application/json", toJson(data), charset);
     }
 
     public static void respJsonp(HttpServletResponse response, 
-                                 String callback, String json) {
-        respJsonp(response, callback, json, DEFAULT_CHARSET);
+                                 String callback, Object data) {
+        respJsonp(response, callback, data, DEFAULT_CHARSET);
     }
 
     /**
@@ -149,8 +149,8 @@ public final class WebUtils {
      * @param charset
      */
     public static void respJsonp(HttpServletResponse resp, String callback, 
-                                 String json, String charset) {
-        respJson(resp, callback + "(" + json + ");", charset);
+                                 Object data, String charset) {
+        respJson(resp, callback + "(" + toJson(data) + ");", charset);
     }
 
     /**
@@ -315,4 +315,13 @@ public final class WebUtils {
         return WebUtils.getHeader(req, SESSION_TRACE_HEADER); // from header;
     }
 
+    private static String toJson(Object data) {
+        if (data == null) {
+            return null;
+        }
+
+        return data instanceof CharSequence
+               ? data.toString()
+               : Jsons.NORMAL.stringify(data);
+    }
 }

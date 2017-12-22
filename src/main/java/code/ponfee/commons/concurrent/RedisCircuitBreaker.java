@@ -12,7 +12,6 @@ import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.cache.Cache;
 import code.ponfee.commons.cache.CacheBuilder;
-import code.ponfee.commons.concurrent.AsyncBatchTransmitter;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.JedisLock;
 import code.ponfee.commons.util.IdWorker;
@@ -165,7 +164,7 @@ public class RedisCircuitBreaker implements CircuitBreaker {
         final String key;
         final double timeMillis;
 
-        public Trace(String key, long timeMillis) {
+        public Trace(String key, double timeMillis) {
             this.key = key;
             this.timeMillis = timeMillis;
         }

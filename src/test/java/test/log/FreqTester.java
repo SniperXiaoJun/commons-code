@@ -36,10 +36,10 @@ public class FreqTester {
     @Test
     public void test1() throws InterruptedException {
         RedisCircuitBreaker f = new RedisCircuitBreaker(jedisClient, 1, 5);
-        f.setRequestThreshold("abc", 70000);
+        f.setRequestThreshold("abc", 700000);
         List<Thread> list = new ArrayList<>();
         AtomicBoolean flag = new AtomicBoolean(true);
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 200; i++) {
             list.add(new Thread(() -> {
                 while (flag.get()) {
                     if (!f.checkpoint("abc")) {
@@ -57,7 +57,7 @@ public class FreqTester {
         for (Thread thread : list) {
             thread.start();
         }
-        Thread.sleep(5000);
+        Thread.sleep(15000);
         flag.set(false);
         for (Thread thread : list) {
             thread.join();
