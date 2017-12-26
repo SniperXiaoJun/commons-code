@@ -312,23 +312,30 @@ public final class Http {
      * http下载
      * @param output    output to stream of response data
      */
+    //private static final Pattern FILENAME_PATTERN = Pattern.compile("(?i)^.*;.*filename=(.*)$");
     public void download(OutputStream output) {
         HttpRequest request = request0();
-        BufferedOutputStream bos = null;
-        try {
-            if (request.ok()) {
+        if (request.ok() || request.created()) {
+            /*// 获取文件名
+            String disposition = UrlCoder.decodeURIComponent(request.header("content-Disposition"));
+            Matcher matcher = FILENAME_PATTERN.matcher(disposition);
+            if (matcher.find()) {
+                String filename = matcher.group(1);
+            }*/
+            BufferedOutputStream bos = null;
+            try {
                 bos = new BufferedOutputStream(output);
                 request.receive(bos);
-            } else {
-                throw new HttpException("request failed, status: " + request.code());
+            } finally {
+                disconnect(request);
+                if (bos != null) try {
+                    bos.close();
+                } catch (IOException ignore) {
+                    ignore.printStackTrace();
+                }
             }
-        } finally {
-            disconnect(request);
-            if (bos != null) try {
-                bos.close();
-            } catch (IOException ignore) {
-                ignore.printStackTrace();
-            }
+        } else {
+            throw new HttpException("request failed, status: " + request.code());
         }
     }
 
@@ -409,10 +416,10 @@ public final class Http {
      * 文件
      */
     private static final class MimePart {
-        private final String formName;    // 表单域字段名
-        private final String fileName;    // 文件名
-        private final String partType;    // 附件类型
-        private final InputStream stream; // 文件流
+        final String formName;    // 表单域字段名
+        final String fileName;    // 文件名
+        final String partType;    // 附件类型
+        final InputStream stream; // 文件流
 
         MimePart(String formName, String fileName, String partType, Object mime) {
             if (mime instanceof byte[]) {
@@ -429,7 +436,8 @@ public final class Http {
             } else if (mime instanceof InputStream) {
                 this.stream = (InputStream) mime;
             } else {
-                throw new IllegalArgumentException("mime must be file path or file or byte array or input stream.");
+                throw new IllegalArgumentException("mime must be one of them: file, "
+                                                 + "file path, byte array, input stream.");
             }
 
             this.formName = formName;

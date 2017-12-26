@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -27,22 +25,23 @@ import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.streaming.SXSSFCell;
+import org.apache.poi.xssf.streaming.SXSSFDrawing;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
-import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import code.ponfee.commons.export.Tmeta.Type;
 import code.ponfee.commons.util.Colors;
 import code.ponfee.commons.util.ImageUtils;
 import code.ponfee.commons.util.ObjectUtils;
+import io.netty.util.internal.shaded.org.jctools.queues.MessagePassingQueue.Consumer;
 
 /**
  * excel导出
@@ -61,7 +60,7 @@ public class ExcelExporter extends AbstractExporter {
     /** 作为分隔符（类似html的<hr />）的合并列数目 */
     private static final int MARGIN_ROW_CELL_SIZE = 26;
 
-    private XSSFWorkbook workbook; // excel
+    private SXSSFWorkbook workbook; // excel
     private final XSSFCellStyle titleStyle; // 标题样式
     private final XSSFCellStyle headStyle; // 表头样式
     private final XSSFCellStyle dataStyle; // 数据样式
@@ -70,27 +69,27 @@ public class ExcelExporter extends AbstractExporter {
     private final XSSFCellStyle tipStyle; // 无样式
     private final XSSFDataFormat dataFormat; // 数据格式
 
-    private final Map<String, XSSFSheet> sheets = new HashMap<>();
-    private final Map<String, Integer> images   = new HashMap<>();
-    private final Map<String, Freeze> freezes   = new HashMap<>();
+    private final Map<String, SXSSFSheet> sheets = new HashMap<>();
+    private final Map<String, Integer>    images = new HashMap<>();
+    private final Map<String, Freeze>    freezes = new HashMap<>();
 
     public ExcelExporter() {
-        workbook = new XSSFWorkbook();
-        dataFormat = workbook.createDataFormat();
+        workbook = new SXSSFWorkbook();
+        dataFormat = (XSSFDataFormat) workbook.createDataFormat();
 
-        XSSFFont titleFont = workbook.createFont();
+        XSSFFont titleFont = (XSSFFont) workbook.createFont();
         titleFont.setBold(true);
         titleFont.setFontName("黑体");
 
-        XSSFFont headFont = workbook.createFont();
+        XSSFFont headFont = (XSSFFont) workbook.createFont();
         headFont.setBold(true);
         headFont.setFontName("宋体");
 
-        XSSFFont redFont = workbook.createFont();
+        XSSFFont redFont = (XSSFFont) workbook.createFont();
         redFont.setColor(new XSSFColor(new Color(255, 0, 0)));
         redFont.setFontName("宋体");
 
-        XSSFCellStyle baseStyle = workbook.createCellStyle();
+        XSSFCellStyle baseStyle = (XSSFCellStyle) workbook.createCellStyle();
         baseStyle.setBorderLeft(BorderStyle.THIN);
         baseStyle.setBorderTop(BorderStyle.THIN);
         baseStyle.setBorderRight(BorderStyle.THIN);
@@ -99,14 +98,14 @@ public class ExcelExporter extends AbstractExporter {
         baseStyle.setWrapText(true);
         baseStyle.setDataFormat(dataFormat.getFormat("@"));
 
-        titleStyle = workbook.createCellStyle();
+        titleStyle = (XSSFCellStyle) workbook.createCellStyle();
         titleStyle.cloneStyleFrom(baseStyle);
         titleStyle.setAlignment(HorizontalAlignment.CENTER);
         titleStyle.setFont(titleFont);
         titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         titleStyle.setFillForegroundColor(new XSSFColor(new Color(255, 255, 224)));
 
-        headStyle = workbook.createCellStyle();
+        headStyle = (XSSFCellStyle) workbook.createCellStyle();
         headStyle.cloneStyleFrom(baseStyle);
         headStyle.setAlignment(HorizontalAlignment.CENTER);
         headStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -114,19 +113,19 @@ public class ExcelExporter extends AbstractExporter {
         headStyle.setFont(headFont);
         headStyle.setWrapText(false);
 
-        dataStyle = workbook.createCellStyle();
+        dataStyle = (XSSFCellStyle) workbook.createCellStyle();
         dataStyle.cloneStyleFrom(baseStyle);
 
-        tfootStyle = workbook.createCellStyle();
+        tfootStyle = (XSSFCellStyle) workbook.createCellStyle();
         tfootStyle.cloneStyleFrom(dataStyle);
         tfootStyle.setFont(headFont);
         tfootStyle.setWrapText(false);
 
-        tipStyle = workbook.createCellStyle();
+        tipStyle = (XSSFCellStyle) workbook.createCellStyle();
         tipStyle.cloneStyleFrom(baseStyle);
         tipStyle.setFont(redFont);
 
-        noneStyle = workbook.createCellStyle();
+        noneStyle = (XSSFCellStyle) workbook.createCellStyle();
         noneStyle.setVerticalAlignment(VerticalAlignment.CENTER);
     }
 
@@ -141,8 +140,8 @@ public class ExcelExporter extends AbstractExporter {
         }
 
         String name = this.getName();
-        // 2、获取或创建工作簿
-        XSSFSheet sheet = getOrCreateSheet(name);
+        // 2、获取工作簿
+        SXSSFSheet sheet = getSheet(name);
 
         // 3、判断工作簿是否已创建过行数据
         CursorRow cursorRow = new CursorRow(sheet.getLastRowNum());
@@ -150,9 +149,9 @@ public class ExcelExporter extends AbstractExporter {
             // 创建两行空白行
             cursorRow.increment();
             int i = cursorRow.getAndIncrement(), j = cursorRow.getAndIncrement();
-            XSSFRow row1 = sheet.createRow(i);
+            SXSSFRow row1 = sheet.createRow(i);
             row1.setHeight(DEFAULT_HEIGHT);
-            XSSFRow row2 = sheet.createRow(j);
+            SXSSFRow row2 = sheet.createRow(j);
             row2.setHeight(DEFAULT_HEIGHT);
             for (int k = 0; k < MARGIN_ROW_CELL_SIZE; k++) {
                 createCell(row1, k, noneStyle, null);
@@ -174,53 +173,58 @@ public class ExcelExporter extends AbstractExporter {
         // 6、判断是否有数据
         if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
             createCell(NO_RESULT_TIP, sheet, tipStyle, cursorRow, table.getTotalLeafCount());
-        } else {
-            super.nonEmpty();
-            List<XSSFCellStyle> styles = createStyles(table.getThead());
-            XSSFRow row;
+            return;
+        }
 
-            // 7、处理tbody数据
-            if (table.getTobdy() != null && !table.getTobdy().isEmpty()) {
-                Object[] data;
-                List<Object[]> tbody = table.getTobdy();
-                Map<CellStyleOptions, Object> options = table.getOptions();
-                for (int n = tbody.size(), i = 0; i < n; i++) {
-                    data = tbody.get(i);
-                    row = sheet.createRow(cursorRow.getAndIncrement());
-                    row.setHeight(DEFAULT_HEIGHT);
-                    for (int m = data.length, j = 0; j < m; j++) {
-                        createCell(row, j, styles.get(j), table.getThead().get(j).getTmeta(), data[j], i, j, options);
-                    }
-                }
-            }
+        super.nonEmpty();
+        List<XSSFCellStyle> styles = createStyles(table.getThead());
+        List<Thead> theads = table.getThead();
+        SXSSFRow row;
 
-            // 8、处理tfoot数据
-            if (table.getTfoot() != null && table.getTfoot().length > 0) {
-                int rowNum = cursorRow.getAndIncrement();
-                row = sheet.createRow(rowNum);
+        // 7、处理tbody数据
+        List<Object[]> tbody = table.getTobdy();
+        if (tbody != null && !tbody.isEmpty()) {
+            Map<CellStyleOptions, Object> options = table.getOptions();
+            Object[] data;
+            for (int i = 0, n = tbody.size(), j, m; i < n; i++) {
+                row = sheet.createRow(cursorRow.getAndIncrement());
                 row.setHeight(DEFAULT_HEIGHT);
-
-                // 合计单元格
-                XSSFCellStyle style = workbook.createCellStyle();
-                style.cloneStyleFrom(tfootStyle);
-                style.setAlignment(HorizontalAlignment.RIGHT);
-                createCell(row, 0, style, "合计");
-                int mergeNum = table.getTotalLeafCount() - table.getTfoot().length;
-                for (int i = 1; i < mergeNum; i++) {
-                    createCell(row, i, style, null);
-                }
-                sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum, 0, mergeNum - 1));
-
-                // 合计数据
-                for (int i = 0; i < table.getTfoot().length; i++) {
-                    createCell(row, i + mergeNum, styles.get(mergeNum + i), table.getThead().get(mergeNum + i).getTmeta(), table.getTfoot()[i]);
+                data = tbody.get(i);
+                for (m = data.length, j = 0; j < m; j++) {
+                    createCell(row, j, styles.get(j), theads.get(j).getTmeta(), data[j], i, j, options);
                 }
             }
+        }
 
-            // 9、文字注释
-            if (StringUtils.isNotBlank(table.getComment())) {
-                createCell(table.getComment(), sheet, tipStyle, cursorRow, table.getTotalLeafCount());
+        // 8、处理tfoot数据
+        Object[] tfoots = table.getTfoot();
+        if (tfoots != null && tfoots.length > 0) {
+            int rowNum = cursorRow.getAndIncrement();
+            row = sheet.createRow(rowNum);
+            row.setHeight(DEFAULT_HEIGHT);
+
+            // 合计单元格
+            XSSFCellStyle style = (XSSFCellStyle) workbook.createCellStyle();
+            style.cloneStyleFrom(tfootStyle);
+            style.setAlignment(HorizontalAlignment.RIGHT);
+            createCell(row, 0, style, "合计");
+
+            // 合计单元格：多列合并
+            int mergeNum = table.getTotalLeafCount() - tfoots.length;
+            for (int i = 1; i < mergeNum; i++) {
+                createCell(row, i, style, null);
             }
+            sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum, 0, mergeNum - 1));
+
+            // 合计数据
+            for (int i = 0; i < tfoots.length; i++) {
+                createCell(row, i + mergeNum, styles.get(mergeNum + i), theads.get(mergeNum + i).getTmeta(), tfoots[i]);
+            }
+        }
+
+        // 9、文字注释
+        if (StringUtils.isNotBlank(table.getComment())) {
+            createCell(table.getComment(), sheet, tipStyle, cursorRow, table.getTotalLeafCount());
         }
     }
 
@@ -240,17 +244,17 @@ public class ExcelExporter extends AbstractExporter {
 
         super.nonEmpty();
 
-        XSSFSheet sheet = getOrCreateSheet(getName());
+        SXSSFSheet sheet = getSheet(getName());
         int startRow = images.get(getName()) == null ? 1 : images.get(getName()), startCol = 1;
         int endCol = startCol + (int) Math.round(((double) width) / RATE_WIDTH);
         int endRow = startRow + (int) Math.round(((double) height) / RATE_HEIGHT);
         images.put(getName(), endRow + 2);
 
-        XSSFDrawing drawing = sheet.createDrawingPatriarch();
+        SXSSFDrawing drawing = sheet.createDrawingPatriarch();
         XSSFClientAnchor anchor = new XSSFClientAnchor(0, 0, width, height, startCol, startRow, (short) endCol, endRow);
 
         anchor.setAnchorType(AnchorType.DONT_MOVE_AND_RESIZE);
-        drawing.createPicture(anchor, workbook.addPicture(imageBytes, XSSFWorkbook.PICTURE_TYPE_PNG));
+        drawing.createPicture(anchor, workbook.addPicture(imageBytes, SXSSFWorkbook.PICTURE_TYPE_PNG));
 
         /*int pictureIdx = workbook.addPicture(imageBytes, Workbook.PICTURE_TYPE_PNG);
         CreationHelper helper = workbook.getCreationHelper();
@@ -277,7 +281,7 @@ public class ExcelExporter extends AbstractExporter {
     }
 
     public void write(String filepath) {
-        try (OutputStream out = new FileOutputStream(new File(filepath))) {
+        try (OutputStream out = new FileOutputStream(filepath)) {
             write(out);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -289,9 +293,9 @@ public class ExcelExporter extends AbstractExporter {
      */
     @Override
     public byte[] export() {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        write(output);
-        return output.toByteArray();
+        ByteArrayOutputStream out = new ByteArrayOutputStream(8192);
+        write(out);
+        return out.toByteArray();
     }
 
     /**
@@ -305,14 +309,17 @@ public class ExcelExporter extends AbstractExporter {
             throw new RuntimeException(e);
         }
         workbook = null;
+        sheets.clear();
+        images.clear();
+        freezes.clear();
     }
 
     //--protected methods------------------------------------------------------------------
-    protected XSSFSheet getOrCreateSheet(String name) {
-        XSSFSheet sheet = sheets.get(name);
+    protected SXSSFSheet getSheet(String name) {
+        SXSSFSheet sheet = sheets.get(name);
         if (sheet == null) {
             sheet = workbook.createSheet(name);
-            sheet.setDisplayGridlines(false);
+            sheet.setDisplayGridlines(false); // 不显示网格线
             /*sheet.setDefaultColumnWidth(DEFAULT_WIDTH);
             sheet.setDefaultRowHeight(DEFAULT_HEIGHT);*/
             sheets.put(name, sheet);
@@ -326,7 +333,7 @@ public class ExcelExporter extends AbstractExporter {
     }
 
     private void createFreezePane() {
-        for (Entry<String, XSSFSheet> entry : sheets.entrySet()) {
+        for (Entry<String, SXSSFSheet> entry : sheets.entrySet()) {
             Freeze freeze = freezes.get(entry.getKey());
             if (freeze != null && freeze.freeze) {
                 entry.getValue().createFreezePane(freeze.colSplit, freeze.rowSplit);
@@ -346,7 +353,7 @@ public class ExcelExporter extends AbstractExporter {
     }*/
 
     // 复合表头
-    private void buildComplexThead(Table table, XSSFSheet sheet, CursorRow cursorRow) {
+    private void buildComplexThead(Table table, SXSSFSheet sheet, CursorRow cursorRow) {
         // create caption
         createCell(table.getCaption(), sheet, titleStyle, cursorRow, table.getTotalLeafCount());
 
@@ -369,7 +376,7 @@ public class ExcelExporter extends AbstractExporter {
                 endRow = cursorRow.get(); // 约定非子节点不能跨行
             }
 
-            XSSFRow colRow = null;
+            SXSSFRow colRow = null;
             if (rows.add(cursorRow.get())) {
                 colRow = sheet.createRow(cursorRow.get()); // 还未创建该行
                 colRow.setHeight(DEFAULT_HEIGHT);
@@ -403,8 +410,8 @@ public class ExcelExporter extends AbstractExporter {
     }
 
     // 创建单元格
-    private void createCell(String text, XSSFSheet sheet, XSSFCellStyle style, CursorRow cursorRow, int columnLen) {
-        XSSFRow row = sheet.createRow(cursorRow.get());
+    private void createCell(String text, SXSSFSheet sheet, XSSFCellStyle style, CursorRow cursorRow, int columnLen) {
+        SXSSFRow row = sheet.createRow(cursorRow.get());
         row.setHeight((short) 500);
         createCell(row, 0, style, text);
         for (int i = 1; i < columnLen; i++) {
@@ -414,11 +421,11 @@ public class ExcelExporter extends AbstractExporter {
         cursorRow.increment();
     }
 
-    private void createCell(XSSFRow row, int colIndex, XSSFCellStyle style, Tmeta tmeta, Object value) {
+    private void createCell(SXSSFRow row, int colIndex, XSSFCellStyle style, Tmeta tmeta, Object value) {
         createCell(row, colIndex, style, tmeta, value, -1, -1, null);
     }
 
-    private void createCell(XSSFRow row, int colIndex, XSSFCellStyle style, Object value) {
+    private void createCell(SXSSFRow row, int colIndex, XSSFCellStyle style, Object value) {
         createCell(row, colIndex, style, null, value, -1, -1, null);
     }
 
@@ -433,9 +440,9 @@ public class ExcelExporter extends AbstractExporter {
      * @param c
      * @param options
      */
-    private void createCell(XSSFRow row, int colIndex, XSSFCellStyle style, Tmeta tmeta, 
-                            Object value, int r, int c, Map<CellStyleOptions, Object> options) {
-        XSSFCell cell = row.createCell(colIndex);
+    private void createCell(SXSSFRow row, int colIndex, XSSFCellStyle style, Tmeta tmeta,
+        Object value, int r, int c, Map<CellStyleOptions, Object> options) {
+        SXSSFCell cell = row.createCell(colIndex);
         // 设置单元格格式
         if (tmeta != null && tmeta.getType() == Type.NUMERIC) {
             cell.setCellType(CellType.NUMERIC);
@@ -474,17 +481,17 @@ public class ExcelExporter extends AbstractExporter {
      * @param options
      */
     @SuppressWarnings("unchecked")
-    private void processOptions(XSSFCell cell, int row, int col, Map<CellStyleOptions, Object> options) {
+    private void processOptions(SXSSFCell cell, int row, int col, Map<CellStyleOptions, Object> options) {
         if (options == null || options.isEmpty()) return;
 
         // 单元格高亮显示
         Map<String, Object> highlight = (Map<String, Object>) options.get(CellStyleOptions.HIGHLIGHT);
         if (highlight != null && !highlight.isEmpty()) {
             for (List<Integer> c : (List<List<Integer>>) highlight.get("cells")) {
-                if (c.get(0).equals(row) && c.get(1).equals(col)) {
-                    XSSFFont font = workbook.createFont();
+                if ((int) c.get(0) == row && (int) c.get(1) == col) {
+                    XSSFFont font = (XSSFFont) workbook.createFont();
                     font.setColor(new XSSFColor(Colors.hex2color((String) highlight.get("color"))));
-                    XSSFCellStyle style = workbook.createCellStyle();
+                    XSSFCellStyle style = (XSSFCellStyle) workbook.createCellStyle();
                     style.cloneStyleFrom(cell.getCellStyle());
                     style.setFont(font);
                     cell.setCellStyle(style);
@@ -493,9 +500,9 @@ public class ExcelExporter extends AbstractExporter {
         }
 
         // 处理
-        Function<Object, String> processor = (Function<Object, String>) options.get(CellStyleOptions.CELL_PROCESS);
+        Consumer<Object[]> processor = (Consumer<Object[]>) options.get(CellStyleOptions.CELL_PROCESS);
         if (processor != null) {
-            processor.apply(new Object[] { cell, row, col });
+            processor.accept(new Object[] { workbook, cell, row, col });
         }
     }
 
@@ -509,7 +516,7 @@ public class ExcelExporter extends AbstractExporter {
         for (Thead cell : thead) {
             if (!cell.isLeaf()) continue; // 非叶子节点
 
-            XSSFCellStyle style = workbook.createCellStyle();
+            XSSFCellStyle style = (XSSFCellStyle) workbook.createCellStyle();
             styles.add(style);
             style.cloneStyleFrom(dataStyle);
 
@@ -539,7 +546,7 @@ public class ExcelExporter extends AbstractExporter {
 
             // 设置颜色
             if (tmeta.getColor() != null) {
-                XSSFFont font = workbook.createFont();
+                XSSFFont font = (XSSFFont) workbook.createFont();
                 font.setColor(new XSSFColor(tmeta.getColor()));
                 style.setFont(font);
             }

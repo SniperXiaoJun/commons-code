@@ -1,6 +1,10 @@
 package code.ponfee.commons.web;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
@@ -17,8 +21,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static code.ponfee.commons.io.Files.BUFF_SIZE;
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.util.Networks;
+import code.ponfee.commons.util.UrlCoder;
 
 /**
  * web工具类
@@ -109,17 +116,10 @@ public final class WebUtils {
                                 String text, String charset) {
         resp.setContentType(contentType + ";charset=" + charset);
         resp.setCharacterEncoding(charset);
-        PrintWriter out = null;
-        try {
-            out = resp.getWriter();
+        try (PrintWriter out = resp.getWriter()) {
             out.write(text);
-            out.flush();
         } catch (IOException e) {
-            logger.error("http response error", e);
-        } finally {
-            if (out != null) {
-                out.close();
-            }
+            logger.error("http response " + contentType + " error", e);
         }
     }
 
@@ -151,6 +151,34 @@ public final class WebUtils {
     public static void respJsonp(HttpServletResponse resp, String callback, 
                                  Object data, String charset) {
         respJson(resp, callback + "(" + toJson(data) + ");", charset);
+    }
+
+    /**
+     * 下载文件
+     * @param resp
+     * @param in
+     * @param filename
+     * @param charset
+     */
+    public static void response(HttpServletResponse resp, InputStream input, 
+                                String filename, String charset) {
+        filename = UrlCoder.encodeURIComponent(filename, charset);
+        try (InputStream in = input;
+             BufferedInputStream bufIn = new BufferedInputStream(in, BUFF_SIZE); 
+             OutputStream out = resp.getOutputStream(); 
+             BufferedOutputStream bufOut = new BufferedOutputStream(out, BUFF_SIZE);
+        ) {
+            resp.setContentType("application/octet-stream");
+            resp.setHeader("Content-Disposition", "attachment;filename=" + filename);
+            resp.setHeader("Content-Length", String.valueOf(in.available()));
+            resp.setCharacterEncoding(charset);
+            byte[] buffer = new byte[BUFF_SIZE];
+            for (int len; (len = bufIn.read(buffer)) != Files.EOF;) {
+                bufOut.write(buffer, 0, len);
+            }
+        } catch (IOException e) {
+            logger.error("http response pplication/octet-stream error", e);
+        }
     }
 
     /**

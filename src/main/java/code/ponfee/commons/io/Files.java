@@ -39,7 +39,7 @@ public final class Files {
 
     public static final String FILE_SEPARATOR = "/"; // file path separator
 
-    public static final int BUFF_SIZE = 4096; // file buffer size
+    public static final int BUFF_SIZE = 8192; // file buffer size
 
     public static final String LINE_SEPARATOR; // line separator of file
     static {
@@ -206,7 +206,7 @@ public final class Files {
      * add file bom head
      * @param filepath
      */
-    private static final byte[] WITH_BOM = { (byte) 0xEF, (byte) 0XBB, (byte) 0XBF };
+    private static final byte[] WINDOWS_BOM = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
     public static void addBOM(String filepath) {
         addBOM(new File(filepath));
     }
@@ -220,7 +220,7 @@ public final class Files {
             if (length >= 3) {
                 bytes1 = new byte[3];
                 input.read(bytes1);
-                if (ObjectUtils.equals(WITH_BOM, bytes1)) {
+                if (ObjectUtils.equals(WINDOWS_BOM, bytes1)) {
                     return;
                 }
                 bytes2 = new byte[length - 3];
@@ -232,7 +232,7 @@ public final class Files {
             }
             output = new FileOutputStream(file);
             bos = new BufferedOutputStream(output);
-            bos.write(WITH_BOM);
+            bos.write(WINDOWS_BOM);
             bos.write(bytes1);
             bos.write(bytes2);
             bos.flush();
@@ -269,7 +269,7 @@ public final class Files {
 
             byte[] bytes = new byte[3];
             input.read(bytes);
-            if (!ObjectUtils.equals(bytes, WITH_BOM)) return;
+            if (!ObjectUtils.equals(bytes, WINDOWS_BOM)) return;
 
             bytes = new byte[length - 3];
             input.read(bytes);

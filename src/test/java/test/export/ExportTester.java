@@ -226,6 +226,7 @@ public class ExportTester {
         List<Object[]> data = new ArrayList<>();
         data.add(new Object[] { "1", "2", "3", "4", "5" });
         table.setTobdy(data);
+        builder.setName("21321");
         builder.build(table);
         IOUtils.write((byte[]) builder.export(), new FileOutputStream("d:/123.xlsx"));
     }
