@@ -2,7 +2,7 @@ package code.ponfee.commons.export;
 
 /**
  * 单元格样式选项
- * @author 01367825
+ * @author Ponfee
  */
 public enum CellStyleOptions {
 

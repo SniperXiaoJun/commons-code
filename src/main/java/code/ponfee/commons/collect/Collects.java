@@ -16,6 +16,10 @@ import code.ponfee.commons.model.Result;
 import code.ponfee.commons.reflect.Fields;
 import code.ponfee.commons.util.ObjectUtils;
 
+/**
+ * 集合工具类
+ * @author Ponfee
+ */
 public class Collects {
 
     /**
