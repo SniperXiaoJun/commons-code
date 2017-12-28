@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.caucho.hessian.io.HessianSerializerInput;
 import com.caucho.hessian.io.HessianSerializerOutput;
 
+import code.ponfee.commons.io.ExtendedGZIPOutputStream;
 import code.ponfee.commons.reflect.ClassUtils;
 
 /**

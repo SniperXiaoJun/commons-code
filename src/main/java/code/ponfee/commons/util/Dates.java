@@ -17,7 +17,7 @@ import org.joda.time.format.DateTimeFormat;
  */
 public class Dates {
 
-    private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     /**
      * 简单的日期格式校验(yyyy-MM-dd HH:mm:ss)

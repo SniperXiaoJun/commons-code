@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import code.ponfee.commons.io.ExtendedGZIPOutputStream;
 import code.ponfee.commons.reflect.ClassUtils;
 
 /**

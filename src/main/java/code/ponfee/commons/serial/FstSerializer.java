@@ -7,6 +7,7 @@ import org.nustaq.serialization.FSTConfiguration;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+import code.ponfee.commons.io.GzipProcessor;
 import code.ponfee.commons.reflect.ClassUtils;
 
 /**
@@ -24,7 +25,7 @@ public class FstSerializer extends Serializer {
     public <T extends Object> byte[] serialize(T t, boolean isCompress) {
         if (t == null) return null;
         byte[] data = FST_CFG.get().asByteArray(t);
-        if (isCompress) data = compress(data);
+        if (isCompress) data = GzipProcessor.compress(data);
         return data;
     }
 
@@ -32,7 +33,7 @@ public class FstSerializer extends Serializer {
     public <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
         if (data == null) return null;
 
-        if (isCompress) data = decompress(data);
+        if (isCompress) data = GzipProcessor.decompress(data);
         T t = (T) FST_CFG.get().asObject(data);
         if (!clazz.isInstance(t)) {
             throw new ClassCastException(ClassUtils.getClassName(t.getClass())

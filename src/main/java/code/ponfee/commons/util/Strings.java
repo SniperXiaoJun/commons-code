@@ -355,6 +355,13 @@ public class Strings {
                && StringUtils.isEmpty((CharSequence) value);
     }
 
+    public static boolean isBlank(Object value) {
+        if (value == null) return true;
+
+        return CharSequence.class.isInstance(value)
+               && StringUtils.isBlank((CharSequence) value);
+    }
+
     /** 
      * 转换为下划线 
      * @param camelCaseName 下划线名

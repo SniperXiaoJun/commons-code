@@ -15,8 +15,8 @@ import java.util.concurrent.ExecutorCompletionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import code.ponfee.commons.io.GzipProcessor;
 import code.ponfee.commons.math.Numbers;
-import code.ponfee.commons.serial.Serializer;
 import redis.clients.jedis.Jedis;
 
 /**
@@ -303,8 +303,8 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public <T extends Object> T getObject(byte[] key,
-        Class<T> clazz, boolean isCompress, Integer seconds) {
+    public <T extends Object> T getObject(byte[] key, Class<T> clazz, 
+                                          boolean isCompress, Integer seconds) {
         return hook(shardedJedis -> {
             T t = jedisClient.deserialize(shardedJedis.get(key), clazz, isCompress);
             if (t != null) {
@@ -338,9 +338,7 @@ public class ValueOperations extends JedisOperations {
     public boolean set(byte[] key, byte[] value, boolean isCompress, int seconds) {
         if (value == null || key == null) return false;
 
-        byte[] _value;
-        if (!isCompress) _value = value;
-        else _value = Serializer.compress(value);
+        byte[] _value = isCompress ? GzipProcessor.compress(value) : value;
 
         return hook(shardedJedis -> {
             String rtn = shardedJedis.setex(key, getActualExpire(seconds), _value);
@@ -366,7 +364,7 @@ public class ValueOperations extends JedisOperations {
             byte[] result = shardedJedis.get(key);
             if (result != null) {
                 if (isCompress) {
-                    result = Serializer.decompress(result);
+                    result = GzipProcessor.decompress(result);
                 }
                 expire(shardedJedis, key, seconds);
             }
@@ -470,7 +468,7 @@ public class ValueOperations extends JedisOperations {
                             v = list.get(i);
                             if (v != null && !resultMap.containsKey(keys[i])) {
                                 if (isCompress) {
-                                    v = Serializer.decompress(v);
+                                    v = GzipProcessor.decompress(v);
                                 }
                                 resultMap.put(keys[i], v);
                             }
@@ -486,7 +484,7 @@ public class ValueOperations extends JedisOperations {
                     v = shardedJedis.get(k);
                     if (v == null) continue;
                     if (isCompress) {
-                        v = Serializer.decompress(v);
+                        v = GzipProcessor.decompress(v);
                     }
                     resultMap.put(k, v);
                 }

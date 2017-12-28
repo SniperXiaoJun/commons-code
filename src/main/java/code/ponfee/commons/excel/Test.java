@@ -7,12 +7,6 @@ import java.util.List;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 
-
-/**
- * FUN Test
- *
- * @author xuxueli 2017-09-08 22:41:19
- */
 public class Test {
 
     public static void main(String[] args) {

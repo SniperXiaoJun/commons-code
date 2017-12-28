@@ -3,6 +3,7 @@ package code.ponfee.commons.serial;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 
+import code.ponfee.commons.io.GzipProcessor;
 import code.ponfee.commons.reflect.ClassUtils;
 
 /**
@@ -35,7 +36,7 @@ public class StringSerializer extends Serializer {
         } else if (t instanceof String) {
             byte[] data = ((String) t).getBytes(charset);
             if (isCompress) {
-                data = compress(data);
+                data = GzipProcessor.compress(data);
             }
             return data;
         } else {
@@ -57,7 +58,7 @@ public class StringSerializer extends Serializer {
         }
 
         if (isCompress) {
-            data = decompress(data);
+            data = GzipProcessor.decompress(data);
         }
         return (T) new String(data, charset);
     }

@@ -10,8 +10,6 @@ import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
 
 /**
  * 表信息
- *
- * @author xuxueli 2017-09-08 20:51:26
  */
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)

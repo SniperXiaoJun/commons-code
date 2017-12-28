@@ -79,8 +79,11 @@ public abstract class CryptoProvider {
      * AES加/解密
      */
     public static final CryptoProvider AES_CRYPTO = new CryptoProvider() {
-        private final SymmetricCryptor key = SymmetricCryptorBuilder.newBuilder(Algorithm.AES).key("z]_5Fi!X$ed4OY8j".getBytes()).mode(Mode.CBC)
-                                                                    .padding(Padding.PKCS5Padding).ivParameter("SVE<r[)qK`n%zQ'o".getBytes()).build();
+        private final SymmetricCryptor key = SymmetricCryptorBuilder.newBuilder(Algorithm.AES)
+                                                                    .key("z]_5Fi!X$ed4OY8j".getBytes())
+                                                                    .mode(Mode.CBC).ivParameter("SVE<r[)qK`n%zQ'o".getBytes())
+                                                                    .provider(Providers.BC).padding(Padding.PKCS7Padding)
+                                                                    .build();
 
         @Override
         public byte[] encrypt(byte[] original) {

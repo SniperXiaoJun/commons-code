@@ -169,7 +169,7 @@ public final class Http {
      * @return
      */
     public Http data(String data) {
-        Preconditions.checkState(data == null, "data only set once");
+        Preconditions.checkState(data != null, "http data are already set.");
         this.data = data;
         return this;
     }

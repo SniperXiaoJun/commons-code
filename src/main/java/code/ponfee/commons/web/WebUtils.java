@@ -177,7 +177,7 @@ public final class WebUtils {
                 bufOut.write(buffer, 0, len);
             }
         } catch (IOException e) {
-            logger.error("http response pplication/octet-stream error", e);
+            logger.error("response application/octet-stream error", e);
         }
     }
 

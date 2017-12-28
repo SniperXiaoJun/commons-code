@@ -5,7 +5,6 @@ import redis.clients.jedis.Jedis;
 /**
  * Redis distributed lock implementation.
  * 
- * @author Alois Belaska <alois.belaska@gmail.com>
  */
 public class JedisLock2 {
 

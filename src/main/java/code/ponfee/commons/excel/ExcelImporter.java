@@ -21,8 +21,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Excel导入工具
- *
- * @author xuxueli 2017-09-08 22:41:19
  */
 public class ExcelImporter {
     private static Logger logger = LoggerFactory.getLogger(ExcelImporter.class);

@@ -17,7 +17,7 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import code.ponfee.commons.util.ObjectUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * 本地线程级的web上下文持有类
@@ -70,7 +70,7 @@ public final class WebContext {
         if (values == null || values.length == 0) {
             values = new String[] { value };
         } else {
-            values = ObjectUtils.concat(new String[] { value }, values);
+            values = ArrayUtils.add(values, value);
         }
         custparams.get().put(name, values);
     }

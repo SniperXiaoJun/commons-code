@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.mail.util.MailConnectException;
 
+import code.ponfee.commons.collect.Collects;
 import code.ponfee.commons.mail.MailEnvelope.MailType;
 import code.ponfee.commons.util.ObjectUtils;
 import code.ponfee.commons.util.RegexUtils;
@@ -268,9 +269,9 @@ public class MailSender {
                     }
                     if (--retries > 0) {
                         // 发送失败重试
-                        envlop.setTo(ObjectUtils.intersect(envlop.getTo(), unsents));
-                        envlop.setBcc(ObjectUtils.intersect(envlop.getBcc(), unsents));
-                        envlop.setCc(ObjectUtils.intersect(envlop.getCc(), unsents));
+                        envlop.setTo(Collects.intersect(envlop.getTo(), unsents));
+                        envlop.setBcc(Collects.intersect(envlop.getBcc(), unsents));
+                        envlop.setCc(Collects.intersect(envlop.getCc(), unsents));
                         return send0(logid, envlop, retries);
                     } else {
                         logger.error("unsend email address [{}] - {}", logid, unsents.toString());

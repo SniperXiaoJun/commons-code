@@ -23,6 +23,8 @@ public class RSACryptoTester {
 
     public static void main(String[] args) throws Exception {
         RSAKeyPair keyPair = genRSAKeyPair(1024);
+        System.out.println(keyPair.getPkcs8PrivateKey());
+        System.out.println(keyPair.getPkcs8PublicKey());
         test(keyPair.getPrivateKey(), RSAPrivateKeys.extractPublicKey(keyPair.getPrivateKey()));
         
         test(RSAPrivateKeys.fromPkcs1Pem(RSAPrivateKeys.toPkcs1Pem(RSAPrivateKeys.fromPkcs1(keyPair.getPkcs1PrivateKey()))),

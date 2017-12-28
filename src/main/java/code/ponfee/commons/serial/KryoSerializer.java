@@ -17,6 +17,9 @@ import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.pool.KryoFactory;
 import com.esotericsoftware.kryo.pool.KryoPool;
 
+import code.ponfee.commons.io.ExtendedGZIPOutputStream;
+import code.ponfee.commons.io.Files;
+
 /**
  * kryo序例化
  * @author fupf
@@ -48,9 +51,9 @@ public class KryoSerializer extends Serializer {
             ByteArrayOutputStream baos = new ByteArrayOutputStream(BYTE_SIZE);
             if (isCompress) {
                 gzout = new ExtendedGZIPOutputStream(baos);
-                output = new ByteBufferOutput(gzout, BUFF_SIZE);
+                output = new ByteBufferOutput(gzout, Files.BUFF_SIZE);
             } else {
-                output = new ByteBufferOutput(baos, BUFF_SIZE);
+                output = new ByteBufferOutput(baos, Files.BUFF_SIZE);
             }
             (kryo = getKryo()).writeObject(output, t);
             output.flush();

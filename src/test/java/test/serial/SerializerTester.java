@@ -1,14 +1,11 @@
 package test.serial;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Scanner;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import bean.TestBean;
+import code.ponfee.commons.io.Files;
+import code.ponfee.commons.io.GzipProcessor;
 import code.ponfee.commons.serial.FstSerializer;
 import code.ponfee.commons.serial.HessianSerializer;
 import code.ponfee.commons.serial.JdkSerializer;
@@ -23,28 +20,7 @@ public class SerializerTester {
 
     @Before
     public void setUp() {
-        FileInputStream in = null;
-        Scanner scan = null;
-        try {
-            in = new FileInputStream(MavenProjects.getTestJavaFile(this.getClass()));
-            scan = new Scanner(in);
-            StringBuilder builder = new StringBuilder();
-            while (scan.hasNext()) {
-                builder.append(scan.nextLine());
-            }
-            builder.setLength(1000);
-            text = builder.toString().replace("\r|\n", "");
-            scan.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            if (scan != null) scan.close();
-            if (in != null) try {
-                in.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        text = Files.toString(MavenProjects.getTestJavaFile(this.getClass())).replaceAll("\r|\n", "");
     }
 
     @Test
@@ -222,10 +198,10 @@ public class SerializerTester {
         System.out.println("压缩前数据：" + text);
         byte[] data = text.getBytes();
         System.out.println("压缩前的数据大小：" + data.length);
-        data = Serializer.compress(data);
+        data = GzipProcessor.compress(data);
         System.out.println("压缩后的数据大小：" + data.length);
 
-        data = Serializer.decompress(data);
+        data = GzipProcessor.decompress(data);
         System.out.println("解压缩后数据：" + new String(data));
         System.out.println("compress end =======================================================耗时" + (System.currentTimeMillis() - start) + "\n");
     }

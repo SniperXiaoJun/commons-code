@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +28,8 @@ import code.ponfee.commons.io.Files;
 public class ExportTester {
 
     @Test
-    public void testHtml() throws IOException {
-        AbstractExporter builder = new HtmlExporter();
+    public void testHtml1() throws IOException {
+        AbstractExporter html = new HtmlExporter();
         AbstractExporter csv = new CsvExporter();
         List<Thead> list = new ArrayList<>();
 
@@ -99,34 +100,38 @@ public class ExportTester {
                                           new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
         ));
         table.setComment("comment1;comment2;comment3;comment4;comment5;comment6;");
-        builder.build(table);
+        html.build(table);
         csv.build(table);
 
         table = new Table(list);
         table.setCaption("123");
-        builder.build(table);
+        html.build(table);
         
         table = new Table(list);
         table.setCaption("bnm");
-        builder.build(table);
+        html.build(table);
 
-        System.out.println(builder.setName("报表").export());
+        System.out.println(html.setName("报表").export());
         IOUtils.write((String) csv.export(), new FileOutputStream("d://csv.csv"), "UTF-8");
         Files.addBOM("d:/csv.csv");
+
+        html.close();
+        csv.close();
     }
 
     @Test
     public void testHtml2() {
-        AbstractExporter builder = new HtmlExporter();
+        AbstractExporter html = new HtmlExporter();
 
         Table table = new Table("a,b,c,d,e".split(","));
-        builder.build(table);
-        System.out.println(builder.export());
+        html.build(table);
+        System.out.println(html.export());
+        html.close();
     }
 
     @Test
     public void testExcel() throws FileNotFoundException, IOException {
-        AbstractExporter excel = new ExcelExporter();
+        ExcelExporter excel = new ExcelExporter();
         List<Thead> list = new ArrayList<>();
 
         list.add(new Thead("区域", 1, 0, new Tmeta(Type.NUMERIC, "#,###.00%", Align.RIGHT, false, "#cccccc")));
@@ -164,71 +169,80 @@ public class ExportTester {
         list.add(new Thead("线上项目成交套数", 33, 12));
         list.add(new Thead("月指标(万)", 34, 12));
         list.add(new Thead("指标完成率", 35, 12));
-        System.out.println("========================================start");
+        
+        List<Object[]> data1 = new ArrayList<>();
+        for (int i = 0; i < 20000; i++) {
+            data1.add(new Object[] { "1234563.918%", "2017-02-03", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd",
+                "abd", "abd",
+                "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" });
+        }
+        
+        List<Object[]> data2 = new ArrayList<>();
+        for (int i = 0; i < 50000; i++) {
+            data2.add(new Object[] { "1234563.918%", "2017-02-03", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd",
+                "abd", "abd",
+                "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" });
+        }
+        
+        List<Object[]> data3 = new ArrayList<>();
+        for (int i = 0; i < 30000; i++) {
+            data3.add(new Object[] { "1234563.918%", "2017-02-03", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd",
+                "abd", "abd",
+                "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" });
+        }
+        
         long start = System.currentTimeMillis();
+        System.out.println("========================================start");
 
-        Table table = new Table(list);
-        table.setCaption("test1");
-        List<Object[]> data = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            data.add(new Object[] { "1234563.918%", "2017-02-03", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd",
-                "abd", "abd",
-                "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" });
-        }
-        table.setTobdy(data);
-        excel.setName("报表1").build(table);
+        Table table1 = new Table(list);
+        table1.setCaption("test1");
+        table1.setTobdy(data1);
+        excel.setName("报表1").build(table1);
 
         // ------------------------------------------
-        table = new Table(list);
-        table.setCaption("test2");
-        data = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            data.add(new Object[] { "1234563.918%", "2017-02-03", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd",
-                "abd", "abd",
-                "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" });
-        }
-        table.setTobdy(data);
-        excel.setName("报表2").build(table);
+        Table table2 = new Table(list);
+        table2.setCaption("test2");
+        table2.setTobdy(data2);
+        excel.setName("报表2").build(table2);
 
         // ------------------------------------------
-        table = new Table(list);
-        table.setCaption("test3");
-        data = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            data.add(new Object[] { "1234563.918%", "2017-02-03", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd",
-                "abd", "abd",
-                "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" });
-        }
-        table.setTobdy(data);
-        excel.setName("报表1").build(table);
+        Table table3 = new Table(list);
+        table3.setCaption("test3");
+        table3.setTobdy(data3);
+        excel.setName("报表1").build(table3);
 
         // ------------------------------------------
         excel.setName("图表");
-        ((ExcelExporter)excel).insertImage(com.google.common.io.Files.toByteArray(new File("d:/test/2.png")));
-        ((ExcelExporter)excel).insertImage(com.google.common.io.Files.toByteArray(new File("d:/test/2.png")));
-        
-        IOUtils.write((byte[]) excel.export(), new FileOutputStream("d:/abc.xlsx"));
+        excel.insertImage(com.google.common.io.Files.toByteArray(new File("d:/test/2.png")));
+        excel.insertImage(com.google.common.io.Files.toByteArray(new File("d:/test/2.png")));
+
+        OutputStream out = new FileOutputStream("d:/abc.xlsx");
+        excel.write(out);
+        out.close();
         excel.close();
         System.out.println("========================================" + (System.currentTimeMillis() - start));
-        
+
+        // -------------------------csv
         CsvExporter csv = new CsvExporter();
-        csv.build(table);
+        csv.build(table1);
         IOUtils.write(csv.export().toString(), new FileOutputStream("d://csv.csv"), "UTF-8");
         Files.addBOM(new File("d://csv.csv"));
+        csv.close();
     }
 
     @Test
     public void testExcel2() throws FileNotFoundException, IOException {
-        AbstractExporter builder = new ExcelExporter();
+        AbstractExporter excel = new ExcelExporter();
 
         Table table = new Table("a,b,c,d,e".split(","));
         table.setCaption("title");
         List<Object[]> data = new ArrayList<>();
         data.add(new Object[] { "1", "2", "3", "4", "5" });
         table.setTobdy(data);
-        builder.setName("21321");
-        builder.build(table);
-        IOUtils.write((byte[]) builder.export(), new FileOutputStream("d:/123.xlsx"));
+        excel.setName("21321");
+        excel.build(table);
+        IOUtils.write((byte[]) excel.export(), new FileOutputStream("d:/123.xlsx"));
+        excel.close();
     }
 
     public static void main(String[] args) {

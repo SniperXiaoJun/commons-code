@@ -8,16 +8,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
@@ -38,10 +41,12 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 
 import code.ponfee.commons.export.Tmeta.Type;
+import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.util.Colors;
+import code.ponfee.commons.util.Dates;
 import code.ponfee.commons.util.ImageUtils;
 import code.ponfee.commons.util.ObjectUtils;
-import io.netty.util.internal.shaded.org.jctools.queues.MessagePassingQueue.Consumer;
+import code.ponfee.commons.util.Strings;
 
 /**
  * excel导出
@@ -74,7 +79,7 @@ public class ExcelExporter extends AbstractExporter {
     private final Map<String, Freeze>    freezes = new HashMap<>();
 
     public ExcelExporter() {
-        workbook = new SXSSFWorkbook();
+        workbook = new SXSSFWorkbook(200);
         dataFormat = (XSSFDataFormat) workbook.createDataFormat();
 
         XSSFFont titleFont = (XSSFFont) workbook.createFont();
@@ -102,8 +107,8 @@ public class ExcelExporter extends AbstractExporter {
         titleStyle.cloneStyleFrom(baseStyle);
         titleStyle.setAlignment(HorizontalAlignment.CENTER);
         titleStyle.setFont(titleFont);
-        titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        titleStyle.setFillForegroundColor(new XSSFColor(new Color(255, 255, 224)));
+        titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND); // 填充样式
+        titleStyle.setFillForegroundColor(new XSSFColor(new Color(255, 255, 224))); // 填充颜色
 
         headStyle = (XSSFCellStyle) workbook.createCellStyle();
         headStyle.cloneStyleFrom(baseStyle);
@@ -172,7 +177,7 @@ public class ExcelExporter extends AbstractExporter {
 
         // 6、判断是否有数据
         if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
-            createCell(NO_RESULT_TIP, sheet, tipStyle, cursorRow, table.getTotalLeafCount());
+            createBlankRow(NO_RESULT_TIP, sheet, tipStyle, cursorRow, table.getTotalLeafCount());
             return;
         }
 
@@ -224,7 +229,7 @@ public class ExcelExporter extends AbstractExporter {
 
         // 9、文字注释
         if (StringUtils.isNotBlank(table.getComment())) {
-            createCell(table.getComment(), sheet, tipStyle, cursorRow, table.getTotalLeafCount());
+            createBlankRow(table.getComment(), sheet, tipStyle, cursorRow, table.getTotalLeafCount());
         }
     }
 
@@ -273,8 +278,6 @@ public class ExcelExporter extends AbstractExporter {
         try (BufferedOutputStream bos = new BufferedOutputStream(out)) {
             createFreezePane();
             workbook.write(bos);
-            bos.flush();
-            out.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -355,11 +358,12 @@ public class ExcelExporter extends AbstractExporter {
     // 复合表头
     private void buildComplexThead(Table table, SXSSFSheet sheet, CursorRow cursorRow) {
         // create caption
-        createCell(table.getCaption(), sheet, titleStyle, cursorRow, table.getTotalLeafCount());
+        createBlankRow(table.getCaption(), sheet, titleStyle, cursorRow, table.getTotalLeafCount());
 
         // 约定非叶子节点不能跨行
         Set<Integer> rows = new HashSet<>();
         int beginCol, endRow, endCol, nodeLevel = 1;
+        //sheet.trackAllColumnsForAutoSizing();
         for (int n = table.getThead().size(), i = 0; i < n; i++) {
             Thead cell = table.getThead().get(i);
             if (cell.getNodeLevel() > nodeLevel) {
@@ -372,6 +376,7 @@ public class ExcelExporter extends AbstractExporter {
             if (cell.isLeaf()) {
                 endRow = cursorRow.get() + table.getMaxTheadLevel() - cell.getNodeLevel();
                 sheet.setColumnWidth(beginCol, DEFAULT_WIDTH);
+                //sheet.autoSizeColumn(beginCol);
             } else {
                 endRow = cursorRow.get(); // 约定非子节点不能跨行
             }
@@ -409,10 +414,18 @@ public class ExcelExporter extends AbstractExporter {
         cursorRow.increment();
     }
 
-    // 创建单元格
-    private void createCell(String text, SXSSFSheet sheet, XSSFCellStyle style, CursorRow cursorRow, int columnLen) {
+    /**
+     * 创建空行
+     * @param text
+     * @param sheet
+     * @param style
+     * @param cursorRow
+     * @param columnLen
+     */
+    private void createBlankRow(String text, SXSSFSheet sheet, XSSFCellStyle style, 
+                                CursorRow cursorRow, int columnLen) {
         SXSSFRow row = sheet.createRow(cursorRow.get());
-        row.setHeight((short) 500);
+        row.setHeight(DEFAULT_HEIGHT);
         createCell(row, 0, style, text);
         for (int i = 1; i < columnLen; i++) {
             createCell(row, i, style, null);
@@ -441,35 +454,45 @@ public class ExcelExporter extends AbstractExporter {
      * @param options
      */
     private void createCell(SXSSFRow row, int colIndex, XSSFCellStyle style, Tmeta tmeta,
-        Object value, int r, int c, Map<CellStyleOptions, Object> options) {
+                            Object value, int r, int c, Map<CellStyleOptions, Object> options) {
+
         SXSSFCell cell = row.createCell(colIndex);
+        cell.setCellStyle(style);
+
         // 设置单元格格式
-        if (tmeta != null && tmeta.getType() == Type.NUMERIC) {
-            cell.setCellType(CellType.NUMERIC);
-            if (value == null || (String.class.isInstance(value) && StringUtils.isBlank((String) value))) {
+        if (tmeta == null) {
+            setCellString(cell, value);
+        } else if (tmeta.getType() == Type.NUMERIC) {
+            if (Strings.isBlank(value)) {
+                cell.setCellType(CellType.NUMERIC);
                 cell.setCellValue(new XSSFRichTextString());
             } else if (String.class.isInstance(value) && ((String) value).endsWith("%")) {
-                String val = (String) value;
-                cell.setCellValue(Double.parseDouble(val.substring(0, val.length() - 1).replaceAll(",", "")) / 100);
+                String val = ((String) value).substring(0, ((String) value).length() - 1);
+                cell.setCellValue(Numbers.toDouble(val.replace(",", "")) / 100);
             } else {
-                cell.setCellValue(Double.parseDouble(value.toString().replaceAll(",", "")));
+                cell.setCellValue(Numbers.toDouble(value.toString().replace(",", "")));
             }
-        } else if (tmeta != null && tmeta.getType() == Type.DATETIME && StringUtils.isNotBlank(tmeta.getFormat())) {
-            if (value != null) {
+        } else if (tmeta.getType() == Type.DATETIME) {
+            if (value == null) {
+                cell.setCellType(CellType.BLANK);
+            } else if (value instanceof Date) {
+                cell.setCellValue((Date) value);
+            } else if (value instanceof Calendar) {
+                cell.setCellValue((Calendar) value);
+            } else {
+                String str = value.toString();
+                String format = ObjectUtils.ifNull(tmeta.getFormat(), Dates.DEFAULT_DATE_FORMAT);
                 try {
-                    cell.setCellValue(new SimpleDateFormat(tmeta.getFormat()).parse(value.toString()));
+                    cell.setCellValue(DateUtils.parseDate(str, format));
                 } catch (ParseException e) {
-                    throw new IllegalArgumentException(e);
+                    throw new IllegalArgumentException("invalid date str: " + str + ", format: " + format, e);
                 }
             }
         } else {
-            cell.setCellType(CellType.STRING);
-            if (value != null) {
-                cell.setCellValue(value.toString());
-            }
+            setCellString(cell, value);
         }
-        cell.setCellStyle(style);
 
+        // 样式自定义处理
         processOptions(cell, r, c, options);
     }
 
@@ -507,7 +530,7 @@ public class ExcelExporter extends AbstractExporter {
     }
 
     /**
-     * 创建样式
+     * create cell style, only called once
      * @param thead
      * @return
      */
@@ -521,37 +544,46 @@ public class ExcelExporter extends AbstractExporter {
             style.cloneStyleFrom(dataStyle);
 
             Tmeta tmeta = cell.getTmeta();
-            if (tmeta == null) continue;
+            if (tmeta != null) {
+                switch (tmeta.getAlign()) { // 对齐方式
+                    case LEFT:
+                        style.setAlignment(HorizontalAlignment.LEFT);
+                        break;
+                    case CENTER:
+                        style.setAlignment(HorizontalAlignment.CENTER);
+                        break;
+                    case RIGHT:
+                        style.setAlignment(HorizontalAlignment.RIGHT);
+                        break;
+                    default:
+                        break;
+                }
 
-            // 对齐方式
-            switch (tmeta.getAlign()) {
-                case LEFT:
-                    style.setAlignment(HorizontalAlignment.LEFT);
-                    break;
-                case CENTER:
-                    style.setAlignment(HorizontalAlignment.CENTER);
-                    break;
-                case RIGHT:
-                    style.setAlignment(HorizontalAlignment.RIGHT);
-                    break;
-                default:
-                    break;
-            }
+                // 设置单元格格式
+                if (StringUtils.isNotBlank(tmeta.getFormat())) {
+                    //dataFormat.getFormat("0.00%")： 0.00%->0xa; #,###.00%->0xa5; #,##0->xxx;
+                    style.setDataFormat(dataFormat.getFormat(tmeta.getFormat()));
+                }
 
-            // 设置单元格格式
-            if (StringUtils.isNotBlank(tmeta.getFormat())) {
-                //dataFormat.getFormat("0.00%")： 0.00%->0xa; #,###.00%->0xa5; #,##0 -> xxx
-                style.setDataFormat(dataFormat.getFormat(tmeta.getFormat()));
-            }
+                // 设置颜色
+                if (tmeta.getColor() != null) {
+                    XSSFFont font = (XSSFFont) workbook.createFont();
+                    font.setColor(new XSSFColor(tmeta.getColor()));
+                    style.setFont(font);
+                }
+            } // end of tmeta
 
-            // 设置颜色
-            if (tmeta.getColor() != null) {
-                XSSFFont font = (XSSFFont) workbook.createFont();
-                font.setColor(new XSSFColor(tmeta.getColor()));
-                style.setFont(font);
-            }
         }
+
         return styles;
+    }
+
+    private static void setCellString(SXSSFCell cell, Object value) {
+        if (value != null) {
+            cell.setCellValue(value.toString());
+        } else {
+            cell.setCellType(CellType.BLANK);
+        }
     }
 
     /**
