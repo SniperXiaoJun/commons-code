@@ -20,7 +20,7 @@ public class CsvExporter extends AbstractExporter {
 
     public CsvExporter(char csvSeparator) {
         this.csvSeparator = csvSeparator;
-        this.csv = new StringBuilder(0x1000); // 初始容量4096
+        this.csv = new StringBuilder(0x2000); // 初始容量8192
     }
 
     @Override

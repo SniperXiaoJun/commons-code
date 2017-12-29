@@ -141,7 +141,7 @@ public class ExportTester {
         list.add(new Thead("区域", 1, 0, new Tmeta(Type.NUMERIC, "#,###.00%", Align.RIGHT, false, "#cccccc")));
         list.add(new Thead("分公司", 2, 0, new Tmeta(Type.DATETIME, "yyyy-MM-dd", Align.CENTER, true, "#fcdebc")));
         list.add(new Thead("昨天", 3, 0));
-        list.add(new Thead("项目数", 4, 3));
+        list.add(new Thead("项目数", 4, 3, new Tmeta(Type.CHAR, null, Align.RIGHT, true, "#abc")));
         list.add(new Thead("项目应收(元)", 5, 3));
         list.add(new Thead("成交套数", 6, 3));
         list.add(new Thead("套均收入(元)", 7, 3));
@@ -194,7 +194,7 @@ public class ExportTester {
                 "abd", "abd",
                 "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" });
         }
-        Object[] tfoot = new Object[] {"abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd","abd", "abd",
+        Object[] tfoot = new Object[] {"abd111111", "abd111111", "ab1111111d", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd","abd", "abd",
             "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" };
         Map<CellStyleOptions, Object> options = ImmutableMap.of(CellStyleOptions.HIGHLIGHT, ImmutableMap.of("cells", Lists.newArrayList(Lists.newArrayList(1,1),Lists.newArrayList(2,2)), "color", "#FF3030"));
         long start = System.currentTimeMillis();

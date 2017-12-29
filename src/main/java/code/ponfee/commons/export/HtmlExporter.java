@@ -35,6 +35,9 @@ public class HtmlExporter extends AbstractExporter {
        .append("      .grid table caption '{font-size:14px;padding:5px;background:#e6e6fa;font-weight:bolder;border-bottom:none;}' \n")
        .append("      .grid table thead th '{padding: 5px;background: #ccc;}'                                                      \n")
        .append("      .grid table tbody td '{text-align: center;padding: 3px;}'                                                    \n")
+       .append("      .grid table tbody td.text-left '{text-align:left;}'                                                          \n")
+       .append("      .grid table tbody td.text-right '{text-align:right;}'                                                        \n")
+       .append("      .grid table tbody td.text-center '{text-align:center;}'                                                      \n")
        .append("      .grid table tfoot th '{padding: 5px;}'                                                                       \n")
        .append("      .grid table tr:nth-child(odd) td'{background:#fff;}'                                                         \n")
        .append("      .grid table tr:nth-child(even) td'{background: #e8e8e8}'                                                     \n")
@@ -98,7 +101,7 @@ public class HtmlExporter extends AbstractExporter {
                     for (m = datas.length, j = 0; j < m; j++) {
                         html.append("<td");
 
-                        processMeta(datas[j], thead.get(j).getTmeta(), i, j, table.getOptions());
+                        processMeta(datas[j], thead.get(j).getTmeta(), i, j, table.getOptions()); // 样式
 
                         html.append(">").append(formatData(datas[j], thead.get(j).getTmeta())).append("</td>");
                     }
@@ -261,13 +264,13 @@ public class HtmlExporter extends AbstractExporter {
         if (tmeta != null) {
             switch (tmeta.getAlign()) {
                 case LEFT:
-                    style.append("text-align:left;");
+                    clazz.append("text-left ");
                     break;
                 case CENTER:
-                    style.append("text-align:right;");
+                    clazz.append("text-center ");
                     break;
                 case RIGHT:
-                    style.append("text-align:center;");
+                    clazz.append("text-right ");
                     break;
                 default:
                     break;

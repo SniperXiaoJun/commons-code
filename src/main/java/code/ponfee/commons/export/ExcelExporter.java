@@ -454,12 +454,12 @@ public class ExcelExporter extends AbstractExporter {
      * @param style
      * @param tmeta
      * @param value
-     * @param dataRowIdx
-     * @param dataColIdx
+     * @param tbodyRowIdx
+     * @param tbodyColIdx
      * @param options
      */
     private void createCell(SXSSFRow row, int colIndex, XSSFCellStyle style, Tmeta tmeta, Object value, 
-                            int dataRowIdx, int dataColIdx, Map<CellStyleOptions, Object> options) {
+                            int tbodyRowIdx, int tbodyColIdx, Map<CellStyleOptions, Object> options) {
 
         SXSSFCell cell = row.createCell(colIndex);
         cell.setCellStyle(style);
@@ -498,18 +498,18 @@ public class ExcelExporter extends AbstractExporter {
         }
 
         // 样式自定义处理
-        processOptions(cell, dataRowIdx, dataColIdx, options);
+        processOptions(cell, tbodyRowIdx, tbodyColIdx, options);
     }
 
     /**
      * 处理其它配置项
      * @param cell
-     * @param dataRowIdx
-     * @param dataColIdx
+     * @param tbodyRowIdx
+     * @param tbodyColIdx
      * @param options
      */
     @SuppressWarnings("unchecked")
-    private void processOptions(SXSSFCell cell, int dataRowIdx, int dataColIdx, 
+    private void processOptions(SXSSFCell cell, int tbodyRowIdx, int tbodyColIdx, 
                                 Map<CellStyleOptions, Object> options) {
         if (options == null || options.isEmpty()) return;
 
@@ -517,7 +517,7 @@ public class ExcelExporter extends AbstractExporter {
         Map<String, Object> highlight = (Map<String, Object>) options.get(CellStyleOptions.HIGHLIGHT);
         if (highlight != null && !highlight.isEmpty()) {
             for (List<Integer> c : (List<List<Integer>>) highlight.get("cells")) {
-                if ((int) c.get(0) == dataRowIdx && (int) c.get(1) == dataColIdx) {
+                if ((int) c.get(0) == tbodyRowIdx && (int) c.get(1) == tbodyColIdx) {
                     XSSFFont font = (XSSFFont) workbook.createFont();
                     font.setColor(new XSSFColor(Colors.hex2color((String) highlight.get("color"))));
                     XSSFCellStyle style = (XSSFCellStyle) workbook.createCellStyle();
@@ -531,7 +531,7 @@ public class ExcelExporter extends AbstractExporter {
         // 处理
         Consumer<Object[]> processor = (Consumer<Object[]>) options.get(CellStyleOptions.CELL_PROCESS);
         if (processor != null) {
-            processor.accept(new Object[] { workbook, cell, dataRowIdx, dataColIdx });
+            processor.accept(new Object[] { workbook, cell, tbodyRowIdx, tbodyColIdx });
         }
     }
 
