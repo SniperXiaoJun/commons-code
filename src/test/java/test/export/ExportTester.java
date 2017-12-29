@@ -29,7 +29,7 @@ import code.ponfee.commons.io.FileTransformer;
 import code.ponfee.commons.io.Files;
 
 public class ExportTester {
-    private int multiple = 10;
+    private int multiple = 20;
     @Test
     public void testHtml1() throws IOException {
         AbstractExporter html = new HtmlExporter();
@@ -194,8 +194,7 @@ public class ExportTester {
                 "abd", "abd",
                 "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" });
         }
-        Object[] tfoot = new Object[] {"abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd",
-            "abd", "abd",
+        Object[] tfoot = new Object[] {"abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd","abd", "abd",
             "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" };
         Map<CellStyleOptions, Object> options = ImmutableMap.of(CellStyleOptions.HIGHLIGHT, ImmutableMap.of("cells", Lists.newArrayList(Lists.newArrayList(1,1),Lists.newArrayList(2,2)), "color", "#FF3030"));
         long start = System.currentTimeMillis();
@@ -233,20 +232,25 @@ public class ExportTester {
         excel.write(out);
         out.close();
         excel.close();
-        System.out.println("========================================" + (System.currentTimeMillis() - start));
+        System.out.println("========================================excel: " + (System.currentTimeMillis() - start));
 
+        start = System.currentTimeMillis();
         // -------------------------csv
         CsvExporter csv = new CsvExporter();
         csv.build(table1);
         IOUtils.write(csv.export().toString(), new FileOutputStream("d://csv.csv"), "UTF-8");
         Files.addBOM(new File("d://csv.csv"));
         csv.close();
-
+        System.out.println("========================================csv: " + (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
         HtmlExporter html = new HtmlExporter();
         html.build(table1);
         html.setName("test");
-        System.out.println(html.export());
+        String s = html.export();
+        System.out.println(s);
         html.close();
+        System.out.println("========================================html: " + (System.currentTimeMillis() - start));
     }
 
     @Test

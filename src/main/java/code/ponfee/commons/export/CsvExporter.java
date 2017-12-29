@@ -12,8 +12,14 @@ import code.ponfee.commons.util.ObjectUtils;
 public class CsvExporter extends AbstractExporter {
 
     private StringBuilder csv;
+    private final char csvSeparator;
 
     public CsvExporter() {
+        this(',');
+    }
+
+    public CsvExporter(char csvSeparator) {
+        this.csvSeparator = csvSeparator;
         this.csv = new StringBuilder(0x1000); // 初始容量4096
     }
 
@@ -27,7 +33,7 @@ public class CsvExporter extends AbstractExporter {
         }
 
         // build table thead
-        buildThead(table.getThead(), table.getMaxTheadLevel());
+        buildComplexThead(table.getThead(), table.getMaxTheadLevel());
 
         if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
             csv.append(NO_RESULT_TIP);
@@ -40,19 +46,16 @@ public class CsvExporter extends AbstractExporter {
         List<Object[]> tbody = table.getTobdy();
         if (tbody != null && !tbody.isEmpty()) {
             Object[] datas;
-            for (int n = tbody.size() - 1, i = 0, j, m; i <= n; i++) {
+            for (int n = tbody.size(), i = 0, j, m; i < n; i++) {
                 datas = tbody.get(i);
                 for (m = datas.length - 1, j = 0; j <= m; j++) {
                     csv.append(datas[j]);
                     if (j < m) {
-                        csv.append(",");
+                        csv.append(csvSeparator);
                     }
                 }
-                if (i < n) {
-                    csv.append(Files.LINE_SEPARATOR); // 换行
-                }
+                csv.append(Files.LINE_SEPARATOR); // 换行
             }
-            csv.append(Files.LINE_SEPARATOR);
         }
 
         // tfoot---------
@@ -67,12 +70,12 @@ public class CsvExporter extends AbstractExporter {
                 if (i == mergeNum - 1) {
                     csv.append("合计");
                 }
-                csv.append(",");
+                csv.append(csvSeparator);
             }
             for (int i = mergeNum; i < n; i++) {
                 csv.append(table.getTfoot()[i - mergeNum]);
                 if (i != n - 1) {
-                    csv.append(",");
+                    csv.append(csvSeparator);
                 }
             }
 
@@ -92,14 +95,22 @@ public class CsvExporter extends AbstractExporter {
         csv = null;
     }
 
-    private void buildThead(List<Thead> thead, int maxTheadLevel) {
+    private void buildComplexThead(List<Thead> thead, int maxTheadLevel) {
         for (Thead cell : thead) {
             if (cell.isLeaf()) {
-                csv.append(cell.getName()).append(",");
+                csv.append(cell.getName()).append(csvSeparator);
             }
         }
         csv.deleteCharAt(csv.length() - 1);
         csv.append(Files.LINE_SEPARATOR);
     }
 
+    /*// 创建简单表头
+    private void buildSimpleThead(String[] theadName) {
+        for (String th : theadName) {
+            csv.append(th).append(csvSeparator);
+        }
+        csv.deleteCharAt(csv.length() - 1);
+        csv.append(Files.LINE_SEPARATOR);
+    }*/
 }

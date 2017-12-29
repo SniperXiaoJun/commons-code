@@ -14,7 +14,6 @@ import java.lang.annotation.Target;
  * 应用中的扩展日志（如打点、临时监控、访问日志等）命名方式：appName_logType_logName.log。
  * logType:日志类型，推荐分类有stats/desc/monitor/visit等；logName:日志描述。
  * 这种命名的好处：通过文件名就可知道日志文件属于什么应用，什么类型，什么目的，也有利于归类查找。
- * <p>
  * 
  * 可以使用warn日志级别来记录用户输入参数错误的情况，避免用户投诉时，无所适从。
  * 注意日志输出的级别，error级别只记录系统逻辑出错、异常等重要的错误信息。

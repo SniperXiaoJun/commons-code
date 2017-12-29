@@ -1,6 +1,5 @@
 package code.ponfee.commons.export;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -20,7 +19,7 @@ public class HtmlExporter extends AbstractExporter {
 
     //private static final Pattern PATTERN_NEGATIVE = Pattern.compile("^(-(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*)))(%)?$");
 
-    private static final String HORIZON = "<hr style=\"border:3 double #b0c4de; with: 95%; margin: 20px 0;\" />";
+    private static final String HORIZON = "<hr style=\"border:3 double #b0c4de;with:95%;margin:20px 0;\" />";
     private static final String TEMPLATE = new StringBuilder(4096) 
        .append("<!DOCTYPE html>                                                                                                    \n")
        .append("<html>                                                                                                             \n")
@@ -70,16 +69,20 @@ public class HtmlExporter extends AbstractExporter {
         horizon();
         html.append("<div class=\"grid\"><table cellpadding=\"0\" cellspacing=\"0\">");
         if (StringUtils.isNotBlank(table.getCaption())) {
-            html.append("<caption>" + table.getCaption() + "</caption>");
+            html.append("<caption>")
+                .append(table.getCaption())
+                .append("</caption>");
         }
 
         // thead
         buildComplexThead(thead, table.getMaxTheadLevel());
 
         if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
-            html.append("<tfoot><tr><td colspan=\"").append(table.getTotalLeafCount());
-            html.append("\" style=\"color:red; padding: 3px;font-size: 14px;\">");
-            html.append(NO_RESULT_TIP).append("</td></tr></tfoot>");
+            html.append("<tfoot><tr><td colspan=\"")
+                .append(table.getTotalLeafCount())
+                .append("\" style=\"color:red;padding:3px;font-size:14px;\">")
+                .append(NO_RESULT_TIP)
+                .append("</td></tr></tfoot>");
         } else {
 
             super.nonEmpty();
@@ -116,7 +119,9 @@ public class HtmlExporter extends AbstractExporter {
 
                 int merge = table.getTotalLeafCount() - table.getTfoot().length;
                 if (merge > 0) {
-                    html.append("<th colspan=\"" + merge + "\" style=\"text-align:right;\">合计</th>");
+                    html.append("<th colspan=\"")
+                        .append(merge)
+                        .append("\" style=\"text-align:right;\">合计</th>");
                 }
 
                 for (int i = 0; i < table.getTfoot().length; i++) {
@@ -124,9 +129,9 @@ public class HtmlExporter extends AbstractExporter {
 
                     processMeta(table.getTfoot()[i], thead.get(merge + i).getTmeta());
 
-                    html.append(">");
-                    html.append(formatData(table.getTfoot()[i], thead.get(merge + i).getTmeta()));
-                    html.append("</th>");
+                    html.append(">")
+                        .append(formatData(table.getTfoot()[i], thead.get(merge + i).getTmeta()))
+                        .append("</th>");
                 }
                 html.append("</tr></tfoot>");
             }
@@ -136,10 +141,10 @@ public class HtmlExporter extends AbstractExporter {
                 StringBuilder builder = new StringBuilder();
                 String[] comments = table.getComment().split(";");
                 builder.append("<tr><td colspan=\"").append(table.getTotalLeafCount());
-                builder.append("\" style=\"color:red; padding: 3px;font-size: 14px;\">");
-                builder.append("<div style=\"font-weight: bold;\">备注：</div>");
+                builder.append("\" style=\"color:red; padding:3px;font-size:14px;\">");
+                builder.append("<div style=\"font-weight:bold;\">备注：</div>");
                 for (String comment : comments) {
-                    builder.append("<div style=\"text-indent: 2em;\">").append(comment).append("</div>");
+                    builder.append("<div style=\"text-indent:2em;\">").append(comment).append("</div>");
                 }
                 builder.append("</td></tr>");
 
@@ -202,15 +207,17 @@ public class HtmlExporter extends AbstractExporter {
                 level = cell.getNodeLevel();
             }
             html.append("<th");
-            if (cell.isLeaf()) {
-                // 叶子节点，跨行
+            if (cell.isLeaf()) { // 叶子节点，跨行
                 if (maxTheadLevel - cell.getNodeLevel() > 0) {
-                    html.append(" rowspan=\"" + (maxTheadLevel - cell.getNodeLevel() + 1) + "\"");
+                    html.append(" rowspan=\"")
+                        .append(maxTheadLevel - cell.getNodeLevel() + 1)
+                        .append("\"");
                 }
-            } else {
-                // 非叶子节点，跨列
+            } else { // 非叶子节点，跨列
                 if (cell.getChildLeafCount() > 1) {
-                    html.append(" colspan=\"" + cell.getChildLeafCount() + "\"");
+                    html.append(" colspan=\"")
+                        .append(cell.getChildLeafCount())
+                        .append("\"");
                 }
             }
             html.append(">").append(cell.getName()).append("</th>");
@@ -234,9 +241,18 @@ public class HtmlExporter extends AbstractExporter {
         processMeta(value, tmeta, -1, -1, null);
     }
 
-    private void processMeta(Object value, Tmeta tmeta, int row, int col, Map<CellStyleOptions, Object> options) {
-        StringBuffer style = new StringBuffer();
-        List<String> css = new ArrayList<>();
+    /**
+     * 样式处理
+     * @param value
+     * @param tmeta
+     * @param tbodyRowIdx
+     * @param tbodyColIdx
+     * @param options
+     */
+    private void processMeta(Object value, Tmeta tmeta, int tbodyRowIdx, 
+                             int tbodyColIdx, Map<CellStyleOptions, Object> options) {
+        StringBuilder style = new StringBuilder();
+        StringBuilder clazz = new StringBuilder();
 
         /*if (PATTERN_NEGATIVE.matcher(Objects.toString(value, "")).matches()) {
             style.append("color:#006400;font-weight:bold;"); // 负数显示绿色
@@ -258,34 +274,44 @@ public class HtmlExporter extends AbstractExporter {
             }
 
             if (tmeta.getColor() != null) {
-                style.append("color: ").append(tmeta.getColorHex()).append(";");
+                style.append("color:").append(tmeta.getColorHex()).append(";");
             }
 
             if (tmeta.isNowrap()) {
-                css.add("nowrap");
+                clazz.append("nowrap ");
             }
         }
 
-        processOptions(style, row, col, options);
+        processOptions(style, tbodyRowIdx, tbodyColIdx, options);
 
         if (style.length() > 0) {
             html.append(" style=\"").append(style.toString()).append("\"");
         }
-        if (!css.isEmpty()) {
-            html.append(" class=\"").append(StringUtils.join(css.toArray(), " ")).append("\"");
+        if (clazz.length() > 0) {
+            html.append(" class=\"").append(clazz.deleteCharAt(clazz.length() - 1)).append("\"");
         }
     }
 
+    /**
+     * 样式自定义处理
+     * @param style
+     * @param dataRowIdx
+     * @param dataColIdx
+     * @param options
+     */
     @SuppressWarnings("unchecked")
-    private void processOptions(StringBuffer style, int row, int col, Map<CellStyleOptions, Object> options) {
-        if (options == null || options.isEmpty()) return;
+    private void processOptions(StringBuilder style, int dataRowIdx, int dataColIdx, 
+                                Map<CellStyleOptions, Object> options) {
+        if (options == null || options.isEmpty()) {
+            return;
+        }
 
         Map<String, Object> highlight = (Map<String, Object>) options.get(CellStyleOptions.HIGHLIGHT);
         if (highlight != null && !highlight.isEmpty()) {
-            String color = "color: " + highlight.get("color") + ";font-weight: bold;";
+            String color = "color:" + highlight.get("color") + ";font-weight:bold;";
             List<List<Integer>> cells = (List<List<Integer>>) highlight.get("cells");
             for (List<Integer> cell : cells) {
-                if (cell.get(0).equals(row) && cell.get(1).equals(col)) {
+                if (cell.get(0).equals(dataRowIdx) && cell.get(1).equals(dataColIdx)) {
                     style.append(color);
                 }
             }
@@ -293,7 +319,7 @@ public class HtmlExporter extends AbstractExporter {
 
         Function<Object, String> processor = (Function<Object, String>) options.get(CellStyleOptions.CELL_PROCESS);
         if (processor != null) {
-            style.append(processor.apply(new Object[] { row, col }));
+            style.append(processor.apply(new Object[] { dataRowIdx, dataColIdx }));
         }
     }
 
