@@ -69,7 +69,7 @@ public class ExcelExporter extends AbstractExporter {
     private final XSSFCellStyle titleStyle; // 标题样式
     private final XSSFCellStyle headStyle; // 表头样式
     private final XSSFCellStyle dataStyle; // 数据样式
-    private final XSSFCellStyle tfootStyle; // 合计行样式
+    private final XSSFCellStyle tfootMergeStyle; // 合计行样式
     private final XSSFCellStyle noneStyle; // 无样式
     private final XSSFCellStyle tipStyle; // 无样式
     private final XSSFDataFormat dataFormat; // 数据格式
@@ -121,10 +121,15 @@ public class ExcelExporter extends AbstractExporter {
         dataStyle = (XSSFCellStyle) workbook.createCellStyle();
         dataStyle.cloneStyleFrom(baseStyle);
 
-        tfootStyle = (XSSFCellStyle) workbook.createCellStyle();
-        tfootStyle.cloneStyleFrom(dataStyle);
-        tfootStyle.setFont(headFont);
-        tfootStyle.setWrapText(false);
+        tfootMergeStyle = (XSSFCellStyle) workbook.createCellStyle();
+        tfootMergeStyle.cloneStyleFrom(dataStyle);
+        tfootMergeStyle.setFont(headFont);
+        tfootMergeStyle.setWrapText(false);
+        tfootMergeStyle.setAlignment(HorizontalAlignment.RIGHT);
+        tfootMergeStyle.setBorderLeft(BorderStyle.THIN);
+        tfootMergeStyle.setBorderTop(BorderStyle.THIN);
+        tfootMergeStyle.setBorderRight(BorderStyle.THIN);
+        tfootMergeStyle.setBorderBottom(BorderStyle.THIN);
 
         tipStyle = (XSSFCellStyle) workbook.createCellStyle();
         tipStyle.cloneStyleFrom(baseStyle);
@@ -172,7 +177,7 @@ public class ExcelExporter extends AbstractExporter {
         if (freezes.get(name) != null) {
             freezes.get(name).disable();
         } else {
-            freezes.put(name, new Freeze(1, cursorRow.get()));
+            freezes.put(name, new Freeze(1, cursorRow.get())); // 叶子节点只占一列，故colSplit=1
         }
 
         // 6、判断是否有数据
@@ -208,18 +213,18 @@ public class ExcelExporter extends AbstractExporter {
             row = sheet.createRow(rowNum);
             row.setHeight(DEFAULT_HEIGHT);
 
-            // 合计单元格
-            XSSFCellStyle style = (XSSFCellStyle) workbook.createCellStyle();
-            style.cloneStyleFrom(tfootStyle);
-            style.setAlignment(HorizontalAlignment.RIGHT);
-            createCell(row, 0, style, "合计");
-
-            // 合计单元格：多列合并
-            int mergeNum = table.getTotalLeafCount() - tfoots.length;
-            for (int i = 1; i < mergeNum; i++) {
-                createCell(row, i, style, null);
+            if (table.getTfoot().length > table.getTotalLeafCount()) {
+                throw new IllegalStateException("tfoot data length cannot more than total leaf count.");
             }
-            sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum, 0, mergeNum - 1));
+
+            // 合计单元格
+            int mergeNum = table.getTotalLeafCount() - table.getTfoot().length;
+            for (int i = 0; i < mergeNum; i++) {
+                createCell(row, i, tfootMergeStyle, (i == 0) ? "合计" : null);
+            }
+            if (mergeNum > 1) {
+                sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum, 0, mergeNum - 1));
+            }
 
             // 合计数据
             for (int i = 0; i < tfoots.length; i++) {

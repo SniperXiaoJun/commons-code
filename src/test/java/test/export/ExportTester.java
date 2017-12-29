@@ -7,13 +7,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import code.ponfee.commons.export.AbstractExporter;
+import code.ponfee.commons.export.CellStyleOptions;
 import code.ponfee.commons.export.CsvExporter;
 import code.ponfee.commons.export.ExcelExporter;
 import code.ponfee.commons.export.HtmlExporter;
@@ -26,7 +29,7 @@ import code.ponfee.commons.io.FileTransformer;
 import code.ponfee.commons.io.Files;
 
 public class ExportTester {
-
+    private int multiple = 10;
     @Test
     public void testHtml1() throws IOException {
         AbstractExporter html = new HtmlExporter();
@@ -99,6 +102,7 @@ public class ExportTester {
                                           new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
                                           new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
         ));
+        table.setTfoot(new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1});
         table.setComment("comment1;comment2;comment3;comment4;comment5;comment6;");
         html.build(table);
         csv.build(table);
@@ -171,44 +175,53 @@ public class ExportTester {
         list.add(new Thead("指标完成率", 35, 12));
         
         List<Object[]> data1 = new ArrayList<>();
-        for (int i = 0; i < 20000; i++) {
+        for (int i = 0; i < 2*multiple; i++) {
             data1.add(new Object[] { "1234563.918%", "2017-02-03", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd",
                 "abd", "abd",
                 "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" });
         }
         
         List<Object[]> data2 = new ArrayList<>();
-        for (int i = 0; i < 50000; i++) {
+        for (int i = 0; i < 5*multiple; i++) {
             data2.add(new Object[] { "1234563.918%", "2017-02-03", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd",
                 "abd", "abd",
                 "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" });
         }
         
         List<Object[]> data3 = new ArrayList<>();
-        for (int i = 0; i < 30000; i++) {
+        for (int i = 0; i < 3*multiple; i++) {
             data3.add(new Object[] { "1234563.918%", "2017-02-03", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd",
                 "abd", "abd",
                 "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" });
         }
-        
+        Object[] tfoot = new Object[] {"abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd",
+            "abd", "abd",
+            "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" };
+        Map<CellStyleOptions, Object> options = ImmutableMap.of(CellStyleOptions.HIGHLIGHT, ImmutableMap.of("cells", Lists.newArrayList(Lists.newArrayList(1,1),Lists.newArrayList(2,2)), "color", "#FF3030"));
         long start = System.currentTimeMillis();
         System.out.println("========================================start");
 
         Table table1 = new Table(list);
         table1.setCaption("test1");
         table1.setTobdy(data1);
+        table1.setTfoot(tfoot);
+        table1.setOptions(options);
         excel.setName("报表1").build(table1);
 
         // ------------------------------------------
         Table table2 = new Table(list);
         table2.setCaption("test2");
         table2.setTobdy(data2);
+        table2.setTfoot(tfoot);
+        table2.setOptions(options);
         excel.setName("报表2").build(table2);
 
         // ------------------------------------------
         Table table3 = new Table(list);
         table3.setCaption("test3");
         table3.setTobdy(data3);
+        table3.setTfoot(tfoot);
+        table3.setOptions(options);
         excel.setName("报表1").build(table3);
 
         // ------------------------------------------
@@ -228,6 +241,12 @@ public class ExportTester {
         IOUtils.write(csv.export().toString(), new FileOutputStream("d://csv.csv"), "UTF-8");
         Files.addBOM(new File("d://csv.csv"));
         csv.close();
+
+        HtmlExporter html = new HtmlExporter();
+        html.build(table1);
+        html.setName("test");
+        System.out.println(html.export());
+        html.close();
     }
 
     @Test

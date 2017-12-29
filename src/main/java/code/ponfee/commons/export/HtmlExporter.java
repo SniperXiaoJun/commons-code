@@ -62,7 +62,8 @@ public class HtmlExporter extends AbstractExporter {
      */
     @Override
     public void build(Table table) {
-        if (table.getThead() == null || table.getThead().isEmpty()) {
+        List<Thead> thead = table.getThead();
+        if (thead == null || thead.isEmpty()) {
             throw new IllegalArgumentException("thead can't be null");
         }
 
@@ -73,27 +74,30 @@ public class HtmlExporter extends AbstractExporter {
         }
 
         // thead
-        buildComplexThead(table.getThead(), table.getMaxTheadLevel());
+        buildComplexThead(thead, table.getMaxTheadLevel());
 
         if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
             html.append("<tfoot><tr><td colspan=\"").append(table.getTotalLeafCount());
             html.append("\" style=\"color:red; padding: 3px;font-size: 14px;\">");
             html.append(NO_RESULT_TIP).append("</td></tr></tfoot>");
         } else {
+
             super.nonEmpty();
-            // tbody
-            if (table.getTobdy() != null && !table.getTobdy().isEmpty()) {
+
+            // tbody-----------
+            List<Object[]> tbody = table.getTobdy();
+            if (tbody != null && !tbody.isEmpty()) {
                 html.append("<tbody>");
                 Object[] datas;
-                for (int n = table.getTobdy().size(), i = 0; i < n; i++) {
-                    datas = table.getTobdy().get(i);
+                for (int n = tbody.size(), i = 0, m, j; i < n; i++) {
+                    datas = tbody.get(i);
                     html.append("<tr>");
-                    for (int m = datas.length, j = 0; j < m; j++) {
+                    for (m = datas.length, j = 0; j < m; j++) {
                         html.append("<td");
 
-                        processMeta(datas[j], table.getThead().get(j).getTmeta(), i, j, table.getOptions());
+                        processMeta(datas[j], thead.get(j).getTmeta(), i, j, table.getOptions());
 
-                        html.append(">").append(formatData(datas[j], table.getThead().get(j).getTmeta())).append("</td>");
+                        html.append(">").append(formatData(datas[j], thead.get(j).getTmeta())).append("</td>");
                     }
                     html.append("</tr>");
                 }
@@ -105,16 +109,23 @@ public class HtmlExporter extends AbstractExporter {
             if (table.getTfoot() != null && table.getTfoot().length > 0) {
                 hasTfoot = true;
                 html.append("<tfoot><tr>");
+
+                if (table.getTfoot().length > table.getTotalLeafCount()) {
+                    throw new IllegalStateException("tfoot data length cannot more than total leaf count.");
+                }
+
                 int merge = table.getTotalLeafCount() - table.getTfoot().length;
-                if (merge > 0) html.append("<th colspan=\"" + merge + "\" style=\"text-align:right;\">合计</th>");
+                if (merge > 0) {
+                    html.append("<th colspan=\"" + merge + "\" style=\"text-align:right;\">合计</th>");
+                }
 
                 for (int i = 0; i < table.getTfoot().length; i++) {
                     html.append("<th");
 
-                    processMeta(table.getTfoot()[i], table.getThead().get(merge + i).getTmeta());
+                    processMeta(table.getTfoot()[i], thead.get(merge + i).getTmeta());
 
                     html.append(">");
-                    html.append(formatData(table.getTfoot()[i], table.getThead().get(merge + i).getTmeta()));
+                    html.append(formatData(table.getTfoot()[i], thead.get(merge + i).getTmeta()));
                     html.append("</th>");
                 }
                 html.append("</tr></tfoot>");
@@ -138,6 +149,7 @@ public class HtmlExporter extends AbstractExporter {
                     html.append("<tfoot>").append(builder).append("</tfoot>");
                 }
             }
+
         }
 
         // end-----

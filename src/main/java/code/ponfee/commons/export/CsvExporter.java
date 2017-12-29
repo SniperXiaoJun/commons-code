@@ -31,34 +31,54 @@ public class CsvExporter extends AbstractExporter {
 
         if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
             csv.append(NO_RESULT_TIP);
-        } else {
-            super.nonEmpty();
-            // tbody
-            if (table.getTobdy() != null && !table.getTobdy().isEmpty()) {
-                Object[] datas;
-                for (int n = table.getTobdy().size(), i = 0; i < n; i++) {
-                    datas = table.getTobdy().get(i);
-                    for (int m = datas.length, j = 0; j < m; j++) {
-                        csv.append(datas[j]);
-                        if (j < m - 1) csv.append(",");
-                    }
-                    if (i < n - 1) csv.append(Files.LINE_SEPARATOR);
-                }
-                csv.append(Files.LINE_SEPARATOR);
-            }
+            return;
+        } 
 
-            // tfoot---------
-            if (table.getTfoot() != null && table.getTfoot().length > 0) {
-                int n = table.getTotalLeafCount();
-                for (int i = n - table.getTfoot().length; i < n; i++) {
-                    csv.append(table.getTfoot()[i]);
-                    if (i < table.getTfoot().length - 1) {
+        super.nonEmpty();
+
+        // tbody---------------
+        List<Object[]> tbody = table.getTobdy();
+        if (tbody != null && !tbody.isEmpty()) {
+            Object[] datas;
+            for (int n = tbody.size() - 1, i = 0, j, m; i <= n; i++) {
+                datas = tbody.get(i);
+                for (m = datas.length - 1, j = 0; j <= m; j++) {
+                    csv.append(datas[j]);
+                    if (j < m) {
                         csv.append(",");
                     }
                 }
-                csv.append(Files.LINE_SEPARATOR);
+                if (i < n) {
+                    csv.append(Files.LINE_SEPARATOR); // 换行
+                }
             }
+            csv.append(Files.LINE_SEPARATOR);
         }
+
+        // tfoot---------
+        if (table.getTfoot() != null && table.getTfoot().length > 0) {
+
+            if (table.getTfoot().length > table.getTotalLeafCount()) {
+                throw new IllegalStateException("tfoot data length cannot more than total leaf count.");
+            }
+
+            int n = table.getTotalLeafCount(), m = table.getTfoot().length, mergeNum = n - m;
+            for (int i = 0; i < mergeNum; i++) {
+                if (i == mergeNum - 1) {
+                    csv.append("合计");
+                }
+                csv.append(",");
+            }
+            for (int i = mergeNum; i < n; i++) {
+                csv.append(table.getTfoot()[i - mergeNum]);
+                if (i != n - 1) {
+                    csv.append(",");
+                }
+            }
+
+            csv.append(Files.LINE_SEPARATOR);
+        }
+
     }
 
     @Override

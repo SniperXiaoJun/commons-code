@@ -16,7 +16,7 @@ public interface Providers {
     static Provider get(Class<? extends Provider> type) {
         Provider provider = ProvidersHolder.HOLDER.get(type);
         if (provider != null) {
-            return NullProvider.INSTANCE.equals(provider) ? null : provider;
+            return provider;
         }
 
         try {
