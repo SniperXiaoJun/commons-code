@@ -37,7 +37,7 @@ public class WrappedBufferedReader extends Reader {
         super();
         this.input = input;
         this.reader = new InputStreamReader(input, charset);
-        this.buffer = new BufferedReader(reader, 8192);
+        this.buffer = new BufferedReader(reader, Files.BUFF_SIZE);
     }
 
     @Override

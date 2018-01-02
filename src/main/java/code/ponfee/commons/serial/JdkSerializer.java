@@ -18,7 +18,10 @@ import code.ponfee.commons.reflect.ClassUtils;
 public class JdkSerializer extends Serializer {
 
     public <T extends Object> byte[] serialize(T t, boolean isCompress) {
-        if (t == null) return null;
+        if (t == null) {
+            return null;
+        }
+
         GZIPOutputStream gzout = null;
         ObjectOutputStream oos = null;
         try {
@@ -53,7 +56,9 @@ public class JdkSerializer extends Serializer {
 
     @SuppressWarnings("unchecked")
     public <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
-        if (data == null || data.length == 0) return null;
+        if (data == null || data.length == 0) {
+            return null;
+        }
 
         GZIPInputStream gzin = null;
         ObjectInputStream ois = null;

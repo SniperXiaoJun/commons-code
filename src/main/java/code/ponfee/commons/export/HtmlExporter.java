@@ -1,5 +1,6 @@
 package code.ponfee.commons.export;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -8,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.export.Tmeta.Type;
 import code.ponfee.commons.math.Numbers;
-import code.ponfee.commons.util.MessageFormats;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
@@ -25,7 +25,7 @@ public class HtmlExporter extends AbstractExporter {
        .append("<html>                                                                                                             \n")
        .append("  <head lang=\"en\">                                                                                               \n")
        .append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />                                      \n")
-       .append("    <title>#{title}</title>                                                                                        \n")
+       .append("    <title>{0}</title>                                                                                             \n")
        .append("    <style>                                                                                                        \n")
        .append("      * '{font-family: Microsoft YaHei;}'                                                                          \n")
        .append("      .grid '{overflow-x: auto;background-color: #fff;color: #555;}'                                               \n")
@@ -45,7 +45,7 @@ public class HtmlExporter extends AbstractExporter {
        .append("      .grid .nowrap '{white-space: nowrap;word-break: keep-all;overflow: hidden;text-overflow: ellipsis;}'         \n")
        .append("    </style>                                                                                                       \n")
        .append("  </head>                                                                                                          \n")
-       .append("  <body>#{report}</body>                                                                                           \n")
+       .append("  <body>#{1}</body>                                                                                                \n")
        .append("</html>                                                                                                            \n")
        .toString();
 
@@ -166,12 +166,11 @@ public class HtmlExporter extends AbstractExporter {
 
     @Override
     public String export() {
-        return MessageFormats.format(TEMPLATE, super.getName(), html.toString());
+        return MessageFormat.format(TEMPLATE, super.getName(), html.toString());
     }
 
     @Override
     public void close() {
-        html.setLength(0);
         html = null;
     }
 
@@ -182,7 +181,8 @@ public class HtmlExporter extends AbstractExporter {
         return this;
     }
 
-    // htmlExporter.horizon().append("<div align=\"center\"><img src=\"cid:" + chart.getId() + "\" /></div>");
+    //htmlExporter.horizon().append("<div align=\"center\"><img src=\"cid:")
+    //                      .append(img.getId()).apend("\" /></div>");
     public HtmlExporter append(String string) {
         if (StringUtils.isNotBlank(string)) {
             super.nonEmpty();
@@ -228,18 +228,6 @@ public class HtmlExporter extends AbstractExporter {
         html.append("</tr></thead>");
     }
 
-    private String formatData(Object obj, Tmeta tmeta) {
-        if (obj == null) {
-            return "";
-        } else if (tmeta == null) {
-            return obj.toString();
-        } else if (tmeta.getType() == Type.NUMERIC) {
-            return Numbers.format(obj);
-        } else {
-            return obj.toString();
-        }
-    }
-
     private void processMeta(Object value, Tmeta tmeta) {
         processMeta(value, tmeta, -1, -1, null);
     }
@@ -252,10 +240,12 @@ public class HtmlExporter extends AbstractExporter {
      * @param tbodyColIdx
      * @param options
      */
+    private final StringBuilder style = new StringBuilder();
+    private final StringBuilder clazz = new StringBuilder();
     private void processMeta(Object value, Tmeta tmeta, int tbodyRowIdx, 
                              int tbodyColIdx, Map<CellStyleOptions, Object> options) {
-        StringBuilder style = new StringBuilder();
-        StringBuilder clazz = new StringBuilder();
+        style.setLength(0);
+        clazz.setLength(0);
 
         /*if (PATTERN_NEGATIVE.matcher(Objects.toString(value, "")).matches()) {
             style.append("color:#006400;font-weight:bold;"); // 负数显示绿色
@@ -296,6 +286,24 @@ public class HtmlExporter extends AbstractExporter {
     }
 
     /**
+     * 格式化
+     * @param data
+     * @param tmeta
+     * @return
+     */
+    private static String formatData(Object data, Tmeta tmeta) {
+        if (data == null) {
+            return "";
+        } else if (tmeta == null) {
+            return data.toString();
+        } else if (tmeta.getType() == Type.NUMERIC) {
+            return Numbers.format(data);
+        } else {
+            return data.toString();
+        }
+    }
+
+    /**
      * 样式自定义处理
      * @param style
      * @param dataRowIdx
@@ -303,8 +311,8 @@ public class HtmlExporter extends AbstractExporter {
      * @param options
      */
     @SuppressWarnings("unchecked")
-    private void processOptions(StringBuilder style, int dataRowIdx, int dataColIdx, 
-                                Map<CellStyleOptions, Object> options) {
+    private static void processOptions(StringBuilder style, int dataRowIdx, int dataColIdx, 
+                                       Map<CellStyleOptions, Object> options) {
         if (options == null || options.isEmpty()) {
             return;
         }

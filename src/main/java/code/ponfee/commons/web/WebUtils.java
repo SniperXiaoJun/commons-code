@@ -41,9 +41,6 @@ public final class WebUtils {
     public static final String SESSION_TRACE_COOKIE = "auth_token";
     public static final String SESSION_TRACE_PARAME = "authToken";
 
-    /** charset */
-    public static final String DEFAULT_CHARSET = "UTF-8";
-
     private static Logger logger = LoggerFactory.getLogger(WebUtils.class);
 
     /**
@@ -129,7 +126,7 @@ public final class WebUtils {
      * @param data
      */
     public static void respJson(HttpServletResponse resp, Object data) {
-        respJson(resp, data, DEFAULT_CHARSET);
+        respJson(resp, data, Files.DEFAULT_CHARSET);
     }
 
     public static void respJson(HttpServletResponse resp, Object data, String charset) {
@@ -138,7 +135,7 @@ public final class WebUtils {
 
     public static void respJsonp(HttpServletResponse response, 
                                  String callback, Object data) {
-        respJsonp(response, callback, data, DEFAULT_CHARSET);
+        respJsonp(response, callback, data, Files.DEFAULT_CHARSET);
     }
 
     /**

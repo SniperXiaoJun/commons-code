@@ -34,7 +34,10 @@ public abstract class Serializer {
      * @return 序例化后的流数据
      */
     public final <T extends Object> byte[] serialize(T t) {
-        if (t == null) return null;
+        if (t == null) {
+            return null;
+        }
+
         return serialize(t, true);
     }
 
@@ -53,7 +56,10 @@ public abstract class Serializer {
      * @return 反序例化后的对象
      */
     public final <T extends Object> T deserialize(byte[] data, Class<T> clazz) {
-        if (data == null) return null;
+        if (data == null) {
+            return null;
+        }
+
         return this.deserialize(data, clazz, true);
     }
 

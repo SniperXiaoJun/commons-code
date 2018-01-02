@@ -29,7 +29,9 @@ public class JsonSerializer extends Serializer {
     }
 
     public <T extends Object> byte[] serialize(T t, boolean isCompress) {
-        if (t == null) return null;
+        if (t == null) {
+            return null;
+        }
 
         GZIPOutputStream gzout = null;
         try {
@@ -55,7 +57,9 @@ public class JsonSerializer extends Serializer {
     }
 
     public <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
-        if (data == null) return null;
+        if (data == null) {
+            return null;
+        }
 
         GZIPInputStream gzin = null;
         try {

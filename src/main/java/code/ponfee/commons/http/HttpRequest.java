@@ -95,6 +95,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
@@ -110,11 +111,6 @@ import code.ponfee.commons.util.ObjectUtils;
  * @author Ponfee
  */
 public class HttpRequest {
-
-    /**
-     * 'UTF-8' charset name
-     */
-    public static final String CHARSET_UTF8 = "UTF-8";
 
     /**
      * 'application/x-www-form-urlencoded' content type header value
@@ -308,7 +304,7 @@ public class HttpRequest {
         if (charset != null && charset.length() > 0) {
             return charset;
         } else {
-            return CHARSET_UTF8;
+            return Files.DEFAULT_CHARSET;
         }
     }
 
@@ -3043,7 +3039,7 @@ public class HttpRequest {
      * @throws HttpRequestException
      */
     public HttpRequest form(final Map<?, ?> values) throws HttpRequestException {
-        return form(values, CHARSET_UTF8);
+        return form(values, Files.DEFAULT_CHARSET);
     }
 
     /**
@@ -3057,7 +3053,7 @@ public class HttpRequest {
      * @throws HttpRequestException
      */
     public HttpRequest form(final Entry<?, ?> entry) throws HttpRequestException {
-        return form(entry, CHARSET_UTF8);
+        return form(entry, Files.DEFAULT_CHARSET);
     }
 
     /**
@@ -3089,7 +3085,7 @@ public class HttpRequest {
      */
     public HttpRequest form(final Object name, final Object value)
         throws HttpRequestException {
-        return form(name, value, CHARSET_UTF8);
+        return form(name, value, Files.DEFAULT_CHARSET);
     }
 
     /**

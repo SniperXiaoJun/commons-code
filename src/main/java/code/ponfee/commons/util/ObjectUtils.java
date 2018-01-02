@@ -43,29 +43,6 @@ public final class ObjectUtils {
      */
     public static String toString(Object obj) {
         return ReflectionToStringBuilder.reflectionToString(obj, ToStringStyle.JSON_STYLE);
-        /*if (obj == null) return null;
-        StringBuilder builder = new StringBuilder();
-        if (obj.getClass().isArray()) {
-            int length = Array.getLength(obj);
-            Object o = null;
-            for (int i = 0; i < length; i++) {
-                o = Array.get(obj, i);
-                if (o == null) {
-                    builder.append("null, ");
-                } else if (o.getClass().isArray()) {
-                    builder.append(toString(o) + ", ");
-                } else {
-                    builder.append(Array.get(obj, i) + ", ");
-                }
-            }
-            if (builder.length() > 0) {
-                builder.delete(builder.length() - 2, builder.length())
-                       .insert(0, "[").append("]");
-            }
-        } else {
-            builder.append(obj);
-        }
-        return builder.toString();*/
     }
 
     /**

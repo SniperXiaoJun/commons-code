@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.util.Strings;
 
@@ -36,7 +37,6 @@ public final class ResourceLoaderFacade {
     private static final String CP_PREFIX = "classpath:";
     private static final String WEB_PREFIX = "webapp:";
     static final String FS_PREFIX = "file:";
-    private static final String DEFAULT_ENCODING = "UTF-8";
     //private static final String CP_ALL_PREFIX = "classpath*:";
 
     private static final ClassPathResourceLoader CP_LOADER = new ClassPathResourceLoader();
@@ -68,7 +68,7 @@ public final class ResourceLoaderFacade {
      */
     public static Resource getResource(String filePath, Class<?> contextClass, String encoding) {
         if (encoding == null || encoding.length() == 0) {
-            encoding = DEFAULT_ENCODING;
+            encoding = Files.DEFAULT_CHARSET;
         }
         if (filePath == null) filePath = "";
         String path = cleanPath(filePath);
@@ -85,7 +85,7 @@ public final class ResourceLoaderFacade {
     }
 
     public static List<Resource> listResources(String extensions[], Class<?> contextClass) {
-        return listResources("", extensions, false, contextClass, DEFAULT_ENCODING);
+        return listResources("", extensions, false, contextClass, Files.DEFAULT_CHARSET);
     }
 
     public static List<Resource> listResources(String dir, String extensions[], boolean recursive) {

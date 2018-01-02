@@ -23,17 +23,26 @@ public class FstSerializer extends Serializer {
     };
 
     public <T extends Object> byte[] serialize(T t, boolean isCompress) {
-        if (t == null) return null;
+        if (t == null) {
+            return null;
+        }
+
         byte[] data = FST_CFG.get().asByteArray(t);
-        if (isCompress) data = GzipProcessor.compress(data);
+        if (isCompress) {
+            data = GzipProcessor.compress(data);
+        }
         return data;
     }
 
     @SuppressWarnings("unchecked")
     public <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
-        if (data == null) return null;
+        if (data == null) {
+            return null;
+        }
 
-        if (isCompress) data = GzipProcessor.decompress(data);
+        if (isCompress) {
+            data = GzipProcessor.decompress(data);
+        }
         T t = (T) FST_CFG.get().asObject(data);
         if (!clazz.isInstance(t)) {
             throw new ClassCastException(ClassUtils.getClassName(t.getClass())

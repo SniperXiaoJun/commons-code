@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.mail.util.MailConnectException;
 
 import code.ponfee.commons.collect.Collects;
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.mail.MailEnvelope.MailType;
 import code.ponfee.commons.util.ObjectUtils;
 import code.ponfee.commons.util.RegexUtils;
@@ -67,7 +68,7 @@ public class MailSender {
     private String nickname;
     private final String password;
     private final String smtpHost;
-    private String charset = "UTF-8";
+    private String charset = Files.DEFAULT_CHARSET;
     private int retryTimes;
     private int validateTimes;
 

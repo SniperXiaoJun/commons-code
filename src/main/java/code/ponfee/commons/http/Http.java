@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.base.Preconditions;
 
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.util.Bytes;
 
@@ -149,7 +150,7 @@ public final class Http {
      * @return
      */
     public Http data(Map<String, ?> params) {
-        return data(params, HttpRequest.CHARSET_UTF8);
+        return data(params, Files.DEFAULT_CHARSET);
     }
 
     /**
@@ -221,7 +222,7 @@ public final class Http {
     }
 
     public Http contentType(String contentType) {
-        return this.contentType(contentType, HttpRequest.CHARSET_UTF8);
+        return this.contentType(contentType, Files.DEFAULT_CHARSET);
     }
 
     // ----------------------------response accept--------------------------

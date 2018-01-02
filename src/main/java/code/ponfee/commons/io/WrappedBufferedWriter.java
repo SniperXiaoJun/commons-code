@@ -36,7 +36,7 @@ public class WrappedBufferedWriter extends Writer {
         super();
         this.output = output;
         this.writer = new OutputStreamWriter(output, charset);
-        this.buffer = new BufferedWriter(writer, 8192);
+        this.buffer = new BufferedWriter(writer, Files.BUFF_SIZE);
     }
 
     @Override

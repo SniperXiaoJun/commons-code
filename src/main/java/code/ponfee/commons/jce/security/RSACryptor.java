@@ -103,6 +103,7 @@ public final class RSACryptor {
      *     1）sun jdk默认的RSA加密实现不允许明文长度超过密钥长度减去11字节（byte）：比如1024位（bit）的密钥，则待加密的明文最长为1024/8-11=117（byte）
      *     2）BouncyCastle提供的加密算法能够支持到的RSA明文长度最长为密钥长度
      *   4、每次生成的密文都不一致证明加密算法安全：这是因为在加密前使用RSA/None/PKCS1Padding对明文信息进行了随机数填充
+     *     为了防止已知明文攻击，随机长度的填充来防止攻击者知道明文的长度。
      *   5、javax.crypto.Cipher是线程不安全的
      * </pre>
      * 
@@ -140,6 +141,8 @@ public final class RSACryptor {
                         ? key.getModulus().bitLength() / 8 - 11
                         : key.getModulus().bitLength() / 8;
         try {
+            //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
+            //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding");
             Cipher cipher = Cipher.getInstance(key.getAlgorithm());
             cipher.init(cryptMode, key);
             byte[] buffer = new byte[bolckSize];
@@ -163,6 +166,8 @@ public final class RSACryptor {
                         ? key.getModulus().bitLength() / 8 - 11
                         : key.getModulus().bitLength() / 8;
         try {
+            //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
+            //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding");
             Cipher cipher = Cipher.getInstance(key.getAlgorithm());
             cipher.init(cryptMode, key);
             ByteArrayOutputStream out = new ByteArrayOutputStream(data.length);

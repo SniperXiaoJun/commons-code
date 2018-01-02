@@ -4,16 +4,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import code.ponfee.commons.io.Files;
+
 /**
  * url编码/解码
  * @author fupf
  */
 public final class UrlCoder {
 
-    private static final String DEFAULT_CHARSET = "UTF-8";
-
     public static String encodeURI(String url) {
-        return encodeURI(url, DEFAULT_CHARSET);
+        return encodeURI(url, Files.DEFAULT_CHARSET);
     }
 
     /**
@@ -50,7 +50,7 @@ public final class UrlCoder {
     }
 
     public static String decodeURI(String url) {
-        return decodeURI(url, DEFAULT_CHARSET);
+        return decodeURI(url, Files.DEFAULT_CHARSET);
     }
 
     /**
@@ -68,7 +68,7 @@ public final class UrlCoder {
     }
 
     public static String encodeURIComponent(String url) {
-        return encodeURIComponent(url, DEFAULT_CHARSET);
+        return encodeURIComponent(url, Files.DEFAULT_CHARSET);
     }
 
     /**
@@ -88,7 +88,7 @@ public final class UrlCoder {
     }
 
     public static String decodeURIComponent(String url) {
-        return decodeURIComponent(url, DEFAULT_CHARSET);
+        return decodeURIComponent(url, Files.DEFAULT_CHARSET);
     }
 
     /**
@@ -111,7 +111,7 @@ public final class UrlCoder {
         System.out.println(decodeURI(s));
 
         System.out.println("======================================");
-        s = encodeURIComponent("http://www.oschina.net/search?scope=bbs&q=C语言", DEFAULT_CHARSET);
+        s = encodeURIComponent("http://www.oschina.net/search?scope=bbs&q=C语言", Files.DEFAULT_CHARSET);
         System.out.println(s);
         System.out.println(decodeURIComponent(s));
 

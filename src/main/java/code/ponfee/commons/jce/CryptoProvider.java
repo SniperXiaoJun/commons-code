@@ -5,6 +5,9 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 
+import com.google.common.base.Preconditions;
+
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jce.crypto.Algorithm;
 import code.ponfee.commons.jce.crypto.Mode;
 import code.ponfee.commons.jce.crypto.Padding;
@@ -12,14 +15,13 @@ import code.ponfee.commons.jce.crypto.SymmetricCryptor;
 import code.ponfee.commons.jce.crypto.SymmetricCryptorBuilder;
 import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSAPrivateKeys;
+import code.ponfee.commons.util.MavenProjects;
 
 /**
  * 加解密服务提供
  * @author fupf
  */
 public abstract class CryptoProvider {
-
-    private static final String DEFAULT_CHARSET = "UTF-8";
 
     /**
      * 数据加密
@@ -41,7 +43,7 @@ public abstract class CryptoProvider {
      * @return
      */
     public final String encrypt(String plaintext) {
-        return encrypt(plaintext, DEFAULT_CHARSET);
+        return encrypt(plaintext, Files.SYSTEM_CHARSET);
     }
 
     /**
@@ -51,6 +53,10 @@ public abstract class CryptoProvider {
      * @return
      */
     public final String encrypt(String plaintext, String charset) {
+        if (plaintext == null) {
+            return null;
+        }
+
         byte[] original = plaintext.getBytes(Charset.forName(charset));
         return Base64.getUrlEncoder().withoutPadding().encodeToString(encrypt(original));
     }
@@ -61,7 +67,7 @@ public abstract class CryptoProvider {
      * @return
      */
     public final String decrypt(String ciphertext) {
-        return decrypt(ciphertext, DEFAULT_CHARSET);
+        return decrypt(ciphertext, Files.SYSTEM_CHARSET);
     }
 
     /**
@@ -71,6 +77,10 @@ public abstract class CryptoProvider {
      * @return
      */
     public final String decrypt(String ciphertext, String charset) {
+        if (ciphertext == null) {
+            return null;
+        }
+
         byte[] original = decrypt(Base64.getUrlDecoder().decode(ciphertext));
         return new String(original, Charset.forName(charset));
     }
@@ -82,16 +92,18 @@ public abstract class CryptoProvider {
         private final SymmetricCryptor key = SymmetricCryptorBuilder.newBuilder(Algorithm.AES)
                                                                     .key("z]_5Fi!X$ed4OY8j".getBytes())
                                                                     .mode(Mode.CBC).ivParameter("SVE<r[)qK`n%zQ'o".getBytes())
-                                                                    .provider(Providers.BC).padding(Padding.PKCS7Padding)
+                                                                    .padding(Padding.PKCS7Padding).provider(Providers.BC)
                                                                     .build();
 
         @Override
         public byte[] encrypt(byte[] original) {
+            Preconditions.checkArgument(original != null);
             return key.encrypt(original);
         }
 
         @Override
         public byte[] decrypt(byte[] encrypted) {
+            Preconditions.checkArgument(encrypted != null);
             return key.decrypt(encrypted);
         }
     };
@@ -105,22 +117,26 @@ public abstract class CryptoProvider {
 
         @Override
         public byte[] encrypt(byte[] original) {
+            Preconditions.checkArgument(original != null);
             return RSACryptor.encrypt(original, pubKey); // 公钥加密
         }
 
         @Override
         public byte[] decrypt(byte[] encrypted) {
+            Preconditions.checkArgument(encrypted != null);
             return RSACryptor.decrypt(encrypted, priKey); // 私钥解密
         }
     };
 
     public static void main(String[] args) {
-        String s = RSA_CRYPTO.encrypt("123");
-        System.out.println(s);
-        System.out.println(RSA_CRYPTO.decrypt(s));
+        String str = Files.toString(MavenProjects.getMainJavaFile(CryptoProvider.class));
+        String data = RSA_CRYPTO.encrypt(str);
+        System.out.println(data);
+        System.out.println(RSA_CRYPTO.decrypt(data));
 
-        s = AES_CRYPTO.encrypt("123");
-        System.out.println(s);
-        System.out.println(AES_CRYPTO.decrypt(s));
+        System.out.println("======================================================");
+        data = AES_CRYPTO.encrypt(str);
+        System.out.println(data);
+        System.out.println(AES_CRYPTO.decrypt(data));
     }
 }

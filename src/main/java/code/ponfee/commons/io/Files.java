@@ -37,36 +37,31 @@ public final class Files {
 
     public static final int EOF = -1; // end of file read
 
-    public static final String FILE_SEPARATOR = "/"; // file path separator
-
     public static final int BUFF_SIZE = 8192; // file buffer size
 
-    public static final String LINE_SEPARATOR; // line separator of file
+    public static final String DEFAULT_FILE_SEPARATOR = "/"; // default file separator
+
+    public static final String SYSTEM_FILE_SEPARATOR = File.separator; // system file separator
+
+    public static final String DEFAULT_CHARSET = "UTF-8"; // default charset spec UTF-8
+
+    public static final String SYSTEM_CHARSET = Charset.defaultCharset().name(); // charset within system
+
+    public static final String DEFAULT_LINE_SEPARATOR = "\n"; // default line serarator spec \n
+
+    public static final String SYSTEM_LINE_SEPARATOR; // line separator of file within system
     static {
         /*String separator = java.security.AccessController.doPrivileged(
-               new sun.security.action.GetPropertyAction("line.separator"));
-        if (StringUtils.isEmpty(separator)) {
-            separator = System.getProperty("line.separator", "/n");
+                               new sun.security.action.GetPropertyAction("line.separator"));
+        if (separator == null || separator.length() == 0) {
+            separator = System.getProperty("line.separator", "\n");
         }
-        LINE_SEPARATOR = separator;*/
-        final StringBuilderWriter buffer = new StringBuilderWriter(4);
-        final PrintWriter out = new PrintWriter(buffer);
+        SYSTEM_LINE_SEPARATOR = separator;*/
+        StringBuilderWriter buffer = new StringBuilderWriter(4);
+        PrintWriter out = new PrintWriter(buffer);
         out.println();
-        LINE_SEPARATOR = buffer.toString();
+        SYSTEM_LINE_SEPARATOR = buffer.toString();
         out.close();
-    }
-
-    private static final String[] FILE_UNITS = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-    /** 
-     * 文件大小可读化（attach unit）：B、KB、MB
-     * @param size 文件字节大小 
-     * @return
-     */
-    public static String human(long size) {
-        if (size <= 0) return "0";
-
-        int digit = (int) (Math.log10(size) / Math.log10(1024));
-        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digit)) + FILE_UNITS[digit];
     }
 
     /**
@@ -133,7 +128,7 @@ public final class Files {
     }
 
     public static String toString(File file) {
-        return toString(file, Charset.defaultCharset().name());
+        return toString(file, SYSTEM_CHARSET);
     }
 
     public static String toString(File file, String charset) {
@@ -199,6 +194,19 @@ public final class Files {
             }
         }
         return list;
+    }
+
+    private static final String[] FILE_UNITS = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+    /** 
+     * 文件大小可读化（attach unit）：B、KB、MB
+     * @param size 文件字节大小 
+     * @return
+     */
+    public static String human(long size) {
+        if (size <= 0) return "0";
+
+        int digit = (int) (Math.log10(size) / Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digit)) + FILE_UNITS[digit];
     }
 
     // -------------------------------------windows file bom head-------------------------------------
@@ -370,6 +378,8 @@ public final class Files {
     }
 
     public static void main(String[] args) throws IOException {
+        System.out.println(File.pathSeparator);
+        System.out.println(File.separator);
         System.out.println(guessFileType(new File("d:/代码走查问题表.xlsx")));
     }
 }

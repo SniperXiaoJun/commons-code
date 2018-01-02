@@ -15,19 +15,20 @@ import code.ponfee.commons.util.SecureRandoms;
  * @author fupf
  */
 public final class SymmetricCryptorBuilder {
-    private SymmetricCryptorBuilder() {}
 
-    private Algorithm algorithm; // 加密算法
+    private final Algorithm algorithm; // 加密算法
     private byte[] key; // 密钥
     private Mode mode; // 分组加密模式
     private Padding padding; // 填充
     private IvParameterSpec iv; // 填充向量
     private Provider provider; // 加密服务提供方
 
+    private SymmetricCryptorBuilder(Algorithm algorithm) {
+        this.algorithm = algorithm;
+    }
+
     public static SymmetricCryptorBuilder newBuilder(Algorithm algorithm) {
-        SymmetricCryptorBuilder builder = new SymmetricCryptorBuilder();
-        builder.algorithm = algorithm;
-        return builder;
+        return new SymmetricCryptorBuilder(algorithm);
     }
 
     public SymmetricCryptorBuilder key(byte[] key) {
@@ -62,7 +63,9 @@ public final class SymmetricCryptorBuilder {
 
     public SymmetricCryptor build() {
         if (mode != null && padding == null) {
-            throw new IllegalArgumentException("padding cannot be null in mode encrypt.");
+            throw new IllegalArgumentException("padding cannot be null within mode crypto.");
+        } else if (mode == null && padding != null) {
+            throw new IllegalArgumentException("padding must be null without mode crypto.");
         }
 
         SecretKey secretKey;

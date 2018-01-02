@@ -54,7 +54,7 @@ public class CsvExporter extends AbstractExporter {
                         csv.append(csvSeparator);
                     }
                 }
-                csv.append(Files.LINE_SEPARATOR); // 换行
+                csv.append(Files.SYSTEM_LINE_SEPARATOR); // 换行
             }
         }
 
@@ -79,7 +79,7 @@ public class CsvExporter extends AbstractExporter {
                 }
             }
 
-            csv.append(Files.LINE_SEPARATOR);
+            csv.append(Files.SYSTEM_LINE_SEPARATOR);
         }
 
     }
@@ -91,7 +91,6 @@ public class CsvExporter extends AbstractExporter {
 
     @Override
     public void close() {
-        csv.setLength(0);
         csv = null;
     }
 
@@ -102,7 +101,7 @@ public class CsvExporter extends AbstractExporter {
             }
         }
         csv.deleteCharAt(csv.length() - 1);
-        csv.append(Files.LINE_SEPARATOR);
+        csv.append(Files.SYSTEM_LINE_SEPARATOR);
     }
 
     /*// 创建简单表头

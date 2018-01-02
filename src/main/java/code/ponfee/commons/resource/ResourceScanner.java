@@ -25,6 +25,8 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 
+import code.ponfee.commons.io.Files;
+
 /**
  * <pre>
  *   用法：
@@ -40,8 +42,8 @@ import org.springframework.core.type.filter.TypeFilter;
  * @author fupf
  */
 public class ResourceScanner {
+
     private static Logger logger = LoggerFactory.getLogger(ResourceScanner.class);
-    private static final String DEFAULT_CHARSET = "UTF-8";
 
     private List<String> scanPaths = new LinkedList<>();
 
@@ -148,7 +150,7 @@ public class ResourceScanner {
      * @return
      */
     public Map<String, String> scan4text() {
-        return scan4text(null, DEFAULT_CHARSET);
+        return scan4text(null, Files.DEFAULT_CHARSET);
     }
 
     /**
@@ -157,7 +159,7 @@ public class ResourceScanner {
      * @return
      */
     public Map<String, String> scan4text(String wildcard) {
-        return scan4text(wildcard, DEFAULT_CHARSET);
+        return scan4text(wildcard, Files.DEFAULT_CHARSET);
     }
 
     /**

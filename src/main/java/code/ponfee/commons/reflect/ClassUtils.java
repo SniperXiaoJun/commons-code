@@ -20,6 +20,7 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.Type;
 
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
@@ -27,8 +28,6 @@ import code.ponfee.commons.util.ObjectUtils;
  * @author fupf
  */
 public final class ClassUtils {
-
-    private static final String DEFAULT_CHARSET = "UTF-8";
 
     private ClassUtils() {}
 
@@ -178,7 +177,7 @@ public final class ClassUtils {
         URL url = clazz.getProtectionDomain().getCodeSource().getLocation();
         String path = null;
         try {
-            path = URLDecoder.decode(url.getPath(), DEFAULT_CHARSET);
+            path = URLDecoder.decode(url.getPath(), Files.DEFAULT_CHARSET);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -199,7 +198,7 @@ public final class ClassUtils {
         URL url = clazz.getProtectionDomain().getCodeSource().getLocation();
         String path = null;
         try {
-            path = URLDecoder.decode(url.getPath(), DEFAULT_CHARSET);
+            path = URLDecoder.decode(url.getPath(), Files.DEFAULT_CHARSET);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -218,7 +217,7 @@ public final class ClassUtils {
     public static String getClasspath() {
         String path = Thread.currentThread().getContextClassLoader().getResource("").getPath();
         try {
-            path = URLDecoder.decode(new File(path).getAbsolutePath(), DEFAULT_CHARSET);
+            path = URLDecoder.decode(new File(path).getAbsolutePath(), Files.DEFAULT_CHARSET);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
