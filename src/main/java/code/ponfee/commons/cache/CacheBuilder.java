@@ -33,7 +33,7 @@ public final class CacheBuilder {
     }
 
     public <T> Cache<T> build() {
-        return new Cache<T>(caseSensitiveKey, compressKey, keepaliveInMillis, autoReleaseInSeconds);
+        return new Cache<>(caseSensitiveKey, compressKey, keepaliveInMillis, autoReleaseInSeconds);
     }
 
     public static CacheBuilder newBuilder() {

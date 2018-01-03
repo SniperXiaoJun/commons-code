@@ -45,7 +45,7 @@ public class HtmlExporter extends AbstractExporter {
        .append("      .grid .nowrap '{white-space: nowrap;word-break: keep-all;overflow: hidden;text-overflow: ellipsis;}'         \n")
        .append("    </style>                                                                                                       \n")
        .append("  </head>                                                                                                          \n")
-       .append("  <body>#{1}</body>                                                                                                \n")
+       .append("  <body>{1}</body>                                                                                                 \n")
        .append("</html>                                                                                                            \n")
        .toString();
 

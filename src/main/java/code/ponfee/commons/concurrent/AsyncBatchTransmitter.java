@@ -52,7 +52,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
     }
 
     /**
-     * batch put {@link #add(List)}
+     * batch put
      * @param t
      * @return
      */

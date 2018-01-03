@@ -216,9 +216,8 @@ public final class Numbers {
      * @return
      */
     public static double add(Double num1, Double num2) {
-        num1 = num1 == null ? 0 : num1;
-        num2 = num2 == null ? 0 : num2;
-        return num1 + num2;
+        return ObjectUtils.ifNull(num1, 0D)
+             + ObjectUtils.ifNull(num2, 0D);
     }
 
     /**

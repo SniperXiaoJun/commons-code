@@ -277,18 +277,15 @@ public class HttpRequest {
 
             context.init(null, new TrustManager[] {
                 new X509TrustManager() {
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
+                    public @Override X509Certificate[] getAcceptedIssuers() {
                         return new X509Certificate[0];
                     }
 
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] chain, String authType) {
+                    public @Override void checkClientTrusted(X509Certificate[] chain, String authType) {
                         // Intentionally left blank
                     }
 
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] chain, String authType) {
+                    public @Override void checkServerTrusted(X509Certificate[] chain, String authType) {
                         // Intentionally left blank
                     }
                 }
