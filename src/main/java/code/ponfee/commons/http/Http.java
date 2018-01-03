@@ -50,7 +50,7 @@ import code.ponfee.commons.util.Bytes;
  * http://www.atool.org/httptest.php
  * 
  * http工具类
- * @author fupf
+ * @author Ponfee
  */
 public final class Http {
 

@@ -5,7 +5,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,11 +13,12 @@ import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * http参数工具类
- * @author fupf
+ * @author Ponfee
  */
 public class HttpParams {
 
@@ -28,7 +29,7 @@ public class HttpParams {
      * @return
      */
     public static Map<String, String[]> parseParams(String queryString, String encoding) {
-        Map<String, String[]> params = new HashMap<>();
+        Map<String, String[]> params = new LinkedHashMap<>();
         if (queryString == null || queryString.length() <= 0) {
             return params;
         }
@@ -49,7 +50,7 @@ public class HttpParams {
      * @return
      */
     public static String buildParams(Map<String, ?> params) {
-        return HttpParams.buildParams(params, "UTF-8");
+        return HttpParams.buildParams(params, Files.DEFAULT_CHARSET);
     }
 
     /**
@@ -105,7 +106,7 @@ public class HttpParams {
             throw new IllegalArgumentException("not pair params");
         }
 
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new LinkedHashMap<>();
         for (int j = 0; j < params.length; j += 2) {
             map.put(params[j], params[j + 1]);
         }
@@ -253,7 +254,7 @@ public class HttpParams {
         //System.out.println(((String[]) map.get("fdsa"))[0]);
         //System.out.println(buildParams(map, "utf-8"));
 
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("a", "1");
         map.put("b", "2");
         map.put("merReserved", "{a=1&b=2}");

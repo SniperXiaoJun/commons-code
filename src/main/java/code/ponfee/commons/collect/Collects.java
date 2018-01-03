@@ -47,13 +47,13 @@ public class Collects {
             return null;
         }
 
-        List<Object[]> results = new ArrayList<>(data.size());
+        List<Object[]> result = new ArrayList<>(data.size());
         for (Map<String, Object> row : data) {
             if (row != null && !row.isEmpty()) {
-                results.add(map2array(row, fields));
+                result.add(map2array(row, fields));
             }
         }
-        return results;
+        return result;
     }
 
     /**
@@ -66,12 +66,12 @@ public class Collects {
             return null;
         }
 
-        Object[] results = new Object[data.size()];
+        Object[] result = new Object[data.size()];
         int i = 0;
         for (Entry<String, Object> entry : data.entrySet()) {
-            results[i++] = ObjectUtils.nullValue(entry.getValue(), "");
+            result[i++] = ObjectUtils.nullValue(entry.getValue(), "");
         }
-        return results;
+        return result;
     }
 
     /**
@@ -84,13 +84,13 @@ public class Collects {
             return null;
         }
 
-        List<Object[]> results = new ArrayList<>(data.size());
+        List<Object[]> result = new ArrayList<>(data.size());
         for (LinkedHashMap<String, Object> row : data) {
             if (row != null && !row.isEmpty()) {
-                results.add(map2array(row));
+                result.add(map2array(row));
             }
         }
-        return results;
+        return result;
     }
 
     /**
@@ -114,7 +114,8 @@ public class Collects {
      * @param fields
      * @return
      */
-    public static Result<Page<Object[]>> map2array(Result<Page<Map<String, Object>>> source, String... fields) {
+    public static Result<Page<Object[]>> map2array(Result<Page<Map<String, Object>>> source, 
+                                                   String... fields) {
         Page<Map<String, Object>> page = source.getData();
         List<Object[]> list = Lists.newArrayList();
         for (Map<String, Object> map : page.getRows()) {
@@ -164,7 +165,7 @@ public class Collects {
      * @param kv
      * @return
      */
-    public static Map<String, Object> ofMap(Object... kv) {
+    public static Map<String, Object> toMap(Object... kv) {
         if (kv.length % 2 != 0) {
             throw new IllegalArgumentException("args must be pair.");
         }
@@ -182,6 +183,26 @@ public class Collects {
      */
     public static <T> T[] toArray(@SuppressWarnings("unchecked") T... args) {
         return args;
+    }
+
+    /**
+     * Represents array of any type as list of objects so we can easily iterate over it
+     * @param array of elements
+     * @return list with the same elements
+     */
+    public static List<Object> toList(Object array) {
+        if (array == null) {
+            return null;
+        } else if (!array.getClass().isArray()) {
+            return Arrays.asList(array);
+        } else {
+            int length = Array.getLength(array);
+            List<Object> result = new ArrayList<>(length);
+            for (int i = 0; i < length; i++) {
+                result.add(Array.get(array, i));
+            }
+            return result;
+        }
     }
 
     /**

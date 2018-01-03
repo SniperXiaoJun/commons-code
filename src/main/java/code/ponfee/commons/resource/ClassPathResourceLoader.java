@@ -145,8 +145,8 @@ final class ClassPathResourceLoader {
         }
     }
 
-    List<Resource> listResources(String directory, String[] extensions, 
-                                 boolean recursive, Class<?> contextClass, String encoding) {
+    List<Resource> listResources(String directory, String[] extensions, boolean recursive, 
+                                 Class<?> contextClass, String encoding) {
         List<Resource> list = new ArrayList<>();
         JarFile jar = null;
         ZipFile zip = null;
@@ -269,8 +269,8 @@ final class ClassPathResourceLoader {
      * @return
      * @throws IOException
      */
-    private static boolean checkWithinClass(Class<?> contextClass, 
-            String filepath, String encoding) throws IOException {
+    private static boolean checkWithinClass(Class<?> contextClass, String filepath, 
+                                            String encoding) throws IOException {
         if (contextClass == null) {
             return true;
         }

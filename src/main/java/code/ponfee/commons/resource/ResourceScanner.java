@@ -4,8 +4,8 @@ import static org.springframework.core.io.support.ResourcePatternResolver.CLASSP
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -24,8 +24,6 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
-
-import code.ponfee.commons.io.Files;
 
 /**
  * <pre>
@@ -66,7 +64,7 @@ public class ResourceScanner {
      */
     @SuppressWarnings("unchecked")
     public Set<Class<?>> scan4class() {
-        return scan4class(new Class[] {});
+        return scan4class(new Class[0]);
     }
 
     /**
@@ -89,8 +87,8 @@ public class ResourceScanner {
         }
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        for (String packageName : this.scanPaths) {
-            try {
+        try {
+            for (String packageName : this.scanPaths) {
                 packageName = packageName.replace('.', '/');
                 Resource[] resources = resolver.getResources(CLASSPATH_ALL_URL_PREFIX + packageName + "/**/*.class");
                 MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(resolver);
@@ -100,7 +98,7 @@ public class ResourceScanner {
                     }
 
                     MetadataReader reader = readerFactory.getMetadataReader(resource);
-                    if (!matchesFilter(reader, typeFilters, readerFactory)) {
+                    if (!this.matchesFilter(reader, typeFilters, readerFactory)) {
                         continue;
                     }
 
@@ -110,11 +108,12 @@ public class ResourceScanner {
                         logger.error("load class error", e);
                     }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
+
+            return classSet;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return classSet;
     }
 
     /**
@@ -134,23 +133,28 @@ public class ResourceScanner {
         if (wildcard == null) {
             wildcard = "*";
         }
+
         Map<String, byte[]> result = new HashMap<>();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        for (String path : this.scanPaths) {
-            try {
+        try {
+            for (String path : this.scanPaths) {
                 Resource[] resources = resolver.getResources(CLASSPATH_ALL_URL_PREFIX + path + wildcard);
                 for (Resource resource : resources) {
+                    if (!resource.isReadable()) {
+                        continue;
+                    }
                     try (InputStream in = resource.getInputStream()) {
                         result.put(resource.getFilename(), IOUtils.toByteArray(in));
                     } catch (IOException e) {
                         logger.error("scan binary error", e);
                     }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
+
+            return result;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return result;
     }
 
     /**
@@ -158,7 +162,7 @@ public class ResourceScanner {
      * @return
      */
     public Map<String, String> scan4text() {
-        return scan4text(null, Files.DEFAULT_CHARSET);
+        return scan4text(null, Charset.defaultCharset());
     }
 
     /**
@@ -167,7 +171,7 @@ public class ResourceScanner {
      * @return
      */
     public Map<String, String> scan4text(String wildcard) {
-        return scan4text(wildcard, Files.DEFAULT_CHARSET);
+        return scan4text(wildcard, Charset.defaultCharset());
     }
 
     /**
@@ -176,14 +180,10 @@ public class ResourceScanner {
      * @param charset
      * @return
      */
-    public Map<String, String> scan4text(String wildcard, String charset) {
+    public Map<String, String> scan4text(String wildcard, Charset charset) {
         Map<String, String> result = new HashMap<>();
         for (Entry<String, byte[]> entry : scan4binary(wildcard).entrySet()) {
-            try {
-                result.put(entry.getKey(), new String(entry.getValue(), charset));
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
+            result.put(entry.getKey(), new String(entry.getValue(), charset));
         }
         return result;
     }
@@ -197,7 +197,7 @@ public class ResourceScanner {
      * @throws IOException
      */
     private boolean matchesFilter(MetadataReader reader, List<TypeFilter> typeFilters,
-        MetadataReaderFactory factory) throws IOException {
+                                  MetadataReaderFactory factory) throws IOException {
         if (typeFilters.isEmpty()) {
             return true;
         }

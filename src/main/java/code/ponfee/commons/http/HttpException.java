@@ -2,7 +2,7 @@ package code.ponfee.commons.http;
 
 /**
  * http exception
- * @author fupf
+ * @author Ponfee
  */
 public class HttpException extends RuntimeException {
 

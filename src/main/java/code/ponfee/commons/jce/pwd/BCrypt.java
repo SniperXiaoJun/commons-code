@@ -80,6 +80,9 @@ import java.security.SecureRandom;
 * @version 0.4
 */
 public final class BCrypt {
+
+    private static final String UTF_8 = "UTF-8";
+
     // BCrypt parameters
     private static final int GENSALT_DEFAULT_LOG2_ROUNDS = 10;
     private static final int BCRYPT_SALT_LEN = 16;
@@ -447,7 +450,7 @@ public final class BCrypt {
 
         real_salt = salt.substring(off + 3, off + 25);
         try {
-            passwordb = (password + (minor >= 'a' ? "\000" : "")).getBytes("UTF-8");
+            passwordb = (password + (minor >= 'a' ? "\000" : "")).getBytes(UTF_8);
         } catch (UnsupportedEncodingException uee) {
             throw new AssertionError("UTF-8 is not supported");
         }
@@ -532,8 +535,8 @@ public final class BCrypt {
         byte try_bytes[];
         try {
             String try_pw = create(plaintext, hashed);
-            hashed_bytes = hashed.getBytes("UTF-8");
-            try_bytes = try_pw.getBytes("UTF-8");
+            hashed_bytes = hashed.getBytes(UTF_8);
+            try_bytes = try_pw.getBytes(UTF_8);
         } catch (UnsupportedEncodingException uee) {
             return false;
         }

@@ -47,7 +47,7 @@ public class ZipUtils {
     /**
      * 压缩文件到指定路径
      * @param src 待压缩的文件
-     * @param dest 压缩文件存放路径，如果没有.zip后缀则会自动加上
+     * @param dest 压缩文件存放路径
      * @return 最终的压缩文件存放的绝对路径
      */
     public static String zip(String src, String dest) throws ZipException {
@@ -55,9 +55,9 @@ public class ZipUtils {
     }
 
     /**
-     * 使用给定密码压缩指定文件或文件夹到当前目录
+     * 使用给定密码压缩文件到指定路径
      * @param src 要压缩的文件
-     * @param dest 压缩文件存放路径，如果没有.zip后缀则会自动加上
+     * @param dest 压缩文件存放路径
      * @param passwd 压缩使用的密码
      * @return 最终的压缩文件存放的绝对路径
      */
@@ -66,11 +66,9 @@ public class ZipUtils {
     }
 
     /**
-     * 使用给定密码压缩指定文件或文件夹到指定位置
+     * 压缩文件到指定路径
      * @param src        待压缩的文件名或文件夹路径名
-     * @param dest       压缩文件存放路径：
-     *                      如果以路径分隔符“/”结尾则视为目录，压缩文件名取源文件名并加“.zip”后缀<p>
-     *                      否则视为文件名<p>
+     * @param dest       压缩文件存放路径
      * @param recursion  是否递归压缩（只对待压缩文件为文件夹时有效）：true是；false否；
      * @param passwd     压缩使用的密码
      * @param comment    注释信息
@@ -141,14 +139,15 @@ public class ZipUtils {
         if (StringUtils.isBlank(zipFile)) {
             throw new IllegalArgumentException("zip file canot be null");
         }
-        String dest;
-        if (zipFile.toLowerCase().endsWith(SUFFIX)) {
-            dest = zipFile.substring(0, zipFile.toLowerCase().indexOf(SUFFIX));
+
+        String lowercasePath = zipFile.toLowerCase();
+        if (lowercasePath.endsWith(SUFFIX)) {
+            String dest = zipFile.substring(0, lowercasePath.indexOf(SUFFIX));
+            unzip(zipFile, dest);
+            return dest;
         } else {
             throw new IllegalStateException("the zip file name must be end with .zip");
         }
-        unzip(zipFile, dest);
-        return dest;
     }
 
     /**
@@ -172,7 +171,7 @@ public class ZipUtils {
      * @throws ZipException 压缩文件有损坏或者解压缩失败抛出
      */
     public static File[] unzip(String zipFile, String dest, String passwd) throws ZipException {
-        return unzip(new File(zipFile), dest, passwd, "UTF-8");
+        return unzip(new File(zipFile), dest, passwd, Files.DEFAULT_CHARSET);
     }
 
     /**

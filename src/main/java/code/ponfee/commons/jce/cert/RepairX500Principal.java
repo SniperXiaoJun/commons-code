@@ -74,7 +74,9 @@ public class RepairX500Principal implements Principal {
                         if (sb.length() > 0) {
                             sb.append(',');
                         }
-                        sb.append(DN_STR[oidType]).append('=').append(new String(value, (valueType == 0x1e) ? "UTF-16BE" : "UTF-8"));
+                        sb.append(DN_STR[oidType])
+                          .append('=')
+                          .append(new String(value, (valueType == 0x1e) ? "UTF-16BE" : "UTF-8"));
                     } catch (IOException ignored) {
                         // ignored
                     }

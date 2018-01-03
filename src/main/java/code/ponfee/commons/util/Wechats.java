@@ -5,6 +5,7 @@ import java.util.Map;
 
 import code.ponfee.commons.http.Http;
 import code.ponfee.commons.http.HttpParams;
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.json.Jsons;
 
 /**
@@ -15,7 +16,7 @@ public class Wechats {
 
     // -------------------------构建微信授权地址------------------------- //
     public static final String buildAuthorizeUrl(String appid, String redirect, String state) {
-        return buildAuthorizeUrl(appid, "UTF-8", redirect, state);
+        return buildAuthorizeUrl(appid, Files.DEFAULT_CHARSET, redirect, state);
     }
 
     public static final String buildAuthorizeUrl(String appid, String charset, String redirect, String state) {
