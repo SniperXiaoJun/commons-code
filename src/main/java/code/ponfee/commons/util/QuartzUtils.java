@@ -45,8 +45,11 @@ public class QuartzUtils {
      */
     public static Date getNextExecTime(String cronExp, Date begin) {
         List<Date> list = listNextExecTime(cronExp, 1, begin);
-        if (list == null || list.isEmpty()) return null;
-        else return list.get(0);
+        if (list == null || list.isEmpty()) {
+            return null;
+        } else {
+            return list.get(0);
+        }
     }
 
     /**
@@ -57,7 +60,9 @@ public class QuartzUtils {
      * @return
      */
     public static List<Date> listNextExecTime(String cronExp, int count, Date begin) {
-        if (count < 1 || begin == null) return null;
+        if (count < 1 || begin == null) {
+            return null;
+        }
 
         try {
             //CronScheduleBuilder.cronSchedule(cron);
@@ -67,13 +72,17 @@ public class QuartzUtils {
             trigger.setCronExpression(exp);
             trigger.setStartTime(begin);
             Date date = trigger.computeFirstFireTime(new BaseCalendar());
-            if (date == null || date.before(begin)) return null;
+            if (date == null || date.before(begin)) {
+                return null;
+            }
 
             List<Date> times = new ArrayList<>();
             times.add(date);
             for (int i = 1; i < count; i++) {
                 date = exp.getNextValidTimeAfter(date);
-                if (date == null) break;
+                if (date == null) {
+                    break;
+                }
                 times.add(date);
             }
             return times;

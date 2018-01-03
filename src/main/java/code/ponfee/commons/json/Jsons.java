@@ -30,7 +30,9 @@ public final class Jsons {
 
     private Jsons(JsonInclude.Include include) {
         // 设置序列化时的特性
-        if (include != null) mapper.setSerializationInclusion(include);
+        if (include != null) {
+            mapper.setSerializationInclusion(include);
+        }
 
         // 反序列化时忽略不存在于对象中的属性
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -82,7 +84,9 @@ public final class Jsons {
      * @throws code.ponfee.commons.json.JsonException   the exception for json
      */
     public <T> T parse(String json, Class<T> target) throws JsonException {
-        if (isEmpty(json)) return null;
+        if (isEmpty(json)) {
+            return null;
+        }
 
         try {
             return mapper.readValue(json, target);
@@ -113,7 +117,9 @@ public final class Jsons {
      * @throws JsonException the exception for json
      */
     public <T> T parse(String json, JavaType javaType) throws JsonException {
-        if (isEmpty(json)) return null;
+        if (isEmpty(json)) {
+            return null;
+        }
 
         try {
             return mapper.readValue(json, javaType);

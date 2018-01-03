@@ -33,6 +33,7 @@ public final class JdkCompilerClassLoader extends ClassLoader {
         return classes.get(qualifiedClassName);
     }
 
+    @Override
     protected synchronized Class<?> findClass(String qualifiedClassName) throws ClassNotFoundException {
         JavaFileObject file = classes.get(qualifiedClassName);
         if (file != null) {
@@ -59,6 +60,7 @@ public final class JdkCompilerClassLoader extends ClassLoader {
         classes.put(qualifiedClassName, javaFile);
     }
 
+    @Override
     protected synchronized Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
         try {
             Class<?> c = findClass(name);
@@ -76,6 +78,7 @@ public final class JdkCompilerClassLoader extends ClassLoader {
         return super.loadClass(name, resolve);
     }
 
+    @Override
     public InputStream getResourceAsStream(final String name) {
         if (name.endsWith(".class")) {
             String qualifiedClassName = name.substring(0, name.length() - ".class".length()).replace('/', '.');

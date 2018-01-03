@@ -44,7 +44,9 @@ public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<Trans
         List<Map<K, V>> list = Lists.newArrayList();
         Page<MapItem> page = TransitPage.recover(v.getData());
         for (MapItem items : page.getRows()) {
-            if (items == null) continue;
+            if (items == null) {
+                continue;
+            }
             Map<K, V> map = Maps.newLinkedHashMap();
             for (MapEntry<K, V> item : items.getItem()) {
                 map.put(item.getKey(), item.getValue());
@@ -67,7 +69,9 @@ public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<Trans
         List<MapItem> list = Lists.newArrayList();
         Page<Map<K, V>> page = v.getData();
         for (Map<K, V> map : page.getRows()) {
-            if (map == null) continue;
+            if (map == null) {
+                continue;
+            }
             MapEntry<K, V>[] item = new MapEntry[map.size()];
             int index = 0;
             for (Map.Entry<K, V> entry : map.entrySet()) {

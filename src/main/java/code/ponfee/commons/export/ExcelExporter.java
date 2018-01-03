@@ -511,7 +511,9 @@ public class ExcelExporter extends AbstractExporter {
     @SuppressWarnings("unchecked")
     private void processOptions(SXSSFCell cell, int tbodyRowIdx, int tbodyColIdx, 
                                 Map<CellStyleOptions, Object> options) {
-        if (options == null || options.isEmpty()) return;
+        if (options == null || options.isEmpty()) {
+            return;
+        }
 
         // 单元格高亮显示
         Map<String, Object> highlight = (Map<String, Object>) options.get(CellStyleOptions.HIGHLIGHT);
@@ -543,7 +545,9 @@ public class ExcelExporter extends AbstractExporter {
     private List<XSSFCellStyle> createStyles(List<Thead> thead) {
         List<XSSFCellStyle> styles = new ArrayList<>();
         for (Thead cell : thead) {
-            if (!cell.isLeaf()) continue; // 非叶子节点
+            if (!cell.isLeaf()) {
+                continue; // 非叶子节点
+            }
 
             XSSFCellStyle style = (XSSFCellStyle) workbook.createCellStyle();
             styles.add(style);

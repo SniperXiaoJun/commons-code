@@ -203,7 +203,9 @@ public final class Files {
      * @return
      */
     public static String human(long size) {
-        if (size <= 0) return "0";
+        if (size <= 0) {
+            return "0";
+        }
 
         int digit = (int) (Math.log10(size) / Math.log10(1024));
         return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digit)) + FILE_UNITS[digit];
@@ -273,11 +275,15 @@ public final class Files {
         BufferedOutputStream bos = null;
         try (FileInputStream input = new FileInputStream(file)) {
             int length = input.available();
-            if (length < 3) return;
+            if (length < 3) {
+                return;
+            }
 
             byte[] bytes = new byte[3];
             input.read(bytes);
-            if (!ObjectUtils.equals(bytes, WINDOWS_BOM)) return;
+            if (!ObjectUtils.equals(bytes, WINDOWS_BOM)) {
+                return;
+            }
 
             bytes = new byte[length - 3];
             input.read(bytes);

@@ -37,7 +37,9 @@ public class HashOperations extends JedisOperations {
      */
     public boolean hset(String key, String field, 
                         String value, Integer seconds) {
-        if (value == null) return false;
+        if (value == null) {
+            return false;
+        }
 
         return hook(shardedJedis -> {
             boolean flag = Numbers.equals(shardedJedis.hset(key, field, value), 1);
@@ -132,7 +134,9 @@ public class HashOperations extends JedisOperations {
      */
     public <T extends Object> boolean hsetObject(byte[] key, byte[] field, T t, 
                                                  boolean isCompress, Integer seconds) {
-        if (t == null) return false;
+        if (t == null) {
+            return false;
+        }
 
         return hook(shardedJedis -> {
             byte[] data = jedisClient.serialize(t, isCompress);
@@ -242,7 +246,9 @@ public class HashOperations extends JedisOperations {
             List<T> list = new ArrayList<>();
             for (byte[] data : shardedJedis.hvals(key)) {
                 T t = jedisClient.deserialize(data, clazz, isCompress);
-                if (t != null) list.add(t);
+                if (t != null) {
+                    list.add(t);
+                }
             }
             expire(shardedJedis, key, seconds);
             return list;
@@ -319,12 +325,16 @@ public class HashOperations extends JedisOperations {
                                                    Integer seconds, byte[]... fields) {
         return hook(shardedJedis -> {
             List<byte[]> datas = shardedJedis.hmget(key, fields);
-            if (datas == null || datas.isEmpty()) return null;
+            if (datas == null || datas.isEmpty()) {
+                return null;
+            }
 
             List<T> list = new ArrayList<>();
             for (byte[] data : datas) {
                 T t = jedisClient.deserialize(data, clazz, isCompress);
-                if (t != null) list.add(t);
+                if (t != null) {
+                    list.add(t);
+                }
             }
             expire(shardedJedis, key, seconds);
             return list;
@@ -383,7 +393,9 @@ public class HashOperations extends JedisOperations {
      * @return 返回值：true成功；false失败；
      */
     public boolean hmset(String key, Map<String, String> map, Integer seconds) {
-        if (map == null || map.isEmpty()) return false;
+        if (map == null || map.isEmpty()) {
+            return false;
+        }
 
         return hook(shardedJedis -> {
             String rtn = shardedJedis.hmset(key, map);

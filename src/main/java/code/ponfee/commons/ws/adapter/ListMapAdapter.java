@@ -43,7 +43,9 @@ public abstract class ListMapAdapter<K, V> extends XmlAdapter<MapItemArray, List
 
         List<Map<K, V>> list = new ArrayList<>();
         for (MapItem items : v.getItems()) {
-            if (items == null) continue;
+            if (items == null) {
+                continue;
+            }
             Map<K, V> map = Maps.newLinkedHashMap();
             for (MapEntry<K, V> item : items.getItem()) {
                 map.put(item.getKey(), item.getValue());
@@ -55,12 +57,16 @@ public abstract class ListMapAdapter<K, V> extends XmlAdapter<MapItemArray, List
 
     @Override
     public MapItemArray marshal(List<Map<K, V>> v) throws Exception {
-        if (v == null) return null;
+        if (v == null) {
+            return null;
+        }
 
         MapItem[] items = new MapItem[v.size()];
         int i = 0;
         for (Map<K, V> map : v) {
-            if (map == null) continue;
+            if (map == null) {
+                continue;
+            }
             MapEntry<K, V>[] item = new MapEntry[map.size()];
             int j = 0;
             for (Entry<K, V> entry : map.entrySet()) {

@@ -43,7 +43,9 @@ public class Collects {
      * @return
      */
     public static List<Object[]> map2array(List<Map<String, Object>> data, String... fields) {
-        if (data == null) return null;
+        if (data == null) {
+            return null;
+        }
 
         List<Object[]> results = new ArrayList<>(data.size());
         for (Map<String, Object> row : data) {
@@ -60,7 +62,9 @@ public class Collects {
      * @return
      */
     public static Object[] map2array(LinkedHashMap<String, Object> data) {
-        if (data == null) return null;
+        if (data == null) {
+            return null;
+        }
 
         Object[] results = new Object[data.size()];
         int i = 0;
@@ -76,7 +80,9 @@ public class Collects {
      * @return
      */
     public static List<Object[]> map2array(List<LinkedHashMap<String, Object>> data) {
-        if (data == null) return null;
+        if (data == null) {
+            return null;
+        }
 
         List<Object[]> results = new ArrayList<>(data.size());
         for (LinkedHashMap<String, Object> row : data) {
@@ -186,7 +192,9 @@ public class Collects {
      */
     @SuppressWarnings("unchecked")
     public static <T> T[] concat(T[]... arrays) {
-        if (arrays == null) return null;
+        if (arrays == null) {
+            return null;
+        }
 
         List<T> list = new ArrayList<>();
         Class<?> type = null;

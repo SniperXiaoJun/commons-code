@@ -115,8 +115,9 @@ public class WrappedBufferedReader extends Reader {
 
     public static void main(String[] args) {
         try (WrappedBufferedReader reader = new WrappedBufferedReader(new File("d:/编辑6.txt"))) {
-            for (String str = reader.readLine(); str != null; str = reader.readLine())
+            for (String str = reader.readLine(); str != null; str = reader.readLine()) {
                 System.out.println(str);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

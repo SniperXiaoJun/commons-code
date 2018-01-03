@@ -82,8 +82,11 @@ public class Thead implements Serializable, Comparable<Thead> {
     }
 
     @Transient int getNodeLevel() {
-        if (nodePath == null) return 0;
-        else return nodePath.size();
+        if (nodePath == null) {
+            return 0;
+        } else {
+            return nodePath.size();
+        }
     }
 
     @Override

@@ -77,7 +77,9 @@ public class ResourceScanner {
     @SuppressWarnings("unchecked")
     public Set<Class<?>> scan4class(Class<? extends Annotation>... annotations) {
         Set<Class<?>> classSet = new HashSet<>();
-        if (this.scanPaths.isEmpty()) return classSet;
+        if (this.scanPaths.isEmpty()) {
+            return classSet;
+        }
 
         List<TypeFilter> typeFilters = new LinkedList<>();
         if (annotations != null) {
@@ -93,10 +95,14 @@ public class ResourceScanner {
                 Resource[] resources = resolver.getResources(CLASSPATH_ALL_URL_PREFIX + packageName + "/**/*.class");
                 MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(resolver);
                 for (Resource resource : resources) {
-                    if (!resource.isReadable()) continue;
+                    if (!resource.isReadable()) {
+                        continue;
+                    }
 
                     MetadataReader reader = readerFactory.getMetadataReader(resource);
-                    if (!matchesFilter(reader, typeFilters, readerFactory)) continue;
+                    if (!matchesFilter(reader, typeFilters, readerFactory)) {
+                        continue;
+                    }
 
                     try {
                         classSet.add(Class.forName(reader.getClassMetadata().getClassName()));
@@ -125,7 +131,9 @@ public class ResourceScanner {
      * @return
      */
     public Map<String, byte[]> scan4binary(String wildcard) {
-        if (wildcard == null) wildcard = "*";
+        if (wildcard == null) {
+            wildcard = "*";
+        }
         Map<String, byte[]> result = new HashMap<>();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         for (String path : this.scanPaths) {
@@ -190,10 +198,14 @@ public class ResourceScanner {
      */
     private boolean matchesFilter(MetadataReader reader, List<TypeFilter> typeFilters,
         MetadataReaderFactory factory) throws IOException {
-        if (typeFilters.isEmpty()) return true;
+        if (typeFilters.isEmpty()) {
+            return true;
+        }
 
         for (TypeFilter filter : typeFilters) {
-            if (filter.match(reader, factory)) return true;
+            if (filter.match(reader, factory)) {
+                return true;
+            }
         }
         return false;
     }

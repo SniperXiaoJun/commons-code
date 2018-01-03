@@ -36,6 +36,8 @@ import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.util.Store;
 
+import code.ponfee.commons.io.Files;
+
 /**
  * 证书工具类
  * @author fupf
@@ -262,9 +264,13 @@ public class X509CertUtils {
                 case PUBLIC_KEY:
                     return Base64.getEncoder().encodeToString(cert.getPublicKey().getEncoded());
                 case USAGE:
-                    if (cert.getKeyUsage()[0]) return "signature";
-                    else if (cert.getKeyUsage()[3]) return "encipherment";
-                    else return null;
+                    if (cert.getKeyUsage()[0]) {
+                        return "signature";
+                    } else if (cert.getKeyUsage()[3]) {
+                        return "encipherment";
+                    } else {
+                        return null;
+                    }
                 case SUBJECT_C:
                 case SUBJECT_CN:
                 case SUBJECT_L:
@@ -405,9 +411,10 @@ public class X509CertUtils {
         byte abyte0[] = new byte[8192];
         ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
         baos.reset();
-        int i;
-        while ((i = inputstream.read(abyte0, 0, abyte0.length)) != -1)
-            baos.write(abyte0, 0, i);
+        int len;
+        while ((len = inputstream.read(abyte0, 0, abyte0.length)) != Files.EOF) {
+            baos.write(abyte0, 0, len);
+        }
         return baos.toByteArray();
     }
 
@@ -418,11 +425,14 @@ public class X509CertUtils {
             BufferedInputStream bufferedinputstream = new BufferedInputStream(inputstream);
             BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(bufferedinputstream, "ASCII"));
             String s;
-            if ((s = readLine(bufferedreader)) == null || !s.startsWith("-----BEGIN")) throw new IOException("Unsupported encoding");
+            if ((s = readLine(bufferedreader)) == null || !s.startsWith("-----BEGIN")) {
+                throw new IOException("Unsupported encoding");
+            }
             l += s.length();
             StringBuffer stringbuffer = new StringBuffer();
-            for (; (s = readLine(bufferedreader)) != null && !s.startsWith("-----END"); stringbuffer.append(s))
-                ;
+            for (; (s = readLine(bufferedreader)) != null && !s.startsWith("-----END"); stringbuffer.append(s)) {
+                ; // do-non
+            }
 
             if (s == null) {
                 throw new IOException("Unsupported encoding");
@@ -452,16 +462,26 @@ public class X509CertUtils {
         int i;
         do {
             i = bufferedreader.read();
-            if (flag && j < ENDBOUNDARY.length) flag = (char) i == ENDBOUNDARY[j++];
-            if (!flag1) flag1 = flag && j == ENDBOUNDARY.length;
+            if (flag && j < ENDBOUNDARY.length) {
+                flag = (char) i == ENDBOUNDARY[j++];
+            }
+            if (!flag1) {
+                flag1 = flag && j == ENDBOUNDARY.length;
+            }
             stringbuffer.append((char) i);
         } while (i != -1 && i != 10 && i != 13);
-        if (!flag1 && i == -1) return null;
+
+        if (!flag1 && i == -1) {
+            return null;
+        }
         if (i == 13) {
             bufferedreader.mark(1);
             int k = bufferedreader.read();
-            if (k == 10) stringbuffer.append((char) i);
-            else bufferedreader.reset();
+            if (k == 10) {
+                stringbuffer.append((char) i);
+            } else {
+                bufferedreader.reset();
+            }
         }
         return stringbuffer.toString();
     }

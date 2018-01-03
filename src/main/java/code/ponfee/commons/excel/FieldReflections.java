@@ -101,7 +101,9 @@ public final class FieldReflections {
         Class<?> fieldType = field.getType();
 
         ExcelField excelField = field.getAnnotation(ExcelField.class);
-        if (value == null || value.trim().length() == 0) return null;
+        if (value == null || value.trim().length() == 0) {
+            return null;
+        }
         value = value.trim();
 
         /*if (Byte.class.equals(fieldType) || Byte.TYPE.equals(fieldType)) {

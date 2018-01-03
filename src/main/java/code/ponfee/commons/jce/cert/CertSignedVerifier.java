@@ -51,7 +51,9 @@ public abstract class CertSignedVerifier {
             }
 
             // 签名验证
-            if (verifySigned) verifySigned();
+            if (verifySigned) {
+                verifySigned();
+            }
         } catch (IOException e) {
             throw new SecurityException("获取证书主题异常", e);
         }
@@ -111,7 +113,9 @@ public abstract class CertSignedVerifier {
     public static void verifyCrlRevoke(X509Certificate subject, X509CRL crl) {
         try {
             String subjectCN = X509CertUtils.getCertInfo(subject, X509CertInfo.SUBJECT_CN);
-            if (crl.isRevoked(subject)) throw new SecurityException("[" + subjectCN + "]已被吊销");
+            if (crl.isRevoked(subject)) {
+                throw new SecurityException("[" + subjectCN + "]已被吊销");
+            }
         } catch (IOException e) {
             throw new SecurityException("获取证书主题异常", e);
         }

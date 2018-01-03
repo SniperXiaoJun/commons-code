@@ -287,8 +287,11 @@ public class KeyStoreResolver {
     }
 
     private char[] toCharArray(String str) {
-        if (null == str || str.length() == 0) return null;
-        else return str.toCharArray();
+        if (null == str || str.length() == 0) {
+            return null;
+        } else {
+            return str.toCharArray();
+        }
     }
 
     private void checkAliasNotExists(String alias) throws KeyStoreException {

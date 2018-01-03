@@ -146,8 +146,11 @@ public class ImageUtils {
                 for (j = bufferedImage.getMinY(); j < bufferedImage.getHeight(); j++) {
                     rgb = bufferedImage.getRGB(i, j);
                     if (rgb != 0) { // 0为透明
-                        if (compare(rgb, refer)) alpha = 0; // -1为白色：255 255 255
-                        else alpha = normal; // 默认设置半透明
+                        if (compare(rgb, refer)) {
+                            alpha = 0; // -1为白色：255 255 255
+                        } else {
+                            alpha = normal; // 默认设置半透明
+                        }
                         rgb = (alpha << 24) | (rgb & 0x00ffffff); // 计算rgb
                         bufferedImage.setRGB(i, j, rgb); // 重新设置rgb
                     }
@@ -192,9 +195,13 @@ public class ImageUtils {
                     return "wbmp";
                 }*/
             }
-            if (types.size() == 0) return null;
-            else if (types.size() == 1) return types.get(0);
-            else return types.toString();
+            if (types.size() == 0) {
+                return null;
+            } else if (types.size() == 1) {
+                return types.get(0);
+            } else {
+                return types.toString();
+            }
         } finally {
             if (mcis != null) try {
                 mcis.close();

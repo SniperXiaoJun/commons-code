@@ -126,7 +126,7 @@ public class Result<T> implements java.io.Serializable {
         }
 
         @Override
-        public void setData(Void _void) {
+        public void setData(Void void0) {
             throw new UnsupportedOperationException();
         }
     }

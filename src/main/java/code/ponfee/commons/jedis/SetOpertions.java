@@ -195,7 +195,9 @@ public class SetOpertions extends JedisOperations {
             if (datas != null && !datas.isEmpty()) {
                 for (byte[] data : datas) {
                     T t = jedisClient.deserialize(data, clazz, isCompress);
-                    if (t != null) result.add(t);
+                    if (t != null) {
+                        result.add(t);
+                    }
                 }
             }
             if (result != null && !result.isEmpty()) {
@@ -266,8 +268,11 @@ public class SetOpertions extends JedisOperations {
 
     public String srandmember(String key, Integer seconds) {
         List<String> list = this.srandmember(key, 1, seconds);
-        if (list == null || list.isEmpty()) return null;
-        return list.get(0);
+        if (list == null || list.isEmpty()) {
+            return null;
+        } else {
+            return list.get(0);
+        }
     }
 
     public String srandmember(String key) {
@@ -296,7 +301,9 @@ public class SetOpertions extends JedisOperations {
             if (datas != null && !datas.isEmpty()) {
                 for (byte[] data : datas) {
                     T t = jedisClient.deserialize(data, clazz, isCompress);
-                    if (t != null) result.add(t);
+                    if (t != null) {
+                        result.add(t);
+                    }
                 }
             }
             if (result != null && !result.isEmpty()) {

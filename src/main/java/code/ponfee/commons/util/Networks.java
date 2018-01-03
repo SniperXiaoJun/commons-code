@@ -26,7 +26,9 @@ public class Networks {
         try {
             for (Enumeration<NetworkInterface> itfs = NetworkInterface.getNetworkInterfaces(); itfs.hasMoreElements();) {
                 NetworkInterface net = itfs.nextElement();
-                if (net.isLoopback()) continue;
+                if (net.isLoopback()) {
+                    continue;
+                }
 
                 for (Enumeration<InetAddress> addrs = net.getInetAddresses(); addrs.hasMoreElements();) {
                     InetAddress addr = addrs.nextElement();
@@ -88,7 +90,9 @@ public class Networks {
         StringBuilder ipAddress = new StringBuilder();
         for (int i = 0; i < MASK.length; i++) {
             ipAddress.insert(0, (ip & MASK[i]) >> (i * 8));
-            if (i < MASK.length - 1) ipAddress.insert(0, ".");
+            if (i < MASK.length - 1) {
+                ipAddress.insert(0, ".");
+            }
         }
         return ipAddress.toString();
     }
@@ -110,11 +114,15 @@ public class Networks {
         int num = 0;
         for (int i = 0; i < ipNums.length; i++) {
             num += Integer.parseInt(ipNums[i]);
-            if (!isPoint) continue;
+            if (!isPoint) {
+                continue;
+            }
 
             String[] sections = ipNums[i].split("");
             for (int j = 0; j < sections.length; j++) {
-                if ("".equals(sections[j])) continue;
+                if ("".equals(sections[j])) {
+                    continue;
+                }
                 num += Integer.parseInt(sections[j]);
             }
         }

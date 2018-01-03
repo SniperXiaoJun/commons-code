@@ -43,10 +43,14 @@ public abstract class ResultListMapAdapter<K, V> extends XmlAdapter<Result<MapIt
 
         List<Map<K, V>> list = new ArrayList<>();
         for (MapItem items : v.getData().getItems()) {
-            if (items == null) continue;
+            if (items == null) {
+                continue;
+            }
             Map<K, V> map = Maps.newLinkedHashMap();
             for (MapEntry<K, V> item : items.getItem()) {
-                if (item == null) continue;
+                if (item == null) {
+                    continue;
+                }
                 map.put(item.getKey(), item.getValue());
             }
             list.add(map);
@@ -63,7 +67,9 @@ public abstract class ResultListMapAdapter<K, V> extends XmlAdapter<Result<MapIt
         MapItem[] items = new MapItem[v.getData().size()];
         int i = 0;
         for (Map<K, V> map : v.getData()) {
-            if (map == null) continue;
+            if (map == null) {
+                continue;
+            }
             MapEntry<K, V>[] item = new MapEntry[map.size()];
             int j = 0;
             for (Entry<K, V> entry : map.entrySet()) {

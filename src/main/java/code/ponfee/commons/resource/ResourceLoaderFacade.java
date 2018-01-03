@@ -70,7 +70,9 @@ public final class ResourceLoaderFacade {
         if (encoding == null || encoding.length() == 0) {
             encoding = Files.DEFAULT_CHARSET;
         }
-        if (filePath == null) filePath = "";
+        if (filePath == null) {
+            filePath = "";
+        }
         String path = cleanPath(filePath);
         if (filePath.startsWith(FS_PREFIX)) {
             return FS_LOADER.getResource(path, encoding);
@@ -106,7 +108,9 @@ public final class ResourceLoaderFacade {
      * @return
      */
     public static List<Resource> listResources(String dir, String extensions[], boolean recursive, Class<?> contextClass, String encoding) {
-        if (dir == null) dir = "";
+        if (dir == null) {
+            dir = "";
+        }
         String path = cleanPath(dir);
         if (dir.startsWith(FS_PREFIX)) {
             return FS_LOADER.listResources(path, extensions, recursive);
@@ -139,7 +143,9 @@ public final class ResourceLoaderFacade {
             path = Strings.cleanPath(path.substring(FS_PREFIX.length()));
         } else if (path.startsWith(CP_PREFIX)) {
             path = Strings.cleanPath(path.substring(CP_PREFIX.length()));
-            if (path.startsWith("/")) path = path.substring(1);
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
         } else {
             path = Strings.cleanPath(path);
         }

@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
 
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.math.Numbers;
 
 /**
@@ -30,7 +31,9 @@ public class Strings {
     private static final String CURRENT_PATH = ".";
 
     public static String mask(String text, String regex, String replacement) {
-        if (text == null) return null;
+        if (text == null) {
+            return null;
+        }
         return text.replaceAll(regex, replacement);
     }
 
@@ -69,7 +72,7 @@ public class Strings {
     }
 
     public static long crc32(String str) {
-        return crc32(str, "UTF-8");
+        return crc32(str, Files.DEFAULT_CHARSET);
     }
 
     /**
@@ -208,7 +211,9 @@ public class Strings {
      * @return 规范的文件路径 
      */
     public static String cleanPath(String path) {
-        if (path == null) return null;
+        if (path == null) {
+            return null;
+        }
 
         String pathToUse = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
 
@@ -329,7 +334,9 @@ public class Strings {
      * @return
      */
     public static String[] toStringArray(Collection<String> collection) {
-        if (collection == null) return null;
+        if (collection == null) {
+            return null;
+        }
         return collection.toArray(new String[collection.size()]);
     }
 
@@ -339,7 +346,9 @@ public class Strings {
      * @return
      */
     public static String[] toStringArray(Enumeration<String> enumeration) {
-        if (enumeration == null) return null;
+        if (enumeration == null) {
+            return null;
+        }
         return toStringArray(Collections.list(enumeration));
     }
 
@@ -349,14 +358,18 @@ public class Strings {
      * @return
      */
     public static boolean isEmpty(Object value) {
-        if (value == null) return true;
+        if (value == null) {
+            return true;
+        }
 
         return CharSequence.class.isInstance(value)
                && StringUtils.isEmpty((CharSequence) value);
     }
 
     public static boolean isBlank(Object value) {
-        if (value == null) return true;
+        if (value == null) {
+            return true;
+        }
 
         return CharSequence.class.isInstance(value)
                && StringUtils.isBlank((CharSequence) value);
@@ -368,7 +381,9 @@ public class Strings {
      * @return 
      */
     public static String underscoreName(String camelCaseName) {
-        if (StringUtils.isEmpty(camelCaseName)) return camelCaseName;
+        if (StringUtils.isEmpty(camelCaseName)) {
+            return camelCaseName;
+        }
 
         StringBuilder result = new StringBuilder();
         result.append(camelCaseName.substring(0, 1).toLowerCase());
@@ -390,7 +405,9 @@ public class Strings {
      * @return 
      */
     public static String camelCaseName(String underscoreName) {
-        if (StringUtils.isEmpty(underscoreName)) return underscoreName;
+        if (StringUtils.isEmpty(underscoreName)) {
+            return underscoreName;
+        }
 
         StringBuilder result = new StringBuilder();
         boolean flag = false;
@@ -424,8 +441,11 @@ public class Strings {
                 checkSum += num; // 1、将奇数位数字相加（从1开始计数）
             } else {
                 num *= 2; // 2、将偶数位数字分别乘以2，分别计算个位数和十位数之和（从1开始计数）
-                if (num < 10) checkSum += num;
-                else checkSum += num - 9;
+                if (num < 10) {
+                    checkSum += num;
+                } else {
+                    checkSum += num - 9;
+                }
             }
         }
         return (10 - checkSum % 10) % 10;

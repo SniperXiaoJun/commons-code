@@ -188,12 +188,16 @@ public class X509CertGenerator {
      */
     private static X509CertInfo createCertInfo(Integer sn, PKCS10 pkcs10, Date notBefore, 
                                                Date notAfter, CertificateExtensions extensions) {
-        if (sn == null) sn = ThreadLocalRandom.current().nextInt() & Integer.MAX_VALUE;
+        if (sn == null) {
+            sn = ThreadLocalRandom.current().nextInt() & Integer.MAX_VALUE;
+        }
         try {
             // 验证pkcs10
             Security.addProvider(Providers.BC);
             PKCS10CertificationRequest req = new PKCS10CertificationRequest(pkcs10.getEncoded());
-            if (!req.verify()) throw new SecurityException("invalid pkcs10 data");
+            if (!req.verify()) {
+                throw new SecurityException("invalid pkcs10 data");
+            }
 
             AlgorithmId signAlg = AlgorithmId.get(req.getSignatureAlgorithm().getAlgorithm().getId());
             X509CertInfo x509certinfo = new X509CertInfo();

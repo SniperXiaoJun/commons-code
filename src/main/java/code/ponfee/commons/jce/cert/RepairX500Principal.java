@@ -29,7 +29,9 @@ public class RepairX500Principal implements Principal {
 
     @Override
     public String getName() {
-        if (input == null) return null;
+        if (input == null) {
+            return null;
+        }
 
         byte[] oid = new byte[9];
         int oidType, valueType;
@@ -37,10 +39,16 @@ public class RepairX500Principal implements Principal {
         if (preLen(0x30) == input.available()) {
             sb = new StringBuilder();
             for (;;) {
-                if (preLen(0x31) == 0) break;
-                if (preLen(0x30) == 0) break;
+                if (preLen(0x31) == 0) {
+                    break;
+                }
+                if (preLen(0x30) == 0) {
+                    break;
+                }
                 int len = preLen(0x06);
-                if (len == 0) break;
+                if (len == 0) {
+                    break;
+                }
                 if (len > 9) {
                     oidType = -1;
                     input.skip(len);
@@ -48,9 +56,13 @@ public class RepairX500Principal implements Principal {
                     input.read(oid, 0, len);
                     for (oidType = DN_STR.length - 1; oidType > -1; oidType--) {
                         for (len = OID_ARRAY[oidType].length - 1; len > -1; len--) {
-                            if (oid[len] != OID_ARRAY[oidType][len]) break;
+                            if (oid[len] != OID_ARRAY[oidType][len]) {
+                                break;
+                            }
                         }
-                        if (len < 0) break;
+                        if (len < 0) {
+                            break;
+                        }
                     }
                 }
                 valueType = input.read();
@@ -59,7 +71,9 @@ public class RepairX500Principal implements Principal {
                     byte[] value = new byte[len];
                     try {
                         input.read(value);
-                        if (sb.length() > 0) sb.append(',');
+                        if (sb.length() > 0) {
+                            sb.append(',');
+                        }
                         sb.append(DN_STR[oidType]).append('=').append(new String(value, (valueType == 0x1e) ? "UTF-16BE" : "UTF-8"));
                     } catch (IOException ignored) {
                         // ignored
@@ -81,11 +95,17 @@ public class RepairX500Principal implements Principal {
         int itag;
         if (tag != -1) {
             itag = input.read();
-            if (itag != tag) return 0;
+            if (itag != tag) {
+                return 0;
+            }
         }
         itag = input.read();
-        if (itag < 0x80) return itag;
-        if (itag == 0x81) return input.read();
+        if (itag < 0x80) {
+            return itag;
+        }
+        if (itag == 0x81) {
+            return input.read();
+        }
         if (itag == 0x82) {
             itag = input.read();
             itag <<= 8;

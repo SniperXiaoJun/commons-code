@@ -130,8 +130,12 @@ public class Captchas {
 
     //-------------------------private methods
     private static Color getRandColor(int fc, int bc) {
-        if (fc > 255) fc = 255;
-        if (bc > 255) bc = 255;
+        if (fc > 255) {
+            fc = 255;
+        }
+        if (bc > 255) {
+            bc = 255;
+        }
         int r = fc + ThreadLocalRandom.current().nextInt(bc - fc);
         int g = fc + ThreadLocalRandom.current().nextInt(bc - fc);
         int b = fc + ThreadLocalRandom.current().nextInt(bc - fc);

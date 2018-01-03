@@ -62,7 +62,9 @@ public class IdcardResolver {
     }
 
     public IdcardResolver(String idcard) {
-        if (idcard == null) return;
+        if (idcard == null) {
+            return;
+        }
 
         this.idcard = idcard.trim().toUpperCase();
         this.isValid = this.resolve(this.idcard);
@@ -84,7 +86,9 @@ public class IdcardResolver {
      */
     private static final Pattern FIRST = Pattern.compile("^[0-9]{15}$");
     private boolean isFirst(String idcard) {
-        if (!FIRST.matcher(idcard).matches()) return false;
+        if (!FIRST.matcher(idcard).matches()) {
+            return false;
+        }
 
         // 转成18位
         idcard = idcard.substring(0, 6) + "19" + idcard.substring(6);
@@ -104,11 +108,15 @@ public class IdcardResolver {
      */
     private static final Pattern SECOND = Pattern.compile("^[0-9]{17}[0-9X]$");
     private boolean isSecond(String idcard) {
-        if (!SECOND.matcher(idcard).matches()) return false;
+        if (!SECOND.matcher(idcard).matches()) {
+            return false;
+        }
 
         // 城市验证
         this.province = CITY_CODES.get(idcard.substring(0, 2));
-        if (this.province == null) return false;
+        if (this.province == null) {
+            return false;
+        }
 
         this.district = DISTRICT_CODE_MAPPING.get(Integer.parseInt(idcard.substring(0, 6)));
         //if (this.district == null) return false; // 有些县升为地级市，code改变了
@@ -116,10 +124,14 @@ public class IdcardResolver {
         // 校验码验证
         String prefix17 = idcard.substring(0, 17);
         String checkCode = genPowerSum(prefix17.toCharArray());
-        if (!checkCode.equals(idcard.substring(17))) return false;
+        if (!checkCode.equals(idcard.substring(17))) {
+            return false;
+        }
 
         // 生日验证
-        if (!verifyBirthday(idcard.substring(6, 14))) return false;
+        if (!verifyBirthday(idcard.substring(6, 14))) {
+            return false;
+        }
 
         // 性别提取
         if (Character.getNumericValue(idcard.charAt(16)) % 2 != 0) {

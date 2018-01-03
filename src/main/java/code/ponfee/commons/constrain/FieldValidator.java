@@ -138,7 +138,9 @@ public class FieldValidator {
      * @param type
      */
     private void verifyMeta(String name, Constraint c, Class<?> type) {
-        if (type == null) return;
+        if (type == null) {
+            return;
+        }
 
         // 基本类型转包装类型（如果是）
         type = org.apache.commons.lang3.ClassUtils.primitiveToWrapper(type);
@@ -256,10 +258,14 @@ public class FieldValidator {
 
         // 时态校验
         if (c.tense() != Constraint.Tense.NON) {
-            if (date == null) date = (Date) v;
+            if (date == null) {
+                date = (Date) v;
+            }
 
             String pattern = c.datePattern();
-            if (isBlank(pattern)) pattern = "yyyy-MM-dd HH:mm:ss";
+            if (isBlank(pattern)) {
+                pattern = "yyyy-MM-dd HH:mm:ss";
+            }
             if (date == null) {
                 return n + "{null}：日期不能为空;";
             } else if (c.tense() == Constraint.Tense.FUTURE && date.before(new Date())) {

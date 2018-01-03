@@ -15,7 +15,9 @@ public final class Throwables {
      * @return
      */
     public static String getStackTrace(Throwable e) {
-        if (e == null) return null;
+        if (e == null) {
+            return null;
+        }
 
         try (StringPrintWriter writer = new StringPrintWriter()) {
             e.printStackTrace(writer);

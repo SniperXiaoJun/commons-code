@@ -112,7 +112,9 @@ public final class ClassUtils {
      * @throws Exception
      */
     public static Field getField(Class<?> clazz, String field) throws Exception {
-        if (clazz.isInterface() || clazz == Object.class) return null;
+        if (clazz.isInterface() || clazz == Object.class) {
+            return null;
+        }
 
         Exception ex;
         do {
@@ -161,7 +163,9 @@ public final class ClassUtils {
      */
     public static String getPackagePath(Class<?> clazz) {
         String className = getClassName(clazz);
-        if (className.indexOf('.') < 0) return ""; // none package name
+        if (className.indexOf('.') < 0) {
+            return ""; // none package name
+        }
 
         return getPackagePath(className.substring(0, className.lastIndexOf('.')));
     }
@@ -183,7 +187,9 @@ public final class ClassUtils {
         }
         path = new File(path).getAbsolutePath();
 
-        if (path.toLowerCase().endsWith(".jar")) path += "!";
+        if (path.toLowerCase().endsWith(".jar")) {
+            path += "!";
+        }
         return path + File.separator + getClassName(clazz).replace('.', File.separatorChar) + ".class";
     }
 
@@ -231,7 +237,9 @@ public final class ClassUtils {
      * @return {@code true} if the Type array each of equals the Class array
      */
     private static boolean sameType(Type[] types, Class<?>[] clazzes) {
-        if (types.length != clazzes.length) return false;
+        if (types.length != clazzes.length) {
+            return false;
+        }
 
         for (int i = 0; i < types.length; i++) {
             if (!Type.getType(clazzes[i]).equals(types[i])) {

@@ -31,6 +31,7 @@ public class JdkCompiler implements JavaSourceCompiler {
         //options.add("1.6");
     }
 
+    @Override
     public Class<?> compile(String sourceString) {
         JavaSource source = new RegexJavaSource(sourceString);
         return compile(source);
@@ -49,11 +50,14 @@ public class JdkCompiler implements JavaSourceCompiler {
      * 编译加载类（如果之前已加载过，则返回）
      * 慎用：如果运行时代码更改，无法重新加载类
      */
+    @Override
     public Class<?> compile(JavaSource javaSource) {
         JdkCompilerClassLoader loader = findOrCreate(this.getClass().getClassLoader());
         try {
             Class<?> clazz = Class.forName(javaSource.getFullyQualifiedName(), true, loader);
-            if (clazz != null) return clazz; // 已加载，直接返回
+            if (clazz != null) {
+                return clazz; // 已加载，直接返回
+            }
         } catch (ClassNotFoundException ignored) {
         }
 

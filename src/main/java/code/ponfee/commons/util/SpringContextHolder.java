@@ -118,7 +118,9 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         NoSuchBeanDefinitionException ex = null;
         for (ApplicationContext c : HOLDER) {
             try {
-                if (c.isSingleton(name)) return true;
+                if (c.isSingleton(name)) {
+                    return true;
+                }
             } catch (NoSuchBeanDefinitionException e) {
                 ex = e;
             }

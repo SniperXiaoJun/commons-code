@@ -253,11 +253,13 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
             this.keyTagPattern = keyTagPattern;
         }
 
+        @Override
         public PooledObject<ShardedJedis> makeObject() throws Exception {
             ShardedJedis jedis = new ShardedJedis(shards, algo, keyTagPattern);
             return new DefaultPooledObject<>(jedis);
         }
 
+        @Override
         public void destroyObject(PooledObject<ShardedJedis> pooledShardedJedis) throws Exception {
             final ShardedJedis shardedJedis = pooledShardedJedis.getObject();
             for (Jedis jedis : shardedJedis.getAllShards()) {
@@ -272,6 +274,7 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
             }
         }
 
+        @Override
         public boolean validateObject(PooledObject<ShardedJedis> pooledShardedJedis) {
             try {
                 ShardedJedis jedis = pooledShardedJedis.getObject();
@@ -286,12 +289,14 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
             }
         }
 
+        @Override
         public void activateObject(PooledObject<ShardedJedis> p) throws Exception {
-
+            // do-non
         }
 
+        @Override
         public void passivateObject(PooledObject<ShardedJedis> p) throws Exception {
-
+            // do-non
         }
     }
 
@@ -338,7 +343,7 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
             this.subscribeRetryWaitTimeMillis = subscribeRetryWaitTimeMillis;
         }
 
-        public void run() {
+        public @Override void run() {
             running.set(true);
             while (running.get()) {
                 jedis = new Jedis(host, port);

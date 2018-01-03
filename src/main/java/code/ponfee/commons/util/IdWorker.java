@@ -141,7 +141,9 @@ public final class IdWorker {
             id = Long.toHexString(idWorker.nextId());
             //id = Long.toString(idWorker.nextId(), 32);
             //id = Long.toUnsignedString(idWorker.nextId());
-            if (!set.add(id)) System.err.println(id);
+            if (!set.add(id)) {
+                System.err.println(id);
+            }
         }
     }
 

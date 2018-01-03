@@ -57,12 +57,20 @@ public final class ObjectUtils {
      * @return 如果相等, 则返回<code>true</code>
      */
     public static boolean equals(Object obj1, Object obj2) {
-        if (obj1 == obj2) return true;
-        if (obj1 == null || obj2 == null) return false;
+        if (obj1 == obj2) {
+            return true;
+        }
+        if (obj1 == null || obj2 == null) {
+            return false;
+        }
 
         Class<? extends Object> clazz = obj1.getClass();
-        if (!clazz.equals(obj2.getClass())) return false;
-        if (!clazz.isArray()) return obj1.equals(obj2);
+        if (!clazz.equals(obj2.getClass())) {
+            return false;
+        }
+        if (!clazz.isArray()) {
+            return obj1.equals(obj2);
+        }
 
         // obj1和obj2为同类型的数组
         if (obj1 instanceof long[]) {

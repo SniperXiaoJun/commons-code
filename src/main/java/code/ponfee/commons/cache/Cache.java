@@ -47,7 +47,9 @@ public class Cache<T> {
         if (autoReleaseInSeconds > 0) {
             // 定时清理
             (executor = Executors.newSingleThreadScheduledExecutor()).scheduleAtFixedRate(() -> {
-                if (!lock.tryLock()) return;
+                if (!lock.tryLock()) {
+                    return;
+                }
                 try {
                     long now = now();
                     Entry<Comparable<?>, CacheValue<T>> entry;
@@ -126,7 +128,9 @@ public class Cache<T> {
      * @return
      */
     public T get(Comparable<?> key) {
-        if (isDestroy) return null;
+        if (isDestroy) {
+            return null;
+        }
 
         key = getEffectiveKey(key);
         CacheValue<T> cacheValue = cache.get(key);
@@ -145,7 +149,9 @@ public class Cache<T> {
      * @param key
      */
     public T getAndRemove(Comparable<?> key) {
-        if (isDestroy) return null;
+        if (isDestroy) {
+            return null;
+        }
 
         CacheValue<T> cacheValue = cache.remove(getEffectiveKey(key));
         return cacheValue == null ? null : cacheValue.getValue();
@@ -156,7 +162,9 @@ public class Cache<T> {
      * @return
      */
     public boolean containsKey(Comparable<?> key) {
-        if (isDestroy) return false;
+        if (isDestroy) {
+            return false;
+        }
 
         key = getEffectiveKey(key);
         CacheValue<T> cacheValue = cache.get(key);
@@ -176,7 +184,9 @@ public class Cache<T> {
      * @return
      */
     public boolean containsValue(T value) {
-        if (isDestroy) return false;
+        if (isDestroy) {
+            return false;
+        }
 
         Entry<Comparable<?>, CacheValue<T>> entry;
         for (Iterator<Entry<Comparable<?>, CacheValue<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
@@ -198,7 +208,9 @@ public class Cache<T> {
      * @return  the collection of values
      */
     public Collection<T> values() {
-        if (isDestroy) return Collections.emptyList();
+        if (isDestroy) {
+            return Collections.emptyList();
+        }
 
         Collection<T> values = new ArrayList<>();
         Entry<Comparable<?>, CacheValue<T>> entry;
@@ -218,7 +230,9 @@ public class Cache<T> {
      * @return
      */
     public int size() {
-        if (isDestroy) return 0;
+        if (isDestroy) {
+            return 0;
+        }
 
         int size = 0;
         long now = now();

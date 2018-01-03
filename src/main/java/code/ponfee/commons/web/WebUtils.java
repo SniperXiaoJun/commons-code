@@ -202,7 +202,9 @@ public final class WebUtils {
      */
     public static String getUrlSuffix(HttpServletRequest req) {
         String url = req.getRequestURI();
-        if (url.indexOf(".") < 0) return null;
+        if (url.indexOf(".") < 0) {
+            return null;
+        }
 
         String[] pathInfos = url.toString().split("/");
         String endUrl = pathInfos[pathInfos.length - 1];
@@ -222,7 +224,9 @@ public final class WebUtils {
      */
     public static String getCookie(HttpServletRequest req, String name) {
         Cookie[] cookies = req.getCookies();
-        if (cookies == null) return null;
+        if (cookies == null) {
+            return null;
+        }
 
         for (Cookie c : cookies) {
             if (name.equals(c.getName())) {
@@ -332,10 +336,14 @@ public final class WebUtils {
      */
     public static String getSessionTrace(HttpServletRequest req) {
         String authToken = req.getParameter(SESSION_TRACE_PARAME); // from parame
-        if (authToken != null) return authToken;
+        if (authToken != null) {
+            return authToken;
+        }
 
         authToken = WebUtils.getCookie(req, SESSION_TRACE_COOKIE); // from cooike
-        if (authToken != null) return authToken;
+        if (authToken != null) {
+            return authToken;
+        }
 
         return WebUtils.getHeader(req, SESSION_TRACE_HEADER); // from header;
     }

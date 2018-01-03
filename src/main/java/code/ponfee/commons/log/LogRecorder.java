@@ -132,7 +132,9 @@ public abstract class LogRecorder {
     }
 
     private String getLogs(LogAnnotation log) {
-        if (log == null) return "";
+        if (log == null) {
+            return "";
+        }
 
         return new StringBuilder("-[").append(log.type())
                                       .append(log.desc() != null ? "," + log.desc() : "")

@@ -53,8 +53,11 @@ public class PKCS7Signature {
      */
     public static byte[] sign(PrivateKey[] privKeys, X509Certificate[] certs, byte[] data, boolean attach) {
         ContentInfo contentInfo = null;
-        if (attach) contentInfo = new ContentInfo(data);
-        else contentInfo = new ContentInfo(ContentInfo.DATA_OID, null);
+        if (attach) {
+            contentInfo = new ContentInfo(data);
+        } else {
+            contentInfo = new ContentInfo(ContentInfo.DATA_OID, null);
+        }
         return sign(contentInfo, data, certs, privKeys);
     }
 
@@ -81,7 +84,9 @@ public class PKCS7Signature {
     public static byte[] sign(PrivateKey[] privKeys, X509Certificate[] certs, String data, boolean attach) {
         try {
             DerValue dv = null;
-            if (attach) dv = new DerValue(data);
+            if (attach) {
+                dv = new DerValue(data);
+            }
             ContentInfo contentInfo = new ContentInfo(ContentInfo.DATA_OID, dv);
             return sign(contentInfo, data.getBytes(), certs, privKeys);
         } catch (IOException e) {

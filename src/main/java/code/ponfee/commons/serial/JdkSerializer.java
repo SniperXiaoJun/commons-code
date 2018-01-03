@@ -17,6 +17,7 @@ import code.ponfee.commons.reflect.ClassUtils;
  */
 public class JdkSerializer extends Serializer {
 
+    @Override
     public <T extends Object> byte[] serialize(T t, boolean isCompress) {
         if (t == null) {
             return null;
@@ -55,6 +56,7 @@ public class JdkSerializer extends Serializer {
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
         if (data == null || data.length == 0) {
             return null;

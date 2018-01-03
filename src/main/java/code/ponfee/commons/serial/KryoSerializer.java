@@ -39,6 +39,7 @@ public class KryoSerializer extends Serializer {
         }).softReferences().build();
     }
 
+    @Override
     public <T extends Object> byte[] serialize(T t, boolean isCompress) {
         if (t == null) {
             return null;
@@ -75,6 +76,7 @@ public class KryoSerializer extends Serializer {
         }
     }
 
+    @Override
     public <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
         if (data == null) {
             return null;

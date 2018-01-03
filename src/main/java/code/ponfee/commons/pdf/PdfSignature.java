@@ -101,7 +101,9 @@ public class PdfSignature {
     public static byte[] sign(byte[] pdf, Stamp[] stamps, Signer signer) {
         byte[] bytes = sign(pdf, stamps[0], signer);
         for (int i = 1; i < stamps.length; i++) {
-            if (stamps[i] == null) continue;
+            if (stamps[i] == null) {
+                continue;
+            }
             bytes = sign(bytes, stamps[i], signer);
         }
         return bytes;

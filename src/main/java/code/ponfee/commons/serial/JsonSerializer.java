@@ -22,12 +22,13 @@ import code.ponfee.commons.io.ExtendedGZIPOutputStream;
 public class JsonSerializer extends Serializer {
 
     /** json object mapper */
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
     static {
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
+    @Override
     public <T extends Object> byte[] serialize(T t, boolean isCompress) {
         if (t == null) {
             return null;
@@ -35,7 +36,7 @@ public class JsonSerializer extends Serializer {
 
         GZIPOutputStream gzout = null;
         try {
-            byte[] data = mapper.writeValueAsBytes(t);
+            byte[] data = MAPPER.writeValueAsBytes(t);
             if (isCompress) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream(BYTE_SIZE);
                 gzout = new ExtendedGZIPOutputStream(baos);
@@ -56,6 +57,7 @@ public class JsonSerializer extends Serializer {
         }
     }
 
+    @Override
     public <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
         if (data == null) {
             return null;
@@ -67,7 +69,7 @@ public class JsonSerializer extends Serializer {
                 gzin = new GZIPInputStream(new ByteArrayInputStream(data));
                 data =  IOUtils.toByteArray(gzin);
             }
-            return mapper.readValue(data, clazz);
+            return MAPPER.readValue(data, clazz);
         } catch (IOException e) {
             throw new SerializationException(e);
         } finally {

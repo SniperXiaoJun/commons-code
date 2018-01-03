@@ -271,7 +271,9 @@ final class ClassPathResourceLoader {
      */
     private static boolean checkWithinClass(Class<?> contextClass, 
             String filepath, String encoding) throws IOException {
-        if (contextClass == null) return true;
+        if (contextClass == null) {
+            return true;
+        }
 
         String destPath = contextClass.getProtectionDomain().getCodeSource().getLocation().getFile();
         destPath = URLDecoder.decode(destPath, encoding);

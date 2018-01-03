@@ -106,10 +106,13 @@ public class PBKDF2SunJce {
         // Compare the hashes in constant time. The password is correct if
         // both hashes match.
 
-        if (hash.length != testHash.length) return false;
+        if (hash.length != testHash.length) {
+            return false;
+        }
         byte ret = 0;
-        for (int i = 0; i < testHash.length; i++)
+        for (int i = 0; i < testHash.length; i++) {
             ret |= hash[i] ^ testHash[i];
+        }
         return ret == 0;
     }
 
@@ -139,8 +142,9 @@ public class PBKDF2SunJce {
     public static void main(String[] args) {
         String alg = "HMACSHA224";
         // Print out 10 hashes
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++) {
             System.out.println(create("p\r\nassw0Rd!"));
+        }
         System.out.println("============================================\n");
 
         // Test password validation
@@ -164,8 +168,11 @@ public class PBKDF2SunJce {
                 failure = true;
             }
         }
-        if (failure) System.out.println("TESTS FAILED!");
-        else System.out.println("TESTS PASSED!");
+        if (failure) {
+            System.out.println("TESTS FAILED!");
+        } else {
+            System.out.println("TESTS PASSED!");
+        }
     }
 
 }

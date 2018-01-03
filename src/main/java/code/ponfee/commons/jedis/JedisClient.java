@@ -75,7 +75,9 @@ public class JedisClient implements DisposableBean {
                        int timeout, Serializer serializer) {
         List<JedisShardInfo> infos = new ArrayList<>();
         for (String str : hosts.split(SEPARATOR)) {
-            if (StringUtils.isBlank(str)) continue;
+            if (StringUtils.isBlank(str)) {
+                continue;
+            }
 
             String name, host, port, password = null;
             String[] array = str.split(":");

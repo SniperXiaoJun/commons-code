@@ -176,7 +176,9 @@ public class HttpParams {
 
     // --------------------------------------private method-----------------------------------
     private static void parseParams(Map<String, String[]> map, byte[] queryString, String encoding) {
-        if (queryString == null || queryString.length == 0) return;
+        if (queryString == null || queryString.length == 0) {
+            return;
+        }
 
         Charset charset = Charset.forName(encoding);
         int ix = 0, ox = 0;
@@ -234,10 +236,15 @@ public class HttpParams {
     }
 
     private static byte decodeHex(byte b) {
-        if ((b >= 48) && (b <= 57)) return (byte) (b - 48);
-        if ((b >= 97) && (b <= 102)) return (byte) (b - 97 + 10);
-        if ((b >= 65) && (b <= 70)) return (byte) (b - 65 + 10);
-        return 0;
+        if ((b >= 48) && (b <= 57)) {
+            return (byte) (b - 48);
+        } else if ((b >= 97) && (b <= 102)) {
+            return (byte) (b - 97 + 10);
+        } else if ((b >= 65) && (b <= 70)) {
+            return (byte) (b - 65 + 10);
+        } else {
+            return 0;
+        }
     }
 
     public static void main(String[] args) {

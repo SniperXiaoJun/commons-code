@@ -35,7 +35,9 @@ public class Dates {
      * @return 有效返回true, 反之false
      */
     public static boolean isValidDate(String date, String pattern) {
-        if (StringUtils.isEmpty(date)) return false;
+        if (StringUtils.isEmpty(date)) {
+            return false;
+        }
 
         try {
             toDate(date, pattern);

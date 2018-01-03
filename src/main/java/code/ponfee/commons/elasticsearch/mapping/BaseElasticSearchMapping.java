@@ -35,7 +35,7 @@ public abstract class BaseElasticSearchMapping implements IElasticSearchMapping 
         this.version = version;
     }
 
-    public XContentBuilder getMapping() {
+    public @Override XContentBuilder getMapping() {
         try {
             return internalGetMapping();
         } catch(Exception e) {
@@ -43,11 +43,12 @@ public abstract class BaseElasticSearchMapping implements IElasticSearchMapping 
         }
     }
 
+    @Override
     public String getIndexType() {
         return indexType;
     }
 
-    public Version getVersion() { return version; }
+    public @Override Version getVersion() { return version; }
 
     public XContentBuilder internalGetMapping() throws IOException {
 

@@ -19,7 +19,9 @@ public final class PageBoundsResolver {
      * @return
      */
     public static List<PageBounds> resolve(int pageNum, int pageSize, long... subTotalCounts) {
-        if (subTotalCounts == null || subTotalCounts.length == 0) return null;
+        if (subTotalCounts == null || subTotalCounts.length == 0) {
+            return null;
+        }
 
         // 总记录数
         long totalCounts = 0;
@@ -54,7 +56,9 @@ public final class PageBoundsResolver {
         List<PageBounds> bounds = new ArrayList<>();
         long start = offset, end = start + pageSize, cursor = 0;
         for (int limit, i = 0; i < subTotalCounts.length; cursor += subTotalCounts[i], i++) {
-            if (start >= cursor + subTotalCounts[i]) continue;
+            if (start >= cursor + subTotalCounts[i]) {
+                continue;
+            }
 
             offset = start - cursor;
             if (end > cursor + subTotalCounts[i]) {

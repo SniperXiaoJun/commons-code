@@ -136,7 +136,9 @@ public class JedisLock implements Lock, java.io.Serializable {
             if (Thread.interrupted()) {
                 throw new InterruptedException();
             }
-            if (tryLock()) break;
+            if (tryLock()) {
+                break;
+            }
             TimeUnit.MILLISECONDS.sleep(sleepMillis);
         }
     }
@@ -149,7 +151,7 @@ public class JedisLock implements Lock, java.io.Serializable {
             Jedis jedis = shardedJedis.getShard(lockKey);
 
             // 仅当lockKey不存在才能设置成功并返回1，否则setnx不做任何动作返回0
-            Long result = jedis.setnx(lockKey, buildValue());
+            Long result = jedis.setnx(lockKey, generateValue());
             if (result != null && result.intValue() == 1) {
                 jedis.expire(lockKey, timeoutSeconds); // 成功则需要设置失效期
                 return true;
@@ -166,7 +168,7 @@ public class JedisLock implements Lock, java.io.Serializable {
             } else {
                 // 锁已超时，争抢锁（事务控制）
                 Transaction tx = jedis.multi();
-                tx.getSet(lockKey, buildValue());
+                tx.getSet(lockKey, generateValue());
                 tx.expire(lockKey, JedisOperations.getActualExpire(timeoutSeconds));
                 List<Object> exec = tx.exec(); // exec执行完后被监控的key会自动unwatch
                 return exec != null && !exec.isEmpty() 
@@ -215,6 +217,8 @@ public class JedisLock implements Lock, java.io.Serializable {
                 tx.del(lockKey);
                 tx.exec(); // 自动unwatch
             }
+
+            LOCK_VALUE.remove(); // 释放
         });
     }
 
@@ -269,7 +273,7 @@ public class JedisLock implements Lock, java.io.Serializable {
      * 获取锁值
      * @return
      */
-    private byte[] buildValue() {
+    private byte[] generateValue() {
         UUID uuid = UUID.randomUUID();
         byte[] value = ByteBuffer.allocate(24)
                                  .putLong(uuid.getMostSignificantBits()) // 8 byte most bits of uuid

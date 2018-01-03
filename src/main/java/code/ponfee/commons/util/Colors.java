@@ -11,12 +11,16 @@ import org.apache.commons.lang3.StringUtils;
 public final class Colors {
 
     public static Color hex2color(String hex) {
-        if (hex == null || hex.isEmpty()) return null;
+        if (hex == null || hex.isEmpty()) {
+            return null;
+        }
         return new Color(Integer.parseInt(hex.substring(1), 16));
     }
 
     public static String color2hex(Color c) {
-        if (c == null) return null;
+        if (c == null) {
+            return null;
+        }
 
         return '#' + toHex(c.getRed()) + toHex(c.getGreen()) + toHex(c.getBlue());
     }

@@ -88,7 +88,9 @@ public class ValueOperations extends JedisOperations {
             int number = 0;
             for (Jedis jedis : shardedJedis.getAllShards()) {
                 Set<String> keys = jedis.keys(keyWildcard);
-                if (keys == null || keys.isEmpty()) continue;
+                if (keys == null || keys.isEmpty()) {
+                    continue;
+                }
 
                 service.submit(new Callable<List<String>>() {
                     @Override
@@ -274,7 +276,9 @@ public class ValueOperations extends JedisOperations {
      */
     public <T extends Object> boolean setObject(byte[] key, T t,
                                                 boolean isCompress, int seconds) {
-        if (t == null) return false;
+        if (t == null) {
+            return false;
+        }
 
         return hook(shardedJedis -> {
             byte[] data = jedisClient.serialize(t, isCompress);
@@ -336,7 +340,9 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public boolean set(byte[] key, byte[] value, boolean isCompress, int seconds) {
-        if (value == null || key == null) return false;
+        if (value == null || key == null) {
+            return false;
+        }
 
         byte[] _value = isCompress ? GzipProcessor.compress(value) : value;
 
@@ -358,7 +364,9 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public byte[] get(byte[] key, boolean isCompress, Integer seconds) {
-        if (key == null) return null;
+        if (key == null) {
+            return null;
+        }
 
         return hook(shardedJedis -> {
             byte[] result = shardedJedis.get(key);
@@ -386,11 +394,15 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public Map<String, String> mget(String... keys) {
-        if (keys == null) return null;
+        if (keys == null) {
+            return null;
+        }
 
         return hook(shardedJedis -> {
             Collection<Jedis> jedisList = shardedJedis.getAllShards();
-            if (jedisList == null || jedisList.isEmpty()) return null;
+            if (jedisList == null || jedisList.isEmpty()) {
+                return null;
+            }
 
             Map<String, String> resultMap;
             if (jedisList.size() < keys.length) { // key数量大于分片数量，则采用mget方式
@@ -409,7 +421,9 @@ public class ValueOperations extends JedisOperations {
                     try {
                         // 所有的 future get 等待
                         List<String> list = service.take().get();
-                        if (list == null || list.isEmpty()) continue;
+                        if (list == null || list.isEmpty()) {
+                            continue;
+                        }
                         String s;
                         for (int i = 0; i < keys.length; i++) {
                             s = list.get(i);
@@ -425,7 +439,9 @@ public class ValueOperations extends JedisOperations {
                 resultMap = new HashMap<>();
                 for (String k : keys) {
                     String v = shardedJedis.get(k);
-                    if (v != null) resultMap.put(k, v);
+                    if (v != null) {
+                        resultMap.put(k, v);
+                    }
                 }
             }
             return resultMap;
@@ -439,11 +455,15 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public Map<byte[], byte[]> mget(boolean isCompress, byte[]... keys) {
-        if (keys == null) return null;
+        if (keys == null) {
+            return null;
+        }
 
         return hook(shardedJedis -> {
             Collection<Jedis> jedisList = shardedJedis.getAllShards();
-            if (jedisList == null || jedisList.isEmpty()) return null;
+            if (jedisList == null || jedisList.isEmpty()) {
+                return null;
+            }
 
             Map<byte[], byte[]> resultMap;
             if (jedisList.size() < keys.length) { // key数量大于分片数量，则采用mget方式
@@ -463,7 +483,9 @@ public class ValueOperations extends JedisOperations {
                         // 获取异步执行的返回数据
                         byte[] v;
                         List<byte[]> list = service.take().get();
-                        if (list == null || list.isEmpty()) continue;
+                        if (list == null || list.isEmpty()) {
+                            continue;
+                        }
                         for (int i = 0; i < keys.length; i++) {
                             v = list.get(i);
                             if (v != null && !resultMap.containsKey(keys[i])) {
@@ -482,7 +504,9 @@ public class ValueOperations extends JedisOperations {
                 byte[] v;
                 for (byte[] k : (byte[][]) keys) {
                     v = shardedJedis.get(k);
-                    if (v == null) continue;
+                    if (v == null) {
+                        continue;
+                    }
                     if (isCompress) {
                         v = GzipProcessor.decompress(v);
                     }
@@ -505,12 +529,16 @@ public class ValueOperations extends JedisOperations {
      */
     public <T extends Object> Map<byte[], T> mgetObject(Class<T> clazz, boolean isCompress, byte[]... keys) {
         Map<byte[], byte[]> datas = this.mget(false, keys);
-        if (datas == null || datas.isEmpty()) return null;
+        if (datas == null || datas.isEmpty()) {
+            return null;
+        }
 
         HashMap<byte[], T> result = new HashMap<>();
         for (Entry<byte[], byte[]> entry : datas.entrySet()) {
             T t = jedisClient.deserialize(entry.getValue(), clazz, isCompress);
-            if (t != null) result.put(entry.getKey(), t);
+            if (t != null) {
+                result.put(entry.getKey(), t);
+            }
         }
         return result;
     }

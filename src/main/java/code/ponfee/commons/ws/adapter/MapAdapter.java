@@ -27,7 +27,9 @@ public abstract class MapAdapter<K, V> extends XmlAdapter<MapEntry[], Map<K, V>>
     }
 
     public @Override MapEntry<K, V>[] marshal(Map<K, V> map) throws Exception {
-        if (map == null) return null;
+        if (map == null) {
+            return null;
+        }
 
         MapEntry<K, V>[] entries = new MapEntry[map.size()];
         int i = 0;
@@ -38,7 +40,9 @@ public abstract class MapAdapter<K, V> extends XmlAdapter<MapEntry[], Map<K, V>>
     }
 
     public @Override Map<K, V> unmarshal(MapEntry[] entries) throws Exception {
-        if (entries == null) return null;
+        if (entries == null) {
+            return null;
+        }
 
         Map<K, V> map = Maps.newLinkedHashMap();
         for (MapEntry<K, V> e : entries) {

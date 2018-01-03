@@ -195,7 +195,9 @@ public final class PKCS7Envelope {
 
     private static AlgorithmMapping getAlgByOid(String oid) {
         for (AlgorithmMapping alg : AlgorithmMapping.values()) {
-            if (alg.oid.equals(oid)) return alg;
+            if (alg.oid.equals(oid)) {
+                return alg;
+            }
         }
         throw new IllegalArgumentException("unknown the alg oid: " + oid);
     }

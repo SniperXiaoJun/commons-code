@@ -236,7 +236,9 @@ public class MailEnvelope implements Serializable {
     }
 
     private String substr(String str) {
-        if (str == null) return null;
+        if (str == null) {
+            return null;
+        }
 
         if (str.length() > MAX_LEN) {
             StringBuilder builder = new StringBuilder(str);
@@ -247,7 +249,9 @@ public class MailEnvelope implements Serializable {
     }
 
     private String substr(Object o) {
-        if (o == null) return null;
+        if (o == null) {
+            return null;
+        }
         return substr(o.toString());
     }
 

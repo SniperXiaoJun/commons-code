@@ -24,11 +24,6 @@ public class EmailValidator {
         "lifehacker.biz", "corbad.org", "megacheaphosting.com", "verify-email.org", "discursive.com" };
     private static final AtomicInteger COUNTER = new AtomicInteger();
 
-    public static void main(String[] args) {
-        for (int i = 0; i < 1; i++)
-            System.out.println(verify("fupengfei163@163.com"));
-    }
-
     /**
      * 验证
      * @param email
@@ -71,22 +66,30 @@ public class EmailValidator {
             }
 
             log.append(client.getReplyString() + "\n");
-            if (SERVICE_READY != client.getReplyCode()) return false;
+            if (SERVICE_READY != client.getReplyCode()) {
+                return false;
+            }
 
             client.login(hostname);
             log.append("> HELO " + hostname + "\n");
             log.append("=" + client.getReplyString() + "\n");
-            if (ACTION_OK != client.getReplyCode()) return false;
+            if (ACTION_OK != client.getReplyCode()) {
+                return false;
+            }
 
             client.setSender("check@" + hostname);
             log.append("> MAIL FROM: <check@" + hostname + ">\n");
             log.append("=" + client.getReplyString() + "\n");
-            if (ACTION_OK != client.getReplyCode()) return false;
+            if (ACTION_OK != client.getReplyCode()) {
+                return false;
+            }
 
             client.addRecipient(email);
             log.append("> RCPT TO: <" + email + ">\n");
             log.append("=" + client.getReplyString() + "\n");
-            if (ACTION_OK != client.getReplyCode()) return false;
+            if (ACTION_OK != client.getReplyCode()) {
+                return false;
+            }
 
             client.logout();
             log.append("> QUIT" + "\n");
@@ -107,9 +110,16 @@ public class EmailValidator {
 
     public static boolean verify(String email, int validateTimes) {
         for (int i = 0; i < validateTimes; i++) {
-            if (!verify(email)) return false;
+            if (!verify(email)) {
+                return false;
+            }
         }
         return true;
     }
 
+    public static void main(String[] args) {
+        for (int i = 0; i < 1; i++) {
+            System.out.println(verify("fupengfei163@163.com"));
+        }
+    }
 }

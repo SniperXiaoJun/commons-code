@@ -104,6 +104,7 @@ public class RedisCircuitBreaker implements CircuitBreaker {
         return countByRangeMillis(key, now - unit.toMillis(time), now);
     }
 
+    @Override
     public long countByRange(String key, Date from, Date to) {
         return countByRangeMillis(key, from.getTime(), to.getTime());
     }

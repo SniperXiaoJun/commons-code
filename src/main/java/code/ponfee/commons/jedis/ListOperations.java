@@ -319,7 +319,9 @@ public class ListOperations extends JedisOperations {
             if (datas != null && !datas.isEmpty()) {
                 for (byte[] data : datas) {
                     T t = jedisClient.deserialize(data, clazz, isCompress);
-                    if (t != null) result.add(t);
+                    if (t != null) {
+                        result.add(t);
+                    }
                 }
             }
             expire(shardedJedis, key, seconds);

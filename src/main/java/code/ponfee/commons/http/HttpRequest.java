@@ -266,7 +266,7 @@ public class HttpRequest {
     private static final String[] EMPTY_STRINGS = new String[0];
 
     private static final HostnameVerifier TRUSTED_VERIFIER = new HostnameVerifier() {
-        public boolean verify(String hostname, SSLSession session) {
+        public @Override boolean verify(String hostname, SSLSession session) {
             return true;
         }
     };
@@ -388,11 +388,11 @@ public class HttpRequest {
          * {@link URL#openConnection()}
          */
         ConnectionFactory DEFAULT = new ConnectionFactory() {
-            public HttpURLConnection create(URL url) throws IOException {
+            public @Override HttpURLConnection create(URL url) throws IOException {
                 return (HttpURLConnection) url.openConnection();
             }
 
-            public HttpURLConnection create(URL url, Proxy proxy) throws IOException {
+            public @Override HttpURLConnection create(URL url, Proxy proxy) throws IOException {
                 return (HttpURLConnection) url.openConnection(proxy);
             }
         };
@@ -425,7 +425,7 @@ public class HttpRequest {
         void onUpload(long uploaded, long total);
 
         UploadProgress DEFAULT = new UploadProgress() {
-            public void onUpload(long uploaded, long total) {}
+            public @Override void onUpload(long uploaded, long total) {}
         };
     }
 
@@ -613,9 +613,15 @@ public class HttpRequest {
          * @since 2.3.1
          */
         public static byte[] encodeBytesToBytes(byte[] source, int off, int len) {
-            if (source == null) throw new NullPointerException("Cannot serialize a null array.");
-            if (off < 0) throw new IllegalArgumentException("Cannot have negative offset: " + off);
-            if (len < 0) throw new IllegalArgumentException("Cannot have length offset: " + len);
+            if (source == null) {
+                throw new NullPointerException("Cannot serialize a null array.");
+            }
+            if (off < 0) {
+                throw new IllegalArgumentException("Cannot have negative offset: " + off);
+            }
+            if (len < 0) {
+                throw new IllegalArgumentException("Cannot have length offset: " + len);
+            }
             if (off + len > source.length) {
                 throw new IllegalArgumentException(String.format("Cannot have offset of %d and length of %d with array of length %d", off, len, source.length));
             }
@@ -628,8 +634,9 @@ public class HttpRequest {
             int d = 0;
             int e = 0;
             int len2 = len - 2;
-            for (; d < len2; d += 3, e += 4)
+            for (; d < len2; d += 3, e += 4) {
                 encode3to4(source, d + off, 3, outBuff, e);
+            }
 
             if (d < len) {
                 encode3to4(source, d + off, len - d, outBuff, e);
@@ -829,26 +836,45 @@ public class HttpRequest {
      * @return list with the same elements
      */
     private static List<Object> arrayToList(final Object array) {
-        if (array instanceof Object[]) return Arrays.asList((Object[]) array);
+        if (array instanceof Object[]) {
+            return Arrays.asList((Object[]) array);
+        }
 
         List<Object> result = new ArrayList<Object>();
         // Arrays of the primitive types can't be cast to array of Object, so this:
-        if (array instanceof int[]) for (int value : (int[]) array)
-            result.add(value);
-        else if (array instanceof boolean[]) for (boolean value : (boolean[]) array)
-            result.add(value);
-        else if (array instanceof long[]) for (long value : (long[]) array)
-            result.add(value);
-        else if (array instanceof float[]) for (float value : (float[]) array)
-            result.add(value);
-        else if (array instanceof double[]) for (double value : (double[]) array)
-            result.add(value);
-        else if (array instanceof short[]) for (short value : (short[]) array)
-            result.add(value);
-        else if (array instanceof byte[]) for (byte value : (byte[]) array)
-            result.add(value);
-        else if (array instanceof char[]) for (char value : (char[]) array)
-            result.add(value);
+        if (array instanceof int[]) {
+            for (int value : (int[]) array) {
+                result.add(value);
+            }
+        } else if (array instanceof boolean[]) {
+            for (boolean value : (boolean[]) array) {
+                result.add(value);
+            }
+        } else if (array instanceof long[]) {
+            for (long value : (long[]) array) {
+                result.add(value);
+            }
+        } else if (array instanceof float[]) {
+            for (float value : (float[]) array) {
+                result.add(value);
+            }
+        } else if (array instanceof double[]) {
+            for (double value : (double[]) array) {
+                result.add(value);
+            }
+        } else if (array instanceof short[]) {
+            for (short value : (short[]) array) {
+                result.add(value);
+            }
+        } else if (array instanceof byte[]) {
+            for (byte value : (byte[]) array) {
+                result.add(value);
+            }
+        } else if (array instanceof char[]) {
+            for (char value : (char[]) array) {
+                result.add(value);
+            }
+        }
         return result;
     }
 
@@ -876,7 +902,9 @@ public class HttpRequest {
 
         String host = parsed.getHost();
         int port = parsed.getPort();
-        if (port != -1) host = host + ':' + Integer.toString(port);
+        if (port != -1) {
+            host = host + ':' + Integer.toString(port);
+        }
 
         try {
             String encoded = new URI(parsed.getProtocol(), host, parsed.getPath(), parsed.getQuery(), null).toASCIIString();
@@ -904,7 +932,9 @@ public class HttpRequest {
      */
     public static String append(final CharSequence url, final Map<?, ?> params) {
         final String baseUrl = url.toString();
-        if (params == null || params.isEmpty()) return baseUrl;
+        if (params == null || params.isEmpty()) {
+            return baseUrl;
+        }
 
         final StringBuilder result = new StringBuilder(baseUrl);
 
@@ -938,7 +968,9 @@ public class HttpRequest {
      */
     public static String append(final CharSequence url, final Object... params) {
         final String baseUrl = url.toString();
-        if (params == null || params.length == 0) return baseUrl;
+        if (params == null || params.length == 0) {
+            return baseUrl;
+        }
 
         if (params.length % 2 != 0) {
             throw new IllegalArgumentException("Must specify an even number of parameter names/values");
@@ -1387,11 +1419,14 @@ public class HttpRequest {
         if (hosts != null && hosts.length > 0) {
             StringBuilder separated = new StringBuilder();
             int last = hosts.length - 1;
-            for (int i = 0; i < last; i++)
+            for (int i = 0; i < last; i++) {
                 separated.append(hosts[i]).append('|');
+            }
             separated.append(hosts[last]);
             setProperty("http.nonProxyHosts", separated.toString());
-        } else setProperty("http.nonProxyHosts", null);
+        } else {
+            setProperty("http.nonProxyHosts", null);
+        }
     }
 
     /**
@@ -1404,19 +1439,12 @@ public class HttpRequest {
      * @return previous value
      */
     private static String setProperty(final String name, final String value) {
-        final PrivilegedAction<String> action;
-        if (value != null) action = new PrivilegedAction<String>() {
-
-            public String run() {
-                return System.setProperty(name, value);
-            }
-        };
-        else action = new PrivilegedAction<String>() {
-
-            public String run() {
-                return System.clearProperty(name);
-            }
-        };
+        PrivilegedAction<String> action;
+        if (value != null) {
+            action = () -> System.setProperty(name, value);
+        } else {
+            action = () -> System.clearProperty(name);
+        }
         return AccessController.doPrivileged(action);
     }
 
@@ -1484,9 +1512,12 @@ public class HttpRequest {
 
     private HttpURLConnection createConnection() {
         try {
-            final HttpURLConnection connection;
-            if (httpProxyHost != null) connection = CONNECTION_FACTORY.create(url, createProxy());
-            else connection = CONNECTION_FACTORY.create(url);
+            HttpURLConnection connection;
+            if (httpProxyHost != null) {
+                connection = CONNECTION_FACTORY.create(url, createProxy());
+            } else {
+                connection = CONNECTION_FACTORY.create(url);
+            }
             connection.setRequestMethod(requestMethod);
             return connection;
         } catch (IOException e) {
@@ -2064,8 +2095,11 @@ public class HttpRequest {
      * @return this request
      */
     public HttpRequest headers(final Map<String, String> headers) {
-        if (!headers.isEmpty()) for (Entry<String, String> header : headers.entrySet())
-            header(header);
+        if (!headers.isEmpty()) {
+            for (Entry<String, String> header : headers.entrySet()) {
+                header(header);
+            }
+        }
         return this;
     }
 
@@ -2170,8 +2204,9 @@ public class HttpRequest {
         final List<String> values = headers.get(name);
         if (values != null && !values.isEmpty()) {
             return values.toArray(new String[values.size()]);
+        } else {
+            return EMPTY_STRINGS;
         }
-        else return EMPTY_STRINGS;
     }
 
     /**
@@ -2216,7 +2251,9 @@ public class HttpRequest {
         }
 
         int end = header.indexOf(';', start);
-        if (end == -1) end = headerLength;
+        if (end == -1) {
+            end = headerLength;
+        }
 
         Map<String, String> params = new LinkedHashMap<String, String>();
         while (start < end) {
@@ -2226,11 +2263,12 @@ public class HttpRequest {
                 if (name.length() > 0) {
                     String value = header.substring(nameEnd + 1, end).trim();
                     int length = value.length();
-                    if (length != 0) if (length > 2 && '"' == value.charAt(0)
-                        && '"' == value.charAt(length - 1)) {
-                        params.put(name, value.substring(1, length - 1));
-                    } else {
-                        params.put(name, value);
+                    if (length != 0) {
+                        if (length > 2 && '"' == value.charAt(0) && '"' == value.charAt(length - 1)) {
+                            params.put(name, value.substring(1, length - 1));
+                        } else {
+                            params.put(name, value);
+                        }
                     }
                 }
             }
@@ -2253,14 +2291,20 @@ public class HttpRequest {
      * @return parameter value or null if none
      */
     protected String getParam(final String value, final String paramName) {
-        if (value == null || value.length() == 0) return null;
+        if (value == null || value.length() == 0) {
+            return null;
+        }
 
         final int length = value.length();
         int start = value.indexOf(';') + 1;
-        if (start == 0 || start == length) return null;
+        if (start == 0 || start == length) {
+            return null;
+        }
 
         int end = value.indexOf(';', start);
-        if (end == -1) end = length;
+        if (end == -1) {
+            end = length;
+        }
 
         while (start < end) {
             int nameEnd = value.indexOf('=', start);
@@ -2268,17 +2312,21 @@ public class HttpRequest {
                 && paramName.equals(value.substring(start, nameEnd).trim())) {
                 String paramValue = value.substring(nameEnd + 1, end).trim();
                 int valueLength = paramValue.length();
-                if (valueLength != 0) if (valueLength > 2 && '"' == paramValue.charAt(0)
-                    && '"' == paramValue.charAt(valueLength - 1)) {
-                    return paramValue.substring(1, valueLength - 1);
-                } else {
-                    return paramValue;
+                if (valueLength != 0) {
+                    if (valueLength > 2 && '"' == paramValue.charAt(0)
+                        && '"' == paramValue.charAt(valueLength - 1)) {
+                        return paramValue.substring(1, valueLength - 1);
+                    } else {
+                        return paramValue;
+                    }
                 }
             }
 
             start = end + 1;
             end = value.indexOf(';', start);
-            if (end == -1) end = length;
+            if (end == -1) {
+                end = length;
+            }
         }
 
         return null;
@@ -2628,13 +2676,18 @@ public class HttpRequest {
      * @return this request
      */
     public HttpRequest progress(final UploadProgress callback) {
-        if (callback == null) progress = UploadProgress.DEFAULT;
-        else progress = callback;
+        if (callback == null) {
+            progress = UploadProgress.DEFAULT;
+        } else {
+            progress = callback;
+        }
         return this;
     }
 
     private HttpRequest incrementTotalSize(final long size) {
-        if (totalSize == -1) totalSize = 0;
+        if (totalSize == -1) {
+            totalSize = 0;
+        }
         totalSize += size;
         return this;
     }
@@ -2690,7 +2743,9 @@ public class HttpRequest {
      * @throws IOException
      */
     protected HttpRequest openOutput() throws IOException {
-        if (output != null) return this;
+        if (output != null) {
+            return this;
+        }
         getConnection().setDoOutput(true);
         final String charset = getParam(getConnection().getRequestProperty(HEADER_CONTENT_TYPE), PARAM_CHARSET);
         output = new RequestOutputStream(getConnection().getOutputStream(), charset, bufferSize);
@@ -2708,7 +2763,9 @@ public class HttpRequest {
             multipart = true;
             contentType(CONTENT_TYPE_MULTIPART).openOutput();
             output.write("--" + BOUNDARY + CRLF);
-        } else output.write(CRLF + "--" + BOUNDARY + CRLF);
+        } else {
+            output.write(CRLF + "--" + BOUNDARY + CRLF);
+        }
         return this;
     }
 
@@ -2738,10 +2795,14 @@ public class HttpRequest {
         final String filename, final String contentType) throws IOException {
         final StringBuilder partBuffer = new StringBuilder();
         partBuffer.append("form-data; name=\"").append(name);
-        if (filename != null) partBuffer.append("\"; filename=\"").append(filename);
+        if (filename != null) {
+            partBuffer.append("\"; filename=\"").append(filename);
+        }
         partBuffer.append('"');
         partHeader("Content-Disposition", partBuffer.toString());
-        if (contentType != null) partHeader(HEADER_CONTENT_TYPE, contentType);
+        if (contentType != null) {
+            partHeader(HEADER_CONTENT_TYPE, contentType);
+        }
         return send(CRLF);
     }
 
@@ -2944,7 +3005,9 @@ public class HttpRequest {
      * @throws HttpRequestException
      */
     public HttpRequest send(final byte[] input) throws HttpRequestException {
-        if (input == null) return this;
+        if (input == null) {
+            return this;
+        }
         incrementTotalSize(input.length);
         return send(new ByteArrayInputStream(input));
     }
@@ -3110,10 +3173,14 @@ public class HttpRequest {
         charset = getValidCharset(charset);
         try {
             openOutput();
-            if (!first) output.write('&');
+            if (!first) {
+                output.write('&');
+            }
             output.write(URLEncoder.encode(name.toString(), charset));
             output.write('=');
-            if (value != null) output.write(URLEncoder.encode(value.toString(), charset));
+            if (value != null) {
+                output.write(URLEncoder.encode(value.toString(), charset));
+            }
         } catch (IOException e) {
             throw new HttpRequestException(e);
         }
@@ -3130,8 +3197,11 @@ public class HttpRequest {
      */
     public HttpRequest form(final Map<?, ?> values, final String charset)
         throws HttpRequestException {
-        if (!values.isEmpty()) for (Entry<?, ?> entry : values.entrySet())
-            form(entry, charset);
+        if (!values.isEmpty()) {
+            for (Entry<?, ?> entry : values.entrySet()) {
+                form(entry, charset);
+            }
+        }
         return this;
     }
 
