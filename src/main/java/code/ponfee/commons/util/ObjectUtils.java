@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.math.Numbers;
 
 /**
@@ -43,6 +44,15 @@ public final class ObjectUtils {
      */
     public static String toString(Object obj) {
         return ReflectionToStringBuilder.reflectionToString(obj, ToStringStyle.JSON_STYLE);
+    }
+
+    /**
+     * 对象转json
+     * @param obj
+     * @return
+     */
+    public static String toJson(Object obj) {
+        return Jsons.NORMAL.stringify(obj);
     }
 
     /**

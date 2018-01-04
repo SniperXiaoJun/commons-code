@@ -98,11 +98,7 @@ public final class UrlCoder {
      * @return
      */
     public static String decodeURIComponent(String url, String charset) {
-        try {
-            return URLDecoder.decode(url, charset);
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalArgumentException(e);
-        }
+        return decodeURI(url, charset);
     }
 
     public static void main(String[] args) throws Exception {

@@ -1,8 +1,6 @@
 package code.ponfee.commons.http;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -11,16 +9,33 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.util.ObjectUtils;
+import code.ponfee.commons.util.UrlCoder;
 
 /**
  * http参数工具类
  * @author Ponfee
  */
 public class HttpParams {
+
+    // ----------------------------获取url中的参数----------------------------
+    public static Map<String, String[]> parseUrlParams(String url) {
+        return parseUrlParams(url, Files.DEFAULT_CHARSET);
+    }
+
+    public static Map<String, String[]> parseUrlParams(String url, String charset) {
+        int idx = url.indexOf('?');
+        return idx == -1 ? null : parseParams(url.substring(idx + 1), charset);
+    }
+
+    // ------------------------解析query string中的请求参数-------------------------
+    public static Map<String, String[]> parseParams(String queryString) {
+        return parseParams(queryString, Files.DEFAULT_CHARSET);
+    }
 
     /**
      * 解析参数
@@ -30,20 +45,23 @@ public class HttpParams {
      */
     public static Map<String, String[]> parseParams(String queryString, String encoding) {
         Map<String, String[]> params = new LinkedHashMap<>();
-        if (queryString == null || queryString.length() <= 0) {
+        if (queryString == null || queryString.length() == 0) {
             return params;
         }
 
-        byte[] bytes = null;
         if (encoding == null) {
-            bytes = queryString.getBytes();
-        } else {
-            bytes = queryString.getBytes(Charset.forName(encoding));
+            encoding = Files.DEFAULT_CHARSET;
         }
-        parseParams(params, bytes, encoding);
+
+        String[] kv;
+        for (String param : queryString.split("&")) {
+            kv = param.split("=", 2);
+            putParam(params, kv[0], kv.length == 1 ? "" : UrlCoder.decodeURIComponent(kv[1], encoding));
+        }
         return params;
     }
 
+    // --------------------------------构建参数--------------------------------
     /**
      * 键值对构建参数(默认UTF-8)
      * @param params
@@ -62,20 +80,23 @@ public class HttpParams {
     public static String buildParams(Map<String, ?> params, String encoding) {
         StringBuilder builder = new StringBuilder();
         String[] values;
+        Object value;
         for (Map.Entry<String, ?> entry : params.entrySet()) {
-            if (entry.getValue() instanceof String[]) {
-                values = (String[]) entry.getValue();
+            value = entry.getValue();
+            if (value != null && value.getClass().isArray()) {
+                values = new String[Array.getLength(value)];
+                for (int length = values.length, i = 0; i < length; i++) {
+                    values[i] = Objects.toString(Array.get(value, i), "");
+                }
             } else {
                 values = new String[] { Objects.toString(entry.getValue(), "") };
             }
 
-            try {
-                for (String value : values) {
-                    builder.append(entry.getKey()).append("=")
-                           .append(URLEncoder.encode(value, encoding)).append("&");
-                }
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
+            for (String val : values) {
+                builder.append(entry.getKey())
+                       .append("=")
+                       .append(UrlCoder.encodeURIComponent(val, encoding))
+                       .append("&");
             }
         }
 
@@ -85,6 +106,7 @@ public class HttpParams {
         return builder.toString();
     }
 
+    // ---------------------------------构建url地址---------------------------------
     /**
      * 构建url地址
      * @param url
@@ -97,8 +119,9 @@ public class HttpParams {
             return url;
         }
 
-        String queryString = buildParams(params, encoding);
-        return url + (url.indexOf('?') < 0 ? '?' : '&') + queryString;
+        return url 
+            + (url.indexOf('?') == -1 ? '?' : '&') 
+            + buildParams(params, encoding);
     }
 
     public static String buildUrlPath(String url, String encoding, String... params) {
@@ -113,34 +136,35 @@ public class HttpParams {
         return buildUrlPath(url, encoding, map);
     }
 
+    // ---------------------------------构建签名数据---------------------------------
     /**
      * 构建待签名数据
      * @param params 请求参数
      * @return
      */
-    public static String buildSigning(Map<String, String> params) {
+    public static String buildSigning(Map<String, ?> params) {
         return buildSigning(params, "", null);
     }
 
-    public static String buildSigning(Map<String, String> params, String[] excludes) {
+    public static String buildSigning(Map<String, ?> params, String[] excludes) {
         return buildSigning(params, "", excludes);
     }
 
-    public static String buildSigning(Map<String, String> params, String wrapChar, String[] excludes) {
+    public static String buildSigning(Map<String, ?> params, String wrapChar, String[] excludes) {
         List<String> filter = (excludes == null || excludes.length == 0)
                               ? Collections.emptyList() 
                               : Arrays.asList(excludes);
 
         // 过滤参数
         Map<String, String> signingMap = new TreeMap<>();
-        for (Map.Entry<String, String> p : params.entrySet()) {
-            if (filter.contains(p.getKey()) || StringUtils.isEmpty(p.getValue())) {
-                continue;
+        for (Map.Entry<String, ?> entry : params.entrySet()) {
+            if (!filter.contains(entry.getKey())
+                && StringUtils.isNotEmpty(Objects.toString(entry.getValue(), null))) {
+                signingMap.put(entry.getKey(), entry.getValue().toString());
             }
-            signingMap.put(p.getKey(), p.getValue());
         }
 
-        // 拼接待签名串
+        // 拼接待签名串，blank string to prevent if signingMap is empty
         StringBuilder signing = new StringBuilder("");
         for (Map.Entry<String, String> entry : signingMap.entrySet()) {
             signing.append(entry.getKey()).append('=').append(wrapChar)
@@ -152,117 +176,54 @@ public class HttpParams {
         return signing.toString();
     }
 
+    // ---------------------------------构建Form表单---------------------------------
     /**
      * 构建form表单
      * @param url
      * @param params
      * @return
      */
-    public static String buildForm(String url, Map<String, String> params) {
-        StringBuilder form = new StringBuilder(128);
+    public static String buildForm(String url, Map<String, ?> params) {
+        StringBuilder form = new StringBuilder(256);
         String formName = ObjectUtils.uuid22();
         form.append("<form action=\"").append(url).append("\" name=\"")
-            .append(formName).append("\" method=\"POST\">");
-        for (Map.Entry<String, String> param : params.entrySet()) {
-            form.append("<input type=\"hidden\" name=\"").append(param.getKey()).append("\" value=\"")
-                .append(StringUtils.defaultString(param.getValue())).append("\" />");
-        }
+            .append(formName).append("\" method=\"post\">");
 
-        form.append("</form>")
-            .append("<script>document.forms['").append(formName)
-            .append("'].submit();</script>");
-
-        return form.toString();
-    }
-
-    // --------------------------------------private method-----------------------------------
-    private static void parseParams(Map<String, String[]> map, byte[] queryString, String encoding) {
-        if (queryString == null || queryString.length == 0) {
-            return;
-        }
-
-        Charset charset = Charset.forName(encoding);
-        int ix = 0, ox = 0;
-        String key = null, value = null;
-        byte c;
-        while (ix < queryString.length) {
-            c = queryString[(ix++)];
-            switch ((char) c) {
-                case '&':
-                    value = new String(queryString, 0, ox, charset);
-                    if (key != null) {
-                        putMapEntry(map, key, value);
-                        key = null;
-                    }
-                    ox = 0;
-                    break;
-                case '=':
-                    if (key == null) {
-                        key = new String(queryString, 0, ox, charset);
-                        ox = 0;
-                    } else {
-                        queryString[(ox++)] = c;
-                    }
-                    break;
-                case '+':
-                    queryString[(ox++)] = 32;
-                    break;
-                case '%':
-                    queryString[(ox++)] = (byte) ((decodeHex(queryString[(ix++)]) << 4) + decodeHex(queryString[(ix++)]));
-                    break;
-                default:
-                    queryString[(ox++)] = c;
-                    break;
+        Object value;
+        for (Map.Entry<String, ?> param : params.entrySet()) {
+            value = param.getValue();
+            if (value != null && value.getClass().isArray()) {
+                for (int length = Array.getLength(value), i = 0; i < length; i++) {
+                    buildInputElement(form, param.getKey(), Array.get(value, i));
+                }
+            } else {
+                buildInputElement(form, param.getKey(), value);
             }
         }
 
-        if (key != null) {
-            value = new String(queryString, 0, ox, charset);
-            putMapEntry(map, key, value);
-        }
+        return form.append("</form>")
+                   .append("<script type=\"text/javascript\">document.forms['")
+                   .append(formName)
+                   .append("'].submit();</script>")
+                   .toString();
     }
 
-    private static void putMapEntry(Map<String, String[]> map, String name, String value) {
-        String[] newValues = null;
-        String[] oldValues = (String[]) map.get(name);
+    // --------------------------------------private method-----------------------------------
+    private static void putParam(Map<String, String[]> params, String name, String value) {
+        String[] oldValues = params.get(name);
         if (oldValues == null) {
-            newValues = new String[1];
-            newValues[0] = value;
+            params.put(name, new String[] { value });
         } else {
-            newValues = new String[oldValues.length + 1];
-            System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
-            newValues[oldValues.length] = value;
-        }
-        map.put(name, newValues);
-    }
-
-    private static byte decodeHex(byte b) {
-        if ((b >= 48) && (b <= 57)) {
-            return (byte) (b - 48);
-        } else if ((b >= 97) && (b <= 102)) {
-            return (byte) (b - 97 + 10);
-        } else if ((b >= 65) && (b <= 70)) {
-            return (byte) (b - 65 + 10);
-        } else {
-            return 0;
+            params.put(name, ArrayUtils.add(oldValues, value));
         }
     }
 
-    public static void main(String[] args) {
-        //String str = "service=http%3A%2F%2Flocalhost%2Fcas-client%2F&fdsa=fds人a";
-        //Map<String, String[]> map = parseParams(str, "UTF-8");
-        //System.out.println(((String[]) map.get("fdsa"))[0]);
-        //System.out.println(buildParams(map, "utf-8"));
-
-        Map<String, String> map = new LinkedHashMap<String, String>();
-        map.put("a", "1");
-        map.put("b", "2");
-        map.put("merReserved", "{a=1&b=2}");
-        String s = HttpParams.buildParams(map, "utf-8");
-        System.out.println(HttpParams.parseParams(s, "utf-8").get("merReserved")[0]);
-
-        System.out.println(buildUrlPath("/index.html", "utf-8", map));
-        
-        System.out.println(buildForm("http://localhost:8080", map));
+    private static void buildInputElement(StringBuilder form, String name, Object value) {
+        form.append("<input type=\"hidden\" name=\"")
+            .append(name)
+            .append("\" value=\"")
+            .append(Objects.toString(value, ""))
+            .append("\" />");
     }
+
 }
