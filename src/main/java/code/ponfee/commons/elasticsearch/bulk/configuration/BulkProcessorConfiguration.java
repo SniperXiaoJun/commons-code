@@ -8,7 +8,7 @@ import code.ponfee.commons.elasticsearch.bulk.options.BulkProcessingOptions;
 import code.ponfee.commons.elasticsearch.bulk.options.BulkProcessingOptionsBuilder;
 
 /**
- * bulk processor构建类
+ * bulk processor配置类
  * @author fupf
  */
 public class BulkProcessorConfiguration {

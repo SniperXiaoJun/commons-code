@@ -78,17 +78,16 @@ public class Wechats {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, String> getOAuth2(String appid, String secret, String code) {
+    public static Map<String, Object> getOAuth2(String appid, String secret, String code) {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("appid", appid);
         params.put("secret", secret);
         params.put("code", code);
         params.put("grant_type", "authorization_code");
-        Map<String, String> result = Http.post("https://api.weixin.qq.com/sns/oauth2/access_token")
+        Map<String, Object> result = Http.post("https://api.weixin.qq.com/sns/oauth2/access_token")
                                          .data(params).request(Map.class);
-        if (result.containsKey("errcode")) {
-            throw new RuntimeException(Jsons.NORMAL.stringify(result));
-        }
+
+        checkError(result);
         return result;
     }
 
@@ -114,16 +113,15 @@ public class Wechats {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, String> getUserInfoByOAuth2(String token, String openid) {
+    public static Map<String, Object> getUserInfoByOAuth2(String token, String openid) {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("access_token", token);
         params.put("openid", openid);
         params.put("lang", "zh_CN"); // this param can be unset
-        Map<String, String> result = Http.post("https://api.weixin.qq.com/sns/userinfo")
+        Map<String, Object> result = Http.post("https://api.weixin.qq.com/sns/userinfo")
                                          .data(params).request(Map.class);
-        if (result.containsKey("errcode")) {
-            throw new RuntimeException(Jsons.NORMAL.stringify(result));
-        }
+
+        checkError(result);
         return result;
     }
 
@@ -132,7 +130,7 @@ public class Wechats {
      * get global access token
      * @param appid
      * @param secret
-     * @return {access_token=?,expires_in=?}
+     * @return {access_token=token, expires_in=7200}
      */
     @SuppressWarnings("unchecked")
     public static String getAccessToken(String appid, String secret) {
@@ -142,7 +140,9 @@ public class Wechats {
         params.put("secret", secret);
         Map<String, Object> result = Http.post("https://api.weixin.qq.com/cgi-bin/token")
                                          .data(params).request(Map.class);
-        return getString(result, "access_token");
+
+        checkError(result);
+        return (String) result.get("access_token");
     }
 
     // -------------------------－－－－－－－通过全局access token获取用户信息－－－－－------------------------- //
@@ -180,15 +180,14 @@ public class Wechats {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, String> getUserInfoByGlobal(String token, String openid) {
+    public static Map<String, Object> getUserInfoByGlobal(String token, String openid) {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("access_token", token);
         params.put("openid", openid);
-        Map<String, String> result = Http.post("https://api.weixin.qq.com/cgi-bin/user/info")
+        Map<String, Object> result = Http.post("https://api.weixin.qq.com/cgi-bin/user/info")
                                          .data(params).request(Map.class);
-        if (result.containsKey("errcode")) {
-            throw new RuntimeException(Jsons.NORMAL.stringify(result));
-        }
+
+        checkError(result);
         return result;
     }
 
@@ -200,6 +199,24 @@ public class Wechats {
      */
     public static String getJsapiTicket(String accessToken) {
         return getTicket("jsapi", accessToken);
+    }
+
+    /**
+     * 获取ticket
+     * @param type        wx_card 卡券；jsapi js接口票据；
+     * @param accessToken 通过调用getAccessToken()获取
+     * @return {errcode=0, errmsg=ok, ticket=ticket, expires_in=7200}
+     */
+    @SuppressWarnings("unchecked")
+    public static String getTicket(String type, String accessToken) {
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("access_token", accessToken);
+        params.put("type", type);
+        Map<String, Object> result = Http.post("https://api.weixin.qq.com/cgi-bin/ticket/getticket")
+                                         .data(params).request(Map.class);
+
+        checkError(result);
+        return (String) result.get("ticket");
     }
 
     /**
@@ -223,27 +240,9 @@ public class Wechats {
     }
 
     // ----------------------------private methods---------------------------
-    /**
-     * 获取ticket
-     * @param type wx_card 卡券；jsapi js接口票据
-     * @param accessToken 通过调用getAccessToken()获取
-     * @return {ticket=?,expires_in=?}
-     */
-    @SuppressWarnings("unchecked")
-    private static String getTicket(String type, String accessToken) {
-        Map<String, String> params = new LinkedHashMap<>();
-        params.put("access_token", accessToken);
-        params.put("type", type);
-        Map<String, Object> result = Http.post("https://api.weixin.qq.com/cgi-bin/ticket/getticket")
-                                         .data(params).request(Map.class);
-        return getString(result, "ticket");
-    }
-
-    private static String getString(Map<String, Object> result, String name) {
+    private static void checkError(Map<String, ?> result) {
         Object errcode = result.get("errcode");
-        if (errcode == null || "0".equals(errcode.toString())) {
-            return (String) result.get(name); // 成功状态
-        } else {
+        if (errcode != null && !"0".equals(errcode.toString())) {
             throw new RuntimeException(Jsons.NORMAL.stringify(result));
         }
     }

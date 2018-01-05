@@ -4,27 +4,30 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
+import org.springframework.beans.factory.DisposableBean;
 
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.JedisLock;
 
 /**
- * wechat token 管理类
+ * wechat global token manager
+ * 微信accesstoken刷新平滑过渡，官方给的是5分钟
  * @author Ponfee
  */
-public class WechatTokenManager {
+public class WechatTokenManager implements DisposableBean {
 
+    /** wechat config of appid and secret */
     private static final Map<String, Wechat> WECHAT_CONFIGS = new HashMap<String, Wechat>() {
         private static final long serialVersionUID = 4891406751053897149L;
         {
-            put(new Wechat("wx37faaaf77fbbdc36", "secret"));
-            put(new Wechat("appid", "secret"));
+            put(new Wechat("wx0a7a9ac2a6e0f7e7", "4516f601af973d42cbfee3b7ca7cff34"));
+            //put(new Wechat("appid", "secret"));
         }
 
         private void put(Wechat wechat) {
@@ -32,27 +35,71 @@ public class WechatTokenManager {
         }
     };
 
-    private static final Map<String, JedisLock> JEDIS_LOCKS = new ConcurrentHashMap<>(); // 锁
-    private static final int REFRESH_PERIOD_TIME = (int) Math.ceil(86400.0D / 2000); // 一天只能获取2000次上限
-    private static final int TOKEN_EXPIRE_TIME = 7200 - 100; // token 7100秒的缓存有效期（token有效期为7200秒）
+    /** refresh token lock key */
+    private static final Map<String, JedisLock> JEDIS_LOCKS = new ConcurrentHashMap<>();
+
+    /** max of 2000 request from wechat every day */
+    private static final int REFRESH_PERIOD_SECONDS = (int) Math.ceil(86400.0D / 2000);
+
+    /** the token effective time 7200 seconds */
+    private static final int TOKEN_EXPIRE = 7200 - 60;
+
+    /** refresh from cache of period */
+    private static final int CACHE_REFRESH_MILLIS = 15000;
+
+    /** the wechat opendid cache key */
+    private static final String WECHAT_OPENID_CACHE = "wechat:openid:cache:";
 
     private static Logger logger = LoggerFactory.getLogger(WechatTokenManager.class);
 
     private final JedisClient jedisClient;
+    private final ScheduledExecutorService scheduled;
 
     public WechatTokenManager(JedisClient jedisClient) {
         this.jedisClient = jedisClient;
 
-        // 定时刷新
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+        // 定时请求微信接口刷新
+        scheduled = Executors.newSingleThreadScheduledExecutor();
+        scheduled.scheduleAtFixedRate(() -> {
             for (Wechat wechat : WECHAT_CONFIGS.values()) {
                 try {
-                    refreshAndGetToken(wechat);
+                    refreshToken(wechat);
                 } catch (FrequentlyRefreshException e) {
                     logger.error(e.getMessage());
                 }
             }
-        }, 0, TOKEN_EXPIRE_TIME, TimeUnit.SECONDS);
+        }, 0, TOKEN_EXPIRE / 2, TimeUnit.SECONDS);
+
+        // 定期从缓存中加载
+        new Thread(() -> {
+            while (true) {
+
+                try { // 加异常捕获为防止Redis挂掉后退出循环
+                      // load token and ticket from redis cache
+                    for (Wechat wx : WECHAT_CONFIGS.values()) {
+                        String accessToken = jedisClient.valueOps().get(wx.accessTokenKey);
+                        if (StringUtils.isNotEmpty(accessToken)) {
+                            wx.accessToken = accessToken;
+                        }
+
+                        String jsapiTicket = jedisClient.valueOps().get(wx.jsapiTicketKey);
+                        if (StringUtils.isNotEmpty(jsapiTicket)) {
+                            wx.jsapiTicket = jsapiTicket;
+                        }
+                    }
+                } catch (Throwable t) {
+                    logger.error("load token from cache occur error", t);
+                }
+
+                try {
+                    // to sleep for prevent endless loop
+                    Thread.sleep(CACHE_REFRESH_MILLIS);
+                } catch (InterruptedException e) {
+                    logger.error("thread sleep occur interrupted exception", e);
+                }
+
+            }
+        }).start();
     }
 
     /**
@@ -61,7 +108,7 @@ public class WechatTokenManager {
      * @return token
      */
     public final String getAccessToken(String appid) {
-        return getWechatToken(appid, Type.ACCESS_TOKEN);
+        return getWechat(appid).accessToken;
     }
 
     /**
@@ -70,7 +117,7 @@ public class WechatTokenManager {
      * @return ticket
      */
     public final String getJsapiTicket(String appid) {
-        return getWechatToken(appid, Type.JSAPI_TICKET);
+        return getWechat(appid).jsapiTicket;
     }
 
     /**
@@ -78,13 +125,11 @@ public class WechatTokenManager {
      * @param appid
      * @return
      */
-    public String refreshAccessToken(String appid) throws FrequentlyRefreshException {
-        Wechat wechat = WECHAT_CONFIGS.get(appid);
-        if (wechat == null) {
-            throw new IllegalArgumentException("invalid wechat appid: " + appid);
-        }
-
-        return refreshAndGetToken(wechat).get(WECHAT_CONFIGS.get(appid).accessTokenKey);
+    public String refreshAndGetAccessToken(String appid)
+        throws FrequentlyRefreshException {
+        Wechat wechat = getWechat(appid);
+        refreshToken(wechat);
+        return wechat.accessToken;
     }
 
     /**
@@ -92,13 +137,11 @@ public class WechatTokenManager {
      * @param appid
      * @return
      */
-    public String refreshJsapiTicket(String appid) throws FrequentlyRefreshException {
-        Wechat wechat = WECHAT_CONFIGS.get(appid);
-        if (wechat == null) {
-            throw new IllegalArgumentException("invalid wechat appid: " + appid);
-        }
-
-        return refreshAndGetToken(wechat).get(WECHAT_CONFIGS.get(appid).jsapiTicketKey);
+    public String refreshAndGetJsapiTicket(String appid)
+        throws FrequentlyRefreshException {
+        Wechat wechat = getWechat(appid);
+        refreshToken(wechat);
+        return wechat.jsapiTicket;
     }
 
     /**
@@ -109,80 +152,60 @@ public class WechatTokenManager {
      * @param code
      * @param openid
      */
-    private static final String WECHAT_OPENID_CACHE = "wechat:openid:cache:";
-    public void cacheOpenidByCode(String code, String openid) {
+    public void cacheOpenIdByCode(String code, String openid) {
         jedisClient.valueOps().set(WECHAT_OPENID_CACHE + code, openid, 30);
     }
 
     /**
      * 加载openId
      * @param code
-     * @return
+     * @return the cache of openid
      */
-    public String loadOpenidByCode(String code) {
+    public String loadOpenIdByCode(String code) {
         return jedisClient.valueOps().get(WECHAT_OPENID_CACHE + code);
     }
 
     // -----------------------------------private methods--------------------------------- //
-    /**
-     * 获取token
-     * @param appid
-     * @param type
-     * @return
-     */
-    private final String getWechatToken(String appid, Type type) {
+    private Wechat getWechat(String appid) {
         Wechat wechat = WECHAT_CONFIGS.get(appid);
-        if (wechat == null) {
-            throw new IllegalArgumentException("invalid wechat appid: " + appid);
+        if (wechat != null) {
+            return wechat;
         }
-
-        String cacheKey = wechat.getCacheKey(type);
-        String token = null;
-        int iteration = 10;
-        do {
-            token = jedisClient.valueOps().get(cacheKey);
-            if (token == null) {
-                try {
-                    token = refreshAndGetToken(wechat).get(cacheKey);
-                } catch (FrequentlyRefreshException ignored) {
-                    // do-non
-                }
-                if (token == null) {
-                    try {
-                        Thread.sleep(99);
-                    } catch (InterruptedException e) {
-                        logger.error("get wechat token thread sleep interrupted", e);
-                    }
-                }
-            }
-        } while (token == null && --iteration > 0);
-
-        return token;
+        throw new IllegalArgumentException("invalid wechat appid: " + appid);
     }
 
     /**
      * 主动刷新token（已限制频率）
-     * @param appid
+     * @param wx
      * @return
      * @throws FrequentlyRefreshException
      */
-    private Map<String, String> refreshAndGetToken(Wechat wechat) 
-        throws FrequentlyRefreshException {
-        // 限制刷新频率，自动超时释放锁
-        if (getLock(wechat.lockRefreshKey, REFRESH_PERIOD_TIME).tryLock()) {
-            // 请求微信接口获取
-            String accessToken = Wechats.getAccessToken(wechat.appid, wechat.secret);
-            String jsapiTicket = Wechats.getJsapiTicket(accessToken);
-            logger.info("－－－ refresh wechat token appid->{} －－－", wechat.appid);
+    private void refreshToken(Wechat wx) throws FrequentlyRefreshException {
+        // limit refresh frequency: set the minimum period seconds
+        if (getLock(wx.lockRefreshKey, REFRESH_PERIOD_SECONDS).tryLock()) {
 
-            // 异步缓存
-            new Thread(() -> {
-                jedisClient.valueOps().set(wechat.accessTokenKey, accessToken, TOKEN_EXPIRE_TIME);
-                jedisClient.valueOps().set(wechat.jsapiTicketKey, jsapiTicket, TOKEN_EXPIRE_TIME);
-            }).start();
+            try {
+                String accessToken = Wechats.getAccessToken(wx.appid, wx.secret);
+                if (StringUtils.isNotEmpty(accessToken)) {
+                    wx.accessToken = accessToken;
+                    jedisClient.valueOps().set(wx.accessTokenKey, accessToken, TOKEN_EXPIRE);
+                }
+            } catch (Exception e) {
+                logger.error("refresh access token occur error", e);
+            }
 
-            return ImmutableMap.of(wechat.accessTokenKey, accessToken, 
-                                   wechat.jsapiTicketKey, jsapiTicket);
+            try {
+                String jsapiTicket = Wechats.getJsapiTicket(wx.accessToken);
+                if (StringUtils.isNotEmpty(jsapiTicket)) {
+                    wx.jsapiTicket = jsapiTicket;
+                    jedisClient.valueOps().set(wx.jsapiTicketKey, jsapiTicket, TOKEN_EXPIRE);
+                }
+            } catch (Exception e) {
+                logger.error("refresh jsapi ticket occur error", e);
+            }
+
+            logger.info("－－－ refresh wechat token appid: {} －－－", wx.appid);
+
         } else {
             throw new FrequentlyRefreshException("微信令牌频繁刷新，请稍后再试！");
         }
@@ -209,40 +232,30 @@ public class WechatTokenManager {
     }
 
     /**
-     * 配置
+     * Wechat
      */
     private static final class Wechat {
-        private final String appid;
-        private final String secret;
-        private final String accessTokenKey;
-        private final String jsapiTicketKey;
-        private final String lockRefreshKey;
+        final String appid;
+        final String secret;
+        final String accessTokenKey;
+        final String jsapiTicketKey;
+        final String lockRefreshKey;
+
+        volatile String accessToken = null;
+        volatile String jsapiTicket = null;
 
         Wechat(String appid, String secret) {
             this.appid = appid;
             this.secret = secret;
-            this.accessTokenKey = "wechat:access:token:" + appid;
-            this.jsapiTicketKey = "wechat:jsapi:ticket:" + appid;
-            this.lockRefreshKey = "wechat:token:refresh:" + appid;
-        }
-
-        String getCacheKey(Type type) {
-            switch (type) {
-                case ACCESS_TOKEN:
-                    return accessTokenKey;
-                case JSAPI_TICKET:
-                    return jsapiTicketKey;
-                default:
-                    throw new IllegalArgumentException("invalid type " + type);
-            }
+            this.accessTokenKey = "wx:access:token:" + appid;
+            this.jsapiTicketKey = "wx:jsapi:ticket:" + appid;
+            this.lockRefreshKey = "wx:token:refrsh:" + appid;
         }
     }
 
-    /**
-     * token类型
-     */
-    private static enum Type {
-        ACCESS_TOKEN, JSAPI_TICKET;
+    @Override
+    public void destroy() throws Exception {
+        scheduled.shutdown();
     }
 
 }
