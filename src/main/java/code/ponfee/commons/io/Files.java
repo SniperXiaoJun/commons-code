@@ -80,7 +80,9 @@ public final class Files {
      */
     public static File mkdir(File file) {
         if (!file.exists()) {
-            file.mkdirs();
+            if (file.mkdirs()) {
+                file.setLastModified(System.currentTimeMillis());
+            }
         } else if (file.isFile()) {
             throw new IllegalStateException("file [" + file.getAbsolutePath() + "] not a dir");
         }
@@ -108,7 +110,9 @@ public final class Files {
             }
 
             try {
-                file.createNewFile();
+                if (file.createNewFile()) {
+                    file.setLastModified(System.currentTimeMillis());
+                }
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }

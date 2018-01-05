@@ -241,10 +241,10 @@ public class JedisClient implements DisposableBean {
         //StackTraceElement[] st = Thread.currentThread().getStackTrace();
         //builder.append(st[p].getClassName()).append(".").append(st[p].getMethodName()).append("(");
         StringBuilder builder = new StringBuilder("redis operation occur error, args(");
-        String arg;
-        for (int n = args.length, i = 0; i < n; i++) {
+        StringBuilder arg = new StringBuilder();
+        for (int n = args.length, i = 0; i < n; i++, arg.setLength(0)) {
             if (args[i] == null) {
-                arg = "null";
+                arg.append("null");
             } else if (i == 0 && (args[i] instanceof byte[] || args[i] instanceof Byte[])) {
                 byte[] bytes;
                 if (args[i] instanceof Byte[]) {
@@ -256,13 +256,13 @@ public class JedisClient implements DisposableBean {
                 } else {
                     bytes = (byte[]) args[i];
                 }
-                arg = toString(bytes); // redis key base64编码
+                arg.append(toString(bytes)); // redis key base64编码
             } else {
-                arg = args[i].toString();
+                arg.append(args[i].toString());
             }
 
             if (arg.length() > MAX_LEN) {
-                arg = arg.substring(0, MAX_LEN - 3) + "...";
+                arg.delete(MAX_LEN - 3, arg.length()).append("...");
             }
             builder.append("`").append(arg).append("`");
             if (i != n - 1) {

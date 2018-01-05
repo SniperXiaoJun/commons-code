@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import code.ponfee.commons.collect.Collects;
+
 /**
  * 消息格式化
  * @author fupf
@@ -41,14 +43,7 @@ public final class MessageFormats {
     }
 
     public static String formatPair(String text, Object... args) {
-        if (args.length % 2 != 0) {
-            throw new IllegalArgumentException("args must be pair.");
-        }
-        Map<String, Object> map = new HashMap<>(args.length * 2);
-        for (int n = args.length, i = 0; i < n; i += 2) {
-            map.put(args[i].toString(), args[i + 1]);
-        }
-        return format(text, map);
+        return format(text, Collects.toMap(args));
     }
 
     public static void main(String[] args) {

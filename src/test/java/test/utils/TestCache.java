@@ -20,7 +20,7 @@ public class TestCache {
             threads[i] = new Thread(() -> {
                 while (flag.get()) {
                     if (cache.isDestroy()) break;
-                    cache.set(ObjectUtils.uuid(8), null, Dates.millis() + random.nextInt(3000));
+                    cache.set(ObjectUtils.uuid(8), null, Dates.millis() + random.nextInt(1000));
                 }
             });
         }
@@ -28,7 +28,7 @@ public class TestCache {
         for (Thread thread : threads) {
             thread.start();
         }
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 15; i++) {
             System.out.println(cache.size());
             Thread.sleep(1000);
         }
@@ -37,5 +37,6 @@ public class TestCache {
             thread.join();
         }
         cache.destroy();
+        System.out.println(cache.size());
     }
 }

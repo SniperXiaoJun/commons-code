@@ -10,7 +10,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -19,7 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 
+import code.ponfee.commons.collect.Collects;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
@@ -279,7 +284,7 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
             try {
                 ShardedJedis jedis = pooledShardedJedis.getObject();
                 for (Jedis shard : jedis.getAllShards()) {
-                    if (!shard.ping().equals("PONG")) {
+                    if (!"PONG".equals(shard.ping())) {
                         return false;
                     }
                 }
@@ -329,18 +334,36 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
         protected Jedis jedis;
         protected AtomicBoolean running = new AtomicBoolean(false);
 
-        protected MasterListener() {}
-
         public MasterListener(List<String> masters, String host, int port) {
-            this.masters = masters;
+            Preconditions.checkArgument(masters != null && !masters.isEmpty());
+            Preconditions.checkArgument(StringUtils.isNotEmpty(host));
+
+            this.masters = masters.stream().sorted().collect(Collectors.toList());
             this.host = host;
             this.port = port;
         }
 
-        public MasterListener(List<String> masters, String host, int port,
-            long subscribeRetryWaitTimeMillis) {
+        public MasterListener(List<String> masters, String host, int port, 
+                              long subscribeRetryWaitTimeMillis) {
             this(masters, host, port);
             this.subscribeRetryWaitTimeMillis = subscribeRetryWaitTimeMillis;
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder().append(masters.toArray())
+                          .append(host).append(port).toHashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null || !(obj instanceof MasterListener)) {
+                return false;
+            }
+
+            MasterListener other = (MasterListener) obj;
+            return Collects.different(this.masters, other.masters).isEmpty()
+                && this.host.equals(other.host) && this.port == other.port;
         }
 
         public @Override void run() {

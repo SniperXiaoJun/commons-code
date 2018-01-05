@@ -344,12 +344,12 @@ public class ValueOperations extends JedisOperations {
             return false;
         }
 
-        byte[] _value = isCompress ? GzipProcessor.compress(value) : value;
+        byte[] value0 = isCompress ? GzipProcessor.compress(value) : value;
 
         return hook(shardedJedis -> {
-            String rtn = shardedJedis.setex(key, getActualExpire(seconds), _value);
+            String rtn = shardedJedis.setex(key, getActualExpire(seconds), value0);
             return SUCCESS_MSG.equalsIgnoreCase(rtn);
-        }, false, key, _value, isCompress, seconds);
+        }, false, key, value0, isCompress, seconds);
     }
 
     public boolean set(String key, byte[] value, int seconds) {

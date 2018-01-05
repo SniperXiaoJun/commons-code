@@ -452,7 +452,7 @@ public class HttpRequest {
         private static final String PREFERRED_ENCODING = "US-ASCII";
 
         /** The 64 valid Base64 values. */
-        private static final byte[] _STANDARD_ALPHABET = { (byte) 'A', (byte) 'B',
+        private static final byte[] STANDARD_ALPHABET = { (byte) 'A', (byte) 'B',
             (byte) 'C', (byte) 'D', (byte) 'E', (byte) 'F', (byte) 'G', (byte) 'H',
             (byte) 'I', (byte) 'J', (byte) 'K', (byte) 'L', (byte) 'M', (byte) 'N',
             (byte) 'O', (byte) 'P', (byte) 'Q', (byte) 'R', (byte) 'S', (byte) 'T',
@@ -501,30 +501,28 @@ public class HttpRequest {
         private static byte[] encode3to4(byte[] source, int srcOffset, int numSigBytes, 
                                          byte[] destination, int destOffset) {
 
-            byte[] ALPHABET = _STANDARD_ALPHABET;
-
             int inBuff = (numSigBytes > 0 ? ((source[srcOffset] << 24) >>> 8) : 0)
                   | (numSigBytes > 1 ? ((source[srcOffset + 1] << 24) >>> 16) : 0)
                   | (numSigBytes > 2 ? ((source[srcOffset + 2] << 24) >>> 24) : 0);
 
             switch (numSigBytes) {
                 case 3:
-                    destination[destOffset] = ALPHABET[(inBuff >>> 18)];
-                    destination[destOffset + 1] = ALPHABET[(inBuff >>> 12) & 0x3f];
-                    destination[destOffset + 2] = ALPHABET[(inBuff >>> 6) & 0x3f];
-                    destination[destOffset + 3] = ALPHABET[(inBuff) & 0x3f];
+                    destination[destOffset] = STANDARD_ALPHABET[(inBuff >>> 18)];
+                    destination[destOffset + 1] = STANDARD_ALPHABET[(inBuff >>> 12) & 0x3f];
+                    destination[destOffset + 2] = STANDARD_ALPHABET[(inBuff >>> 6) & 0x3f];
+                    destination[destOffset + 3] = STANDARD_ALPHABET[(inBuff) & 0x3f];
                     return destination;
 
                 case 2:
-                    destination[destOffset] = ALPHABET[(inBuff >>> 18)];
-                    destination[destOffset + 1] = ALPHABET[(inBuff >>> 12) & 0x3f];
-                    destination[destOffset + 2] = ALPHABET[(inBuff >>> 6) & 0x3f];
+                    destination[destOffset] = STANDARD_ALPHABET[(inBuff >>> 18)];
+                    destination[destOffset + 1] = STANDARD_ALPHABET[(inBuff >>> 12) & 0x3f];
+                    destination[destOffset + 2] = STANDARD_ALPHABET[(inBuff >>> 6) & 0x3f];
                     destination[destOffset + 3] = EQUALS_SIGN;
                     return destination;
 
                 case 1:
-                    destination[destOffset] = ALPHABET[(inBuff >>> 18)];
-                    destination[destOffset + 1] = ALPHABET[(inBuff >>> 12) & 0x3f];
+                    destination[destOffset] = STANDARD_ALPHABET[(inBuff >>> 18)];
+                    destination[destOffset + 1] = STANDARD_ALPHABET[(inBuff >>> 12) & 0x3f];
                     destination[destOffset + 2] = EQUALS_SIGN;
                     destination[destOffset + 3] = EQUALS_SIGN;
                     return destination;

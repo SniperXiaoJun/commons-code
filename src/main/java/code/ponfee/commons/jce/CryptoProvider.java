@@ -43,7 +43,7 @@ public abstract class CryptoProvider {
      * @return
      */
     public final String encrypt(String plaintext) {
-        return encrypt(plaintext, Files.SYSTEM_CHARSET);
+        return encrypt(plaintext, Charset.forName(Files.SYSTEM_CHARSET));
     }
 
     /**
@@ -52,13 +52,14 @@ public abstract class CryptoProvider {
      * @param charset   字符串编码
      * @return
      */
-    public final String encrypt(String plaintext, String charset) {
+    public final String encrypt(String plaintext, Charset charset) {
         if (plaintext == null) {
             return null;
         }
 
-        byte[] original = plaintext.getBytes(Charset.forName(charset));
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(encrypt(original));
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(
+                   this.encrypt(plaintext.getBytes(charset))
+               );
     }
 
     /**
@@ -67,7 +68,7 @@ public abstract class CryptoProvider {
      * @return
      */
     public final String decrypt(String ciphertext) {
-        return decrypt(ciphertext, Files.SYSTEM_CHARSET);
+        return decrypt(ciphertext, Charset.forName(Files.SYSTEM_CHARSET));
     }
 
     /**
@@ -76,13 +77,12 @@ public abstract class CryptoProvider {
      * @param charset     明文字符串编码
      * @return
      */
-    public final String decrypt(String ciphertext, String charset) {
+    public final String decrypt(String ciphertext, Charset charset) {
         if (ciphertext == null) {
             return null;
         }
 
-        byte[] original = decrypt(Base64.getUrlDecoder().decode(ciphertext));
-        return new String(original, Charset.forName(charset));
+        return new String(decrypt(Base64.getUrlDecoder().decode(ciphertext)), charset);
     }
 
     /**

@@ -230,23 +230,7 @@ public class Cache<T> {
      * @return
      */
     public int size() {
-        if (isDestroy) {
-            return 0;
-        }
-
-        int size = 0;
-        long now = now();
-
-        Entry<Comparable<?>, CacheValue<T>> entry;
-        for (Iterator<Entry<Comparable<?>, CacheValue<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
-            entry = iter.next();
-            if (entry.getValue().isAlive(now)) {
-                size++;
-            } else {
-                iter.remove();
-            }
-        }
-        return size;
+        return cache.size();
     }
 
     /**

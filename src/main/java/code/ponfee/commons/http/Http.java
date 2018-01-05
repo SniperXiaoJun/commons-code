@@ -133,12 +133,12 @@ public final class Http {
      * @param params
      * @return
      */
-    public Http addParam(Map<String, ? extends Object> params) {
+    public Http addParam(Map<String, ?> params) {
         this.params.putAll(params);
         return this;
     }
 
-    public <T extends Object> Http addParam(String name, T value) {
+    public <T> Http addParam(String name, T value) {
         this.params.put(name, value);
         return this;
     }
@@ -269,7 +269,7 @@ public final class Http {
         return this;
     }
 
-    public Http setSSLContext(SSLContext sslContext) {
+    public Http setSSLSocketFactory(SSLContext sslContext) {
         return setSSLSocketFactory(sslContext.getSocketFactory());
     }
 

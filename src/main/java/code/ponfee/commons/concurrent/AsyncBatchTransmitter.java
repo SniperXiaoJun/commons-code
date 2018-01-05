@@ -91,6 +91,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
     public void end() {
         this.batch.refresh();
         this.isEnd = true;
+        this.batch.refresh();
     }
 
     /**
@@ -142,7 +143,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
             T t;
             List<T> list = new ArrayList<>(thresholdChunk);
             for (;;) {
-                if (isEnd && queue.isEmpty() && isRefresh()) {
+                if (isEnd && queue.isEmpty() && cumulate() > 2 * thresholdPeriod) {
                     if (requireDestroyWhenEnd) {
                         executor.shutdown();
                     }
@@ -162,7 +163,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
                 }
 
                 if (list.size() == thresholdChunk 
-                    || ( !list.isEmpty() && (isEnd || isRefresh()) )
+                    || ( !list.isEmpty() && (isEnd || cumulate() > thresholdPeriod) )
                 ) {
                     // task抛异常后： execute会输出错误信息，线程结束，后续任务会创建新线程执行
                     //            submit不会输出错误信息，线程继续分配执行其它任务
@@ -183,8 +184,8 @@ public final class AsyncBatchTransmitter<T> extends Thread {
             lastConsumeTimeMillis = System.currentTimeMillis();
         }
 
-        boolean isRefresh() {
-            return System.currentTimeMillis() - lastConsumeTimeMillis > thresholdPeriod;
+        long cumulate() {
+            return System.currentTimeMillis() - lastConsumeTimeMillis;
         }
     }
 

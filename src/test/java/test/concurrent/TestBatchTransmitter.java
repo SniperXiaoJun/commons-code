@@ -26,7 +26,7 @@ public class TestBatchTransmitter {
                 while (flag.get()) {
                     transmitter.put(increment.getAndIncrement());
                     try {
-                        Thread.sleep(211 + ThreadLocalRandom.current().nextInt(1611));
+                        Thread.sleep(161 + ThreadLocalRandom.current().nextInt(1211));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

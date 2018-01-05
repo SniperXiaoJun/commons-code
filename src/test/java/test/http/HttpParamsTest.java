@@ -41,4 +41,9 @@ public class HttpParamsTest {
         String url = "http://10.118.58.74:8000/open/api/test?a=1=32=14=12=4=3214=2&abcdef&" + Math.random();
         System.out.println(ObjectUtils.toJson(HttpParams.parseUrlParams(url, "UTF-8")));
     }
+
+    @Test
+    public void test3() {
+        System.out.println(HttpParams.buildUrlPath("url", "UTF-8", "a", "1","b","2"));
+    }
 }

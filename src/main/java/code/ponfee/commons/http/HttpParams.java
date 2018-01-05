@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import code.ponfee.commons.collect.Collects;
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.util.ObjectUtils;
 import code.ponfee.commons.util.UrlCoder;
@@ -124,16 +125,8 @@ public class HttpParams {
             + buildParams(params, encoding);
     }
 
-    public static String buildUrlPath(String url, String encoding, String... params) {
-        if (params.length % 2 != 0) {
-            throw new IllegalArgumentException("not pair params");
-        }
-
-        Map<String, String> map = new LinkedHashMap<>();
-        for (int j = 0; j < params.length; j += 2) {
-            map.put(params[j], params[j + 1]);
-        }
-        return buildUrlPath(url, encoding, map);
+    public static String buildUrlPath(String url, String encoding, Object... params) {
+        return buildUrlPath(url, encoding, Collects.toMap(params));
     }
 
     // ---------------------------------构建签名数据---------------------------------

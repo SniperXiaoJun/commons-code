@@ -7,9 +7,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import code.ponfee.commons.model.Page;
 import code.ponfee.commons.model.Result;
@@ -117,7 +119,7 @@ public class Collects {
     public static Result<Page<Object[]>> map2array(Result<Page<Map<String, Object>>> source, 
                                                    String... fields) {
         Page<Map<String, Object>> page = source.getData();
-        List<Object[]> list = Lists.newArrayList();
+        List<Object[]> list = Lists.newArrayListWithCapacity(page.getRows().size());
         for (Map<String, Object> map : page.getRows()) {
             list.add(map2array(map, fields));
         }
@@ -161,16 +163,58 @@ public class Collects {
     }
 
     /**
+     * list差集
+     * @param list1
+     * @param list2
+     * @return
+     */
+    public static <T> List<T> different(List<T> list1, List<T> list2) {
+        Set<T> set1 = Sets.newHashSet(list1);
+        Set<T> set2 = Sets.newHashSet(list2);
+        List<T> diff = Lists.newArrayList(Sets.difference(set1, set2));
+        diff.addAll(Sets.difference(set2, set1));
+        return diff;
+    }
+
+    /**
+     * map差集
+     * @param map1
+     * @param map2
+     * @return
+     */
+    public static <K, V> Map<K, V> different(Map<K, V> map1, Map<K, V> map2) {
+        Set<K> set1 = map1.keySet();
+        Set<K> set2 = map2.keySet();
+        Set<K> diffSet = Sets.difference(set1, set2);
+        diffSet.addAll(Sets.difference(set2, set1));
+        Map<K, V> result = Maps.newHashMapWithExpectedSize(diffSet.size());
+        for (K key : diffSet) {
+            if (map1.containsKey(key)) {
+                result.put(key, map1.get(key));
+            } else {
+                result.put(key, map2.get(key));
+            }
+        }
+        return result;
+    }
+
+    /**
      * 转map
      * @param kv
      * @return
      */
     public static Map<String, Object> toMap(Object... kv) {
-        if (kv.length % 2 != 0) {
+        if (kv == null) {
+            return null;
+        }
+
+        int length = kv.length;
+        if (length % 2 != 0) {
             throw new IllegalArgumentException("args must be pair.");
         }
-        Map<String, Object> map = Maps.newLinkedHashMap();
-        for (int i = 0; i < kv.length; i = i + 2) {
+
+        Map<String, Object> map = new LinkedHashMap<>(length / 2);
+        for (int i = 0; i < length; i += 2) {
             map.put((String) kv[i], kv[i + 1]);
         }
         return map;
@@ -234,4 +278,5 @@ public class Collects {
         return list.toArray((T[]) Array.newInstance(type, list.size()));
         //return list.toArray((T[]) new Object[list.size()]); // [Ljava.lang.Object; cannot be cast to [Ljava.lang.String;
     }
+
 }

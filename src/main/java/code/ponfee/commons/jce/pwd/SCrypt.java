@@ -65,7 +65,7 @@ public class SCrypt {
         try {
             String[] parts = hashed.split("\\$");
 
-            if (parts.length != 5 || !parts[1].equals("s0")) {
+            if (parts.length != 5 || !"s0".equals(parts[1])) {
                 throw new IllegalArgumentException("Invalid hashed value");
             }
 
