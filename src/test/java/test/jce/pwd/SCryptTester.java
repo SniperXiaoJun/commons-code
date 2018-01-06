@@ -32,6 +32,7 @@ public class SCryptTester {
 
         int params = Integer.valueOf(parts[2], 16);
 
+        // 0xe0801 >> 16  ->  0xe
         assertEquals(N, (int) Math.pow(2, params >> 16 & 0xffff));
         assertEquals(r, params >> 8 & 0xff);
         assertEquals(p, params >> 0 & 0xff);
@@ -60,5 +61,10 @@ public class SCryptTester {
         assertEquals(N, (int) Math.pow(2, params >>> 16 & 0xffff));
         assertEquals(r, params >> 8 & 0xff);
         assertEquals(p, params >> 0 & 0xff);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(0xe);
+        System.out.println(Math.pow(2, 0xe));
     }
 }

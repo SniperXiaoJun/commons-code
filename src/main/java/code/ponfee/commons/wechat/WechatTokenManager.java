@@ -16,7 +16,7 @@ import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.JedisLock;
 
 /**
- * wechat global token manager
+ * wechat global token and jsapi ticket manager
  * 微信accesstoken刷新会平滑过渡，官方文档给出的是5分钟
  * @author Ponfee
  */
@@ -35,7 +35,7 @@ public class WechatTokenManager implements DisposableBean {
         }
     };
 
-    /** refresh token lock key */
+    /** refresh token lock key(cluster servers refresh once) */
     private static final Map<String, JedisLock> JEDIS_LOCKS = new ConcurrentHashMap<>();
 
     /** maximum of 2000 request from wechat every day */
@@ -203,7 +203,8 @@ public class WechatTokenManager implements DisposableBean {
             logger.info("－－－ refresh wechat token appid: {} －－－", wx.appid);
 
         } else {
-            throw new FrequentlyRefreshException("微信令牌频繁刷新，请稍后再试！");
+            throw new FrequentlyRefreshException("wechat token refreshed is too frequent, "
+                                               + "plz try again later.");
         }
     }
 

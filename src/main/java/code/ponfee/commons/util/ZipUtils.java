@@ -61,7 +61,8 @@ public class ZipUtils {
      * @param passwd 压缩使用的密码
      * @return 最终的压缩文件存放的绝对路径
      */
-    public static String zip(String src, String dest, String passwd) throws ZipException {
+    public static String zip(String src, String dest, String passwd)
+        throws ZipException {
         return zip(src, dest, true, passwd, null);
     }
 
@@ -170,7 +171,8 @@ public class ZipUtils {
      * @return 解压后文件数组
      * @throws ZipException 压缩文件有损坏或者解压缩失败抛出
      */
-    public static File[] unzip(String zipFile, String dest, String passwd) throws ZipException {
+    public static File[] unzip(String zipFile, String dest, 
+                               String passwd) throws ZipException {
         return unzip(new File(zipFile), dest, passwd, Files.DEFAULT_CHARSET);
     }
 
@@ -189,7 +191,8 @@ public class ZipUtils {
                                String charset) throws ZipException {
         // validate zip file
         if (!zipFile.exists()) {
-            throw new IllegalArgumentException("zip file not found: " + zipFile.getAbsolutePath());
+            throw new IllegalArgumentException("zip file not found: " 
+                                              + zipFile.getAbsolutePath());
         }
         ZipFile zFile = new ZipFile(zipFile);
         if (!zFile.isValidZipFile()) {

@@ -19,7 +19,8 @@ public final class UrlCoder {
     /**
      * 相当于javascript中的encodeURI
      * 不会被此方法编码的字符：! @ # $& * ( ) = : / ; ? + '
-     * encodeURI("http://www.oschina.net/search?scope=bbs&q=C语言") -> http://www.oschina.net/search?scope=bbs&q=C%E8%AF%AD%E8%A8%80
+     * encodeURI("http://www.oschina.net/search?scope=bbs&q=C语言", "UTF-8") 
+     * -> http://www.oschina.net/search?scope=bbs&q=C%E8%AF%AD%E8%A8%80
      * @param url
      * @param charset
      * @return
@@ -74,7 +75,8 @@ public final class UrlCoder {
     /**
      * 相当于javascript中的encodeURIComponent
      * 不会被此方法编码的字符：! * ( )
-     * encodeURIComponent("http://www.oschina.net/search?scope=bbs&q=C语言", DEFAULT_CHARSET) -> http%3A%2F%2Fwww.oschina.net%2Fsearch%3Fscope%3Dbbs%26q%3DC%E8%AF%AD%E8%A8%80
+     * encodeURIComponent("http://www.oschina.net/search?scope=bbs&q=C语言", "UTF-8") 
+     * -> http%3A%2F%2Fwww.oschina.net%2Fsearch%3Fscope%3Dbbs%26q%3DC%E8%AF%AD%E8%A8%80
      * @param url
      * @param charset
      * @return

@@ -104,10 +104,11 @@ import code.ponfee.commons.util.ObjectUtils;
  * Each instance supports making a single request and cannot be reused for
  * further requests.
  * 
- * 更改自github开源项目：https://github.com/kevinsawicki/http-request
- * 
  * @author Kevin Sawicki
  * @author Ponfee
+ * 
+ * Reference from internet and with optimization 
+ * https://github.com/kevinsawicki/http-request
  */
 public class HttpRequest {
 
