@@ -28,7 +28,7 @@ import code.ponfee.commons.util.SecureRandoms;
  */
 public class PBKDF2 {
 
-    private static final ImmutableBiMap<Integer, HmacAlgorithm> PREFIX_MAPPING = 
+    private static final ImmutableBiMap<Integer, HmacAlgorithm> ALGORITHM_MAPPING = 
         ImmutableBiMap.<Integer, HmacAlgorithm>builder()
         .put(1, HmacAlgorithm.HmacSHA1)
         .put(2, HmacAlgorithm.HmacSHA224)
@@ -63,14 +63,14 @@ public class PBKDF2 {
     public static String create(HmacAlgorithm alg, char[] password, int saltByteSize,
                                 int iterationCount, int dkLen) {
         Preconditions.checkArgument(iterationCount >= 1 && iterationCount <= 0xffff, 
-                                    "iterations must between 1 and " + 0xffff);
+                                    "iterations must between 1 and 65535");
         // Generate a random salt
         byte[] salt = SecureRandoms.nextBytes(saltByteSize);
 
         // Hash the password
         byte[] hash = pbkdf2(alg, password, salt, iterationCount, dkLen);
 
-        int keyIdx = PREFIX_MAPPING.inverse().get(alg) & 0xf;
+        int keyIdx = ALGORITHM_MAPPING.inverse().get(alg) & 0xf; // maximum is 15
         String params = Long.toString(keyIdx << 16 | iterationCount, 16);
 
         // format iterations:salt:hash
@@ -106,7 +106,7 @@ public class PBKDF2 {
         String[] parts = correctHash.split("\\" + SEPARATOR);
 
         long params = Long.parseLong(parts[1], 16);
-        HmacAlgorithm alg = PREFIX_MAPPING.get((int) params >> 16 & 0xf);
+        HmacAlgorithm alg = ALGORITHM_MAPPING.get((int) params >> 16 & 0xf);
         int iterations = (int) params & 0xffff;
         byte[] salt = Base64.getUrlDecoder().decode(parts[2]);
         byte[] hash = Base64.getUrlDecoder().decode(parts[3]);
