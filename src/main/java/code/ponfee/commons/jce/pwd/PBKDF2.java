@@ -9,7 +9,6 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableBiMap;
 
 import code.ponfee.commons.jce.HmacAlgorithm;
 import code.ponfee.commons.util.SecureRandoms;
@@ -26,16 +25,8 @@ import code.ponfee.commons.util.SecureRandoms;
  * @author Ponfee
  * Reference from internet and with optimization
  */
-public class PBKDF2 {
-
-    private static final ImmutableBiMap<Integer, HmacAlgorithm> ALGORITHM_MAPPING = 
-        ImmutableBiMap.<Integer, HmacAlgorithm>builder()
-        .put(1, HmacAlgorithm.HmacSHA1)
-        .put(2, HmacAlgorithm.HmacSHA224)
-        .put(3, HmacAlgorithm.HmacSHA256)
-        .put(4, HmacAlgorithm.HmacSHA384)
-        .put(5, HmacAlgorithm.HmacSHA512)
-        .build();
+public final class PBKDF2 {
+    private PBKDF2() {}
 
     private static final String SEPARATOR = "$";
 
@@ -70,11 +61,11 @@ public class PBKDF2 {
         // Hash the password
         byte[] hash = pbkdf2(alg, password, salt, iterationCount, dkLen);
 
-        int keyIdx = ALGORITHM_MAPPING.inverse().get(alg) & 0xf; // maximum is 15
-        String params = Long.toString(keyIdx << 16 | iterationCount, 16);
+        long algIdx = HmacAlgorithm.ALGORITHM_MAPPING.inverse().get(alg) & 0xf; // maximum is 0xf
+        String params = Long.toString(algIdx << 16L | iterationCount, 16);
 
         // format iterations:salt:hash
-        return new StringBuilder(12 + (salt.length + hash.length) * 4 / 3)
+        return new StringBuilder(8 + (salt.length + hash.length) * 4 / 3 + 4)
                 .append(SEPARATOR).append(params)
                 .append(SEPARATOR).append(toBase64(salt))
                 .append(SEPARATOR).append(toBase64(hash))
@@ -106,7 +97,7 @@ public class PBKDF2 {
         String[] parts = correctHash.split("\\" + SEPARATOR);
 
         long params = Long.parseLong(parts[1], 16);
-        HmacAlgorithm alg = ALGORITHM_MAPPING.get((int) params >> 16 & 0xf);
+        HmacAlgorithm alg = HmacAlgorithm.ALGORITHM_MAPPING.get((int) (params >> 16 & 0xf));
         int iterations = (int) params & 0xffff;
         byte[] salt = Base64.getUrlDecoder().decode(parts[2]);
         byte[] hash = Base64.getUrlDecoder().decode(parts[3]);

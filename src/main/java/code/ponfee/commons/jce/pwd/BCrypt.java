@@ -43,6 +43,7 @@ import code.ponfee.commons.util.SecureRandoms;
 * Reference from internet and with optimization
 */
 public final class BCrypt {
+    private BCrypt() {}
 
     private static final Charset UTF_8 = Charset.forName("UTF-8");
 
@@ -527,13 +528,13 @@ public final class BCrypt {
      * @param off   the position in the array of the blocks
      */
     private static void encipher(int[] P, int[] S, int[] lr, int off) {
-        int l = lr[off] ^ P[0], r = lr[off + 1];
+        int k = lr[off] ^ P[0], r = lr[off + 1];
         for (int i = 0, n; i <= BLOWFISH_NUM_ROUNDS - 2;) {
             // Feistel substitution on left word
-            n = S[(l >> 24) & 0xff];
-            n += S[0x100 | ((l >> 16) & 0xff)];
-            n ^= S[0x200 | ((l >> 8) & 0xff)];
-            n += S[0x300 | (l & 0xff)];
+            n = S[(k >> 24) & 0xff];
+            n += S[0x100 | ((k >> 16) & 0xff)];
+            n ^= S[0x200 | ((k >> 8) & 0xff)];
+            n += S[0x300 | (k & 0xff)];
             r ^= n ^ P[++i];
 
             // Feistel substitution on right word
@@ -541,10 +542,10 @@ public final class BCrypt {
             n += S[0x100 | ((r >> 16) & 0xff)];
             n ^= S[0x200 | ((r >> 8) & 0xff)];
             n += S[0x300 | (r & 0xff)];
-            l ^= n ^ P[++i];
+            k ^= n ^ P[++i];
         }
         lr[off]     = r ^ P[BLOWFISH_NUM_ROUNDS + 1];
-        lr[off + 1] = l;
+        lr[off + 1] = k;
     }
 
     private static String encodeBase64(byte[] data) {

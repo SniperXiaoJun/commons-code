@@ -18,16 +18,6 @@ import code.ponfee.commons.util.Bytes;
 public final class HashUtils {
 
     private static final int BUF_SIZE = 4096;
-    private static final char[] CHARS = {
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
-        'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-        'q', 'r', 's', 't', 'u', 'v', 'w', 'x',
-        'y', 'z', '0', '1', '2', '3', '4', '5',
-        '6', '7', '8', '9', 'A', 'B', 'C', 'D',
-        'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-        'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-        'U', 'V', 'W', 'X', 'Y', 'Z'
-    };
 
     public static byte[] md5(InputStream input) {
         return digest(input, "MD5");
@@ -99,28 +89,6 @@ public final class HashUtils {
 
     public static String sha512Hex(byte[] data) {
         return Bytes.hexEncode(sha512(data));
-    }
-
-    /**
-     * 类似微博的短路径地址
-     * @param text
-     * @return
-     */
-    public static String[] shortText(String text) {
-        String hex = md5Hex(text.getBytes());
-        String[] sections = new String[4];
-        for (int len = hex.length() / 8, i = 0; i < len; i++) {
-            StringBuilder builder = new StringBuilder();
-            String subHex = hex.substring(i * 8, i * 8 + 8);
-            long idx = 0x3FFFFFFF & Long.parseLong(subHex, 16);
-            for (int j = 0; j < 6; j++) {
-                int index = (int) (0x0000003D & idx);
-                builder.append(CHARS[index]);
-                idx = idx >> 5;
-            }
-            sections[i] = builder.toString();
-        }
-        return sections;
     }
 
     // ---------------------------------------private methods---------------------------------------
