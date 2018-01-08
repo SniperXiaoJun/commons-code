@@ -1,8 +1,11 @@
 package code.ponfee.commons.jce.pwd;
 
+import static code.ponfee.commons.jce.HmacAlgorithm.ALGORITHM_MAPPING;
+
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.crypto.SecretKeyFactory;
@@ -61,7 +64,7 @@ public final class PBKDF2 {
         // Hash the password
         byte[] hash = pbkdf2(alg, password, salt, iterationCount, dkLen);
 
-        long algIdx = HmacAlgorithm.ALGORITHM_MAPPING.inverse().get(alg) & 0xf; // maximum is 0xf
+        long algIdx = ALGORITHM_MAPPING.inverse().get(alg) & 0xf; // maximum is 0xf
         String params = Long.toString(algIdx << 16L | iterationCount, 16);
 
         // format iterations:salt:hash
@@ -95,9 +98,12 @@ public final class PBKDF2 {
     public static boolean check(char[] password, String correctHash) {
         // Decode the hash into its parameters
         String[] parts = correctHash.split("\\" + SEPARATOR);
+        if (parts.length != 4) {
+            throw new IllegalArgumentException("Invalid hashed value");
+        }
 
         long params = Long.parseLong(parts[1], 16);
-        HmacAlgorithm alg = HmacAlgorithm.ALGORITHM_MAPPING.get((int) (params >> 16 & 0xf));
+        HmacAlgorithm alg = ALGORITHM_MAPPING.get((int) (params >> 16 & 0xf));
         int iterations = (int) params & 0xffff;
         byte[] salt = Base64.getUrlDecoder().decode(parts[2]);
         byte[] hash = Base64.getUrlDecoder().decode(parts[3]);
@@ -107,14 +113,7 @@ public final class PBKDF2 {
         // Compare the hashes in constant time. The password is correct if
         // both hashes match.
 
-        if (hash.length != testHash.length) {
-            return false;
-        }
-        byte ret = 0;
-        for (int i = 0; i < testHash.length; i++) {
-            ret |= hash[i] ^ testHash[i];
-        }
-        return ret == 0;
+        return Arrays.equals(hash, testHash);
     }
 
     /**

@@ -140,6 +140,30 @@ public final class Bytes {
     }
 
     /**
+     * 比较两个byte数组是否相同
+     * @param b1
+     * @param b2
+     * @return
+     */
+    public static boolean equals(byte[] b1, byte[] b2) {
+        if (b1 == b2) {
+            return true;
+        }
+        if (b1 == null || b2 == null) {
+            return false;
+        }
+        if (b1.length != b1.length) {
+            return false;
+        }
+
+        int result = 0;
+        for (int n = b1.length, i = 0; i < n; i++) {
+            result |= b1[i] ^ b2[i];
+        }
+        return result == 0;
+    }
+
+    /**
      * merge byte array
      * @param first
      * @param rest

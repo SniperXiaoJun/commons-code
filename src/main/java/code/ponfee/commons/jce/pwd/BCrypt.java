@@ -1,6 +1,7 @@
 package code.ponfee.commons.jce.pwd;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Base64;
 
 import com.google.common.base.Preconditions;
@@ -372,20 +373,11 @@ public final class BCrypt {
         // crypt passwd by salt
         byte[] expect = crypt(passwd.getBytes(UTF_8), salt, logrounds);
 
-        // compare
-        if (actual.length != expect.length) {
-            return false;
-        }
-        byte ret = 0;
-        for (int i = 0; i < actual.length; i++) {
-            ret |= actual[i] ^ expect[i];
-        }
-        return ret == 0;
+        return Arrays.equals(actual, expect);
     }
 
     private static byte[] crypt(byte[] passwd, byte[] salt, int logrounds) {
-        int[] ciphertext = new int[CIPHERTEXT.length];
-        System.arraycopy(CIPHERTEXT, 0, ciphertext, 0, CIPHERTEXT.length);
+        int[] ciphertext = Arrays.copyOf(CIPHERTEXT, CIPHERTEXT.length);
         return crypt(passwd, salt, logrounds, (int[]) ciphertext);
     }
 
@@ -406,9 +398,9 @@ public final class BCrypt {
             throw new IllegalArgumentException("bad salt length");
         }
 
-        int[] P = new int[P_ORIGIN.length], S = new int[S_ORIGIN.length];
-        System.arraycopy(P_ORIGIN, 0, P, 0, P_ORIGIN.length);
-        System.arraycopy(S_ORIGIN, 0, S, 0, S_ORIGIN.length);
+        int[] P = Arrays.copyOf(P_ORIGIN, P_ORIGIN.length), 
+              S = Arrays.copyOf(S_ORIGIN, S_ORIGIN.length);
+
         ekskey(P, S, salt, passwd);
 
         // Math.pow(2,5), left move logrounds bit
@@ -559,7 +551,7 @@ public final class BCrypt {
         boolean flag = true;
         String hashed = create(password, 2);
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 100000; i++) { // 37 seconds
+        for (int i = 0; i < 100000; i++) { // 45 seconds
             if (!check(password, hashed)) {
                 System.err.println("fail!");
                 flag = false;

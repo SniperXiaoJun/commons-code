@@ -2,11 +2,13 @@
 
 package code.ponfee.commons.jce.pwd;
 
+import static code.ponfee.commons.jce.HmacAlgorithm.ALGORITHM_MAPPING;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.System.arraycopy;
 
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.crypto.Mac;
@@ -35,6 +37,7 @@ public final class SCrypt {
 
     private static final Charset UTF_8 = Charset.forName("UTF-8");
 
+    // -------------------------------------pbkdf2------------------------------
     /**
      * Implementation of PBKDF2 (RFC2898).
      * @param alg HMAC algorithm to use.
@@ -50,12 +53,24 @@ public final class SCrypt {
     }
 
     public static boolean check(HmacAlgorithm alg, byte[] P, byte[] S,
-                                int c, int dkLen, String hashed) {
-        return hashed.equals(create(alg, P, S, c, dkLen));
+                                int c, String hashed) {
+        byte[] actual = Base64.getUrlDecoder().decode(hashed);
+        byte[] except = pbkdf2(alg, P, S, c, actual.length);
+        return Arrays.equals(actual, except);
     }
 
+    // -------------------------------------scrypt------------------------------
+    /**
+     * default HmacAlgorithm HmacSHA256
+     * default dkLen is 32 byte
+     * @param passwd Password.
+     * @param N CPU cost parameter.
+     * @param r Memory cost parameter.
+     * @param p Parallelization parameter.
+     * @return
+     */
     public static String create(String passwd, int N, int r, int p) {
-        return create(HmacAlgorithm.HmacSHA256, passwd, N, r, p);
+        return create(HmacAlgorithm.HmacSHA256, passwd, N, r, p, 32);
     }
 
     /**
@@ -66,17 +81,19 @@ public final class SCrypt {
      * @param N CPU cost parameter.
      * @param r Memory cost parameter.
      * @param p Parallelization parameter.
+     * @param dkLen Intended length, in octets, of the derived key.
      * @return The hashed password.
      */
-    public static String create(HmacAlgorithm alg, String passwd, int N, int r, int p) {
+    public static String create(HmacAlgorithm alg, String passwd, 
+                                int N, int r, int p, int dkLen) {
         // N max 0x800000 -> 8388608
         //Preconditions.checkArgument(N >= 1 && N <= 8388608, "N must between 1 and 8388608");
         Preconditions.checkArgument(r >= 1 && r <= 0xff, "r must between 1 and 255");
         Preconditions.checkArgument(p >= 1 && p <= 0xff, "r must between 1 and 255");
 
-        long algIdx = HmacAlgorithm.ALGORITHM_MAPPING.inverse().get(alg) & 0xf; // maximum is 0xf
+        long algIdx = ALGORITHM_MAPPING.inverse().get(alg) & 0xf; // maximum is 0xf
         byte[] salt = SecureRandoms.nextBytes(16);
-        byte[] derived = scrypt(alg, passwd.getBytes(UTF_8), salt, N, r, p, 32);
+        byte[] derived = scrypt(alg, passwd.getBytes(UTF_8), salt, N, r, p, dkLen);
         String params = Long.toString(algIdx << 32 | log2(N) << 16 | r << 8 | p, 16);
 
         return new StringBuilder(15 + (salt.length + derived.length) * 4 / 3 + 4)
@@ -102,22 +119,14 @@ public final class SCrypt {
         byte[] salt = Base64.getUrlDecoder().decode(parts[3]);
         byte[] actual = Base64.getUrlDecoder().decode(parts[4]);
 
-        HmacAlgorithm alg = HmacAlgorithm.ALGORITHM_MAPPING.get((int) (params >> 32 & 0xf));
+        HmacAlgorithm alg = ALGORITHM_MAPPING.get((int) (params >> 32 & 0xf));
         int N = (int) Math.pow(2, params >> 16 & 0xffff);
         int r = (int) params >> 8 & 0xff;
         int p = (int) params      & 0xff;
 
-        byte[] except = scrypt(alg, passwd.getBytes(UTF_8), salt, N, r, p, 32);
+        byte[] except = scrypt(alg, passwd.getBytes(UTF_8), salt, N, r, p, actual.length);
 
-        // compare
-        if (actual.length != except.length) {
-            return false;
-        }
-        int result = 0;
-        for (int i = 0; i < actual.length; i++) {
-            result |= actual[i] ^ except[i];
-        }
-        return result == 0;
+        return Arrays.equals(actual, except);
     }
 
     /**
@@ -129,12 +138,13 @@ public final class SCrypt {
      * @param dkLen Intended length, in octets, of the derived key.
      * @return the byte array of DK
      */
-    private static byte[] pbkdf2(HmacAlgorithm alg, byte[] P, byte[] S, 
-                                 int c, int dkLen) {
+    private static byte[] pbkdf2(HmacAlgorithm alg, byte[] P, 
+                                 byte[] S, int c, int dkLen) {
         Mac mac = HmacUtils.getInitializedMac(alg.name(), P);
         int hLen = mac.getMacLength();
 
-        if (dkLen > (Math.pow(2, 32) - 1) * hLen) {
+        // (Math.pow(2, 32) - 1) == 4294967295L
+        if (dkLen > 4294967295L * hLen) {
             throw new SecurityException("Requested key length too long");
         }
 
@@ -359,9 +369,9 @@ public final class SCrypt {
         System.out.println("=====================PBKDF2=============================");
         byte[] pwd = "password".getBytes(UTF_8);
         byte[] salt = "salt".getBytes(UTF_8);
-        String hashed = create(HmacAlgorithm.HmacSHA256, pwd, salt, 1024, 24);
+        String hashed = create(HmacAlgorithm.HmacSHA256, pwd, salt, 1024, 32);
         System.out.println(hashed);
-        System.out.println(check(HmacAlgorithm.HmacSHA256, pwd, salt, 1024, 24, hashed));
+        System.out.println(check(HmacAlgorithm.HmacSHA256, pwd, salt, 1024, hashed));
 
         System.out.println("\n=====================Scrypt=============================");
         String password = "passwd";
@@ -372,7 +382,7 @@ public final class SCrypt {
         System.out.print("Test begin");
         boolean flag = true;
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 100000; i++) { // 22 seconds
+        for (int i = 0; i < 100000; i++) { // 20 seconds
             if (!check(password, hashed)) {
                 System.err.println("fail!");
                 flag = false;
