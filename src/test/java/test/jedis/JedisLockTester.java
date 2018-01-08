@@ -24,7 +24,7 @@ import code.ponfee.commons.util.ObjectUtils;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:jedis-cfg.xml" })
 public class JedisLockTester {
-    private static final String NAME = ObjectUtils.uuid(3);
+    private static final String NAME = ObjectUtils.shortid(3);
     private @Resource JedisClient jedisClient;
 
     @Before

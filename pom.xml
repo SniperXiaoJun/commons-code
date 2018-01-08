@@ -443,6 +443,11 @@
             <!-- <scope>system</scope>
             <systemPath>${pom.basedir}/lib/third-jce-1.0.0.jar</systemPath> -->
         </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.11</version>
+        </dependency>
         <!-- ====================加解密==================== -->
 
         <!-- jdk源码动态编译 -->

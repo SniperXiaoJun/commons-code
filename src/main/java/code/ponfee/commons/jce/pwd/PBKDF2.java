@@ -8,6 +8,9 @@ import java.util.Base64;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableBiMap;
+
 import code.ponfee.commons.jce.HmacAlgorithm;
 import code.ponfee.commons.util.SecureRandoms;
 
@@ -25,6 +28,15 @@ import code.ponfee.commons.util.SecureRandoms;
  */
 public class PBKDF2 {
 
+    private static final ImmutableBiMap<Integer, HmacAlgorithm> PREFIX_MAPPING = 
+        ImmutableBiMap.<Integer, HmacAlgorithm>builder()
+        .put(1, HmacAlgorithm.HmacSHA1)
+        .put(2, HmacAlgorithm.HmacSHA224)
+        .put(3, HmacAlgorithm.HmacSHA256)
+        .put(4, HmacAlgorithm.HmacSHA384)
+        .put(5, HmacAlgorithm.HmacSHA512)
+        .build();
+
     private static final String SEPARATOR = "$";
 
     public static String create(String password) {
@@ -36,36 +48,51 @@ public class PBKDF2 {
     }
 
     public static String create(HmacAlgorithm alg, char[] password) {
-        return create(alg, password, 24, 24, 64);
+        return create(alg, password, 16, 64, 32);
     }
 
     /**
      * Returns a salted PBKDF2 hash of the password.
-     * @param alg Hmac Algorithm
-     * @param password the password to hash
-     * @param saltByteSize
-     * @param hashByteSize
-     * @param pbkdf2Iterations
+     * @param alg                HmacAlgorithm, HmacAlgorithm.HmacMD5 is invalid
+     * @param password           the password to hash
+     * @param saltByteSize       the byte length of random slat
+     * @param iterationCount     the iteration count (slowness factor)
+     * @param dkLen              Intended length, in octets, of the derived key.
      * @return a salted PBKDF2 hash of the password
      */
     public static String create(HmacAlgorithm alg, char[] password, int saltByteSize,
-                                int hashByteSize, int pbkdf2Iterations) {
+                                int iterationCount, int dkLen) {
+        Preconditions.checkArgument(iterationCount >= 1 && iterationCount <= 0xffff, 
+                                    "iterations must between 1 and " + 0xffff);
         // Generate a random salt
         byte[] salt = SecureRandoms.nextBytes(saltByteSize);
 
         // Hash the password
-        byte[] hash = pbkdf2(alg.name(), password, salt, pbkdf2Iterations, hashByteSize);
+        byte[] hash = pbkdf2(alg, password, salt, iterationCount, dkLen);
+
+        int keyIdx = PREFIX_MAPPING.inverse().get(alg) & 0xf;
+        String params = Long.toString(keyIdx << 16 | iterationCount, 16);
 
         // format iterations:salt:hash
-        return pbkdf2Iterations + SEPARATOR + toBase64(salt) + SEPARATOR + toBase64(hash);
+        return new StringBuilder(12 + (salt.length + hash.length) * 4 / 3)
+                .append(SEPARATOR).append(params)
+                .append(SEPARATOR).append(toBase64(salt))
+                .append(SEPARATOR).append(toBase64(hash))
+                .toString();
     }
 
     private static String toBase64(byte[] data) {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
+    /**
+     * Validates a password using a hash.
+     * @param password the password to check
+     * @param correctHash the hash of the valid password
+     * @return true if the password is correct, false if not
+     */
     public static boolean check(String password, String correctHash) {
-        return check(HmacAlgorithm.HmacSHA256, password.toCharArray(), correctHash);
+        return check(password.toCharArray(), correctHash);
     }
 
     /**
@@ -74,26 +101,18 @@ public class PBKDF2 {
      * @param correctHash the hash of the valid password
      * @return true if the password is correct, false if not
      */
-    public static boolean check(HmacAlgorithm algorithm, String password,
-                                String correctHash) {
-        return check(algorithm, password.toCharArray(), correctHash);
-    }
-
-    /**
-     * Validates a password using a hash.
-     * @param password the password to check
-     * @param correctHash the hash of the valid password
-     * @return true if the password is correct, false if not
-     */
-    public static boolean check(HmacAlgorithm alg, char[] password, String correctHash) {
+    public static boolean check(char[] password, String correctHash) {
         // Decode the hash into its parameters
-        String[] params = correctHash.split("\\" + SEPARATOR);
-        int iterations = Integer.parseInt(params[0]);
-        byte[] salt = Base64.getUrlDecoder().decode(params[1]);
-        byte[] hash = Base64.getUrlDecoder().decode(params[2]);
+        String[] parts = correctHash.split("\\" + SEPARATOR);
+
+        long params = Long.parseLong(parts[1], 16);
+        HmacAlgorithm alg = PREFIX_MAPPING.get((int) params >> 16 & 0xf);
+        int iterations = (int) params & 0xffff;
+        byte[] salt = Base64.getUrlDecoder().decode(parts[2]);
+        byte[] hash = Base64.getUrlDecoder().decode(parts[3]);
         // Compute the hash of the provided password, using the same salt, 
         // iteration count, and hash length
-        byte[] testHash = pbkdf2(alg.name(), password, salt, iterations, hash.length);
+        byte[] testHash = pbkdf2(alg, password, salt, iterations, hash.length);
         // Compare the hashes in constant time. The password is correct if
         // both hashes match.
 
@@ -109,17 +128,18 @@ public class PBKDF2 {
 
     /**
      * Computes the PBKDF2 hash of a password.
-     * @param password the password to hash.
-     * @param salt the salt
-     * @param iterations the iteration count (slowness factor)
-     * @param bytes the length of the hash to compute in bytes
+     * @param alg             the HmacAlgorithm
+     * @param password        the password to hash
+     * @param salt            the salt
+     * @param iterationCount  the iteration count (slowness factor)
+     * @param dkLen           the length of the hash to compute in bytes
      * @return the PBDKF2 hash of the password
      */
-    private static byte[] pbkdf2(String algorithm, char[] password, byte[] salt,
-                                 int iterations, int bytes) {
-        PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, bytes * 8);
+    private static byte[] pbkdf2(HmacAlgorithm alg, char[] password, byte[] salt,
+                                 int iterationCount, int dkLen) {
+        PBEKeySpec spec = new PBEKeySpec(password, salt, iterationCount, dkLen * 8);
         try {
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2With" + algorithm);
+            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2With" + alg.name());
             return skf.generateSecret(spec).getEncoded();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new SecurityException(e);
@@ -132,34 +152,28 @@ public class PBKDF2 {
      * @throws GeneralSecurityException
      */
     public static void main(String[] args) {
-        HmacAlgorithm alg = HmacAlgorithm.HmacSHA256;
         // Print out 10 hashes
         for (int i = 0; i < 10; i++) {
-            System.out.println(create("p\r\nassw0Rd!"));
+            System.out.println(create(HmacAlgorithm.HmacSHA256, "p\r\nassw0Rd!".toCharArray(), 16, 65535, 32));
         }
         System.out.println("============================================\n");
 
         // Test password validation
+        HmacAlgorithm alg = HmacAlgorithm.HmacSHA384;
         boolean failure = false;
         System.out.println("Running tests...");
-        for (int i = 0; i < 1000; i++) {
-            String password = "" + i;
-            String hash = create(alg, password);
-            String secondHash = create(alg, password);
-            if (hash.equals(secondHash)) {
-                System.out.println("FAILURE: TWO HASHES ARE EQUAL!");
-                failure = true;
-            }
-            String wrongPassword = "" + (i + 1);
-            if (check(alg, wrongPassword, hash)) {
-                System.out.println("FAILURE: WRONG PASSWORD ACCEPTED!");
-                failure = true;
-            }
-            if (!check(alg, password, hash)) {
+        String passwd = "password";
+        String hashed = create(alg, passwd);
+        System.out.println(hashed);
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 100000; i++) { // 20 seconds
+            if (!check(passwd, hashed)) {
                 System.out.println("FAILURE: GOOD PASSWORD NOT ACCEPTED!");
                 failure = true;
+                break;
             }
         }
+        System.out.println("cost: "+(System.currentTimeMillis()-start)/1000);
         if (failure) {
             System.out.println("TESTS FAILED!");
         } else {

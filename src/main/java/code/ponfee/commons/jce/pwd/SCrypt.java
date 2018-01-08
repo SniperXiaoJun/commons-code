@@ -65,9 +65,9 @@ public class SCrypt {
     public static String create(String passwd, int N, int r, int p) {
         byte[] salt = SecureRandoms.nextBytes(16);
         byte[] derived = scrypt(passwd.getBytes(UTF_8), salt, N, r, p, 32);
-        String params = Long.toString(log2(N) << 16L | r << 8 | p, 16);
+        String params = Long.toString(log2(N) << 16 | r << 8 | p, 16);
 
-        return new StringBuilder((salt.length + derived.length) * 2)
+        return new StringBuilder(15 + (salt.length + derived.length) * 4 / 3)
                         .append("$s0$").append(params).append('$')
                         .append(encodeBase64(salt)).append('$')
                         .append(encodeBase64(derived)).toString();
@@ -352,22 +352,23 @@ public class SCrypt {
 
         System.out.println("\n=====================Scrypt=============================");
         String password = "passwd";
-        System.out.println(create(password, 2, 255, 255));
+        hashed = create(password, 2, 255, 255);
+        hashed = create(password, 2, 4, 4);
+        System.out.println(hashed);
         System.out.print("Test begin");
         boolean flag = true;
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 10000; i++) {
-            String passwd = i + password;
-            if (!check(passwd, create(passwd, 2, 4, 4))) {
+        for (int i = 0; i < 100000; i++) { // 22 seconds
+            if (!check(password, hashed)) {
                 System.err.println("fail!");
                 flag = false;
                 break;
             }
         }
+        System.out.println("cost: "+(System.currentTimeMillis()-start)/1000);
         if (flag) {
             System.out.println("\nTest success!");
         }
-        System.out.println("cost: "+(System.currentTimeMillis()-start)/1000);
     }
 
 }

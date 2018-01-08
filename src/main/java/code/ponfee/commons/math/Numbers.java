@@ -18,6 +18,22 @@ public final class Numbers {
     public static final Integer INTEGER_ZERO = Integer.valueOf(0);
 
     // -----------------------------------to primary number------------------------------
+    public static byte toByte(Object obj) {
+        return toByte(obj, (byte) 0);
+    }
+
+    public static byte toByte(Object obj, byte defaultVal) {
+        return ((Double) toDouble(obj, defaultVal)).byteValue();
+    }
+
+    public static short toShort(Object obj) {
+        return toShort(obj, (short) 0);
+    }
+
+    public static short toShort(Object obj, short defaultVal) {
+        return ((Double) toDouble(obj, defaultVal)).shortValue();
+    }
+
     public static int toInt(Object obj) {
         return toInt(obj, 0);
     }
@@ -65,6 +81,24 @@ public final class Numbers {
     // -----------------------------------to wrapper number------------------------------
     public static Double toWrapDouble(Number value) {
         return value == null ? null : value.doubleValue();
+    }
+
+    public static Byte toWrapByte(Object obj) {
+        return toWrapByte(obj, null);
+    }
+
+    public static Byte toWrapByte(Object obj, Byte defaultVal) {
+        Double value = toWrapDouble(obj, toWrapDouble(defaultVal));
+        return value == null ? null : value.byteValue();
+    }
+
+    public static Short toWrapShort(Object obj) {
+        return toWrapShort(obj, null);
+    }
+
+    public static Short toWrapShort(Object obj, Short defaultVal) {
+        Double value = toWrapDouble(obj, toWrapDouble(defaultVal));
+        return value == null ? null : value.shortValue();
     }
 
     public static Integer toWrapInt(Object obj) {

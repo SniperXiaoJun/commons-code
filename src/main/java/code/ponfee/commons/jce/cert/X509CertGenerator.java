@@ -7,6 +7,7 @@ import java.security.Security;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -14,7 +15,6 @@ import org.bouncycastle.jce.PKCS10CertificationRequest;
 
 import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.jce.RSASignAlgorithm;
-import code.ponfee.commons.util.ObjectUtils;
 import sun.security.pkcs10.PKCS10;
 import sun.security.util.ObjectIdentifier;
 import sun.security.x509.AlgorithmId;
@@ -262,9 +262,9 @@ public class X509CertGenerator {
         byte[] b1 = userData.getBytes();
         byte[] b2 = new byte[userData.length()];
         System.arraycopy(b1, 0, b2, 0, b1.length);
-        System.out.println(ObjectUtils.equals(b1, b2));
+        System.out.println(Objects.deepEquals(b1, b2));
         b2[15] = 1;
-        System.out.println(ObjectUtils.equals(b1, b2));
+        System.out.println(Objects.deepEquals(b1, b2));
     }
 
 }

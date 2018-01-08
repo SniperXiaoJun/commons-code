@@ -18,7 +18,7 @@ import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.ObjectUtils;
 
 public class RedissonLockTester {
-    private static final String NAME = ObjectUtils.uuid(3);
+    private static final String NAME = ObjectUtils.shortid(3);
 
     public RedissonClient redisson;
 

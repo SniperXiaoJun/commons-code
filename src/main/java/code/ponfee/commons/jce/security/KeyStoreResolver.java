@@ -50,13 +50,6 @@ public class KeyStoreResolver {
         this(type, new ByteArrayInputStream(keyStore), storePassword);
     }
 
-    public static KeyStoreResolver loadFromPem(String pem) {
-        KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.JKS);
-        // X509CertUtils.loadX509Cert(pem.getBytes())
-        resolver.setCertificateEntry(HashUtils.md5Hex(pem), X509CertUtils.loadFromPem(pem));
-        return resolver;
-    }
-
     /**
      * 创建密钥库
      * @param type           密钥库类型
@@ -99,7 +92,8 @@ public class KeyStoreResolver {
      * @param keyPassword    私钥加锁密码
      * @param chain
      */
-    public final void setKeyEntry(String alias, PrivateKey key, String keyPassword, Certificate[] chain) {
+    public final void setKeyEntry(String alias, PrivateKey key, 
+                                  String keyPassword, Certificate[] chain) {
         try {
             checkAliasNotExists(alias);
             this.keyStore.setKeyEntry(alias, key, keyPassword.toCharArray(), chain);
@@ -241,7 +235,8 @@ public class KeyStoreResolver {
             X509Certificate[] x509Certchain = new X509Certificate[certs.length];
             for (int i = 0; i < certs.length; i++) {
                 if (!(certs[i] instanceof X509Certificate)) {
-                    throw new SecurityException("certificate[" + i + "] in chain '" + alias + "' is not a X509Certificate.");
+                    throw new SecurityException("certificate[" + i + "] in chain '" 
+                                              + alias + "' is not a X509Certificate.");
                 }
                 x509Certchain[i] = (X509Certificate) certs[i];
             }
@@ -298,6 +293,13 @@ public class KeyStoreResolver {
         if (keyStore.containsAlias(alias)) {
             throw new SecurityException("alias[" + alias + "] is exists.");
         }
+    }
+
+    public static KeyStoreResolver loadFromPem(String pem) {
+        KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.JKS);
+        // X509CertUtils.loadFromPem(pem) <==> X509CertUtils.loadX509Cert(pem.getBytes())
+        resolver.setCertificateEntry(HashUtils.md5Hex(pem), X509CertUtils.loadFromPem(pem));
+        return resolver;
     }
 
 }

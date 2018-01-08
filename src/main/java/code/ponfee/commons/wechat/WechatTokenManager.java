@@ -70,7 +70,7 @@ public class WechatTokenManager implements DisposableBean {
                     logger.error("refresh token occur error", t);
                 }
             }
-        }, 0, TOKEN_EXPIRE / 2, TimeUnit.SECONDS);
+        }, 0, TOKEN_EXPIRE / 2 - 1, TimeUnit.SECONDS);
 
         // load token and ticket from redis cache schedule
         this.scheduled.scheduleAtFixedRate(() -> {

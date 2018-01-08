@@ -1,10 +1,10 @@
 package code.ponfee.commons.util;
 
+import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -56,55 +56,6 @@ public final class ObjectUtils {
     }
 
     /**
-     * <pre>
-     *   递归地比较两个数组是否相同，支持多维数组。
-     *   如果比较的对象不是数组，则此方法的结果同
-     *   <code>Objects.equals</code>。
-     * </pre>
-     * 
-     * @param obj1
-     * @param obj2
-     * @return 如果相等, 则返回<code>true</code>
-     */
-    public static boolean equals(Object obj1, Object obj2) {
-        if (obj1 == obj2) {
-            return true;
-        }
-        if (obj1 == null || obj2 == null) {
-            return false;
-        }
-
-        Class<? extends Object> clazz = obj1.getClass();
-        if (!clazz.equals(obj2.getClass())) {
-            return false;
-        }
-        if (!clazz.isArray()) {
-            return obj1.equals(obj2);
-        }
-
-        // obj1和obj2为同类型的数组
-        if (obj1 instanceof long[]) {
-            return Arrays.equals((long[]) obj1, (long[]) obj2);
-        } else if (obj1 instanceof int[]) {
-            return Arrays.equals((int[]) obj1, (int[]) obj2);
-        } else if (obj1 instanceof short[]) {
-            return Arrays.equals((short[]) obj1, (short[]) obj2);
-        } else if (obj1 instanceof byte[]) {
-            return Arrays.equals((byte[]) obj1, (byte[]) obj2);
-        } else if (obj1 instanceof double[]) {
-            return Arrays.equals((double[]) obj1, (double[]) obj2);
-        } else if (obj1 instanceof float[]) {
-            return Arrays.equals((float[]) obj1, (float[]) obj2);
-        } else if (obj1 instanceof boolean[]) {
-            return Arrays.equals((boolean[]) obj1, (boolean[]) obj2);
-        } else if (obj1 instanceof char[]) {
-            return Arrays.equals((char[]) obj1, (char[]) obj2);
-        } else {
-            return Arrays.equals((Object[]) obj1, (Object[]) obj2);
-        }
-    }
-
-    /**
      * 判断对象是否为空
      * @param o
      * @return
@@ -138,10 +89,11 @@ public final class ObjectUtils {
      */
     public static <T> void map2bean(Map<String, ?> map, T bean) {
         try {
+            BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
             String name;
             Object value;
             Class<?> type;
-            for (PropertyDescriptor prop : Introspector.getBeanInfo(bean.getClass()).getPropertyDescriptors()) {
+            for (PropertyDescriptor prop : beanInfo.getPropertyDescriptors()) {
                 name = prop.getName();
                 if ("class".equals(name) || 
                     (!map.containsKey(name) && !map.containsKey(name = Strings.underscoreName(name)))
@@ -151,37 +103,40 @@ public final class ObjectUtils {
 
                 value = map.get(name);
                 type = prop.getPropertyType();
-
                 if (type.isPrimitive() && Strings.isEmpty(value)) {
                     continue; // 原始类型跳过
                 }
 
+                //type = ClassUtils.primitiveToWrapper(type);
+                //ClassUtils.isPrimitiveOrWrapper(type)
                 if (ClassUtils.isPrimitiveWrapper(type) && Strings.isEmpty(value)) {
-                    value = null; // 包装类型则设置为null
-                } else if (ClassUtils.isPrimitiveOrWrapper(type)) {
-                    // 原始或包装类型
-                    if (int.class == type) {
-                        value = Numbers.toInt(value);
-                    } else if (Integer.class == type) {
-                        value = Numbers.toWrapInt(value);
-                    } else if (long.class == type) {
-                        value = Numbers.toLong(value);
-                    } else if (Long.class == type) {
-                        value = Numbers.toWrapLong(value);
-                    } else if (float.class == type) {
-                        value = Numbers.toFloat(value);
-                    } else if (Float.class == type) {
-                        value = Numbers.toWrapFloat(value);
-                    } else if (double.class == type) {
-                        value = Numbers.toDouble(value);
-                    } else if (Double.class == type) {
-                        value = Numbers.toWrapDouble(value);
-                    } else if (!type.isAssignableFrom(value.getClass())) {
-                        type = ClassUtils.primitiveToWrapper(type); // 转包装类型
-                        value = type.getConstructor(String.class).newInstance(value.toString()); // 字符串值转包装类型
-                    }
+                    value = null; // 原始包装类型则设置为null
+                } else if (byte.class == type) {
+                    value = Numbers.toByte(value);
+                } else if (Byte.class == type) {
+                    value = Numbers.toWrapByte(value);
+                } else if (short.class == type) {
+                    value = Numbers.toShort(value);
+                } else if (Short.class == type) {
+                    value = Numbers.toWrapShort(value);
+                } else if (int.class == type) {
+                    value = Numbers.toInt(value);
+                } else if (Integer.class == type) {
+                    value = Numbers.toWrapInt(value);
+                } else if (long.class == type) {
+                    value = Numbers.toLong(value);
+                } else if (Long.class == type) {
+                    value = Numbers.toWrapLong(value);
+                } else if (float.class == type) {
+                    value = Numbers.toFloat(value);
+                } else if (Float.class == type) {
+                    value = Numbers.toWrapFloat(value);
+                } else if (double.class == type) {
+                    value = Numbers.toDouble(value);
+                } else if (Double.class == type) {
+                    value = Numbers.toWrapDouble(value);
                 } else if (CharSequence.class.isAssignableFrom(type) && !type.isInstance(value)) {
-                    value = type.getConstructor(String.class).newInstance(value.toString()); // 字符序列转换
+                    value = type.getConstructor(String.class).newInstance(value.toString());
                 }
 
                 // set value into bean field
@@ -216,8 +171,9 @@ public final class ObjectUtils {
     public static Map<String, Object> bean2map(Object bean) {
         try {
             Map<String, Object> map = new HashMap<>();
+            BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
             String name;
-            for (PropertyDescriptor prop : Introspector.getBeanInfo(bean.getClass()).getPropertyDescriptors()) {
+            for (PropertyDescriptor prop : beanInfo.getPropertyDescriptors()) {
                 name = prop.getName();
                 if (!"class".equals(name)) {
                     map.put(name, prop.getReadMethod().invoke(bean));
@@ -264,8 +220,8 @@ public final class ObjectUtils {
      * @param len
      * @return
      */
-    public static String uuid(int len) {
-        return uuid(len, URL_SAFE_BASE64_CODES);
+    public static String shortid(int len) {
+        return shortid(len, URL_SAFE_BASE64_CODES);
     }
 
     /**
@@ -275,7 +231,7 @@ public final class ObjectUtils {
      * @param chars
      * @return
      */
-    public static String uuid(int len, char[] chars) {
+    public static String shortid(int len, char[] chars) {
         int size = chars.length;
         StringBuilder builder = new StringBuilder(len);
         for (String str : Strings.slice(uuid32(), len)) {
@@ -303,6 +259,12 @@ public final class ObjectUtils {
                       .append(trace.getLineNumber()).toString();
     }
 
+    /**
+     * if t is null the other
+     * @param t
+     * @param other
+     * @return
+     */
     public static <T> T ifNull(T t, T other) {
         return t != null ? t : other;
     }

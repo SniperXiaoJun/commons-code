@@ -18,50 +18,6 @@ import code.ponfee.commons.util.SecureRandoms;
 * the algorithm is parameterised, so it can be increased as
 * computers get faster.
 * <p>
-* Usage is really simple. To hash a password for the first time,
-* call the hashpw method with a random salt, like this:
-* <p>
-* <code>
-* String pw_hash = BCrypt.hashpw(plain_password, BCrypt.gensalt()); <br />
-* </code>
-* <p>
-* To check whether a plaintext password matches one that has been
-* hashed previously, use the checkpw method:
-* <p>
-* <code>
-* if (BCrypt.checkpw(candidate_password, stored_hash))<br />
-* &nbsp;&nbsp;&nbsp;&nbsp;System.out.println("It matches");<br />
-* else<br />
-* &nbsp;&nbsp;&nbsp;&nbsp;System.out.println("It does not match");<br />
-* </code>
-* <p>
-* The gensalt() method takes an optional parameter (log_rounds)
-* that determines the computational complexity of the hashing:
-* <p>
-* <code>
-* String strong_salt = BCrypt.gensalt(10)<br />
-* String stronger_salt = BCrypt.gensalt(12)<br />
-* </code>
-* <p>
-* The amount of work increases exponentially (2**log_rounds), so 
-* each increment is twice as much work. The default log_rounds is
-* 10, and the valid range is 4 to 30.
-*
-* <pre>
-*  // Hash a password for the first time
-*  String hashed = BCrypt.hashpw(password, BCrypt.gensalt());
-*  
-*  // gensalt's log_rounds parameter determines the complexity
-*  // the work factor is pow(2,log_rounds), and the default is 10
-*  String hashed = BCrypt.hashpw(password, BCrypt.gensalt(12));
-*  
-*  // Check that an unencrypted password matches one that has
-*  // previously been hashed
-*  if (BCrypt.checkpw(candidate, hashed))
-*      System.out.println("It matches");
-*  else
-*      System.out.println("It does not match");
-* </pre>
 * 
 * Maven position：
 *  <dependency>
@@ -77,6 +33,8 @@ import code.ponfee.commons.util.SecureRandoms;
 * $sha1$: SHA-1
 *    $5$: SHA-256
 *    $6$: SHA-512
+* 
+* Crypt {@link org.apache.commons.codec.digest.Crypt}
 * 
 * @author Damien Miller
 * @author Ponfee
@@ -378,10 +336,10 @@ public final class BCrypt {
      * @return the hashed password (fixed 62 length string)
      */
     public static String create(String passwd, int logrounds) {
-        Preconditions.checkArgument(logrounds >= 2 && logrounds <= 30, 
-                                    "rounds exceeds maximum (30)");
+        Preconditions.checkArgument(logrounds >= 2 && logrounds <= 20, 
+                                    "logrounds must between 2 and 20.");
 
-        StringBuilder builder = new StringBuilder("$2a$");
+        StringBuilder builder = new StringBuilder(62).append("$2a$");
         if (logrounds < 10) {
             builder.append("0");
         }
@@ -440,8 +398,8 @@ public final class BCrypt {
      * @return  an array containing the binary hashed password
      */
     private static byte[] crypt(byte[] passwd, byte[] salt, int logrounds, int[] cdata) {
-        if (logrounds < 2 || logrounds > 30) {
-            throw new IllegalArgumentException("logrounds must between 2 and 30.");
+        if (logrounds < 2 || logrounds > 20) {
+            throw new IllegalArgumentException("logrounds must between 2 and 20.");
         }
         if (salt.length != 16) {
             throw new IllegalArgumentException("bad salt length");
@@ -594,22 +552,22 @@ public final class BCrypt {
     }
 
     public static void main(String[] args) {
-        System.out.println(create("password", 20));
         String password = "passwd";
+        System.out.println(create(password, 11));
         System.out.print("Test begin");
         boolean flag = true;
+        String hashed = create(password, 2);
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 10000; i++) {
-            String pwd = i + password;
-            if (!check(pwd, create(pwd, 2))) {
+        for (int i = 0; i < 100000; i++) { // 37 seconds
+            if (!check(password, hashed)) {
                 System.err.println("fail!");
                 flag = false;
                 break;
             }
         }
+        System.out.println("cost: "+(System.currentTimeMillis()-start)/1000);
         if (flag) {
             System.out.println("\nTest success!");
         }
-        System.out.println("cost: "+(System.currentTimeMillis()-start)/1000);
     }
 }

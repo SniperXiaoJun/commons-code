@@ -251,9 +251,9 @@ public class Collects {
 
     /**
      * 合并数组
-     * @see org.apache.commons.lang3.ArrayUtils#addAll(T[] array1, T... array2);
+     * @see org.apache.commons.lang3.ArrayUtils#addAll(T[] array1, T... array2)
      * @param arrays
-     * @return
+     * @return The new array of merged
      */
     @SuppressWarnings("unchecked")
     public static <T> T[] concat(T[]... arrays) {

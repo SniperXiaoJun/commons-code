@@ -14,11 +14,14 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.ArrayUtils;
@@ -26,7 +29,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.google.common.collect.ImmutableMap;
 
 import code.ponfee.commons.util.Bytes;
-import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * 文件工具类
@@ -200,6 +202,23 @@ public final class Files {
         return list;
     }
 
+    /**
+     * 读取文件
+     * @param input
+     * @param charset
+     * @param consumer
+     */
+    public static void readFile(InputStream input, String charset, 
+                                Consumer<String> consumer) {
+        try (Scanner scanner = (charset == null)
+                               ? new Scanner(input)
+                               : new Scanner(input, charset)) {
+            while (scanner.hasNextLine()) {
+                consumer.accept(scanner.nextLine());
+            }
+        }
+    }
+
     private static final String[] FILE_UNITS = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
     /** 
      * 文件大小可读化（attach unit）：B、KB、MB
@@ -234,7 +253,7 @@ public final class Files {
             if (length >= 3) {
                 bytes1 = new byte[3];
                 input.read(bytes1);
-                if (ObjectUtils.equals(WINDOWS_BOM, bytes1)) {
+                if (Objects.deepEquals(WINDOWS_BOM, bytes1)) {
                     return;
                 }
                 bytes2 = new byte[length - 3];
@@ -285,7 +304,7 @@ public final class Files {
 
             byte[] bytes = new byte[3];
             input.read(bytes);
-            if (!ObjectUtils.equals(bytes, WINDOWS_BOM)) {
+            if (!Arrays.equals(bytes, WINDOWS_BOM)) {
                 return;
             }
 

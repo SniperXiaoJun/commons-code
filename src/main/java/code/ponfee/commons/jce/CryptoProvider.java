@@ -15,6 +15,7 @@ import code.ponfee.commons.jce.crypto.SymmetricCryptor;
 import code.ponfee.commons.jce.crypto.SymmetricCryptorBuilder;
 import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSAPrivateKeys;
+import code.ponfee.commons.jce.security.RSAPublicKeys;
 import code.ponfee.commons.util.MavenProjects;
 
 /**
@@ -86,57 +87,91 @@ public abstract class CryptoProvider {
     }
 
     /**
-     * AES加/解密
+     * 获取对称加密组件
+     * @param symmetricCryptor {@link SymmetricCryptor}
+     * @return
      */
-    public static final CryptoProvider AES_CRYPTO = new CryptoProvider() {
-        private final SymmetricCryptor key = SymmetricCryptorBuilder.newBuilder(Algorithm.AES)
-                                                                    .key("z]_5Fi!X$ed4OY8j".getBytes())
-                                                                    .mode(Mode.CBC).ivParameter("SVE<r[)qK`n%zQ'o".getBytes())
-                                                                    .padding(Padding.PKCS7Padding).provider(Providers.BC)
-                                                                    .build();
+    public static CryptoProvider newSymmetricCryptor(final SymmetricCryptor key) {
+        return new CryptoProvider() {
+            private final SymmetricCryptor symmetricKey = key;
 
-        @Override
-        public byte[] encrypt(byte[] original) {
-            Preconditions.checkArgument(original != null);
-            return key.encrypt(original);
-        }
+            @Override
+            public byte[] encrypt(byte[] original) {
+                Preconditions.checkArgument(original != null);
+                return symmetricKey.encrypt(original);
+            }
 
-        @Override
-        public byte[] decrypt(byte[] encrypted) {
-            Preconditions.checkArgument(encrypted != null);
-            return key.decrypt(encrypted);
-        }
-    };
+            @Override
+            public byte[] decrypt(byte[] encrypted) {
+                Preconditions.checkArgument(encrypted != null);
+                return symmetricKey.decrypt(encrypted);
+            }
+        };
+    }
 
     /**
-     * RSA加/解密
+     * 获取RSA解密组件
+     * @param pkcs8PrivateKey  the string of pkcs8 private format
+     * @return
      */
-    public static final CryptoProvider RSA_CRYPTO = new CryptoProvider() {
-        private final RSAPrivateKey priKey = RSAPrivateKeys.fromPkcs8("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
-        private final RSAPublicKey pubKey = RSAPrivateKeys.extractPublicKey(priKey);
+    public static CryptoProvider newRSADecryptor(final String pkcs8PrivateKey) {
+        return new CryptoProvider() {
+            private final RSAPrivateKey priKey = RSAPrivateKeys.fromPkcs8(pkcs8PrivateKey);
+            private final RSAPublicKey pubKey  = RSAPrivateKeys.extractPublicKey(priKey);
 
-        @Override
-        public byte[] encrypt(byte[] original) {
-            Preconditions.checkArgument(original != null);
-            return RSACryptor.encrypt(original, pubKey); // 公钥加密
-        }
+            @Override
+            public byte[] encrypt(byte[] original) {
+                Preconditions.checkArgument(original != null);
+                return RSACryptor.encrypt(original, pubKey); // 公钥加密
+            }
 
-        @Override
-        public byte[] decrypt(byte[] encrypted) {
-            Preconditions.checkArgument(encrypted != null);
-            return RSACryptor.decrypt(encrypted, priKey); // 私钥解密
-        }
-    };
+            @Override
+            public byte[] decrypt(byte[] encrypted) {
+                Preconditions.checkArgument(encrypted != null);
+                return RSACryptor.decrypt(encrypted, priKey); // 私钥解密
+            }
+        };
+    }
+
+    /**
+     * 获取RSA加密组件
+     * @param pkcs8PublicKey  the string of pkcs8 public format
+     * @return
+     */
+    public static CryptoProvider newRSAEncryptor(final String pkcs8PublicKey) {
+        return new CryptoProvider() {
+            private final RSAPublicKey pubKey = RSAPublicKeys.fromPkcs8(pkcs8PublicKey);
+
+            @Override
+            public byte[] encrypt(byte[] original) {
+                Preconditions.checkArgument(original != null);
+                return RSACryptor.encrypt(original, pubKey); // 公钥加密
+            }
+
+            @Override
+            public byte[] decrypt(byte[] encrypted) {
+                throw new UnsupportedOperationException("cannot support rsa decrypt");
+            }
+        };
+    }
 
     public static void main(String[] args) {
-        String str = Files.toString(MavenProjects.getMainJavaFile(CryptoProvider.class));
-        String data = RSA_CRYPTO.encrypt(str);
-        System.out.println(data);
-        System.out.println(RSA_CRYPTO.decrypt(data));
+        System.out.println("============================RSA==========================");
+        CryptoProvider rsa = newRSADecryptor("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
+        String str = Files.toString(MavenProjects.getMainJavaFile(CryptoProvider.class)).replaceAll("\r|\n|\\s+", "");
+        String data = rsa.encrypt(str);
+        System.out.println("加密后：" + data);
+        System.out.println("解密后：" + rsa.decrypt(data));
 
-        System.out.println("======================================================");
-        data = AES_CRYPTO.encrypt(str);
-        System.out.println(data);
-        System.out.println(AES_CRYPTO.decrypt(data));
+        System.out.println("============================AES==========================");
+        CryptoProvider aes = newSymmetricCryptor(SymmetricCryptorBuilder.newBuilder(Algorithm.AES)
+                                                                        .key("z]_5Fi!X$ed4OY8j".getBytes())
+                                                                        .mode(Mode.CBC).ivParameter("SVE<r[)qK`n%zQ'o".getBytes())
+                                                                        .padding(Padding.PKCS7Padding).provider(Providers.BC)
+                                                                        .build());
+        data = aes.encrypt(str);
+        System.out.println("加密后：" + data);
+        System.out.println("解密后：" + aes.decrypt(data));
     }
+
 }
