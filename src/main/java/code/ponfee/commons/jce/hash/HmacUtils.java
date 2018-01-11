@@ -10,9 +10,10 @@ import java.security.NoSuchAlgorithmException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.codec.binary.Hex;
+
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jce.HmacAlgorithm;
-import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.SecureRandoms;
 
@@ -32,11 +33,11 @@ public final class HmacUtils {
     }
 
     public static String sha1Hex(byte[] key, byte[] data) {
-        return Bytes.hexEncode(sha1(key, data));
+        return Hex.encodeHexString(sha1(key, data));
     }
 
     public static String sha1Hex(byte[] key, InputStream data) {
-        return Bytes.hexEncode(sha1(key, data));
+        return Hex.encodeHexString(sha1(key, data));
     }
 
     public static byte[] md5(byte[] key, byte[] data) {
@@ -44,7 +45,7 @@ public final class HmacUtils {
     }
 
     public static String md5Hex(byte[] key, byte[] data) {
-        return Bytes.hexEncode(md5(key, data));
+        return Hex.encodeHexString(md5(key, data));
     }
 
     public static byte[] sha224(byte[] key, byte[] data) {
@@ -52,7 +53,7 @@ public final class HmacUtils {
     }
 
     public static String sha224Hex(byte[] key, byte[] data) {
-        return Bytes.hexEncode(sha224(key, data));
+        return Hex.encodeHexString(sha224(key, data));
     }
 
     public static byte[] sha256(byte[] key, byte[] data) {
@@ -60,7 +61,7 @@ public final class HmacUtils {
     }
 
     public static String sha256Hex(byte[] key, byte[] data) {
-        return Bytes.hexEncode(sha256(key, data));
+        return Hex.encodeHexString(sha256(key, data));
     }
 
     public static byte[] sha384(byte[] key, byte[] data) {
@@ -68,7 +69,7 @@ public final class HmacUtils {
     }
 
     public static String sha384Hex(byte[] key, byte[] data) {
-        return Bytes.hexEncode(sha384(key, data));
+        return Hex.encodeHexString(sha384(key, data));
     }
 
     public static byte[] sha512(byte[] key, byte[] data) {
@@ -76,7 +77,7 @@ public final class HmacUtils {
     }
 
     public static String sha512Hex(byte[] key, byte[] data) {
-        return Bytes.hexEncode(sha512(key, data));
+        return Hex.encodeHexString(sha512(key, data));
     }
 
     public static Mac getInitializedMac(String algorithm, byte[] key) {
@@ -92,7 +93,7 @@ public final class HmacUtils {
         } catch (final NoSuchAlgorithmException e) {
             throw new IllegalArgumentException("unknown slgorithm:" + algorithm);
         } catch (final InvalidKeyException e) {
-            throw new IllegalArgumentException("invalid key:" + Bytes.hexEncode(key));
+            throw new IllegalArgumentException("invalid key:" + Hex.encodeHexString(key));
         }
     }
 

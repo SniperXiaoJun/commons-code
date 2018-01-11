@@ -85,7 +85,7 @@ public final class RSAPublicKeys {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(RSACryptor.ALG_RSA);
             return (RSAPublicKey) keyFactory.generatePublic(x509KeySpec);
-        } catch (Exception e) {
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new SecurityException(e);
         }
     }
@@ -131,8 +131,17 @@ public final class RSAPublicKeys {
             RSAKeyParameters param = (RSAKeyParameters) PublicKeyFactory.createKey(subPkInfo);
             RSAPublicKeySpec keySpec = new RSAPublicKeySpec(param.getModulus(), param.getExponent());
             return (RSAPublicKey) KeyFactory.getInstance(RSACryptor.ALG_RSA).generatePublic(keySpec);
-        } catch (Exception e) {
+        } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new SecurityException(e);
         }
+    }
+
+    /**
+     * get the rsa key length
+     * @param publicKey
+     * @return
+     */
+    public static int getKeyLength(RSAPublicKey publicKey) {
+        return publicKey.getModulus().bitLength();
     }
 }

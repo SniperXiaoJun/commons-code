@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorCompletionService;
@@ -78,6 +77,21 @@ public class ValueOperations extends JedisOperations {
     }
 
     /**
+     * 设置并删除
+     * @param key
+     * @return
+     */
+    public String getAndDel(String key) {
+        return hook(shardedJedis -> {
+            String value = shardedJedis.get(key);
+            if (value != null) {
+                shardedJedis.del(key);
+            }
+            return value;
+        }, null, key);
+    }
+
+    /**
      * 通配符获取值
      * @param keyWildcard
      * @return
@@ -86,18 +100,14 @@ public class ValueOperations extends JedisOperations {
         return hook(shardedJedis -> {
             CompletionService<List<String>> service = new ExecutorCompletionService<>(EXECUTOR);
             int number = 0;
-            for (Jedis jedis : shardedJedis.getAllShards()) {
+            for (final Jedis jedis : shardedJedis.getAllShards()) {
                 Set<String> keys = jedis.keys(keyWildcard);
                 if (keys == null || keys.isEmpty()) {
                     continue;
                 }
 
-                service.submit(new Callable<List<String>>() {
-                    @Override
-                    public List<String> call() throws Exception {
-                        // 相应分片上获取值
-                        return jedis.mget(keys.toArray(new String[keys.size()]));
-                    }
+                service.submit(() -> {
+                    return jedis.mget(keys.toArray(new String[keys.size()]));
                 });
                 number++;
             }
@@ -405,16 +415,13 @@ public class ValueOperations extends JedisOperations {
             }
 
             Map<String, String> resultMap;
-            if (jedisList.size() < keys.length) { // key数量大于分片数量，则采用mget方式
+            int number = jedisList.size();
+            if (number < keys.length / BATCH_MULTIPLE) { // key数量大于分片数量倍数，则采用mget方式
                 resultMap = new ConcurrentHashMap<>();
                 CompletionService<List<String>> service = new ExecutorCompletionService<>(EXECUTOR);
-                int number = jedisList.size();
                 for (Jedis jedis : jedisList) {
-                    service.submit(new Callable<List<String>>() {
-                        @Override
-                        public List<String> call() throws Exception {
-                            return jedis.mget(keys);
-                        }
+                    service.submit(() -> {
+                        return jedis.mget(keys);
                     });
                 }
                 for (; number > 0; number--) {
@@ -466,16 +473,13 @@ public class ValueOperations extends JedisOperations {
             }
 
             Map<byte[], byte[]> resultMap;
-            if (jedisList.size() < keys.length) { // key数量大于分片数量，则采用mget方式
+            int number = jedisList.size();
+            if (number < keys.length / BATCH_MULTIPLE) { // key数量大于分片数量倍数，则采用mget方式
                 resultMap = new ConcurrentHashMap<>();
                 CompletionService<List<byte[]>> service = new ExecutorCompletionService<>(EXECUTOR);
-                int number = jedisList.size();
                 for (Jedis jedis : jedisList) {
-                    service.submit(new Callable<List<byte[]>>() {
-                        @Override
-                        public List<byte[]> call() throws Exception {
-                            return jedis.mget((byte[][]) keys);
-                        }
+                    service.submit(() -> {
+                        return jedis.mget((byte[][]) keys);
                     });
                 }
                 for (; number > 0; number--) {

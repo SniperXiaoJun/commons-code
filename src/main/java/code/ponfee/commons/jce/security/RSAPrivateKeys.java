@@ -28,6 +28,7 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.operator.InputDecryptorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OutputEncryptor;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
@@ -176,7 +177,7 @@ public final class RSAPrivateKeys {
             JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(Providers.BC.getName());
             //PublicKey publicKey = converter.getPublicKey(keyPair.getPublicKeyInfo());
             return (RSAPrivateKey) converter.getPrivateKey(keyPair.getPrivateKeyInfo());
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new SecurityException(e);
         }
     }
@@ -203,35 +204,12 @@ public final class RSAPrivateKeys {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(RSACryptor.ALG_RSA);
             return (RSAPrivateKey) keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
-        } catch (Exception e) {
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new SecurityException(e);
         }
     }
 
     // ----------------------------------PRIVATE KEY ENCRYPTED PKCS8 PEM FORMAT-----------------------------------
-    /**
-     * BEGIN ENCRYPTED PRIVATE KEY
-     * 
-     * convert private key to encrypted pem format
-     * @param privateKey
-     * @param password      encrypt password
-     * @param outEncryptor  encrypt alg
-     * @return
-     */
-    public static String toEncryptedPkcs8Pem(RSAPrivateKey privateKey, String password,
-                                             OutputEncryptor outEncryptor) {
-        try (StringWriter stringWriter = new StringWriter(); 
-             JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
-        ) {
-            PrivateKeyInfo privKeyInfo = PrivateKeyInfo.getInstance(privateKey.getEncoded());
-            pemWriter.writeObject(new PKCS8Generator(privKeyInfo, outEncryptor));
-            pemWriter.flush();
-            return stringWriter.toString();
-        } catch (IOException e) {
-            throw new SecurityException(e);
-        }
-    }
-
     /**
      * -----BEGIN ENCRYPTED PRIVATE KEY-----
      * MIICrjAoBgoqhkiG9w0BDAEDMBoEFA4ymXPHyGS9n5BRIibZHRkJ+idqAgIEAASC
@@ -253,16 +231,38 @@ public final class RSAPrivateKeys {
      * <p>
      * 
      * convert private key to encrypted pem format
-     * default pbeWithSHAAnd3_KeyTripleDES_CBC algorithm for encrypt
+     * @param privateKey    the private key
+     * @param outEncryptor  the out encryptor
+     * @return
+     */
+    public static String toEncryptedPkcs8Pem(RSAPrivateKey privateKey,
+                                             OutputEncryptor outEncryptor) {
+        try (StringWriter stringWriter = new StringWriter(); 
+             JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
+        ) {
+            PrivateKeyInfo privKeyInfo = PrivateKeyInfo.getInstance(privateKey.getEncoded());
+            pemWriter.writeObject(new PKCS8Generator(privKeyInfo, outEncryptor));
+            pemWriter.flush();
+            return stringWriter.toString();
+        } catch (IOException e) {
+            throw new SecurityException(e);
+        }
+    }
+
+    /**
+     * convert private key to encrypted pem format
+     * default {#link PKCSObjectIdentifiers#pbeWithSHAAnd3_KeyTripleDES_CBC} 
+     * algorithm for encrypt
      * @param privateKey
      * @param password
      * @return
      */
     public static String toEncryptedPkcs8Pem(RSAPrivateKey privateKey, String password) {
+        JcePKCSPBEOutputEncryptorBuilder builder = new JcePKCSPBEOutputEncryptorBuilder(
+            PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC
+        );
         try {
-            ASN1ObjectIdentifier alg = PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC;
-            JcePKCSPBEOutputEncryptorBuilder encryptorBuilder = new JcePKCSPBEOutputEncryptorBuilder(alg);
-            return toEncryptedPkcs8Pem(privateKey, password, encryptorBuilder.build(password.toCharArray()));
+            return toEncryptedPkcs8Pem(privateKey, builder.build(password.toCharArray()));
         } catch (OperatorCreationException e) {
             throw new SecurityException(e);
         }
@@ -270,17 +270,17 @@ public final class RSAPrivateKeys {
 
     /**
      * parse private key from encrypted pem format
-     * @param encryptedPem  encoded pem encrypted private key
-     * @param password
+     * @param encryptedPem
+     * @param inputDecryptor
      * @return
      */
-    public static RSAPrivateKey fromEncryptedPkcs8Pem(String encryptedPem, String password) {
+    public static RSAPrivateKey fromEncryptedPkcs8Pem(String encryptedPem, 
+                                                      InputDecryptorProvider inputDecryptor) {
         try (Reader reader = new StringReader(encryptedPem); 
              PEMParser pemParser = new PEMParser(reader);
         ) {
             PKCS8EncryptedPrivateKeyInfo encrypted = (PKCS8EncryptedPrivateKeyInfo) pemParser.readObject();
-            JcePKCSPBEInputDecryptorProviderBuilder decryptorBuilder = new JcePKCSPBEInputDecryptorProviderBuilder();
-            PrivateKeyInfo pkInfo = encrypted.decryptPrivateKeyInfo(decryptorBuilder.build(password.toCharArray()));
+            PrivateKeyInfo pkInfo = encrypted.decryptPrivateKeyInfo(inputDecryptor);
             JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(Providers.BC.getName());
             return (RSAPrivateKey) converter.getPrivateKey(pkInfo);
         } catch (IOException | PKCSException e) {
@@ -288,4 +288,24 @@ public final class RSAPrivateKeys {
         }
     }
 
+    /**
+     * parse private key from encrypted pem format
+     * default {@link JcePKCSPBEInputDecryptorProviderBuilder} input decryptor
+     * @param encryptedPem
+     * @param password
+     * @return
+     */
+    public static RSAPrivateKey fromEncryptedPkcs8Pem(String encryptedPem, String password) {
+        JcePKCSPBEInputDecryptorProviderBuilder builder = new JcePKCSPBEInputDecryptorProviderBuilder();
+        return fromEncryptedPkcs8Pem(encryptedPem, builder.build(password.toCharArray()));
+    }
+
+    /**
+     * get the rsa key length
+     * @param publicKey
+     * @return
+     */
+    public static int getKeyLength(RSAPrivateKey privateKey) {
+        return privateKey.getModulus().bitLength();
+    }
 }

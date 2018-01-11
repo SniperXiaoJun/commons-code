@@ -1,8 +1,15 @@
 package code.ponfee.commons.jedis;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import code.ponfee.commons.util.ObjectUtils;
 import redis.clients.jedis.Jedis;
 
 /**
@@ -10,6 +17,7 @@ import redis.clients.jedis.Jedis;
  * @author fupf
  */
 public class KeysOperations extends JedisOperations {
+    private static Logger logger = LoggerFactory.getLogger(KeysOperations.class);
 
     KeysOperations(JedisClient jedisClient) {
         super(jedisClient);
@@ -108,19 +116,76 @@ public class KeysOperations extends JedisOperations {
     }
 
     /**
+     * 删除多个key值
+     * @param keys
+     * @return
+     */
+    public Long dels(String... keys) {
+        return hook(shardedJedis -> {
+            if (keys == null || keys.length == 0) {
+                return 0L;
+            }
+
+            Collection<Jedis> jedisList = shardedJedis.getAllShards();
+            if (jedisList == null || jedisList.isEmpty()) {
+                return 0L;
+            }
+
+            Long delCounts = 0L;
+            int number = jedisList.size();
+            if (number < keys.length / BATCH_MULTIPLE) { // key数量大于分片数量的BATCH_MULTIPLE倍
+                CompletionService<Long> service = new ExecutorCompletionService<>(EXECUTOR);
+                for (Jedis jedis : jedisList) {
+                    service.submit(() -> {
+                        return jedis.del(keys);
+                    });
+                }
+                for (; number > 0; number--) {
+                    try {
+                        delCounts += ObjectUtils.ifNull(service.take().get(), 0L);
+                    } catch (Exception e) {
+                        logger.error("Jedis del occur error", e);
+                    }
+                }
+            } else {
+                for (String key : keys) {
+                    delCounts += ObjectUtils.ifNull(shardedJedis.del(key), 0L);
+                }
+            }
+            return delCounts;
+        }, null, (Object[]) keys);
+    }
+
+    /**
      * 删除key（匹配通配符）
      * @param keyWildcard
      * @return 被删除 key 的数量
      */
-    public long dels(String keyWildcard) {
+    public long delWithWildcard(String keyWildcard) {
         return hook(shardedJedis -> {
-            long delCounts = 0;
-            Set<String> keys;
-            for (Jedis jedis : shardedJedis.getAllShards()) {
-                keys = jedis.keys(keyWildcard);
-                if (keys != null && keys.size() > 0) {
-                    delCounts += jedis.del(keys.toArray(new String[keys.size()]));
-                    keys.clear();
+            long delCounts = 0L;
+            Collection<Jedis> jedisList = shardedJedis.getAllShards();
+            if (jedisList == null || jedisList.isEmpty()) {
+                return delCounts;
+            }
+
+            int number = jedisList.size();
+            CompletionService<Long> service = new ExecutorCompletionService<>(EXECUTOR);
+            for (Jedis jedis : jedisList) {
+                service.submit(() -> {
+                    Set<String> keys = jedis.keys(keyWildcard);
+                    if (keys == null || keys.isEmpty()) {
+                        return 0L;
+                    } else {
+                        return jedis.del(keys.toArray(new String[keys.size()]));
+                    }
+                });
+            }
+            for (; number > 0; number--) {
+                try {
+                    delCounts += ObjectUtils.ifNull(service.take().get(), 0L);
+                } catch (Exception e) {
+                    logger.error("Jedis del by wildcard occur error", e);
                 }
             }
             return delCounts;

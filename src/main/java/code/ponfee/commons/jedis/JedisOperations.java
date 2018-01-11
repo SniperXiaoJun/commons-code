@@ -19,8 +19,9 @@ abstract class JedisOperations {
     private static final int MAX_EXPIRE_SECONDS = 30 * DEFAULT_EXPIRE_SECONDS; // max 30 days
     static final String SUCCESS_MSG = "OK"; // 返回成功信息
     static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
+    static final int BATCH_MULTIPLE = 3; // the multiple jedis server number to use batch
 
-    static final ExecutorService EXECUTOR = ThreadPoolExecutors.create(0, 20, 60, 0, "redis-mget-furture");
+    static final ExecutorService EXECUTOR = ThreadPoolExecutors.create(0, 20, 60, 0, "jedis-ops-furture");
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(EXECUTOR::shutdown));
     }

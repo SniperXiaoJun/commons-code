@@ -9,6 +9,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 import java.util.Date;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
@@ -98,7 +99,7 @@ public class KeyStoreResolverTester {
             System.out.println("\n\n===========================签名测试=========================");
             data = Base64.getDecoder().decode("");
             byte[] signed = RSACryptor.signSha1(data, privateKey);
-            String hex = Bytes.hexEncode(signed);
+            String hex = Hex.encodeHexString(signed);
             System.out.println("签名结果：" + hex.length() + " --> " + hex);
             System.out.println("验签结果：" + RSACryptor.verifySha1(data, publicKey, signed));
         } catch (IOException e) {

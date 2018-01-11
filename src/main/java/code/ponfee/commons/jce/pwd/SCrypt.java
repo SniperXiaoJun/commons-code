@@ -61,8 +61,9 @@ public final class SCrypt {
 
     // -------------------------------------scrypt------------------------------
     /**
-     * default HmacAlgorithm HmacSHA256
-     * default dkLen is 32 byte
+     * fix
+     *     HmacAlgorithm   HmacSHA256
+     *     dkLen           32 byte
      * @param passwd Password.
      * @param N CPU cost parameter.
      * @param r Memory cost parameter.

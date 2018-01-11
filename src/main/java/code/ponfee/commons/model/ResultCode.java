@@ -38,10 +38,23 @@ public final class ResultCode implements Serializable {
         this.msg = msg;
     }
 
+    /**
+     * inner create, only call in this class
+     * use in assign the commons code 
+     * @param code
+     * @param msg
+     * @return
+     */
     private static ResultCode create0(int code, String msg) {
         return new ResultCode(code, msg);
     }
 
+    /**
+     * others place cannot set the code in commons code range[000 ~ 999]
+     * @param code
+     * @param msg
+     * @return
+     */
     public static ResultCode create(int code, String msg) {
         if (code >= 0 && code < 1000) {
             throw new IllegalArgumentException("the code must not between 0 and 999.");

@@ -405,7 +405,7 @@ public final class BCrypt {
 
         // Math.pow(2,5), left move logrounds bit
         int i, j, clen = cdata.length, rounds = 1 << logrounds;
-        for (i = 0; i != rounds; i++) {
+        for (i = 0; i < rounds; i++) {
             key(P, S, passwd);
             key(P, S, salt);
         }

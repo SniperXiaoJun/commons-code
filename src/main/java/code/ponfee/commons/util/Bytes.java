@@ -1,6 +1,5 @@
 package code.ponfee.commons.util;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -18,7 +17,6 @@ import com.google.common.base.Preconditions;
 public final class Bytes {
 
     private static final char SINGLE_SPACE = ' ';
-    private static final String HEX_CODES = "0123456789abcdef";
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
 
     /**
@@ -77,40 +75,20 @@ public final class Bytes {
     }
 
     /**
-     * byte[]转hex
-     * @param str
-     * @return
+     * convert byte array to char array
+     * @param bytes the byte array
+     * @return char array
      */
-    public static String hexEncode(byte[] bytes) {
-        //new BigInteger(1, bytes).toString(16);
-        StringBuilder builder = new StringBuilder(bytes.length * 2);
-        // one byte -> two hex
-        for (int n = bytes.length, i = 0; i < n; i++) {
-            builder.append(HEX_CODES.charAt((bytes[i] & 0xf0) >> 4))
-                   .append(HEX_CODES.charAt((bytes[i] & 0x0f) >> 0));
-        }
-        return builder.toString();
-    }
-
-    /**
-     * hex转byte[]
-     * @param hex
-     * @return
-     */
-    public static byte[] hexDecode(String hex) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(hex.length() / 2);
-        // two hex -> one byte
-        for (int i = 0, n = hex.length(); i < n; i += 2) {
-            baos.write(HEX_CODES.indexOf(hex.charAt(i)) << 4 
-                       | HEX_CODES.indexOf(hex.charAt(i + 1)));
-        }
-        return baos.toByteArray();
-    }
-
     public static char[] toCharArray(byte[] bytes) {
         return toCharArray(bytes, US_ASCII.name());
     }
 
+    /**
+     * convert byte array to char array
+     * @param bytes the byte array
+     * @param charset the encoding of char array
+     * @return char array
+     */
     public static char[] toCharArray(byte[] bytes, String charset) {
         //return new String(bytes, Charset.forName(charset)).toCharArray();
         ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
@@ -119,10 +97,21 @@ public final class Bytes {
         return Charset.forName(charset).decode(buffer).array();
     }
 
+    /**
+     * convert char array to byte array
+     * @param chars the char array
+     * @return byte array
+     */
     public static byte[] fromCharArray(char[] chars) {
         return fromCharArray(chars, US_ASCII.name());
     }
 
+    /**
+     * convert char array to byte array
+     * @param chars the char array
+     * @param charset the charset
+     * @return byte array
+     */
     public static byte[] fromCharArray(char[] chars, String charset) {
         //return new String(chars).getBytes(Charset.forName(charset));
         CharBuffer buffer = CharBuffer.allocate(chars.length);
@@ -131,46 +120,48 @@ public final class Bytes {
         return Charset.forName(charset).encode(buffer).array();
     }
 
+    /**
+     * convert long number to byte array
+     * @param number the long number
+     * @return byte array
+     */
     public static byte[] fromLong(long number) {
         return ByteBuffer.allocate(8).putLong(number).array();
     }
 
+    /**
+     * convert byte array to long number
+     * @param bytes  the byte array
+     * @param fromIdx the byte array offset
+     * @return long number
+     */
     public static long toLong(byte[] bytes, int fromIdx) {
-        return ((ByteBuffer) ByteBuffer.allocate(8).put(bytes, fromIdx, 8).flip()).getLong();
+        ByteBuffer buffer = ByteBuffer.allocate(8);
+        buffer.put(bytes, fromIdx, 8).flip();
+        return buffer.getLong();
     }
 
     /**
-     * 比较两个byte数组是否相同
-     * @param b1
-     * @param b2
+     * convert byte array to long number
+     * @param bytes the byte array
      * @return
      */
-    public static boolean equals(byte[] b1, byte[] b2) {
-        if (b1 == b2) {
-            return true;
-        }
-        if (b1 == null || b2 == null) {
-            return false;
-        }
-        if (b1.length != b1.length) {
-            return false;
-        }
-
-        int result = 0;
-        for (int n = b1.length, i = 0; i < n; i++) {
-            result |= b1[i] ^ b2[i];
-        }
-        return result == 0;
+    public static long toLong(byte[] bytes) {
+        return toLong(bytes, 0);
     }
 
     /**
-     * merge byte array
-     * @param first
-     * @param rest
-     * @return
+     * merge byte arrays
+     * @param first  first byte array of args
+     * @param rest   others byte array
+     * @return a new byte array of them
      */
     public static byte[] concat(byte[] first, byte[]... rest) {
         Preconditions.checkArgument(first != null, "the first can not be null");
+        if (rest == null || rest.length == 0) {
+            return first;
+        }
+
         int totalLength = first.length;
         for (byte[] array : rest) {
             if (array != null) {

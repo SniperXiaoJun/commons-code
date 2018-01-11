@@ -5,6 +5,8 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.io.Files;
@@ -37,6 +39,25 @@ public abstract class CryptoProvider {
      * @return
      */
     public abstract byte[] decrypt(byte[] encrypted);
+
+    /**
+     * sign the data
+     * @param data
+     * @return signature
+     */
+    public byte[] sign(byte[] data) {
+        throw new UnsupportedOperationException("canot support sign.");
+    }
+
+    /**
+     * verify the data signature
+     * @param data
+     * @param signed
+     * @return true|false
+     */
+    public boolean verify(byte[] data, byte[] signed) {
+        throw new UnsupportedOperationException("canot support verify signature.");
+    }
 
     /**
      * 字符串数据加密
@@ -87,11 +108,56 @@ public abstract class CryptoProvider {
     }
 
     /**
+     * sign of data
+     * @param data
+     * @return
+     */
+    public final String sign(String data) {
+        return sign(data, Files.SYSTEM_CHARSET);
+    }
+
+    /**
+     * data
+     * @param data
+     * @param charset
+     * @return
+     */
+    public final String sign(String data, String charset) {
+        if (StringUtils.isEmpty(data)) {
+            return null;
+        }
+        byte[] signed = sign(data.getBytes(Charset.forName(charset)));
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(signed);
+    }
+
+    /**
+     * verify the data
+     * @param data
+     * @param signed
+     * @return
+     */
+    public boolean verify(String data, String signed) {
+        return verify(data, Files.SYSTEM_CHARSET, signed);
+    }
+
+    /**
+     * verify the data
+     * @param data
+     * @param charset
+     * @param signed
+     * @return
+     */
+    public boolean verify(String data, String charset, String signed) {
+        return verify(data.getBytes(Charset.forName(charset)), 
+                      Base64.getUrlDecoder().decode(signed));
+    }
+
+    /**
      * 获取对称加密组件
      * @param symmetricCryptor {@link SymmetricCryptor}
      * @return
      */
-    public static CryptoProvider newSymmetricCryptor(final SymmetricCryptor key) {
+    public static CryptoProvider symmetricCryptProvider(final SymmetricCryptor key) {
         return new CryptoProvider() {
             private final SymmetricCryptor symmetricKey = key;
 
@@ -111,13 +177,13 @@ public abstract class CryptoProvider {
 
     /**
      * 获取RSA解密组件
-     * @param pkcs8PrivateKey  the string of pkcs8 private format
+     * @param pkcs8PrivateKey  the string of pkcs8 private key format
      * @return
      */
-    public static CryptoProvider newRSADecryptor(final String pkcs8PrivateKey) {
+    public static CryptoProvider rsaDecryptProvider(final String pkcs8PrivateKey) {
         return new CryptoProvider() {
             private final RSAPrivateKey priKey = RSAPrivateKeys.fromPkcs8(pkcs8PrivateKey);
-            private final RSAPublicKey pubKey  = RSAPrivateKeys.extractPublicKey(priKey);
+            private final RSAPublicKey  pubKey = RSAPrivateKeys.extractPublicKey(priKey);
 
             @Override
             public byte[] encrypt(byte[] original) {
@@ -130,15 +196,25 @@ public abstract class CryptoProvider {
                 Preconditions.checkArgument(encrypted != null);
                 return RSACryptor.decrypt(encrypted, priKey); // 私钥解密
             }
+
+            @Override
+            public byte[] sign(byte[] data) {
+                return RSACryptor.signSha1(data, priKey);
+            }
+
+            @Override
+            public boolean verify(byte[] data, byte[] signed) {
+                return RSACryptor.verifySha1(data, pubKey, signed);
+            }
         };
     }
 
     /**
      * 获取RSA加密组件
-     * @param pkcs8PublicKey  the string of pkcs8 public format
+     * @param pkcs8PublicKey  the string of pkcs8 public key format
      * @return
      */
-    public static CryptoProvider newRSAEncryptor(final String pkcs8PublicKey) {
+    public static CryptoProvider rsaEncryptProvider(final String pkcs8PublicKey) {
         return new CryptoProvider() {
             private final RSAPublicKey pubKey = RSAPublicKeys.fromPkcs8(pkcs8PublicKey);
 
@@ -150,21 +226,31 @@ public abstract class CryptoProvider {
 
             @Override
             public byte[] decrypt(byte[] encrypted) {
-                throw new UnsupportedOperationException("cannot support rsa decrypt");
+                throw new UnsupportedOperationException("cannot support decrypt.");
+            }
+
+            @Override
+            public boolean verify(byte[] data, byte[] signed) {
+                return RSACryptor.verifySha1(data, pubKey, signed);
             }
         };
     }
 
     public static void main(String[] args) {
-        System.out.println("============================RSA==========================");
-        CryptoProvider rsa = newRSADecryptor("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
+        System.out.println("\n============================RSA crypt==========================");
+        CryptoProvider rsa = rsaDecryptProvider("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
         String str = Files.toString(MavenProjects.getMainJavaFile(CryptoProvider.class)).replaceAll("\r|\n|\\s+", "");
         String data = rsa.encrypt(str);
         System.out.println("加密后：" + data);
         System.out.println("解密后：" + rsa.decrypt(data));
 
-        System.out.println("============================AES==========================");
-        CryptoProvider aes = newSymmetricCryptor(SymmetricCryptorBuilder.newBuilder(Algorithm.AES)
+        System.out.println("\n============================RSA sign==========================");
+        String signed = rsa.sign(str);
+        System.out.println("签名："+signed);
+        System.out.println("验签："+rsa.verify(str, signed));
+        
+        System.out.println("\n============================AES crypt==========================");
+        CryptoProvider aes = symmetricCryptProvider(SymmetricCryptorBuilder.newBuilder(Algorithm.AES)
                                                                         .key("z]_5Fi!X$ed4OY8j".getBytes())
                                                                         .mode(Mode.CBC).ivParameter("SVE<r[)qK`n%zQ'o".getBytes())
                                                                         .padding(Padding.PKCS7Padding).provider(Providers.BC)

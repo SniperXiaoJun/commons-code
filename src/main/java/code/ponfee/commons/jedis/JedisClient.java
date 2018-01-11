@@ -31,8 +31,8 @@ public class JedisClient implements DisposableBean {
 
     private final static String SEPARATOR = ";";
     private final static int DEFAULT_TIMEOUT_MILLIS = 2000; // default 2000 millis timeout
-    private static final int MAX_BYTE_LEN = 40; // max bytes length
-    private static final int MAX_LEN = 50; // max str length
+    private static final int MAX_BYTE_LEN = 30; // max bytes length
+    private static final int MAX_LEN = 40; // max str length
     private static Logger logger = LoggerFactory.getLogger(JedisClient.class);
 
     private Pool<ShardedJedis> shardedJedisPool;
@@ -241,34 +241,31 @@ public class JedisClient implements DisposableBean {
         //StackTraceElement[] st = Thread.currentThread().getStackTrace();
         //builder.append(st[p].getClassName()).append(".").append(st[p].getMethodName()).append("(");
         StringBuilder builder = new StringBuilder("redis operation occur error, args(");
-        StringBuilder arg = new StringBuilder();
-        for (int n = args.length, i = 0; i < n; i++, arg.setLength(0)) {
-            if (args[i] == null) {
-                arg.append("null");
-            } else if (i == 0 && (args[i] instanceof byte[] || args[i] instanceof Byte[])) {
-                byte[] bytes;
-                if (args[i] instanceof Byte[]) {
-                    Byte[] b = (Byte[]) args[i];
-                    bytes = new byte[b.length > MAX_BYTE_LEN ? MAX_BYTE_LEN : b.length];
-                    for (int j = 0; j < bytes.length; j++) {
-                        bytes[i] = b[i];
-                    }
+        StringBuilder part = new StringBuilder();
+        Object arg;
+        for (int n = args.length, i = 0; i < n; i++, part.setLength(0)) {
+            arg = args[i];
+            if (arg == null) {
+                part.append("null");
+            } else if (i == 0 && (arg instanceof byte[] || arg instanceof Byte[])) {
+                if (arg instanceof byte[]) {
+                    part.append(toString((byte[]) arg));
                 } else {
-                    bytes = (byte[]) args[i];
+                    part.append(toString((Byte[]) arg));
                 }
-                arg.append(toString(bytes)); // redis key base64编码
             } else {
-                arg.append(args[i].toString());
+                part.append(arg.toString());
             }
 
-            if (arg.length() > MAX_LEN) {
-                arg.delete(MAX_LEN - 3, arg.length()).append("...");
+            if (part.length() > MAX_LEN) {
+                part.delete(MAX_LEN - 3, part.length()).append("...");
             }
-            builder.append("`").append(arg).append("`");
+            builder.append("`").append(part).append("`");
             if (i != n - 1) {
                 builder.append(", ");
             }
-        }
+        } // end for loop
+
         logger.error(builder.append(")").toString(), e);
     }
 
@@ -277,6 +274,15 @@ public class JedisClient implements DisposableBean {
             bytes = ArrayUtils.subarray(bytes, 0, MAX_BYTE_LEN);
         }
         return "b64:" + Base64.getEncoder().encodeToString(bytes);
+    }
+
+    private static String toString(Byte[] bytes) {
+        int length = Math.min(bytes.length, MAX_BYTE_LEN);
+        byte[] data = new byte[length];
+        for (int i = 0; i < length; i++) {
+            data[i] = bytes[i];
+        }
+        return "B64:" + Base64.getEncoder().encodeToString(data);
     }
 
     /**

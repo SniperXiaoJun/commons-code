@@ -14,12 +14,18 @@ import code.ponfee.commons.util.Bytes;
  */
 public class RequestLimiter {
 
+    /** limit operation key */
     private static final String CHECK_FREQ_KEY = "req:lmt:fre:";
     private static final String CHECK_THRE_KEY = "req:lmt:thr:";
 
-    private static final String CACHE_CAPTCHA_KEY = "req:cah:cap:";
-    private static final String CHECK_CAPTCHA_KEY = "req:chk:cap:";
+    /** validation code verify key */
+    private static final String CACHE_CODE_KEY = "req:cah:code:";
+    private static final String CHECK_CODE_KEY = "req:chk:code:";
 
+    /** image captcha code verify key */
+    private static final String CACHE_CAPTCHA_KEY = "req:cah:cap:";
+
+    /** count operation action key */
     private static final String INCR_ACTION_KEY = "req:inc:act:";
     private static final String COUNT_ACTION_KEY = "req:cnt:act:";
 
@@ -33,6 +39,7 @@ public class RequestLimiter {
         return new RequestLimiter(client);
     }
 
+    // ---------------------------------用于请求限制-------------------------------
     public RequestLimiter limitFrequency(String key, int period)
         throws RequestLimitException {
         return this.limitFrequency(key, period, "请求频繁，请" + format(period) + "后再试！");
@@ -71,29 +78,30 @@ public class RequestLimiter {
         return this;
     }
 
+    // ------------------------------用于验证码校验（如手机验证码）----------------------------------
     /**
-     * 缓存验证码
-     * @param key
-     * @param captcha
-     * @param ttl     缓存有效时间
+     * cache for the server generate validation code
+     * @param key   the cache key
+     * @param code  the validation code of server generate
+     * @param ttl   the expire time
      * @return
      */
-    public void cacheCaptcha(String key, String captcha, int ttl) {
-        client.valueOps().set(CACHE_CAPTCHA_KEY + key, captcha, ttl);
-        client.keysOps().del(CHECK_CAPTCHA_KEY + key);
+    public void cacheCode(String key, String code, int ttl) {
+        client.valueOps().set(CACHE_CODE_KEY + key, code, ttl);
+        client.keysOps().del(CHECK_CODE_KEY + key);
     }
 
     /**
-     * 校验验证码
-     * @param key
-     * @param captcha
-     * @param limit    限制验证失败的最多次数
+     * check the validation code of user input is equals server cache
+     * @param key   the cache key
+     * @param code  the validation code of user input
+     * @param limit the maximum fail input times
      * @return
      * @throws RequestLimitException
      */
-    public RequestLimiter checkCaptcha(String key, String captcha, int limit)
+    public RequestLimiter checkCode(String key, String code, int limit)
         throws RequestLimitException {
-        String cacheKey = CACHE_CAPTCHA_KEY + key;
+        String cacheKey = CACHE_CODE_KEY + key;
 
         // 1、判断验证码是否已失效
         String actual = client.valueOps().get(cacheKey);
@@ -101,27 +109,66 @@ public class RequestLimiter {
             throw new RequestLimitException("验证码失效，请重新获取！");
         }
 
-        String checkKey = CHECK_CAPTCHA_KEY + key;
+        String checkKey = CHECK_CODE_KEY + key;
 
         // 2、检查是否验证超过限定次数
         long times = client.valueOps().incrBy(checkKey);
         if (times == 1) {
-            int ttl = client.keysOps().ttl(cacheKey).intValue() + 1;
-            client.keysOps().expire(checkKey, ttl); // 第一次验证，设置缓存失效期
+            int ttl = client.keysOps().ttl(cacheKey).intValue() + 1; // calc check key ttl
+            client.keysOps().expire(checkKey, ttl); // 第一次验证，设置验证标识数据的缓存失效期
         } else if (times > limit) {
             client.keysOps().del(cacheKey); // 超过验证次数，删除缓存中的验证码
             throw new RequestLimitException("验证错误次数过多，请重新获取！");
         }
 
         // 3、检查验证码是否匹配
-        if (!actual.equals(captcha)) {
+        if (!actual.equals(code)) {
             throw new RequestLimitException("验证码错误！");
         }
 
-        client.keysOps().del(cacheKey);
+        // 验证成功，删除缓存key
+        client.keysOps().dels(cacheKey, checkKey);
         return this;
     }
 
+    // ------------------------------用于缓存图片验证码----------------------------------
+    /**
+     * cache captcha of server generate
+     * @param key
+     * @param captcha the image cptcha code of server generate
+     * @param expire  缓存有效时间
+     * @return
+     */
+    public void cacheCaptcha(String key, String captcha, int expire) {
+        client.valueOps().set(CACHE_CAPTCHA_KEY + key, captcha, expire);
+    }
+
+    public boolean checkCaptcha(String key, String captcha) {
+        return checkCaptcha(key, captcha, false); // ignore case sensitive
+    }
+
+    /**
+     * check captcha of user input
+     * @param key  the cache key
+     * @param captcha  the captcha
+     * @param caseSensitive  is case sensitive
+     * @return true|flase
+     */
+    public boolean checkCaptcha(String key, String captcha, boolean caseSensitive) {
+        String value = client.valueOps().getAndDel(CACHE_CAPTCHA_KEY + key);
+
+        if (value == null) {
+            return false;
+        }
+
+        if (caseSensitive) {
+            return value.equals(captcha);
+        } else {
+            return value.equalsIgnoreCase(captcha);
+        }
+    }
+
+    // ----------------------------------行为计数（用于登录失败限制）--------------------------------------
     /**
      * 计数周期内的行为<p>
      * 用于登录失败达到一定次数后锁定账户等场景<p>
@@ -143,29 +190,39 @@ public class RequestLimiter {
      * @return
      */
     public long countAction(String key) {
-        return client.valueOps().getLong(COUNT_ACTION_KEY + key);
+        Long count = client.valueOps().getLong(COUNT_ACTION_KEY + key);
+        return count == null ? 0 : count;
     }
 
     /**
+     * 重置行为
+     * @param key
+     */
+    public void resetAction(String key) {
+        client.keysOps().del(COUNT_ACTION_KEY + key);
+    }
+
+    // -------------------------------用于验证码校验---------------------------------
+    /**
      * 生成nonce str校验码（返回到用户端）
-     * @param captcha
+     * @param code
      * @param salt
      * @return
      */
-    public static String buildNonce(String captcha, String salt) {
-        long first = new Random(captcha.hashCode()).nextLong(); // 第一个nextLong值是固定的
+    public static String buildNonce(String code, String salt) {
+        long first = new Random(code.hashCode()).nextLong(); // 第一个nextLong值是固定的
         return HmacUtils.sha1Hex(Bytes.fromLong(first), salt.getBytes());
     }
 
     /**
      * 校验noce str
      * @param nonce
-     * @param captcha
+     * @param code
      * @param text
      * @return
      */
-    public static boolean verifyNonce(String nonce, String captcha, String salt) {
-        return StringUtils.isNotEmpty(nonce) && nonce.equals(buildNonce(captcha, salt));
+    public static boolean verifyNonce(String nonce, String code, String salt) {
+        return StringUtils.isNotEmpty(nonce) && nonce.equals(buildNonce(code, salt));
     }
 
     // -------------------------------------private methods----------------------------------
@@ -214,15 +271,4 @@ public class RequestLimiter {
         return seconds + "秒"; // 秒
     }
 
-    public static void main(String[] args) {
-        System.out.println(format(50000000));
-        System.out.println(format(10000000));
-        System.out.println(format(2000000));
-        System.out.println(format(400000));
-        System.out.println(format(80000));
-        System.out.println(format(16000));
-        System.out.println(format(4561));
-        System.out.println(format(1502));
-        System.out.println(format(40));
-    }
 }

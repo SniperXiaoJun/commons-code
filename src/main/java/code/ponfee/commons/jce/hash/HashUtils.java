@@ -8,8 +8,9 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.commons.codec.binary.Hex;
+
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.util.Bytes;
 
 /**
  * hash算法封装
@@ -28,11 +29,11 @@ public final class HashUtils {
     }
 
     public static String md5Hex(InputStream input) {
-        return Bytes.hexEncode(md5(input));
+        return Hex.encodeHexString(md5(input));
     }
 
     public static String md5Hex(byte[] data) {
-        return Bytes.hexEncode(md5(data));
+        return Hex.encodeHexString(md5(data));
     }
 
     public static String md5Hex(String data) {
@@ -52,11 +53,11 @@ public final class HashUtils {
     }
 
     public static String sha1Hex(InputStream input) {
-        return Bytes.hexEncode(sha1(input));
+        return Hex.encodeHexString(sha1(input));
     }
 
     public static String sha1Hex(byte[] data) {
-        return Bytes.hexEncode(sha1(data));
+        return Hex.encodeHexString(sha1(data));
     }
 
     public static String sha1Hex(String data) {
@@ -72,7 +73,7 @@ public final class HashUtils {
     }
 
     public static String sha256Hex(byte[] data) {
-        return Bytes.hexEncode(sha256(data));
+        return Hex.encodeHexString(sha256(data));
     }
 
     public static byte[] sha384(byte[] data) {
@@ -80,7 +81,7 @@ public final class HashUtils {
     }
 
     public static String sha384Hex(byte[] data) {
-        return Bytes.hexEncode(sha384(data));
+        return Hex.encodeHexString(sha384(data));
     }
 
     public static byte[] sha512(byte[] data) {
@@ -88,7 +89,7 @@ public final class HashUtils {
     }
 
     public static String sha512Hex(byte[] data) {
-        return Bytes.hexEncode(sha512(data));
+        return Hex.encodeHexString(sha512(data));
     }
 
     // ---------------------------------------private methods---------------------------------------

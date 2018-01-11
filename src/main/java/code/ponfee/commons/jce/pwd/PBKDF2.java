@@ -33,6 +33,11 @@ public final class PBKDF2 {
 
     private static final String SEPARATOR = "$";
 
+    /**
+     * 
+     * @param password
+     * @return
+     */
     public static String create(String password) {
         return create(HmacAlgorithm.HmacSHA256, password.toCharArray());
     }
@@ -41,6 +46,14 @@ public final class PBKDF2 {
         return create(alg, password.toCharArray());
     }
 
+    /**
+     * fix  salt            16 byte
+     *      iterationCount  64
+     *      dkLen           32 byte
+     * @param alg
+     * @param password
+     * @return
+     */
     public static String create(HmacAlgorithm alg, char[] password) {
         return create(alg, password, 16, 64, 32);
     }
@@ -107,12 +120,13 @@ public final class PBKDF2 {
         int iterations = (int) params & 0xffff;
         byte[] salt = Base64.getUrlDecoder().decode(parts[2]);
         byte[] hash = Base64.getUrlDecoder().decode(parts[3]);
+
         // Compute the hash of the provided password, using the same salt, 
         // iteration count, and hash length
         byte[] testHash = pbkdf2(alg, password, salt, iterations, hash.length);
+
         // Compare the hashes in constant time. The password is correct if
         // both hashes match.
-
         return Arrays.equals(hash, testHash);
     }
 
