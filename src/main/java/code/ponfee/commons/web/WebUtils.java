@@ -1,13 +1,13 @@
 package code.ponfee.commons.web;
 
+import static code.ponfee.commons.io.Files.BUFF_SIZE;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -21,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static code.ponfee.commons.io.Files.BUFF_SIZE;
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.util.Networks;
@@ -33,7 +32,6 @@ import code.ponfee.commons.util.UrlCoder;
  */
 public final class WebUtils {
 
-    private static final List<String> LOCAL_IP = Arrays.asList("127.0.0.1", "0:0:0:0:0:0:0:1");
     private final static Pattern PATTERN_SUFFIX = Pattern.compile("\\S*[?]\\S*");
 
     /** session trace */
@@ -84,10 +82,10 @@ public final class WebUtils {
         }
 
         if (ip != null && ip.indexOf(",") > 0) {
-            // 对于通过多个代理的情况，第一个ip为客户端真实ip，多个ip按照','分割   
+            // 对于通过多个代理的情况，第一个ip为客户端真实ip，多个ip按照','分割
             ip = ip.substring(0, ip.indexOf(","));
         }
-        if (LOCAL_IP.contains(ip)) {
+        if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
             ip = Networks.getSiteIp(); // 如果是本机ip
         }
         return ip;

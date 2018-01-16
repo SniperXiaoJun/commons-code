@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.pwd;
+package code.ponfee.commons.jce.passwd;
 
 import static code.ponfee.commons.jce.HmacAlgorithm.ALGORITHM_MAPPING;
 

@@ -12,7 +12,7 @@ import java.util.Base64;
 import org.junit.Assert;
 import org.junit.Test;
 
-import code.ponfee.commons.jce.pwd.SCrypt;
+import code.ponfee.commons.jce.passwd.SCrypt;
 
 public class SCryptTester {
     String passwd = "secret";

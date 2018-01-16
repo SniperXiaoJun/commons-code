@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.pwd;
+package code.ponfee.commons.jce.passwd;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;

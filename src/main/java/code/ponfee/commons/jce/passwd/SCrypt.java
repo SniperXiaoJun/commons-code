@@ -1,6 +1,6 @@
 // Copyright (C) 2011 - Will Glozer. All rights reserved.
 
-package code.ponfee.commons.jce.pwd;
+package code.ponfee.commons.jce.passwd;
 
 import static code.ponfee.commons.jce.HmacAlgorithm.ALGORITHM_MAPPING;
 import static java.lang.Integer.MAX_VALUE;
