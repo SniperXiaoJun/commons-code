@@ -174,7 +174,7 @@ public final class RSAPrivateKeys {
              PEMParser pemParser = new PEMParser(reader);
         ) {
             PEMKeyPair keyPair = (PEMKeyPair) pemParser.readObject();
-            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(Providers.BC.getName());
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(Providers.BC);
             //PublicKey publicKey = converter.getPublicKey(keyPair.getPublicKeyInfo());
             return (RSAPrivateKey) converter.getPrivateKey(keyPair.getPrivateKeyInfo());
         } catch (IOException e) {
@@ -281,7 +281,7 @@ public final class RSAPrivateKeys {
         ) {
             PKCS8EncryptedPrivateKeyInfo encrypted = (PKCS8EncryptedPrivateKeyInfo) pemParser.readObject();
             PrivateKeyInfo pkInfo = encrypted.decryptPrivateKeyInfo(inputDecryptor);
-            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(Providers.BC.getName());
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(Providers.BC);
             return (RSAPrivateKey) converter.getPrivateKey(pkInfo);
         } catch (IOException | PKCSException e) {
             throw new SecurityException(e);

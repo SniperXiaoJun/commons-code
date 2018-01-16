@@ -136,7 +136,7 @@ public abstract class CryptoProvider {
      * @param signed
      * @return
      */
-    public boolean verify(String data, String signed) {
+    public final boolean verify(String data, String signed) {
         return verify(data, Files.SYSTEM_CHARSET, signed);
     }
 
@@ -147,7 +147,7 @@ public abstract class CryptoProvider {
      * @param signed
      * @return
      */
-    public boolean verify(String data, String charset, String signed) {
+    public final boolean verify(String data, String charset, String signed) {
         return verify(data.getBytes(Charset.forName(charset)), 
                       Base64.getUrlDecoder().decode(signed));
     }

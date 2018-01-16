@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 
 /**
  * byte[]
+ * 转hex：new BigInteger(1, bytes).toString(16);
  * @author fupf
  */
 public final class Bytes {

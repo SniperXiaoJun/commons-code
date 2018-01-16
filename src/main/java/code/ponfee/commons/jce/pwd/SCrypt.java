@@ -18,6 +18,7 @@ import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.jce.HmacAlgorithm;
 import code.ponfee.commons.jce.hash.HmacUtils;
+import code.ponfee.commons.math.Maths;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
@@ -95,7 +96,8 @@ public final class SCrypt {
         long algIdx = ALGORITHM_MAPPING.inverse().get(alg) & 0xf; // maximum is 0xf
         byte[] salt = SecureRandoms.nextBytes(16);
         byte[] derived = scrypt(alg, passwd.getBytes(UTF_8), salt, N, r, p, dkLen);
-        String params = Long.toString(algIdx << 32 | log2(N) << 16 | r << 8 | p, 16);
+        long log2 = Math.round(Maths.log2(N));
+        String params = Long.toString(algIdx << 32 | log2 << 16 | r << 8 | p, 16);
 
         return new StringBuilder(15 + (salt.length + derived.length) * 4 / 3 + 4)
                         .append("$s0$").append(params).append('$')
@@ -339,27 +341,6 @@ public final class SCrypt {
              | ((B[Bi + 1] & 0xff) <<  8)
              | ((B[Bi + 2] & 0xff) << 16)
              | ((B[Bi + 3] & 0xff) << 24);
-    }
-
-    private static int log2(int n) {
-        int log = 0;
-        if ((n & 0xffff0000) != 0) {
-            n >>>= 16;
-            log = 16;
-        }
-        if (n >= 256) {
-            n >>>= 8;
-            log += 8;
-        }
-        if (n >= 16) {
-            n >>>= 4;
-            log += 4;
-        }
-        if (n >= 4) {
-            n >>>= 2;
-            log += 2;
-        }
-        return log + (n >>> 1);
     }
 
     private static String encodeBase64(byte[] data) {
