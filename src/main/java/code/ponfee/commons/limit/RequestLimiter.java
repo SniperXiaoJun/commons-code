@@ -42,7 +42,7 @@ public class RequestLimiter {
     // ---------------------------------用于请求限制-------------------------------
     public RequestLimiter limitFrequency(String key, int period)
         throws RequestLimitException {
-        return this.limitFrequency(key, period, "请求频繁，请" + format(period) + "后再试！");
+        return limitFrequency(key, period, "请求频繁，请" + format(period) + "后再试！");
     }
 
     /**
@@ -204,7 +204,7 @@ public class RequestLimiter {
 
     // -------------------------------用于验证码校验---------------------------------
     /**
-     * 生成nonce str校验码（返回到用户端）
+     * 生成nonce校验码（返回到用户端）
      * @param code
      * @param salt
      * @return

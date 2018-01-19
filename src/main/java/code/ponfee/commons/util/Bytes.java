@@ -1,5 +1,6 @@
 package code.ponfee.commons.util;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -149,6 +150,15 @@ public final class Bytes {
      */
     public static long toLong(byte[] bytes) {
         return toLong(bytes, 0);
+    }
+
+    /**
+     * 转BigInteger
+     * @param bytes
+     * @return
+     */
+    public static BigInteger toBigInteger(byte[] bytes) {
+        return new BigInteger(1, bytes);
     }
 
     /**

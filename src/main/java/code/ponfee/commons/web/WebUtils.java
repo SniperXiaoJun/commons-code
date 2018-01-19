@@ -18,8 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.json.Jsons;
@@ -38,8 +36,6 @@ public final class WebUtils {
     public static final String SESSION_TRACE_HEADER = "X-Auth-Token";
     public static final String SESSION_TRACE_COOKIE = "auth_token";
     public static final String SESSION_TRACE_PARAME = "authToken";
-
-    private static Logger logger = LoggerFactory.getLogger(WebUtils.class);
 
     /**
      * 获取请求参数，<b>支付模块参数签名/验签时使用</b>
@@ -114,7 +110,8 @@ public final class WebUtils {
         try (PrintWriter out = resp.getWriter()) {
             out.write(text);
         } catch (IOException e) {
-            logger.error("http response " + contentType + " error", e);
+            // not happened
+            throw new RuntimeException("http response " + contentType + " error", e);
         }
     }
 
@@ -165,14 +162,15 @@ public final class WebUtils {
         ) {
             resp.setContentType("application/octet-stream");
             resp.setHeader("Content-Disposition", "attachment;filename=" + filename);
-            resp.setHeader("Content-Length", String.valueOf(in.available()));
+            resp.setHeader("Content-Length", Integer.toString(in.available()));
             resp.setCharacterEncoding(charset);
             byte[] buffer = new byte[BUFF_SIZE];
             for (int len; (len = bufIn.read(buffer)) != Files.EOF;) {
                 bufOut.write(buffer, 0, len);
             }
         } catch (IOException e) {
-            logger.error("response application/octet-stream error", e);
+            // not happened
+            throw new RuntimeException("response application/octet-stream error", e);
         }
     }
 

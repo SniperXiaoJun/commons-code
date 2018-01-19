@@ -27,6 +27,8 @@ import code.ponfee.commons.util.SecureRandoms;
  * @author havoc AT defuse.ca
  * @author Ponfee
  * Reference from internet and with optimization
+ * 
+ * Password-Based Key Derivation Function 2
  */
 public final class PBKDF2 {
     private PBKDF2() {}

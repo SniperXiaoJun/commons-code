@@ -30,7 +30,7 @@ public final class Throwables {
      * @param ignored
      */
     public static void ignore(Throwable ignored) {
-        ignore(ignored, false);
+        ignore(ignored, true);
     }
 
     /**
@@ -41,7 +41,7 @@ public final class Throwables {
      */
     public static void ignore(Throwable ignored, boolean console) {
         if (console) {
-            ignored.printStackTrace();
+            console(ignored);
         }
     }
 

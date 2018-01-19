@@ -210,7 +210,7 @@ public class MailSender {
                     }
                 }
 
-                if (!isEmpty(envlop.getAttachments())) { // 附件
+                if (envlop.getAttachments() != null && !envlop.getAttachments().isEmpty()) { // 附件
                     for (Entry<String, DataSource> attachment : envlop.getAttachments().entrySet()) {
                         BodyPart attachmentPart = new MimeBodyPart();
                         attachmentPart.setDataHandler(new DataHandler(attachment.getValue()));

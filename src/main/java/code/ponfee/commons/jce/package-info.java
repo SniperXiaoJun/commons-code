@@ -42,6 +42,20 @@
  * 
  * 8、密码安全：BCrypt、SCrypt、PBKDF2
  * 
+ * 9、时间戳、签章
+ * 
+ * 10、区块链：
+ *     SHA256：SHA256(SHA256(version + prev_hash + merkle_root + ntime + nbits + x )) < TARGET
+ *              block的版本 version
+ *              上一个block的hash值: prev_hash
+ *              需要写入的交易记录的hash树的值: merkle_root
+ *              更新时间: ntime
+ *              当前难度: nbits
+ *              Nonce: x
+ *              target=tragetmax/difficulty
+ *     ECC：公钥160位的指纹作为钱包地址，一笔交易就是一个地址的比特币转移到另一个地址
+ *     Base58：
+ * 
  * @author fupf
  */
 package code.ponfee.commons.jce;

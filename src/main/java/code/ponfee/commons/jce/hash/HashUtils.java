@@ -18,7 +18,7 @@ import code.ponfee.commons.io.Files;
  */
 public final class HashUtils {
 
-    private static final int BUF_SIZE = 4096;
+    private static final int BUFF_SIZE = 4096;
 
     public static byte[] md5(InputStream input) {
         return digest(input, "MD5");
@@ -66,6 +66,14 @@ public final class HashUtils {
 
     public static String sha1Hex(String data, String charset) {
         return sha1Hex(data.getBytes(Charset.forName(charset)));
+    }
+
+    public static byte[] sha224(byte[] data) {
+        return digest(data, "SHA-224");
+    }
+
+    public static String sha224Hex(byte[] data) {
+        return Hex.encodeHexString(sha224(data));
     }
 
     public static byte[] sha256(byte[] data) {
@@ -116,12 +124,12 @@ public final class HashUtils {
     private static byte[] digest(InputStream input, String algorithm) {
         /*try {
             byte[] buffer = new byte[BUF_SIZE];
-            MessageDigest md = MessageDigest.getInstance(algorithm);
+            MessageDigest digest = MessageDigest.getInstance(algorithm);
             int len;
             while ((len = input.read(buffer)) != Files.EOF) {
-                md.update(buffer, 0, len);
+                digest.update(buffer, 0, len);
             }
-            return md.digest();
+            return digest.digest();
         } catch (NoSuchAlgorithmException | IOException e) {
             throw new IllegalArgumentException(e);
         } finally {
@@ -134,13 +142,13 @@ public final class HashUtils {
 
         DigestInputStream digestInput = null;
         try {
-            MessageDigest md = MessageDigest.getInstance(algorithm);
-            digestInput = new DigestInputStream(input, md);
-            byte[] buffer = new byte[BUF_SIZE];
+            MessageDigest digest = MessageDigest.getInstance(algorithm);
+            digestInput = new DigestInputStream(input, digest);
+            byte[] buffer = new byte[BUFF_SIZE];
             while (digestInput.read(buffer) != Files.EOF) {
                 //  nothing to do
             }
-            return md.digest();
+            return digest.digest();
         } catch (NoSuchAlgorithmException | IOException e) {
             throw new IllegalArgumentException(e);
         } finally {
@@ -158,6 +166,7 @@ public final class HashUtils {
     }
 
     public static void main(String[] args) throws Exception {
+        System.out.println(sha224Hex("1".getBytes()));
         //System.out.println(ObjectUtils.toString(shortText("http://www.manong5.com/102542001/")));
         long start = System.currentTimeMillis();
         System.out.println(sha1Hex(new FileInputStream("E:\\tools\\develop\\linux\\CentOS-6.6-x86_64-bin-DVD1.iso")));

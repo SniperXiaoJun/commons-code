@@ -22,7 +22,8 @@ import code.ponfee.commons.util.SecureRandoms;
  * @author fupf
  */
 public final class HmacUtils {
-    private static final int BUF_SIZE = 4096;
+
+    private static final int BUFF_SIZE = 4096;
 
     public static byte[] sha1(byte[] key, byte[] data) {
         return crypt(key, data, HmacAlgorithm.HmacSHA1.name());
@@ -105,9 +106,8 @@ public final class HmacUtils {
     private static byte[] crypt(byte[] key, InputStream input, String algName) {
         try {
             Mac mac = getInitializedMac(algName, key);
-            byte[] buffer = new byte[BUF_SIZE];
-            int len;
-            while ((len = input.read(buffer)) != Files.EOF) {
+            byte[] buffer = new byte[BUFF_SIZE];
+            for (int len; (len = input.read(buffer)) != Files.EOF;) {
                 mac.update(buffer, 0, len);
             }
             return mac.doFinal();
