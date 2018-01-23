@@ -33,7 +33,8 @@ public class Wechats {
      * @param appid
      * @param state
      * @param scope snsapi_base不弹出授权页面，直接跳转，只能获取用户openid
-     *              snsapi_userinfo弹出授权页面，可通过openid拿到昵称、性别、所在地。并且，即使在未关注的情况下，只要用户授权，也能获取其信息
+     *              snsapi_userinfo弹出授权页面，可通过openid拿到昵称、性别、所在地。
+     *              并且，即使在未关注的情况下，只要用户授权，也能获取其信息
      * @param redirect
      * @return
      */

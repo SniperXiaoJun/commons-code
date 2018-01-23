@@ -2,7 +2,6 @@ package code.ponfee.commons.util;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Base64;
 
 /**
  * Base58 code：except number 0, uppercase letter I and O, lowercase latter l
@@ -12,9 +11,10 @@ import java.util.Base64;
 public class Base58 {
 
     public static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
-    private static final int[] INDEXES = new int[128];
+
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
 
+    private static final int[] INDEXES = new int[128];
     static {
         Arrays.fill(INDEXES, -1);
         for (int i = 0; i < ALPHABET.length; i++) {
@@ -25,22 +25,26 @@ public class Base58 {
     /** 
      * Encodes the given bytes in base58. No checksum is appended.
      */
-    public static String encode(byte[] input) {
-        if (input.length == 0) {
+    public static String encode(byte[] data) {
+        if (data.length == 0) {
             return "";
         }
-        input = copyOfRange(input, 0, input.length);
+
+        // Duplicate input 
+        data = copyOfRange(data, 0, data.length);
+
         // Count leading zeroes.
         int zeroCount = 0;
-        while (zeroCount < input.length && input[zeroCount] == 0) {
+        while (zeroCount < data.length && data[zeroCount] == 0) {
             ++zeroCount;
         }
+
         // The actual encoding.
-        byte[] temp = new byte[input.length * 2];
+        byte[] temp = new byte[data.length * 2];
         int j = temp.length;
-        for (int startAt = zeroCount; startAt < input.length;) {
-            byte mod = divmod58(input, startAt);
-            if (input[startAt] == 0) {
+        for (int startAt = zeroCount; startAt < data.length;) {
+            byte mod = divmod58(data, startAt);
+            if (data[startAt] == 0) {
                 ++startAt;
             }
             temp[--j] = (byte) ALPHABET[mod];
@@ -50,45 +54,46 @@ public class Base58 {
         while (j < temp.length && temp[j] == ALPHABET[0]) {
             ++j;
         }
+
         // Add as many leading '1' as there were leading zeros.
         while (--zeroCount >= 0) {
             temp[--j] = (byte) ALPHABET[0];
         }
 
-        byte[] output = copyOfRange(temp, j, temp.length);
-        return new String(output, US_ASCII);
+        return new String(temp, j, temp.length - j, US_ASCII);
     }
 
     /**
      * decode base58 string
      */
-    public static byte[] decode(String input) {
-        if (input.length() == 0) {
+    public static byte[] decode(String data) {
+        if (data.length() == 0) {
             return new byte[0];
         }
-        byte[] input58 = new byte[input.length()];
-        // Transform the String to a base58 byte sequence  
-        for (int i = 0; i < input.length(); ++i) {
-            char c = input.charAt(i);
+        byte[] input58 = new byte[data.length()];
 
+        // Transform the String to a base58 byte sequence  
+        for (int i = 0; i < data.length(); ++i) {
+            char c = data.charAt(i);
             int digit58 = -1;
             if (c >= 0 && c < 128) {
                 digit58 = INDEXES[c];
             }
             if (digit58 < 0) {
-                throw new IllegalArgumentException("Illegal character '" + c 
-                                                 + "' at [" + i + "]");
+                throw new IllegalArgumentException("Illegal character '" 
+                                                 + c + "' at [" + i + "]");
             }
-
             input58[i] = (byte) digit58;
         }
+
         // Count leading zeroes  
         int zeroCount = 0;
         while (zeroCount < input58.length && input58[zeroCount] == 0) {
             ++zeroCount;
         }
+
         // The encoding  
-        byte[] temp = new byte[input.length()];
+        byte[] temp = new byte[data.length()];
         int j = temp.length;
 
         int startAt = zeroCount;
@@ -142,15 +147,21 @@ public class Base58 {
     }
 
     public static void main(String[] args) {
-        byte[] b128 = new byte[] { -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128 };
-        byte[] b0 = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        byte[] b127 = new byte[] { 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127 };
-        System.out.println(encode(b128));
-        System.out.println(encode(b0));
-        System.out.println(encode(b127));
+        //System.out.println(encode(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class))));
 
+        byte[] b128 = new byte[16], b0 = new byte[16], b127 = new byte[16];
+        Arrays.fill(b128, (byte) -128);
+        Arrays.fill(b0, (byte) 0);
+        Arrays.fill(b127, (byte) 127);
+
+        System.out.println("==================base58==================");
+        System.out.println(encode(b128));
+        //System.out.println(encode(b0));
+        //System.out.println(encode(b127));
+
+        /*System.out.println("\n==================base64==================");
         System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(b128));
         System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(b0));
-        System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(b127));
+        System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(b127));*/
     }
 }
