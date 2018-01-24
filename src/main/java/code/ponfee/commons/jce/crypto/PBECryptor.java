@@ -16,7 +16,7 @@ import code.ponfee.commons.util.SecureRandoms;
 /**
  * <pre>
  *  |---------------------------------------|-------------------|---------------------------|
- *  | Algorithm                             | secret key length | default secret key length |
+ *  |                Algorithm              | secret key length | default secret key length |
  *  |---------------------------------------|-------------------|---------------------------|
  *  | PBEWithMD5AndDES(Bad Algorithm)       |        56         |            56             |
  *  |---------------------------------------|-------------------|---------------------------|

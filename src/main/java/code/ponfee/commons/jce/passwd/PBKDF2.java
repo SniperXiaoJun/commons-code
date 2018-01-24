@@ -57,7 +57,7 @@ public final class PBKDF2 {
      * @return
      */
     public static String create(HmacAlgorithm alg, char[] password) {
-        return create(alg, password, 16, 64, 32);
+        return create(alg, password, 32, 64, 32);
     }
 
     /**

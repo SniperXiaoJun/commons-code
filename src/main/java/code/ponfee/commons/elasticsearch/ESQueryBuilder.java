@@ -350,7 +350,7 @@ public class ESQueryBuilder {
         return search.get();
     }
 
-    SearchResponse scrolling(TransportClient client, int size) {
+    SearchResponse scroll(TransportClient client, int size) {
         SearchRequestBuilder search = build(client, size);
         search.setScroll(ElasticSearchClient.SCROLL_TIMEOUT);
         //search.setSearchType(SearchType.QUERY_THEN_FETCH); // default QUERY_THEN_FETCH

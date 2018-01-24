@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableBiMap;
  * @author Ponfee
  */
 public enum HmacAlgorithm {
+
     HmacMD5, HmacSHA1, HmacSHA224, HmacSHA256, HmacSHA384, HmacSHA512;
 
     public static final ImmutableBiMap<Integer, HmacAlgorithm> ALGORITHM_MAPPING = 

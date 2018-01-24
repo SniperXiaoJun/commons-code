@@ -6,8 +6,12 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -26,6 +30,33 @@ import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
  */
 public final class RSAPublicKeys {
     private RSAPublicKeys() {}
+
+    /**
+     * 证书中获取公钥
+     * @param cert
+     * @return
+     */
+    public static PublicKey getPublicKey(Certificate cert) {
+        return cert.getPublicKey();
+    }
+
+    /**
+     * 因为 IBM JDK 不支持私钥加密, 公钥解密, 所以要反转公私钥
+     * 也就是说对于解密, 可以通过公钥的参数伪造一个私钥对象欺骗 IBM JDK
+     * 公钥伪造成私钥，此时可用伪造的私钥解密及签名
+     * @param publicKey
+     * @return
+     */
+    public static RSAPrivateKey fakePrivateKey(RSAPublicKey publicKey) {
+        RSAPrivateKeySpec spec = new RSAPrivateKeySpec(publicKey.getModulus(), 
+                                                       publicKey.getPublicExponent());
+        try {
+            return (RSAPrivateKey) KeyFactory.getInstance(publicKey.getAlgorithm())
+                                             .generatePrivate(spec);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            throw new SecurityException(e);
+        }
+    }
 
     // ----------------------------------PUBLIC KEY PKCS1 FORMAT-----------------------------------
     /**

@@ -18,7 +18,20 @@ import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
- * Hmac算法封装
+ * HMAC的一个典型应用是用在“质询/响应”（Challenge/Response）身份认证中
+ * Hmac算法封装，计算“text”的HMAC：
+ * <code>
+ *   if (length(K) > blocksize) {
+ *       K = H(K) // keys longer than blocksize are shortened
+ *   } else if (length(key) < blocksize) {
+ *       K += [0x00 * (blocksize - length(K))] // keys shorter than blocksize are zero-padded 
+ *   }
+ *   opad = [0x5c * B] XOR K
+ *   ipad = [0x36 * B] XOR K
+ *   hash = H(opad + H(ipad + text))
+ * </code>
+ * 其中：H为散列函数，K为密钥，text为数据，
+ *     B表示数据块的字长（the blocksize is that of the underlying hash function）
  * @author fupf
  */
 public final class HmacUtils {
@@ -87,14 +100,13 @@ public final class HmacUtils {
         }
 
         try {
-            SecretKeySpec keySpec = new SecretKeySpec(key, algorithm);
             Mac mac = Mac.getInstance(algorithm);
-            mac.init(keySpec);
+            mac.init(new SecretKeySpec(key, mac.getAlgorithm()));
             return mac;
         } catch (final NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException("unknown slgorithm:" + algorithm);
+            throw new IllegalArgumentException("unknown algorithm:" + algorithm);
         } catch (final InvalidKeyException e) {
-            throw new IllegalArgumentException("invalid key:" + Hex.encodeHexString(key));
+            throw new IllegalArgumentException("invalid key: " + Hex.encodeHexString(key));
         }
     }
 

@@ -105,12 +105,12 @@ public abstract class DHCryptor {
 
     /**
      * 双方公私钥生成（协商）对称密钥
-     * @param aPubKey
      * @param bPriKey
+     * @param aPubKey
      * @return
      * @throws Exception
      */
-    public static SecretKey getSecretKey(byte[] aPubKey, byte[] bPriKey) throws Exception {
+    public static SecretKey genSecretKey(byte[] bPriKey, byte[] aPubKey) throws Exception {
         KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
         X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(aPubKey);
         DHPublicKey pubKey = (DHPublicKey) keyFactory.generatePublic(x509KeySpec);
@@ -119,17 +119,17 @@ public abstract class DHCryptor {
         PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(bPriKey);
         DHPrivateKey priKey = (DHPrivateKey) keyFactory.generatePrivate(pkcs8KeySpec);
 
-        return genSecretKey(pubKey, priKey);
+        return genSecretKey(priKey, pubKey);
     }
 
     /**
      * 双方公私钥生成（协商）对称密钥
-     * @param aPubKey
      * @param bPriKey
+     * @param aPubKey
      * @return
      * @throws Exception
      */
-    public static SecretKey genSecretKey(DHPublicKey aPubKey, DHPrivateKey bPriKey) throws Exception {
+    public static SecretKey genSecretKey(DHPrivateKey bPriKey, DHPublicKey aPubKey) throws Exception {
         KeyAgreement keyAgree = KeyAgreement.getInstance(aPubKey.getAlgorithm());
         keyAgree.init(bPriKey);
         keyAgree.doPhase(aPubKey, true);
@@ -162,13 +162,13 @@ public abstract class DHCryptor {
         byte[] data = "123456".getBytes();
 
         // 乙方加密甲方解密
-        byte[] encrypted = encrypt(data, genSecretKey(getPublicKey(partA), getPrivateKey(partB)));
-        byte[] decrypted = decrypt(encrypted, genSecretKey(getPublicKey(partB), getPrivateKey(partA)));
+        byte[] encrypted = encrypt(data, genSecretKey(getPrivateKey(partB), getPublicKey(partA)));
+        byte[] decrypted = decrypt(encrypted, genSecretKey(getPrivateKey(partA), getPublicKey(partB)));
         System.out.println(new String(decrypted));
 
         // 甲方加密乙方解密
-        encrypted = encrypt(data, genSecretKey(getPublicKey(partB), getPrivateKey(partA)));
-        decrypted = decrypt(encrypted, genSecretKey(getPublicKey(partA), getPrivateKey(partB)));
+        encrypted = encrypt(data, genSecretKey(getPrivateKey(partA), getPublicKey(partB)));
+        decrypted = decrypt(encrypted, genSecretKey(getPrivateKey(partB), getPublicKey(partA)));
         System.out.println(new String(decrypted));
     }
 }

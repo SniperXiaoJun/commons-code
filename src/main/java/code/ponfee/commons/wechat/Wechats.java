@@ -232,7 +232,7 @@ public class Wechats {
         map.put("jsapi_ticket", jsapiTicket);
         map.put("noncestr", ObjectUtils.uuid22());
         map.put("timestamp", Long.toString(System.currentTimeMillis() / 1000));
-        map.put("url", url);
+        map.put("url", url.indexOf("#") == -1 ? url : url.substring(0, url.indexOf("#")));
 
         // generate sigin data
         map.put("signature", HashUtils.sha1Hex(HttpParams.buildSigning(map)));

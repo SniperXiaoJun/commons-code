@@ -318,7 +318,7 @@ public final class WebUtils {
     public static void setSessionTrace(String token) {
         int maxAge = (token == null) ? 0 : 24 * 60 * 60;
         HttpServletResponse resp = getResponse();
-        //result.setAuthToken(token); // to parame
+        //result.setAuthToken(token); // to resp body
         WebUtils.addCookie(resp, SESSION_TRACE_COOKIE, token, "/", maxAge); // to cookie
         WebUtils.addHeader(resp, SESSION_TRACE_HEADER, token); // to header
     }
@@ -331,7 +331,7 @@ public final class WebUtils {
      * 会话跟踪
      */
     public static String getSessionTrace(HttpServletRequest req) {
-        String authToken = req.getParameter(SESSION_TRACE_PARAME); // from parame
+        String authToken = req.getParameter(SESSION_TRACE_PARAME); // from param
         if (authToken != null) {
             return authToken;
         }
@@ -344,6 +344,11 @@ public final class WebUtils {
         return WebUtils.getHeader(req, SESSION_TRACE_HEADER); // from header;
     }
 
+    /**
+     * to json string
+     * @param data
+     * @return
+     */
     private static String toJson(Object data) {
         if (data == null) {
             return null;

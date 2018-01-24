@@ -406,13 +406,12 @@ public class X509CertUtils {
         }
     }
 
-    private static byte[] getTotalBytes(InputStream inputstream)
+    private static byte[] getTotalBytes(InputStream input)
         throws IOException {
         byte abyte0[] = new byte[8192];
         ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
         baos.reset();
-        int len;
-        while ((len = inputstream.read(abyte0, 0, abyte0.length)) != Files.EOF) {
+        for (int len; (len = input.read(abyte0, 0, abyte0.length)) != Files.EOF;) {
             baos.write(abyte0, 0, len);
         }
         return baos.toByteArray();

@@ -71,6 +71,22 @@ import code.ponfee.commons.jce.Providers;
 public final class RSAPrivateKeys {
     private RSAPrivateKeys() {}
 
+    /**
+     * 私钥伪造公钥，此时可以用此伪造的公钥加密及验签
+     * @param publicKey
+     * @return
+     */
+    public static RSAPublicKey fakePublicKey(RSAPrivateKey privateKey) {
+        RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(privateKey.getModulus(), 
+                                                              privateKey.getPrivateExponent());
+        try {
+            return (RSAPublicKey) KeyFactory.getInstance(privateKey.getAlgorithm())
+                                            .generatePublic(publicKeySpec);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            throw new SecurityException(e);
+        }
+    }
+
     // ----------------------------------EXTRACT PUBLIC KEY FROM PRIVATE KEY-----------------------------------
     /**
      * extract public key from private key

@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 
 import org.slf4j.Logger;
@@ -222,7 +223,7 @@ public class ValueOperations extends JedisOperations {
      * @return 执行 INCR 命令之后 key 的值
      */
     public Long incrBy(String key) {
-        return incrBy(key, 1);
+        return incrBy(key, 1, null);
     }
 
     public Long incrBy(String key, int step) {
@@ -261,7 +262,7 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public Long decrBy(String key) {
-        return decrBy(key, 1);
+        return decrBy(key, 1, null);
     }
 
     public Long decrBy(String key, int step) {
@@ -438,7 +439,7 @@ public class ValueOperations extends JedisOperations {
                                 resultMap.put(keys[i], s);
                             }
                         }
-                    } catch (Exception e) {
+                    } catch (InterruptedException | ExecutionException e) {
                         logger.error("Jedis mget occur error", e);
                     }
                 }

@@ -22,7 +22,8 @@ public class Tmeta implements Serializable {
 
     public Tmeta() {}
 
-    public Tmeta(Type type, String format, Align align, boolean nowrap, String colorHex) {
+    public Tmeta(Type type, String format, Align align, 
+                 boolean nowrap, String colorHex) {
         this.type = type;
         this.format = format;
         this.align = align;

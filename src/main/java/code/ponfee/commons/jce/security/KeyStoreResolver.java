@@ -281,17 +281,17 @@ public class KeyStoreResolver {
         return keyStore;
     }
 
-    private char[] toCharArray(String str) {
+    private void checkAliasNotExists(String alias) throws KeyStoreException {
+        if (keyStore.containsAlias(alias)) {
+            throw new SecurityException("alias[" + alias + "] is exists.");
+        }
+    }
+
+    private static char[] toCharArray(String str) {
         if (null == str || str.length() == 0) {
             return null;
         } else {
             return str.toCharArray();
-        }
-    }
-
-    private void checkAliasNotExists(String alias) throws KeyStoreException {
-        if (keyStore.containsAlias(alias)) {
-            throw new SecurityException("alias[" + alias + "] is exists.");
         }
     }
 

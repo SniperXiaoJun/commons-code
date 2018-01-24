@@ -200,39 +200,44 @@ public class JedisClientTester {
 
         jedisClient.valueOps().get("abc");
     }
-    
-    /*@Test
-    public void testHook2() {
-        jedisClient.hook2((shardedJedis, args) -> {
-            return 1;
-        }, 1, 1, 2, 3);
-    }*/
 
     @Test
     public void testPubsub() throws InterruptedException {
-        new Thread(() -> {
+        Thread thread = new Thread(() -> {
             jedisClient.mqOps().subscribe(new JedisPubSub() {
                 @Override
                 public void onMessage(String channel, String message) {
-                    System.out.println(channel + " --> " + message);
+                    System.out.println("onMessage: " + channel + "--->" + message);
                 }
 
                 @Override
-                public void onPMessage(String pattern, String channel, String message) {}
+                public void onPMessage(String pattern, String channel, String message) {
+                    System.out.println("onPMessage: " + pattern + "--->" + channel + "--->" + message);
+                }
 
                 @Override
-                public void onPSubscribe(String pattern, int subscribedChannels) {}
+                public void onPSubscribe(String pattern, int subscribedChannels) {
+                    System.out.println("onPSubscribe: " + pattern + "--->" + subscribedChannels);
+                }
 
                 @Override
-                public void onPUnsubscribe(String pattern, int subscribedChannels) {}
+                public void onPUnsubscribe(String pattern, int subscribedChannels) {
+                    System.out.println("onPUnsubscribe: " + pattern + "--->" + subscribedChannels);
+                }
 
                 @Override
-                public void onSubscribe(String channel, int subscribedChannels) {}
+                public void onSubscribe(String channel, int subscribedChannels) {
+                    System.out.println("onSubscribe: " + channel + "--->" + subscribedChannels);
+                }
 
                 @Override
-                public void onUnsubscribe(String channel, int subscribedChannels) {}
+                public void onUnsubscribe(String channel, int subscribedChannels) {
+                    System.out.println("onSubscribe: " + channel + "--->" + subscribedChannels);
+                }
             }, "testChannel", "testChannel1");
-        }).start();
+        });
+        thread.start();
+        Thread.sleep(1000);
         System.out.println("====================");
         jedisClient.mqOps().publish("testChannel", "a");
         jedisClient.mqOps().publish("testChannel", "b");
@@ -240,6 +245,17 @@ public class JedisClientTester {
         jedisClient.mqOps().publish("testChannel1", "1");
         jedisClient.mqOps().publish("testChannel1", "2");
         jedisClient.mqOps().publish("testChannel1", "3");
-        Thread.sleep(10000);
+        Thread.sleep(5000);
+    }
+
+    @Test
+    public void testIncr() {
+        String key = "abcde";
+        System.out.println( jedisClient.valueOps().incrBy(key));
+        System.out.println(jedisClient.valueOps().getLong(key));
+        System.out.println(jedisClient.valueOps().getLong(key));
+        System.out.println( jedisClient.valueOps().incrBy(key));
+        System.out.println(jedisClient.valueOps().getLong(key));
+        System.out.println(jedisClient.valueOps().getLong(key));
     }
 }

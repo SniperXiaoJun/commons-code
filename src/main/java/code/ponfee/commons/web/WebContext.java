@@ -157,8 +157,8 @@ public final class WebContext {
 
         public @Override void init(FilterConfig cfg) throws ServletException {}
 
-        public @Override void doFilter(ServletRequest req, ServletResponse resp, 
-                                       FilterChain chain) throws IOException, ServletException { 
+        public @Override void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) 
+            throws IOException, ServletException { 
             try {
                 WebContext.setRequest((HttpServletRequest) req);
                 WebContext.setResponse((HttpServletResponse) resp);

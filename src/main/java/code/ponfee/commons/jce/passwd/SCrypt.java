@@ -36,6 +36,7 @@ import code.ponfee.commons.util.SecureRandoms;
 public final class SCrypt {
     private SCrypt() {}
 
+    private static final String SEPARATOR = "$";
     private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     // -------------------------------------pbkdf2------------------------------
@@ -94,14 +95,15 @@ public final class SCrypt {
         Preconditions.checkArgument(p >= 1 && p <= 0xff, "r must between 1 and 255");
 
         long algIdx = ALGORITHM_MAPPING.inverse().get(alg) & 0xf; // maximum is 0xf
-        byte[] salt = SecureRandoms.nextBytes(16);
+        byte[] salt = SecureRandoms.nextBytes(32);
         byte[] derived = scrypt(alg, passwd.getBytes(UTF_8), salt, N, r, p, dkLen);
         long log2 = Math.round(Maths.log2(N));
         String params = Long.toString(algIdx << 32 | log2 << 16 | r << 8 | p, 16);
 
         return new StringBuilder(15 + (salt.length + derived.length) * 4 / 3 + 4)
-                        .append("$s0$").append(params).append('$')
-                        .append(encodeBase64(salt)).append('$')
+                        .append(SEPARATOR).append("s0").append(SEPARATOR)
+                        .append(params).append(SEPARATOR)
+                        .append(encodeBase64(salt)).append(SEPARATOR)
                         .append(encodeBase64(derived)).toString();
     }
 
@@ -112,7 +114,7 @@ public final class SCrypt {
      * @return true if passwd matches hashed value.
      */
     public static boolean check(String passwd, String hashed) {
-        String[] parts = hashed.split("\\$");
+        String[] parts = hashed.split("\\" + SEPARATOR);
 
         if (parts.length != 5 || !"s0".equals(parts[1])) {
             throw new IllegalArgumentException("Invalid hashed value");

@@ -3,7 +3,20 @@ package code.ponfee.commons.util;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import code.ponfee.commons.io.Files;
+
 /**
+ * https://www.jianshu.com/p/ffc97c4d2306
+ * 在计算机系统中数值使用补码来表示和存储
+ *  原码：正数的原码为其二进制；负数的原码为对应的正数值在高位补1；True form
+ *  反码：正数的反码与原码相同；负数的反码为其原码除符号位以外各位取反；1's complement
+ *  补码：正数的补码与原码相同；负数的补码为其反码（最低位）加1；2's complement
+ * <p>
+ * 
+ * 补码系统的最大优点是可以在加法或减法处理中，不需因为数字的正负而使用不同的计算方式
+ * 计算机中只有加法，用两数补码相加，结果仍是补码表示
+ * 补码转原码：减1再取反
+ * 
  * Base58 code：except number 0, uppercase letter I and O, lowercase latter l
  * Reference from internet
  * @author Ponfee
@@ -23,7 +36,7 @@ public class Base58 {
     }
 
     /** 
-     * Encodes the given bytes in base58. No checksum is appended.
+     * Encode the given bytes in base58. No checksum is appended.
      */
     public static String encode(byte[] data) {
         if (data.length == 0) {
@@ -64,7 +77,7 @@ public class Base58 {
     }
 
     /**
-     * decode base58 string
+     * Decode base58 string
      */
     public static byte[] decode(String data) {
         if (data.length() == 0) {
@@ -118,7 +131,11 @@ public class Base58 {
     private static byte divmod58(byte[] number, int startAt) {
         int remainder = 0;
         for (int i = startAt; i < number.length; i++) {
-            int digit256 = (int) number[i] & 0xFF;
+            // b & 0xFF再转int是为了保持二进制补码的一致性
+            // byte b = -127; 补码：10000001
+            // int  i = -127; 补码：111111111111111111111111 10000001
+            // Integer.toBinaryString(b & 0xFF) --> 10000001
+            int digit256 = number[i] & 0xFF;
             int temp = remainder * 256 + digit256;
             number[i] = (byte) (temp / 58);
             remainder = temp % 58;
@@ -131,7 +148,7 @@ public class Base58 {
     private static byte divmod256(byte[] number58, int startAt) {
         int remainder = 0;
         for (int i = startAt; i < number58.length; i++) {
-            int digit58 = (int) number58[i] & 0xFF;
+            int digit58 = number58[i] & 0xFF;
             int temp = remainder * 58 + digit58;
             number58[i] = (byte) (temp / 256);
             remainder = temp % 256;
@@ -147,7 +164,7 @@ public class Base58 {
     }
 
     public static void main(String[] args) {
-        //System.out.println(encode(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class))));
+        System.out.println(encode(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class))));
 
         byte[] b128 = new byte[16], b0 = new byte[16], b127 = new byte[16];
         Arrays.fill(b128, (byte) -128);

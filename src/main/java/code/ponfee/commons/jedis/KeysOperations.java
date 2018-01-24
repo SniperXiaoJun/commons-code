@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 
 import org.slf4j.Logger;
@@ -143,7 +144,7 @@ public class KeysOperations extends JedisOperations {
                 for (; number > 0; number--) {
                     try {
                         delCounts += ObjectUtils.ifNull(service.take().get(), 0L);
-                    } catch (Exception e) {
+                    } catch (InterruptedException | ExecutionException e) {
                         logger.error("Jedis del occur error", e);
                     }
                 }
@@ -184,7 +185,7 @@ public class KeysOperations extends JedisOperations {
             for (; number > 0; number--) {
                 try {
                     delCounts += ObjectUtils.ifNull(service.take().get(), 0L);
-                } catch (Exception e) {
+                } catch (InterruptedException | ExecutionException e) {
                     logger.error("Jedis del by wildcard occur error", e);
                 }
             }

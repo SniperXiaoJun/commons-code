@@ -490,7 +490,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.7.0</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -505,6 +505,9 @@
                         <!-- windows用;分隔，linux用:分隔 -->
                         <bootclasspath>${java.home}/lib/rt.jar${separator}${java.home}/lib/jce.jar${separator}${java.home}/lib/jsse.jar</bootclasspath>
                     </compilerArguments>
+                    <excludes>
+                        <exclude>node_modules/**</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>

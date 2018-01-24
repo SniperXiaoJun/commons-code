@@ -315,28 +315,28 @@ public final class Http {
      */
     //private static final Pattern FILENAME_PATTERN = Pattern.compile("(?i)^.*;.*filename=(.*)$");
     public void download(OutputStream output) {
+        BufferedOutputStream bos = null;
         HttpRequest request = request0();
-        if (request.ok() || request.created()) {
-            /*// 获取文件名
-            String disposition = UrlCoder.decodeURIComponent(request.header("content-Disposition"));
-            Matcher matcher = FILENAME_PATTERN.matcher(disposition);
-            if (matcher.find()) {
-                String filename = matcher.group(1);
-            }*/
-            BufferedOutputStream bos = null;
-            try {
+        try {
+            if (request.ok() || request.created()) {
+                /*// 获取文件名
+                String disposition = UrlCoder.decodeURIComponent(request.header("content-Disposition"));
+                Matcher matcher = FILENAME_PATTERN.matcher(disposition);
+                if (matcher.find()) {
+                    String filename = matcher.group(1);
+                }*/
                 bos = new BufferedOutputStream(output);
                 request.receive(bos);
-            } finally {
-                disconnect(request);
-                if (bos != null) try {
-                    bos.close();
-                } catch (IOException ignore) {
-                    ignore.printStackTrace();
-                }
+            } else {
+                throw new HttpException("request failed, status: " + request.code());
             }
-        } else {
-            throw new HttpException("request failed, status: " + request.code());
+        } finally {
+            disconnect(request);
+            if (bos != null) try {
+                bos.close();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
+            }
         }
     }
 

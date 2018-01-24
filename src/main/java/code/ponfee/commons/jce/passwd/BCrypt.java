@@ -46,6 +46,7 @@ import code.ponfee.commons.util.SecureRandoms;
 public final class BCrypt {
     private BCrypt() {}
 
+    private static final String SEPARATOR = "$";
     private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     // Blowfish parameters
@@ -341,14 +342,15 @@ public final class BCrypt {
         Preconditions.checkArgument(logrounds >= 2 && logrounds <= 20, 
                                     "logrounds must between 2 and 20.");
 
-        StringBuilder builder = new StringBuilder(62).append("$2a$");
+        StringBuilder builder = new StringBuilder(62).append(SEPARATOR)
+                                        .append("2a").append(SEPARATOR);
         if (logrounds < 10) {
             builder.append("0");
         }
-        builder.append(Integer.toString(logrounds)).append("$");
+        builder.append(Integer.toString(logrounds)).append(SEPARATOR);
 
         byte[] salt = SecureRandoms.nextBytes(16);
-        builder.append(encodeBase64(salt)).append("$");
+        builder.append(encodeBase64(salt)).append(SEPARATOR);
 
         byte[] hashed = crypt(passwd.getBytes(UTF_8), salt, logrounds);
         return builder.append(encodeBase64(hashed)).toString();
@@ -361,9 +363,9 @@ public final class BCrypt {
      * @return  true if the passwords match, false otherwise
      */
     public static boolean check(String passwd, String hashed) {
-        String[] parts = hashed.split("\\$");
+        String[] parts = hashed.split("\\" + SEPARATOR);
         if (parts.length != 5 || !"2a".equals(parts[1])) {
-            throw new IllegalArgumentException("Invalid hashed value");
+            throw new IllegalArgumentException("Invalid hashed value: " + hashed);
         }
 
         int logrounds = Integer.parseInt(parts[2]);

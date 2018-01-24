@@ -153,11 +153,11 @@ public abstract class CryptoProvider {
     }
 
     /**
-     * 获取对称加密组件
+     * 对称密钥组件
      * @param symmetricCryptor {@link SymmetricCryptor}
      * @return
      */
-    public static CryptoProvider symmetricCryptProvider(final SymmetricCryptor key) {
+    public static CryptoProvider symmetricKeyProvider(final SymmetricCryptor key) {
         return new CryptoProvider() {
             private final SymmetricCryptor symmetricKey = key;
 
@@ -176,11 +176,11 @@ public abstract class CryptoProvider {
     }
 
     /**
-     * 获取RSA解密组件
+     * rsa private key密钥组件
      * @param pkcs8PrivateKey  the string of pkcs8 private key format
      * @return
      */
-    public static CryptoProvider rsaDecryptProvider(final String pkcs8PrivateKey) {
+    public static CryptoProvider privateKeyProvider(final String pkcs8PrivateKey) {
         return new CryptoProvider() {
             private final RSAPrivateKey priKey = RSAPrivateKeys.fromPkcs8(pkcs8PrivateKey);
             private final RSAPublicKey  pubKey = RSAPrivateKeys.extractPublicKey(priKey);
@@ -210,11 +210,11 @@ public abstract class CryptoProvider {
     }
 
     /**
-     * 获取RSA加密组件
+     * rsa public key密钥组件
      * @param pkcs8PublicKey  the string of pkcs8 public key format
      * @return
      */
-    public static CryptoProvider rsaEncryptProvider(final String pkcs8PublicKey) {
+    public static CryptoProvider publicKeyProvider(final String pkcs8PublicKey) {
         return new CryptoProvider() {
             private final RSAPublicKey pubKey = RSAPublicKeys.fromPkcs8(pkcs8PublicKey);
 
@@ -238,7 +238,7 @@ public abstract class CryptoProvider {
 
     public static void main(String[] args) {
         System.out.println("\n============================RSA crypt==========================");
-        CryptoProvider rsa = rsaDecryptProvider("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
+        CryptoProvider rsa = privateKeyProvider("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
         String str = Files.toString(MavenProjects.getMainJavaFile(CryptoProvider.class)).replaceAll("\r|\n|\\s+", "");
         String data = rsa.encrypt(str);
         System.out.println("加密后：" + data);
@@ -248,13 +248,13 @@ public abstract class CryptoProvider {
         String signed = rsa.sign(str);
         System.out.println("签名："+signed);
         System.out.println("验签："+rsa.verify(str, signed));
-        
+
         System.out.println("\n============================AES crypt==========================");
-        CryptoProvider aes = symmetricCryptProvider(SymmetricCryptorBuilder.newBuilder(Algorithm.AES)
-                                                                        .key("z]_5Fi!X$ed4OY8j".getBytes())
-                                                                        .mode(Mode.CBC).ivParameter("SVE<r[)qK`n%zQ'o".getBytes())
-                                                                        .padding(Padding.PKCS7Padding).provider(Providers.BC)
-                                                                        .build());
+        CryptoProvider aes = symmetricKeyProvider(SymmetricCryptorBuilder.newBuilder(Algorithm.AES)
+                                                                         .key("z]_5Fi!X$ed4OY8j".getBytes())
+                                                                         .mode(Mode.CBC).ivParameter("SVE<r[)qK`n%zQ'o".getBytes())
+                                                                         .padding(Padding.PKCS7Padding).provider(Providers.BC)
+                                                                         .build());
         data = aes.encrypt(str);
         System.out.println("加密后：" + data);
         System.out.println("解密后：" + aes.decrypt(data));

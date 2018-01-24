@@ -2,6 +2,7 @@ package code.ponfee.commons.limit;
 
 import java.util.Random;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.jce.hash.HmacUtils;
@@ -13,6 +14,8 @@ import code.ponfee.commons.util.Bytes;
  * @author Ponfee
  */
 public class RequestLimiter {
+
+    private static final byte[] SLAT_PREFIX = "{;a*9)p<?T".getBytes();
 
     /** limit operation key */
     private static final String CHECK_FREQ_KEY = "req:lmt:fre:";
@@ -117,7 +120,7 @@ public class RequestLimiter {
             int ttl = client.keysOps().ttl(cacheKey).intValue() + 1; // calc check key ttl
             client.keysOps().expire(checkKey, ttl); // 第一次验证，设置验证标识数据的缓存失效期
         } else if (times > limit) {
-            client.keysOps().del(cacheKey); // 超过验证次数，删除缓存中的验证码
+            client.keysOps().dels(cacheKey, checkKey); // 超过验证次数，删除缓存中的验证码
             throw new RequestLimitException("验证错误次数过多，请重新获取！");
         }
 
@@ -211,14 +214,15 @@ public class RequestLimiter {
      */
     public static String buildNonce(String code, String salt) {
         long first = new Random(code.hashCode()).nextLong(); // 第一个nextLong值是固定的
-        return HmacUtils.sha1Hex(Bytes.fromLong(first), salt.getBytes());
+        byte[] slatBytes = ArrayUtils.addAll(SLAT_PREFIX, salt.getBytes());
+        return HmacUtils.sha1Hex(Bytes.fromLong(first), slatBytes);
     }
 
     /**
-     * 校验noce str
+     * 校验nonce
      * @param nonce
      * @param code
-     * @param text
+     * @param salt
      * @return
      */
     public static boolean verifyNonce(String nonce, String code, String salt) {

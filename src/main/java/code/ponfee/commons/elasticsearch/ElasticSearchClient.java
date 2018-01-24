@@ -655,9 +655,9 @@ public class ElasticSearchClient implements DisposableBean {
      * @param size      每次滚动的数据量大小
      * @param callback  回调处理量
      */
-    public void scrollingSearch(ESQueryBuilder query, int scrollSize, ScrollSearchCallback callback) {
-        SearchResponse scrollResp = query.scrolling(client, scrollSize);
-        this.scrollingSearch(scrollResp, scrollSize, callback);
+    public void scrollSearch(ESQueryBuilder query, int scrollSize, ScrollSearchCallback callback) {
+        SearchResponse scrollResp = query.scroll(client, scrollSize);
+        this.scrollSearch(scrollResp, scrollSize, callback);
     }
 
     /**
@@ -667,9 +667,9 @@ public class ElasticSearchClient implements DisposableBean {
      * @param scrollSize
      * @param callback
      */
-    public void scrollingSearch(SearchRequestBuilder search, int scrollSize, ScrollSearchCallback callback) {
+    public void scrollSearch(SearchRequestBuilder search, int scrollSize, ScrollSearchCallback callback) {
         SearchResponse scrollResp = search.setSize(scrollSize).setScroll(SCROLL_TIMEOUT).get();
-        this.scrollingSearch(scrollResp, scrollSize, callback);
+        this.scrollSearch(scrollResp, scrollSize, callback);
     }
 
     // ---------------------------------------------全部搜索-------------------------------------------
@@ -686,8 +686,8 @@ public class ElasticSearchClient implements DisposableBean {
      */
     public <T> List<T> fullSearch(ESQueryBuilder query, Class<T> clazz) {
         List<T> result = new ArrayList<>(SCROLL_SIZE);
-        SearchResponse scrollResp = query.scrolling(client, SCROLL_SIZE);
-        this.scrollingSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecords, totalPages, pageNo) -> {
+        SearchResponse scrollResp = query.scroll(client, SCROLL_SIZE);
+        this.scrollSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecords, totalPages, pageNo) -> {
             for (SearchHit hit : searchHits.getHits()) {
                 result.add(convertFromMap(hit.getSource(), clazz));
             }
@@ -709,7 +709,7 @@ public class ElasticSearchClient implements DisposableBean {
     public <T> List<T> fullSearch(SearchRequestBuilder search, Class<T> clazz) {
         List<T> result = new ArrayList<>(SCROLL_SIZE);
         SearchResponse scrollResp = search.setSize(SCROLL_SIZE).setScroll(SCROLL_TIMEOUT).get();
-        this.scrollingSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecords, totalPages, pageNo) -> {
+        this.scrollSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecords, totalPages, pageNo) -> {
             for (SearchHit hit : searchHits.getHits()) {
                 result.add(convertFromMap(hit.getSource(), clazz));
             }
@@ -813,14 +813,14 @@ public class ElasticSearchClient implements DisposableBean {
      * @param scrollSize
      * @param callback
      */
-    private void scrollingSearch(SearchResponse scrollResp, int scrollSize, ScrollSearchCallback callback) {
+    private void scrollSearch(SearchResponse scrollResp, int scrollSize, ScrollSearchCallback callback) {
         try {
             SearchHits searchHits = scrollResp.getHits();
             long totalRecords = searchHits.getTotalHits(); // 总记录数
             int totalPages = (int) ((totalRecords + scrollSize - 1) / scrollSize); // 总页数
 
             if (logger.isInfoEnabled()) {
-                logger.info("scrolling search: {} total[{}-{}]", 
+                logger.info("scroll search: {} total[{}-{}]", 
                             ObjectUtils.getStackTrace(4), totalPages, totalRecords);
             }
 
