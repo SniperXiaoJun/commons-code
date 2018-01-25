@@ -246,8 +246,8 @@ public final class WebUtils {
      * @param resp
      */
     public static void cors(HttpServletRequest req, HttpServletResponse resp) {
-        //resp.setHeader("Access-Control-Allow-Origin", "*");
-        resp.setHeader("Access-Control-Allow-Origin",  req.getHeader("Origin"));
+        String origin = req.getHeader("Origin");
+        resp.setHeader("Access-Control-Allow-Origin", StringUtils.isEmpty(origin) ? "*" : origin);
         resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
         resp.setHeader("Access-Control-Max-Age", "0");
         resp.setHeader("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, "

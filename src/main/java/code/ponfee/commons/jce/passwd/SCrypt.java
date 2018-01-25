@@ -145,7 +145,7 @@ public final class SCrypt {
      */
     private static byte[] pbkdf2(HmacAlgorithm alg, byte[] P, 
                                  byte[] S, int c, int dkLen) {
-        Mac mac = HmacUtils.getInitializedMac(alg.name(), P);
+        Mac mac = HmacUtils.getInitializedMac(alg, P);
         int hLen = mac.getMacLength();
 
         // (Math.pow(2, 32) - 1) == 4294967295L

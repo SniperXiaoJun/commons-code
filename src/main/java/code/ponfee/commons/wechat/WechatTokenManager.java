@@ -16,6 +16,9 @@ import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.JedisLock;
 
 /**
+ * 不用实现InitializingBean接口，用@PostConstruct也可以
+ * 先后顺序：Constructor > `@PostConstruct > InitializingBean > init-method[xml config]
+ * 
  * wechat global token and jsapi ticket manager
  * 微信accesstoken刷新会平滑过渡，官方文档给出的是5分钟
  * @author Ponfee

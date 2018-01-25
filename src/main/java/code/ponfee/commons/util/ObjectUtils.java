@@ -262,9 +262,11 @@ public final class ObjectUtils {
         }
 
         StackTraceElement trace = traces[deepPath];
-        return new StringBuilder(trace.getClassName()).append("#")
-                      .append(trace.getMethodName()).append(":")
-                      .append(trace.getLineNumber()).toString();
+        return new StringBuilder()
+                      .append(trace.getLineNumber()).append(":")
+                      .append(trace.getClassName())
+                      .append("#").append(trace.getMethodName())
+                      .toString();
     }
 
     /**

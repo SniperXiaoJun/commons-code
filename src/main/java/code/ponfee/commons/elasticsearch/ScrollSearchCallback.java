@@ -16,7 +16,8 @@ public interface ScrollSearchCallback {
      * @param totalPages   总页数
      * @param pageNo       当前滚动的页码
      */
-    void nextPage(SearchHits searchHits, long totalRecords, int totalPages, int pageNo);
+    void nextPage(SearchHits searchHits, long totalRecords, 
+                  int totalPages, int pageNo);
 
     /**
      * 无结果数据

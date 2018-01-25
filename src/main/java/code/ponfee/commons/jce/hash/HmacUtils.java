@@ -39,11 +39,11 @@ public final class HmacUtils {
     private static final int BUFF_SIZE = 4096;
 
     public static byte[] sha1(byte[] key, byte[] data) {
-        return crypt(key, data, HmacAlgorithm.HmacSHA1.name());
+        return crypt(key, data, HmacAlgorithm.HmacSHA1);
     }
 
     public static byte[] sha1(byte[] key, InputStream data) {
-        return crypt(key, data, HmacAlgorithm.HmacSHA1.name());
+        return crypt(key, data, HmacAlgorithm.HmacSHA1);
     }
 
     public static String sha1Hex(byte[] key, byte[] data) {
@@ -55,7 +55,7 @@ public final class HmacUtils {
     }
 
     public static byte[] md5(byte[] key, byte[] data) {
-        return crypt(key, data, HmacAlgorithm.HmacMD5.name());
+        return crypt(key, data, HmacAlgorithm.HmacMD5);
     }
 
     public static String md5Hex(byte[] key, byte[] data) {
@@ -63,7 +63,7 @@ public final class HmacUtils {
     }
 
     public static byte[] sha224(byte[] key, byte[] data) {
-        return crypt(key, data, HmacAlgorithm.HmacSHA224.name());
+        return crypt(key, data, HmacAlgorithm.HmacSHA224);
     }
 
     public static String sha224Hex(byte[] key, byte[] data) {
@@ -71,7 +71,7 @@ public final class HmacUtils {
     }
 
     public static byte[] sha256(byte[] key, byte[] data) {
-        return crypt(key, data, HmacAlgorithm.HmacSHA256.name());
+        return crypt(key, data, HmacAlgorithm.HmacSHA256);
     }
 
     public static String sha256Hex(byte[] key, byte[] data) {
@@ -79,7 +79,7 @@ public final class HmacUtils {
     }
 
     public static byte[] sha384(byte[] key, byte[] data) {
-        return crypt(key, data, HmacAlgorithm.HmacSHA384.name());
+        return crypt(key, data, HmacAlgorithm.HmacSHA384);
     }
 
     public static String sha384Hex(byte[] key, byte[] data) {
@@ -87,50 +87,44 @@ public final class HmacUtils {
     }
 
     public static byte[] sha512(byte[] key, byte[] data) {
-        return crypt(key, data, HmacAlgorithm.HmacSHA512.name());
+        return crypt(key, data, HmacAlgorithm.HmacSHA512);
     }
 
     public static String sha512Hex(byte[] key, byte[] data) {
         return Hex.encodeHexString(sha512(key, data));
     }
 
-    public static Mac getInitializedMac(String algorithm, byte[] key) {
+    public static Mac getInitializedMac(HmacAlgorithm algorithm, byte[] key) {
         if (key == null) {
             throw new IllegalArgumentException("Null key");
         }
 
         try {
-            Mac mac = Mac.getInstance(algorithm);
+            Mac mac = Mac.getInstance(algorithm.name());
             mac.init(new SecretKeySpec(key, mac.getAlgorithm()));
             return mac;
         } catch (final NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException("unknown algorithm:" + algorithm);
+            throw new IllegalArgumentException("unknown algorithm: " + algorithm);
         } catch (final InvalidKeyException e) {
             throw new IllegalArgumentException("invalid key: " + Hex.encodeHexString(key));
         }
     }
 
     // ------------------------private methods-------------------------
-    private static byte[] crypt(byte[] key, byte[] data, String algName) {
-        return getInitializedMac(algName, key).doFinal(data);
+    private static byte[] crypt(byte[] key, byte[] data, HmacAlgorithm alg) {
+        return getInitializedMac(alg, key).doFinal(data);
     }
 
-    private static byte[] crypt(byte[] key, InputStream input, String algName) {
-        try {
-            Mac mac = getInitializedMac(algName, key);
+    private static byte[] crypt(byte[] key, InputStream input, HmacAlgorithm alg) {
+        try (InputStream in = input) {
+            Mac mac = getInitializedMac(alg, key);
             byte[] buffer = new byte[BUFF_SIZE];
-            for (int len; (len = input.read(buffer)) != Files.EOF;) {
+            for (int len; (len = in.read(buffer)) != Files.EOF;) {
                 mac.update(buffer, 0, len);
             }
             return mac.doFinal();
         } catch (IOException e) {
             throw new IllegalArgumentException("read data error:" + e);
-        } finally {
-            if (input != null) try {
-                input.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 

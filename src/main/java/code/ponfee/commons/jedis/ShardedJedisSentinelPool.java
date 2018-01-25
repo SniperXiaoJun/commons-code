@@ -37,6 +37,7 @@ import redis.clients.util.Pool;
 
 /**
  * 分片Sentinel连接池
+ * http://blog.csdn.net/dc_726/article/details/48084373
  * 参考：https://github.com/warmbreeze/sharded-jedis-sentinel-pool并修复其连接池泄露的bug
  * @author fupf
  */

@@ -38,8 +38,8 @@ import code.ponfee.commons.io.Files;
  *   * C=0x98BADCFE
  *   * D=0x10325476
  *   * E=0xC3D2E1F0
- * 8、A、B、C、D、E五个链接变量中的值先赋值到另外5个记录单元A′，B′，C′，D′，E′中。这5个值将保留，用于在第4轮的最后一个步骤完成之后与链接变量A，B，C，D，E进行求和操作。
- *   SHA1的4轮运算，共80个步骤使用同一个操作程序，如下：
+ * 8、A、B、C、D、E五个链接变量中的值先赋值到另外5个记录单元A′，B′，C′，D′，E′中。这5个值将保留，
+ *   用于在第4轮的最后一个步骤完成之后与链接变量A，B，C，D，E进行求和操作。SHA1的4轮运算，共80个步骤使用同一个操作程序，如下：
  *   A,B,C,D,E←[(A<<<5)+ ft(B,C,D)+E+Wt+Kt],A,(B<<<30),C,D，其中 ft(B,C,D)为逻辑函数，Wt为子明文分组W[t]，Kt为固定常数。这个操作程序的意义为：
  *   * 将[(A<<<5)+ ft(B,C,D)+E+Wt+Kt]的结果赋值给链接变量A；
  *   * 将链接变量A初始值赋值给链接变量B；
@@ -147,7 +147,7 @@ public final class HashUtils {
         try {
             return MessageDigest.getInstance(algorithm).digest(data);
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException(e); // can not happened
         }
     }
 
@@ -158,46 +158,34 @@ public final class HashUtils {
      * @return
      */
     private static byte[] digest(InputStream input, String algorithm) {
-        /*try {
-            byte[] buffer = new byte[BUF_SIZE];
+        byte[] buffer = new byte[BUFF_SIZE];
+
+        /*try (InputStream in = input) {
             MessageDigest digest = MessageDigest.getInstance(algorithm);
-            int len;
-            while ((len = input.read(buffer)) != Files.EOF) {
+            for (int len; (len = in.read(buffer)) != Files.EOF;) {
                 digest.update(buffer, 0, len);
             }
             return digest.digest();
         } catch (NoSuchAlgorithmException | IOException e) {
             throw new IllegalArgumentException(e);
-        } finally {
-            if (input != null) try {
-                input.close();
-            } catch (IOException ignored) {
-                ignored.printStackTrace();
-            }
         }*/
 
-        DigestInputStream digestInput = null;
+        MessageDigest digest = null;
         try {
-            MessageDigest digest = MessageDigest.getInstance(algorithm);
-            digestInput = new DigestInputStream(input, digest);
-            byte[] buffer = new byte[BUFF_SIZE];
-            while (digestInput.read(buffer) != Files.EOF) {
-                //  nothing to do
+            digest = MessageDigest.getInstance(algorithm);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e); // can not happened
+        }
+
+        try (InputStream in = input; 
+             DigestInputStream dIn = new DigestInputStream(input, digest)
+         ) {
+            while (dIn.read(buffer) != Files.EOF) {
+                //  do-non
             }
             return digest.digest();
-        } catch (NoSuchAlgorithmException | IOException e) {
-            throw new IllegalArgumentException(e);
-        } finally {
-            if (digestInput != null) try {
-                digestInput.close();
-            } catch (IOException ignored) {
-                ignored.printStackTrace();
-            }
-            if (input != null) try {
-                input.close();
-            } catch (IOException ignored) {
-                ignored.printStackTrace();
-            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

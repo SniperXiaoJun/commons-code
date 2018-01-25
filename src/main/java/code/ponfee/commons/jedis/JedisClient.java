@@ -93,8 +93,10 @@ public class JedisClient implements DisposableBean {
                     password = array[3].trim();
                 }
             } else {
-                throw new IllegalArgumentException("invalid hosts config[" + hosts + "]");
+                logger.error("invalid hosts config[" + hosts + "]");
+                continue;
             }
+
             JedisShardInfo info = new JedisShardInfo(host, Integer.parseInt(port), timeout, name);
             if (StringUtils.isNotBlank(password)) {
                 info.setPassword(password);
@@ -163,14 +165,14 @@ public class JedisClient implements DisposableBean {
                           : new FstSerializer();
 
         this.shardedJedisPool = shardedJedisPool;
-        this.keysOps = new KeysOperations(this);
-        this.valueOps = new ValueOperations(this);
-        this.hashOps = new HashOperations(this);
-        this.listOps = new ListOperations(this);
-        this.setOps = new SetOpertions(this);
-        this.zsetOps = new ZSetOperations(this);
+        this.keysOps   = new KeysOperations(this);
+        this.valueOps  = new ValueOperations(this);
+        this.hashOps   = new HashOperations(this);
+        this.listOps   = new ListOperations(this);
+        this.setOps    = new SetOpertions(this);
+        this.zsetOps   = new ZSetOperations(this);
         this.scriptOps = new ScriptOperations(this);
-        this.mqOps = new MQOperations(this);
+        this.mqOps     = new MQOperations(this);
     }
 
     public KeysOperations keysOps() {
@@ -238,9 +240,9 @@ public class JedisClient implements DisposableBean {
     }
 
     static final void exception(Exception e, Object... args) {
-        //StackTraceElement[] st = Thread.currentThread().getStackTrace();
-        //builder.append(st[p].getClassName()).append(".").append(st[p].getMethodName()).append("(");
-        StringBuilder builder = new StringBuilder("redis operation occur error, args(");
+        StringBuilder builder = new StringBuilder();
+        builder.append("redis operation occur error, args(");
+        //builder.append(ObjectUtils.getStackTrace(5)).append("(");
         StringBuilder part = new StringBuilder();
         Object arg;
         for (int n = args.length, i = 0; i < n; i++, part.setLength(0)) {
@@ -297,7 +299,7 @@ public class JedisClient implements DisposableBean {
             jedis.connect();
             return true;
         } catch (Exception e) {
-            logger.error("jedis can not connect", e);
+            logger.error("jedis can not connect: " + jedisInfo + " - " + e.getMessage());
             return false;
         } finally {
             if (jedis != null) try {

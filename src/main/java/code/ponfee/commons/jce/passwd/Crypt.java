@@ -80,7 +80,7 @@ public class Crypt {
      */
     private static byte[] crypt(HmacAlgorithm alg, byte[] password, 
                                 byte[] salt, int rounds) {
-        Mac mac = HmacUtils.getInitializedMac(alg.name(), salt);
+        Mac mac = HmacUtils.getInitializedMac(alg, salt);
         for (int i = 0; i < rounds; i++) {
             password = mac.doFinal(password);
         }

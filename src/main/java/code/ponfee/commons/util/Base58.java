@@ -30,7 +30,7 @@ import code.ponfee.commons.jce.hash.HashUtils;
  */
 public class Base58 {
 
-    public static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
+    private static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
 
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
 
@@ -154,9 +154,7 @@ public class Base58 {
      * @return the base58-encoded string is appended checksum
      */
     public static String encodeWithChecksum(byte[] data) {
-        byte[] twiceSha256 = HashUtils.sha256(HashUtils.sha256(data));
-        data = ArrayUtils.addAll(data, Arrays.copyOfRange(twiceSha256, 0, 4));
-        return encode(data);
+        return encode(ArrayUtils.addAll(data, checksum(data)));
     }
 
     /**
@@ -174,16 +172,14 @@ public class Base58 {
             throw new IllegalArgumentException("Data too short.");
         }
 
-        byte[] bytes = Arrays.copyOfRange(decoded, 0, decoded.length - 4);
-        byte[] twiceSha256 = HashUtils.sha256(HashUtils.sha256(bytes));
-        byte[] actualChecksum = Arrays.copyOfRange(twiceSha256, 0, 4);
+        int bounds = decoded.length - 4;
+        byte[] origin = Arrays.copyOfRange(decoded, 0, bounds);
+        byte[] checksum = Arrays.copyOfRange(decoded, bounds, decoded.length);
 
-        byte[] checksum = Arrays.copyOfRange(decoded, decoded.length - 4, decoded.length);
-
-        if (!Arrays.equals(checksum, actualChecksum)) {
+        if (!Arrays.equals(checksum, checksum(origin))) {
             throw new IllegalArgumentException("Invalid checksum.");
         }
-        return bytes;
+        return origin;
     }
 
     // number -> number / 58, returns number % 58
@@ -221,6 +217,11 @@ public class Base58 {
         byte[] range = new byte[to - from];
         System.arraycopy(source, from, range, 0, range.length);
         return range;
+    }
+
+    private static byte[] checksum(byte[] data) {
+        byte[] twiceSha256 = HashUtils.sha256(HashUtils.sha256(data));
+        return Arrays.copyOfRange(twiceSha256, 0, 4); // take previous 4 bytes
     }
 
     public static void main(String[] args) {
