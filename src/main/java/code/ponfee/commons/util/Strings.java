@@ -12,6 +12,7 @@ import java.util.zip.CRC32;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 
 import code.ponfee.commons.io.Files;
@@ -376,22 +377,23 @@ public class Strings {
     }
 
     /** 
-     * 转换为下划线 
-     * @param camelCaseName 下划线名
-     * @return 
+     * 驼峰转换为下划线 
+     * CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, camelCaseName);
+     * @param camelCaseName 驼峰名
+     * @return the underscore name
+     * @see CaseFormat#to(CaseFormat, String)
      */
     public static String underscoreName(String camelCaseName) {
         if (StringUtils.isEmpty(camelCaseName)) {
             return camelCaseName;
         }
 
-        StringBuilder result = new StringBuilder();
-        result.append(camelCaseName.substring(0, 1).toLowerCase());
-        for (int i = 1; i < camelCaseName.length(); i++) {
+        StringBuilder result = new StringBuilder(camelCaseName.length() * 2);
+        result.append(Character.toLowerCase(camelCaseName.charAt(0)));
+        for (int i = 1, len = camelCaseName.length(); i < len; i++) {
             char ch = camelCaseName.charAt(i);
             if (Character.isUpperCase(ch)) {
-                result.append("_");
-                result.append(Character.toLowerCase(ch));
+                result.append('_').append(Character.toLowerCase(ch));
             } else {
                 result.append(ch);
             }
@@ -400,28 +402,31 @@ public class Strings {
     }
 
     /** 
-     * 转换为驼峰 
-     * @param underscoreName 驼峰名
-     * @return 
+     * 下划线转换为驼峰 
+     * CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, underscoreName);
+     * 1  LOWER_HYPHEN       连字符的变量命名规范如lower-hyphen
+     * 2  LOWER_UNDERSCORE   c++变量命名规范如lower_underscore
+     * 3  LOWER_CAMEL        java变量命名规范如lowerCamel
+     * 4  UPPER_CAMEL        java和c++类的命名规范如UpperCamel
+     * 5  UPPER_UNDERSCORE   java和c++常量的命名规范如UPPER_UNDERSCORE
+     * @param underscoreName 下划线名
+     * @return the camel case name
+     * @see CaseFormat#to(CaseFormat, String)
      */
     public static String camelCaseName(String underscoreName) {
         if (StringUtils.isEmpty(underscoreName)) {
             return underscoreName;
         }
 
-        StringBuilder result = new StringBuilder();
-        boolean flag = false;
-        for (int i = 0; i < underscoreName.length(); i++) {
+        StringBuilder result = new StringBuilder(underscoreName.length());
+        for (int i = 0, len = underscoreName.length(); i < len; i++) {
             char ch = underscoreName.charAt(i);
-            if ("_".charAt(0) == ch) {
-                flag = true;
-            } else {
-                if (flag) {
-                    result.append(Character.toUpperCase(ch));
-                    flag = false;
-                } else {
-                    result.append(ch);
+            if ('_' == ch) {
+                if (++i < len) {
+                    result.append(Character.toUpperCase(underscoreName.charAt(i)));
                 }
+            } else {
+                result.append(ch);
             }
         }
         return result.toString();
@@ -434,9 +439,8 @@ public class Strings {
      */
     public static int iemeCode(String str) {
         int checkSum = 0;
-        char[] chars = str.toCharArray();
-        for (int i = 0, num; i < chars.length; i++) {
-            num = chars[i] - '0'; // ascii to num  
+        for (int i = 0, len = str.length(), num; i < len; i++) {
+            num = str.charAt(i) - '0'; // ascii to num  
             if (i % 2 == 0) {
                 checkSum += num; // 1、将奇数位数字相加（从1开始计数）
             } else {
@@ -448,6 +452,7 @@ public class Strings {
                 }
             }
         }
+
         return (10 - checkSum % 10) % 10;
     }
 
@@ -457,7 +462,7 @@ public class Strings {
      * @param defaultStr
      * @return
      */
-    public static String setIfEmpty(String str, String defaultStr) {
+    public static String ifEmpty(String str, String defaultStr) {
         return StringUtils.isEmpty(str) ? defaultStr : str;
     }
 
@@ -486,6 +491,8 @@ public class Strings {
     }
 
     public static void main(String[] args) {
+        System.out.println(camelCaseName("test_ab"));
+        System.out.println(underscoreName("testAb"));
         System.out.println(deleteAny("hello world", "eo"));
         System.out.println(ObjectUtils.toString(split("hello world", "l", "eo")));
         System.out.println(replace("hello world", "o", "-"));

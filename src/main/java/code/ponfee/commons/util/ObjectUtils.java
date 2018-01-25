@@ -17,6 +17,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import static com.google.common.base.CaseFormat.LOWER_CAMEL;
+import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
+
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.math.Numbers;
 
@@ -88,16 +91,20 @@ public final class ObjectUtils {
      * @param bean
      */
     public static <T> void map2bean(Map<String, ?> map, T bean) {
+        String name;
+        Object value;
+        Class<?> type;
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
-            String name;
-            Object value;
-            Class<?> type;
             for (PropertyDescriptor prop : beanInfo.getPropertyDescriptors()) {
-                name = prop.getName();
-                if ("class".equals(name) || 
-                    (!map.containsKey(name) && !map.containsKey(name = Strings.underscoreName(name)))
-                ) {
+                if ("class".equals(name = prop.getName())) {
+                    continue;
+                }
+
+                String name0 = name;
+                if (!map.containsKey(name)
+                    && !map.containsKey(name = LOWER_CAMEL.to(LOWER_UNDERSCORE, name0))
+                    && !map.containsKey(name = LOWER_UNDERSCORE.to(LOWER_CAMEL, name0))) {
                     continue;
                 }
 
@@ -136,6 +143,7 @@ public final class ObjectUtils {
                 } else if (Double.class == type) {
                     value = Numbers.toWrapDouble(value);
                 } else if (CharSequence.class.isAssignableFrom(type) && !type.isInstance(value)) {
+                    // new String(value.toString()), new StringBuilder(value.toString())
                     value = type.getConstructor(String.class).newInstance(value.toString());
                 }
 

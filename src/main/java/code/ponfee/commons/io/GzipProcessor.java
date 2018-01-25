@@ -25,8 +25,23 @@ public final class GzipProcessor {
      */
     public static byte[] compress(byte[] data) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(BYTE_SIZE);
-        compress(new ByteArrayInputStream(data), baos);
+        compress(data, baos);
         return baos.toByteArray();
+    }
+
+    /**
+     * gzip压缩
+     * @param data
+     * @param output
+     */
+    public static void compress(byte[] data, OutputStream output) {
+        try (GZIPOutputStream gzout = new ExtendedGZIPOutputStream(output)) {
+            gzout.write(data);
+            gzout.flush();
+            gzout.finish();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -36,10 +51,7 @@ public final class GzipProcessor {
      */
     public static void compress(InputStream input, OutputStream output) {
         try (GZIPOutputStream gzout = new ExtendedGZIPOutputStream(output)) {
-            byte[] buffer = new byte[Files.BUFF_SIZE];
-            for (int len; (len = input.read(buffer)) != Files.EOF;) {
-                gzout.write(buffer, 0, len);
-            }
+            IOUtils.copyLarge(input, gzout);
             gzout.flush();
             gzout.finish();
         } catch (IOException e) {
@@ -65,9 +77,10 @@ public final class GzipProcessor {
      */
     public static void decompress(InputStream input, OutputStream output) {
         try (GZIPInputStream gzin = new GZIPInputStream(input)) {
-            IOUtils.copy(gzin, output);
+            IOUtils.copyLarge(gzin, output);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 }

@@ -1,9 +1,5 @@
 package code.ponfee.commons.web;
 
-import static code.ponfee.commons.io.Files.BUFF_SIZE;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,9 +13,11 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.io.Files;
+import code.ponfee.commons.io.GzipProcessor;
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.util.Networks;
 import code.ponfee.commons.util.UrlCoder;
@@ -40,15 +38,33 @@ public final class WebUtils {
     /**
      * 获取请求参数，<b>支付模块参数签名/验签时使用</b>
      * @param request
-     * @return
+     * @return Map<String, String>, array param value use "," join
      */
-    public static Map<String, String> getReqParams(HttpServletRequest request) {
+    public static Map<String, String> getParams(HttpServletRequest request) {
         Map<String, String[]> requestParams = request.getParameterMap();
         Map<String, String> params = new TreeMap<>();
         for (Entry<String, String[]> entry : requestParams.entrySet()) {
             params.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
         }
         return params;
+    }
+
+    public static String getText(HttpServletRequest request) {
+        return getText(request, Files.DEFAULT_CHARSET);
+    }
+
+    /**
+     * get the text string from request input stream
+     * @param request the HttpServletRequest
+     * @param charset the string encoding
+     * @return string
+     */
+    public static String getText(HttpServletRequest request, String charset) {
+        try (InputStream input = request.getInputStream()) {
+            return IOUtils.toString(input, charset);
+        } catch (Exception e) {
+            throw new RuntimeException("read request input stream error", e);
+        }
     }
 
     /**
@@ -107,11 +123,11 @@ public final class WebUtils {
                                 String text, String charset) {
         resp.setContentType(contentType + ";charset=" + charset);
         resp.setCharacterEncoding(charset);
-        try (PrintWriter out = resp.getWriter()) {
-            out.write(text);
+        try (PrintWriter writer = resp.getWriter()) {
+            writer.write(text);
         } catch (IOException e) {
             // not happened
-            throw new RuntimeException("http response " + contentType + " error", e);
+            throw new RuntimeException("response " + contentType + " occur error", e);
         }
     }
 
@@ -146,31 +162,82 @@ public final class WebUtils {
     }
 
     /**
-     * 下载文件
-     * @param resp
-     * @param in
-     * @param filename
-     * @param charset
+     * response to input stream
+     * @param resp     the HttpServletResponse
+     * @param input    the input stream
+     * @param filename the resp attachment filename
+     */
+    public static void response(HttpServletResponse resp, 
+                                InputStream input, String filename) {
+        response(resp, input, filename, Files.DEFAULT_CHARSET, false);
+    }
+
+    /**
+     * response to input stream
+     * @param resp      the HttpServletResponse
+     * @param in        the input stream
+     * @param filename  the resp attachment filename
+     * @param charset   the attachment filename encoding
+     * @param isGzip    {@code true} to use gzip compress
      */
     public static void response(HttpServletResponse resp, InputStream input, 
-                                String filename, String charset) {
+                                String filename, String charset, boolean isGzip) {
         filename = UrlCoder.encodeURIComponent(filename, charset);
         try (InputStream in = input;
-             BufferedInputStream bufIn = new BufferedInputStream(in, BUFF_SIZE); 
              OutputStream out = resp.getOutputStream(); 
-             BufferedOutputStream bufOut = new BufferedOutputStream(out, BUFF_SIZE);
         ) {
             resp.setContentType("application/octet-stream");
-            resp.setHeader("Content-Disposition", "attachment;filename=" + filename);
             resp.setHeader("Content-Length", Integer.toString(in.available()));
+            resp.setHeader("Content-Disposition", "attachment;filename=" + filename);
             resp.setCharacterEncoding(charset);
-            byte[] buffer = new byte[BUFF_SIZE];
-            for (int len; (len = bufIn.read(buffer)) != Files.EOF;) {
-                bufOut.write(buffer, 0, len);
+            if (isGzip) {
+                resp.setHeader("Content-Encoding", "gzip");
+                GzipProcessor.compress(in, out);
+            } else {
+                IOUtils.copyLarge(in, out);
             }
         } catch (IOException e) {
             // not happened
-            throw new RuntimeException("response application/octet-stream error", e);
+            throw new RuntimeException("response input stream occur error", e);
+        }
+    }
+
+    /**
+     * response to byte array
+     * @param resp     the HttpServletResponse
+     * @param data     the byte array data
+     * @param filename the resp attachment filename
+     */
+    public static void response(HttpServletResponse resp, 
+                                byte[] data, String filename) {
+        response(resp, data, filename, Files.DEFAULT_CHARSET, false);
+    }
+
+    /**
+     * 响应流数据
+     * @param resp      the HttpServletResponse
+     * @param data      the resp byte array data
+     * @param filename  the resp attachment filename
+     * @param charset   the attachment filename encoding
+     * @param isGzip    {@code true} to use gzip compress
+     */
+    public static void response(HttpServletResponse resp, byte[] data,
+                                String filename, String charset, boolean isGzip) {
+        filename = UrlCoder.encodeURIComponent(filename, charset);
+        try (OutputStream out = resp.getOutputStream()) {
+            resp.setContentType("application/octet-stream");
+            resp.setHeader("Content-Length", Integer.toString(data.length));
+            resp.setHeader("Content-Disposition", "attachment;filename=" + filename);
+            resp.setCharacterEncoding(charset);
+            if (isGzip) {
+                resp.setHeader("Content-Encoding", "gzip");
+                GzipProcessor.compress(data, out);
+            } else {
+                out.write(data);
+            }
+        } catch (IOException e) {
+            // not happened
+            throw new RuntimeException("response byte array data occur error", e);
         }
     }
 

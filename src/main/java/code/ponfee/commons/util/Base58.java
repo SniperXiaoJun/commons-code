@@ -1,9 +1,13 @@
 package code.ponfee.commons.util;
 
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import code.ponfee.commons.io.Files;
+import code.ponfee.commons.jce.hash.HashUtils;
 
 /**
  * https://www.jianshu.com/p/ffc97c4d2306
@@ -16,6 +20,9 @@ import code.ponfee.commons.io.Files;
  * 补码系统的最大优点是可以在加法或减法处理中，不需因为数字的正负而使用不同的计算方式
  * 计算机中只有加法，用两数补码相加，结果仍是补码表示
  * 补码转原码：减1再取反
+ * 
+ * byte b = a byte number;
+ * int i = b & 0xff; // 使得i与b的二进制补码一致
  * 
  * Base58 code：except number 0, uppercase letter I and O, lowercase latter l
  * Reference from internet
@@ -35,15 +42,17 @@ public class Base58 {
         }
     }
 
-    /** 
-     * Encode the given bytes in base58. No checksum is appended.
+    /**
+     * Encodes the given bytes as a base58 string (no checksum is appended).
+     * @param data  the bytes to encode
+     * @return the base58-encoded string
      */
     public static String encode(byte[] data) {
         if (data.length == 0) {
             return "";
         }
 
-        // Duplicate input 
+        // Duplicate data 
         data = copyOfRange(data, 0, data.length);
 
         // Count leading zeroes.
@@ -77,12 +86,15 @@ public class Base58 {
     }
 
     /**
-     * Decode base58 string
+     * Decodes the given base58 string into the original data bytes.
+     * @param data  the base58-encoded string to decode
+     * @return  the decoded data bytes
      */
     public static byte[] decode(String data) {
         if (data.length() == 0) {
             return new byte[0];
         }
+
         byte[] input58 = new byte[data.length()];
 
         // Transform the String to a base58 byte sequence  
@@ -127,6 +139,53 @@ public class Base58 {
         return copyOfRange(temp, j - zeroCount, temp.length);
     }
 
+    /**
+     * base58 decode and construct BigInteger
+     * @param data the base58-encoded string to decode
+     * @return the BigInteger of base58-decoded
+     */
+    public static BigInteger decodeToBigInteger(String data) {
+        return new BigInteger(1, decode(data));
+    }
+
+    /**
+     * Encodes the given bytes as a base58 string (with appended checksum).
+     * @param data  the bytes to encode
+     * @return the base58-encoded string is appended checksum
+     */
+    public static String encodeWithChecksum(byte[] data) {
+        byte[] twiceSha256 = HashUtils.sha256(HashUtils.sha256(data));
+        data = ArrayUtils.addAll(data, Arrays.copyOfRange(twiceSha256, 0, 4));
+        return encode(data);
+    }
+
+    /**
+     * Decodes the given base58 string into the original data bytes, using the checksum in the
+     * last 4 bytes of the decoded data to verify that the rest are correct. The checksum is
+     * removed from the returned data.
+     * 
+     * if the data is not base 58 or the checksum is invalid then throw IllegalArgumentException
+     *
+     * @param data the base58-encoded string to decode (which should include the checksum)
+     */
+    public static byte[] decodeWithChecksum(String data) {
+        byte[] decoded = decode(data);
+        if (decoded.length < 4) {
+            throw new IllegalArgumentException("Data too short.");
+        }
+
+        byte[] bytes = Arrays.copyOfRange(decoded, 0, decoded.length - 4);
+        byte[] twiceSha256 = HashUtils.sha256(HashUtils.sha256(bytes));
+        byte[] actualChecksum = Arrays.copyOfRange(twiceSha256, 0, 4);
+
+        byte[] checksum = Arrays.copyOfRange(decoded, decoded.length - 4, decoded.length);
+
+        if (!Arrays.equals(checksum, actualChecksum)) {
+            throw new IllegalArgumentException("Invalid checksum.");
+        }
+        return bytes;
+    }
+
     // number -> number / 58, returns number % 58
     private static byte divmod58(byte[] number, int startAt) {
         int remainder = 0;
@@ -135,6 +194,7 @@ public class Base58 {
             // byte b = -127; 补码：10000001
             // int  i = -127; 补码：111111111111111111111111 10000001
             // Integer.toBinaryString(b & 0xFF) --> 10000001
+            // new BigInteger(1, new byte[] { b }).toString(2); // 10000001
             int digit256 = number[i] & 0xFF;
             int temp = remainder * 256 + digit256;
             number[i] = (byte) (temp / 58);
@@ -165,6 +225,9 @@ public class Base58 {
 
     public static void main(String[] args) {
         System.out.println(encode(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class))));
+        String base58 = encodeWithChecksum(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class)));
+        System.out.println(base58);
+        System.out.println(new String(decodeWithChecksum(base58)));
 
         byte[] b128 = new byte[16], b0 = new byte[16], b127 = new byte[16];
         Arrays.fill(b128, (byte) -128);
