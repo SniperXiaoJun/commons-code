@@ -2,12 +2,16 @@ package code.ponfee.commons.jce.pkcs;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Signature;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 
+import code.ponfee.commons.jce.cert.CertPKCS7Verifier;
 import sun.security.pkcs.ContentInfo;
 import sun.security.pkcs.PKCS7;
+import sun.security.pkcs.ParsingException;
 import sun.security.pkcs.SignerInfo;
 import sun.security.util.DerValue;
 import sun.security.x509.AlgorithmId;
@@ -20,16 +24,13 @@ import sun.security.x509.X500Name;
 @SuppressWarnings("restriction")
 public class PKCS7Signature {
 
-    /*private static final Map<String, String> HASH_SIGN_ALG = new HashMap<>() {
-        private static final long serialVersionUID = 8252202658190109593L;
-        {
-            put("1.2.840.113549.1.1.4", "MD5");
-            put("1.2.840.113549.1.1.5", "SHA-1");
-            put("1.2.840.113549.1.1.11", "SHA-256");
-            put("1.2.840.113549.1.1.12", "SHA-384");
-            put("1.2.840.113549.1.1.13", "SHA-512");
-        }
-    };*/
+    /*private static final Map<String, String> HASH_SIGN_ALG = ImmutableMap.<String, String>builder()
+        .put("1.2.840.113549.1.1.4", "MD5")
+        .put("1.2.840.113549.1.1.5", "SHA-1")
+        .put("1.2.840.113549.1.1.11", "SHA-256")
+        .put("1.2.840.113549.1.1.12", "SHA-384")
+        .put("1.2.840.113549.1.1.13", "SHA-512")
+        .build();*/
 
     /**
      * byte流数据签名（单人）
@@ -95,43 +96,37 @@ public class PKCS7Signature {
     }
 
     /**
-     * 附原文的验签（P7方式验签，可验证CMS格式签名）
-     * @param pkcs7
-     * @return 返回原文
+     * 附原文的验签（pkcs7方式验签，可验证CMS格式签名）
+     * @param pkcs7Data  the pkcs7 byte array data, with origin
+     * @return the origin byte data
      */
-    public static byte[] verify(byte[] pkcs7) {
-        try {
-            ContentInfo contentInfo = new PKCS7(pkcs7).getContentInfo();
-            byte[] data = null;
-            if (contentInfo.getContent() == null) {
-                data = contentInfo.getData();
-            } else {
-                try {
-                    data = contentInfo.getContent().getOctetString();
-                } catch (Exception e) {
-                    data = contentInfo.getContent().getDataBytes();
-                }
-            }
-            verify(pkcs7, data);
-            return data;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public static byte[] verify(byte[] pkcs7Data) {
+        PKCS7 pkcs7 = CertPKCS7Verifier.getPkcs7(pkcs7Data);
+        byte[] data = CertPKCS7Verifier.getPkcs7Content(pkcs7);
+        verify(pkcs7, data);
+        return data;
     }
 
     /**
-     * 不附原文的验签（P7方式验签，可验证CMS格式签名）
-     * @param pkcs7Data
-     * @param data
+     * 不附原文的验签（pkcs7方式验签，可验证CMS格式签名）
+     * @param pkcs7Data  the pkcs7 byte array data, without origin
+     * @param data  the origin byte data
      * @return
      */
     public static void verify(byte[] pkcs7Data, byte[] data) {
+        try {
+            verify(new PKCS7(pkcs7Data), data);
+        } catch (ParsingException e) {
+            throw new IllegalArgumentException("Invalid pacs7 data", e);
+        }
+    }
+
+    public static void verify(PKCS7 pkcs7, byte[] data) {
         if (data == null || data.length == 0) {
-            throw new SecurityException("待验签的原数据为空！");
+            throw new IllegalArgumentException("the origin data canot be null.");
         }
 
         try {
-            PKCS7 pkcs7 = new PKCS7(pkcs7Data);
             for (SignerInfo signed : pkcs7.getSignerInfos()) {
                 if (pkcs7.verify(signed, data) == null) {
                     String certSN = signed.getCertificateSerialNumber().toString(16);
@@ -140,7 +135,7 @@ public class PKCS7Signature {
                     throw new SecurityException("验签失败[certSN：" + certSN + "；CertDN：" + certDN + "]");
                 }
             }
-        } catch (Exception e) {
+        } catch (NoSuchAlgorithmException | SignatureException | IOException e) {
             throw new RuntimeException(e);
         }
     }

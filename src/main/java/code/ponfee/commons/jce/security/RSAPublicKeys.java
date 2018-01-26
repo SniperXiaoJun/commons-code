@@ -41,9 +41,8 @@ public final class RSAPublicKeys {
     }
 
     /**
-     * 因为 IBM JDK 不支持私钥加密, 公钥解密, 所以要反转公私钥
-     * 也就是说对于解密, 可以通过公钥的参数伪造一个私钥对象欺骗 IBM JDK
-     * 公钥伪造成私钥，此时可用伪造的私钥解密及签名
+     * 对于某些jdk不支持公钥解密及签名，所以要反转公钥为私钥
+     * 公钥伪造成私钥来支持解密及签名
      * @param publicKey
      * @return
      */

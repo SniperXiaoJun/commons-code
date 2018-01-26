@@ -101,7 +101,8 @@ public class TestPem {
         privatePemParser.close();
     }
     
-    private static void test() throws IOException {
+    @Test
+    public void test() throws IOException {
         String publicKeyString = "-----BEGIN PUBLIC KEY-----\n" + "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDKQtJAyCu5FHwDncK2LB/J5ClJ\n"
             + "hulGggyc7vwtji6TJHtSJfgD4TLpHRIHh/cHqf3brhpQtYB9yjKlwogji/OzedY2\n" + "mdTdSOP8O6suJYu3QENN2xG/HvT8UiYK3feVLbJtukhJm7eSuwfMDsjHh4AK7g11\n"
             + "fVs6EmY+foh3mjoKLQIDAQAB\n" + "-----END PUBLIC KEY-----";

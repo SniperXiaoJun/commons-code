@@ -3,6 +3,7 @@ package code.ponfee.commons.jce.crypto;
 import java.security.GeneralSecurityException;
 import java.security.Provider;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -96,12 +97,32 @@ public class SymmetricCryptor {
         return secretKey.getEncoded();
     }
 
+    public final String getKeyAsBase64() {
+        return Base64.getEncoder().encodeToString(getKey());
+    }
+
     /**
      * get iv parameter byte[] data
      * @return
      */
     public byte[] getParameter() {
         return ((IvParameterSpec) parameter).getIV();
+    }
+
+    public final String getParameterAsBase64() {
+        return Base64.getEncoder().encodeToString(getParameter());
+    }
+
+    public final Mode getMode() {
+        return mode;
+    }
+
+    public final Padding getPadding() {
+        return padding;
+    }
+
+    public final Provider getProvider() {
+        return provider;
     }
 
 }

@@ -35,7 +35,7 @@ public class PKCS7EnvelopeTester {
         System.out.println("===============================================");
 
         byte[] unveloped = PKCS7Envelope.unenvelop(enveloped, cert, privateKey);
-        //System.out.println(new String(unveloped));
+        System.out.println(new String(unveloped));
         //System.out.println("===============================================");
         
         

@@ -36,9 +36,11 @@ public final class WebUtils {
     public static final String SESSION_TRACE_PARAME = "authToken";
 
     /**
-     * 获取请求参数，<b>支付模块参数签名/验签时使用</b>
+     * get the http servlet request parameters
+     * the parameter value is {@link java.lang.String} type
+     * if is array parameter, then the value is based-join on "," as String
      * @param request
-     * @return Map<String, String>, array param value use "," join
+     * @return Map<String, String>, the array param value use "," to join
      */
     public static Map<String, String> getParams(HttpServletRequest request) {
         Map<String, String[]> requestParams = request.getParameterMap();
@@ -126,7 +128,7 @@ public final class WebUtils {
         try (PrintWriter writer = resp.getWriter()) {
             writer.write(text);
         } catch (IOException e) {
-            // not happened
+            // can not happened
             throw new RuntimeException("response " + contentType + " occur error", e);
         }
     }
@@ -182,14 +184,10 @@ public final class WebUtils {
      */
     public static void response(HttpServletResponse resp, InputStream input, 
                                 String filename, String charset, boolean isGzip) {
-        filename = UrlCoder.encodeURIComponent(filename, charset);
         try (InputStream in = input;
              OutputStream out = resp.getOutputStream(); 
         ) {
-            resp.setContentType("application/octet-stream");
-            resp.setHeader("Content-Length", Integer.toString(in.available()));
-            resp.setHeader("Content-Disposition", "attachment;filename=" + filename);
-            resp.setCharacterEncoding(charset);
+            respStream(resp, in.available(), filename, charset);
             if (isGzip) {
                 resp.setHeader("Content-Encoding", "gzip");
                 GzipProcessor.compress(in, out);
@@ -197,7 +195,7 @@ public final class WebUtils {
                 IOUtils.copyLarge(in, out);
             }
         } catch (IOException e) {
-            // not happened
+            // can not happened
             throw new RuntimeException("response input stream occur error", e);
         }
     }
@@ -223,12 +221,8 @@ public final class WebUtils {
      */
     public static void response(HttpServletResponse resp, byte[] data,
                                 String filename, String charset, boolean isGzip) {
-        filename = UrlCoder.encodeURIComponent(filename, charset);
         try (OutputStream out = resp.getOutputStream()) {
-            resp.setContentType("application/octet-stream");
-            resp.setHeader("Content-Length", Integer.toString(data.length));
-            resp.setHeader("Content-Disposition", "attachment;filename=" + filename);
-            resp.setCharacterEncoding(charset);
+            respStream(resp, data.length, filename, charset);
             if (isGzip) {
                 resp.setHeader("Content-Encoding", "gzip");
                 GzipProcessor.compress(data, out);
@@ -236,7 +230,7 @@ public final class WebUtils {
                 out.write(data);
             }
         } catch (IOException e) {
-            // not happened
+            // can not happened
             throw new RuntimeException("response byte array data occur error", e);
         }
     }
@@ -411,6 +405,7 @@ public final class WebUtils {
         return WebUtils.getHeader(req, SESSION_TRACE_HEADER); // from header;
     }
 
+    // ----------------------------------private methods----------------------------------
     /**
      * to json string
      * @param data
@@ -424,5 +419,14 @@ public final class WebUtils {
         return data instanceof CharSequence
                ? data.toString()
                : Jsons.NORMAL.stringify(data);
+    }
+
+    private static void respStream(HttpServletResponse resp, long size,
+                                   String filename, String charset) {
+        filename = UrlCoder.encodeURIComponent(filename, charset);
+        resp.setContentType("application/octet-stream");
+        resp.setHeader("Content-Length", Long.toString(size));
+        resp.setHeader("Content-Disposition", "attachment;filename=" + filename);
+        resp.setCharacterEncoding(charset);
     }
 }

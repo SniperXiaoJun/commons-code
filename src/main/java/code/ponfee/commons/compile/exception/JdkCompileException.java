@@ -52,8 +52,8 @@ public class JdkCompileException extends Exception {
 
     private void setClassNames(Set<String> qualifiedClassNames) {
         // create a new HashSet because the set passed in may not
-        // be Serializable. For example, Map.keySet() returns a non-Serializable
-        // set.
+        // be Serializable. For example, Map.keySet() returns 
+        // a non-Serializable set.
         classNames = new HashSet<>(qualifiedClassNames);
     }
 

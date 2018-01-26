@@ -37,7 +37,7 @@ public class CryptoMessageSyntaxTester {
         System.out.println("===============================================");
 
         byte[] unveloped = CryptoMessageSyntax.unenvelop(enveloped, privateKey);
-        //System.out.println(new String(unveloped));
+        System.out.println(new String(unveloped));
         System.out.println("===============================================");
     }
 
@@ -50,7 +50,7 @@ public class CryptoMessageSyntaxTester {
         byte[] signed = CryptoMessageSyntax.sign(data, privateKey, certChain);
         System.out.println("signed len------------" + signed.length);
         CryptoMessageSyntax.verify(signed);
-        PKCS7Signature.verify(signed);
+        PKCS7Signature.verify(signed); // PKCS7验证CMS签名
     }
 
     public @Test void testPKCS7Sign() throws Exception {
@@ -61,8 +61,8 @@ public class CryptoMessageSyntaxTester {
         System.out.println("origin len------------" + data.length);
         byte[] signed = PKCS7Signature.sign(privateKey, certChain[0], data, true);
         System.out.println("signed len------------" + signed.length);
-        CryptoMessageSyntax.verify(signed);
         PKCS7Signature.verify(signed);
+        CryptoMessageSyntax.verify(signed); // CMS验证PKCS7签名
     }
 
 }

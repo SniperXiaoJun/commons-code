@@ -1,26 +1,32 @@
 package code.ponfee.commons.jce.cert;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 
 /**
- * p1验签
+ * pkcs1 signature verifier
  * @author fupf
  */
 public class CertPKCS1Verifier extends CertSignedVerifier {
 
+    /**
+     * the signature of pkcs1 verifer
+     * @param rootCert the ca root cert
+     * @param crl      the cert revoke list
+     * @param subject  the subject cert
+     * @param info     origin data info
+     * @param signed   signed info
+     */
     public CertPKCS1Verifier(X509Certificate rootCert, X509CRL crl, 
-                             X509Certificate subject, byte[] info, byte[] signedInfo) {
-        super(rootCert, crl);
-        try {
-            this.subjects = new X509Certificate[] { subject };
-            this.info = info;
-            this.signedInfos.add(signedInfo);
-        } catch (Exception e) {
-            throw new SecurityException("证书数据格式错误", e);
-        }
+                             X509Certificate subject, byte[] info, byte[] signed) {
+        super(rootCert, crl, info);
+        this.subjects = new X509Certificate[] { subject };
+        this.signedInfos.add(signed);
     }
 
     public @Override void verifySigned() {
@@ -38,7 +44,7 @@ public class CertPKCS1Verifier extends CertSignedVerifier {
             throw new SecurityException("[" + subjectCN + "]证书签名信息错误", e);
         } catch (SecurityException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | IOException e) {
             throw new SecurityException("证书验签出错", e);
         }
     }

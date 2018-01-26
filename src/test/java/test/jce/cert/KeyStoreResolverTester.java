@@ -75,8 +75,8 @@ public class KeyStoreResolverTester {
         X509Certificate[] subjectChain = new KeyStoreResolver(KeyStoreType.PKCS12, new FileInputStream("d:/test/subject.pfx"), "123456").getX509CertChain();
 
         // 方法一：获取证书的签名内容
-        System.out.println(PKCS1Signature.verify(root, root.getTBSCertificate(), root.getSignature()));
-        System.out.println(PKCS1Signature.verify(subjectChain[1], subjectChain[0].getTBSCertificate(), subjectChain[0].getSignature()));
+        System.out.println(PKCS1Signature.verify(root.getTBSCertificate(), root.getSignature(), root));
+        System.out.println(PKCS1Signature.verify(subjectChain[0].getTBSCertificate(), subjectChain[0].getSignature(), subjectChain[1]));
 
         // 方法二：通过证书接口验证cert.verify(publicKey);
         CertSignedVerifier.verifyIssuingSign(root, root);

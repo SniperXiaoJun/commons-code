@@ -23,9 +23,10 @@ public class RegexJavaSource extends JavaSource {
         // X*?  X，零次或多次（懒汉模式）
         String findFirst = RegexUtils.findFirst(sourceString, "package (?s).*?;");
         this.packageName = findFirst.replaceAll("package ", EMPTY).replaceAll(";", EMPTY).trim();
-        
+
         findFirst = RegexUtils.findFirst(sourceString, "public class (?s).*?{");
-        this.publicClass = findFirst.split("extends")[0].split("implements")[0].replaceAll("public class ", EMPTY).replace("{", EMPTY).trim();*/
+        this.publicClass = findFirst.split("extends")[0].split("implements")[0]
+                                    .replaceAll("public class ", EMPTY).replace("{", EMPTY).trim();*/
 
         Matcher matcher = PACKAGE_NAME.matcher(sourceCode);
         if (matcher.find()) {

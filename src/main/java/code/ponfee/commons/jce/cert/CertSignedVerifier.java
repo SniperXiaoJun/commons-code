@@ -17,15 +17,16 @@ import java.util.List;
 public abstract class CertSignedVerifier {
     protected final X509Certificate rootCert; // 根证书
     protected final X509CRL crl; // 吊销列表
-    protected X509Certificate[] subjects; // 多人签名证书
-    protected byte[] info; // 原文信息
-    protected List<byte[]> signedInfos = new ArrayList<>(); // 签名数据
+    protected final byte[] info; // 原文信息
+    protected final List<byte[]> signedInfos = new ArrayList<>(); // 签名数据
 
+    protected X509Certificate[] subjects; // 多人签名证书
     private boolean verifySigned = true;
 
-    protected CertSignedVerifier(X509Certificate rootCert, X509CRL crl) {
+    protected CertSignedVerifier(X509Certificate rootCert, X509CRL crl, byte[] info) {
         this.rootCert = rootCert;
         this.crl = crl;
+        this.info = info;
     }
 
     /**

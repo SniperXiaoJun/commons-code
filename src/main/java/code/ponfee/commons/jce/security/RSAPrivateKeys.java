@@ -72,7 +72,8 @@ public final class RSAPrivateKeys {
     private RSAPrivateKeys() {}
 
     /**
-     * 私钥伪造公钥，此时可以用此伪造的公钥加密及验签
+     * 对于某些jdk不支持私钥加密及验签，所以要反转私钥为公钥
+     * 私钥伪造公钥来支持加密及验签
      * @param publicKey
      * @return
      */

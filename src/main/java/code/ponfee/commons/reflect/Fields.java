@@ -10,6 +10,7 @@ import sun.misc.Unsafe;
  */
 @SuppressWarnings("restriction")
 public final class Fields {
+
     private static final Unsafe UNSAFE/* = sun.misc.Unsafe.getUnsafe()*/;
     static {
         try {
