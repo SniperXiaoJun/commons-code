@@ -8,7 +8,6 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 
-import code.ponfee.commons.jce.cert.CertPKCS7Verifier;
 import sun.security.pkcs.ContentInfo;
 import sun.security.pkcs.PKCS7;
 import sun.security.pkcs.ParsingException;
@@ -101,8 +100,8 @@ public class PKCS7Signature {
      * @return the origin byte data
      */
     public static byte[] verify(byte[] pkcs7Data) {
-        PKCS7 pkcs7 = CertPKCS7Verifier.getPkcs7(pkcs7Data);
-        byte[] data = CertPKCS7Verifier.getPkcs7Content(pkcs7);
+        PKCS7 pkcs7 = getPkcs7(pkcs7Data);
+        byte[] data = getContent(pkcs7);
         verify(pkcs7, data);
         return data;
     }
@@ -114,11 +113,7 @@ public class PKCS7Signature {
      * @return
      */
     public static void verify(byte[] pkcs7Data, byte[] data) {
-        try {
-            verify(new PKCS7(pkcs7Data), data);
-        } catch (ParsingException e) {
-            throw new IllegalArgumentException("Invalid pacs7 data", e);
-        }
+        verify(getPkcs7(pkcs7Data), data);
     }
 
     public static void verify(PKCS7 pkcs7, byte[] data) {
@@ -147,7 +142,8 @@ public class PKCS7Signature {
      * @param keys
      * @return
      */
-    private static byte[] sign(ContentInfo contentInfo, byte[] data, X509Certificate[] certs, PrivateKey[] keys) {
+    private static byte[] sign(ContentInfo contentInfo, byte[] data, 
+                               X509Certificate[] certs, PrivateKey[] keys) {
         SignerInfo[] signs = new SignerInfo[keys.length];
         AlgorithmId[] digestAlgorithmIds = new AlgorithmId[keys.length];
         for (int i = 0; i < keys.length; i++) {
@@ -182,4 +178,40 @@ public class PKCS7Signature {
         }
     }
 
+    /**
+     * get the pkcs7 from byte array data
+     * @param pkcs7Data
+     * @return
+     */
+    public static PKCS7 getPkcs7(byte[] pkcs7Data) {
+        try {
+            return new PKCS7(pkcs7Data);
+        } catch (ParsingException e) {
+            throw new IllegalArgumentException("Invalid pacs7 data", e);
+        }
+    }
+
+    /**
+     * get the origin byte array data from pkcs7
+     * @param pkcs7
+     * @return
+     */
+    public static byte[] getContent(PKCS7 pkcs7) {
+        ContentInfo contentInfo = pkcs7.getContentInfo();
+        try {
+            byte[] data;
+            if (contentInfo.getContent() == null) {
+                data = contentInfo.getData();
+            } else {
+                try {
+                    data = contentInfo.getContent().getOctetString();
+                } catch (Exception e) {
+                    data = contentInfo.getContent().getDataBytes();
+                }
+            }
+            return data;
+        } catch (IOException e) {
+            throw new SecurityException("Get content from pkcs7 occur error", e);
+        }
+    }
 }

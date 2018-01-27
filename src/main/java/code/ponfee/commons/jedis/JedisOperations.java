@@ -39,8 +39,8 @@ abstract class JedisOperations {
      * @param args             参数
      * @return
      */
-    final <T> T hook(JedisHook<T> hook, T occurErrorRtnVal, Object... args) {
-        return hook.hook(jedisClient, occurErrorRtnVal, args);
+    final <T> T hook(JedisCallback<T> hook, T occurErrorRtnVal, Object... args) {
+        return hook.call(jedisClient, occurErrorRtnVal, args);
     }
 
     /**
@@ -48,8 +48,8 @@ abstract class JedisOperations {
      * @param call 勾子对象
      * @param args 参数列表
      */
-    final void call(JedisCall call, Object... args) {
-        call.call(jedisClient, args);
+    final void call(JedisHook call, Object... args) {
+        call.hook(jedisClient, args);
     }
 
     /**

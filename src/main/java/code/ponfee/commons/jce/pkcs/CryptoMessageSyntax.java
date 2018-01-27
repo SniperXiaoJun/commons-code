@@ -107,12 +107,18 @@ public final class CryptoMessageSyntax {
     // -----------------------------------------envelop/unenvelop----------------------------------
     /**
      * 构造数字信封
-     * PKCSObjectIdentifiers.des_EDE3_CBC
+     * 
+     * PKCSObjectIdentifiers#des_EDE3_CBC
      * PKCSObjectIdentifiers.RC2_CBC
+     * 
      * new ASN1ObjectIdentifier("1.2.840.113549.3.2"); // RSA_RC2
      * new ASN1ObjectIdentifier("1.2.840.113549.3.4"); // RSA_RC4
+     * 
      * new ASN1ObjectIdentifier("1.3.14.3.2.7"); // DES_CBC
      * new ASN1ObjectIdentifier("1.2.840.113549.3.7"); // DESede_CBC
+     * 
+     * new ASN1ObjectIdentifier("2.16.840.1.101.3.4.1.2"); // AES128_CBC
+     * 
      * @param data
      * @param cert
      * @param alg

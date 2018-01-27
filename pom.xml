@@ -16,7 +16,7 @@
         <poi.version>3.17</poi.version>
         <log4j2.version>2.10.0</log4j2.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <bouncycastle.version>1.58</bouncycastle.version>
+        <bouncycastle.version>1.59</bouncycastle.version>
     </properties>
 
     <profiles>

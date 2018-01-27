@@ -53,7 +53,7 @@ public class Base58 {
         }
 
         // Duplicate data 
-        data = copyOfRange(data, 0, data.length);
+        data = Arrays.copyOfRange(data, 0, data.length);
 
         // Count leading zeroes.
         int zeroCount = 0;
@@ -136,7 +136,7 @@ public class Base58 {
             ++j;
         }
 
-        return copyOfRange(temp, j - zeroCount, temp.length);
+        return Arrays.copyOfRange(temp, j - zeroCount, temp.length);
     }
 
     /**
@@ -211,12 +211,6 @@ public class Base58 {
         }
 
         return (byte) remainder;
-    }
-
-    private static byte[] copyOfRange(byte[] source, int from, int to) {
-        byte[] range = new byte[to - from];
-        System.arraycopy(source, from, range, 0, range.length);
-        return range;
     }
 
     private static byte[] checksum(byte[] data) {

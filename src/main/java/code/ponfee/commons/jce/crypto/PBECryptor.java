@@ -16,7 +16,7 @@ import code.ponfee.commons.util.SecureRandoms;
 /**
  * <pre>
  *  |---------------------------------------|-------------------|---------------------------|
- *  |                Algorithm              | secret key length | default secret key length |
+ *  |               Algorithm               | secret key length | default secret key length |
  *  |---------------------------------------|-------------------|---------------------------|
  *  | PBEWithMD5AndDES(Bad Algorithm)       |        56         |            56             |
  *  |---------------------------------------|-------------------|---------------------------|
@@ -28,8 +28,11 @@ import code.ponfee.commons.util.SecureRandoms;
  *  |---------------------------------------|-------------------|---------------------------|
  * </pre>
  * 
- * String是常量（即创建之后就无法更改），会保存到常量池中，如果有其他进程可以dump这个进程的内存，那么密码就会随着常量池被dump出去从而泄露。
+ * String是常量（即创建之后就无法更改），会保存到常量池中，如果有其他进程
+ * 可以dump这个进程的内存，那么密码就会随着常量池被dump出去从而泄露。
  * 而char[]可以写入其他的信息从而改变，即是被dump了也会减少泄露密码的风险。
+ * <p>
+ * 
  * PBE salt encryption
  * @author fupf
  */

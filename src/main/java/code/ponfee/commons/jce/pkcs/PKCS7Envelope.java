@@ -29,6 +29,7 @@ import org.bjca.jce.fastparser.FastPkcs7;
 import org.bjca.jce.fastparser.Item;
 import org.bjca.jce.fastparser.RecipientInfo;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.Arrays;
 
 import code.ponfee.commons.util.SecureRandoms;
 
@@ -52,7 +53,7 @@ public final class PKCS7Envelope {
      * @param alg
      * @return
      */
-    public static byte[] envelop(byte plaindata[], X509Certificate cert, AlgorithmMapping alg) {
+    public static byte[] envelop(byte[] plaindata, X509Certificate cert, AlgorithmMapping alg) {
         DEROutputStream dout = null;
         try {
             // 生成对称密钥
@@ -61,7 +62,7 @@ public final class PKCS7Envelope {
             // 公钥对对称密钥加密
             Cipher cipher = Cipher.getInstance(TRANSFORM);
             cipher.init(Cipher.ENCRYPT_MODE, cert.getPublicKey());
-            byte encKey[] = cipher.doFinal(key.getEncoded());
+            byte[] encKey = cipher.doFinal(key.getEncoded());
 
             // 对称密钥对原文加密
             DERObject iv = alg.ivLen > 0 ? new DEROctetString(SecureRandoms.nextBytes(alg.ivLen)) : null;
@@ -73,7 +74,7 @@ public final class PKCS7Envelope {
             } else {
                 cipher.init(Cipher.ENCRYPT_MODE, key);
             }
-            byte encdata[] = cipher.doFinal(plaindata);
+            byte[] encdata = cipher.doFinal(plaindata);
 
             // 填充接收者信息
             X509Principal p = new X509Principal(cert.getIssuerX500Principal().getEncoded());
@@ -123,7 +124,7 @@ public final class PKCS7Envelope {
      * @param privateKey
      * @return
      */
-    public static byte[] unenvelop(byte envelopeddata[], X509Certificate cert, PrivateKey privateKey) {
+    public static byte[] unenvelop(byte[] envelopeddata, X509Certificate cert, PrivateKey privateKey) {
         FastPkcs7 fastPkcs7 = new FastPkcs7();
         if (!fastPkcs7.pkcs7Data(envelopeddata)) {
             throw new SecurityException("can't decode PKCS7Envlope object");
@@ -139,7 +140,7 @@ public final class PKCS7Envelope {
         Item item = recipientInfo.getIssuerAndSerialNumber();
         org.bjca.jce.fastparser.IssuerAndSerialNumber iasn = new org.bjca.jce.fastparser.IssuerAndSerialNumber(envelopeddata, item);
         item = iasn.getIssuer();
-        /*byte ss[] = new byte[item.length];
+        /*byte[] ss = new byte[item.length];
         ss = DerUtil.getItemDataAndTag(envelopeddata, item);*/
         if (!cert.getSerialNumber().equals(iasn.getSerialNumber().getSerialNumber())) {
             throw new SecurityException("certificate is not match");
@@ -148,16 +149,15 @@ public final class PKCS7Envelope {
         ASN1InputStream input = null;
         try {
             // 解密被加密的对称密钥
-            byte encKey[] = recipientInfo.getEncKey();
+            byte[] encKey = recipientInfo.getEncKey();
             Cipher c = Cipher.getInstance(TRANSFORM);
             c.init(2, privateKey);
-            byte key[] = c.doFinal(encKey);
+            byte[] key = c.doFinal(encKey);
 
             // 获取对称加密算法
             EncryptedContentInfo eci = ed.getEncryptedContentInfoObject();
             item = eci.getContentEncryptionAlgorithm();
-            byte[] bs = new byte[item.length];
-            System.arraycopy(envelopeddata, item.offset, bs, 0, bs.length);
+            byte[] bs = Arrays.copyOfRange(envelopeddata, item.offset, item.offset + item.length);
             input = new ASN1InputStream(bs);
             AlgorithmIdentifier alg = AlgorithmIdentifier.getInstance(input.readObject());
             String algoid = alg.getObjectId().getId();
@@ -166,13 +166,11 @@ public final class PKCS7Envelope {
 
             // 对称加密向量参数
             item = eci.getIvParameter();
-            byte[] iv = new byte[item.length];
-            System.arraycopy(envelopeddata, item.offset, iv, 0, iv.length);
+            byte[] iv = Arrays.copyOfRange(envelopeddata, item.offset, item.offset + item.length);
 
             // 获取密文
             item = eci.getEncryptedContent();
-            byte encdata[] = new byte[item.length];
-            System.arraycopy(envelopeddata, item.offset, encdata, 0, encdata.length);
+            byte[] encdata = Arrays.copyOfRange(envelopeddata, item.offset, item.offset + item.length);
 
             // 解密
             SecretKey secretKey = new SecretKeySpec(key, algorithm.name);
@@ -206,16 +204,19 @@ public final class PKCS7Envelope {
      * 算法相关
      */
     public static enum AlgorithmMapping {
-        AES128_WRAP("2.16.840.1.101.3.4.1.5", "AES", "AES", 0), // aes128 wrap
-        AES192_WRAP("2.16.840.1.101.3.4.1.25", "AES", "AES", 0), // aes192 wrap
-        AES256_WRAP("2.16.840.1.101.3.4.1.45", "AES", "AES", 0), // aes256 wrap
-        RSA_RC4("1.2.840.113549.3.4", "RC4", "RC4", 0), // rsa rc4
-        RSA_RC2("1.2.840.113549.3.2", "RC2", "RC2", 0), // rsa rc2 cbc
-        AES128_CBC("2.16.840.1.101.3.4.1.2", "AES", "AES/CBC/PKCS5Padding", 16), // aes128 cbc
-        AES192_CBC("2.16.840.1.101.3.4.1.22", "AES", "AES/CBC/PKCS5Padding", 16), // aes192 cbc
-        AES256_CBC("2.16.840.1.101.3.4.1.42", "AES", "AES/CBC/PKCS5Padding", 16), // aes256 cbc
-        DESede_CBC("1.2.840.113549.3.7", "DESede", "DESede/CBC/PKCS5Padding", 8), // 3des cbc
-        DES_CBC("1.3.14.3.2.7", "DES", "DES/CBC/PKCS5Padding", 8), // des cbc
+        AES128_WRAP("2.16.840.1.101.3.4.1.5", "AES", "AES", 0), //
+        AES192_WRAP("2.16.840.1.101.3.4.1.25", "AES", "AES", 0), //
+        AES256_WRAP("2.16.840.1.101.3.4.1.45", "AES", "AES", 0), //
+
+        RSA_RC2("1.2.840.113549.3.2", "RC2", "RC2", 0), //
+        RSA_RC4("1.2.840.113549.3.4", "RC4", "RC4", 0), //
+
+        DES_CBC("1.3.14.3.2.7", "DES", "DES/CBC/PKCS5Padding", 8), //
+        DESede_CBC("1.2.840.113549.3.7", "DESede", "DESede/CBC/PKCS5Padding", 8), //
+
+        AES128_CBC("2.16.840.1.101.3.4.1.2", "AES", "AES/CBC/PKCS5Padding", 16), //
+        AES192_CBC("2.16.840.1.101.3.4.1.22", "AES", "AES/CBC/PKCS5Padding", 16), //
+        AES256_CBC("2.16.840.1.101.3.4.1.42", "AES", "AES/CBC/PKCS5Padding", 16), //
         ;
 
         final String oid;

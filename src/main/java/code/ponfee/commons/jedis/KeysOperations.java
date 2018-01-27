@@ -32,7 +32,7 @@ public class KeysOperations extends JedisOperations {
      * @return
      */
     public Long ttl(String key) {
-        return ((JedisHook<Long>) sjedis -> sjedis.ttl(key)).hook(jedisClient, null, key);
+        return ((JedisCallback<Long>) sjedis -> sjedis.ttl(key)).call(jedisClient, null, key);
     }
 
     /**

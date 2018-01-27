@@ -3,15 +3,14 @@ package code.ponfee.commons.jce.cert;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.Security;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Objects;
 import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
 import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.jce.RSASignAlgorithm;
@@ -35,7 +34,7 @@ import sun.security.x509.X509CertInfo;
  * 证书生成工具类
  * @author fupf
  */
-@SuppressWarnings({ "restriction", "deprecation" })
+@SuppressWarnings({ "restriction" })
 public class X509CertGenerator {
 
     // ------------------------create root ca cert of self sign -----------------------------
@@ -59,7 +58,7 @@ public class X509CertGenerator {
                                                  PublicKey publicKey, Date notBefore, Date notAfter) {
         PKCS10 pkcs10 = createPkcs10(issuer, privateKey, publicKey, sigAlg);
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(true));
-        return signSelf(privateKey, sigAlg, certInfo);
+        return selfSign(privateKey, certInfo);
     }
 
     // ---------------------------------create subject cert of ca sign ------------------------------
@@ -87,7 +86,7 @@ public class X509CertGenerator {
                                                     PublicKey publicKey, Date notBefore, Date notAfter) {
         PKCS10 pkcs10 = createPkcs10(subject, privateKey, publicKey, sigAlg);
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(false));
-        return signCert(caCert, caKey, certInfo);
+        return caSign(caCert, caKey, certInfo);
     }
 
     public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, 
@@ -108,7 +107,7 @@ public class X509CertGenerator {
     public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, Integer sn,
                                                     PKCS10 pkcs10, Date notBefore, Date notAfter) {
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(false));
-        return signCert(caCert, caKey, certInfo);
+        return caSign(caCert, caKey, certInfo);
     }
 
     // -------------------------------------------create pkcs10 ------------------------------------------
@@ -136,26 +135,29 @@ public class X509CertGenerator {
     // -------------------------------------------create cert ext-----------------------------------------
     /**
      * 创建默认的扩展信息
+     * @param isCA {@code true} is create CA cert
+     *             {@code false} is create subject cert
      * @return
      */
     public static CertificateExtensions createExtensions(boolean isCA) {
         try {
             CertificateExtensions extensions = new CertificateExtensions();
-            //byte[] userData = null;
+            //byte[] userData;
 
             // 密钥用法
             KeyUsageExtension keyUsage = new KeyUsageExtension();
-            keyUsage.set(KeyUsageExtension.DIGITAL_SIGNATURE, true);
+            keyUsage.set(KeyUsageExtension.DIGITAL_SIGNATURE, true); // 支持数据签名
             if (isCA) {
                 //userData = "Digital Signature, Certificate Signing, Off-line CRL Signing, CRL Signing (86)".getBytes();
 
-                keyUsage.set(KeyUsageExtension.KEY_CERTSIGN, true);
-                keyUsage.set(KeyUsageExtension.CRL_SIGN, true);
+                keyUsage.set(KeyUsageExtension.KEY_ENCIPHERMENT, true); // 支持密钥加密
+                keyUsage.set(KeyUsageExtension.KEY_AGREEMENT, true); // 支持密钥协议
+                keyUsage.set(KeyUsageExtension.KEY_CERTSIGN, true); // 支持证书签名
+                keyUsage.set(KeyUsageExtension.CRL_SIGN, true); // 支持吊销列表签名
             } else {
                 //userData = "Digital Signature, Data Encipherment (90)".getBytes();
 
-                //keyUsage.set(KeyUsageExtension.KEY_ENCIPHERMENT, true);
-                keyUsage.set(KeyUsageExtension.DATA_ENCIPHERMENT, true);
+                keyUsage.set(KeyUsageExtension.DATA_ENCIPHERMENT, true); // 支持数据加密
 
                 // 增强密钥用法
                 Vector<ObjectIdentifier> extendedKeyUsage = new Vector<>();
@@ -193,24 +195,31 @@ public class X509CertGenerator {
         }
         try {
             // 验证pkcs10
-            Security.addProvider(Providers.BC);
             PKCS10CertificationRequest req = new PKCS10CertificationRequest(pkcs10.getEncoded());
-            if (!req.verify()) {
-                throw new SecurityException("invalid pkcs10 data");
+            JcaContentVerifierProviderBuilder builder = new JcaContentVerifierProviderBuilder();
+            builder.setProvider(Providers.BC);
+            if (!req.isSignatureValid(builder.build(req.getSubjectPublicKeyInfo()))) {
+                throw new SecurityException("Invalid pkcs10 signature data.");
             }
 
+            /*org.bouncycastle.jce.PKCS10CertificationRequest req = 
+            new org.bouncycastle.jce.PKCS10CertificationRequest(pkcs10.getEncoded());
+            if (!req.verify()) {
+                throw new SecurityException("Invalid pkcs10 signature data.");
+            }*/
+
             AlgorithmId signAlg = AlgorithmId.get(req.getSignatureAlgorithm().getAlgorithm().getId());
-            X509CertInfo x509certinfo = new X509CertInfo();
-            x509certinfo.set(X509CertInfo.VERSION, new CertificateVersion(2));
-            x509certinfo.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(sn));
-            x509certinfo.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(signAlg));
-            x509certinfo.set(X509CertInfo.SUBJECT, pkcs10.getSubjectName());
-            x509certinfo.set(X509CertInfo.KEY, new CertificateX509Key(pkcs10.getSubjectPublicKeyInfo()));
-            x509certinfo.set(X509CertInfo.VALIDITY, new CertificateValidity(notBefore, notAfter));
+            X509CertInfo x509certInfo = new X509CertInfo();
+            x509certInfo.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
+            x509certInfo.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(sn));
+            x509certInfo.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(signAlg));
+            x509certInfo.set(X509CertInfo.SUBJECT, pkcs10.getSubjectName());
+            x509certInfo.set(X509CertInfo.KEY, new CertificateX509Key(pkcs10.getSubjectPublicKeyInfo()));
+            x509certInfo.set(X509CertInfo.VALIDITY, new CertificateValidity(notBefore, notAfter));
             if (extensions != null) {
-                x509certinfo.set(X509CertInfo.EXTENSIONS, extensions);
+                x509certInfo.set(X509CertInfo.EXTENSIONS, extensions);
             }
-            return x509certinfo;
+            return x509certInfo;
         } catch (Exception e) {
             throw new SecurityException(e);
         }
@@ -218,16 +227,16 @@ public class X509CertGenerator {
 
     /**
      * 自签名证书（根证书）
-     * @param privateKey
-     * @param sigAlg
-     * @param certInfo
+     * @param caKey
+     * @param caCertInfo
      * @return
      */
-    private static X509Certificate signSelf(PrivateKey privateKey, RSASignAlgorithm sigAlg, X509CertInfo certInfo) {
+    private static X509Certificate selfSign(PrivateKey caKey, X509CertInfo caCertInfo) {
         try {
-            certInfo.set(X509CertInfo.ISSUER, certInfo.get(X509CertInfo.SUBJECT));
-            X509CertImpl signedCert = new X509CertImpl(certInfo);
-            signedCert.sign(privateKey, sigAlg.name()); // 签名
+            CertificateAlgorithmId algId = (CertificateAlgorithmId) caCertInfo.get(X509CertInfo.ALGORITHM_ID);
+            caCertInfo.set(X509CertInfo.ISSUER, caCertInfo.get(X509CertInfo.SUBJECT));
+            X509CertImpl signedCert = new X509CertImpl(caCertInfo);
+            signedCert.sign(caKey, algId.get("algorithm").getName()); // 签名
             return signedCert;
         } catch (Exception e) {
             throw new SecurityException(e);
@@ -235,36 +244,30 @@ public class X509CertGenerator {
     }
 
     /**
-     * 签名证书
+     * CA签名证书
      * @param caCert
      * @param caKey
-     * @param certInfo
+     * @param subjectCertInfo
      * @return
      */
-    private static X509Certificate signCert(X509Certificate caCert, PrivateKey caKey, X509CertInfo certInfo) {
+    private static X509Certificate caSign(X509Certificate caCert, PrivateKey caKey, X509CertInfo subjectCertInfo) {
         try {
             // 从CA的证书中提取签发者的信息
-            X509CertImpl caCertImpl = new X509CertImpl(caCert.getEncoded()); // 用该编码创建X509CertImpl类型对象
-            X509CertInfo caCertInfo = (X509CertInfo) caCertImpl.get(X509CertImpl.NAME + "." + X509CertImpl.INFO); // 获取X509CertInfo对象
-            X500Name issuer = (X500Name) caCertInfo.get(X509CertInfo.SUBJECT + "." + CertificateIssuerName.DN_NAME); // 获取X509Name类型的签发者信息
+            X509CertImpl caCertImpl = new X509CertImpl(caCert.getEncoded());
 
-            certInfo.set(X509CertInfo.ISSUER, issuer);
-            X509CertImpl signedCert = new X509CertImpl(certInfo);
+            // 获取X509CertInfo对象
+            X509CertInfo caCertInfo = (X509CertInfo) caCertImpl.get(X509CertImpl.NAME + "." + X509CertImpl.INFO);
+
+            // 获取X509Name类型的签发者信息
+            X500Name issuer = (X500Name) caCertInfo.get(X509CertInfo.SUBJECT + "." + CertificateIssuerName.DN_NAME);
+
+            subjectCertInfo.set(X509CertInfo.ISSUER, issuer);
+            X509CertImpl signedCert = new X509CertImpl(subjectCertInfo);
             signedCert.sign(caKey, caCert.getSigAlgName()); // 使用CA私钥对其签名
             return signedCert;
         } catch (Exception e) {
             throw new SecurityException(e);
         }
-    }
-
-    public static void main(String[] args) {
-        String userData = "Digital Signature, Non-Repudiation, Key Encipherment, Data Encipherment (f0)";
-        byte[] b1 = userData.getBytes();
-        byte[] b2 = new byte[userData.length()];
-        System.arraycopy(b1, 0, b2, 0, b1.length);
-        System.out.println(Objects.deepEquals(b1, b2));
-        b2[15] = 1;
-        System.out.println(Objects.deepEquals(b1, b2));
     }
 
 }

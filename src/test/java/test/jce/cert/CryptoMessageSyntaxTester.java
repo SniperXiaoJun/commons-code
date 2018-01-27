@@ -29,7 +29,8 @@ public class CryptoMessageSyntaxTester {
         System.out.println("origin len------------" + data.length);
         System.out.println("===============================================");
 
-        byte[] enveloped = CryptoMessageSyntax.envelop(data, cert, new ASN1ObjectIdentifier("1.2.840.113549.3.7"));
+        //byte[] enveloped = CryptoMessageSyntax.envelop(data, cert, new ASN1ObjectIdentifier("1.2.840.113549.3.7"));
+        byte[] enveloped = CryptoMessageSyntax.envelop(data, cert, new ASN1ObjectIdentifier("2.16.840.1.101.3.4.1.2"));
         System.out.println("cost" + (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
         //System.out.println(Bytes.hexDump(enveloped));

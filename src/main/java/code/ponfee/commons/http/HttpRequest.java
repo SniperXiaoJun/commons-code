@@ -73,6 +73,7 @@ import java.security.GeneralSecurityException;
 import java.security.PrivilegedAction;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -642,9 +643,7 @@ public class HttpRequest {
             }
 
             if (e <= outBuff.length - 1) {
-                byte[] finalOut = new byte[e];
-                System.arraycopy(outBuff, 0, finalOut, 0, e);
-                return finalOut;
+                return Arrays.copyOf(outBuff, e);
             } else {
                 return outBuff;
             }

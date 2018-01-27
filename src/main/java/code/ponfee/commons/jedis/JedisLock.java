@@ -147,7 +147,7 @@ public class JedisLock implements Lock, java.io.Serializable {
      * 尝试获取锁，成功返回true，失败返回false
      */
     public @Override boolean tryLock() {
-        return jedisClient.hook(shardedJedis -> {
+        return jedisClient.call(shardedJedis -> {
             Jedis jedis = shardedJedis.getShard(lockKey);
 
             // 仅当lockKey不存在才能设置成功并返回1，否则setnx不做任何动作返回0
@@ -203,7 +203,7 @@ public class JedisLock implements Lock, java.io.Serializable {
      * 释放锁
      */
     public @Override void unlock() {
-        jedisClient.call(shardedJedis -> {
+        jedisClient.hook(shardedJedis -> {
             // 根据分片获取jedis
             Jedis jedis = shardedJedis.getShard(lockKey);
             jedis.watch(lockKey);

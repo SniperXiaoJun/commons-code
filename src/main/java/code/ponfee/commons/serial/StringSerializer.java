@@ -45,6 +45,23 @@ public class StringSerializer extends Serializer {
         }
     }
 
+    /**
+     * serialize the byte array of string
+     * @param str
+     * @param isCompress
+     * @return
+     */
+    public byte[] serialize(String str, boolean isCompress) {
+        if (str == null) {
+            return null;
+        }
+        byte[] data = str.getBytes(charset);
+        if (isCompress) {
+            data = GzipProcessor.compress(data);
+        }
+        return data;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <T> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
@@ -61,6 +78,22 @@ public class StringSerializer extends Serializer {
             data = GzipProcessor.decompress(data);
         }
         return (T) new String(data, charset);
+    }
+
+    /**
+     * deserialize the byte array to string
+     * @param data
+     * @param isCompress
+     * @return
+     */
+    public String deserialize(byte[] data, boolean isCompress) {
+        if (data == null) {
+            return null;
+        }
+        if (isCompress) {
+            data = GzipProcessor.decompress(data);
+        }
+        return new String(data, charset);
     }
 
     public static void main(String[] args) {

@@ -166,7 +166,7 @@ public class SerializerTester {
 
     @Test
     public void testString() {
-        Serializer serializer = null;
+        StringSerializer serializer = null;
         boolean isCompress;
         byte[] data = null;
         String b = null;

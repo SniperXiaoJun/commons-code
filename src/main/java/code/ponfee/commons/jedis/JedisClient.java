@@ -220,25 +220,30 @@ public class JedisClient implements DisposableBean {
     }
 
     /**
-     * 调用勾子函数：有返回值
-     * @param hook              勾子对象
+     * 回调函数：有返回值
+     * @param call              回调对象
      * @param occurErrorRtnVal  出现异常时的返回值
      * @param args              参数
-     * @return
+     * @return a result
      */
-    public final <T> T hook(JedisHook<T> hook, T occurErrorRtnVal, Object... args) {
-        return hook.hook(this, occurErrorRtnVal, args);
+    public final <T> T call(JedisCallback<T> call, T occurErrorRtnVal, Object... args) {
+        return call.call(this, occurErrorRtnVal, args);
     }
 
     /**
-     * 调用勾子函数：无返回值
-     * @param call 调用勾子函数
+     * 勾子函数：无返回值
+     * @param hook 调用勾子函数
      * @param args 参数列表
      */
-    public final void call(JedisCall call, Object... args) {
-        call.call(this, args);
+    public final void hook(JedisHook hook, Object... args) {
+        hook.hook(this, args);
     }
 
+    /**
+     * 异常处理
+     * @param e    the exception
+     * @param args method arguments
+     */
     static final void exception(Exception e, Object... args) {
         StringBuilder builder = new StringBuilder();
         builder.append("redis operation occur error, args(");

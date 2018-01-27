@@ -33,7 +33,7 @@ public class KeyStoreResolverTester {
     public @Test void testLoad() throws Exception {
         KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.PKCS12, ResourceLoaderFacade.getResource("cas_test.pfx").getStream(), "1234");
         String alias = resolver.listAlias().get(0);
-        _test((RSAPrivateKey)resolver.getPrivateKey(alias, "1234"), (RSAPublicKey)resolver.getPublicKey(alias));
+        test0((RSAPrivateKey)resolver.getPrivateKey(alias, "1234"), (RSAPublicKey)resolver.getPublicKey(alias));
 
         String pem = X509CertUtils.exportToPem(resolver.getX509CertChain()[0]);
         resolver = new KeyStoreResolver(KeyStoreType.JKS);
@@ -44,7 +44,7 @@ public class KeyStoreResolverTester {
     public @Test void testCreateCert() throws Exception {
         Date before = Dates.toDate("2017-03-01 00:00:00"), after = Dates.toDate("2027-08-01 00:00:00");
         RSAKeyPair p1 = RSACryptor.genRSAKeyPair(2048), p2 = RSACryptor.genRSAKeyPair(2048);
-        RSASignAlgorithm alg = RSASignAlgorithm.SHA1withRSA;
+        RSASignAlgorithm alg = RSASignAlgorithm.SHA256withRSA;
         String caPwd = "1234", subjectPwd = "123456";
         String _issuer = "CN=ca,OU=hackwp,O=wp,L=BJ,S=BJ,C=CN";
         String _subject = "CN=subject,OU=hackwp,O=wp,L=BJ,S=BJ,C=CN";
@@ -53,17 +53,16 @@ public class KeyStoreResolverTester {
         X509Certificate ccert = X509CertGenerator.createRootCert(null, _issuer, alg, p1.getPrivateKey(), p1.getPublicKey(), before, after);
         KeyStoreResolver ca = new KeyStoreResolver(KeyStoreType.PKCS12);
         ca.setKeyEntry(X509CertUtils.getCertInfo(ccert, X509CertInfo.SUBJECT_CN), p1.getPrivateKey(), caPwd, new X509Certificate[] { ccert });
-        _test((RSAPrivateKey)ca.getPrivateKey("1234"), (RSAPublicKey)ca.getPublicKey());
+        test0((RSAPrivateKey)ca.getPrivateKey("1234"), (RSAPublicKey)ca.getPublicKey());
 
         System.out.println("\n\n------------------------------------------------------------\n\n");
 
         // --------------------------------------------------
-        X509Certificate scert =
-            X509CertGenerator.createSubjectCert(ccert, p1.getPrivateKey(), null, _subject, alg, p2.getPrivateKey(), p2.getPublicKey(), before, after);
+        X509Certificate scert = X509CertGenerator.createSubjectCert(ccert, p1.getPrivateKey(), null, _subject, alg, p2.getPrivateKey(), p2.getPublicKey(), before, after);
         KeyStoreResolver subject = new KeyStoreResolver(KeyStoreType.PKCS12);
         String scn = X509CertUtils.getCertInfo(scert, X509CertInfo.SUBJECT_CN);
         subject.setKeyEntry(scn, p2.getPrivateKey(), subjectPwd, new X509Certificate[] { scert, ccert });
-        _test((RSAPrivateKey)subject.getPrivateKey(subjectPwd), (RSAPublicKey)subject.getPublicKey());
+        test0((RSAPrivateKey)subject.getPrivateKey(subjectPwd), (RSAPublicKey)subject.getPublicKey());
 
         // --------------------------------------------------
         ca.export(new FileOutputStream("d:/test/ca.pfx"), caPwd);
@@ -83,7 +82,8 @@ public class KeyStoreResolverTester {
         CertSignedVerifier.verifyIssuingSign(subjectChain[0], subjectChain[1]);
     }
 
-    private static void _test(RSAPrivateKey privateKey, RSAPublicKey publicKey) {
+    // -----------------------------------------------------------------------------------
+    private static void test0(RSAPrivateKey privateKey, RSAPublicKey publicKey) {
         try {
             System.out.println("=============================加密测试==============================");
             //byte[] data = "加解密测试".getBytes();

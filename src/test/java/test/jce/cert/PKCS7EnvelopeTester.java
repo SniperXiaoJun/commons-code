@@ -37,8 +37,7 @@ public class PKCS7EnvelopeTester {
         byte[] unveloped = PKCS7Envelope.unenvelop(enveloped, cert, privateKey);
         System.out.println(new String(unveloped));
         //System.out.println("===============================================");
-        
-        
+
         byte[] encrypted = RSACryptor.encrypt(data, (RSAPrivateKey)privateKey);
         //System.out.println(By`tes.hexDump(encrypted));
         System.out.println("cost"+(System.currentTimeMillis()-start));

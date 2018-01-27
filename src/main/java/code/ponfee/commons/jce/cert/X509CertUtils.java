@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -77,19 +78,13 @@ public class X509CertUtils {
                 /*DERObject publicKey = struct.getSubjectPublicKeyInfo().getPublicKey();
                 struct.getSubjectPublicKeyInfo().getPublicKeyData();
                 byte[] encodedPublicKey = publicKey.getEncoded();
-                byte[] eP = new byte[64];
-                System.arraycopy(encodedPublicKey, 5, eP, 0, eP.length);*/
+                byte[] eP = Arrays.copyOfRange(encodedPublicKey, 5, 69);*/
 
                 return new X509CertificateObject(struct);
             } catch (Exception ex) {
-                SecurityException exception = new SecurityException(e.getMessage() + ";" + ex.getMessage());
-                StackTraceElement[] trace1 = e.getStackTrace();
-                StackTraceElement[] trace2 = ex.getStackTrace();
-                StackTraceElement[] trace0 = new StackTraceElement[trace1.length + trace2.length];
-                System.arraycopy(trace1, 0, trace0, 0, trace1.length);
-                System.arraycopy(trace2, 0, trace0, trace1.length, trace2.length);
-                exception.setStackTrace(trace0);
-                throw exception;
+                SecurityException se = new SecurityException(e.getMessage() + ";" + ex.getMessage());
+                se.setStackTrace(ArrayUtils.addAll(e.getStackTrace(), ex.getStackTrace()));
+                throw se;
             } finally {
                 if (input != null) try {
                     input.close();
@@ -175,15 +170,9 @@ public class X509CertUtils {
                 parser.engineInit(in);
                 return (X509CRLObject) parser.engineRead();
             } catch (Exception ex) {
-                SecurityException iae = new SecurityException(e.getMessage() + "；"
-                    + ex.getMessage());
-                StackTraceElement[] se = e.getStackTrace();
-                StackTraceElement[] sx = ex.getStackTrace();
-                StackTraceElement[] s = new StackTraceElement[se.length + sx.length];
-                System.arraycopy(se, 0, s, 0, se.length);
-                System.arraycopy(sx, 0, s, se.length, sx.length);
-                iae.setStackTrace(s);
-                throw iae;
+                SecurityException se = new SecurityException(e.getMessage() + "；" + ex.getMessage());
+                se.setStackTrace(ArrayUtils.addAll(e.getStackTrace(), ex.getStackTrace()));
+                throw se;
             }
         }
     }

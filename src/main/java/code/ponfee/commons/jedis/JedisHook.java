@@ -3,28 +3,24 @@ package code.ponfee.commons.jedis;
 import redis.clients.jedis.ShardedJedis;
 
 /**
- * 钩子函数（有返回值时使用）
+ * 回调函数（无返回值时使用）
  * @author fupf
- * @param <T>
  */
 @FunctionalInterface
-public interface JedisHook<T> {
+public interface JedisHook {
 
-    T hook(ShardedJedis shardedJedis);
+    void hook(ShardedJedis shardedJedis);
 
     /**
-     * 挂勾
-     * @param jedisClient      JedisClient
-     * @param occurErrorRtnVal 出现异常时的返回值
-     * @param args             参数列表
-     * @return
+     * 钩子函数，无返回值
+     * @param jedisClient JedisClient
+     * @param args        参数列表
      */
-    default T hook(JedisClient jedisClient, T occurErrorRtnVal, Object... args) {
+    default void hook(JedisClient jedisClient, Object... args) {
         try (ShardedJedis shardedJedis = jedisClient.getShardedJedis()) {
-            return this.hook(shardedJedis);
+            this.hook(shardedJedis);
         } catch (Exception e) {
             JedisClient.exception(e, args);
-            return occurErrorRtnVal;
         }
     }
 }

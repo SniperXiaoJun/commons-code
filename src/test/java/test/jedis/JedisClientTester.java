@@ -180,20 +180,20 @@ public class JedisClientTester {
         System.out.println(jedisClient.scriptOps().eval("return 10", Lists.newArrayList(), Lists.newArrayList()));
         System.out.println(jedisClient.scriptOps().eval("return {KEYS[1],KEYS[2],ARGV[1],ARGV[2]}", Lists.newArrayList("myname", "test"), Lists.newArrayList("a", "b")));
         System.out.println(jedisClient.scriptOps().eval("return redis.call('set',KEYS[1],'bar11')", Lists.newArrayList("myname"), Lists.newArrayList()));
-        System.out.println((String)jedisClient.hook(shardedJedis -> {
+        System.out.println((String)jedisClient.call(shardedJedis -> {
             return shardedJedis.getShard(ScriptOperations.JEDIS_SCRIPT_OPS).get("myname");
         }, null, "myname"));
     }
 
     @Test
     public void testHook() {
-        jedisClient.hook(shardedJedis -> {
+        jedisClient.call(shardedJedis -> {
             System.out.println(shardedJedis.set("aaa", "111"));
             System.out.println(shardedJedis.get("aaa"));
             return 1;
         }, true, 1, 2, 3);
 
-        jedisClient.call(shardedJedis -> {
+        jedisClient.hook(shardedJedis -> {
             System.out.println(shardedJedis.set("aaa", "111"));
             System.out.println(shardedJedis.get("aaa"));
         });

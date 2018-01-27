@@ -5,5 +5,5 @@ package code.ponfee.commons.jce;
  * @author fupf
  */
 public enum RSASignAlgorithm {
-    SHA1withRSA, MD5withRSA;
+    MD5withRSA, SHA1withRSA, SHA256withRSA, SHA512withRSA;
 }

@@ -9,7 +9,7 @@ import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
-import sun.security.pkcs.ContentInfo;
+import code.ponfee.commons.jce.pkcs.PKCS7Signature;
 import sun.security.pkcs.PKCS7;
 import sun.security.pkcs.SignerInfo;
 
@@ -31,7 +31,7 @@ public class CertPKCS7Verifier extends CertSignedVerifier {
      */
     public CertPKCS7Verifier(X509Certificate rootCert, X509CRL crl, 
                              byte[] pkcs7Data, byte[] info) {
-        this(rootCert, crl, getPkcs7(pkcs7Data), info);
+        this(rootCert, crl, PKCS7Signature.getPkcs7(pkcs7Data), info);
     }
 
     /**
@@ -41,7 +41,7 @@ public class CertPKCS7Verifier extends CertSignedVerifier {
      * @param pkcs7Data the pkcs7 byte array data, attached origin byte array data
      */
     public CertPKCS7Verifier(X509Certificate rootCert, X509CRL crl, byte[] pkcs7Data) {
-        this(rootCert, crl, getPkcs7(pkcs7Data));
+        this(rootCert, crl, PKCS7Signature.getPkcs7(pkcs7Data));
     }
 
     /**
@@ -51,7 +51,7 @@ public class CertPKCS7Verifier extends CertSignedVerifier {
      * @param pkcs7     the pkcs7
      */
     public CertPKCS7Verifier(X509Certificate rootCert, X509CRL crl, PKCS7 pkcs7) {
-        this(rootCert, crl, pkcs7, getPkcs7Content(pkcs7));
+        this(rootCert, crl, pkcs7, PKCS7Signature.getContent(pkcs7));
     }
 
     /**
@@ -105,42 +105,6 @@ public class CertPKCS7Verifier extends CertSignedVerifier {
             throw new SecurityException("获取证书主题异常", e);
         } catch (NoSuchAlgorithmException e) {
             throw new SecurityException("证书验签出错", e);
-        }
-    }
-
-    /**
-     * get the pkcs7 from byte array data
-     * @param pkcs7Data
-     * @return
-     */
-    public static PKCS7 getPkcs7(byte[] pkcs7Data) {
-        try {
-            return new PKCS7(pkcs7Data);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Invalid pacs7 data", e);
-        }
-    }
-    /**
-     * get the origin byte array data from pkcs7
-     * @param pkcs7
-     * @return
-     */
-    public static byte[] getPkcs7Content(PKCS7 pkcs7) {
-        try {
-            ContentInfo contentInfo = pkcs7.getContentInfo();
-            byte[] data;
-            if (contentInfo.getContent() == null) {
-                data = contentInfo.getData();
-            } else {
-                try {
-                    data = contentInfo.getContent().getOctetString();
-                } catch (Exception e) {
-                    data = contentInfo.getContent().getDataBytes();
-                }
-            }
-            return data;
-        } catch (IOException e) {
-            throw new SecurityException("get content from pkcs7 occur error", e);
         }
     }
 
