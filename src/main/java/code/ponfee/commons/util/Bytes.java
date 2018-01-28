@@ -122,6 +122,20 @@ public final class Bytes {
         return Charset.forName(charset).encode(buffer).array();
     }
 
+    public static byte[] fromInt(int value) {
+        return ByteBuffer.allocate(4).putInt(value).array();
+    }
+
+    public static int toInt(byte[] bytes) {
+        return toInt(bytes, 0);
+    }
+
+    public static int toInt(byte[] bytes, int fromIdx) {
+        ByteBuffer buffer = ByteBuffer.allocate(4);
+        buffer.put(bytes, fromIdx, 4).flip();
+        return buffer.getInt();
+    }
+
     /**
      * convert long number to byte array
      * @param number the long number

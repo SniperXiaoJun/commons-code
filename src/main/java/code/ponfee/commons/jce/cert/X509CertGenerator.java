@@ -1,19 +1,20 @@
 package code.ponfee.commons.jce.cert;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Vector;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
 import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.jce.RSASignAlgorithm;
+import code.ponfee.commons.util.ObjectUtils;
 import sun.security.pkcs10.PKCS10;
 import sun.security.util.ObjectIdentifier;
 import sun.security.x509.AlgorithmId;
@@ -54,7 +55,7 @@ public class X509CertGenerator {
      * @param notAfter
      * @return
      */
-    public static X509Certificate createRootCert(Integer sn, String issuer, RSASignAlgorithm sigAlg, PrivateKey privateKey, 
+    public static X509Certificate createRootCert(BigInteger sn, String issuer, RSASignAlgorithm sigAlg, PrivateKey privateKey, 
                                                  PublicKey publicKey, Date notBefore, Date notAfter) {
         PKCS10 pkcs10 = createPkcs10(issuer, privateKey, publicKey, sigAlg);
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(true));
@@ -81,7 +82,7 @@ public class X509CertGenerator {
      * @param notAfter
      * @return
      */
-    public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, Integer sn,
+    public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, BigInteger sn,
                                                     String subject, RSASignAlgorithm sigAlg, PrivateKey privateKey,
                                                     PublicKey publicKey, Date notBefore, Date notAfter) {
         PKCS10 pkcs10 = createPkcs10(subject, privateKey, publicKey, sigAlg);
@@ -104,7 +105,7 @@ public class X509CertGenerator {
      * @param notAfter
      * @return
      */
-    public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, Integer sn,
+    public static X509Certificate createSubjectCert(X509Certificate caCert, PrivateKey caKey, BigInteger sn,
                                                     PKCS10 pkcs10, Date notBefore, Date notAfter) {
         X509CertInfo certInfo = createCertInfo(sn, pkcs10, notBefore, notAfter, createExtensions(false));
         return caSign(caCert, caKey, certInfo);
@@ -188,10 +189,11 @@ public class X509CertGenerator {
      * @param extensions
      * @return
      */
-    private static X509CertInfo createCertInfo(Integer sn, PKCS10 pkcs10, Date notBefore, 
+    private static X509CertInfo createCertInfo(BigInteger sn, PKCS10 pkcs10, Date notBefore, 
                                                Date notAfter, CertificateExtensions extensions) {
         if (sn == null) {
-            sn = ThreadLocalRandom.current().nextInt() & Integer.MAX_VALUE;
+            //sn = ThreadLocalRandom.current().nextInt() & Integer.MAX_VALUE;
+            sn = new BigInteger(ObjectUtils.uuid());
         }
         try {
             // 验证pkcs10
@@ -236,7 +238,7 @@ public class X509CertGenerator {
             CertificateAlgorithmId algId = (CertificateAlgorithmId) caCertInfo.get(X509CertInfo.ALGORITHM_ID);
             caCertInfo.set(X509CertInfo.ISSUER, caCertInfo.get(X509CertInfo.SUBJECT));
             X509CertImpl signedCert = new X509CertImpl(caCertInfo);
-            signedCert.sign(caKey, algId.get("algorithm").getName()); // 签名
+            signedCert.sign(caKey, algId.get(CertificateAlgorithmId.ALGORITHM).getName()); // 签名
             return signedCert;
         } catch (Exception e) {
             throw new SecurityException(e);
