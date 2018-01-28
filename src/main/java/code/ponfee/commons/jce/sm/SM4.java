@@ -8,8 +8,6 @@ import org.bouncycastle.util.Arrays;
 
 import com.google.common.base.Preconditions;
 
-import code.ponfee.commons.util.SecureRandoms;
-
 /**
  * SM4对称加密算法实现
  * @author Ponfee
@@ -351,8 +349,8 @@ public final class SM4 {
 
     public static void main(String[] args) throws IOException {
         byte[] data = "12q34".getBytes();
-        byte[] key = SecureRandoms.nextBytes(16);
-        byte[] iv = SecureRandoms.nextBytes(16);
+        byte[] key = "1234567785465466".getBytes();
+        byte[] iv = "1a345677b546d4de".getBytes();
 
         byte[] encrypted = SM4.encrypt(key, data);
         System.out.println(new String(SM4.decrypt(key, encrypted)));

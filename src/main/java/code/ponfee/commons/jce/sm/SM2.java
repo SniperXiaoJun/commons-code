@@ -25,7 +25,8 @@ import code.ponfee.commons.util.Bytes;
  * @author Ponfee
  */
 @SuppressWarnings("deprecation")
-public class SM2 {
+public final class SM2 {
+
     public static final String PRIVATE_KEY = "private";
     public static final String PUBLIC_KEY = "public";
 
