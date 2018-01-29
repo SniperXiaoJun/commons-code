@@ -2,9 +2,11 @@ package code.ponfee.commons.util;
 
 import java.io.File;
 
+import code.ponfee.commons.io.Files;
+
 /**
  * maven标准的项目文件工具类
- * only use test case
+ * only use in test case
  * @author fupf
  */
 public class MavenProjects {
@@ -20,10 +22,26 @@ public class MavenProjects {
         return new File(path);
     }
 
+    public static byte[] getMainJavaFileAsByteArray(Class<?> clazz) {
+        return Files.toByteArray(MavenProjects.getMainJavaFile(clazz));
+    }
+
+    public static String getMainJavaFileAsLineString(Class<?> clazz) {
+        return Files.toString(MavenProjects.getMainJavaFile(clazz)).replaceAll("\r|\n|\\s+", "");
+    }
+
     public static File getTestJavaFile(Class<?> clazz) {
         String path = getProjectBaseDir() + "/src/test/java/";
         path += clazz.getCanonicalName().replace('.', '/') + ".java";
         return new File(path);
+    }
+
+    public static byte[] getTestJavaFileAsByteArray(Class<?> clazz) {
+        return Files.toByteArray(MavenProjects.getTestJavaFile(clazz));
+    }
+
+    public static String getTestJavaFileAsLineString(Class<?> clazz) {
+        return Files.toString(MavenProjects.getTestJavaFile(clazz)).replaceAll("\r|\n|\\s+", "");
     }
 
     public static String getMainJavaPath(String basePackage) {
@@ -46,16 +64,16 @@ public class MavenProjects {
         return getProjectBaseDir() + "/src/main/resources/";
     }
 
-    public static String getMainResourcesPath(String contextPath) {
-        return getMainResourcesPath() + contextPath;
+    public static String getMainResourcesPath(String followPath) {
+        return getMainResourcesPath() + followPath;
     }
 
     public static String getTestResourcesPath() {
         return getProjectBaseDir() + "/src/test/resources/";
     }
 
-    public static String getTestResourcesPath(String contextPath) {
-        return getTestResourcesPath() + contextPath;
+    public static String getTestResourcesPath(String followPath) {
+        return getTestResourcesPath() + followPath;
     }
 
     public static String getWebAppPath() {

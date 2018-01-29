@@ -50,7 +50,8 @@ public final class GenericUtils {
     }
 
     /**
-     * getActualTypeArgument(public class ResultPageMapNormalAdapter extends ResultPageMapAdapter<String, Object>, 0) -> String.class
+     * getActualTypeArgument(public class ResultPageMapNormalAdapter extends ResultPageMapAdapter<String, Integer>, 0) -> String.class
+     * getActualTypeArgument(public class ResultPageMapNormalAdapter extends ResultPageMapAdapter<String, Integer>, 1) -> Integer.class
      * 获取泛型的实际类型参数
      * @param clazz
      * @param genericArgsIndex

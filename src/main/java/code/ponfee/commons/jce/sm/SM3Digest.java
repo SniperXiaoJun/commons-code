@@ -1,6 +1,7 @@
 package code.ponfee.commons.jce.sm;
 
 import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.util.Arrays;
 
 /**
  * SM3摘要算法实现
@@ -17,34 +18,71 @@ public class SM3Digest {
     /** 缓冲区长度 */
     private static final int BUFFER_LENGTH = BLOCK_LENGTH * 1;
 
-    /** 缓冲区 */
-    private byte[] xBuf = new byte[BUFFER_LENGTH];
+    private byte[] xBuf = new byte[BUFFER_LENGTH]; // 缓冲区
+    private int xBufOffset; // 缓冲区偏移量
+    private byte[] V = Arrays.copyOf(SM3.IV, SM3.IV.length); // 初始向量
+    private int cntBlock = 0; // block数量
 
-    /** 缓冲区偏移量 */
-    private int xBufOff;
+    private SM3Digest() {}
 
-    /** 初始向量 */
-    private byte[] V = SM3.IV.clone();
-
-    private int cntBlock = 0;
-
-    public SM3Digest() {}
-
-    public SM3Digest(SM3Digest t) {
+    private SM3Digest(SM3Digest t) {
         System.arraycopy(t.xBuf, 0, this.xBuf, 0, t.xBuf.length);
-        this.xBufOff = t.xBufOff;
+        this.xBufOffset = t.xBufOffset;
         System.arraycopy(t.V, 0, this.V, 0, t.V.length);
+    }
+
+    public static SM3Digest getInstance() {
+        return new SM3Digest();
+    }
+
+    public static SM3Digest getInstance(SM3Digest t) {
+        return new SM3Digest(t);
+    }
+
+    public void update(byte[] in) {
+        this.update(in, 0, in.length);
+    }
+
+    /**
+     * 明文输入
+     * @param in 明文输入缓冲区
+     * @param inOffset 缓冲区偏移量
+     * @param len 明文长度
+     */
+    public void update(byte[] in, int inOffset, int len) {
+        int partLen = BUFFER_LENGTH - xBufOffset, 
+            dPos = inOffset;
+        if (partLen < len) {
+            System.arraycopy(in, dPos, xBuf, xBufOffset, partLen);
+            len -= partLen;
+            dPos += partLen;
+            doUpdate();
+            while (len > BUFFER_LENGTH) {
+                System.arraycopy(in, dPos, xBuf, 0, BUFFER_LENGTH);
+                len -= BUFFER_LENGTH;
+                dPos += BUFFER_LENGTH;
+                doUpdate();
+            }
+        }
+
+        System.arraycopy(in, dPos, xBuf, xBufOffset, len);
+        xBufOffset += len;
+    }
+
+    public void update(byte in) {
+        byte[] buffer = new byte[] { in };
+        update(buffer, 0, 1);
     }
 
     /**
      * SM3结果输出
-     * @param out 保存SM3结构的缓冲区
-     * @param outOff 缓冲区偏移量
+     * @param out       保存SM3结构的缓冲区
+     * @param outOffset 缓冲区偏移量
      * @return
      */
-    public void doFinal(byte[] out, int outOff) {
+    public void doFinal(byte[] out, int outOffset) {
         byte[] tmp = doFinal();
-        System.arraycopy(tmp, 0, out, 0, tmp.length);
+        System.arraycopy(tmp, 0, out, outOffset, tmp.length);
     }
 
     public byte[] doFinal(byte[] in) {
@@ -54,7 +92,7 @@ public class SM3Digest {
 
     public byte[] doFinal() {
         byte[] B = new byte[BLOCK_LENGTH];
-        byte[] buffer = new byte[xBufOff];
+        byte[] buffer = new byte[xBufOffset];
         System.arraycopy(xBuf, 0, buffer, 0, buffer.length);
         byte[] tmp = SM3.padding(buffer, cntBlock);
         for (int i = 0; i < tmp.length; i += BLOCK_LENGTH) {
@@ -65,45 +103,9 @@ public class SM3Digest {
     }
 
     public void reset() {
-        xBufOff = 0;
+        xBufOffset = 0;
         cntBlock = 0;
         V = SM3.IV.clone();
-    }
-
-    public void update(byte[] in) {
-        this.update(in, 0, in.length);
-    }
-
-    /**
-     * 明文输入
-     * @param in 明文输入缓冲区
-     * @param inOff 缓冲区偏移量
-     * @param len 明文长度
-     */
-    public void update(byte[] in, int inOff, int len) {
-        int partLen = BUFFER_LENGTH - xBufOff;
-        int inputLen = len;
-        int dPos = inOff;
-        if (partLen < inputLen) {
-            System.arraycopy(in, dPos, xBuf, xBufOff, partLen);
-            inputLen -= partLen;
-            dPos += partLen;
-            doUpdate();
-            while (inputLen > BUFFER_LENGTH) {
-                System.arraycopy(in, dPos, xBuf, 0, BUFFER_LENGTH);
-                inputLen -= BUFFER_LENGTH;
-                dPos += BUFFER_LENGTH;
-                doUpdate();
-            }
-        }
-
-        System.arraycopy(in, dPos, xBuf, xBufOff, inputLen);
-        xBufOff += inputLen;
-    }
-
-    public void update(byte in) {
-        byte[] buffer = new byte[] { in };
-        update(buffer, 0, 1);
     }
 
     public int getDigestSize() {
@@ -117,19 +119,15 @@ public class SM3Digest {
         sm3.update(msg1, 0, msg1.length);
         sm3.doFinal(md, 0);
 
-        char c = string2char(inputStr);
-        String finalStr = convertKey(Hex.encodeHexString(md), c);
+        String finalStr = convertKey(Hex.encodeHexString(md), 
+                                     string2char(inputStr));
 
-        String hahaStr = "";
         char[] arr = finalStr.toCharArray();
+        StringBuilder builder = new StringBuilder(arr.length / 2);
         for (int i = 0; i < arr.length / 2; i++) {
-            int integer1 = arr[i];
-            int integer2 = arr[arr.length - 1 - i];
-            int integer = (integer1 + integer2) % 95 + 32;
-            char ch = (char) integer;
-            hahaStr += ch;
+            builder.append((char) ((arr[i] + arr[arr.length - 1 - i]) % 95 + 32));
         }
-        return hahaStr.substring(4, 20);
+        return builder.substring(4, 20);
     }
 
     private void doUpdate() {
@@ -138,7 +136,7 @@ public class SM3Digest {
             System.arraycopy(xBuf, i, B, 0, B.length);
             doHash(B);
         }
-        xBufOff = 0;
+        xBufOffset = 0;
     }
 
     private void doHash(byte[] B) {
@@ -152,8 +150,7 @@ public class SM3Digest {
         for (int i = 0; i < string.length(); i++) {
             n += string.charAt(i);
         }
-        n = n % 95 + 32;
-        return (char) n;
+        return (char) (n % 95 + 32);
     }
 
     private static String convertKey(String inStr, char c) {
@@ -161,18 +158,17 @@ public class SM3Digest {
         for (int i = 0; i < a.length; i++) {
             a[i] = (char) (a[i] ^ c);
         }
-        String s = new String(a);
-        return s;
+        return new String(a);
     }
 
     private static class SM3 {
         static final byte[] IV = {
-            0x73, (byte) 0x80, 0x16, 0x6f, 0x49,
-            0x14, (byte) 0xb2, (byte) 0xb9, 0x17, 0x24, 0x42, (byte) 0xd7,
-            (byte) 0xda, (byte) 0x8a, 0x06, 0x00, (byte) 0xa9, 0x6f, 0x30,
-            (byte) 0xbc, (byte) 0x16, 0x31, 0x38, (byte) 0xaa, (byte) 0xe3,
-            (byte) 0x8d, (byte) 0xee, 0x4d, (byte) 0xb0, (byte) 0xfb, 0x0e,
-            0x4e
+            0x73, (byte) 0x80, 0x16, 0x6f, 0x49, 0x14, 
+            (byte) 0xb2, (byte) 0xb9, 0x17, 0x24, 0x42, (byte) 0xd7,
+            (byte) 0xda, (byte) 0x8a, 0x06, 0x00, (byte) 0xa9, 0x6f, 
+            0x30, (byte) 0xbc, (byte) 0x16, 0x31, 0x38, (byte) 0xaa, 
+            (byte) 0xe3, (byte) 0x8d, (byte) 0xee, 0x4d, (byte) 0xb0, 
+            (byte) 0xfb, 0x0e, 0x4e
         };
 
         static final int[] T_J = new int[64];
@@ -187,10 +183,7 @@ public class SM3Digest {
         }
 
         static byte[] cf(byte[] V, byte[] B) {
-            int[] v, b;
-            v = convert(V);
-            b = convert(B);
-            return convert(cf(v, b));
+            return convert(cf(convert(V), convert(B)));
         }
 
         /**
@@ -240,20 +233,12 @@ public class SM3Digest {
         }
 
         static int[] cf(int[] V, int[] B) {
-            int a, b, c, d, e, f, g, h;
-            int ss1, ss2, tt1, tt2;
-            a = V[0];
-            b = V[1];
-            c = V[2];
-            d = V[3];
-            e = V[4];
-            f = V[5];
-            g = V[6];
-            h = V[7];
+            int a = V[0], b = V[1], c = V[2], d = V[3],
+                e = V[4], f = V[5], g = V[6], h = V[7];
 
+            int ss1, ss2, tt1, tt2;
             int[][] arr = expand(B);
-            int[] w = arr[0];
-            int[] w1 = arr[1];
+            int[] w = arr[0], w1 = arr[1];
 
             for (int j = 0; j < 64; j++) {
                 ss1 = (bitCycleLeft(a, 12) + e + bitCycleLeft(T_J[j], j));
@@ -292,16 +277,18 @@ public class SM3Digest {
             }
 
             for (int i = 16; i < 68; i++) {
-                W[i] = P1(W[i - 16] ^ W[i - 9] ^ bitCycleLeft(W[i - 3], 15))
-                    ^ bitCycleLeft(W[i - 13], 7) ^ W[i - 6];
+                W[i] = P1(W[i - 16] 
+                     ^ W[i - 9] 
+                     ^ bitCycleLeft(W[i - 3], 15))
+                     ^ bitCycleLeft(W[i - 13], 7) 
+                     ^ W[i - 6];
             }
 
             for (int i = 0; i < 64; i++) {
                 W1[i] = W[i] ^ W[i + 4];
             }
 
-            int arr[][] = new int[][] { W, W1 };
-            return arr;
+            return new int[][] { W, W1 };
         }
 
         static byte[] bigEndianIntToByte(int num) {
@@ -330,23 +317,19 @@ public class SM3Digest {
 
         // 逻辑位运算函数
         static int FF1j(int X, int Y, int Z) {
-            int tmp = X ^ Y ^ Z;
-            return tmp;
+            return X ^ Y ^ Z;
         }
 
         static int FF2j(int X, int Y, int Z) {
-            int tmp = ((X & Y) | (X & Z) | (Y & Z));
-            return tmp;
+            return ((X & Y) | (X & Z) | (Y & Z));
         }
 
         static int GG1j(int X, int Y, int Z) {
-            int tmp = X ^ Y ^ Z;
-            return tmp;
+            return X ^ Y ^ Z;
         }
 
         static int GG2j(int X, int Y, int Z) {
-            int tmp = (X & Y) | (~X & Z);
-            return tmp;
+            return (X & Y) | (~X & Z);
         }
 
         static int P0(int X) {
@@ -354,13 +337,11 @@ public class SM3Digest {
             y = bitCycleLeft(X, 9);
             int z = rotateLeft(X, 17);
             z = bitCycleLeft(X, 17);
-            int t = X ^ y ^ z;
-            return t;
+            return X ^ y ^ z;
         }
 
         static int P1(int X) {
-            int t = X ^ bitCycleLeft(X, 15) ^ bitCycleLeft(X, 23);
-            return t;
+            return X ^ bitCycleLeft(X, 15) ^ bitCycleLeft(X, 23);
         }
 
         /**
@@ -389,11 +370,9 @@ public class SM3Digest {
             if (byteLen > 0) {
                 tmp = byteCycleLeft(tmp, byteLen);
             }
-
             if (len > 0) {
                 tmp = bitSmall8CycleLeft(tmp, len);
             }
-
             return bigEndianByteToInt(tmp);
         }
 
@@ -406,7 +385,6 @@ public class SM3Digest {
                 t3 = (byte) (t1 | t2);
                 tmp[i] = (byte) t3;
             }
-
             return tmp;
         }
 
@@ -437,8 +415,7 @@ public class SM3Digest {
          * @return 一个整型数据
          */
         static int byteArrayToInt(byte[] bytes) {
-            int num = 0;
-            int temp;
+            int num = 0, temp;
             temp = (0x000000ff & (bytes[0])) << 0;
             num = num | temp;
             temp = (0x000000ff & (bytes[1])) << 8;
@@ -446,8 +423,7 @@ public class SM3Digest {
             temp = (0x000000ff & (bytes[2])) << 16;
             num = num | temp;
             temp = (0x000000ff & (bytes[3])) << 24;
-            num = num | temp;
-            return num;
+            return num | temp;
         }
 
         /**
@@ -460,16 +436,16 @@ public class SM3Digest {
             for (int i = 0; i < 8; i++) {
                 bytes[i] = (byte) (0xff & (num >> (i * 8)));
             }
-
             return bytes;
         }
     }
 
     public static void main(String[] args) {
-        byte[] hash = new SM3Digest().doFinal("ererfeiisgod".getBytes());
+        byte[] hash = SM3Digest.getInstance().doFinal("0123456789".getBytes());
         System.out.println(Hex.encodeHexString(hash));
 
-        hash = new SM3Digest().doFinal("ererfeiisgod".getBytes());
+        hash = SM3Digest.getInstance().doFinal("0123456789".getBytes());
         System.out.println(Hex.encodeHexString(hash));
+        System.out.println(SM3Digest.getInstance().getKey("0123456789"));
     }
 }

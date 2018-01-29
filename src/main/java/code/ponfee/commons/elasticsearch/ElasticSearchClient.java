@@ -415,7 +415,7 @@ public class ElasticSearchClient implements DisposableBean {
      * @param list
      * @return result
      */
-    public Result<Void> addDocss(String index, String type, List<Map<String, Object>> list) {
+    public Result<Void> addDocsSpecId(String index, String type, List<Map<String, Object>> list) {
         try {
             BulkRequestBuilder bulkRequest = client.prepareBulk();
             for (Map<String, Object> map : list) {

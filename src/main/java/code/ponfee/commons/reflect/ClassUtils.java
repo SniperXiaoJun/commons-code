@@ -86,7 +86,9 @@ public final class ClassUtils {
      * Method m = ObjectUtils.class.getMethod("map2array", List.class, String[].class);
      * getMethodSignature(m) -> public static java.util.List code.ponfee.commons.util.ObjectUtils.map2array(java.util.List data, java.lang.String[] fields)
      * @param method
-     * @return
+     * @return the method string
+     * @see java.lang.reflect.Method#toString()
+     * @see java.lang.reflect.Method#toGenericString()
      */
     public static String getMethodSignature(final Method method) {
         String[] names = getMethodParamNames(method);

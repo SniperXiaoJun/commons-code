@@ -178,7 +178,8 @@ public class TransitPage<T> {
 
     @SuppressWarnings("unchecked")
     public static <T> TransitPage<T> transform(Page<T> page, Class<?> type) {
-        return transform(page, page.getRows().toArray((T[]) Array.newInstance(type, page.getRows().size())));
+        T[] array = (T[]) Array.newInstance(type, page.getRows().size());
+        return transform(page, page.getRows().toArray(array));
     }
 
     public static <T> TransitPage<T> transform(Page<?> page, T[] t) {

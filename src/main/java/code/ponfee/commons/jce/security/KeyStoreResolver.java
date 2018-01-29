@@ -179,11 +179,10 @@ public class KeyStoreResolver {
      */
     public PublicKey getPublicKey(String alias) {
         try {
-            /*if (!keyStore.isCertificateEntry(alias)) {
-                throw new SecurityException(alias + " is not certificate entry.");
-            }*/
-            Certificate cert = keyStore.getCertificate(alias);
-            return cert.getPublicKey();
+            if (!keyStore.isCertificateEntry(alias)) {
+                throw new NullPointerException(alias + " is not certificate entry.");
+            }
+            return keyStore.getCertificate(alias).getPublicKey();
         } catch (KeyStoreException e) {
             throw new SecurityException(e);
         }
@@ -235,8 +234,8 @@ public class KeyStoreResolver {
             X509Certificate[] x509Certchain = new X509Certificate[certs.length];
             for (int i = 0; i < certs.length; i++) {
                 if (!(certs[i] instanceof X509Certificate)) {
-                    throw new SecurityException("certificate[" + i + "] in chain '" 
-                                              + alias + "' is not a X509Certificate.");
+                    throw new SecurityException("cert[" + i + "] in chain '" + alias 
+                                              + "' is not a X509Certificate.");
                 }
                 x509Certchain[i] = (X509Certificate) certs[i];
             }

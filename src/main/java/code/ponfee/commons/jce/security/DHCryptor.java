@@ -5,7 +5,6 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.Cipher;
@@ -20,10 +19,12 @@ import com.google.common.collect.ImmutableMap;
 
 /**
  * Diffie-Hellman加解密组件（一般用于密钥交换）
+ * Key-Agreement
  * @author fupf
  */
 public abstract class DHCryptor {
-    private static final String ALGORITHM = "DH";
+
+    private static final String ALGORITHM = "DH"; // DH算法名称
     private static final String SECRET_ALGORITHM = "DESede"; // 使用3DES对称加密
     private static final String PUBLIC_KEY = "DHPublicKey";
     private static final String PRIVATE_KEY = "DHPrivateKey";
@@ -42,7 +43,8 @@ public abstract class DHCryptor {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
         keyPairGenerator.initialize(keySize);
         KeyPair pair = keyPairGenerator.generateKeyPair();
-        return ImmutableMap.of(PUBLIC_KEY, (DHKey) pair.getPublic(), PRIVATE_KEY, (DHKey) pair.getPrivate());
+        return ImmutableMap.of(PUBLIC_KEY, (DHKey) pair.getPublic(), 
+                               PRIVATE_KEY, (DHKey) pair.getPrivate());
     }
 
     /**
@@ -71,10 +73,46 @@ public abstract class DHCryptor {
         keyPairGen.initialize(dhParamSpec);
         KeyPair keyPair = keyPairGen.generateKeyPair();
 
-        Map<String, DHKey> keyMap = new HashMap<>(2);
-        keyMap.put(PUBLIC_KEY, (DHKey) keyPair.getPublic()); // 乙方公钥
-        keyMap.put(PRIVATE_KEY, (DHKey) keyPair.getPrivate()); // 乙方私钥
-        return keyMap;
+        return ImmutableMap.of(PUBLIC_KEY, (DHKey) keyPair.getPublic(),  // 乙方公钥
+                               PRIVATE_KEY, (DHKey) keyPair.getPrivate());  // 乙方私钥
+    }
+
+    /**
+     * DHPublicKey convert to byte array
+     * @param key the DHPublicKey
+     * @return byte array encoded of DHPublicKey
+     */
+    public static byte[] toByteArray(DHPublicKey key) {
+        return key.getEncoded();
+    }
+
+    /**
+     * DHPrivateKey convert to byte array
+     * @param key the DHPrivateKey
+     * @return byte array encoded of DHPrivateKey
+     */
+    public static byte[] toByteArray(DHPrivateKey key) {
+        return key.getEncoded();
+    }
+
+    /**
+     * 取得私钥
+     * @param keyMap
+     * @return
+     * @throws Exception
+     */
+    public static DHPrivateKey getPrivateKey(Map<String, DHKey> keyMap) throws Exception {
+        return (DHPrivateKey) keyMap.get(PRIVATE_KEY);
+    }
+
+    /**
+     * 取得公钥
+     * @param keyMap
+     * @return
+     * @throws Exception
+     */
+    public static DHPublicKey getPublicKey(Map<String, DHKey> keyMap) throws Exception {
+        return (DHPublicKey) keyMap.get(PUBLIC_KEY);
     }
 
     /**
@@ -134,26 +172,6 @@ public abstract class DHCryptor {
         keyAgree.init(bPriKey);
         keyAgree.doPhase(aPubKey, true);
         return keyAgree.generateSecret(SECRET_ALGORITHM); // 生成本地密钥
-    }
-
-    /**
-     * 取得私钥
-     * @param keyMap
-     * @return
-     * @throws Exception
-     */
-    public static DHPrivateKey getPrivateKey(Map<String, DHKey> keyMap) throws Exception {
-        return (DHPrivateKey) keyMap.get(PRIVATE_KEY);
-    }
-
-    /**
-     * 取得公钥
-     * @param keyMap
-     * @return
-     * @throws Exception
-     */
-    public static DHPublicKey getPublicKey(Map<String, DHKey> keyMap) throws Exception {
-        return (DHPublicKey) keyMap.get(PUBLIC_KEY);
     }
 
     public static void main(String[] args) throws Exception {
