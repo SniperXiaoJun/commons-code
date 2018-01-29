@@ -31,16 +31,17 @@ public final class RSACryptor {
 
     static final String ALG_RSA = "RSA";
 
-    public static RSAKeyPair genRsaKeyPair() {
-        return genRSAKeyPair(1024);
+    public static RSAKeyPair generateKeyPair() {
+        return generateKeyPair(1024);
     }
 
     /**
      * 密钥生成
-     * @param keySize 密钥长度（位）
-     * @return
+     * @param keySize   the RSA key size, optional is 512 or 1028
+     *                  or 2048 or 4096
+     * @return RSAKeyPair
      */
-    public static RSAKeyPair genRSAKeyPair(int keySize) {
+    public static RSAKeyPair generateKeyPair(int keySize) {
         KeyPairGenerator keyPairGen;
         try {
             keyPairGen = KeyPairGenerator.getInstance(ALG_RSA);
@@ -49,22 +50,13 @@ public final class RSACryptor {
         }
         keyPairGen.initialize(keySize);
         KeyPair pair = keyPairGen.generateKeyPair();
-        return new RSAKeyPair((RSAPrivateKey) pair.getPrivate(), (RSAPublicKey) pair.getPublic());
+        return new RSAKeyPair((RSAPrivateKey) pair.getPrivate(), 
+                              (RSAPublicKey) pair.getPublic());
     }
 
     // ---------------------------------------sign/verify---------------------------------------
     /**
-     * SHA1签名
-     * @param data
-     * @param privateKey
-     * @return
-     */
-    public static byte[] signSha1(byte[] data, RSAPrivateKey privateKey) {
-        return sign(data, privateKey, RSASignAlgorithm.SHA1withRSA);
-    }
-
-    /**
-     * MD5签名
+     * MD5 sign
      * @param data
      * @param privateKey
      * @return
@@ -74,18 +66,27 @@ public final class RSACryptor {
     }
 
     /**
-     * SHA1
+     * SHA1 sign
      * @param data
-     * @param publicKey
-     * @param signed
+     * @param privateKey
      * @return
      */
-    public static boolean verifySha1(byte[] data, RSAPublicKey publicKey, byte[] signed) {
-        return verify(data, publicKey, signed, RSASignAlgorithm.SHA1withRSA);
+    public static byte[] signSha1(byte[] data, RSAPrivateKey privateKey) {
+        return sign(data, privateKey, RSASignAlgorithm.SHA1withRSA);
     }
 
     /**
-     * MD5验签
+     * SHA256 sign
+     * @param data
+     * @param privateKey
+     * @return
+     */
+    public static byte[] signSha256(byte[] data, RSAPrivateKey privateKey) {
+        return sign(data, privateKey, RSASignAlgorithm.SHA256withRSA);
+    }
+
+    /**
+     * verify MD5 signature
      * @param data
      * @param publicKey
      * @param signed
@@ -96,14 +97,37 @@ public final class RSACryptor {
     }
 
     /**
+     * verify SHA1 signature
+     * @param data
+     * @param publicKey
+     * @param signed
+     * @return
+     */
+    public static boolean verifySha1(byte[] data, RSAPublicKey publicKey, byte[] signed) {
+        return verify(data, publicKey, signed, RSASignAlgorithm.SHA1withRSA);
+    }
+
+    /**
+     * verify SHA256 signature
+     * @param data
+     * @param publicKey
+     * @param signed
+     * @return
+     */
+    public static boolean verifySha256(byte[] data, RSAPublicKey publicKey, byte[] signed) {
+        return verify(data, publicKey, signed, RSASignAlgorithm.SHA256withRSA);
+    }
+
+    /**
      * <pre>
      *   1、可以通过修改生成密钥的长度来调整密文长度
      *   2、不管明文长度是多少，RSA生成的密文长度总是固定的
      *   3、明文长度不能超过密钥长度：
-     *     1）sun jdk默认的RSA加密实现不允许明文长度超过密钥长度减去11字节（byte）：比如1024位（bit）的密钥，则待加密的明文最长为1024/8-11=117（byte）
+     *     1）SUN JDK默认的RSA加密实现不允许明文长度超过密钥长度减去11字节（byte）：比如1024位（bit）的密钥，
+     *        则待加密的明文最长为1024/8-11=117（byte）
      *     2）BouncyCastle提供的加密算法能够支持到的RSA明文长度最长为密钥长度
-     *   4、每次生成的密文都不一致证明加密算法安全：这是因为在加密前使用RSA/None/PKCS1Padding对明文信息进行了随机数填充
-     *     为了防止已知明文攻击，随机长度的填充来防止攻击者知道明文的长度。
+     *   4、每次生成的密文都不一致证明加密算法安全：这是因为在加密前使用RSA/None/PKCS1Padding对明文信息进行了
+     *      随机数填充，为了防止已知明文攻击，随机长度的填充来防止攻击者知道明文的长度。
      *   5、javax.crypto.Cipher是线程不安全的
      * </pre>
      * 
@@ -116,7 +140,8 @@ public final class RSACryptor {
         return docrypt(data, key, Cipher.ENCRYPT_MODE);
     }
 
-    public static <T extends Key & RSAKey> void encrypt(InputStream input, T key, OutputStream out) {
+    public static <T extends Key & RSAKey> void encrypt(InputStream input, T key, 
+                                                        OutputStream out) {
         docrypt(input, key, out, Cipher.ENCRYPT_MODE);
     }
 
@@ -130,7 +155,8 @@ public final class RSACryptor {
         return docrypt(encrypted, key, Cipher.DECRYPT_MODE);
     }
 
-    public static <T extends Key & RSAKey> void decrypt(InputStream input, T key, OutputStream out) {
+    public static <T extends Key & RSAKey> void decrypt(InputStream input, T key, 
+                                                        OutputStream out) {
         docrypt(input, key, out, Cipher.DECRYPT_MODE);
     }
 

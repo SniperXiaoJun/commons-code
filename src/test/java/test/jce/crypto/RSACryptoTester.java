@@ -1,6 +1,6 @@
 package test.jce.crypto;
 
-import static code.ponfee.commons.jce.security.RSACryptor.genRSAKeyPair;
+import static code.ponfee.commons.jce.security.RSACryptor.generateKeyPair;
 
 import java.io.IOException;
 import java.security.interfaces.RSAPrivateKey;
@@ -25,7 +25,7 @@ public class RSACryptoTester {
 
     @Test
     public void test1() throws Exception {
-        RSAKeyPair keyPair = genRSAKeyPair(1024);
+        RSAKeyPair keyPair = generateKeyPair(4096);
         
         // 签名解密－－－－
         byte [] bytes = "123456".getBytes();

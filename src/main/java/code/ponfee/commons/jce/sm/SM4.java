@@ -73,7 +73,8 @@ public final class SM4 {
         0xc0c7ced5, 0xdce3eaf1, 0xf8ff060d, 0x141b2229,
         0x30373e45, 0x4c535a61, 0x686f767d, 0x848b9299,
         0xa0a7aeb5, 0xbcc3cad1, 0xd8dfe6ed, 0xf4fb0209,
-        0x10171e25, 0x2c333a41, 0x484f565d, 0x646b7279 };
+        0x10171e25, 0x2c333a41, 0x484f565d, 0x646b7279 
+    };
 
     public static byte[] encrypt( byte[] key, byte[] input) {
         return crypt(MODE_ENCRYPT, true, key, input);
@@ -110,7 +111,7 @@ public final class SM4 {
     }
 
     /**
-     * 不带向量的加密
+     * 不带向量的加密（ECB模式）
      * @param ctx
      * @param mode
      * @param key
@@ -119,19 +120,18 @@ public final class SM4 {
      */
     private static byte[] crypt(int mode, boolean isPadding, 
                                 byte[] key, byte[] input) {
-        Preconditions.checkArgument(input != null, "input is null!");
+        Preconditions.checkArgument(input != null, "input cannot not null.");
 
         long[] sk = setKey(mode, key);
 
         if (isPadding && (mode == MODE_ENCRYPT)) {
             input = padding(input, MODE_ENCRYPT);
         }
-        int length = input.length;
         ByteArrayInputStream bins = new ByteArrayInputStream(input);
         ByteArrayOutputStream bous = new ByteArrayOutputStream();
         try {
-            for (; length > 0; length -= 16) {
-                byte[] in = new byte[16];
+            for (int length = input.length; length > 0; length -= 16) {
+                byte[]  in = new byte[16];
                 byte[] out = new byte[16];
                 bins.read(in);
                 oneRound(sk, in, out);
@@ -149,7 +149,7 @@ public final class SM4 {
     }
 
     /**
-     * 带向量的加密
+     * 带向量的加密（CBC模式）
      * @param ctx
      * @param mode
      * @param key
@@ -159,16 +159,19 @@ public final class SM4 {
      */
     private static byte[] crypt(int mode, boolean isPadding, byte[] key, 
                                 byte[] iv, byte[] input) {
-        Preconditions.checkArgument(input != null, "input is null!");
+        Preconditions.checkArgument(input != null, "input cannot not null.");
+        Preconditions.checkArgument(iv != null && iv.length == 16, 
+                                    "iv must be 16 byte array.");
+
         long[] sk = setKey(mode, key);
         iv = Arrays.copyOf(iv, iv.length);
         if (isPadding && mode == MODE_ENCRYPT) {
             input = padding(input, MODE_ENCRYPT);
         }
 
-        int i = 0, length = input.length;
-        ByteArrayInputStream bins = new ByteArrayInputStream(input);
+        ByteArrayInputStream bins  = new ByteArrayInputStream(input);
         ByteArrayOutputStream bous = new ByteArrayOutputStream();
+        int i = 0, length = input.length;
         try {
             if (mode == MODE_ENCRYPT) {
                 for (; length > 0; length -= 16) {
@@ -187,8 +190,8 @@ public final class SM4 {
             } else {
                 byte[] temp = new byte[16];
                 for (; length > 0; length -= 16) {
-                    byte[] in = new byte[16];
-                    byte[] out = new byte[16];
+                    byte[] in   = new byte[16];
+                    byte[] out  = new byte[16];
                     byte[] out1 = new byte[16];
 
                     bins.read(in);
@@ -214,13 +217,13 @@ public final class SM4 {
 
     private static long getUlongBe(byte[] b, int i) {
         return (long) (b[i] & 0xff) << 24
-            | (long) ((b[i + 1] & 0xff) << 16)
-            | (long) ((b[i + 2] & 0xff) << 8)
-            | (long) (b[i + 3] & 0xff) & 0xffffffffL;
+             | (long) ((b[i + 1] & 0xff) << 16)
+             | (long) ((b[i + 2] & 0xff) << 8)
+             | (long) (b[i + 3] & 0xff) & 0xffffffffL;
     }
 
     private static void putUlongBe(long n, byte[] b, int i) {
-        b[i] = (byte) (int) (0xFF & n >> 24);
+        b[i]     = (byte) (int) (0xFF & n >> 24);
         b[i + 1] = (byte) (int) (0xFF & n >> 16);
         b[i + 2] = (byte) (int) (0xFF & n >> 8);
         b[i + 3] = (byte) (int) (0xFF & n);
@@ -241,14 +244,11 @@ public final class SM4 {
     }
 
     private static byte sm4Sbox(byte inch) {
-        int i = inch & 0xFF;
-        byte retVal = SBOX_TABLE[i];
-        return retVal;
+        return SBOX_TABLE[inch & 0xFF];
     }
 
     private static long sm4Lt(long ka) {
         long bb = 0L;
-        long c = 0L;
         byte[] a = new byte[4];
         byte[] b = new byte[4];
         putUlongBe(ka, a, 0);
@@ -257,8 +257,11 @@ public final class SM4 {
         b[2] = sm4Sbox(a[2]);
         b[3] = sm4Sbox(a[3]);
         bb = getUlongBe(b, 0);
-        c = bb ^ rotl(bb, 2) ^ rotl(bb, 10) ^ rotl(bb, 18) ^ rotl(bb, 24);
-        return c;
+        return bb 
+             ^ rotl(bb, 2) 
+             ^ rotl(bb, 10) 
+             ^ rotl(bb, 18) 
+             ^ rotl(bb, 24);
     }
 
     private static long sm4F(long x0, long x1, long x2, long x3, long rk) {
@@ -266,8 +269,6 @@ public final class SM4 {
     }
 
     private static long sm4CalciRK(long ka) {
-        long bb = 0L;
-        long rk = 0L;
         byte[] a = new byte[4];
         byte[] b = new byte[4];
         putUlongBe(ka, a, 0);
@@ -275,19 +276,18 @@ public final class SM4 {
         b[1] = sm4Sbox(a[1]);
         b[2] = sm4Sbox(a[2]);
         b[3] = sm4Sbox(a[3]);
-        bb = getUlongBe(b, 0);
-        rk = bb ^ rotl(bb, 13) ^ rotl(bb, 23);
-        return rk;
+        long bb = getUlongBe(b, 0);
+        return bb ^ rotl(bb, 13) ^ rotl(bb, 23);
     }
 
     private static long[] setKey(int mode, byte[] key) {
-        Preconditions.checkArgument(key != null && key.length == 16, "key error!");
-        key = Arrays.copyOf(key, key.length);
+        Preconditions.checkArgument(key != null && key.length == 16, 
+                                    "Key must be 16 byte array");
 
+        key = Arrays.copyOf(key, key.length);
         long[] MK = new long[4];
         long[] k = new long[36];
         long[] SK = new long[32];
-        int i = 0;
         MK[0] = getUlongBe(key, 0);
         MK[1] = getUlongBe(key, 4);
         MK[2] = getUlongBe(key, 8);
@@ -296,8 +296,13 @@ public final class SM4 {
         k[1] = MK[1] ^ (long) FK[1];
         k[2] = MK[2] ^ (long) FK[2];
         k[3] = MK[3] ^ (long) FK[3];
+        int i = 0;
         for (; i < 32; i++) {
-            k[(i + 4)] = (k[i] ^ sm4CalciRK(k[(i + 1)] ^ k[(i + 2)] ^ k[(i + 3)] ^ (long) CK[i]));
+            k[(i + 4)] = k[i] 
+                       ^ sm4CalciRK(k[(i + 1)] 
+                       ^ k[(i + 2)] 
+                       ^ k[(i + 3)] 
+                       ^ (long) CK[i]);
             SK[i] = k[(i + 4)];
         }
 
@@ -310,15 +315,17 @@ public final class SM4 {
     }
 
     private static void oneRound(long[] sk, byte[] input, byte[] output) {
-        int i = 0;
         long[] ulbuf = new long[36];
         ulbuf[0] = getUlongBe(input, 0);
         ulbuf[1] = getUlongBe(input, 4);
         ulbuf[2] = getUlongBe(input, 8);
         ulbuf[3] = getUlongBe(input, 12);
-        while (i < 32) {
-            ulbuf[(i + 4)] = sm4F(ulbuf[i], ulbuf[(i + 1)], ulbuf[(i + 2)], ulbuf[(i + 3)], sk[i]);
-            i++;
+        for (int i = 0; i < 32; i++) {
+            ulbuf[(i + 4)] = sm4F(ulbuf[i], 
+                                  ulbuf[(i + 1)], 
+                                  ulbuf[(i + 2)], 
+                                  ulbuf[(i + 3)], 
+                                  sk[i]);
         }
         putUlongBe(ulbuf[35], output, 0);
         putUlongBe(ulbuf[34], output, 4);
@@ -331,31 +338,43 @@ public final class SM4 {
             return null;
         }
 
-        byte[] ret = (byte[]) null;
+        byte[] result;
         if (mode == MODE_ENCRYPT) {
             int p = 16 - input.length % 16;
-            ret = new byte[input.length + p];
-            System.arraycopy(input, 0, ret, 0, input.length);
+            result = new byte[input.length + p];
+            System.arraycopy(input, 0, result, 0, input.length);
             for (int i = 0; i < p; i++) {
-                ret[input.length + i] = (byte) p;
+                result[input.length + i] = (byte) p;
             }
         } else {
             int p = input[input.length - 1];
-            ret = new byte[input.length - p];
-            System.arraycopy(input, 0, ret, 0, input.length - p);
+            result = new byte[input.length - p];
+            System.arraycopy(input, 0, result, 0, input.length - p);
         }
-        return ret;
+        return result;
     }
 
     public static void main(String[] args) throws IOException {
-        byte[] data = "12q34".getBytes();
+        //byte[] data = Files.toString(MavenProjects.getMainJavaFile(SM4.class)).replaceAll("\r|\n", "").getBytes();
+        byte[] data = "1234".getBytes();
         byte[] key = "1234567785465466".getBytes();
         byte[] iv = "1a345677b546d4de".getBytes();
 
         byte[] encrypted = SM4.encrypt(key, data);
+        System.out.println(data.length + "-->" + encrypted.length);
         System.out.println(new String(SM4.decrypt(key, encrypted)));
 
         encrypted = SM4.encrypt(key, iv, data);
+        System.out.println(data.length + "-->" + encrypted.length);
         System.out.println(new String(SM4.decrypt(key, iv, encrypted)));
+
+        encrypted = SM4.encrypt(false, key, data);
+        System.out.println(data.length + "-->" + encrypted.length);
+        System.out.println(new String(SM4.decrypt(false, key, encrypted)));
+
+        encrypted = SM4.encrypt(false, key, iv, data);
+        System.out.println(data.length + "-->" + encrypted.length);
+        System.out.println(new String(SM4.decrypt(false, key, iv, encrypted)));
     }
+
 }

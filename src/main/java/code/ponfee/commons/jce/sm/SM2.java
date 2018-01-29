@@ -50,7 +50,7 @@ public final class SM2 {
     private final ECCurve curve;
     private final ECKeyPairGenerator keyPairGenerator;
 
-    private ECPoint c1;
+    private ECPoint pointM;
     private ECPoint p2;
     private int ct;
     private SM3Digest sm3keybase;
@@ -81,24 +81,22 @@ public final class SM2 {
     private SM2(BigInteger privateKey, byte[] publicKey) {
         this();
 
-        this.ct = 1;
-        this.key = new byte[32];
-        this.keyOffset = 0;
-
-        ECPoint pubKey = this.curve.decodePoint(publicKey);
+        ECPoint pointG = this.curve.decodePoint(publicKey); // base point
         if (privateKey == null) { // 构造加密参数
             AsymmetricCipherKeyPair key = this.keyPairGenerator.generateKeyPair();
 
             ECPublicKeyParameters ecpub = (ECPublicKeyParameters) key.getPublic();
-            this.c1 = ecpub.getQ(); // 公钥
+            this.pointM = ecpub.getQ();
 
             ECPrivateKeyParameters ecpriv = (ECPrivateKeyParameters) key.getPrivate();
-            this.p2 = pubKey.multiply(ecpriv.getD()); // 私钥
+            this.p2 = pointG.multiply(ecpriv.getD()); // pubKey * ecpriv.getD()
 
         } else { // 构造解密参数
-            this.p2 = pubKey.multiply(privateKey); // 私钥
+            this.p2 = pointG.multiply(privateKey); // pubKey * privateKey
 
         }
+
+        this.key = new byte[32];
         this.reset();
     }
 
@@ -186,7 +184,7 @@ public final class SM2 {
         ECPublicKeyParameters ecpub = (ECPublicKeyParameters) key.getPublic();
 
         BigInteger privateKey = ecpriv.getD();
-        ECPoint publicKey = ecpub.getQ();
+        ECPoint publicKey = ecpub.getQ(); // the point G of base point
 
         return ImmutableMap.of(PRIVATE_KEY, privateKey.toByteArray(), 
                                PUBLIC_KEY, publicKey.getEncoded(false));
@@ -211,7 +209,7 @@ public final class SM2 {
         byte[] c3 = sm2.doFinal(); // 摘要
 
         // return the C1(65) + C2(data.length) + C3(32)
-        return Bytes.concat(sm2.c1.getEncoded(false), c2, c3);
+        return Bytes.concat(sm2.pointM.getEncoded(false), c2, c3);
     }
 
     /**
@@ -226,7 +224,7 @@ public final class SM2 {
         }
 
         // 分解加密数据
-        // C1公钥 = 1位标志位+64位公钥（65位）
+        // C1公钥 = 1位标志位+64位公钥（共65位）
         // C2数据 = encrypted.length-C1-C3
         // C3摘要 = 32
         int c1Len = 65, c3Len = 32, c2Len = encrypted.length - (c1Len + c3Len);

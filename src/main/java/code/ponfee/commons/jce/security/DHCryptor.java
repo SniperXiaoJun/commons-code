@@ -1,8 +1,12 @@
 package code.ponfee.commons.jce.security;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Map;
@@ -13,7 +17,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.interfaces.DHKey;
 import javax.crypto.interfaces.DHPrivateKey;
 import javax.crypto.interfaces.DHPublicKey;
-import javax.crypto.spec.DHParameterSpec;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -29,7 +32,7 @@ public abstract class DHCryptor {
     private static final String PUBLIC_KEY = "DHPublicKey";
     private static final String PRIVATE_KEY = "DHPrivateKey";
 
-    public static Map<String, DHKey> initPartAKey() throws Exception {
+    public static Map<String, DHKey> initPartAKey() {
         return initPartAKey(1024);
     }
 
@@ -37,42 +40,45 @@ public abstract class DHCryptor {
      * 初始化甲方密钥
      * @param Keysize must be a multiple of 64, ranging from 512 to 1024 (inclusive).
      * @return
-     * @throws Exception
      */
-    public static Map<String, DHKey> initPartAKey(int keySize) throws Exception {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
+    public static Map<String, DHKey> initPartAKey(int keySize) {
+        KeyPairGenerator keyPairGenerator;
+        try {
+            keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
+        } catch (NoSuchAlgorithmException e) {
+            throw new SecurityException(e);
+        }
         keyPairGenerator.initialize(keySize);
         KeyPair pair = keyPairGenerator.generateKeyPair();
-        return ImmutableMap.of(PUBLIC_KEY, (DHKey) pair.getPublic(), 
-                               PRIVATE_KEY, (DHKey) pair.getPrivate());
+        return ImmutableMap.of(PUBLIC_KEY, (DHKey) pair.getPublic(), // 甲方公钥
+                               PRIVATE_KEY, (DHKey) pair.getPrivate()); // 甲方私钥
     }
 
     /**
      * 初始化乙方密钥
      * @param key 甲方公钥
      * @return
-     * @throws Exception
      */
-    public static Map<String, DHKey> initPartBKey(byte[] partAPubKeyBytes) throws Exception {
-        // 解析甲方公钥
-        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(partAPubKeyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
-        return initPartBKey((DHPublicKey) keyFactory.generatePublic(x509KeySpec));
+    public static Map<String, DHKey> initPartBKey(byte[] partAPubKey) {
+        return initPartBKey(getPublicKey(partAPubKey));
     }
 
     /**
      * 初始化乙方密钥
      * @param partAPublicKey 甲方公钥
      * @return
-     * @throws Exception
      */
-    public static Map<String, DHKey> initPartBKey(DHPublicKey partAPublicKey) throws Exception {
+    public static Map<String, DHKey> initPartBKey(DHPublicKey partAPublicKey) {
         // 由甲方公钥构建乙方密钥
-        DHParameterSpec dhParamSpec = partAPublicKey.getParams();
-        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(partAPublicKey.getAlgorithm());
-        keyPairGen.initialize(dhParamSpec);
-        KeyPair keyPair = keyPairGen.generateKeyPair();
+        KeyPairGenerator keyPairGen;
+        try {
+            keyPairGen = KeyPairGenerator.getInstance(partAPublicKey.getAlgorithm());
+            keyPairGen.initialize(partAPublicKey.getParams());
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            throw new SecurityException(e);
+        }
 
+        KeyPair keyPair = keyPairGen.generateKeyPair();
         return ImmutableMap.of(PUBLIC_KEY, (DHKey) keyPair.getPublic(),  // 乙方公钥
                                PRIVATE_KEY, (DHKey) keyPair.getPrivate());  // 乙方私钥
     }
@@ -82,7 +88,7 @@ public abstract class DHCryptor {
      * @param key the DHPublicKey
      * @return byte array encoded of DHPublicKey
      */
-    public static byte[] toByteArray(DHPublicKey key) {
+    public static byte[] encode(DHPublicKey key) {
         return key.getEncoded();
     }
 
@@ -91,7 +97,7 @@ public abstract class DHCryptor {
      * @param key the DHPrivateKey
      * @return byte array encoded of DHPrivateKey
      */
-    public static byte[] toByteArray(DHPrivateKey key) {
+    public static byte[] encode(DHPrivateKey key) {
         return key.getEncoded();
     }
 
@@ -99,9 +105,8 @@ public abstract class DHCryptor {
      * 取得私钥
      * @param keyMap
      * @return
-     * @throws Exception
      */
-    public static DHPrivateKey getPrivateKey(Map<String, DHKey> keyMap) throws Exception {
+    public static DHPrivateKey getPrivateKey(Map<String, DHKey> keyMap) {
         return (DHPrivateKey) keyMap.get(PRIVATE_KEY);
     }
 
@@ -109,10 +114,39 @@ public abstract class DHCryptor {
      * 取得公钥
      * @param keyMap
      * @return
-     * @throws Exception
      */
-    public static DHPublicKey getPublicKey(Map<String, DHKey> keyMap) throws Exception {
+    public static DHPublicKey getPublicKey(Map<String, DHKey> keyMap) {
         return (DHPublicKey) keyMap.get(PUBLIC_KEY);
+    }
+
+    /**
+     * 取得私钥
+     * @param keyMap
+     * @return
+     */
+    public static DHPrivateKey getPrivateKey(byte[] privateKey) {
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
+            PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(privateKey);
+            return (DHPrivateKey) keyFactory.generatePrivate(pkcs8KeySpec);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new SecurityException(e);
+        }
+    }
+
+    /**
+     * 取得公钥
+     * @param keyMap
+     * @return
+     */
+    public static DHPublicKey getPublicKey(byte[] publicKey) {
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
+            X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(publicKey);
+            return (DHPublicKey) keyFactory.generatePublic(x509KeySpec);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new SecurityException(e);
+        }
     }
 
     /**
@@ -120,12 +154,15 @@ public abstract class DHCryptor {
      * @param data 待加密数据
      * @param secretKey 双方公私钥协商的对称密钥
      * @return
-     * @throws Exception
      */
-    public static byte[] encrypt(byte[] data, SecretKey secretKey) throws Exception {
-        Cipher cipher = Cipher.getInstance(secretKey.getAlgorithm());
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        return cipher.doFinal(data);
+    public static byte[] encrypt(byte[] data, SecretKey secretKey) {
+        try {
+            Cipher cipher = Cipher.getInstance(secretKey.getAlgorithm());
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            return cipher.doFinal(data);
+        } catch (Exception e) {
+            throw new SecurityException(e);
+        }
     }
 
     /**
@@ -133,12 +170,15 @@ public abstract class DHCryptor {
      * @param data 待解密数据
      * @param secretKey 双方公私钥协商的对称密钥
      * @return
-     * @throws Exception
      */
-    public static byte[] decrypt(byte[] data, SecretKey secretKey) throws Exception {
-        Cipher cipher = Cipher.getInstance(secretKey.getAlgorithm());
-        cipher.init(Cipher.DECRYPT_MODE, secretKey);
-        return cipher.doFinal(data);
+    public static byte[] decrypt(byte[] data, SecretKey secretKey) {
+        try {
+            Cipher cipher = Cipher.getInstance(secretKey.getAlgorithm());
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            return cipher.doFinal(data);
+        } catch (Exception e) {
+            throw new SecurityException(e);
+        }
     }
 
     /**
@@ -146,18 +186,9 @@ public abstract class DHCryptor {
      * @param bPriKey
      * @param aPubKey
      * @return
-     * @throws Exception
      */
-    public static SecretKey genSecretKey(byte[] bPriKey, byte[] aPubKey) throws Exception {
-        KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
-        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(aPubKey);
-        DHPublicKey pubKey = (DHPublicKey) keyFactory.generatePublic(x509KeySpec);
-
-        // 初始化私钥  
-        PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(bPriKey);
-        DHPrivateKey priKey = (DHPrivateKey) keyFactory.generatePrivate(pkcs8KeySpec);
-
-        return genSecretKey(priKey, pubKey);
+    public static SecretKey genSecretKey(byte[] bPriKey, byte[] aPubKey) {
+        return genSecretKey(getPrivateKey(bPriKey), getPublicKey(aPubKey));
     }
 
     /**
@@ -165,16 +196,19 @@ public abstract class DHCryptor {
      * @param bPriKey
      * @param aPubKey
      * @return
-     * @throws Exception
      */
-    public static SecretKey genSecretKey(DHPrivateKey bPriKey, DHPublicKey aPubKey) throws Exception {
-        KeyAgreement keyAgree = KeyAgreement.getInstance(aPubKey.getAlgorithm());
-        keyAgree.init(bPriKey);
-        keyAgree.doPhase(aPubKey, true);
-        return keyAgree.generateSecret(SECRET_ALGORITHM); // 生成本地密钥
+    public static SecretKey genSecretKey(DHPrivateKey bPriKey, DHPublicKey aPubKey) {
+        try {
+            KeyAgreement keyAgree = KeyAgreement.getInstance(aPubKey.getAlgorithm());
+            keyAgree.init(bPriKey);
+            keyAgree.doPhase(aPubKey, true);
+            return keyAgree.generateSecret(SECRET_ALGORITHM); // 生成本地密钥
+        } catch (InvalidKeyException | NoSuchAlgorithmException | IllegalStateException e) {
+            throw new SecurityException(e);
+        }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         Map<String, DHKey> partA = initPartAKey(1024);
         Map<String, DHKey> partB = initPartBKey(getPublicKey(partA));
         byte[] data = "123456".getBytes();

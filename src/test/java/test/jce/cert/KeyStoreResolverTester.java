@@ -43,7 +43,7 @@ public class KeyStoreResolverTester {
 
     public @Test void testCreateCert() throws Exception {
         Date before = Dates.toDate("2017-03-01 00:00:00"), after = Dates.toDate("2027-08-01 00:00:00");
-        RSAKeyPair p1 = RSACryptor.genRSAKeyPair(2048), p2 = RSACryptor.genRSAKeyPair(2048);
+        RSAKeyPair p1 = RSACryptor.generateKeyPair(2048), p2 = RSACryptor.generateKeyPair(2048);
         RSASignAlgorithm alg = RSASignAlgorithm.SHA256withRSA;
         String caPwd = "1234", subjectPwd = "123456";
         String _issuer = "CN=ca,OU=hackwp,O=wp,L=BJ,S=BJ,C=CN";
