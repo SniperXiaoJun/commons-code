@@ -161,17 +161,20 @@ public final class RSACryptor {
     }
 
     // -----------------------------------private methods-------------------------------------
+    private static <T extends Key & RSAKey> int getBlockSize(int cryptMode, T key) {
+        return (cryptMode == Cipher.ENCRYPT_MODE)
+               ? key.getModulus().bitLength() / 8 - 11
+               : key.getModulus().bitLength() / 8;
+    }
+
     private static <T extends Key & RSAKey> void docrypt(InputStream input, T key, 
                                                          OutputStream out, int cryptMode) {
-        int bolckSize = (cryptMode == Cipher.ENCRYPT_MODE)
-                        ? key.getModulus().bitLength() / 8 - 11
-                        : key.getModulus().bitLength() / 8;
         try {
             //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
             //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding");
             Cipher cipher = Cipher.getInstance(key.getAlgorithm());
             cipher.init(cryptMode, key);
-            byte[] buffer = new byte[bolckSize];
+            byte[] buffer = new byte[getBlockSize(cryptMode, key)];
             for (int len; (len = input.read(buffer)) != Files.EOF;) {
                 out.write(cipher.doFinal(buffer, 0, len));
             }
@@ -188,9 +191,7 @@ public final class RSACryptor {
     }
 
     private static <T extends Key & RSAKey> byte[] docrypt(byte[] data, T key, int cryptMode) {
-        int bolckSize = (cryptMode == Cipher.ENCRYPT_MODE)
-                        ? key.getModulus().bitLength() / 8 - 11
-                        : key.getModulus().bitLength() / 8;
+        int bolckSize = getBlockSize(cryptMode, key);
         try {
             //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
             //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding");

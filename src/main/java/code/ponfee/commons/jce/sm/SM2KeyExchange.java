@@ -20,7 +20,6 @@ public class SM2KeyExchange implements Serializable {
 
     private static final long serialVersionUID = 8553046425593791291L;
 
-
     private BigInteger rA;
     private ECPoint RA;
     private ECPoint V;
@@ -57,10 +56,10 @@ public class SM2KeyExchange implements Serializable {
 
     /**
      * 密钥协商响应方
-     * @param entity 传输实体
+     * @param entity1 传输实体
      * @return
      */
-    public TransportEntity step2PartB(TransportEntity entity) {
+    public TransportEntity step2PartB(TransportEntity entity1) {
         BigInteger rB = SM2.random(ecParam.n);
         ECPoint RB = ecParam.pointG.multiply(rB).normalize();
         this.rA = rB;
@@ -70,12 +69,12 @@ public class SM2KeyExchange implements Serializable {
         x2 = w.add(x2.and(w.subtract(BigInteger.ONE)));
 
         BigInteger tB = privateKey.add(x2.multiply(rB)).mod(ecParam.n);
-        ECPoint RA = ecParam.curve.decodePoint(entity.R).normalize();
+        ECPoint RA = ecParam.curve.decodePoint(entity1.R).normalize();
 
         BigInteger x1 = RA.getXCoord().toBigInteger();
         x1 = w.add(x1.and(w.subtract(BigInteger.ONE)));
 
-        ECPoint aPublicKey = ecParam.curve.decodePoint(entity.K).normalize();
+        ECPoint aPublicKey = ecParam.curve.decodePoint(entity1.K).normalize();
         ECPoint temp = aPublicKey.add(RA.multiply(x1).normalize()).normalize();
         ECPoint V = temp.multiply(ecParam.bcSpec.getH().multiply(tB)).normalize();
         if (V.isInfinity()) throw new IllegalStateException();
@@ -83,10 +82,10 @@ public class SM2KeyExchange implements Serializable {
 
         byte[] xV = V.getXCoord().toBigInteger().toByteArray();
         byte[] yV = V.getYCoord().toBigInteger().toByteArray();
-        byte[] KB = kdf(Bytes.concat(xV, yV, entity.Z, this.Z), 16);
+        byte[] KB = kdf(Bytes.concat(xV, yV, entity1.Z, this.Z), 16);
         key = KB;
 
-        byte[] data = concat(xV, entity.Z, this.Z, RA, RB);
+        byte[] data = concat(xV, entity1.Z, this.Z, RA, RB);
         SM3Digest sm3 = SM3Digest.getInstance();
         data = sm3.doFinal(data);
         byte[] sB = sm3.doFinal(Bytes.concat(new byte[] { 0x02 }, yV, data));
@@ -95,19 +94,19 @@ public class SM2KeyExchange implements Serializable {
 
     /**
      * 密钥协商发起方第二步
-     * @param entity 传输实体
+     * @param entity2 传输实体
      */
-    public TransportEntity step3PartA(TransportEntity entity) {
+    public TransportEntity step3PartA(TransportEntity entity2) {
         BigInteger x1 = RA.getXCoord().toBigInteger();
         x1 = w.add(x1.and(w.subtract(BigInteger.ONE)));
 
         BigInteger tA = privateKey.add(x1.multiply(rA)).mod(ecParam.n);
-        ECPoint RB = ecParam.curve.decodePoint(entity.R).normalize();
+        ECPoint RB = ecParam.curve.decodePoint(entity2.R).normalize();
 
         BigInteger x2 = RB.getXCoord().toBigInteger();
         x2 = w.add(x2.and(w.subtract(BigInteger.ONE)));
 
-        ECPoint bPublicKey = ecParam.curve.decodePoint(entity.K).normalize();
+        ECPoint bPublicKey = ecParam.curve.decodePoint(entity2.K).normalize();
         ECPoint temp = bPublicKey.add(RB.multiply(x2).normalize()).normalize();
         ECPoint U = temp.multiply(ecParam.bcSpec.getH().multiply(tA)).normalize();
         if (U.isInfinity()) throw new IllegalStateException();
@@ -115,18 +114,18 @@ public class SM2KeyExchange implements Serializable {
 
         byte[] xU = U.getXCoord().toBigInteger().toByteArray();
         byte[] yU = U.getYCoord().toBigInteger().toByteArray();
-        byte[] KA = kdf(Bytes.concat(xU, yU, this.Z, entity.Z), 16);
+        byte[] KA = kdf(Bytes.concat(xU, yU, this.Z, entity2.Z), 16);
         key = KA;
-        byte[] data = concat(xU, this.Z, entity.Z, RA, RB);
+        byte[] data = concat(xU, this.Z, entity2.Z, RA, RB);
         SM3Digest sm3 = SM3Digest.getInstance();
         data = sm3.doFinal(data);
         data = Bytes.concat(new byte[] { 0x02 }, yU, data);
         data = sm3.doFinal(data);
-        if (!Arrays.equals(entity.S, data)) {
+        if (!Arrays.equals(entity2.S, data)) {
             return null;
         }
 
-        data = concat(xU, this.Z, entity.Z, RA, RB);
+        data = concat(xU, this.Z, entity2.Z, RA, RB);
         data = sm3.doFinal(data);
 
         byte[] sA = sm3.doFinal(Bytes.concat(new byte[] { 0x03 }, yU, data));
@@ -135,17 +134,17 @@ public class SM2KeyExchange implements Serializable {
 
     /**
      * 密钥确认最后一步
-     * @param entity 传输实体
+     * @param entity3 传输实体
      */
-    public boolean step4PartB(TransportEntity entity) {
+    public boolean step4PartB(TransportEntity entity3) {
         byte[] xV = V.getXCoord().toBigInteger().toByteArray();
         byte[] yV = V.getYCoord().toBigInteger().toByteArray();
-        ECPoint RA = ecParam.curve.decodePoint(entity.R).normalize();
-        byte[] data = concat(xV, entity.Z, this.Z, RA, this.RA);
+        ECPoint RA = ecParam.curve.decodePoint(entity3.R).normalize();
+        byte[] data = concat(xV, entity3.Z, this.Z, RA, this.RA);
         SM3Digest sm3 = SM3Digest.getInstance();
         data = sm3.doFinal(data);
         byte[] s2 = sm3.doFinal(Bytes.concat(new byte[] { 0x03 }, yV, data));
-        return Arrays.equals(entity.S, s2);
+        return Arrays.equals(entity3.S, s2);
     }
 
     

@@ -81,7 +81,7 @@ public class SM3Digest {
      * @return
      */
     public void doFinal(byte[] out, int outOffset) {
-        byte[] tmp = doFinal();
+        byte[] tmp = this.doFinal();
         System.arraycopy(tmp, 0, out, outOffset, tmp.length);
     }
 
@@ -97,10 +97,10 @@ public class SM3Digest {
         byte[] tmp = SM3.padding(buffer, cntBlock);
         for (int i = 0; i < tmp.length; i += BLOCK_LENGTH) {
             System.arraycopy(tmp, i, B, 0, B.length);
-            doHash(B);
+            this.doHash(B);
         }
         byte[] v = Arrays.copyOf(V, V.length);
-        reset();
+        this.reset();
         return v;
     }
 

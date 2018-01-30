@@ -20,6 +20,8 @@ import code.ponfee.commons.util.MavenProjects;
 
 /**
  * SM2非对称加密算法实现
+ * support encrypt/decrypt
+ * and sign/verify signature
  * @author Ponfee
  */
 public final class SM2 {
@@ -146,7 +148,7 @@ public final class SM2 {
         }
 
         // create C1 point
-        AsymmetricCipherKeyPair key = ecParam.keyPairGenerator.generateKeyPair(); // POINT_M
+        AsymmetricCipherKeyPair key = ecParam.keyPairGenerator.generateKeyPair(); // point M
         ECPublicKeyParameters ecPub = (ECPublicKeyParameters) key.getPublic();
         ECPrivateKeyParameters ecPri = (ECPrivateKeyParameters) key.getPrivate();
 
@@ -350,29 +352,25 @@ public final class SM2 {
     /**
      * SM2WithSM3 signature
      */
-    public static class Signature implements java.io.Serializable {
+    private static class Signature implements java.io.Serializable {
         private static final long serialVersionUID = -2732762291362285185L;
-        private static final int INT_BYTE_LEN = 4;
+        static final int INT_BYTE_LEN = 4;
 
         final BigInteger r;
         final BigInteger s;
 
-        public Signature(BigInteger r, BigInteger s) {
+        Signature(BigInteger r, BigInteger s) {
             this.r = r;
             this.s = s;
         }
 
-        public Signature(String signed) {
-            this(Base64.getUrlDecoder().decode(signed));
-        }
-
-        public Signature(byte[] signed) {
+        Signature(byte[] signed) {
             int rLen = Bytes.toInt(Arrays.copyOf(signed, INT_BYTE_LEN));
             this.r = new BigInteger(1, Arrays.copyOfRange(signed, INT_BYTE_LEN, INT_BYTE_LEN + rLen));
             this.s = new BigInteger(1, Arrays.copyOfRange(signed, INT_BYTE_LEN + rLen, signed.length));
         }
 
-        public byte[] toByteArray() {
+        byte[] toByteArray() {
             byte[] rBytes = r.toByteArray();
             return Bytes.concat(Bytes.fromInt(rBytes.length), rBytes, s.toByteArray());
         }
@@ -384,7 +382,7 @@ public final class SM2 {
 
     public static void main(String[] args) {
         ECParameter ecParameter = ECParameter.TEST_EC_PARAM;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
             byte[] data = MavenProjects.getMainJavaFileAsLineString(SM2.class).substring(0, 100).getBytes();
             Map<String, byte[]> keyMap = generateKeyPair(ecParameter);
 
@@ -402,7 +400,7 @@ public final class SM2 {
         byte[] data = MavenProjects.getMainJavaFileAsLineString(SM2.class).substring(0, 100).getBytes();
         Map<String, byte[]> keyMap = generateKeyPair(ecParameter);
         System.out.println(checkPublicKey(ecParameter, getPublicKey(keyMap)));
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
             System.out.println("\n=============================加密/解密============================");
             byte[] encrypted = encrypt(ecParameter, keyMap.get(PUBLIC_KEY), data);
             byte[] decrypted = decrypt(ecParameter, keyMap.get(PRIVATE_KEY), encrypted);
