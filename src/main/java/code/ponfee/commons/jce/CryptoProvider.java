@@ -4,6 +4,7 @@ import java.nio.charset.Charset;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -18,6 +19,8 @@ import code.ponfee.commons.jce.crypto.SymmetricCryptorBuilder;
 import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSAPrivateKeys;
 import code.ponfee.commons.jce.security.RSAPublicKeys;
+import code.ponfee.commons.jce.sm.ECParameter;
+import code.ponfee.commons.jce.sm.SM2;
 import code.ponfee.commons.util.MavenProjects;
 
 /**
@@ -157,10 +160,8 @@ public abstract class CryptoProvider {
      * @param symmetricCryptor {@link SymmetricCryptor}
      * @return
      */
-    public static CryptoProvider symmetricKeyProvider(final SymmetricCryptor key) {
+    public static CryptoProvider symmetricKeyProvider(final SymmetricCryptor symmetricKey) {
         return new CryptoProvider() {
-            private final SymmetricCryptor symmetricKey = key;
-
             @Override
             public byte[] encrypt(byte[] original) {
                 Preconditions.checkArgument(original != null);
@@ -180,7 +181,7 @@ public abstract class CryptoProvider {
      * @param pkcs8PrivateKey  the string of pkcs8 private key format
      * @return
      */
-    public static CryptoProvider privateKeyProvider(final String pkcs8PrivateKey) {
+    public static CryptoProvider rsaPrivateKeyProvider(final String pkcs8PrivateKey) {
         return new CryptoProvider() {
             private final RSAPrivateKey priKey = RSAPrivateKeys.fromPkcs8(pkcs8PrivateKey);
             private final RSAPublicKey  pubKey = RSAPrivateKeys.extractPublicKey(priKey);
@@ -214,7 +215,7 @@ public abstract class CryptoProvider {
      * @param pkcs8PublicKey  the string of pkcs8 public key format
      * @return
      */
-    public static CryptoProvider publicKeyProvider(final String pkcs8PublicKey) {
+    public static CryptoProvider rsaPublicKeyProvider(final String pkcs8PublicKey) {
         return new CryptoProvider() {
             private final RSAPublicKey pubKey = RSAPublicKeys.fromPkcs8(pkcs8PublicKey);
 
@@ -236,9 +237,59 @@ public abstract class CryptoProvider {
         };
     }
 
+    public static CryptoProvider sm2PublicKeyProvider(final ECParameter ecParameter, 
+                                                      final byte[] publicKey) {
+        return new CryptoProvider() {
+            private final byte[] ida = "ida".getBytes();
+
+            @Override
+            public byte[] encrypt(byte[] original) {
+                return SM2.encrypt(ecParameter, publicKey, original); // 公钥加密
+            }
+
+            @Override
+            public byte[] decrypt(byte[] encrypted) {
+                throw new UnsupportedOperationException("cannot support decrypt.");
+            }
+
+            @Override
+            public boolean verify(byte[] data, byte[] signed) {
+                return SM2.verify(ecParameter, data, ida, signed, publicKey);
+            }
+        };
+    }
+
+    public static CryptoProvider sm2PrivateKeyProvider(ECParameter ecParameter,
+                                                       final byte[] publicKey, 
+                                                       final byte[] privateKey) {
+        return new CryptoProvider() {
+            private final byte[] ida = "ida".getBytes();
+
+            @Override
+            public byte[] encrypt(byte[] original) {
+                return SM2.encrypt(ecParameter, publicKey, original); // 公钥加密
+            }
+
+            @Override
+            public byte[] decrypt(byte[] encrypted) {
+                return SM2.decrypt(ecParameter, privateKey, encrypted);
+            }
+
+            @Override
+            public byte[] sign(byte[] data) { // SM2WithSM3 sign
+                return SM2.sign(ecParameter, data, ida, publicKey, privateKey);
+            }
+
+            @Override
+            public boolean verify(byte[] data, byte[] signed) {
+                return SM2.verify(ecParameter, data, ida, signed, publicKey);
+            }
+        };
+    }
+
     public static void main(String[] args) {
         System.out.println("\n============================RSA crypt==========================");
-        CryptoProvider rsa = privateKeyProvider("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
+        CryptoProvider rsa = rsaPrivateKeyProvider("MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA9pU2mWa+yJwXF1VQb3WL5uk06Rc2jARYPlcV0JK0x4fMXboR9rpMlpJ9cr4B1wbJdBEa8H+kSgbJROFKsmkhFQIDAQABAkAcGiNP1krV+BwVl66EFWRtW5ShH/kiefhImoos7BtYReN5WZyYyxFCAf2yjMJigq2GFm8qdkQK+c+E7Q3lY6zdAiEA/wVfy+wGQcFh3gdFKhaQ12fBYMCtywxZ3Edss0EmxBMCIQD3h4vfENmbIMH+PX5dAPbRfrBFcx77/MxFORMESN0bNwIgL5kJMD51TICTi6U/u4NKtWmgJjbQOT2s5/hMyYg3fBECIEqRc+qUKenYuXg80Dd2VeSQlMunPZtN8b+czQTKaomLAiEA02qUv/p1dT/jc2BDtp9bl8jDiWFg5FNFcH6bBDlwgts=");
         String str = Files.toString(MavenProjects.getMainJavaFile(CryptoProvider.class)).replaceAll("\r|\n|\\s+", "");
         String data = rsa.encrypt(str);
         System.out.println("加密后：" + data);
@@ -258,6 +309,19 @@ public abstract class CryptoProvider {
         data = aes.encrypt(str);
         System.out.println("加密后：" + data);
         System.out.println("解密后：" + aes.decrypt(data));
+
+        System.out.println("\n============================SM2 crypt==========================");
+        ECParameter ecParameter = ECParameter.DEFAULT_EC_PARAM;
+        Map<String, byte[]> sm2KeyMap = SM2.generateKeyPair(ecParameter);
+        CryptoProvider sm2 = sm2PrivateKeyProvider(ecParameter, SM2.getPublicKey(sm2KeyMap), SM2.getPrivateKey(sm2KeyMap));
+        data = sm2.encrypt(str);
+        System.out.println("加密后：" + data);
+        System.out.println("解密后：" + sm2.decrypt(data));
+
+        System.out.println("\n============================SM2 sign==========================");
+        signed = sm2.sign(str);
+        System.out.println("签名："+signed);
+        System.out.println("验签："+sm2.verify(str, signed));
     }
 
 }

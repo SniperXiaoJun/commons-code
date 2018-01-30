@@ -203,6 +203,19 @@ public final class Bytes {
             }
         }
         return result;
+
+        /*ByteArrayOutputStream baos = new ByteArrayOutputStream(totalLength);
+        try {
+            baos.write(first);
+            for (byte[] array : rest) {
+                if (array != null) {
+                    baos.write(array);
+                }
+            }
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e); // cannot happened
+        }*/
     }
 
 }

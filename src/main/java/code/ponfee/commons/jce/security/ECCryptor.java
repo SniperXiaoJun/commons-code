@@ -22,11 +22,11 @@ import sun.security.ec.ECPublicKeyImpl;
  * @author fupf
  */
 @SuppressWarnings("restriction")
-public abstract class ECCCryptor {
+public abstract class ECCryptor {
 
     public static final String ALGORITHM = "EC";
-    private static final String PUBLIC_KEY = "ECCPublicKey";
-    private static final String PRIVATE_KEY = "ECCPrivateKey";
+    private static final String PUBLIC_KEY = "ECPublicKey";
+    private static final String PRIVATE_KEY = "ECPrivateKey";
 
     /**
      * 初始化密钥
@@ -134,11 +134,11 @@ public abstract class ECCCryptor {
         String inputStr = "abc";
         byte[] data = inputStr.getBytes();
 
-        Map<String, ECKey> keyMap = ECCCryptor.initKey();
+        Map<String, ECKey> keyMap = ECCryptor.initKey();
 
-        byte[] encodedData = ECCCryptor.encrypt(data, ECCCryptor.getPublicKey(keyMap));
+        byte[] encodedData = ECCryptor.encrypt(data, ECCryptor.getPublicKey(keyMap));
 
-        byte[] decodedData = ECCCryptor.decrypt(encodedData, ECCCryptor.getPrivateKey(keyMap));
+        byte[] decodedData = ECCryptor.decrypt(encodedData, ECCryptor.getPrivateKey(keyMap));
 
         System.out.println(new String(data));
         System.out.println(new String(encodedData));

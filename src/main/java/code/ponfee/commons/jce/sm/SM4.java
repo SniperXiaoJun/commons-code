@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.util.Arrays;
 
 import com.google.common.base.Preconditions;
@@ -120,7 +121,8 @@ public final class SM4 {
      */
     private static byte[] crypt(int mode, boolean isPadding, 
                                 byte[] key, byte[] input) {
-        Preconditions.checkArgument(input != null, "input cannot not null.");
+        Preconditions.checkArgument(ArrayUtils.isNotEmpty(input), 
+                                    "input cannot not null.");
 
         long[] sk = setKey(mode, key);
 
@@ -159,7 +161,8 @@ public final class SM4 {
      */
     private static byte[] crypt(int mode, boolean isPadding, byte[] key, 
                                 byte[] iv, byte[] input) {
-        Preconditions.checkArgument(input != null, "input cannot not null.");
+        Preconditions.checkArgument(ArrayUtils.isNotEmpty(input), 
+                                    "input cannot not null.");
         Preconditions.checkArgument(iv != null && iv.length == 16, 
                                     "iv must be 16 byte array.");
 
@@ -361,20 +364,16 @@ public final class SM4 {
         byte[] iv = "1a345677b546d4de".getBytes();
 
         byte[] encrypted = SM4.encrypt(key, data);
-        System.out.println(data.length + "-->" + encrypted.length);
-        System.out.println(new String(SM4.decrypt(key, encrypted)));
+        System.out.println(data.length + "-->" + encrypted.length + "\t|" + new String(SM4.decrypt(key, encrypted)) + "|");
 
         encrypted = SM4.encrypt(key, iv, data);
-        System.out.println(data.length + "-->" + encrypted.length);
-        System.out.println(new String(SM4.decrypt(key, iv, encrypted)));
+        System.out.println(data.length + "-->" + encrypted.length + "\t|" + new String(SM4.decrypt(key, iv, encrypted)) + "|");
 
         encrypted = SM4.encrypt(false, key, data);
-        System.out.println(data.length + "-->" + encrypted.length);
-        System.out.println(new String(SM4.decrypt(false, key, encrypted)));
+        System.out.println(data.length + "-->" + encrypted.length + "\t|" + new String(SM4.decrypt(false, key, encrypted)) + "|");
 
         encrypted = SM4.encrypt(false, key, iv, data);
-        System.out.println(data.length + "-->" + encrypted.length);
-        System.out.println(new String(SM4.decrypt(false, key, iv, encrypted)));
+        System.out.println(data.length + "-->" + encrypted.length + "\t|" + new String(SM4.decrypt(false, key, iv, encrypted)) + "|");
     }
 
 }
