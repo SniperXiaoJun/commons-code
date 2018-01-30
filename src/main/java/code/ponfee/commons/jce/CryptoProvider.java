@@ -259,7 +259,7 @@ public abstract class CryptoProvider {
         };
     }
 
-    public static CryptoProvider sm2PrivateKeyProvider(ECParameter ecParameter,
+    public static CryptoProvider sm2PrivateKeyProvider(final ECParameter ecParameter,
                                                        final byte[] publicKey, 
                                                        final byte[] privateKey) {
         return new CryptoProvider() {
@@ -271,17 +271,17 @@ public abstract class CryptoProvider {
             }
 
             @Override
-            public byte[] decrypt(byte[] encrypted) {
+            public byte[] decrypt(byte[] encrypted) { // 私钥解密
                 return SM2.decrypt(ecParameter, privateKey, encrypted);
             }
 
             @Override
-            public byte[] sign(byte[] data) { // SM2WithSM3 sign
+            public byte[] sign(byte[] data) { // sign data by SM2WithSM3
                 return SM2.sign(ecParameter, data, ida, publicKey, privateKey);
             }
 
             @Override
-            public boolean verify(byte[] data, byte[] signed) {
+            public boolean verify(byte[] data, byte[] signed) { // verify the SM2WithSM3 signature
                 return SM2.verify(ecParameter, data, ida, signed, publicKey);
             }
         };

@@ -3,6 +3,7 @@ package code.ponfee.commons.jce.sm;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
+import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
@@ -14,6 +15,8 @@ import org.bouncycastle.math.ec.ECPoint;
  * @author Ponfee
  */
 public class ECParameter {
+
+    private static final char SEPARATOR = ',';
 
     public static final ECParameter DEFAULT_EC_PARAM = new ECParameter(
         new BigInteger("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF", 16), 
@@ -59,5 +62,36 @@ public class ECParameter {
         this.pointG = curve.createPoint(gx, gy);
         this.bcSpec = new ECDomainParameters(curve, pointG, n);
         this.keyPairGenerator.init(new ECKeyGenerationParameters(bcSpec, new SecureRandom()));
+    }
+
+    public @Override String toString() {
+        return new StringBuilder()
+                   .append(toHex(q)).append(SEPARATOR)
+                   .append(toHex(a)).append(SEPARATOR)
+                   .append(toHex(b)).append(SEPARATOR)
+                   .append(toHex(n)).append(SEPARATOR)
+                   .append(toHex(gx)).append(SEPARATOR)
+                   .append(toHex(gy)).toString();
+    }
+
+    public static ECParameter fromString(String parameter) {
+        String[] array = parameter.split(String.valueOf(SEPARATOR), 6);
+        return new ECParameter(new BigInteger(array[0], 16), 
+                               new BigInteger(array[1], 16), 
+                               new BigInteger(array[2], 16), 
+                               new BigInteger(array[3], 16), 
+                               new BigInteger(array[4], 16), 
+                               new BigInteger(array[5], 16));
+    }
+
+    private static String toHex(BigInteger num) {
+        String hex = Hex.encodeHexString(num.toByteArray(), false);
+        return hex.replaceFirst("^0*", "");
+    }
+
+    public static void main(String[] args) {
+        String s = DEFAULT_EC_PARAM.toString();
+        System.out.println(s);
+        System.out.println(fromString(s));
     }
 }
