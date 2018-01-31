@@ -42,7 +42,7 @@ public final class ClassUtils {
     public static String[] getMethodParamNames(final Method method) {
         ClassReader classReader = null;
         try {
-            // 第一种方式，can not use in jar file
+            // 第一种方式，cannot use in jar file
             /*String name = getClassFilePath(method.getDeclaringClass());
             classReader = new ClassReader(new FileInputStream(name));*/
 

@@ -49,7 +49,7 @@ public abstract class CryptoProvider {
      * @return signature
      */
     public byte[] sign(byte[] data) {
-        throw new UnsupportedOperationException("canot support sign.");
+        throw new UnsupportedOperationException("cannot support sign.");
     }
 
     /**
@@ -59,7 +59,7 @@ public abstract class CryptoProvider {
      * @return true|false
      */
     public boolean verify(byte[] data, byte[] signed) {
-        throw new UnsupportedOperationException("canot support verify signature.");
+        throw new UnsupportedOperationException("cannot support verify signature.");
     }
 
     /**
@@ -183,8 +183,8 @@ public abstract class CryptoProvider {
      */
     public static CryptoProvider rsaPrivateKeyProvider(final String pkcs8PrivateKey) {
         return new CryptoProvider() {
-            private final RSAPrivateKey priKey = RSAPrivateKeys.fromPkcs8(pkcs8PrivateKey);
-            private final RSAPublicKey  pubKey = RSAPrivateKeys.extractPublicKey(priKey);
+            private final RSAPrivateKey priKey = RSAPrivateKeys.fromPkcs8(pkcs8PrivateKey); // thread-safe
+            private final RSAPublicKey  pubKey = RSAPrivateKeys.extractPublicKey(priKey); // thread-safe
 
             @Override
             public byte[] encrypt(byte[] original) {
@@ -217,7 +217,7 @@ public abstract class CryptoProvider {
      */
     public static CryptoProvider rsaPublicKeyProvider(final String pkcs8PublicKey) {
         return new CryptoProvider() {
-            private final RSAPublicKey pubKey = RSAPublicKeys.fromPkcs8(pkcs8PublicKey);
+            private final RSAPublicKey pubKey = RSAPublicKeys.fromPkcs8(pkcs8PublicKey); // thread-safe
 
             @Override
             public byte[] encrypt(byte[] original) {

@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.ArrayUtils;
 
 import code.ponfee.commons.io.Files;
@@ -23,6 +24,9 @@ import code.ponfee.commons.jce.hash.HashUtils;
  * 
  * byte b = a byte number;
  * int i = b & 0xff; // 使得i与b的二进制补码一致
+ * 
+ * 0xff is the bit length mask, calc bit length mask can use 
+ * (1<<bits)-1 or -1L^(-1L<<bits)
  * 
  * Base58 code：except number 0, uppercase letter I and O, lowercase latter l
  * Reference from internet
@@ -145,7 +149,7 @@ public class Base58 {
      * @return the BigInteger of base58-decoded
      */
     public static BigInteger decodeToBigInteger(String data) {
-        return new BigInteger(1, decode(data));
+        return Bytes.toBigInteger(decode(data));
     }
 
     /**
@@ -238,5 +242,12 @@ public class Base58 {
         System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(b128));
         System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(b0));
         System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(b127));*/
+
+        // 比特币钱包地址
+        System.out.println(Hex.encodeHexString(decodeWithChecksum("3D2oetdNuZUqQHPJmcMDDHYoqkyNVsFk9r")));
+        System.out.println(Hex.encodeHexString(decodeWithChecksum("16rCmCmbuWDhPjWTrpQGaU3EPdZF7MTdUk")));
+        System.out.println(decodeWithChecksum("1DiHDQMPFu4p84rkLn6Majj2LCZZZRQUaa").length);
+        System.out.println(decodeWithChecksum("3Nxwenay9Z8Lc9JBiywExpnEFiLp6Afp8v").length);
+        System.out.println(decodeWithChecksum("17QY6BzRnsTGKBqGdZHG1bWe1VB6MweiDH").length);
     }
 }

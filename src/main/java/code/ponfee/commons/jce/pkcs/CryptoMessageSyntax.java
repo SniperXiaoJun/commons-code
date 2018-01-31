@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
@@ -94,7 +95,7 @@ public final class CryptoMessageSyntax {
                 @SuppressWarnings("unchecked") Collection<?> certChain = store.getMatches(signer.getSID()); // 证书链
                 X509CertificateHolder cert = (X509CertificateHolder) certChain.iterator().next();
                 if (!signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert))) {
-                    String certSN = cert.getSerialNumber().toString(16);
+                    String certSN = Hex.encodeHexString(cert.getSerialNumber().toByteArray());
                     String certDN = cert.getSubject().toString();
                     throw new SecurityException("signature verify fail[" + certSN + ", " + certDN + "]");
                 }

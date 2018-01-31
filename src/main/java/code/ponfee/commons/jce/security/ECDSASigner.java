@@ -27,9 +27,11 @@ import com.google.common.collect.ImmutableMap;
  */
 public class ECDSASigner {
 
+    private static final String ALGORITHM = "EC";
+
     public static final String PRIVATE_KEY = "ECPrivateKey";
     public static final String PUBLIC_KEY = "ECPublicKey";
-    private static final String ALGORITHM = "EC";
+
     private static final String SHA256withECDSA = "SHA256withECDSA";
     private static final String SHA1withECDSA = "SHA1withECDSA";
 
@@ -137,7 +139,7 @@ public class ECDSASigner {
         return verify(data, signed, publicKey, SHA256withECDSA);
     }
 
-    public static byte[] sign(byte[] data, ECPrivateKey privateKey, String algorithm) {
+    private static byte[] sign(byte[] data, ECPrivateKey privateKey, String algorithm) {
         try {
             Signature signature = Signature.getInstance(algorithm);
             signature.initSign(privateKey);
@@ -148,8 +150,8 @@ public class ECDSASigner {
         }
     }
 
-    public static boolean verify(byte[] data, byte[] signed, 
-                                 ECPublicKey publicKey, String algorithm) {
+    private static boolean verify(byte[] data, byte[] signed, 
+                                  ECPublicKey publicKey, String algorithm) {
         try {
             Signature signature = Signature.getInstance(algorithm);
             signature.initVerify(publicKey);

@@ -45,7 +45,10 @@ import code.ponfee.commons.util.Bytes;
  *  <p>
  *  实体报头有：Allow、Location、Content-Base、Content-Encoding、Content-Length、
  *          Content-Range、Content-MD5、Content-Type、Expires、Last-Modified等
- *  Content-Type：WEB服务器告诉浏览器自己响应的消息格式，例如Content-Type(application/xml)
+ *  Content-Type：
+ *     请求实体报头：浏览器告诉Web服务器自己发送的数据格式，如Content-Type(application/json，multipart/form-data，
+ *                                                        application/x-www-form-urlencoded)
+ *     响应实体报头：Web服务器告诉浏览器自己响应的消息格式，例如Content-Type(application/xml，application/json)
  * </pre>
  * http://www.atool.org/httptest.php
  * 

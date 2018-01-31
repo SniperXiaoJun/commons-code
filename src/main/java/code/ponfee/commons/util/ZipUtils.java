@@ -85,7 +85,7 @@ public class ZipUtils {
 
         // validate dest file
         if (StringUtils.isEmpty(dest)) {
-            throw new IllegalArgumentException("dest file canot be null");
+            throw new IllegalArgumentException("dest file cannot be null");
         }
         File destFile = new File(dest);
         if (destFile.exists()) {
@@ -138,7 +138,7 @@ public class ZipUtils {
      */
     public static String unzip(String zipFile) throws ZipException {
         if (StringUtils.isBlank(zipFile)) {
-            throw new IllegalArgumentException("zip file canot be null");
+            throw new IllegalArgumentException("zip file cannot be null");
         }
 
         String lowercasePath = zipFile.toLowerCase();

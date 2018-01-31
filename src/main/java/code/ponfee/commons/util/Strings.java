@@ -13,7 +13,6 @@ import java.util.zip.CRC32;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.CaseFormat;
-import com.google.common.collect.Lists;
 
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.math.Numbers;
@@ -38,14 +37,19 @@ public class Strings {
         return text.replaceAll(regex, replacement);
     }
 
+    public static String mask(String text, int start, int len) {
+        return mask(text, start, len, '*');
+    }
+
     /**
-     * 遮掩
-     * @param text
-     * @param start
-     * @param len
+     * 遮掩（如手机号中间4位加*）
+     * @param text    需要处理的字符串
+     * @param start   开始位置
+     * @param len     要处理的字数长度
+     * @param maskChar 替换的字符
      * @return
      */
-    public static String mask(String text, int start, int len) {
+    public static String mask(String text, int start, int len, char maskChar) {
         if (len < 1 || StringUtils.isEmpty(text) || text.length() < start) {
             return text;
         }
@@ -57,7 +61,7 @@ public class Strings {
         }
         int end = text.length() - start - len;
         String regex = "(\\w{" + start + "})\\w{" + len + "}(\\w{" + end + "})";
-        return mask(text, regex, "$1" + StringUtils.repeat("*", len) + "$2");
+        return mask(text, regex, "$1" + StringUtils.repeat(maskChar, len) + "$2");
     }
 
     /**
@@ -78,6 +82,7 @@ public class Strings {
 
     /**
      * 字符串分片
+     * slice("abcdefghijklmn", 5)  ->  ["abc","def","ghi","jkl","mn"]
      * @param str
      * @param segment
      * @return
@@ -490,17 +495,4 @@ public class Strings {
         return StringUtils.replace(str, "'", "''");
     }
 
-    public static void main(String[] args) {
-        System.out.println(camelCaseName("test_ab"));
-        System.out.println(underscoreName("testAb"));
-        System.out.println(deleteAny("hello world", "eo"));
-        System.out.println(ObjectUtils.toString(split("hello world", "l", "eo")));
-        System.out.println(replace("hello world", "o", "-"));
-        System.out.println(join(Lists.newArrayList("a", "b", "c"), ",", "(", ")"));
-
-        System.out.println(isMatch("ab * cdec", "ab * c"));
-        System.out.println(isMatch("* ba", "* a"));
-        System.out.println(isMatch("* a", "*"));
-        System.out.println(isMatch("* a", "*"));
-    }
 }

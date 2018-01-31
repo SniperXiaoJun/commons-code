@@ -24,7 +24,7 @@ public class StringSerializer extends Serializer {
 
     public StringSerializer(Charset charset) {
         if (charset == null) {
-            throw new IllegalArgumentException("charset can not be null");
+            throw new IllegalArgumentException("charset cannot be null");
         }
         this.charset = charset;
     }

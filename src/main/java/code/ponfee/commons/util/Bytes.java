@@ -14,11 +14,12 @@ import com.google.common.base.Preconditions;
 /**
  * byte[]
  * 转hex：new BigInteger(1, bytes).toString(16);
+ * 求与4的余数：(4 - b64.length() % 4) % 4
  * @author fupf
  */
 public final class Bytes {
 
-    private static final char SINGLE_SPACE = ' ';
+    private static final char SPACE_CHAR = ' ';
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
 
     /**
@@ -42,7 +43,7 @@ public final class Bytes {
                 byte b = bytes[i + j * wid];
                 fmt.format("%02X ", b); // 输出hex：“B1 ”
                 if ((i + 1) % block == 0 || i + 1 == wid) {
-                    fmt.format("%s", SINGLE_SPACE); // block与block间加一个空格
+                    fmt.format("%s", SPACE_CHAR); // block与block间加一个空格
                 }
                 if (b >= 0x21 && b <= 0x7e) {
                     text.format("%c", b);
@@ -52,13 +53,13 @@ public final class Bytes {
             }
 
             if (i < wid) { // 最后一行空格补全：i为该行的byte数
-                fmt.format("%s", StringUtils.repeat(SINGLE_SPACE, (wid - i) * 3)); // 补全byte位
+                fmt.format("%s", StringUtils.repeat(SPACE_CHAR, (wid - i) * 3)); // 补全byte位
                 for (int k = i + 1; k <= wid; k += block) {
-                    fmt.format("%s", SINGLE_SPACE); // 补全block与block间的空格
+                    fmt.format("%s", SPACE_CHAR); // 补全block与block间的空格
                 }
             }
 
-            fmt.format("%s", SINGLE_SPACE); // block与text间加一个空格
+            fmt.format("%s", SPACE_CHAR); // block与text间加一个空格
             fmt.format("%s", text.toString()); // 输出text：“..@.s.UwH...b{.U”
             fmt.format("%s", "\n"); // 输出换行
             text.close();
@@ -182,7 +183,7 @@ public final class Bytes {
      * @return a new byte array of them
      */
     public static byte[] concat(byte[] first, byte[]... rest) {
-        Preconditions.checkArgument(first != null, "the first can not be null");
+        Preconditions.checkArgument(first != null, "the first cannot be null");
         if (rest == null || rest.length == 0) {
             return first;
         }

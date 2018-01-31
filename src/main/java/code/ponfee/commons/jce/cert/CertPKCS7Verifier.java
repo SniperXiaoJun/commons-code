@@ -77,7 +77,7 @@ public class CertPKCS7Verifier extends CertSignedVerifier {
         for (int i = 0; i < signs.length; i++) {
             X509Certificate cert = certs.get(signs[i].getCertificateSerialNumber());
             if (cert == null) {
-                throw new IllegalArgumentException("can not found the sign cert: " 
+                throw new IllegalArgumentException("cannot found the sign cert: " 
                                          + signs[i].getCertificateSerialNumber());
             } else {
                 this.subjects[i++] = cert;

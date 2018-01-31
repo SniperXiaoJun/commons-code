@@ -45,6 +45,7 @@
  * 9、时间戳、签章
  * 
  * 10、区块链：
+ *     https://anders.com/blockchain/
  *     SHA256：SHA256(SHA256(version + prev_hash + merkle_root + ntime + nbits + x )) < TARGET
  *              block的版本 version
  *              上一个block的hash值: prev_hash

@@ -128,7 +128,7 @@ public final class WebUtils {
         try (PrintWriter writer = resp.getWriter()) {
             writer.write(text);
         } catch (IOException e) {
-            // can not happened
+            // cannot happened
             throw new RuntimeException("response " + contentType + " occur error", e);
         }
     }
@@ -195,7 +195,7 @@ public final class WebUtils {
                 IOUtils.copyLarge(in, out);
             }
         } catch (IOException e) {
-            // can not happened
+            // cannot happened
             throw new RuntimeException("response input stream occur error", e);
         }
     }
@@ -230,7 +230,7 @@ public final class WebUtils {
                 out.write(data);
             }
         } catch (IOException e) {
-            // can not happened
+            // cannot happened
             throw new RuntimeException("response byte array data occur error", e);
         }
     }

@@ -140,7 +140,7 @@ public final class SM4 {
                 bous.write(out);
             }
         } catch (IOException e) {
-            throw new SecurityException(e); // can not happened
+            throw new SecurityException(e); // cannot happened
         }
 
         byte[] output = bous.toByteArray();
@@ -208,7 +208,7 @@ public final class SM4 {
                 }
             }
         } catch (IOException e) {
-            throw new SecurityException(e); // can not happened
+            throw new SecurityException(e); // cannot happened
         }
 
         byte[] output = bous.toByteArray();

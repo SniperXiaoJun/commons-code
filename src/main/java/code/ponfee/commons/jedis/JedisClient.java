@@ -304,7 +304,7 @@ public class JedisClient implements DisposableBean {
             jedis.connect();
             return true;
         } catch (Exception e) {
-            logger.error("jedis can not connect: " + jedisInfo + " - " + e.getMessage());
+            logger.error("jedis cannot connect: " + jedisInfo + " - " + e.getMessage());
             return false;
         } finally {
             if (jedis != null) try {

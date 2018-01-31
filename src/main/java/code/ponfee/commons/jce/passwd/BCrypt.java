@@ -4,6 +4,8 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Base64;
 
+import org.apache.commons.codec.binary.Hex;
+
 import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.util.SecureRandoms;
@@ -548,6 +550,15 @@ public final class BCrypt {
     }
 
     public static void main(String[] args) {
+        byte[] pwd = "123456".getBytes();
+        byte[] salt = "0123456789123456".getBytes();
+        String actual = Hex.encodeHexString(crypt(pwd, salt, 5));
+        if (!"ddc41d0b514ecedb8ae12c42e8c2f4419e71e15c519ecd4b".equals(actual)) {
+            System.err.println("crypt fail!");
+        } else {
+            System.out.println("crypt success!");
+        }
+
         String password = "passwd";
         System.out.println(create(password, 11));
         System.out.print("Test begin");

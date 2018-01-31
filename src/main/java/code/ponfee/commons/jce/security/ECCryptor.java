@@ -8,11 +8,12 @@ import java.security.spec.ECFieldF2m;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.NullCipher;
+
+import com.google.common.collect.ImmutableMap;
 
 import sun.security.ec.ECPrivateKeyImpl;
 import sun.security.ec.ECPublicKeyImpl;
@@ -56,11 +57,9 @@ public abstract class ECCryptor {
 
         BigInteger s = new BigInteger("1234006549323611672814741753598448348329118574063", 10);
 
-        Map<String, ECKey> keyMap = new HashMap<>(2);
-        keyMap.put(PUBLIC_KEY, new ECPublicKeyImpl(g, ecParameterSpec)); // 公钥
-        keyMap.put(PRIVATE_KEY, new ECPrivateKeyImpl(s, ecParameterSpec)); // 私钥
-
-        return keyMap;
+        return ImmutableMap.of(PUBLIC_KEY, new ECPublicKeyImpl(g, ecParameterSpec), // 66 byte
+                               PRIVATE_KEY, new ECPrivateKeyImpl(s, ecParameterSpec) // 52 byte
+                              );
     }
 
     public static byte[] boByteArray(ECPrivateKey priKey) throws Exception {

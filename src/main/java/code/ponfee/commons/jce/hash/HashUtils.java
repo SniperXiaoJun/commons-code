@@ -149,7 +149,7 @@ public final class HashUtils {
         try {
             return MessageDigest.getInstance(algorithm).digest(data);
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(e); // can not happened
+            throw new IllegalArgumentException(e); // cannot happened
         }
     }
 
@@ -176,7 +176,7 @@ public final class HashUtils {
         try {
             digest = MessageDigest.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(e); // can not happened
+            throw new IllegalArgumentException(e); // cannot happened
         }
 
         try (InputStream in = input; 

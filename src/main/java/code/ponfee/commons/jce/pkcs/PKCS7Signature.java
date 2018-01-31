@@ -8,6 +8,8 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 
+import org.apache.commons.codec.binary.Hex;
+
 import sun.security.pkcs.ContentInfo;
 import sun.security.pkcs.PKCS7;
 import sun.security.pkcs.ParsingException;
@@ -118,13 +120,13 @@ public class PKCS7Signature {
 
     public static void verify(PKCS7 pkcs7, byte[] data) {
         if (data == null || data.length == 0) {
-            throw new IllegalArgumentException("the origin data canot be null.");
+            throw new IllegalArgumentException("the origin data cannot be null.");
         }
 
         try {
             for (SignerInfo signed : pkcs7.getSignerInfos()) {
                 if (pkcs7.verify(signed, data) == null) {
-                    String certSN = signed.getCertificateSerialNumber().toString(16);
+                    String certSN = Hex.encodeHexString(signed.getCertificateSerialNumber().toByteArray());
                     String certDN = signed.getCertificate(pkcs7).getSubjectX500Principal().getName();
                     //new X509Principal(signed.getCertificate(pkcs7).getSubjectX500Principal().getEncoded()).getName()
                     throw new SecurityException("验签失败[certSN：" + certSN + "；CertDN：" + certDN + "]");

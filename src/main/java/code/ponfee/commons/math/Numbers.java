@@ -1,10 +1,12 @@
 package code.ponfee.commons.math;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.util.ObjectUtils;
@@ -383,6 +385,11 @@ public final class Numbers {
             builder.append("整");
         }
         return builder.toString();
+    }
+
+    public static String toHex(BigInteger num) {
+        String hex = Hex.encodeHexString(num.toByteArray(), false);
+        return hex.replaceFirst("^0*", "");
     }
 
     public static void main(String[] args) {

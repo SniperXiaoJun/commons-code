@@ -96,7 +96,7 @@ public class JedisLock implements Lock, java.io.Serializable {
      * @param sleepMillis        休眠时间（毫秒）
      */
     public JedisLock(JedisClient jedisClient, String lockKey, int timeoutSeconds, int sleepMillis) {
-        Preconditions.checkArgument(jedisClient != null, "jedis client canot be null");
+        Preconditions.checkArgument(jedisClient != null, "jedis client cannot be null");
         Preconditions.checkArgument(StringUtils.isNotEmpty(lockKey), "lock key cannot be null");
 
         this.jedisClient = jedisClient;

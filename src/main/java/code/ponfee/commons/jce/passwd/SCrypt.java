@@ -14,7 +14,10 @@ import java.util.Base64;
 import javax.crypto.Mac;
 import javax.crypto.ShortBufferException;
 
+import org.apache.commons.codec.binary.Hex;
+
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 
 import code.ponfee.commons.jce.HmacAlgorithm;
 import code.ponfee.commons.jce.hash.HmacUtils;
@@ -350,9 +353,24 @@ public final class SCrypt {
     }
 
     public static void main(String[] args) {
+        byte[] pwd = "123456".getBytes();
+        byte[] salt = "0123456789123456".getBytes();
+        Stopwatch watch = Stopwatch.createStarted();
+        scrypt(HmacAlgorithm.HmacSHA256, "123".getBytes(), "123".getBytes(), 16384, 8, 8, 64); // 推荐参数
+        System.out.println("16384, 8, 8, 64: " + watch.stop());
+
+        watch.reset().start();
+        scrypt(HmacAlgorithm.HmacSHA256, "123".getBytes(), "123".getBytes(), 2, 2, 2, 32); // 推荐参数
+        System.out.println("2, 2, 2, 32: " + watch.stop());
+
+        String actual = Hex.encodeHexString(SCrypt.scrypt(HmacAlgorithm.HmacSHA256, pwd, salt, 8, 255, 255, 32));
+        if (!"e488217f72b6c850f82911e78427a78d8a64aa7d313cdc9ee6989915d7548df4".equals(actual)) {
+            System.err.println("scrypt fail!");
+        } else {
+            System.out.println("scrypt success!");
+        }
+
         System.out.println("=====================PBKDF2=============================");
-        byte[] pwd = "password".getBytes(UTF_8);
-        byte[] salt = "salt".getBytes(UTF_8);
         String hashed = create(HmacAlgorithm.HmacSHA256, pwd, salt, 1024, 32);
         System.out.println(hashed);
         System.out.println(check(HmacAlgorithm.HmacSHA256, pwd, salt, 1024, hashed));
@@ -365,7 +383,7 @@ public final class SCrypt {
         System.out.println(hashed);
         System.out.print("Test begin");
         boolean flag = true;
-        long start = System.currentTimeMillis();
+        watch.reset().start();
         for (int i = 0; i < 100000; i++) { // 20 seconds
             if (!check(password, hashed)) {
                 System.err.println("fail!");
@@ -373,7 +391,7 @@ public final class SCrypt {
                 break;
             }
         }
-        System.out.println("cost: "+(System.currentTimeMillis()-start)/1000);
+        System.out.println("cost: " + watch.stop());
         if (flag) {
             System.out.println("\nTest success!");
         }

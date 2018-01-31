@@ -514,7 +514,7 @@ public class ElasticSearchClient implements DisposableBean {
      */
     public <T> List<T> getDocs(String index, String type, Class<T> clazz, String... ids) {
         MultiGetResponse multiResp = client.prepareMultiGet().add(index, type, ids).get();
-        List<T> result = new ArrayList<>();
+        List<T> result = new ArrayList<>(ids.length);
         for (MultiGetItemResponse itemResp : multiResp) {
             GetResponse response = itemResp.getResponse();
             if (response.isExists()) {
@@ -685,8 +685,8 @@ public class ElasticSearchClient implements DisposableBean {
      * @return
      */
     public <T> List<T> fullSearch(ESQueryBuilder query, Class<T> clazz) {
-        List<T> result = new ArrayList<>(SCROLL_SIZE);
         SearchResponse scrollResp = query.scroll(client, SCROLL_SIZE);
+        List<T> result = new ArrayList<>((int) scrollResp.getHits().getTotalHits());
         this.scrollSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecords, totalPages, pageNo) -> {
             for (SearchHit hit : searchHits.getHits()) {
                 result.add(convertFromMap(hit.getSource(), clazz));
@@ -707,8 +707,8 @@ public class ElasticSearchClient implements DisposableBean {
      * @return
      */
     public <T> List<T> fullSearch(SearchRequestBuilder search, Class<T> clazz) {
-        List<T> result = new ArrayList<>(SCROLL_SIZE);
         SearchResponse scrollResp = search.setSize(SCROLL_SIZE).setScroll(SCROLL_TIMEOUT).get();
+        List<T> result = new ArrayList<>((int) scrollResp.getHits().getTotalHits());
         this.scrollSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecords, totalPages, pageNo) -> {
             for (SearchHit hit : searchHits.getHits()) {
                 result.add(convertFromMap(hit.getSource(), clazz));
@@ -797,7 +797,7 @@ public class ElasticSearchClient implements DisposableBean {
         page.setPageSize(pageSize);
         page.setSize(result.size());
         page.setStartRow(from);
-        page.setEndRow(from + result.size());
+        page.setEndRow(from + result.size() - 1);
         page.setFirstPage(pageNo == 1);
         page.setLastPage(pageNo == page.getPages());
         page.setHasNextPage(pageNo > 1);

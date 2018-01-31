@@ -50,7 +50,7 @@ public abstract class DSASigner {
         try {
             keygen = KeyPairGenerator.getInstance(ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
-            throw new SecurityException(e); // can not happened
+            throw new SecurityException(e); // cannot happened
         }
         // 初始化随机产生器
         SecureRandom secureRandom = new SecureRandom();

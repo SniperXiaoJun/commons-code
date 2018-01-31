@@ -3,12 +3,13 @@ package code.ponfee.commons.jce.sm;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
+
+import code.ponfee.commons.math.Numbers;
 
 /**
  * EC parameter
@@ -37,7 +38,7 @@ public class ECParameter {
    );
 
     /** init parameter */
-    public final BigInteger q;
+    public final BigInteger p;
     public final BigInteger a;
     public final BigInteger b;
     public final BigInteger n;
@@ -50,15 +51,15 @@ public class ECParameter {
     public final ECDomainParameters bcSpec;
     public final ECKeyPairGenerator keyPairGenerator = new ECKeyPairGenerator();
  
-    public ECParameter(BigInteger q, BigInteger a, BigInteger b, 
+    public ECParameter(BigInteger p, BigInteger a, BigInteger b, 
                        BigInteger n, BigInteger gx, BigInteger gy) {
-        this.q = q;
+        this.p = p;
         this.a = a;
         this.b = b;
         this.n = n;
         this.gx = gx;
         this.gy = gy;
-        this.curve = new ECCurve.Fp(q, a, b);
+        this.curve = new ECCurve.Fp(p, a, b);
         this.pointG = curve.createPoint(gx, gy);
         this.bcSpec = new ECDomainParameters(curve, pointG, n);
         this.keyPairGenerator.init(new ECKeyGenerationParameters(bcSpec, new SecureRandom()));
@@ -66,12 +67,12 @@ public class ECParameter {
 
     public @Override String toString() {
         return new StringBuilder()
-                   .append(toHex(q)).append(SEPARATOR)
-                   .append(toHex(a)).append(SEPARATOR)
-                   .append(toHex(b)).append(SEPARATOR)
-                   .append(toHex(n)).append(SEPARATOR)
-                   .append(toHex(gx)).append(SEPARATOR)
-                   .append(toHex(gy)).toString();
+                   .append(Numbers.toHex(p)).append(SEPARATOR)
+                   .append(Numbers.toHex(a)).append(SEPARATOR)
+                   .append(Numbers.toHex(b)).append(SEPARATOR)
+                   .append(Numbers.toHex(n)).append(SEPARATOR)
+                   .append(Numbers.toHex(gx)).append(SEPARATOR)
+                   .append(Numbers.toHex(gy)).toString();
     }
 
     public static ECParameter fromString(String parameter) {
@@ -82,11 +83,6 @@ public class ECParameter {
                                new BigInteger(array[3], 16), 
                                new BigInteger(array[4], 16), 
                                new BigInteger(array[5], 16));
-    }
-
-    private static String toHex(BigInteger num) {
-        String hex = Hex.encodeHexString(num.toByteArray(), false);
-        return hex.replaceFirst("^0*", "");
     }
 
     public static void main(String[] args) {

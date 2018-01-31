@@ -46,7 +46,7 @@ public class SM2KeyExchange implements Serializable {
 
     /**
      * 密钥协商发起第一步
-     * @return
+     * @return TransportEntity
      */
     public TransportEntity step1PartA() {
         rA = SM2.random(ecParam.n);
@@ -57,7 +57,7 @@ public class SM2KeyExchange implements Serializable {
     /**
      * 密钥协商响应方
      * @param entity1 传输实体
-     * @return
+     * @return TransportEntity
      */
     public TransportEntity step2PartB(TransportEntity entity1) {
         BigInteger rB = SM2.random(ecParam.n);
@@ -95,6 +95,7 @@ public class SM2KeyExchange implements Serializable {
     /**
      * 密钥协商发起方第二步
      * @param entity2 传输实体
+     * @return TransportEntity
      */
     public TransportEntity step3PartA(TransportEntity entity2) {
         BigInteger x1 = RA.getXCoord().toBigInteger();
@@ -258,9 +259,13 @@ public class SM2KeyExchange implements Serializable {
         SM2KeyExchange bKeyExchange = new SM2KeyExchange(id2, SM2.getPublicKey(ecParameter, SM2.getPublicKey(keyMap2)), SM2.getPrivateKey(SM2.getPrivateKey(keyMap2)));
         TransportEntity entity1 = aKeyExchange.step1PartA();
         TransportEntity entity2 = bKeyExchange.step2PartB(entity1);
+
         TransportEntity entity3 = aKeyExchange.step3PartA(entity2);
-        System.out.println(bKeyExchange.step4PartB(entity3));
-        System.out.println(Hex.encodeHexString(aKeyExchange.getKey()));
         System.out.println(Hex.encodeHexString(bKeyExchange.getKey()));
+
+        if (!bKeyExchange.step4PartB(entity3)) {
+            System.err.println("FAIL!");
+        }
+        System.out.println(Hex.encodeHexString(aKeyExchange.getKey()));
     }
 }

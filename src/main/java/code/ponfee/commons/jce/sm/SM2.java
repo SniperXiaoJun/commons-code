@@ -275,10 +275,10 @@ public final class SM2 {
         }
         BigInteger x = publicKey.getXCoord().toBigInteger();
         BigInteger y = publicKey.getYCoord().toBigInteger();
-        if (isBetween(x, new BigInteger("0"), ecParam.q)
-            && isBetween(y, new BigInteger("0"), ecParam.q)) {
-            BigInteger xResult = x.pow(3).add(ecParam.a.multiply(x)).add(ecParam.b).mod(ecParam.q);
-            BigInteger yResult = y.pow(2).mod(ecParam.q);
+        if (isBetween(x, new BigInteger("0"), ecParam.p)
+            && isBetween(y, new BigInteger("0"), ecParam.p)) {
+            BigInteger xResult = x.pow(3).add(ecParam.a.multiply(x)).add(ecParam.b).mod(ecParam.p);
+            BigInteger yResult = y.pow(2).mod(ecParam.p);
             if (yResult.equals(xResult)
                 && publicKey.multiply(ecParam.n).isInfinity()) {
                 return true;
@@ -338,10 +338,10 @@ public final class SM2 {
     }
 
     /**
-     * check the number is between min and max(exclusion)
-     * @param number
-     * @param min
-     * @param max
+     * check the number is between min(inclusion) and max(exclusion)
+     * @param number the value
+     * @param min   the min number, inclusion
+     * @param max   the max number, exclusion
      * @return {@code true} is between
      */
     private static boolean isBetween(BigInteger number, BigInteger min, 
@@ -399,7 +399,7 @@ public final class SM2 {
 
         byte[] data = MavenProjects.getMainJavaFileAsLineString(SM2.class).substring(0, 100).getBytes();
         Map<String, byte[]> keyMap = generateKeyPair(ecParameter);
-        System.out.println(checkPublicKey(ecParameter, getPublicKey(keyMap)));
+        System.out.println("\ncheckPublicKey: "+checkPublicKey(ecParameter, getPublicKey(keyMap)));
         for (int i = 0; i < 5; i++) {
             System.out.println("\n=============================加密/解密============================");
             byte[] encrypted = encrypt(ecParameter, keyMap.get(PUBLIC_KEY), data);

@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -239,7 +240,7 @@ public class X509CertUtils {
                 case VERSION:
                     return cert.getVersion() + "";
                 case CERT_SN:
-                    return cert.getSerialNumber().toString(16).toUpperCase();
+                    return Hex.encodeHexString(cert.getSerialNumber().toByteArray(), false);
                 case ALG_NAME:
                     return cert.getSigAlgName();
                 case START_TM:
