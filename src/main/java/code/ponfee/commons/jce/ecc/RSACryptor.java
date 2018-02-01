@@ -18,8 +18,8 @@ public class RSACryptor extends Cryptor {
     public byte[] encrypt(byte[] input, int length, Key key) {
         RSAKey k = (RSAKey) key;
         hash.reset();
-        BigInteger hashelem = new BigInteger(k.moudles.bitLength() + 17, Cryptor.SECURE_RANDOM).mod(k.moudles);
-        byte[] cryptelm = hashelem.modPow(k.publicKey, k.moudles).toByteArray();
+        BigInteger hashelem = new BigInteger(k.n.bitLength() + 17, Cryptor.SECURE_RANDOM).mod(k.n);
+        byte[] cryptelm = hashelem.modPow(k.e, k.n).toByteArray();
         byte[] res = new byte[cryptelm.length + length + 2];
         res[0] = (byte) ((cryptelm.length) >> 8);
         res[1] = (byte) cryptelm.length;
@@ -38,7 +38,7 @@ public class RSACryptor extends Cryptor {
         byte[] res = new byte[input.length - 2 - cryptelm.length];
         System.arraycopy(input, 2, cryptelm, 0, cryptelm.length);
         hash.reset();
-        hash.update(new BigInteger(cryptelm).modPow(k.privateKey, k.moudles).toByteArray());
+        hash.update(new BigInteger(cryptelm).modPow(k.d, k.n).toByteArray());
         byte[] digest = hash.digest();
         for (int j = 0; j < res.length; j++) {
             res[j] = (byte) (input[cryptelm.length + 2 + j] ^ digest[j]);

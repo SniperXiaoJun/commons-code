@@ -173,6 +173,9 @@ public final class Bytes {
      * @return
      */
     public static BigInteger toBigInteger(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return BigInteger.ZERO;
+        }
         return new BigInteger(1, bytes);
     }
 

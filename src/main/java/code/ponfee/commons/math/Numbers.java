@@ -395,6 +395,9 @@ public final class Numbers {
      */
     public static String toHex(BigInteger num) {
         String hex = Hex.encodeHexString(num.toByteArray(), false);
+        if (hex.matches("^0+$")) {
+            return "0";
+        }
         return hex.replaceFirst("^0*", "");
     }
 

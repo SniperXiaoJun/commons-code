@@ -12,18 +12,12 @@ public class ECCryptorTest {
     public static void main(String[] args) throws Exception {
         Cryptor cs = new ECCryptor(new EllipticCurve(ECParameters.secp256r1));
         Key sk = cs.generateKey();
-        //Key pk = sk.getPublic();
-        Key pk = ((ECKey) sk).getECPublic();
+        Key pk = sk.getPublic();
+        //Key pk = ((ECKey) sk).getECPublic();
         System.out.println(sk + "\n" + pk);
 
-        byte[] origin = "H".getBytes();
-        byte[] encrypted = cs.encrypt(origin, origin.length, pk);
-        try {
-            new String((cs.encrypt(encrypted, encrypted.length, pk)));
-        } catch (Exception e) {
-            System.out.println("Exception!");
-        }
-
+        byte[] origin = "中文".getBytes();
+        byte[] encrypted = cs.encrypt(origin, pk);
         byte[] decrypted = cs.decrypt(encrypted, sk);
         System.out.println("Decrypted text is: " + new String(decrypted));
     }

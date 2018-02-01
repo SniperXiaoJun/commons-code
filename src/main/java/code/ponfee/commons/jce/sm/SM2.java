@@ -102,6 +102,10 @@ public final class SM2 {
         return p;
     }
 
+    public static Map<String, byte[]> generateKeyPair() {
+        return generateKeyPair(ECParameters.SM2_BEST);
+    }
+
     /**
      * generate the SM2 key pair
      * a public key and a private key
@@ -128,12 +132,20 @@ public final class SM2 {
         return keyMap.get(PRIVATE_KEY);
     }
 
+    public static ECPoint getPublicKey(byte[] publicKey) {
+        return getPublicKey(ECParameters.SM2_BEST, publicKey);
+    }
+
     public static ECPoint getPublicKey(ECParameters ecParam, byte[] publicKey) {
         return ecParam.curve.decodePoint(publicKey);
     }
 
     public static BigInteger getPrivateKey(byte[] privateKey) {
         return new BigInteger(1, privateKey);
+    }
+
+    public static byte[] encrypt(byte[] publicKey, byte[] data) {
+        return encrypt(ECParameters.SM2_BEST, publicKey, data);
     }
 
     /**
@@ -163,6 +175,10 @@ public final class SM2 {
 
         // return the C1(65) + C2(data.length) + C3(32)
         return Bytes.concat(c1, c2, c3);
+    }
+
+    public static byte[] decrypt(byte[] privateKey, byte[] encrypted) {
+        return decrypt(ECParameters.SM2_BEST, privateKey, encrypted);
     }
 
     /**
@@ -200,6 +216,11 @@ public final class SM2 {
         return c2;
     }
 
+    public static byte[] sign(byte[] data, byte[] ida, 
+                              byte[] publicKey, byte[] privateKey) {
+        return sign(ECParameters.SM2_BEST, data, ida, publicKey, privateKey);
+    }
+
     /**
      * sm2 sign
      * @param ecParam the ec parameter
@@ -231,6 +252,11 @@ public final class SM2 {
         BigInteger s = n3.mod(ecParam.n);
 
         return new Signature(r, s).toByteArray();
+    }
+
+    public static boolean verify(byte[] data, byte[] ida, 
+                                 byte[] signed, byte[] publicKey) {
+        return verify(ECParameters.SM2_BEST, data, ida, signed, publicKey);
     }
 
     /**
@@ -266,8 +292,16 @@ public final class SM2 {
         return R.equals(signature.r);
     }
 
+    public static boolean checkPublicKey(byte[] publicKey) {
+        return checkPublicKey(getPublicKey(publicKey));
+    }
+
     public static boolean checkPublicKey(ECParameters ecParam, byte[] publicKey) {
         return checkPublicKey(ecParam, getPublicKey(ecParam, publicKey));
+    }
+
+    public static boolean checkPublicKey(ECPoint publicKey) {
+        return checkPublicKey(ECParameters.SM2_BEST, publicKey);
     }
 
     public static boolean checkPublicKey(ECParameters ecParam, ECPoint publicKey) {
@@ -385,7 +419,8 @@ public final class SM2 {
     }
 
     public static void main(String[] args) {
-        ECParameters ecParameter = ECParameters.secp256r1;
+        //ECParameters ecParameter = ECParameters.secp256r1;
+        ECParameters ecParameter = ECParameters.EC_PARAMETERS.get("secp256r1");
         for (int i = 0; i < 5; i++) {
             byte[] data = MavenProjects.getMainJavaFileAsLineString(SM2.class).substring(0, 100).getBytes();
             Map<String, byte[]> keyMap = generateKeyPair(ecParameter);

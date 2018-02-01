@@ -9,35 +9,41 @@ import java.math.BigInteger;
 
 public class RSAKey implements Key {
 
-    public BigInteger moudles;
-    public BigInteger publicKey;
-    public BigInteger privateKey;
-    public boolean secret;
+    public final BigInteger n;
+    public final BigInteger e;
+    public final BigInteger d;
+    public final boolean secret;
 
     public boolean isPublic() {
         return (!secret);
     }
 
     public RSAKey(int keySize) {
-        BigInteger p = new BigInteger(keySize / 2, 500, Cryptor.SECURE_RANDOM);
-        BigInteger q = new BigInteger(keySize / 2, 500, Cryptor.SECURE_RANDOM);
-        BigInteger phin = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
         this.secret = true;
-        this.moudles = p.multiply(q);
 
-        this.publicKey = new BigInteger(keySize, Cryptor.SECURE_RANDOM);
-        while (!this.publicKey.gcd(phin).equals(BigInteger.ONE)) {
-            this.publicKey = new BigInteger(keySize, Cryptor.SECURE_RANDOM);
-        }
+        BigInteger p = new BigInteger(keySize / 2, 500, Cryptor.SECURE_RANDOM); // prime p
+        BigInteger q = new BigInteger(keySize / 2, 500, Cryptor.SECURE_RANDOM); // prime q
+        this.n = p.multiply(q); // mod
 
-        this.privateKey = this.publicKey.modInverse(phin);
+        BigInteger pSub1 = p.subtract(BigInteger.ONE); // p-1
+        BigInteger qSub1 = q.subtract(BigInteger.ONE); // q-1
+        BigInteger phin = pSub1.multiply(qSub1);
+        //BigInteger phin = pSub1.divide(pSub1.gcd(qSub1)).multiply(qSub1);;
+
+        BigInteger e;
+        do {
+            e = new BigInteger(keySize, Cryptor.SECURE_RANDOM);
+        } while (!e.gcd(phin).equals(BigInteger.ONE));
+
+        this.e = e;
+        this.d = this.e.modInverse(phin);
     }
 
-    public RSAKey(BigInteger moudles, BigInteger publicExponent, 
-                  BigInteger privateExponent, boolean secret) {
-        this.moudles = moudles;
-        this.publicKey = publicExponent;
-        this.privateKey = privateExponent;
+    public RSAKey(BigInteger n, BigInteger e, 
+                  BigInteger d, boolean secret) {
+        this.n = n;
+        this.e = e;
+        this.d = d;
         this.secret = secret;
     }
 
@@ -48,51 +54,51 @@ public class RSAKey implements Key {
 
     /** Turns this key into a public key (does nothing if this key is public) */
     public Key getPublic() {
-        return new RSAKey(moudles, publicKey, null, false);
+        return new RSAKey(n, e, null, false);
     }
 
-    // Secret: (privateExponent, moudles, publicExponent)
-    // Public: (moudles, publicExponent)
+    // Secret: (d, n, e)
+    // Public: (n, e)
     public void writeKey(OutputStream out) throws IOException {
         DataOutputStream output = new DataOutputStream(out);
  
         output.writeBoolean(secret);
 
         if (secret) {
-            byte[] db = privateKey.toByteArray();
+            byte[] db = d.toByteArray();
             output.writeInt(db.length);
             output.write(db);
         }
 
-        byte[] nb = moudles.toByteArray();
+        byte[] nb = n.toByteArray();
         output.writeInt(nb.length);
         output.write(nb);
 
-        byte[] eb = publicKey.toByteArray();
+        byte[] eb = e.toByteArray();
         output.writeInt(eb.length);
         output.write(eb);
     }
 
-    // Secret: (privateExponent, moudles, publicExponent)
-    // Public: (moudles, publicExponent)
+    // Secret: (d, n, e)
+    // Public: (n, e)
     public Key readKey(InputStream in) throws IOException {
         DataInputStream input = new DataInputStream(in);
         boolean secret = input.readBoolean();
-        BigInteger privateExponent = null;
+        BigInteger d = null;
         if (secret) {
             byte[] db = new byte[input.readInt()];
             input.read(db);
-            privateExponent = new BigInteger(db);
+            d = new BigInteger(db);
         }
         
         byte[] nb = new byte[input.readInt()];
         input.read(nb);
-        BigInteger moudles = new BigInteger(nb);
+        BigInteger n = new BigInteger(nb);
         
         byte[] eb = new byte[input.readInt()];
         input.read(eb);
-        BigInteger publicExponent = new BigInteger(eb);
+        BigInteger e = new BigInteger(eb);
 
-        return new RSAKey(moudles, publicExponent, privateExponent, secret);
+        return new RSAKey(n, e, d, secret);
     }
 }
