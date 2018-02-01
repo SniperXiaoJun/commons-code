@@ -2,7 +2,7 @@
 
 package code.ponfee.commons.jce.passwd;
 
-import static code.ponfee.commons.jce.HmacAlgorithm.ALGORITHM_MAPPING;
+import static code.ponfee.commons.jce.HmacAlgorithms.ALGORITHM_MAPPING;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.System.arraycopy;
 
@@ -19,7 +19,7 @@ import org.apache.commons.codec.binary.Hex;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 
-import code.ponfee.commons.jce.HmacAlgorithm;
+import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.hash.HmacUtils;
 import code.ponfee.commons.math.Maths;
 import code.ponfee.commons.util.SecureRandoms;
@@ -52,12 +52,12 @@ public final class SCrypt {
      * @param dkLen Intended length, in octets, of the derived key (hash byte size).
      * @return The derived key.
      */
-    public static String create(HmacAlgorithm alg, byte[] P, byte[] S, 
+    public static String create(HmacAlgorithms alg, byte[] P, byte[] S, 
                                 int c, int dkLen) {
         return encodeBase64(pbkdf2(alg, P, S, c, dkLen));
     }
 
-    public static boolean check(HmacAlgorithm alg, byte[] P, byte[] S,
+    public static boolean check(HmacAlgorithms alg, byte[] P, byte[] S,
                                 int c, String hashed) {
         byte[] actual = Base64.getUrlDecoder().decode(hashed);
         byte[] except = pbkdf2(alg, P, S, c, actual.length);
@@ -76,7 +76,7 @@ public final class SCrypt {
      * @return
      */
     public static String create(String passwd, int N, int r, int p) {
-        return create(HmacAlgorithm.HmacSHA256, passwd, N, r, p, 32);
+        return create(HmacAlgorithms.HmacSHA256, passwd, N, r, p, 32);
     }
 
     /**
@@ -90,7 +90,7 @@ public final class SCrypt {
      * @param dkLen Intended length, in octets, of the derived key.
      * @return The hashed password.
      */
-    public static String create(HmacAlgorithm alg, String passwd, 
+    public static String create(HmacAlgorithms alg, String passwd, 
                                 int N, int r, int p, int dkLen) {
         // N max 0x800000 -> 8388608
         //Preconditions.checkArgument(N >= 1 && N <= 8388608, "N must between 1 and 8388608");
@@ -127,7 +127,7 @@ public final class SCrypt {
         byte[] salt = Base64.getUrlDecoder().decode(parts[3]);
         byte[] actual = Base64.getUrlDecoder().decode(parts[4]);
 
-        HmacAlgorithm alg = ALGORITHM_MAPPING.get((int) (params >> 32 & 0xf));
+        HmacAlgorithms alg = ALGORITHM_MAPPING.get((int) (params >> 32 & 0xf));
         int N = (int) Math.pow(2, params >> 16 & 0xffff);
         int r = (int) params >> 8 & 0xff;
         int p = (int) params      & 0xff;
@@ -146,7 +146,7 @@ public final class SCrypt {
      * @param dkLen Intended length, in octets, of the derived key.
      * @return the byte array of DK
      */
-    private static byte[] pbkdf2(HmacAlgorithm alg, byte[] P, 
+    private static byte[] pbkdf2(HmacAlgorithms alg, byte[] P, 
                                  byte[] S, int c, int dkLen) {
         Mac mac = HmacUtils.getInitializedMac(alg, P);
         int hLen = mac.getMacLength();
@@ -205,7 +205,7 @@ public final class SCrypt {
      * @return The derived key.
      * @throws GeneralSecurityException when HMAC_SHA256 is not available.
      */
-    private static byte[] scrypt(HmacAlgorithm alg, byte[] passwd, byte[] salt, 
+    private static byte[] scrypt(HmacAlgorithms alg, byte[] passwd, byte[] salt, 
                                  int N, int r, int p, int dkLen) {
         if (N < 2 || (N & (N - 1)) != 0) {
             throw new IllegalArgumentException("N must be a power of 2 greater than 1");
@@ -356,14 +356,14 @@ public final class SCrypt {
         byte[] pwd = "123456".getBytes();
         byte[] salt = "0123456789123456".getBytes();
         Stopwatch watch = Stopwatch.createStarted();
-        scrypt(HmacAlgorithm.HmacSHA256, "123".getBytes(), "123".getBytes(), 16384, 8, 8, 64); // 推荐参数
+        scrypt(HmacAlgorithms.HmacSHA256, "123".getBytes(), "123".getBytes(), 16384, 8, 8, 64); // 推荐参数
         System.out.println("16384, 8, 8, 64: " + watch.stop());
 
         watch.reset().start();
-        scrypt(HmacAlgorithm.HmacSHA256, "123".getBytes(), "123".getBytes(), 2, 2, 2, 32); // 推荐参数
+        scrypt(HmacAlgorithms.HmacSHA256, "123".getBytes(), "123".getBytes(), 2, 2, 2, 32); // 推荐参数
         System.out.println("2, 2, 2, 32: " + watch.stop());
 
-        String actual = Hex.encodeHexString(SCrypt.scrypt(HmacAlgorithm.HmacSHA256, pwd, salt, 8, 255, 255, 32));
+        String actual = Hex.encodeHexString(SCrypt.scrypt(HmacAlgorithms.HmacSHA256, pwd, salt, 8, 255, 255, 32));
         if (!"e488217f72b6c850f82911e78427a78d8a64aa7d313cdc9ee6989915d7548df4".equals(actual)) {
             System.err.println("scrypt fail!");
         } else {
@@ -371,9 +371,9 @@ public final class SCrypt {
         }
 
         System.out.println("=====================PBKDF2=============================");
-        String hashed = create(HmacAlgorithm.HmacSHA256, pwd, salt, 1024, 32);
+        String hashed = create(HmacAlgorithms.HmacSHA256, pwd, salt, 1024, 32);
         System.out.println(hashed);
-        System.out.println(check(HmacAlgorithm.HmacSHA256, pwd, salt, 1024, hashed));
+        System.out.println(check(HmacAlgorithms.HmacSHA256, pwd, salt, 1024, hashed));
 
         System.out.println("\n=====================Scrypt=============================");
         String password = "passwd";

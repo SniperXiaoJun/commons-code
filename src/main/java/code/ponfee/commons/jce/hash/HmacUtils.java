@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -13,7 +14,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Hex;
 
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.jce.HmacAlgorithm;
+import code.ponfee.commons.jce.HmacAlgorithms;
+import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.SecureRandoms;
 
@@ -39,11 +41,11 @@ public final class HmacUtils {
     private static final int BUFF_SIZE = 4096;
 
     public static byte[] sha1(byte[] key, byte[] data) {
-        return crypt(key, data, HmacAlgorithm.HmacSHA1);
+        return crypt(key, data, HmacAlgorithms.HmacSHA1);
     }
 
     public static byte[] sha1(byte[] key, InputStream data) {
-        return crypt(key, data, HmacAlgorithm.HmacSHA1);
+        return crypt(key, data, HmacAlgorithms.HmacSHA1);
     }
 
     public static String sha1Hex(byte[] key, byte[] data) {
@@ -55,7 +57,7 @@ public final class HmacUtils {
     }
 
     public static byte[] md5(byte[] key, byte[] data) {
-        return crypt(key, data, HmacAlgorithm.HmacMD5);
+        return crypt(key, data, HmacAlgorithms.HmacMD5);
     }
 
     public static String md5Hex(byte[] key, byte[] data) {
@@ -63,7 +65,7 @@ public final class HmacUtils {
     }
 
     public static byte[] sha224(byte[] key, byte[] data) {
-        return crypt(key, data, HmacAlgorithm.HmacSHA224);
+        return crypt(key, data, HmacAlgorithms.HmacSHA224);
     }
 
     public static String sha224Hex(byte[] key, byte[] data) {
@@ -71,7 +73,7 @@ public final class HmacUtils {
     }
 
     public static byte[] sha256(byte[] key, byte[] data) {
-        return crypt(key, data, HmacAlgorithm.HmacSHA256);
+        return crypt(key, data, HmacAlgorithms.HmacSHA256);
     }
 
     public static String sha256Hex(byte[] key, byte[] data) {
@@ -79,7 +81,7 @@ public final class HmacUtils {
     }
 
     public static byte[] sha384(byte[] key, byte[] data) {
-        return crypt(key, data, HmacAlgorithm.HmacSHA384);
+        return crypt(key, data, HmacAlgorithms.HmacSHA384);
     }
 
     public static String sha384Hex(byte[] key, byte[] data) {
@@ -87,14 +89,50 @@ public final class HmacUtils {
     }
 
     public static byte[] sha512(byte[] key, byte[] data) {
-        return crypt(key, data, HmacAlgorithm.HmacSHA512);
+        return crypt(key, data, HmacAlgorithms.HmacSHA512);
     }
 
     public static String sha512Hex(byte[] key, byte[] data) {
         return Hex.encodeHexString(sha512(key, data));
     }
 
-    public static Mac getInitializedMac(HmacAlgorithm algorithm, byte[] key) {
+    public static byte[] ripeMD128(byte[] key, byte[] data) {
+        Security.addProvider(Providers.BC);
+        return crypt(key, data, HmacAlgorithms.HmacRipeMD128);
+    }
+
+    public static String ripeMD128Hex(byte[] key, byte[] data) {
+        return Hex.encodeHexString(ripeMD128(key, data));
+    }
+
+    public static byte[] ripeMD160(byte[] key, byte[] data) {
+        Security.addProvider(Providers.BC);
+        return crypt(key, data, HmacAlgorithms.HmacRipeMD160);
+    }
+
+    public static String ripeMD160Hex(byte[] key, byte[] data) {
+        return Hex.encodeHexString(ripeMD160(key, data));
+    }
+
+    public static byte[] ripeMD256(byte[] key, byte[] data) {
+        Security.addProvider(Providers.BC);
+        return crypt(key, data, HmacAlgorithms.HmacRipeMD256);
+    }
+
+    public static String ripeMD256Hex(byte[] key, byte[] data) {
+        return Hex.encodeHexString(ripeMD256(key, data));
+    }
+
+    public static byte[] ripeMD320(byte[] key, byte[] data) {
+        Security.addProvider(Providers.BC);
+        return crypt(key, data, HmacAlgorithms.HmacRipeMD320);
+    }
+
+    public static String ripeMD320Hex(byte[] key, byte[] data) {
+        return Hex.encodeHexString(ripeMD320(key, data));
+    }
+
+    public static Mac getInitializedMac(HmacAlgorithms algorithm, byte[] key) {
         if (key == null) {
             throw new IllegalArgumentException("Null key");
         }
@@ -111,11 +149,11 @@ public final class HmacUtils {
     }
 
     // ------------------------private methods-------------------------
-    private static byte[] crypt(byte[] key, byte[] data, HmacAlgorithm alg) {
+    private static byte[] crypt(byte[] key, byte[] data, HmacAlgorithms alg) {
         return getInitializedMac(alg, key).doFinal(data);
     }
 
-    private static byte[] crypt(byte[] key, InputStream input, HmacAlgorithm alg) {
+    private static byte[] crypt(byte[] key, InputStream input, HmacAlgorithms alg) {
         try (InputStream in = input) {
             Mac mac = getInitializedMac(alg, key);
             byte[] buffer = new byte[BUFF_SIZE];
@@ -132,5 +170,9 @@ public final class HmacUtils {
         byte[] key = SecureRandoms.nextBytes(16);
         System.out.println(sha1Hex(key, new FileInputStream(MavenProjects.getMainJavaFile(HmacUtils.class))));
         System.out.println(sha1Hex(key, new FileInputStream(MavenProjects.getMainJavaFile(HmacUtils.class))));
+        System.out.println(ripeMD128Hex(key, "abc".getBytes()));
+        System.out.println(ripeMD160Hex(key, "abc".getBytes()));
+        System.out.println(ripeMD256Hex(key, "abc".getBytes()));
+        System.out.println(ripeMD320Hex(key, "abc".getBytes()));
     }
 }

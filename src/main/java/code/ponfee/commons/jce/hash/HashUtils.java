@@ -7,10 +7,12 @@ import java.nio.charset.Charset;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 
 import org.apache.commons.codec.binary.Hex;
 
 import code.ponfee.commons.io.Files;
+import code.ponfee.commons.jce.Providers;
 
 /**
  * hash算法封装
@@ -138,6 +140,43 @@ public final class HashUtils {
         return Hex.encodeHexString(sha512(data));
     }
 
+    // ---------------------------------------RipeMD---------------------------------------
+    public static byte[] ripeMD128(byte[] data) {
+        Security.addProvider(Providers.BC);
+        return digest(data, "RipeMD128");
+    }
+
+    public static String ripeMD128Hex(byte[] data) {
+        return Hex.encodeHexString(ripeMD128(data));
+    }
+
+    public static byte[] ripeMD160(byte[] data) {
+        Security.addProvider(Providers.BC);
+        return digest(data, "RipeMD160");
+    }
+
+    public static String ripeMD160Hex(byte[] data) {
+        return Hex.encodeHexString(ripeMD160(data));
+    }
+
+    public static byte[] ripeMD256(byte[] data) {
+        Security.addProvider(Providers.BC);
+        return digest(data, "RipeMD256");
+    }
+
+    public static String ripeMD256Hex(byte[] data) {
+        return Hex.encodeHexString(ripeMD256(data));
+    }
+
+    public static byte[] ripeMD320(byte[] data) {
+        Security.addProvider(Providers.BC);
+        return digest(data, "RipeMD320");
+    }
+
+    public static String ripeMD320Hex(byte[] data) {
+        return Hex.encodeHexString(ripeMD320(data));
+    }
+
     // ---------------------------------------private methods---------------------------------------
     /**
      * 数据摘要
@@ -193,6 +232,7 @@ public final class HashUtils {
 
     public static void main(String[] args) throws Exception {
         System.out.println(sha224Hex("1".getBytes()));
+        System.out.println(ripeMD160Hex("1234567890".getBytes()));
         //System.out.println(ObjectUtils.toString(shortText("http://www.manong5.com/102542001/")));
         long start = System.currentTimeMillis();
         System.out.println(sha1Hex(new FileInputStream("E:\\tools\\develop\\linux\\CentOS-6.6-x86_64-bin-DVD1.iso")));

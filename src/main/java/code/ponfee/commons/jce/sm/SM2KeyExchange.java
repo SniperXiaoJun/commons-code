@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.math.ec.ECPoint;
 
+import code.ponfee.commons.jce.ECParameters;
 import code.ponfee.commons.util.Bytes;
 
 /**
@@ -25,18 +26,18 @@ public class SM2KeyExchange implements Serializable {
     private ECPoint V;
     private byte[] key;
 
-    private final ECParameter ecParam;
+    private final ECParameters ecParam;
     private final BigInteger w;
     private final ECPoint publicKey;
     private final BigInteger privateKey;
     private final byte[] Z;
 
     public SM2KeyExchange(byte[] ida, ECPoint publicKey, BigInteger privateKey) {
-        this(ida, publicKey, privateKey, ECParameter.DEFAULT_EC_PARAM);
+        this(ida, publicKey, privateKey, ECParameters.SM2_BEST);
     }
 
     public SM2KeyExchange(byte[] ida, ECPoint publicKey, BigInteger privateKey, 
-                          ECParameter ecParam) {
+                          ECParameters ecParam) {
         this.ecParam = ecParam;
         this.w = new BigInteger("2").pow((int) Math.ceil(ecParam.n.bitLength() * 1.0 / 2) - 1);
         this.publicKey = publicKey;
@@ -247,7 +248,7 @@ public class SM2KeyExchange implements Serializable {
     }
 
     public static void main(String[] args) {
-        ECParameter ecParameter = ECParameter.DEFAULT_EC_PARAM;
+        ECParameters ecParameter = ECParameters.SM2_BEST;
 
         System.out.println("=============================密钥协商============================");
         Map<String, byte[]> keyMap = SM2.generateKeyPair(ecParameter);

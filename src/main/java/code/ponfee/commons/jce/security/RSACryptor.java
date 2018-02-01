@@ -18,7 +18,7 @@ import javax.crypto.Cipher;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.jce.RSASignAlgorithm;
+import code.ponfee.commons.jce.RSASignAlgorithms;
 
 /**
  * RSA Cryptor
@@ -62,7 +62,7 @@ public final class RSACryptor {
      * @return
      */
     public static byte[] signMd5(byte[] data, RSAPrivateKey privateKey) {
-        return sign(data, privateKey, RSASignAlgorithm.MD5withRSA);
+        return sign(data, privateKey, RSASignAlgorithms.MD5withRSA);
     }
 
     /**
@@ -72,7 +72,7 @@ public final class RSACryptor {
      * @return
      */
     public static byte[] signSha1(byte[] data, RSAPrivateKey privateKey) {
-        return sign(data, privateKey, RSASignAlgorithm.SHA1withRSA);
+        return sign(data, privateKey, RSASignAlgorithms.SHA1withRSA);
     }
 
     /**
@@ -82,7 +82,7 @@ public final class RSACryptor {
      * @return
      */
     public static byte[] signSha256(byte[] data, RSAPrivateKey privateKey) {
-        return sign(data, privateKey, RSASignAlgorithm.SHA256withRSA);
+        return sign(data, privateKey, RSASignAlgorithms.SHA256withRSA);
     }
 
     /**
@@ -93,7 +93,7 @@ public final class RSACryptor {
      * @return
      */
     public static boolean verifyMd5(byte[] data, RSAPublicKey publicKey, byte[] signed) {
-        return verify(data, publicKey, signed, RSASignAlgorithm.MD5withRSA);
+        return verify(data, publicKey, signed, RSASignAlgorithms.MD5withRSA);
     }
 
     /**
@@ -104,7 +104,7 @@ public final class RSACryptor {
      * @return
      */
     public static boolean verifySha1(byte[] data, RSAPublicKey publicKey, byte[] signed) {
-        return verify(data, publicKey, signed, RSASignAlgorithm.SHA1withRSA);
+        return verify(data, publicKey, signed, RSASignAlgorithms.SHA1withRSA);
     }
 
     /**
@@ -115,7 +115,7 @@ public final class RSACryptor {
      * @return
      */
     public static boolean verifySha256(byte[] data, RSAPublicKey publicKey, byte[] signed) {
-        return verify(data, publicKey, signed, RSASignAlgorithm.SHA256withRSA);
+        return verify(data, publicKey, signed, RSASignAlgorithms.SHA256withRSA);
     }
 
     /**
@@ -217,7 +217,7 @@ public final class RSACryptor {
      * @param algId
      * @return
      */
-    private static byte[] sign(byte[] data, RSAPrivateKey privateKey, RSASignAlgorithm alg) {
+    private static byte[] sign(byte[] data, RSAPrivateKey privateKey, RSASignAlgorithms alg) {
         try {
             Signature signature = Signature.getInstance(alg.name());
             signature.initSign(privateKey);
@@ -237,7 +237,7 @@ public final class RSACryptor {
      * @return
      */
     private static boolean verify(byte[] data, RSAPublicKey publicKey, 
-                                  byte[] signed, RSASignAlgorithm alg) {
+                                  byte[] signed, RSASignAlgorithms alg) {
         try {
             Signature signature = Signature.getInstance(alg.name());
             signature.initVerify(publicKey);

@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -31,13 +31,23 @@ import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 public final class RSAPublicKeys {
     private RSAPublicKeys() {}
 
+    public static RSAPublicKey toRSAPublicKey(BigInteger modulus, BigInteger publicExponent) {
+        try {
+            // 存储的就是这两个大整形数
+            return (RSAPublicKey) KeyFactory.getInstance(RSACryptor.ALG_RSA)
+                .generatePublic(new RSAPublicKeySpec(modulus, publicExponent));
+        } catch (Exception ex) {
+            throw new SecurityException(ex);
+        }
+    }
+  
     /**
      * 证书中获取公钥
      * @param cert
      * @return
      */
-    public static PublicKey getPublicKey(Certificate cert) {
-        return cert.getPublicKey();
+    public static RSAPublicKey getPublicKey(Certificate cert) {
+        return (RSAPublicKey) cert.getPublicKey();
     }
 
     /**

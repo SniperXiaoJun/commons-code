@@ -146,6 +146,7 @@ public final class Numbers {
         try {
             return Double.parseDouble(obj.toString());
         } catch (NumberFormatException ignored) {
+            ignored.printStackTrace();
             return defaultVal;
         }
     }
@@ -387,9 +388,18 @@ public final class Numbers {
         return builder.toString();
     }
 
+    /**
+     * to upper hex string and remove prefix 0
+     * @param num the BigInteger
+     * @return upper hex string
+     */
     public static String toHex(BigInteger num) {
         String hex = Hex.encodeHexString(num.toByteArray(), false);
         return hex.replaceFirst("^0*", "");
+    }
+
+    public static BigInteger toBigInteger(String hex) {
+        return new BigInteger(hex, 16);
     }
 
     public static void main(String[] args) {

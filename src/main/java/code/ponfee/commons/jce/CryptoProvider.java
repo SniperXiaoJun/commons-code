@@ -19,7 +19,6 @@ import code.ponfee.commons.jce.crypto.SymmetricCryptorBuilder;
 import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSAPrivateKeys;
 import code.ponfee.commons.jce.security.RSAPublicKeys;
-import code.ponfee.commons.jce.sm.ECParameter;
 import code.ponfee.commons.jce.sm.SM2;
 import code.ponfee.commons.util.MavenProjects;
 
@@ -237,7 +236,11 @@ public abstract class CryptoProvider {
         };
     }
 
-    public static CryptoProvider sm2PublicKeyProvider(final ECParameter ecParameter, 
+    public static CryptoProvider sm2PublicKeyProvider(final byte[] publicKey) {
+        return sm2PublicKeyProvider(ECParameters.SM2_BEST, publicKey);
+    }
+
+    public static CryptoProvider sm2PublicKeyProvider(final ECParameters ecParameter, 
                                                       final byte[] publicKey) {
         return new CryptoProvider() {
             private final byte[] ida = "ida".getBytes();
@@ -259,7 +262,12 @@ public abstract class CryptoProvider {
         };
     }
 
-    public static CryptoProvider sm2PrivateKeyProvider(final ECParameter ecParameter,
+    public static CryptoProvider sm2PrivateKeyProvider(final byte[] publicKey, 
+                                                       final byte[] privateKey) {
+        return sm2PrivateKeyProvider(ECParameters.SM2_BEST, publicKey, privateKey);
+    }
+
+    public static CryptoProvider sm2PrivateKeyProvider(final ECParameters ecParameter,
                                                        final byte[] publicKey, 
                                                        final byte[] privateKey) {
         return new CryptoProvider() {
@@ -311,7 +319,7 @@ public abstract class CryptoProvider {
         System.out.println("解密后：" + aes.decrypt(data));
 
         System.out.println("\n============================SM2 crypt==========================");
-        ECParameter ecParameter = ECParameter.DEFAULT_EC_PARAM;
+        ECParameters ecParameter = ECParameters.SM2_BEST;
         Map<String, byte[]> sm2KeyMap = SM2.generateKeyPair(ecParameter);
         CryptoProvider sm2 = sm2PrivateKeyProvider(ecParameter, SM2.getPublicKey(sm2KeyMap), SM2.getPrivateKey(sm2KeyMap));
         data = sm2.encrypt(str);

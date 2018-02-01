@@ -1,6 +1,6 @@
 package code.ponfee.commons.jce.passwd;
 
-import static code.ponfee.commons.jce.HmacAlgorithm.ALGORITHM_MAPPING;
+import static code.ponfee.commons.jce.HmacAlgorithms.ALGORITHM_MAPPING;
 
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
@@ -13,7 +13,7 @@ import javax.crypto.spec.PBEKeySpec;
 
 import com.google.common.base.Preconditions;
 
-import code.ponfee.commons.jce.HmacAlgorithm;
+import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
@@ -41,10 +41,10 @@ public final class PBKDF2 {
      * @return
      */
     public static String create(String password) {
-        return create(HmacAlgorithm.HmacSHA256, password.toCharArray());
+        return create(HmacAlgorithms.HmacSHA256, password.toCharArray());
     }
 
-    public static String create(HmacAlgorithm alg, String password) {
+    public static String create(HmacAlgorithms alg, String password) {
         return create(alg, password.toCharArray());
     }
 
@@ -56,7 +56,7 @@ public final class PBKDF2 {
      * @param password
      * @return
      */
-    public static String create(HmacAlgorithm alg, char[] password) {
+    public static String create(HmacAlgorithms alg, char[] password) {
         return create(alg, password, 32, 64, 32);
     }
 
@@ -69,7 +69,7 @@ public final class PBKDF2 {
      * @param dkLen              Intended length, in octets, of the derived key.
      * @return a salted PBKDF2 hash of the password
      */
-    public static String create(HmacAlgorithm alg, char[] password, int saltByteSize,
+    public static String create(HmacAlgorithms alg, char[] password, int saltByteSize,
                                 int iterationCount, int dkLen) {
         Preconditions.checkArgument(iterationCount >= 1 && iterationCount <= 0xffff, 
                                     "iterations must between 1 and 65535");
@@ -118,7 +118,7 @@ public final class PBKDF2 {
         }
 
         long params = Long.parseLong(parts[1], 16);
-        HmacAlgorithm alg = ALGORITHM_MAPPING.get((int) (params >> 16 & 0xf));
+        HmacAlgorithms alg = ALGORITHM_MAPPING.get((int) (params >> 16 & 0xf));
         int iterations = (int) params & 0xffff;
         byte[] salt = Base64.getUrlDecoder().decode(parts[2]);
         byte[] hash = Base64.getUrlDecoder().decode(parts[3]);
@@ -141,7 +141,7 @@ public final class PBKDF2 {
      * @param dkLen           the length of the hash to compute in bytes
      * @return the PBDKF2 hash of the password
      */
-    private static byte[] pbkdf2(HmacAlgorithm alg, char[] password, byte[] salt,
+    private static byte[] pbkdf2(HmacAlgorithms alg, char[] password, byte[] salt,
                                  int iterationCount, int dkLen) {
         PBEKeySpec spec = new PBEKeySpec(password, salt, iterationCount, dkLen * 8);
         try {
@@ -160,12 +160,12 @@ public final class PBKDF2 {
     public static void main(String[] args) {
         // Print out 10 hashes
         for (int i = 0; i < 10; i++) {
-            System.out.println(create(HmacAlgorithm.HmacSHA256, "p\r\nassw0Rd!".toCharArray(), 16, 65535, 32));
+            System.out.println(create(HmacAlgorithms.HmacSHA256, "p\r\nassw0Rd!".toCharArray(), 16, 65535, 32));
         }
         System.out.println("============================================\n");
 
         // Test password validation
-        HmacAlgorithm alg = HmacAlgorithm.HmacSHA384;
+        HmacAlgorithms alg = HmacAlgorithms.HmacSHA384;
         boolean failure = false;
         System.out.println("Running tests...");
         String passwd = "password";

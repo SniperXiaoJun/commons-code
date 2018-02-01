@@ -1,6 +1,6 @@
 package code.ponfee.commons.jce.passwd;
 
-import static code.ponfee.commons.jce.HmacAlgorithm.ALGORITHM_MAPPING;
+import static code.ponfee.commons.jce.HmacAlgorithms.ALGORITHM_MAPPING;
 
 import java.util.Arrays;
 import java.util.Base64;
@@ -11,7 +11,7 @@ import org.apache.commons.codec.binary.Hex;
 
 import com.google.common.base.Preconditions;
 
-import code.ponfee.commons.jce.HmacAlgorithm;
+import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.hash.HmacUtils;
 import code.ponfee.commons.util.SecureRandoms;
 
@@ -24,7 +24,7 @@ public class Crypt {
     private static final String SEPARATOR = "$";
 
     public static String create(String passwd) {
-        return create(HmacAlgorithm.HmacSHA256, passwd, 32);
+        return create(HmacAlgorithms.HmacSHA256, passwd, 32);
     }
 
     /**
@@ -34,7 +34,7 @@ public class Crypt {
      * @param rounds
      * @return
      */
-    public static String create(HmacAlgorithm alg, String passwd, int rounds) {
+    public static String create(HmacAlgorithms alg, String passwd, int rounds) {
         Preconditions.checkArgument(rounds >= 1 && rounds <= 0xff, 
                                     "iterations must between 1 and 255");
 
@@ -62,7 +62,7 @@ public class Crypt {
         }
 
         long params = Long.parseLong(parts[1], 16);
-        HmacAlgorithm alg = ALGORITHM_MAPPING.get((int) (params >> 8 & 0xf));
+        HmacAlgorithms alg = ALGORITHM_MAPPING.get((int) (params >> 8 & 0xf));
         byte[] salt = Base64.getUrlDecoder().decode(parts[2]);
         byte[] testHash = crypt(alg, passwd.getBytes(), salt, (int) params & 0xff);
 
@@ -78,7 +78,7 @@ public class Crypt {
      * @param rounds
      * @return
      */
-    private static byte[] crypt(HmacAlgorithm alg, byte[] password, 
+    private static byte[] crypt(HmacAlgorithms alg, byte[] password, 
                                 byte[] salt, int rounds) {
         Mac mac = HmacUtils.getInitializedMac(alg, salt);
         for (int i = 0; i < rounds; i++) {
@@ -103,6 +103,6 @@ public class Crypt {
         }
         System.out.println(System.currentTimeMillis()-start);
 
-        System.out.println(Hex.encodeHexString(crypt(HmacAlgorithm.HmacSHA256, "password".getBytes(), "salt".getBytes(), 64)));
+        System.out.println(Hex.encodeHexString(crypt(HmacAlgorithms.HmacSHA256, "password".getBytes(), "salt".getBytes(), 64)));
     }
 }

@@ -48,7 +48,7 @@ import code.ponfee.commons.io.Files;
 public class X509CertUtils {
 
     private static final String X509 = "X.509";
-    private static final char ENDBOUNDARY[] = "-----END".toCharArray();
+    private static final char[] ENDBOUNDARY = "-----END".toCharArray();
     private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     /**
@@ -83,7 +83,7 @@ public class X509CertUtils {
 
                 return new X509CertificateObject(struct);
             } catch (Exception ex) {
-                SecurityException se = new SecurityException(e.getMessage() + ";" + ex.getMessage());
+                SecurityException se = new SecurityException(e.getMessage() + "; " + ex.getMessage());
                 se.setStackTrace(ArrayUtils.addAll(e.getStackTrace(), ex.getStackTrace()));
                 throw se;
             } finally {
@@ -171,7 +171,7 @@ public class X509CertUtils {
                 parser.engineInit(in);
                 return (X509CRLObject) parser.engineRead();
             } catch (Exception ex) {
-                SecurityException se = new SecurityException(e.getMessage() + "；" + ex.getMessage());
+                SecurityException se = new SecurityException(e.getMessage() + "; " + ex.getMessage());
                 se.setStackTrace(ArrayUtils.addAll(e.getStackTrace(), ex.getStackTrace()));
                 throw se;
             }
@@ -381,8 +381,11 @@ public class X509CertUtils {
                 int i2 = inputstream.read();
                 int j2 = inputstream.read();
                 inputstream.reset();
-                return i == 45 && j == 45 && k == 45 && l == 45 && i1 == 45 && j1 == 66 && k1 == 69
-                    && l1 == 71 && i2 == 73 && j2 == 78;
+                return i == 45 && j == 45 
+                    && k == 45 && l == 45 
+                    && i1 == 45 && j1 == 66 
+                    && k1 == 69 && l1 == 71 
+                    && i2 == 73 && j2 == 78;
             } else {
                 return false;
             }

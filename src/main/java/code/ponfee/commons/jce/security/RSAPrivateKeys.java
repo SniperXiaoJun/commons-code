@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateCrtKey;
@@ -11,6 +12,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
 
@@ -70,6 +72,16 @@ import code.ponfee.commons.jce.Providers;
  */
 public final class RSAPrivateKeys {
     private RSAPrivateKeys() {}
+
+    public static RSAPrivateKey toRSAPrivateKey(BigInteger modulus, BigInteger privateExponent) {
+        try {
+            // 存储的就是这两个大整形数
+            return (RSAPrivateKey) KeyFactory.getInstance(RSACryptor.ALG_RSA)
+                .generatePrivate(new RSAPrivateKeySpec(modulus, privateExponent));
+        } catch (Exception ex) {
+            throw new SecurityException(ex);
+        }
+    }
 
     /**
      * 对于某些jdk不支持私钥加密及验签，所以要反转私钥为公钥

@@ -24,13 +24,13 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 
-import code.ponfee.commons.jce.sm.ECParameter;
+import code.ponfee.commons.jce.ECParameters;
 import code.ponfee.commons.jce.sm.SM2;
 
 public class SM2Crypto extends JFrame{
     private static final long serialVersionUID = 1L;
 
-    Map<String, byte[]> map = SM2.generateKeyPair(ECParameter.DEFAULT_EC_PARAM);
+    Map<String, byte[]> map = SM2.generateKeyPair(ECParameters.SM2_BEST);
     
     StringBuffer str=new StringBuffer();
     // 显示面板
@@ -131,13 +131,13 @@ public class SM2Crypto extends JFrame{
         JMenuItem pItem = new JMenuItem("加密");
         pItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                textArea.setText(Base64.getEncoder().encodeToString(SM2.encrypt(ECParameter.DEFAULT_EC_PARAM, map.get(SM2.PUBLIC_KEY), urlField.getText().getBytes())));
+                textArea.setText(Base64.getEncoder().encodeToString(SM2.encrypt(ECParameters.SM2_BEST, map.get(SM2.PUBLIC_KEY), urlField.getText().getBytes())));
             }
         });
         JMenuItem cItem = new JMenuItem("解密");
         cItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                urlField.setText(new String(SM2.decrypt(ECParameter.DEFAULT_EC_PARAM, map.get(SM2.PRIVATE_KEY), Base64.getDecoder().decode(textArea.getText()))));
+                urlField.setText(new String(SM2.decrypt(ECParameters.SM2_BEST, map.get(SM2.PRIVATE_KEY), Base64.getDecoder().decode(textArea.getText()))));
             }
         });
         doMenu.add(pItem);

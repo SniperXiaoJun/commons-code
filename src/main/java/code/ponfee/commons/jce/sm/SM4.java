@@ -251,15 +251,13 @@ public final class SM4 {
     }
 
     private static long sm4Lt(long ka) {
-        long bb = 0L;
         byte[] a = new byte[4];
-        byte[] b = new byte[4];
         putUlongBe(ka, a, 0);
-        b[0] = sm4Sbox(a[0]);
-        b[1] = sm4Sbox(a[1]);
-        b[2] = sm4Sbox(a[2]);
-        b[3] = sm4Sbox(a[3]);
-        bb = getUlongBe(b, 0);
+        byte[] b = {
+            sm4Sbox(a[0]), sm4Sbox(a[1]),
+            sm4Sbox(a[2]), sm4Sbox(a[3]),
+        };
+        long bb = getUlongBe(b, 0);
         return bb 
              ^ rotl(bb, 2) 
              ^ rotl(bb, 10) 
@@ -273,12 +271,12 @@ public final class SM4 {
 
     private static long sm4CalciRK(long ka) {
         byte[] a = new byte[4];
-        byte[] b = new byte[4];
         putUlongBe(ka, a, 0);
-        b[0] = sm4Sbox(a[0]);
-        b[1] = sm4Sbox(a[1]);
-        b[2] = sm4Sbox(a[2]);
-        b[3] = sm4Sbox(a[3]);
+
+        byte[] b = {
+            sm4Sbox(a[0]), sm4Sbox(a[1]),
+            sm4Sbox(a[2]), sm4Sbox(a[3])
+        };
         long bb = getUlongBe(b, 0);
         return bb ^ rotl(bb, 13) ^ rotl(bb, 23);
     }
@@ -288,17 +286,16 @@ public final class SM4 {
                                     "Key must be 16 byte array");
 
         key = Arrays.copyOf(key, key.length);
-        long[] MK = new long[4];
+        long[] MK = {
+            getUlongBe(key, 0), getUlongBe(key, 4),
+            getUlongBe(key, 8), getUlongBe(key, 12)
+        };
         long[] k = new long[36];
-        long[] SK = new long[32];
-        MK[0] = getUlongBe(key, 0);
-        MK[1] = getUlongBe(key, 4);
-        MK[2] = getUlongBe(key, 8);
-        MK[3] = getUlongBe(key, 12);
         k[0] = MK[0] ^ (long) FK[0];
         k[1] = MK[1] ^ (long) FK[1];
         k[2] = MK[2] ^ (long) FK[2];
         k[3] = MK[3] ^ (long) FK[3];
+        long[] SK = new long[32];
         int i = 0;
         for (; i < 32; i++) {
             k[(i + 4)] = k[i] 

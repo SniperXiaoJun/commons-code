@@ -15,6 +15,7 @@ import org.bouncycastle.math.ec.ECPoint;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
+import code.ponfee.commons.jce.ECParameters;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
 
@@ -107,7 +108,7 @@ public final class SM2 {
      * @param ecParam the ec parameter
      * @return sm2 key store the map
      */
-    public static Map<String, byte[]> generateKeyPair(ECParameter ecParam) {
+    public static Map<String, byte[]> generateKeyPair(ECParameters ecParam) {
         AsymmetricCipherKeyPair key = ecParam.keyPairGenerator.generateKeyPair();
         ECPrivateKeyParameters ecpriv = (ECPrivateKeyParameters) key.getPrivate();
         ECPublicKeyParameters ecpub = (ECPublicKeyParameters) key.getPublic();
@@ -127,7 +128,7 @@ public final class SM2 {
         return keyMap.get(PRIVATE_KEY);
     }
 
-    public static ECPoint getPublicKey(ECParameter ecParam, byte[] publicKey) {
+    public static ECPoint getPublicKey(ECParameters ecParam, byte[] publicKey) {
         return ecParam.curve.decodePoint(publicKey);
     }
 
@@ -142,7 +143,7 @@ public final class SM2 {
      * @param data the data to be encrypt
      * @return encrypted byte array
      */
-    public static byte[] encrypt(ECParameter ecParam, byte[] publicKey, byte[] data) {
+    public static byte[] encrypt(ECParameters ecParam, byte[] publicKey, byte[] data) {
         if (ArrayUtils.isEmpty(publicKey) || ArrayUtils.isEmpty(data)) {
             return null;
         }
@@ -171,7 +172,7 @@ public final class SM2 {
      * @param encrypted the encrypted byte array data
      * @return the origin byte array data
      */
-    public static byte[] decrypt(ECParameter ecParam, 
+    public static byte[] decrypt(ECParameters ecParam, 
                                  byte[] privateKey, byte[] encrypted) {
         if (ArrayUtils.isEmpty(privateKey) || ArrayUtils.isEmpty(encrypted)) {
             return null;
@@ -208,7 +209,7 @@ public final class SM2 {
      * @param privateKey 私钥
      * @return 签名信息
      */
-    public static byte[] sign(ECParameter ecParam, byte[] data, byte[] ida, 
+    public static byte[] sign(ECParameters ecParam, byte[] data, byte[] ida, 
                               byte[] publicKey, byte[] privateKey) {
         ECPoint pubKey = getPublicKey(ecParam, publicKey);
         BigInteger priKey = getPrivateKey(privateKey);
@@ -241,7 +242,7 @@ public final class SM2 {
      * @param publicKey
      * @return
      */
-    public static boolean verify(ECParameter ecParam, byte[] data, byte[] ida, 
+    public static boolean verify(ECParameters ecParam, byte[] data, byte[] ida, 
                                  byte[] signed, byte[] publicKey) {
         Signature signature = new Signature(signed);
         if (!isBetween(signature.r, BigInteger.ONE, ecParam.n)
@@ -265,25 +266,28 @@ public final class SM2 {
         return R.equals(signature.r);
     }
 
-    public static boolean checkPublicKey(ECParameter ecParam, byte[] publicKey) {
+    public static boolean checkPublicKey(ECParameters ecParam, byte[] publicKey) {
         return checkPublicKey(ecParam, getPublicKey(ecParam, publicKey));
     }
 
-    public static boolean checkPublicKey(ECParameter ecParam, ECPoint publicKey) {
+    public static boolean checkPublicKey(ECParameters ecParam, ECPoint publicKey) {
         if (publicKey.isInfinity()) {
             return false;
         }
+
         BigInteger x = publicKey.getXCoord().toBigInteger();
         BigInteger y = publicKey.getYCoord().toBigInteger();
         if (isBetween(x, new BigInteger("0"), ecParam.p)
             && isBetween(y, new BigInteger("0"), ecParam.p)) {
-            BigInteger xResult = x.pow(3).add(ecParam.a.multiply(x)).add(ecParam.b).mod(ecParam.p);
+            BigInteger xResult = x.pow(3).add(ecParam.a.multiply(x))
+                                         .add(ecParam.b).mod(ecParam.p);
             BigInteger yResult = y.pow(2).mod(ecParam.p);
             if (yResult.equals(xResult)
                 && publicKey.multiply(ecParam.n).isInfinity()) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -294,9 +298,9 @@ public final class SM2 {
      * @param pubKey
      * @return
      */
-    static byte[] calcZ(ECParameter ecParam, byte[] ida, ECPoint pubKey) {
+    static byte[] calcZ(ECParameters ecParam, byte[] ida, ECPoint pubKey) {
         int entlenA = ida.length * 8;
-        byte[] entla = new byte[] { (byte) (entlenA & 0xFF00), (byte) (entlenA & 0x00FF) };
+        byte[] entla = { (byte) (entlenA & 0xFF00), (byte) (entlenA & 0x00FF) };
         byte[] data = Bytes.concat(entla, ida, ecParam.a.toByteArray(), ecParam.b.toByteArray(), 
                                    ecParam.gx.toByteArray(), ecParam.gy.toByteArray(),
                                    pubKey.getXCoord().toBigInteger().toByteArray(),
@@ -305,7 +309,7 @@ public final class SM2 {
     }
 
     /**
-     * 随机数生成器
+     * generate the random which is lesser than max number
      * @param max
      * @return BigInteger
      */
@@ -371,7 +375,7 @@ public final class SM2 {
         }
 
         byte[] toByteArray() {
-            byte[] rBytes = r.toByteArray();
+            byte[] rBytes = r.toByteArray(); // fixed 32 byte length
             return Bytes.concat(Bytes.fromInt(rBytes.length), rBytes, s.toByteArray());
         }
 
@@ -381,7 +385,7 @@ public final class SM2 {
     }
 
     public static void main(String[] args) {
-        ECParameter ecParameter = ECParameter.TEST_EC_PARAM;
+        ECParameters ecParameter = ECParameters.secp256r1;
         for (int i = 0; i < 5; i++) {
             byte[] data = MavenProjects.getMainJavaFileAsLineString(SM2.class).substring(0, 100).getBytes();
             Map<String, byte[]> keyMap = generateKeyPair(ecParameter);
