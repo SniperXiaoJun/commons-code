@@ -65,7 +65,7 @@ public final class HashUtils {
     }
 
     public static byte[] md5(byte[] data) {
-        return digest(data, "MD5");
+        return digest("MD5", data);
     }
 
     public static String md5Hex(InputStream input) {
@@ -89,7 +89,7 @@ public final class HashUtils {
     }
 
     public static byte[] sha1(byte[] data) {
-        return digest(data, "SHA-1");
+        return digest("SHA-1", data);
     }
 
     public static String sha1Hex(InputStream input) {
@@ -109,7 +109,7 @@ public final class HashUtils {
     }
 
     public static byte[] sha224(byte[] data) {
-        return digest(data, "SHA-224");
+        return digest("SHA-224", data);
     }
 
     public static String sha224Hex(byte[] data) {
@@ -117,7 +117,7 @@ public final class HashUtils {
     }
 
     public static byte[] sha256(byte[] data) {
-        return digest(data, "SHA-256");
+        return digest("SHA-256", data);
     }
 
     public static String sha256Hex(byte[] data) {
@@ -125,15 +125,15 @@ public final class HashUtils {
     }
 
     public static byte[] sha384(byte[] data) {
-        return digest(data, "SHA-384");
+        return digest("SHA-384", data);
     }
 
     public static String sha384Hex(byte[] data) {
         return Hex.encodeHexString(sha384(data));
     }
 
-    public static byte[] sha512(byte[] data) {
-        return digest(data, "SHA-512");
+    public static byte[] sha512(byte[]... data) {
+        return digest("SHA-512", data);
     }
 
     public static String sha512Hex(byte[] data) {
@@ -143,7 +143,7 @@ public final class HashUtils {
     // ---------------------------------------RipeMD---------------------------------------
     public static byte[] ripeMD128(byte[] data) {
         Security.addProvider(Providers.BC);
-        return digest(data, "RipeMD128");
+        return digest("RipeMD128", data);
     }
 
     public static String ripeMD128Hex(byte[] data) {
@@ -152,7 +152,7 @@ public final class HashUtils {
 
     public static byte[] ripeMD160(byte[] data) {
         Security.addProvider(Providers.BC);
-        return digest(data, "RipeMD160");
+        return digest("RipeMD160", data);
     }
 
     public static String ripeMD160Hex(byte[] data) {
@@ -161,7 +161,7 @@ public final class HashUtils {
 
     public static byte[] ripeMD256(byte[] data) {
         Security.addProvider(Providers.BC);
-        return digest(data, "RipeMD256");
+        return digest("RipeMD256", data);
     }
 
     public static String ripeMD256Hex(byte[] data) {
@@ -170,7 +170,7 @@ public final class HashUtils {
 
     public static byte[] ripeMD320(byte[] data) {
         Security.addProvider(Providers.BC);
-        return digest(data, "RipeMD320");
+        return digest("RipeMD320", data);
     }
 
     public static String ripeMD320Hex(byte[] data) {
@@ -184,12 +184,17 @@ public final class HashUtils {
      * @param algorithm hash算法
      * @return
      */
-    private static byte[] digest(byte[] data, String algorithm) {
+    private static byte[] digest(String algorithm, byte[]... data) {
+        MessageDigest md;
         try {
-            return MessageDigest.getInstance(algorithm).digest(data);
+            md = MessageDigest.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(e); // cannot happened
         }
+        for (byte[] input : data) {
+            md.update(input);
+        }
+        return md.digest();
     }
 
     /**

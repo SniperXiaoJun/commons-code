@@ -43,7 +43,7 @@ public abstract class Cryptor {
      * @return the maximum block size the system can encrypt. 
      */
     public int blockSize() {
-        return 20;
+        return 64;
     }
 
     /** Returns a String describing this CryptoSystem*/
