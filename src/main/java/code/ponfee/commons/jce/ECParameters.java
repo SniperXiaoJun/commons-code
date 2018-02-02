@@ -132,13 +132,14 @@ public class ECParameters implements java.io.Serializable {
 
     /** init parameter */
     public final String name;
-    public final BigInteger p;
-    public final BigInteger a;
+    public final BigInteger p; // p为素数域内点的个数
+    public final BigInteger a; // a和b是其内的两个大数
     public final BigInteger b;
-    public final BigInteger gx;
+    public final BigInteger gx; // x,y为G基点的坐标
     public final BigInteger gy;
-    public final BigInteger n;
+    public final BigInteger n; // n为点G基点的阶
     public final BigInteger S;
+    // 有时候我们还会用到h(椭圆曲线上所有点的个数p与n相除的整数部分)
 
     /** build parameter */
     public transient final ECCurve curve; // the curve

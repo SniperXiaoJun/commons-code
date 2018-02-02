@@ -35,13 +35,15 @@ public class RSAHashCryptor extends RSACryptor {
         // 对密码进行HASH
         byte[] hashedPasswd = HashUtils.sha512(passwd.toByteArray());
 
-        int metaLen = SHORT_BYTE_LEN + encryptedPasswd.length;
-        byte[] result = Arrays.copyOf(Bytes.fromShort((short) encryptedPasswd.length), metaLen + length);
+        int kLen = SHORT_BYTE_LEN + encryptedPasswd.length;
+        byte[] result = Arrays.copyOf(Bytes.fromShort((short) encryptedPasswd.length), kLen + length);
         System.arraycopy(encryptedPasswd, 0, result, SHORT_BYTE_LEN, encryptedPasswd.length);
 
-        int hLen = hashedPasswd.length;
-        for (int j = 0; j < length; j++) {
-            result[metaLen + j] = (byte) (input[j] ^ hashedPasswd[j % hLen]);
+        for (int hLen = hashedPasswd.length, i = 0, j = 0; i < length; i++, j++) {
+            if (j == hLen) {
+                j = 0;
+            }
+            result[kLen + i] = (byte) (input[i] ^ hashedPasswd[j]);
         }
         return result;
     }
@@ -58,10 +60,13 @@ public class RSAHashCryptor extends RSACryptor {
         // 对密码进行HASH
         byte[] hashedPasswd = HashUtils.sha512(passwd.toByteArray());
 
-        int hLen = hashedPasswd.length, kLen = SHORT_BYTE_LEN + encryptedPasswd.length;
         byte[] result = new byte[input.length - SHORT_BYTE_LEN - encryptedPasswd.length];
-        for (int j = 0; j < result.length; j++) {
-            result[j] = (byte) (input[kLen + j] ^ hashedPasswd[j % hLen]);
+        int kLen = SHORT_BYTE_LEN + encryptedPasswd.length;
+        for (int hLen = hashedPasswd.length, i = 0, j = 0; i < result.length; i++, j++) {
+            if (j == hLen) {
+                j = 0;
+            }
+            result[i] = (byte) (input[kLen + i] ^ hashedPasswd[j]);
         }
         return result;
     }

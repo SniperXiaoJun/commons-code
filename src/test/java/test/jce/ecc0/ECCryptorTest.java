@@ -40,7 +40,7 @@ public class ECCryptorTest {
 
     @Test
     public void testRSA() throws Exception {
-        RSAKey dk = new RSAKey(1024);
+        RSAKey dk = new RSAKey(2048);
         Key ek = dk.getPublic();
         Cryptor cs = new RSACryptor();
         System.out.println(dk + "\n" + ek);
@@ -62,7 +62,7 @@ public class ECCryptorTest {
 
     @Test
     public void testRSAHash() throws Exception {
-        RSAKey dk = new RSAKey(1024);
+        RSAKey dk = new RSAKey(2048);
         Key ek = dk.getPublic();
         RSACryptor cs = new RSAHashCryptor();
         System.out.println(dk + "\n" + ek);

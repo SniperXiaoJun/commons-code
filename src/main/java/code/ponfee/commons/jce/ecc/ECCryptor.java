@@ -52,10 +52,12 @@ public class ECCryptor extends Cryptor {
         ECPoint sec = ecKey.beta.multiply(rk);
 
         // 用HASH值与原文进行xor操作
-        byte[] digest = HashUtils.sha512(sec.getx().toByteArray(), sec.gety().toByteArray());
-        int dLen = digest.length;
-        for (int j = 0; j < length; j++) {
-            result[j + offset] = (byte) (input[j] ^ digest[j % dLen]);
+        byte[] hashed = HashUtils.sha512(sec.getx().toByteArray(), sec.gety().toByteArray());
+        for (int hLen = hashed.length, i = 0, j = 0; i < length; i++, j++) {
+            if (j == hLen) {
+                j = 0;
+            }
+            result[i + offset] = (byte) (input[i] ^ hashed[j]);
         }
         return result;
     }
@@ -72,17 +74,19 @@ public class ECCryptor extends Cryptor {
         // beta(public key) * rk = ECPoint S = alpha(public key) * dk
         ECPoint sec = gamma.multiply(ecKey.dk);
 
-        byte[] digest;
+        byte[] hashed;
         if (sec.isZero()) {
-            digest = HashUtils.sha512(BigInteger.ZERO.toByteArray(), BigInteger.ZERO.toByteArray());
+            hashed = HashUtils.sha512(BigInteger.ZERO.toByteArray(), BigInteger.ZERO.toByteArray());
         } else {
-            digest = HashUtils.sha512(sec.getx().toByteArray(), sec.gety().toByteArray());
+            hashed = HashUtils.sha512(sec.getx().toByteArray(), sec.gety().toByteArray());
         }
 
         byte[] result = new byte[input.length - offset];
-        int dLen = digest.length;
-        for (int j = 0; j < input.length - offset; j++) {
-            result[j] = (byte) (input[j + offset] ^ digest[j % dLen]);
+        for (int hLen = hashed.length, i = 0, j = 0; i < input.length - offset; i++, j++) {
+            if (j == hLen) {
+                j = 0;
+            }
+            result[i] = (byte) (input[i + offset] ^ hashed[j]);
         }
         return result;
     }
