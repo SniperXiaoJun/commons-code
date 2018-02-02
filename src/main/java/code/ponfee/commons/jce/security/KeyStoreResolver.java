@@ -179,9 +179,9 @@ public class KeyStoreResolver {
      */
     public PublicKey getPublicKey(String alias) {
         try {
-            if (!keyStore.isCertificateEntry(alias)) {
-                throw new NullPointerException(alias + " is not certificate entry.");
-            }
+            //if (!keyStore.isCertificateEntry(alias)) { // pfx cert isNotCertificateEntry 
+            //    throw new NullPointerException(alias + " is not certificate entry.");
+            //}
             return keyStore.getCertificate(alias).getPublicKey();
         } catch (KeyStoreException e) {
             throw new SecurityException(e);

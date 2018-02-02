@@ -123,6 +123,20 @@ public final class Bytes {
         return Charset.forName(charset).encode(buffer).array();
     }
 
+    public static byte[] fromShort(short value) {
+        return ByteBuffer.allocate(4).putShort(value).array();
+    }
+
+    public static short toShort(byte[] bytes) {
+        return toShort(bytes, 0);
+    }
+
+    public static short toShort(byte[] bytes, int fromIdx) {
+        ByteBuffer buffer = ByteBuffer.allocate(4);
+        buffer.put(bytes, fromIdx, 4).flip();
+        return buffer.getShort();
+    }
+
     public static byte[] fromInt(int value) {
         return ByteBuffer.allocate(4).putInt(value).array();
     }

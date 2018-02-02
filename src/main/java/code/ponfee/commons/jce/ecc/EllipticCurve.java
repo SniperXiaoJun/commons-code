@@ -22,22 +22,23 @@ public class EllipticCurve {
     public static final BigInteger COEFB = new BigInteger("27");
     public static final int PRIMESECURITY = 500;
 
-    /** Constructs an elliptic curve over the finite field of 'mod' elements.
-     *The equation of the curve is on the form : y^2 = x^3 + ax + b.
-     *@param a the value of 'a' where y^2 = x^3 + ax + b
-     *@param b the value of 'b' where y^2 = x^3 + ax + b
-     *@param mod The number of elements in the field. 
-     IMPORTANT: Must a prime number!
-    *@exception InsecureCurveException if the curve defined by a and b are singular, 
-    *supersingular, trace one/anomalous. 
-    *This ensures well defined operations and security.*/
+    /** 
+     * Constructs an elliptic curve over the finite field of 'mod' elements.
+     * The equation of the curve is on the form : y^2 = x^3 + ax + b.
+     * This ensures well defined operations and security.
+     * @param a the value of 'a' where y^2 = x^3 + ax + b
+     * @param b the value of 'b' where y^2 = x^3 + ax + b
+     * @param mod The number of elements in the field. IMPORTANT: Must a prime number!
+     * @exception InsecureCurveException if the curve defined by a and b are singular, 
+     *            supersingular, trace one/anomalous. 
+     */
     public EllipticCurve(BigInteger a, BigInteger b, BigInteger p) throws InsecureCurveException {
         this.a = a;
         this.b = b;
         this.p = p;
         if (!p.isProbablePrime(PRIMESECURITY)) {
-            //System.out.println("THIS CANNOT HAPPEN!!! "+p+" is not a prime!");
-            //throw new InsecureCurveException(InsecureCurveException.NONPRIMEMODULUS,this);
+            // cannot happened
+            throw new InsecureCurveException(InsecureCurveException.NONPRIMEMODULUS,this);
         }
         if (isSingular()) {
             throw new InsecureCurveException(InsecureCurveException.SINGULAR, this);
@@ -50,7 +51,7 @@ public class EllipticCurve {
             pointcmpsize = pb.length + 1;
         }
         //ppodbf = (p.add(BigInteger.ONE)).shiftRight(2);
-        name = "";
+        name = "cust";
         //FIXME compute the n of the group
         //FIXME compute a generator for the group
     }

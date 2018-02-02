@@ -10,7 +10,7 @@ import java.math.BigInteger;
 public class ECKey implements Key {
     /** There are to kinds of keys secret and public */
     protected boolean secret;
-    protected BigInteger sk;
+    protected BigInteger dk;
     protected ECPoint beta;
     protected EllipticCurve mother;
 
@@ -18,17 +18,17 @@ public class ECKey implements Key {
     public ECKey(EllipticCurve ec) {
         mother = ec;
         secret = true;
-        sk = new BigInteger(ec.getp().bitLength() + 17, Cryptor.SECURE_RANDOM); //sk is a random num.
+        dk = new BigInteger(ec.getp().bitLength() + 17, Cryptor.SECURE_RANDOM); //sk is a random num.
         if (mother.getN() != null) {
-            sk = sk.mod(mother.getN()); //sk=sk%order
+            dk = dk.mod(mother.getN()); //sk=sk%order
         }
-        beta = (mother.getGenerator()).multiply(sk); //beta=generator*sk (public key)
+        beta = (mother.getGenerator()).multiply(dk); //beta=generator*sk (public key)
         beta.fastCache();
     }
 
     public String toString() {
         if (secret) {
-            return ("Private key: " + sk + " " + beta + " " + mother);
+            return ("Private key: " + dk + " " + beta + " " + mother);
         } else {
             return ("Public key:" + beta + " " + mother);
         }
@@ -43,7 +43,7 @@ public class ECKey implements Key {
         mother.writeCurve(output);
         output.writeBoolean(secret);
         if (secret) {
-            byte[] skb = sk.toByteArray();
+            byte[] skb = dk.toByteArray();
             output.writeInt(skb.length);
             output.write(skb);
         }
@@ -59,7 +59,7 @@ public class ECKey implements Key {
         if (k.secret) {
             byte[] skb = new byte[input.readInt()];
             input.read(skb);
-            k.sk = new BigInteger(skb);
+            k.dk = new BigInteger(skb);
         }
         byte[] betab = new byte[input.readInt()];
         input.read(betab);
@@ -71,7 +71,7 @@ public class ECKey implements Key {
     public Key getPublic() {
         ECKey pubKey = new ECKey(mother);
         pubKey.beta = beta;
-        pubKey.sk = BigInteger.ZERO;
+        pubKey.dk = BigInteger.ZERO;
         pubKey.secret = false;
         System.gc();
         return pubKey;
@@ -106,7 +106,7 @@ public class ECKey implements Key {
         }
 
         pubKey.beta = R0;
-        pubKey.sk = BigInteger.ZERO;
+        pubKey.dk = BigInteger.ZERO;
         pubKey.secret = false;
         System.gc();
         return pubKey;

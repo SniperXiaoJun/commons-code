@@ -82,7 +82,9 @@ public class ECPoint {
         }
         byte[] xb = x.toByteArray();
         System.arraycopy(xb, 0, cmp, mother.getPCS() - xb.length, xb.length);
-        if (y.testBit(0)) cmp[0] = 1;
+        if (y.testBit(0)) {
+            cmp[0] = 1;
+        }
         return cmp;
     }
 

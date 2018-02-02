@@ -25,8 +25,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import code.ponfee.commons.jce.ecc.CryptoInputStream;
-import code.ponfee.commons.jce.ecc.CryptoOutputStream;
 import code.ponfee.commons.jce.ecc.Cryptor;
 import code.ponfee.commons.jce.ecc.Key;
 

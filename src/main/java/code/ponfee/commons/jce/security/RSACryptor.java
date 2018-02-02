@@ -18,6 +18,7 @@ import javax.crypto.Cipher;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import code.ponfee.commons.io.Files;
+import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.jce.RSASignAlgorithms;
 
 /**
@@ -137,12 +138,21 @@ public final class RSACryptor {
      * @return
      */
     public static <T extends Key & RSAKey> byte[] encrypt(byte[] data, T key) {
-        return docrypt(data, key, Cipher.ENCRYPT_MODE);
+        return docrypt(data, key, Cipher.ENCRYPT_MODE, true);
+    }
+
+    public static <T extends Key & RSAKey> byte[] encryptWithoutPadding(byte[] data, T key) {
+        return docrypt(data, key, Cipher.ENCRYPT_MODE, false);
     }
 
     public static <T extends Key & RSAKey> void encrypt(InputStream input, T key, 
                                                         OutputStream out) {
-        docrypt(input, key, out, Cipher.ENCRYPT_MODE);
+        docrypt(input, key, out, Cipher.ENCRYPT_MODE, true);
+    }
+
+    public static <T extends Key & RSAKey> void encryptWithoutPadding(InputStream input, 
+                                                                      T key, OutputStream out) {
+        docrypt(input, key, out, Cipher.ENCRYPT_MODE, false);
     }
 
     /**
@@ -152,12 +162,21 @@ public final class RSACryptor {
      * @return
      */
     public static <T extends Key & RSAKey> byte[] decrypt(byte[] encrypted, T key) {
-        return docrypt(encrypted, key, Cipher.DECRYPT_MODE);
+        return docrypt(encrypted, key, Cipher.DECRYPT_MODE, true);
+    }
+
+    public static <T extends Key & RSAKey> byte[] decryptWithoutPadding(byte[] encrypted, T key) {
+        return docrypt(encrypted, key, Cipher.DECRYPT_MODE, false);
     }
 
     public static <T extends Key & RSAKey> void decrypt(InputStream input, T key, 
                                                         OutputStream out) {
-        docrypt(input, key, out, Cipher.DECRYPT_MODE);
+        docrypt(input, key, out, Cipher.DECRYPT_MODE, true);
+    }
+
+    public static <T extends Key & RSAKey> void decryptWithoutPadding(InputStream input, 
+                                                                      T key, OutputStream out) {
+        docrypt(input, key, out, Cipher.DECRYPT_MODE, false);
     }
 
     // -----------------------------------private methods-------------------------------------
@@ -167,12 +186,12 @@ public final class RSACryptor {
                : key.getModulus().bitLength() / 8;
     }
 
-    private static <T extends Key & RSAKey> void docrypt(InputStream input, T key, 
-                                                         OutputStream out, int cryptMode) {
+    private static <T extends Key & RSAKey> void docrypt(InputStream input, T key, OutputStream out, 
+                                                         int cryptMode, boolean isPadding) {
         try {
-            //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
-            //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding");
-            Cipher cipher = Cipher.getInstance(key.getAlgorithm());
+            Cipher cipher = isPadding 
+                            ? Cipher.getInstance(key.getAlgorithm()) // getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding");
+                            : Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
             cipher.init(cryptMode, key);
             byte[] buffer = new byte[getBlockSize(cryptMode, key)];
             for (int len; (len = input.read(buffer)) != Files.EOF;) {
@@ -190,17 +209,19 @@ public final class RSACryptor {
         }
     }
 
-    private static <T extends Key & RSAKey> byte[] docrypt(byte[] data, T key, int cryptMode) {
-        int bolckSize = getBlockSize(cryptMode, key);
+    private static <T extends Key & RSAKey> byte[] docrypt(byte[] data, T key, 
+                                                           int cryptMode, boolean isPadding) {
+        int blockSize = getBlockSize(cryptMode, key);
         try {
-            //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
+            Cipher cipher = isPadding 
+                            ? Cipher.getInstance(key.getAlgorithm())
+                            : Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
             //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding");
-            Cipher cipher = Cipher.getInstance(key.getAlgorithm());
             cipher.init(cryptMode, key);
             ByteArrayOutputStream out = new ByteArrayOutputStream(data.length);
             byte[] block;
-            for (int offSet = 0, len = data.length; offSet < len; offSet += bolckSize) {
-                block = cipher.doFinal(data, offSet, NumberUtils.min(bolckSize, len - offSet));
+            for (int offSet = 0, len = data.length; offSet < len; offSet += blockSize) {
+                block = cipher.doFinal(data, offSet, NumberUtils.min(blockSize, len - offSet));
                 out.write(block, 0, block.length);
             }
             out.flush();

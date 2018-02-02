@@ -20,6 +20,7 @@ import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
 
 /**
+ * new BigInteger("0") // 0为十进制数字符串表示
  * SM2非对称加密算法实现
  * support encrypt/decrypt
  * and sign/verify signature
@@ -403,14 +404,14 @@ public final class SM2 {
         }
 
         Signature(byte[] signed) {
-            int rLen = Bytes.toInt(Arrays.copyOf(signed, INT_BYTE_LEN));
+            short rLen = Bytes.toShort(Arrays.copyOf(signed, INT_BYTE_LEN));
             this.r = new BigInteger(1, Arrays.copyOfRange(signed, INT_BYTE_LEN, INT_BYTE_LEN + rLen));
             this.s = new BigInteger(1, Arrays.copyOfRange(signed, INT_BYTE_LEN + rLen, signed.length));
         }
 
         byte[] toByteArray() {
             byte[] rBytes = r.toByteArray(); // fixed 32 byte length
-            return Bytes.concat(Bytes.fromInt(rBytes.length), rBytes, s.toByteArray());
+            return Bytes.concat(Bytes.fromShort((short)rBytes.length), rBytes, s.toByteArray());
         }
 
         public @Override String toString() {

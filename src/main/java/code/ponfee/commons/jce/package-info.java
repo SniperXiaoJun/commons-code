@@ -20,6 +20,7 @@
  *   算法：
  *      DH：基于离散对数的实现，主要用于密钥交换
  *      RSA：基于大整数分解的实现，Ron Rivest, Adi Shamir, Leonard Adleman（三人）
+ *          https://www.kancloud.cn/kancloud/rsa_algorithm/48488
  *      DSA：基于整数有限域离散对数难题（特点是两个素数公开），Digital Signature Algorithm，顾名思义只用于数字签名
  *      ECC：基于椭圆曲线算法，指在取代RSA
  *   填充：RSA_PKCS1_PADDING（ blocklen=keysize/8–11）、RSA_PKCS1_OAEP_PADDING(keysize-41)、RSA_NO_PADDING

@@ -10,7 +10,7 @@ import java.security.SecureRandom;
  */
 public abstract class Cryptor {
 
-    public static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     public final byte[] encrypt(byte[] original, Key ek) {
         return encrypt(original, original.length, ek);
@@ -27,10 +27,10 @@ public abstract class Cryptor {
 
     /**  Decrypts the string c.  
      *@param cipher the ciphertext to be decrypted.
-     *@param sk     the (secret) key to use for decryption.
+     *@param dk     the (secret) key to use for decryption.
      *@return the input string decrypted with the current key.
      */
-    public abstract byte[] decrypt(byte[] cipher, Key sk);
+    public abstract byte[] decrypt(byte[] cipher, Key dk);
 
     /** 
      * This method generates a new key for the cryptosystem.
@@ -42,8 +42,8 @@ public abstract class Cryptor {
      * This method returns the maximum size of blocks it can encrypt.
      * @return the maximum block size the system can encrypt. 
      */
-    public int blockSize() {
-        return 64;
+    public int getBlockSize(Key key) {
+        return 64; // sha512 byte size
     }
 
     /** Returns a String describing this CryptoSystem*/
