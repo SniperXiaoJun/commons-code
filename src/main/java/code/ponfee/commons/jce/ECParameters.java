@@ -153,9 +153,9 @@ public class ECParameters implements java.io.Serializable {
         this.p  = Numbers.toBigInteger(p);
         this.a  = Numbers.toBigInteger(a);
         this.b  = Numbers.toBigInteger(b);
-        this.n  = Numbers.toBigInteger(n);
         this.gx = Numbers.toBigInteger(gx);
         this.gy = Numbers.toBigInteger(gy);
+        this.n  = Numbers.toBigInteger(n);
         this.S  = Numbers.toBigInteger(S);
         
         ECCurve curve = null;
@@ -207,8 +207,8 @@ public class ECParameters implements java.io.Serializable {
     @Override
     public int hashCode() {
         return new HashCodeBuilder().append(name).append(p)
-                .append(a).append(b).append(n).append(gx)
-                .append(gy).append(S).toHashCode();
+                .append(a).append(b).append(gx).append(gy)
+                .append(n).append(S).toHashCode();
     }
 
     @Override

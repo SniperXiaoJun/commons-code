@@ -214,9 +214,9 @@ public final class RSACryptor {
         int blockSize = getBlockSize(cryptMode, key);
         try {
             Cipher cipher = isPadding 
-                            ? Cipher.getInstance(key.getAlgorithm())
+                            ? Cipher.getInstance(key.getAlgorithm()) // getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding");
                             : Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
-            //Cipher cipher = Cipher.getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding");
+
             cipher.init(cryptMode, key);
             ByteArrayOutputStream out = new ByteArrayOutputStream(data.length);
             byte[] block;

@@ -4,13 +4,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * Key interface
+ * @author Ponfee
+ */
 public interface Key {
 
-    public Key readKey(InputStream in) throws IOException;
+    Key readKey(InputStream in) throws IOException;
 
-    public void writeKey(OutputStream out) throws IOException;
+    void writeKey(OutputStream out) throws IOException;
 
-    public Key getPublic();
+    Key getPublic();
 
-    public boolean isPublic();
+    boolean isPublic();
 }

@@ -296,6 +296,11 @@ public class RipeMD160 {
 
     public static void main(String[] args) {
         RipeMD160 md = RipeMD160.getInstance();
-        System.out.println(Hex.encodeHexString(md.digest("1234567890".getBytes())));
+        String actual = Hex.encodeHexString(md.digest("1234567890".getBytes()));
+        if(!"9d752daa3fb4df29837088e1e5a1acf74932e074".equals(actual)) {
+            System.err.println("fail");
+        } else {
+            System.out.println("success");
+        }
     }
 }

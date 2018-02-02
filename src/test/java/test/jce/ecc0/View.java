@@ -28,19 +28,14 @@ import javax.swing.JScrollPane;
 import code.ponfee.commons.jce.ecc.Cryptor;
 import code.ponfee.commons.jce.ecc.Key;
 
-//import ecc.elliptic.*;
-//import ecc.*;
-//import ecc.io.*;
-
 public class View extends JFrame implements ActionListener {
+    private static final long serialVersionUID = 1L;
     public final JButton ENCRYPT = new JButton("Encrypt");
     public final JButton DECRYPT = new JButton("Decrypt");
-    //	public final JButton GENKEY = new JButton("Gen. key");
     public final JButton LOADKEY = new JButton("Load key");
     public final JButton SAVEKEY = new JButton("Display key");
     public final JButton QUIT = new JButton("Quit");
     public final String TITLE = "JECC";
-    //File chosen;
     public String filePath;
 
     private JScrollPane scroll_pane;
@@ -193,9 +188,8 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void encrypt() {
-
         File f = new File(filePath);
-        if (f == null) {
+        if (!f.exists()) {
             new JOptionPane("No file selected for encryption!");
             return;
         }
@@ -206,18 +200,16 @@ public class View extends JFrame implements ActionListener {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             String s;
 
-            int read;
             setStatus("Encrypting: " + f.getName() + " -> " + "encrypted.txt ...");
             System.out.print("Encrypting: " + f.getName() + " -> " + "encrypted.txt ...");
 
             //For storing encrypted text in encrypted.txt file
             OutputStream eout = new FileOutputStream(new File(f.getParent(), "encrypted.txt"));
 
-            int bytes = 0;
+            int read;
             while ((read = in.read()) != -1) {
                 bout.write(read);
                 out.write(read);
-                bytes++;
             }
             out.flush();
             in.close();
@@ -246,6 +238,7 @@ public class View extends JFrame implements ActionListener {
             System.out.println("OK");
 
         } catch (IOException e) {
+            e.printStackTrace();
             System.out.println("Error in encryption!");
         }
     }
@@ -253,7 +246,7 @@ public class View extends JFrame implements ActionListener {
     private void decrypt() {
         filePath = filePath + ".enc";
         File f = new File(filePath);
-        if (f == null) {
+        if (!f.exists()) {
             new JOptionPane("No file selected for decryption!");
             return;
         }
@@ -266,12 +259,10 @@ public class View extends JFrame implements ActionListener {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             String s;
 
-            int bytes = 0;
             int read;
             while ((read = in.read()) != -1) {
                 out.write(read);
                 bout.write(read);
-                bytes++;
             }
             s = "Decrypted Text: " + bout.toString();
             pane.setFont(new Font("TimesNewRoman", Font.BOLD, 12));
@@ -305,26 +296,6 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void saveKey() {
-        /*File f = saveFile();
-          if (f==null) 
-          {
-          new JOptionPane("No file selected for key");
-          return;
-          }
-          File fsk=new File(f.getName()+"_secret.txt");
-          System.out.println("Filename :"+fsk);
-          File fpk=new File(f.getName()+"_public.txt");
-          System.out.println("Filename 2: "+fpk);
-          try
-          {
-        //if (!sk.isPublic()) 
-        writeKey(fsk,sk);
-        writeKey(fpk,pk);
-        }
-        catch(Exception e)
-        {
-        System.out.println("Error in decryption!");
-        }*/
         String keydisp = " " + sk + "\n" + " " + pk;
         pane.setFont(new Font("TimesNewRoman", Font.BOLD, 12));
         pane.setText(keydisp);

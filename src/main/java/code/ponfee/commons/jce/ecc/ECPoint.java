@@ -2,148 +2,156 @@ package code.ponfee.commons.jce.ecc;
 
 import java.math.BigInteger;
 
+/**
+ * The EC point of lie on the curve
+ * @author Ponfee
+ */
 public class ECPoint {
 
     public final static BigInteger TWO = new BigInteger("2");
     public final static BigInteger THREE = new BigInteger("3");
 
-    private EllipticCurve mother;
+    private EllipticCurve curve;
 
-    private BigInteger x, y;
+    private BigInteger x;
+    private BigInteger y;
     private boolean iszero;
 
-    private ECPoint[] fastcache = null; //fastcache is an array of ECPoints
+    // fastcache is an array of ECPoints
+    private ECPoint[] fastcache = null;
 
     public void fastCache() {
-        try {
-            if (fastcache == null) {
-                fastcache = new ECPoint[256]; //fastcache initialised to 256 EC Points.
-                fastcache[0] = new ECPoint(mother); //First point is null.
-                for (int i = 1; i < fastcache.length; i++) { //From 1 to 256
-                    fastcache[i] = fastcache[i - 1].add(this); //add the point repeatedly (Cumulative sum). P,2P,...
-                }
+        if (fastcache == null) {
+            // fastcache initialised to 256 EC Points.
+            fastcache = new ECPoint[256];
+            // First point is null.
+            fastcache[0] = new ECPoint(curve);
+            for (int i = 1; i < fastcache.length; i++) { // From 1 to 256
+                // add the point repeatedly (Cumulative sum). P,2P,...
+                fastcache[i] = fastcache[i - 1].add(this);
             }
-        } catch (NoCommonMotherException e) {
-            System.out.println("ECPoint.fastcache: THIS CANNOT HAPPEN!!!");
         }
     }
 
-    /** Constructs a point on an elliptic curve.
-     *@param mother The elliptic curve on wich the point is surposed to lie
-     *@param x the x coordinate of the point
-     *@param y the y coordinate of the point
-     *@exception Throws a NotOnMotherException if (x,y) is not on the mother curve.*/
-    public ECPoint(EllipticCurve mother, BigInteger x, BigInteger y) throws NotOnMotherException {
-        this.mother = mother;
+    /** 
+     * Constructs a point on an elliptic curve.
+     * @param curve The elliptic curve on wich the point is surposed to lie
+     * @param x     The x coordinate of the point
+     * @param y     The y coordinate of the point
+     */
+    public ECPoint(EllipticCurve curve, BigInteger x, BigInteger y) {
+        this.curve = curve;
         this.x = x;
         this.y = y;
-        if (!mother.onCurve(this)) {
-            throw new NotOnMotherException(this);
+        if (!curve.onCurve(this)) {
+            throw new IllegalArgumentException("(x,y) is not on this curve!");
         }
-        iszero = false;
+        this.iszero = false;
     }
 
-    /** Decompresses a compressed point stored in a byte-array into a new ECPoint.
-     *@param bytes the array of bytes to be decompressed
-     *@param mother the EllipticCurve the decompressed point is supposed to lie on.*/
-    public ECPoint(byte[] bytes, EllipticCurve mother) {
-        this.mother = mother;
+    /**
+     * Decompresses a compressed point stored in a byte-array into a new ECPoint.
+     * @param bytes the array of bytes to be decompressed
+     * @param curve the EllipticCurve the decompressed point is supposed to lie on.
+     */
+    public ECPoint(byte[] bytes, EllipticCurve curve) {
+        this.curve = curve;
         if (bytes[0] == 2) {
-            iszero = true;
+            this.iszero = true;
             return;
         }
         boolean ymt = false;
         if (bytes[0] != 0) ymt = true;
         bytes[0] = 0;
-        x = new BigInteger(bytes);
-        if (mother.getPPODBF() == null) {
-            System.out.println("Fuck dig!!!");
+        this.x = new BigInteger(bytes);
+        if (curve.getPPODBF() == null) {
+            System.err.println("ppodbf is null");
         }
-        y = x.multiply(x).add(mother.geta()).multiply(x).add(mother.getb())
-                         .modPow(mother.getPPODBF(), mother.getp());
-        if (ymt != y.testBit(0)) {
-            y = mother.getp().subtract(y);
+        this.y = this.x.multiply(this.x).add(curve.geta()).multiply(this.x)
+                       .add(curve.getb()).modPow(curve.getPPODBF(), curve.getp());
+        if (ymt != this.y.testBit(0)) {
+            this.y = curve.getp().subtract(this.y);
         }
-        iszero = false;
+        this.iszero = false;
     }
 
-    /** IMPORTANT this renders the values of x and y to be null! Use this constructor
-     *only to create instances of a Zero class!*/
+    /**
+     * IMPORTANT this renders the values of x and y to be null! 
+     * Use this constructor only to create instances of a Zero class!
+     */
     public ECPoint(EllipticCurve e) {
-        x = y = BigInteger.ZERO;
-        mother = e;
-        iszero = true;
+        this.x = this.y = BigInteger.ZERO;
+        this.curve = e;
+        this.iszero = true;
     }
 
     public byte[] compress() {
-        byte[] cmp = new byte[mother.getPCS()];
+        byte[] cmp = new byte[curve.getPCS()];
         if (iszero) {
             cmp[0] = 2;
         }
         byte[] xb = x.toByteArray();
-        System.arraycopy(xb, 0, cmp, mother.getPCS() - xb.length, xb.length);
+        System.arraycopy(xb, 0, cmp, curve.getPCS() - xb.length, xb.length);
         if (y.testBit(0)) {
             cmp[0] = 1;
         }
         return cmp;
     }
 
-    /** Adds another elliptic curve point to this point.
-     *@param q The point to be added
-     *@return the sum of this point on the argument
-     *@exception Throws a NoCommonMotherException if the two points don't lie on the same elliptic curve.*/
-    public ECPoint add(ECPoint q) throws NoCommonMotherException {
+    /**
+     * Adds another elliptic curve point to this point.
+     * @param q The point to be added
+     * @return the sum of this point on the argument
+     */
+    public ECPoint add(ECPoint q) {
+        if (!hasCurve(q)) {
+            throw new IllegalArgumentException("the q point don't lie on "
+                                             + "the same elliptic curve.");
+        }
 
-        if (!hasCommonMother(q)) throw new NoCommonMotherException();
+        if (this.iszero) {
+            return q;
+        } else if (q.isZero()) {
+            return this;
+        }
 
-        if (this.iszero) return q;
-        else if (q.isZero()) return this;
-
-        BigInteger y1 = y;
+        BigInteger y1 = this.y;
         BigInteger y2 = q.gety();
-        BigInteger x1 = x;
+        BigInteger x1 = this.x;
         BigInteger x2 = q.getx();
 
         BigInteger alpha;
-
         if (x2.compareTo(x1) == 0) {
             if (!(y2.compareTo(y1) == 0)) {
-                return new ECPoint(mother);
+                return new ECPoint(curve);
             } else {
-                alpha = ((x1.modPow(TWO, mother.getp())).multiply(THREE)).add(mother.geta());
-                alpha = (alpha.multiply((TWO.multiply(y1)).modInverse(mother.getp()))).mod(mother.getp());
+                alpha = ((x1.modPow(TWO, curve.getp())).multiply(THREE)).add(curve.geta());
+                alpha = (alpha.multiply((TWO.multiply(y1)).modInverse(curve.getp()))).mod(curve.getp());
             }
         } else {
-            alpha = ((y2.subtract(y1)).multiply((x2.subtract(x1)).modInverse(mother.getp())))
-                                      .mod(mother.getp());
+            BigInteger i = x2.subtract(x1).modInverse(curve.getp());
+            alpha = y2.subtract(y1).multiply(i).mod(curve.getp());
         }
 
         BigInteger x3, y3;
-        x3 = (((alpha.modPow(TWO, mother.getp())).subtract(x2)).subtract(x1)).mod(mother.getp());
-        y3 = ((alpha.multiply(x1.subtract(x3))).subtract(y1)).mod(mother.getp());
+        x3 = (((alpha.modPow(TWO, curve.getp())).subtract(x2)).subtract(x1)).mod(curve.getp());
+        y3 = ((alpha.multiply(x1.subtract(x3))).subtract(y1)).mod(curve.getp());
 
-        try {
-            return new ECPoint(mother, x3, y3);
-        } catch (NotOnMotherException e) {
-            System.out.println("Error in add!!! Result not on mother!");
-            return null;
-        }
-
+        return new ECPoint(curve, x3, y3);
     }
 
     public ECPoint multiply(BigInteger coef) {
-        int nk = coef.bitCount(); //nk in paper.
+        int nk = coef.bitCount(); // nk in paper.
         ECPoint result = this;
         for (int i = nk - 1; i > 0; i--) {
             try {
                 result = result.add(result);
                 if (coef.testBit(i)) result = result.add(this);
             } catch (Exception e) {
-                System.out.println("Error in multiplying");
+                System.err.println("Error in multiplying");
             }
         }
         return result;
-
     }
 
     public BigInteger getx() {
@@ -154,16 +162,16 @@ public class ECPoint {
         return y;
     }
 
-    public EllipticCurve getMother() {
-        return mother;
+    public EllipticCurve getCurve() {
+        return curve;
     }
 
     public String toString() {
         return "(" + x.toString() + ", " + y.toString() + ")";
     }
 
-    public boolean hasCommonMother(ECPoint p) {
-        return this.mother.equals(p.getMother());
+    public boolean hasCurve(ECPoint p) {
+        return this.curve.equals(p.getCurve());
     }
 
     public boolean isZero() {

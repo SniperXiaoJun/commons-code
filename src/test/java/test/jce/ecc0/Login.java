@@ -12,20 +12,18 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 public class Login extends JFrame implements ActionListener {
+    private static final long serialVersionUID = -8266964331082261609L;
     JTextField untf;
     JPasswordField pwpf;
     JLabel unl, pwl;
     JButton Next, Close;
-    Chatter ch;
 
-    public Login(Chatter ch) {
+    public Login() {
         try {
             setLayout(null);
             unl = new JLabel("User Name : ");
             untf = new JTextField(15);
             untf.setFont(new Font("Times New Roman", Font.BOLD, 12));
-
-            this.ch = ch;
 
             addc(unl, 50, 40, 100, 25);
             addc(untf, 120, 40, 150, 25);
@@ -69,16 +67,13 @@ public class Login extends JFrame implements ActionListener {
 
     public void actionPerformed(ActionEvent ae) {
         JButton b = (JButton) ae.getSource();
-        if (b == Close) System.exit(0);
-        if (b == Next) {
-            if ((untf.getText().equals("admin")) && (pwpf.getText().equals("admin"))) {
-                new Screen();//ch);
-                //View v = new View(600,600, new RSACryptoSystem());
-
-                dispose();
-            } else {
-                new Login(ch);
-            }
+        if (b == Close) {
+            System.exit(0);
         }
+        if (b != Next) {
+            return;
+        }
+        new Screen();
+        dispose();
     }
 }

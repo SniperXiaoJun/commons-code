@@ -23,6 +23,7 @@ import code.ponfee.commons.jce.ecc.ECCryptor;
 import code.ponfee.commons.jce.ecc.EllipticCurve;
 
 public class Screen extends JFrame implements ActionListener {
+    private static final long serialVersionUID = 1L;
     JTextArea ta;
     JLabel path, title;
     JTextField pathtf;
@@ -30,12 +31,10 @@ public class Screen extends JFrame implements ActionListener {
     JButton Load, Close, Next, fdl;
     JPanel p1, p2;
     String s, file, p;
-    //Chatter ch;
     File targetFile;
     String filePath;
 
-    public Screen()//Chatter ch)
-    {
+    public Screen() {
         try {
             setLayout(null);
             path = new JLabel("Path  :");
@@ -43,8 +42,6 @@ public class Screen extends JFrame implements ActionListener {
             pathtf = new JTextField(15);
             pathtf.setFont(new Font("TimesNewRoman", Font.BOLD, 12));
             pathtf.setEditable(false);
-
-            //this.ch = ch;
 
             fdl = new JButton("Select File");
             fdl.setMnemonic('S');
@@ -105,12 +102,6 @@ public class Screen extends JFrame implements ActionListener {
             } catch (Exception e) {
                 System.out.println("EC Exception");
             }
-
-            //Screen2 f2 = new Screen2();
-            //View v = new View(600,600, new RSACryptoSystem());
-            //f2.s2 = new String(s);
-            //f2.sbyte = new byte[s.length()];
-            //dispose();
         }
         if (b == fdl) {
 
@@ -130,15 +121,7 @@ public class Screen extends JFrame implements ActionListener {
                 filePath = targetFile.getPath();
                 pathtf.setText(filePath);
                 System.out.println("\nPath is " + filePath);
-                //	return targetFile;
             } else System.out.println("Error in opening File");
-
-            /*fd = new FileDialog(this, "Select File", FileDialog.LOAD);
-              fd.setVisible(true);
-              file = fd.getFile();
-              p = fd.getDirectory();
-              pathtf.setText(p + "" + file);
-              file = pathtf.getText();*/
         }
         if (b == Load) {
             try {

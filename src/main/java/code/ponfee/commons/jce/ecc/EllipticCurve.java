@@ -1,8 +1,5 @@
 package code.ponfee.commons.jce.ecc;
 
-/**An implementation of an elliptic curve over a -finite- field.
- *
-*/
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,6 +7,10 @@ import java.math.BigInteger;
 
 import code.ponfee.commons.jce.ECParameters;
 
+/**
+ * An implementation of an elliptic curve over a -finite- field.
+ * @author Ponfee
+ */
 public class EllipticCurve {
 
     private BigInteger a, b, p, n;
@@ -25,50 +26,41 @@ public class EllipticCurve {
     /** 
      * Constructs an elliptic curve over the finite field of 'mod' elements.
      * The equation of the curve is on the form : y^2 = x^3 + ax + b.
-     * This ensures well defined operations and security.
      * @param a the value of 'a' where y^2 = x^3 + ax + b
      * @param b the value of 'b' where y^2 = x^3 + ax + b
-     * @param mod The number of elements in the field. IMPORTANT: Must a prime number!
-     * @exception InsecureCurveException if the curve defined by a and b are singular, 
-     *            supersingular, trace one/anomalous. 
      */
-    public EllipticCurve(BigInteger a, BigInteger b, BigInteger p) throws InsecureCurveException {
+    public EllipticCurve(BigInteger a, BigInteger b, BigInteger p) {
         this.a = a;
         this.b = b;
         this.p = p;
         if (!p.isProbablePrime(PRIMESECURITY)) {
-            // cannot happened
-            throw new InsecureCurveException(InsecureCurveException.NONPRIMEMODULUS,this);
+            throw new IllegalArgumentException("the p is not prime!");
         }
         if (isSingular()) {
-            throw new InsecureCurveException(InsecureCurveException.SINGULAR, this);
+            throw new IllegalArgumentException("is singular!");
         }
 
         byte[] pb = p.toByteArray();
         if (pb[0] == 0) {
-            pointcmpsize = pb.length;
+            this.pointcmpsize = pb.length;
         } else {
-            pointcmpsize = pb.length + 1;
+            this.pointcmpsize = pb.length + 1;
         }
-        //ppodbf = (p.add(BigInteger.ONE)).shiftRight(2);
         name = "cust";
-        //FIXME compute the n of the group
-        //FIXME compute a generator for the group
+        calculateN();
+        calculateGenerator();
     }
 
-    public EllipticCurve(ECParameters ecp) throws InsecureCurveException {
+    public EllipticCurve(ECParameters ecp) {
         this(ecp.a, ecp.b, ecp.p);
-        n = ecp.n;
-        name = ecp.toString();
-        try {
-            generator = new ECPoint(this, ecp.gx, ecp.gy);
-            generator.fastCache();
-        } catch (NotOnMotherException e) {
-            System.out.println("Error defining EllipticCurve: generator not on mother!");
-        }
+        this.n = ecp.n;
+        this.name = ecp.toString();
+        this.generator = new ECPoint(this, ecp.gx, ecp.gy);
+        generator.fastCache();
     }
 
-    public void writeCurve(DataOutputStream output) throws IOException {
+    public void writeCurve(DataOutputStream output) 
+        throws IOException {
         byte[] ab = a.toByteArray();
         output.writeInt(ab.length);
         output.write(ab);
@@ -91,7 +83,8 @@ public class EllipticCurve {
         output.writeUTF(name);
     }
 
-    protected EllipticCurve(DataInputStream input) throws IOException {
+    protected EllipticCurve(DataInputStream input) 
+        throws IOException {
         byte[] ab = new byte[input.readInt()];
         input.read(ab);
         a = new BigInteger(ab);
@@ -118,18 +111,16 @@ public class EllipticCurve {
     public boolean isSingular() {
         BigInteger aa = a.pow(3);
         BigInteger bb = b.pow(2);
-        BigInteger result = ((aa.multiply(COEFA)).add(bb.multiply(COEFB))).mod(p);
+        BigInteger result = aa.multiply(COEFA).add(bb.multiply(COEFB)).mod(p);
         return result.compareTo(BigInteger.ZERO) == 0;
     }
 
-    //FIXME!!!!!!!!!!
     public BigInteger calculateN() {
-        return null;
+        return null; // TODO
     }
 
-    //FIXME!!!!!!!!
     public ECPoint calculateGenerator() {
-        return null;
+        return null; // TODO
     }
 
     public boolean onCurve(ECPoint q) {
@@ -144,7 +135,6 @@ public class EllipticCurve {
         return y_square.compareTo(dum) == 0;
     }
 
-    /** Returns the n of the group */
     public BigInteger getN() {
         return n;
     }
@@ -169,7 +159,6 @@ public class EllipticCurve {
         return pointcmpsize;
     }
 
-    /** Returns a generator for this EllipticCurve.*/
     public ECPoint getGenerator() {
         return generator;
     }

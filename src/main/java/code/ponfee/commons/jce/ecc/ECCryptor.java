@@ -17,6 +17,7 @@ import code.ponfee.commons.util.ObjectUtils;
  * 
  * 即：[beta(public key), dk]，[alpha(public key), rk]
  *    beta(public key) * rk = ECPoint S = alpha(public key) * dk
+ * 
  * @author Ponfee
  */
 public class ECCryptor extends Cryptor {
@@ -27,22 +28,22 @@ public class ECCryptor extends Cryptor {
         this.curve = curve;
     }
 
-    public byte[] encrypt(byte[] input, int length, Key ek) {
+    public @Override byte[] encrypt(byte[] input, int length, Key ek) {
         // ek is an Elliptic key (sk=secret, beta=public)
         ECKey ecKey = (ECKey) ek;
 
         // PCS is compressed point size.
-        int offset = ecKey.mother.getPCS();
+        int offset = ecKey.curve.getPCS();
 
         // 生成随机数rk
-        BigInteger rk = new BigInteger(ecKey.mother.getp().bitLength() + 17, Cryptor.SECURE_RANDOM);
+        BigInteger rk = new BigInteger(ecKey.curve.getp().bitLength() + 17, Cryptor.SECURE_RANDOM);
         rk = new BigInteger(1, Bytes.concat(rk.toByteArray(), ObjectUtils.uuid()));
-        if (ecKey.mother.getN() != null) {
-            rk = rk.mod(ecKey.mother.getN()); // rk = rk % n
+        if (ecKey.curve.getN() != null) {
+            rk = rk.mod(ecKey.curve.getN()); // rk = rk % n
         }
 
         // 计算曲线上rk倍点alpha：ECPoint gamma = alpha(public key) * rk
-        ECPoint gamma = ecKey.mother.getGenerator().multiply(rk);
+        ECPoint gamma = ecKey.curve.getGenerator().multiply(rk);
 
         // 导出该rk倍点alpha(public key)
         byte[] result = Arrays.copyOf(gamma.compress(), offset + length);
@@ -59,13 +60,13 @@ public class ECCryptor extends Cryptor {
         return result;
     }
 
-    public byte[] decrypt(byte[] input, Key dk) {
+    public @Override byte[] decrypt(byte[] input, Key dk) {
         ECKey ecKey = (ECKey) dk;
-        int offset = ecKey.mother.getPCS();
+        int offset = ecKey.curve.getPCS();
 
         // 取出被加密的密码：alpha(public key)
         byte[] gammacom = Arrays.copyOfRange(input, 0, offset);
-        ECPoint gamma = new ECPoint(gammacom, ecKey.mother);
+        ECPoint gamma = new ECPoint(gammacom, ecKey.curve);
 
         // EC解密被加密的密码：ECPoint sec = alpha(public key) * dk
         // beta(public key) * rk = ECPoint S = alpha(public key) * dk
@@ -87,10 +88,9 @@ public class ECCryptor extends Cryptor {
     }
 
     /**
-     * This method generates a new key for the cryptosystem.
-     * @return the new key generated
+     * generate ECKey
      */
-    public Key generateKey() {
+    public @Override Key generateKey() {
         return new ECKey(curve);
     }
 
