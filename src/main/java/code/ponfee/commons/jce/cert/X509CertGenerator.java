@@ -193,7 +193,7 @@ public class X509CertGenerator {
                                                Date notAfter, CertificateExtensions extensions) {
         if (sn == null) {
             //sn = ThreadLocalRandom.current().nextInt() & Integer.MAX_VALUE;
-            sn = new BigInteger(ObjectUtils.uuid());
+            sn = new BigInteger(1, ObjectUtils.uuid());
         }
         try {
             // 验证pkcs10

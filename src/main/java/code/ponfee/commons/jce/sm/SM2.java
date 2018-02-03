@@ -235,8 +235,11 @@ public final class SM2 {
                               byte[] publicKey, byte[] privateKey) {
         ECPoint pubKey = getPublicKey(ecParam, publicKey);
         BigInteger priKey = getPrivateKey(privateKey);
-        data = Bytes.concat(calcZ(ecParam, ida, pubKey), data);
-        BigInteger e = new BigInteger(1, SM3Digest.getInstance().doFinal(data));
+
+        SM3Digest sm3 = SM3Digest.getInstance();
+        sm3.update(calcZ(sm3, ecParam, ida, pubKey));
+        sm3.update(data);
+        BigInteger e = new BigInteger(1, sm3.doFinal());
         BigInteger k;
         BigInteger r;
         do {
@@ -278,8 +281,11 @@ public final class SM2 {
         }
 
         ECPoint pubKey = getPublicKey(ecParam, publicKey);
-        data = Bytes.concat(calcZ(ecParam, ida, pubKey), data);
-        BigInteger e = new BigInteger(1, SM3Digest.getInstance().doFinal(data));
+
+        SM3Digest sm3 = SM3Digest.getInstance();
+        sm3.update(calcZ(sm3, ecParam, ida, pubKey));
+        sm3.update(data);
+        BigInteger e = new BigInteger(1, sm3.doFinal());
         BigInteger t = signature.r.add(signature.s).mod(ecParam.n);
 
         if (t.equals(BigInteger.ZERO)) {
@@ -333,14 +339,19 @@ public final class SM2 {
      * @param pubKey
      * @return
      */
-    static byte[] calcZ(ECParameters ecParam, byte[] ida, ECPoint pubKey) {
+    static byte[] calcZ(SM3Digest sm3, ECParameters ecParam, byte[] ida, ECPoint pubKey) {
         int entlenA = ida.length * 8;
-        byte[] entla = { (byte) (entlenA & 0xFF00), (byte) (entlenA & 0x00FF) };
-        byte[] data = Bytes.concat(entla, ida, ecParam.a.toByteArray(), ecParam.b.toByteArray(), 
-                                   ecParam.gx.toByteArray(), ecParam.gy.toByteArray(),
-                                   pubKey.getXCoord().toBigInteger().toByteArray(),
-                                   pubKey.getYCoord().toBigInteger().toByteArray());
-        return SM3Digest.getInstance().doFinal(data);
+        sm3.reset();
+        sm3.update((byte) (entlenA & 0xFF00));
+        sm3.update((byte) (entlenA & 0x00FF));
+        sm3.update(ida);
+        sm3.update(ecParam.a.toByteArray());
+        sm3.update(ecParam.b.toByteArray());
+        sm3.update(ecParam.gx.toByteArray());
+        sm3.update(ecParam.gy.toByteArray());
+        sm3.update(pubKey.getXCoord().toBigInteger().toByteArray());
+        sm3.update(pubKey.getYCoord().toBigInteger().toByteArray());
+        return sm3.doFinal();
     }
 
     /**
@@ -393,7 +404,7 @@ public final class SM2 {
      */
     private static class Signature implements java.io.Serializable {
         private static final long serialVersionUID = -2732762291362285185L;
-        static final int INT_BYTE_LEN = 4;
+        static final int SHORT_BYTE_LEN = 2;
 
         final BigInteger r;
         final BigInteger s;
@@ -404,14 +415,14 @@ public final class SM2 {
         }
 
         Signature(byte[] signed) {
-            short rLen = Bytes.toShort(Arrays.copyOf(signed, INT_BYTE_LEN));
-            this.r = new BigInteger(1, Arrays.copyOfRange(signed, INT_BYTE_LEN, INT_BYTE_LEN + rLen));
-            this.s = new BigInteger(1, Arrays.copyOfRange(signed, INT_BYTE_LEN + rLen, signed.length));
+            short rLen = Bytes.toShort(Arrays.copyOf(signed, SHORT_BYTE_LEN));
+            this.r = new BigInteger(1, Arrays.copyOfRange(signed, SHORT_BYTE_LEN, SHORT_BYTE_LEN + rLen));
+            this.s = new BigInteger(1, Arrays.copyOfRange(signed, SHORT_BYTE_LEN + rLen, signed.length));
         }
 
         byte[] toByteArray() {
             byte[] rBytes = r.toByteArray(); // fixed 32 byte length
-            return Bytes.concat(Bytes.fromShort((short)rBytes.length), rBytes, s.toByteArray());
+            return Bytes.concat(Bytes.fromShort((short) rBytes.length), rBytes, s.toByteArray());
         }
 
         public @Override String toString() {
@@ -423,7 +434,7 @@ public final class SM2 {
         //ECParameters ecParameter = ECParameters.secp256r1;
         ECParameters ecParameter = ECParameters.EC_PARAMETERS.get("secp256r1");
         for (int i = 0; i < 5; i++) {
-            byte[] data = MavenProjects.getMainJavaFileAsLineString(SM2.class).substring(0, 100).getBytes();
+            byte[] data = MavenProjects.getMainJavaFileAsLineString(SM2.class).getBytes();
             Map<String, byte[]> keyMap = generateKeyPair(ecParameter);
 
             System.out.println("\n=============================加密/解密============================");

@@ -37,14 +37,4 @@ public abstract class Cryptor {
      */
     public abstract Key generateKey();
 
-    /**
-     * encrypt block size
-     * normal 64 byte of sha-512
-     * @param ek encrypt key
-     * @return
-     */
-    public int getBlockSize(Key ek) {
-        return 64;
-    }
-
 }

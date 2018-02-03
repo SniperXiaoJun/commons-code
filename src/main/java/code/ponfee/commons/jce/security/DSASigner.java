@@ -24,7 +24,7 @@ import code.ponfee.commons.util.ObjectUtils;
  * DSA签名/验签（只用于数字签名）
  * @author fupf
  */
-public abstract class DSASigner {
+public final class DSASigner {
 
     private static final String ALGORITHM = "DSA";
     private static final String PUBLIC_KEY = "DSAPublicKey";

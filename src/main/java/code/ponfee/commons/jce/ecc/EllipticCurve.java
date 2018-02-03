@@ -87,22 +87,22 @@ public class EllipticCurve {
         throws IOException {
         byte[] ab = new byte[input.readInt()];
         input.read(ab);
-        a = new BigInteger(ab);
+        a = new BigInteger(1, ab);
         byte[] bb = new byte[input.readInt()];
         input.read(bb);
-        b = new BigInteger(bb);
+        b = new BigInteger(1, bb);
         byte[] pb = new byte[input.readInt()];
         input.read(pb);
-        p = new BigInteger(pb);
+        p = new BigInteger(1, pb);
         byte[] ob = new byte[input.readInt()];
         input.read(ob);
-        n = new BigInteger(ob);
+        n = new BigInteger(1, ob);
         byte[] gb = new byte[input.readInt()];
         input.read(gb);
         generator = new ECPoint(gb, this);
         byte[] ppb = new byte[input.readInt()];
         input.read(ppb);
-        ppodbf = new BigInteger(ppb);
+        ppodbf = new BigInteger(1, ppb);
         pointcmpsize = input.readInt();
         name = input.readUTF();
         generator.fastCache();

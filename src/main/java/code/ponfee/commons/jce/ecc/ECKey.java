@@ -70,7 +70,7 @@ public class ECKey implements Key {
         if (k.secret) {
             byte[] skb = new byte[input.readInt()];
             input.read(skb);
-            k.dk = new BigInteger(skb);
+            k.dk = new BigInteger(1, skb);
         }
         byte[] betab = new byte[input.readInt()];
         input.read(betab);

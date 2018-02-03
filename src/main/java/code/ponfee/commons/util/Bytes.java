@@ -124,7 +124,7 @@ public final class Bytes {
     }
 
     public static byte[] fromShort(short value) {
-        return ByteBuffer.allocate(4).putShort(value).array();
+        return ByteBuffer.allocate(2).putShort(value).array();
     }
 
     public static short toShort(byte[] bytes) {
@@ -132,8 +132,8 @@ public final class Bytes {
     }
 
     public static short toShort(byte[] bytes, int fromIdx) {
-        ByteBuffer buffer = ByteBuffer.allocate(4);
-        buffer.put(bytes, fromIdx, 4).flip();
+        ByteBuffer buffer = ByteBuffer.allocate(2);
+        buffer.put(bytes, fromIdx, 2).flip();
         return buffer.getShort();
     }
 

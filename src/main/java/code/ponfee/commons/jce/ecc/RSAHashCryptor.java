@@ -1,8 +1,12 @@
 package code.ponfee.commons.jce.ecc;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
 
+import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jce.hash.HashUtils;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.ObjectUtils;
@@ -24,13 +28,14 @@ public class RSAHashCryptor extends RSACryptor {
      */
     public @Override byte[] encrypt(byte[] input, int length, Key ek) {
         RSAKey rsaKey = (RSAKey) ek;
+        BigInteger exponent = getExponent(rsaKey);
 
         // 随机生成密码（需要mod n，以免溢出）
         BigInteger passwd = new BigInteger(rsaKey.n.bitLength() + 17, Cryptor.SECURE_RANDOM);
         passwd = new BigInteger(1, Bytes.concat(passwd.toByteArray(), ObjectUtils.uuid())).mod(rsaKey.n);
 
         // 对密码进行RSA加密，encryptedPasswd = passwd^e mode n
-        byte[] encryptedPasswd = passwd.modPow(rsaKey.e, rsaKey.n).toByteArray();
+        byte[] encryptedPasswd = passwd.modPow(exponent, rsaKey.n).toByteArray();
 
         // 对密码进行HASH
         byte[] hashedPasswd = HashUtils.sha512(passwd.toByteArray());
@@ -50,12 +55,13 @@ public class RSAHashCryptor extends RSACryptor {
 
     public @Override byte[] decrypt(byte[] input, Key dk) {
         RSAKey rsaKey = (RSAKey) dk;
+        BigInteger exponent = getExponent(rsaKey);
 
         // 获取被加密的密码数据
         byte[] encryptedPasswd = Arrays.copyOfRange(input, SHORT_BYTE_LEN, SHORT_BYTE_LEN + Bytes.toShort(input));
 
         // 解密被加密的密码数据，passwd = encryptedPasswd^d mode n
-        BigInteger passwd = new BigInteger(1, encryptedPasswd).modPow(rsaKey.d, rsaKey.n);
+        BigInteger passwd = new BigInteger(1, encryptedPasswd).modPow(exponent, rsaKey.n);
 
         // 对密码进行HASH
         byte[] hashedPasswd = HashUtils.sha512(passwd.toByteArray());
@@ -71,7 +77,83 @@ public class RSAHashCryptor extends RSACryptor {
         return result;
     }
 
-    public String toString() {
-        return "RSAHashCryptor";
+    public @Override void encrypt(InputStream input, Key ek, OutputStream output) {
+        RSAKey rsaKey = (RSAKey) ek;
+        BigInteger exponent = getExponent(rsaKey);
+
+        // 随机生成密码（需要mod n，以免溢出）
+        BigInteger passwd = new BigInteger(rsaKey.n.bitLength() + 17, Cryptor.SECURE_RANDOM);
+        passwd = new BigInteger(1, Bytes.concat(passwd.toByteArray(), ObjectUtils.uuid())).mod(rsaKey.n);
+
+        // 对密码进行RSA加密，encryptedPasswd = passwd^e mode n
+        byte[] encryptedPasswd = passwd.modPow(exponent, rsaKey.n).toByteArray();
+
+        // 对密码进行HASH
+        byte[] hashedPasswd = HashUtils.sha512(passwd.toByteArray());
+        int hLen = hashedPasswd.length;
+
+        try {
+            output.write(Bytes.fromShort((short) encryptedPasswd.length)); // SHORT_BYTE_LEN
+            output.write(encryptedPasswd); // encrypted passwd
+
+            byte[] buffer = new byte[getOriginBlockSize(rsaKey)];
+            for (int len, i, j; (len = input.read(buffer)) != Files.EOF;) {
+                for (i = 0, j = 0; i < len; i++, j++) {
+                    if (j == hLen) {
+                        j = 0;
+                    }
+                    output.write((byte) (buffer[i] ^ hashedPasswd[j]));
+                }
+            }
+            output.flush();
+        } catch (IOException e) {
+            throw new SecurityException(e);
+        }
+    }
+
+    public @Override void decrypt(InputStream input, Key dk, OutputStream output) {
+        try {
+            if (input.available() < SHORT_BYTE_LEN + 1) {
+                throw new IllegalArgumentException("Invalid cipher data");
+            }
+
+            RSAKey rsaKey = (RSAKey) dk;
+            BigInteger exponent = getExponent(rsaKey);
+
+            byte[] prefixBytes = new byte[SHORT_BYTE_LEN];
+            input.read(prefixBytes);
+
+            // 获取被加密的密码数据
+            byte[] encryptedPasswd = new byte[Bytes.toShort(prefixBytes)];
+            input.read(encryptedPasswd);
+
+            // 解密被加密的密码数据，passwd = encryptedPasswd^d mode n
+            BigInteger passwd = new BigInteger(1, encryptedPasswd).modPow(exponent, rsaKey.n);
+
+            // 对密码进行HASH
+            byte[] hashedPasswd = HashUtils.sha512(passwd.toByteArray());
+            int hLen = hashedPasswd.length;
+
+            byte[] buffer = new byte[getCipherBlockSize(rsaKey)];
+            for (int len, i, j; (len = input.read(buffer)) != Files.EOF;) {
+                for (i = 0, j = 0; i < len; i++, j++) {
+                    if (j == hLen) {
+                        j = 0;
+                    }
+                    output.write((byte) (buffer[i] ^ hashedPasswd[j]));
+                }
+            }
+            output.flush();
+        } catch (IOException e) {
+            throw new SecurityException(e);
+        }
+    }
+
+    public @Override int getOriginBlockSize(RSAKey rsaKey) {
+        return 4096;
+    }
+
+    public @Override int getCipherBlockSize(RSAKey rsaKey) {
+        return getOriginBlockSize(rsaKey);
     }
 }

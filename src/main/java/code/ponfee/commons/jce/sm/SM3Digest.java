@@ -45,27 +45,27 @@ public class SM3Digest {
 
     /**
      * 明文输入
-     * @param in 明文输入缓冲区
-     * @param inOffset 缓冲区偏移量
+     * @param input 明文输入缓冲区
+     * @param inputOffset 缓冲区偏移量
      * @param len 明文长度
      */
-    public void update(byte[] in, int inOffset, int len) {
+    public void update(byte[] input, int inputOffset, int len) {
         int partLen = BUFFER_LENGTH - xBufOffset, 
-            dPos = inOffset;
+            dPos = inputOffset;
         if (partLen < len) {
-            System.arraycopy(in, dPos, xBuf, xBufOffset, partLen);
+            System.arraycopy(input, dPos, xBuf, xBufOffset, partLen);
             len -= partLen;
             dPos += partLen;
             doUpdate();
             while (len > BUFFER_LENGTH) {
-                System.arraycopy(in, dPos, xBuf, 0, BUFFER_LENGTH);
+                System.arraycopy(input, dPos, xBuf, 0, BUFFER_LENGTH);
                 len -= BUFFER_LENGTH;
                 dPos += BUFFER_LENGTH;
                 doUpdate();
             }
         }
 
-        System.arraycopy(in, dPos, xBuf, xBufOffset, len);
+        System.arraycopy(input, dPos, xBuf, xBufOffset, len);
         xBufOffset += len;
     }
 
@@ -107,7 +107,7 @@ public class SM3Digest {
     public void reset() {
         xBufOffset = 0;
         cntBlock = 0;
-        V = SM3.IV.clone();
+        V = Arrays.copyOf(SM3.IV, SM3.IV.length);
     }
 
     public int getDigestSize() {
@@ -165,12 +165,13 @@ public class SM3Digest {
 
     private static class SM3 {
         static final byte[] IV = {
-            0x73, (byte) 0x80, 0x16, 0x6f, 0x49, 0x14, 
-            (byte) 0xb2, (byte) 0xb9, 0x17, 0x24, 0x42, (byte) 0xd7,
-            (byte) 0xda, (byte) 0x8a, 0x06, 0x00, (byte) 0xa9, 0x6f, 
-            0x30, (byte) 0xbc, (byte) 0x16, 0x31, 0x38, (byte) 0xaa, 
-            (byte) 0xe3, (byte) 0x8d, (byte) 0xee, 0x4d, (byte) 0xb0, 
-            (byte) 0xfb, 0x0e, 0x4e
+            (byte) 0x73, (byte) 0x80, (byte) 0x16, (byte) 0x6f, (byte) 0x49,
+            (byte) 0x14, (byte) 0xb2, (byte) 0xb9, (byte) 0x17, (byte) 0x24,
+            (byte) 0x42, (byte) 0xd7, (byte) 0xda, (byte) 0x8a, (byte) 0x06,
+            (byte) 0x00, (byte) 0xa9, (byte) 0x6f, (byte) 0x30, (byte) 0xbc,
+            (byte) 0x16, (byte) 0x31, (byte) 0x38, (byte) 0xaa, (byte) 0xe3,
+            (byte) 0x8d, (byte) 0xee, (byte) 0x4d, (byte) 0xb0, (byte) 0xfb,
+            (byte) 0x0e, (byte) 0x4e
         };
 
         static final int[] T_J = new int[64];
@@ -336,9 +337,9 @@ public class SM3Digest {
 
         static int P0(int X) {
             int y = rotateLeft(X, 9);
-            y = bitCycleLeft(X, 9);
+                y = bitCycleLeft(X, 9);
             int z = rotateLeft(X, 17);
-            z = bitCycleLeft(X, 17);
+                z = bitCycleLeft(X, 17);
             return X ^ y ^ z;
         }
 
@@ -403,12 +404,10 @@ public class SM3Digest {
          * @return 4个字节的自己数组
          */
         static byte[] intToByteArray(int num) {
-            byte[] bytes = new byte[4];
-            bytes[0] = (byte) (0xff & (num >> 0));
-            bytes[1] = (byte) (0xff & (num >> 8));
-            bytes[2] = (byte) (0xff & (num >> 16));
-            bytes[3] = (byte) (0xff & (num >> 24));
-            return bytes;
+            return new byte[] {
+                (byte) (0xff & (num >> 0 )), (byte) (0xff & (num >> 8)),
+                (byte) (0xff & (num >> 16)), (byte) (0xff & (num >> 24))
+            };
         }
 
         /**

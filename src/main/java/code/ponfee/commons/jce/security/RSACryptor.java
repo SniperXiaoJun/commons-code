@@ -190,7 +190,7 @@ public final class RSACryptor {
                                                          int cryptMode, boolean isPadding) {
         try {
             Cipher cipher = isPadding 
-                            ? Cipher.getInstance(key.getAlgorithm()) // getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding");
+                            ? Cipher.getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding") // Cipher.getInstance(key.getAlgorithm())
                             : Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
             cipher.init(cryptMode, key);
             byte[] buffer = new byte[getBlockSize(cryptMode, key)];
@@ -209,12 +209,26 @@ public final class RSACryptor {
         }
     }
 
+    /**
+     * JDK supported:
+     * Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+     * 
+     * BC supported: 
+     *   Cipher.getInstance("RSA/None/NoPadding", Providers.BC);
+     *   Cipher.getInstance("RSA/ECB/NOPADDING", Providers.BC);
+     *   ...
+     * @param data
+     * @param key
+     * @param cryptMode
+     * @param isPadding
+     * @return
+     */
     private static <T extends Key & RSAKey> byte[] docrypt(byte[] data, T key, 
                                                            int cryptMode, boolean isPadding) {
         int blockSize = getBlockSize(cryptMode, key);
         try {
             Cipher cipher = isPadding 
-                            ? Cipher.getInstance(key.getAlgorithm()) // getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding");
+                            ? Cipher.getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding") // Cipher.getInstance(key.getAlgorithm())
                             : Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
 
             cipher.init(cryptMode, key);

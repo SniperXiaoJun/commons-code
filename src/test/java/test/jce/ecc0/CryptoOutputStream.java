@@ -18,7 +18,7 @@ public class CryptoOutputStream extends OutputStream {
         this.out = new DataOutputStream(out);
         this.cs = cs;
         this.key = key;
-        buffer = new byte[cs.getBlockSize(key)];
+        buffer = new byte[64];
     }
 
     private void writeOut() throws IOException {

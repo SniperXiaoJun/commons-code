@@ -63,7 +63,7 @@ public class ECPoint {
         boolean ymt = false;
         if (bytes[0] != 0) ymt = true;
         bytes[0] = 0;
-        this.x = new BigInteger(bytes);
+        this.x = new BigInteger(1, bytes);
         if (curve.getPPODBF() == null) {
             System.err.println("ppodbf is null");
         }

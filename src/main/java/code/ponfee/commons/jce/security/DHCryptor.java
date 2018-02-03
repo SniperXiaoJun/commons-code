@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableMap;
  * Key-Agreement
  * @author fupf
  */
-public abstract class DHCryptor {
+public final class DHCryptor {
 
     private static final String ALGORITHM = "DH"; // DH算法名称
     private static final String SECRET_ALGORITHM = "DESede"; // 使用3DES对称加密

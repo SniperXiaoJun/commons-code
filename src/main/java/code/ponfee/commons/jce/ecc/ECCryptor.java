@@ -9,8 +9,8 @@ import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * EC Cryptor base xor
- * 首先：在曲线上生成dk倍点beta， beta point为公钥beta(public key)，dk为私钥
- * 加密：生成随机数rk，在曲线上计算得到rk倍点的alpha，alpha point为公钥alpha(public key)，rk为私钥
+ * 首先：生成随机数dk，在曲线上计算得到dk倍的点beta， beta point为公钥beta(public key)，dk为私钥
+ * 加密：生成随机数rk，在曲线上计算得到rk倍的点alpha，alpha point为公钥alpha(public key)，rk为私钥
  *     ECPoint S = beta(public key) * rk，并把alpha(public key)数据放入加密数据中
  * 解密：解析得到alpha(public key)，用私钥dk解密
  *     ECPoint S = alpha(public key) * dk
@@ -28,6 +28,10 @@ public class ECCryptor extends Cryptor {
         this.curve = curve;
     }
 
+    /**
+     * 加密数据逻辑：
+     * origin ≡ origin ⊕ data ⊕ data
+     */
     public @Override byte[] encrypt(byte[] input, int length, Key ek) {
         // ek is an Elliptic key (sk=secret, beta=public)
         ECKey ecKey = (ECKey) ek;
@@ -81,8 +85,9 @@ public class ECCryptor extends Cryptor {
             hashed = HashUtils.sha512(sec.getx().toByteArray(), sec.gety().toByteArray());
         }
 
-        byte[] result = new byte[input.length - offset];
-        for (int hLen = hashed.length, i = 0, j = 0; i < input.length - offset; i++, j++) {
+        int length = input.length - offset;
+        byte[] result = new byte[length];
+        for (int hLen = hashed.length, i = 0, j = 0; i < length; i++, j++) {
             if (j == hLen) {
                 j = 0;
             }

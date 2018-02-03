@@ -14,7 +14,7 @@ import code.ponfee.commons.util.Bytes;
 
 /**
  * SM2 key exchange
- * the final, partA and partB get the same key
+ * the final, partA and partB get the same symmetric key
  * @author Ponfee
  */
 public class SM2KeyExchange implements Serializable {
@@ -42,7 +42,7 @@ public class SM2KeyExchange implements Serializable {
         this.w = new BigInteger("2").pow((int) Math.ceil(ecParam.n.bitLength() * 1.0 / 2) - 1);
         this.publicKey = publicKey;
         this.privateKey = privateKey;
-        this.Z = SM2.calcZ(ecParam, ida, publicKey);
+        this.Z = SM2.calcZ(SM3Digest.getInstance(), ecParam, ida, publicKey);
     }
 
     /**
@@ -86,10 +86,14 @@ public class SM2KeyExchange implements Serializable {
         byte[] KB = kdf(Bytes.concat(xV, yV, entity1.Z, this.Z), 16);
         key = KB;
 
-        byte[] data = concat(xV, entity1.Z, this.Z, RA, RB);
         SM3Digest sm3 = SM3Digest.getInstance();
-        data = sm3.doFinal(data);
-        byte[] sB = sm3.doFinal(Bytes.concat(new byte[] { 0x02 }, yV, data));
+        byte[] data = digest(sm3, xV, entity1.Z, this.Z, RA, RB);
+
+        sm3.update((byte) 0x02);
+        sm3.update(yV);
+        sm3.update(data);
+        byte[] sB = sm3.doFinal();
+
         return new TransportEntity(RB.getEncoded(false), sB, this.Z, publicKey);
     }
 
@@ -118,19 +122,24 @@ public class SM2KeyExchange implements Serializable {
         byte[] yU = U.getYCoord().toBigInteger().toByteArray();
         byte[] KA = kdf(Bytes.concat(xU, yU, this.Z, entity2.Z), 16);
         key = KA;
-        byte[] data = concat(xU, this.Z, entity2.Z, RA, RB);
+
         SM3Digest sm3 = SM3Digest.getInstance();
-        data = sm3.doFinal(data);
-        data = Bytes.concat(new byte[] { 0x02 }, yU, data);
-        data = sm3.doFinal(data);
+        byte[] data = digest(sm3, xU, this.Z, entity2.Z, RA, RB);
+
+        sm3.update((byte) 0x02);
+        sm3.update(yU);
+        sm3.update(data);
+        data = sm3.doFinal();
         if (!Arrays.equals(entity2.S, data)) {
             return null;
         }
 
-        data = concat(xU, this.Z, entity2.Z, RA, RB);
-        data = sm3.doFinal(data);
+        data = digest(sm3, xU, this.Z, entity2.Z, RA, RB);
 
-        byte[] sA = sm3.doFinal(Bytes.concat(new byte[] { 0x03 }, yU, data));
+        sm3.update((byte) 0x03);
+        sm3.update(yU);
+        sm3.update(data);
+        byte[] sA = sm3.doFinal();
         return new TransportEntity(RA.getEncoded(false), sA, this.Z, publicKey);
     }
 
@@ -142,11 +151,14 @@ public class SM2KeyExchange implements Serializable {
         byte[] xV = V.getXCoord().toBigInteger().toByteArray();
         byte[] yV = V.getYCoord().toBigInteger().toByteArray();
         ECPoint RA = ecParam.curve.decodePoint(entity3.R).normalize();
-        byte[] data = concat(xV, entity3.Z, this.Z, RA, this.RA);
+
         SM3Digest sm3 = SM3Digest.getInstance();
-        data = sm3.doFinal(data);
-        byte[] s2 = sm3.doFinal(Bytes.concat(new byte[] { 0x03 }, yV, data));
-        return Arrays.equals(entity3.S, s2);
+        byte[] data = digest(sm3, xV, entity3.Z, this.Z, RA, this.RA);
+
+        sm3.update((byte) 0x03);
+        sm3.update(yV);
+        sm3.update(data);
+        return Arrays.equals(entity3.S, sm3.doFinal());
     }
 
     
@@ -203,12 +215,17 @@ public class SM2KeyExchange implements Serializable {
      * @param b
      * @return
      */
-    private static byte[] concat(byte[] x, byte[] z1, byte[] z2, ECPoint a, ECPoint b) {
-        return Bytes.concat(x, z1, z2, 
-                            a.getXCoord().toBigInteger().toByteArray(), 
-                            a.getYCoord().toBigInteger().toByteArray(), 
-                            b.getXCoord().toBigInteger().toByteArray(), 
-                            b.getYCoord().toBigInteger().toByteArray());
+    private static byte[] digest(SM3Digest sm3, byte[] x, byte[] z1, 
+                                 byte[] z2, ECPoint a, ECPoint b) {
+        sm3.reset();
+        sm3.update(x);
+        sm3.update(z1);
+        sm3.update(z2);
+        sm3.update(a.getXCoord().toBigInteger().toByteArray());
+        sm3.update(a.getYCoord().toBigInteger().toByteArray());
+        sm3.update(b.getXCoord().toBigInteger().toByteArray());
+        sm3.update(b.getYCoord().toBigInteger().toByteArray());
+        return sm3.doFinal();
     }
 
     /**
@@ -224,10 +241,15 @@ public class SM2KeyExchange implements Serializable {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             for (int i = 1; i < end; i++) {
-                baos.write(sm3.doFinal(Bytes.concat(Z, toByteArray(ct))));
+                sm3.update(Z);
+                sm3.update(toByteArray(ct));
+                baos.write(sm3.doFinal());
                 ct++;
             }
-            byte[] last = sm3.doFinal(Bytes.concat(Z, toByteArray(ct)));
+
+            sm3.update(Z);
+            sm3.update(toByteArray(ct));
+            byte[] last = sm3.doFinal();
             if (klen % 32 == 0) {
                 baos.write(last);
             } else baos.write(last, 0, klen % 32);
@@ -264,9 +286,10 @@ public class SM2KeyExchange implements Serializable {
         TransportEntity entity3 = aKeyExchange.step3PartA(entity2);
         System.out.println(Hex.encodeHexString(bKeyExchange.getKey()));
 
-        if (!bKeyExchange.step4PartB(entity3)) {
+        if (!bKeyExchange.step4PartB(entity3)
+            || !Arrays.equals(aKeyExchange.getKey(), bKeyExchange.getKey())) {
             System.err.println("FAIL!");
         }
-        System.out.println(Hex.encodeHexString(aKeyExchange.getKey()));
+        System.out.println(Hex.encodeHexString(aKeyExchange.getKey())); // 16 byte
     }
 }

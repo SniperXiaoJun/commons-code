@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableMap;
  * 
  * @author Ponfee
  */
-public class ECDSASigner {
+public final class ECDSASigner {
 
     private static final String ALGORITHM = "EC";
 
