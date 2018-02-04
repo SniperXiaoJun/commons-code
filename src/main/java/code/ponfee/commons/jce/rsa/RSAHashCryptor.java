@@ -7,14 +7,12 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.jce.Cryptor;
 import code.ponfee.commons.jce.Key;
 import code.ponfee.commons.jce.hash.HashUtils;
 import code.ponfee.commons.util.Bytes;
-import code.ponfee.commons.util.ObjectUtils;
 
 /**
- * RSA Hash512 Cryptor 
+ * RSA Cryptor based sha512 xor 
  * @author Ponfee
  */
 public class RSAHashCryptor extends RSANoPaddingCryptor {
@@ -32,9 +30,8 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
         RSAKey rsaKey = (RSAKey) ek;
         BigInteger exponent = getExponent(rsaKey);
 
-        // 随机生成密码（需要mod n，以免溢出）
-        BigInteger passwd = new BigInteger(rsaKey.n.bitLength() + 17, Cryptor.SECURE_RANDOM);
-        passwd = new BigInteger(1, Bytes.concat(passwd.toByteArray(), ObjectUtils.uuid())).mod(rsaKey.n);
+        // 生成随机密码
+        BigInteger passwd = super.random(rsaKey.n);
 
         // 对密码进行RSA加密，encryptedPasswd = passwd^e mode n
         byte[] encryptedPasswd = passwd.modPow(exponent, rsaKey.n).toByteArray();
@@ -60,7 +57,8 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
         BigInteger exponent = getExponent(rsaKey);
 
         // 获取被加密的密码数据
-        byte[] encryptedPasswd = Arrays.copyOfRange(input, SHORT_BYTE_LEN, SHORT_BYTE_LEN + Bytes.toShort(input));
+        int len = Bytes.toShort(input);
+        byte[] encryptedPasswd = Arrays.copyOfRange(input, SHORT_BYTE_LEN, SHORT_BYTE_LEN + len);
 
         // 解密被加密的密码数据，passwd = encryptedPasswd^d mode n
         BigInteger passwd = new BigInteger(1, encryptedPasswd).modPow(exponent, rsaKey.n);
@@ -83,9 +81,8 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
         RSAKey rsaKey = (RSAKey) ek;
         BigInteger exponent = getExponent(rsaKey);
 
-        // 随机生成密码（需要mod n，以免溢出）
-        BigInteger passwd = new BigInteger(rsaKey.n.bitLength() + 17, Cryptor.SECURE_RANDOM);
-        passwd = new BigInteger(1, Bytes.concat(passwd.toByteArray(), ObjectUtils.uuid())).mod(rsaKey.n);
+        // 生成随机密码
+        BigInteger passwd = super.random(rsaKey.n);
 
         // 对密码进行RSA加密，encryptedPasswd = passwd^e mode n
         byte[] encryptedPasswd = passwd.modPow(exponent, rsaKey.n).toByteArray();
@@ -134,10 +131,8 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
 
             // 对密码进行HASH
             byte[] hashedPasswd = HashUtils.sha512(passwd.toByteArray());
-            int hLen = hashedPasswd.length;
-
             byte[] buffer = new byte[getCipherBlockSize(rsaKey)];
-            for (int len, i, j; (len = input.read(buffer)) != Files.EOF;) {
+            for (int len, hLen = hashedPasswd.length, i, j; (len = input.read(buffer)) != Files.EOF;) {
                 for (i = 0, j = 0; i < len; i++, j++) {
                     if (j == hLen) {
                         j = 0;
@@ -156,6 +151,6 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
     }
 
     public @Override int getCipherBlockSize(RSAKey rsaKey) {
-        return getOriginBlockSize(rsaKey);
+        return this.getOriginBlockSize(rsaKey);
     }
 }

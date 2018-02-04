@@ -6,40 +6,40 @@ import java.util.Arrays;
 import code.ponfee.commons.jce.Cryptor;
 import code.ponfee.commons.jce.Key;
 import code.ponfee.commons.jce.hash.HashUtils;
-import code.ponfee.commons.util.Bytes;
-import code.ponfee.commons.util.ObjectUtils;
 
 /**
- * EC Cryptor base xor
- * 首先：生成随机数dk，在曲线上计算得到dk倍的点beta， beta point(public key)为公钥，dk为私钥
+ * EC Cryptor based xor
  * 
- * 加密：1）生成随机数rk，在曲线上计算得到rk倍的点alpha，由椭圆曲线特性可
- *         得出：BetaPoint(public key) * rk = ECPoint S = AlphaPoint(public key) * dk
+ * origin ≡ origin ⊕   key ⊕  key
  * 
- *       2）把ECPoint S作为中间对称密钥，通过HASH函数计算对称加密密钥
- *          key = SHA-512(ECPoint S)
+ * 一、首先：生成随机数dk，在曲线上计算得到dk倍的点beta， beta point(public key)为公钥，dk为私钥
  * 
- *       3）加密：origin ⊕  key = cipher 
+ * 二、加密：1）生成随机数rk，在曲线上计算得到rk倍的点alpha，由椭圆曲线特性可
+ *             得出：BetaPoint(public key) * rk = ECPoint S = AlphaPoint(public key) * dk
  * 
- *       4）打包加密数据Encrypted = {alpha(public key), cipher}
+ *          2）把ECPoint S作为中间对称密钥，通过HASH函数计算对称加密密钥
+ *             key = SHA-512(ECPoint S)
  * 
- * 解密：1）解析加密数据Encrypted = {alpha(public key), cipher}，
- *         得到：alpha(public key)，cipher
+ *          3）加密：origin ⊕  key = cipher 
  * 
- *       2）用第一步的私钥dk与alpha(public key)进行计算
- *          得到：ECPoint S = alpha(public key) * dk
- *          
- *       3）通过HASH函数计算对称加密密钥
- *          key = SHA-512(ECPoint S)
- *          
- *       3）解密：cipher ⊕   key = origin
- *          原理：origin ≡ origin ⊕   key ⊕  key
+ *          4）打包加密数据Encrypted = {alpha(public key), cipher}
+ * 
+ * 三、解密：1）解析加密数据Encrypted： {alpha(public key), cipher}，
+ *             得到：alpha(public key)，cipher
+ * 
+ *          2）用第一步的私钥dk与alpha(public key)进行计算
+ *             得到：alpha(public key) * dk = ECPoint S
+ * 
+ *          3）通过HASH函数计算对称加密密钥
+ *             key = SHA-512(ECPoint S)
+ * 
+ *          4）解密：cipher ⊕   key = origin
  * 
  * @author Ponfee
  */
 public class ECCryptor extends Cryptor {
 
-    private EllipticCurve curve;
+    private final EllipticCurve curve;
 
     public ECCryptor(EllipticCurve curve) {
         this.curve = curve;
@@ -57,10 +57,11 @@ public class ECCryptor extends Cryptor {
         int offset = ecKey.curve.getPCS();
 
         // 生成随机数rk
-        BigInteger rk = new BigInteger(ecKey.curve.getp().bitLength() + 17, Cryptor.SECURE_RANDOM);
-        rk = new BigInteger(1, Bytes.concat(rk.toByteArray(), ObjectUtils.uuid()));
+        BigInteger rk;
         if (ecKey.curve.getN() != null) {
-            rk = rk.mod(ecKey.curve.getN()); // rk = rk % n
+            rk = Cryptor.random(ecKey.curve.getN());
+        } else {
+            rk = Cryptor.random(ecKey.curve.getp().bitLength() + 17);
         }
 
         // 计算曲线上rk倍点alpha：ECPoint gamma = alpha(public key) * rk

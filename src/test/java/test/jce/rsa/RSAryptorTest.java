@@ -27,9 +27,17 @@ import code.ponfee.commons.util.SecureRandoms;
 public class RSAryptorTest {
 
     private static byte[] origin = MavenProjects.getMainJavaFileAsByteArray(IdcardResolver.class);
+    private static boolean isPrint = false;
+
+    private static void print(String s) {
+        if (isPrint) {
+            System.out.println(s);
+        }
+    }
 
     @Test
     public void testRSANoPadding() throws Exception {
+        System.out.println("\n\ntestRSANoPadding======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
         RSANoPaddingCryptor cs = new RSANoPaddingCryptor();
@@ -40,7 +48,7 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSA1 Decrypted text is: \n" + new String(decrypted));
+            print("\n\n=====RSA1 Decrypted text is: \n" + new String(decrypted));
         }
         System.out.println(watch.stop());
 
@@ -52,14 +60,14 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSA2 Decrypted text is: \n" + new String(decrypted));
-            System.out.println(new String(decrypted));
+            print("\n\n=====RSA2 Decrypted text is: \n" + new String(decrypted));
         }
         System.out.println(watch.stop());
     }
 
     @Test
     public void testRSAPKCS1Padding() throws Exception {
+        System.out.println("\n\ntestRSAPKCS1Padding======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
         RSANoPaddingCryptor cs = new RSAPKCS1PaddingCryptor();
@@ -73,7 +81,7 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSA1 Decrypted text is: \n" + new String(decrypted));
+            print("\n\n=====RSA1 Decrypted text is: \n" + new String(decrypted));
         }
         System.out.println(watch.stop());
 
@@ -82,8 +90,7 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSA2 Decrypted text is: \n" + new String(decrypted));
-            System.out.println(new String(decrypted));
+            print("\n\n=====RSA2 Decrypted text is: \n" + new String(decrypted));
         }
         System.out.println(watch.stop());
 
@@ -94,7 +101,7 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSA1 Decrypted text is: \n" + new String(decrypted));
+            print("\n\n=====RSA1 Decrypted text is: \n" + new String(decrypted));
         }
         System.out.println(watch.stop());
 
@@ -103,8 +110,7 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSA2 Decrypted text is: \n" + new String(decrypted));
-            System.out.println(new String(decrypted));
+            print("\n\n=====RSA2 Decrypted text is: \n" + new String(decrypted));
         }
         System.out.println(watch.stop());
 
@@ -114,7 +120,7 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSA1 Decrypted text is: \n" + new String(decrypted));
+            print("\n\n=====RSA1 Decrypted text is: \n" + new String(decrypted));
         }
 
         // =======================================加密－解密
@@ -123,12 +129,13 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSA1 Decrypted text is: \n" + new String(decrypted));
+            print("\n\n=====RSA1 Decrypted text is: \n" + new String(decrypted));
         }
     }
 
     @Test
     public void testRSAHash() throws Exception {
+        System.out.println("\n\ntestRSAHash======================================");
         RSAKey dk = new RSAKey(2048);
         Key ek = dk.getPublic();
         RSANoPaddingCryptor cs = new RSAHashCryptor();
@@ -139,19 +146,20 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSAHashCryptor Decrypted text is: \n" + new String(decrypted));
+            print("\n\n=====RSAHashCryptor Decrypted text is: \n" + new String(decrypted));
         }
     }
 
     @Test
     public void testRSARandom() throws Exception {
+        System.out.println("\n\ntestRSARandom======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
         RSANoPaddingCryptor cs = new RSANoPaddingCryptor();
         RSAPKCS1PaddingCryptor cs2 = new RSAPKCS1PaddingCryptor();
         RSAPublicKey pub = RSAPublicKeys.toRSAPublicKey(dk.n, dk.e);
         RSAPrivateKey pri = RSAPrivateKeys.toRSAPrivateKey(dk.n, dk.d);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
 
             /*int length = ThreadLocalRandom.current().nextInt(65537) + 1;
             int offset = ThreadLocalRandom.current().nextInt(origin.length - length);
@@ -211,6 +219,7 @@ public class RSAryptorTest {
 
     @Test
     public void testRSAHashInverseKey() throws Exception {
+        System.out.println("\n\ntestRSAHashInverseKey======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
         RSAHashCryptor cs = new RSAHashCryptor();
@@ -227,10 +236,11 @@ public class RSAryptorTest {
 
     @Test
     public void testRSANoPaddingInverseKey() throws Exception {
+        System.out.println("\n\ntestRSANoPaddingInverseKey======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
         RSANoPaddingCryptor cs = new RSANoPaddingCryptor();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             byte[] data = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(255) + 1);
             byte[] encrypted1 = cs.encrypt(data, dk); // 私钥加密
             byte[] decrypted1 = cs.decrypt(encrypted1, ek); // 公钥解密
@@ -243,6 +253,7 @@ public class RSAryptorTest {
     
     @Test
     public void testRSAPKCS1InverseKey() throws Exception {
+        System.out.println("\n\ntestRSAPKCS1InverseKey======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
         RSAPKCS1PaddingCryptor cs = new RSAPKCS1PaddingCryptor();
@@ -258,6 +269,7 @@ public class RSAryptorTest {
     }
     @Test
     public void testRSANoPaddingStream() throws Exception {
+        System.out.println("\n\ntestRSANoPaddingStream======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
         RSANoPaddingCryptor cs = new RSANoPaddingCryptor();
@@ -275,7 +287,7 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSAStream Decrypted text is: \n" + new String(decrypted));
+            print("\n\n=====RSAStream Decrypted text is: \n" + new String(decrypted));
         }
         System.out.println(watch.stop());
 
@@ -288,13 +300,14 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSAStream Decrypted text is: \n" + new String(decrypted));
+            print("\n\n=====RSAStream Decrypted text is: \n" + new String(decrypted));
         }
         System.out.println(watch.stop());
     }
 
     @Test
     public void testRSAPKCS1PaddingStream() throws Exception {
+        System.out.println("\n\ntestRSAPKCS1PaddingStream======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
         RSANoPaddingCryptor cs = new RSAPKCS1PaddingCryptor();
@@ -312,7 +325,7 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSAStream Decrypted text is: \n" + new String(decrypted));
+            print("\n\n=====RSAStream Decrypted text is: \n" + new String(decrypted));
         }
         System.out.println(watch.stop());
 
@@ -325,13 +338,14 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSAStream Decrypted text is: \n" + new String(decrypted));
+            print("\n\n=====RSAStream Decrypted text is: \n" + new String(decrypted));
         }
         System.out.println(watch.stop());
     }
 
     @Test
     public void testRSAHashStream() throws Exception {
+        System.out.println("\n\ntestRSAHashStream======================================");
         RSAKey dk = new RSAKey(2048);
         Key ek = dk.getPublic();
         RSAHashCryptor cs = new RSAHashCryptor();
@@ -341,7 +355,7 @@ public class RSAryptorTest {
         Stopwatch watch = Stopwatch.createStarted();
         cs.encrypt(input, ek, output);
         byte[] encrypted = output.toByteArray();
-        System.out.println("encrypted len: " + encrypted.length + ",  origin len: " + origin.length);
+        print("encrypted len: " + encrypted.length + ",  origin len: " + origin.length);
 
         input = new ByteArrayInputStream(encrypted);
         output = new ByteArrayOutputStream();
@@ -350,7 +364,7 @@ public class RSAryptorTest {
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
-            System.out.println("\n\n=====RSAStream Decrypted text is: \n" + new String(decrypted));
+            print("\n\n=====RSAStream Decrypted text is: \n" + new String(decrypted));
         }
         System.out.println(watch.stop());
     }

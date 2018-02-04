@@ -182,7 +182,7 @@ public class RSAKey implements Key {
                     keyPair.q = temp;
                 }
                 keyPair.n = keyPair.p.multiply(keyPair.q);
-            } while (keyPair.n.bitLength() < keySize);
+            } while (keyPair.n.bitLength() != keySize);
             keyPair.p1 = keyPair.p.subtract(BigInteger.ONE);
             keyPair.q1 = keyPair.q.subtract(BigInteger.ONE);
             keyPair.phi = keyPair.p1.multiply(keyPair.q1);

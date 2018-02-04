@@ -19,7 +19,7 @@ public class ECKey implements Key {
     protected boolean secret; // 是否是私钥
     protected BigInteger dk; // decrypt key
     protected ECPoint beta; // the public key of ECPoint
-    protected EllipticCurve curve; // the Elliptic cCurve
+    protected final EllipticCurve curve; // the Elliptic cCurve
 
     /**
      * ECKey generates a random secret key (contains also the public key)
@@ -30,9 +30,10 @@ public class ECKey implements Key {
         this.secret = true;
 
         // dk is a random num.
-        this.dk = new BigInteger(ec.getp().bitLength() + 17, Cryptor.SECURE_RANDOM);
         if (curve.getN() != null) {
-            dk = dk.mod(curve.getN()); // dk = dk % n
+            this.dk = Cryptor.random(curve.getN());
+        } else {
+            this.dk = Cryptor.random(ec.getp().bitLength() + 17);
         }
 
         // beta = generator*dk (public key)
