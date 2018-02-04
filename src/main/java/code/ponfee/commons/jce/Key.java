@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.ecc;
+package code.ponfee.commons.jce;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.ecc;
+package code.ponfee.commons.jce;
 
 import java.security.SecureRandom;
 
@@ -8,7 +8,7 @@ import java.security.SecureRandom;
  */
 public abstract class Cryptor {
 
-    static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    public static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     public final byte[] encrypt(byte[] original, Key ek) {
         return encrypt(original, original.length, ek);

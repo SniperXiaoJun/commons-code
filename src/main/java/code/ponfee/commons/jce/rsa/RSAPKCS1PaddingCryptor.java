@@ -1,7 +1,9 @@
-package code.ponfee.commons.jce.ecc;
+package code.ponfee.commons.jce.rsa;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import code.ponfee.commons.jce.Key;
 
 /**
  * RSA Cryptor with PKCS1 padding

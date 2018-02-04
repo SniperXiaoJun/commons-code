@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 
+import code.ponfee.commons.jce.Cryptor;
+import code.ponfee.commons.jce.Key;
+
 /**
  * This is Elliptic Curve key
  * @author Ponfee

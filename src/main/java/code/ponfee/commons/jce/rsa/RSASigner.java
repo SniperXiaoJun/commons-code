@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.ecc;
+package code.ponfee.commons.jce.rsa;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,7 +25,8 @@ import code.ponfee.commons.jce.HashAlgorithms;
 import code.ponfee.commons.jce.hash.HashUtils;
 
 /**
- * RSA签名
+ * RSA sign
+ * https://www.cnblogs.com/jintianhu/p/5051169.html
  * 
  * @see org.bouncycastle.crypto.signers.RSADigestSigner
  * 
@@ -66,7 +67,7 @@ public class RSASigner {
             // 签名
             rsaEngine.init(true, new RSAKeyParameters(true, rsaKey.n, rsaKey.d));
         } else {
-            // 加密
+            // 验签
             rsaEngine.init(false, new RSAKeyParameters(false, rsaKey.n, rsaKey.e));
         }
     }
@@ -86,6 +87,7 @@ public class RSASigner {
         return verify(data, signature, HashAlgorithms.SHA256);
     }
 
+    // --------------------private methods---------------------------
     private byte[] sign(byte[] data, HashAlgorithms alg) {
         if (!this.rsaKey.isSecret) {
             throw new IllegalArgumentException("Sign must use private key.");
@@ -150,14 +152,14 @@ public class RSASigner {
                     return false;
                 }
             }
-
             return true;
         } else {
             return false;
         }
     }
 
-    private byte[] derEncode(byte[] hash, ASN1ObjectIdentifier digestOid) throws IOException {
+    private byte[] derEncode(byte[] hash, ASN1ObjectIdentifier digestOid) 
+        throws IOException {
         AlgorithmIdentifier algId = new AlgorithmIdentifier(digestOid, DERNull.INSTANCE);
         DigestInfo dInfo = new DigestInfo(algId, hash);
         return dInfo.getEncoded(ASN1Encoding.DER);

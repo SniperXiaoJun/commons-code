@@ -3,6 +3,8 @@ package code.ponfee.commons.jce.ecc;
 import java.math.BigInteger;
 import java.util.Arrays;
 
+import code.ponfee.commons.jce.Cryptor;
+import code.ponfee.commons.jce.Key;
 import code.ponfee.commons.jce.hash.HashUtils;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.ObjectUtils;

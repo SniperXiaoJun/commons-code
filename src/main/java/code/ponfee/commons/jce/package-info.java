@@ -75,7 +75,6 @@
  *   签名算法：SM3WithSM2
  * 
  * 12、Windows证书管理：
- *    本地计算机的证书管理：certlm.msc
  *    当前用户的证书管理：certmgr.msc
  * 
  * @author fupf
