@@ -15,7 +15,7 @@ import code.ponfee.commons.util.ObjectUtils;
  * RSA Hash512 Cryptor 
  * @author Ponfee
  */
-public class RSAHashCryptor extends RSACryptor {
+public class RSAHashCryptor extends RSANoPaddingCryptor {
 
     private static final int SHORT_BYTE_LEN = 2;
 

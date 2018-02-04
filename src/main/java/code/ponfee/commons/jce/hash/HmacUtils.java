@@ -149,11 +149,11 @@ public final class HmacUtils {
     }
 
     // ------------------------private methods-------------------------
-    private static byte[] crypt(byte[] key, byte[] data, HmacAlgorithms alg) {
+    public static byte[] crypt(byte[] key, byte[] data, HmacAlgorithms alg) {
         return getInitializedMac(alg, key).doFinal(data);
     }
 
-    private static byte[] crypt(byte[] key, InputStream input, HmacAlgorithms alg) {
+    public static byte[] crypt(byte[] key, InputStream input, HmacAlgorithms alg) {
         try (InputStream in = input) {
             Mac mac = getInitializedMac(alg, key);
             byte[] buffer = new byte[BUFF_SIZE];

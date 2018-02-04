@@ -13,15 +13,15 @@ import code.ponfee.commons.jce.ECParameters;
  */
 public class EllipticCurve {
 
-    private BigInteger a, b, p, n;
-    private ECPoint generator;
-    private BigInteger ppodbf;
-    private int pointcmpsize;
-    private String name;
-
     public static final BigInteger COEFA = new BigInteger("4");
     public static final BigInteger COEFB = new BigInteger("27");
     public static final int PRIMESECURITY = 500;
+
+    private BigInteger a, b, p, n;
+    private ECPoint generator; // point G
+    private BigInteger ppodbf;
+    private int pointcmpsize;
+    private String name;
 
     /** 
      * Constructs an elliptic curve over the finite field of 'mod' elements.

@@ -432,7 +432,8 @@ public final class SM2 {
 
     public static void main(String[] args) {
         //ECParameters ecParameter = ECParameters.secp256r1;
-        ECParameters ecParameter = ECParameters.EC_PARAMETERS.get("secp256r1");
+        //ECParameters ecParameter = ECParameters.EC_PARAMETERS.get("secp256r1");
+        ECParameters ecParameter = ECParameters.EC_PARAMETERS.get("secp256k1");
         for (int i = 0; i < 5; i++) {
             byte[] data = MavenProjects.getMainJavaFileAsLineString(SM2.class).getBytes();
             Map<String, byte[]> keyMap = generateKeyPair(ecParameter);

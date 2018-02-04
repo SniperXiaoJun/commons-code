@@ -7,6 +7,7 @@ import java.math.BigInteger;
 
 import org.apache.commons.io.IOUtils;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 
 import sun.security.util.DerInputStream;
@@ -33,18 +34,14 @@ public class RSAKey implements Key {
     public final BigInteger qe;
     public final BigInteger coeff;
 
-    public final boolean secret;
-
-    public boolean isPublic() {
-        return (!secret);
-    }
+    public final boolean isSecret;
 
     public RSAKey(int keySize) {
         this(keySize, RSA_F4.intValue());
     }
 
     public RSAKey(int keySize, int e) {
-        this.secret = true;
+        this.isSecret = true;
         KeyPair pair = generateKey(keySize, e);
         this.e = pair.e;
         this.p = pair.p;
@@ -56,10 +53,14 @@ public class RSAKey implements Key {
         this.coeff = pair.coeff;
     }
 
-    public RSAKey(boolean secret, BigInteger n, BigInteger e,
+    public RSAKey(BigInteger n, BigInteger e,
                   BigInteger d, BigInteger p, BigInteger q,
                   BigInteger pe, BigInteger qe, BigInteger coeff) {
-        this.secret = secret;
+
+        Preconditions.checkArgument(n != null && e != null && d != null 
+                                    && p != null && q != null && pe != null 
+                                    && qe != null && coeff != null);
+        this.isSecret = true;
         this.n = n;
         this.e = e;
         this.d = d;
@@ -70,21 +71,39 @@ public class RSAKey implements Key {
         this.coeff = coeff;
     }
 
+    public RSAKey(BigInteger n, BigInteger e) {
+        Preconditions.checkArgument(n != null && e != null);
+        this.isSecret = false;
+        this.n = n;
+        this.e = e;
+
+        this.d = null;
+        this.p = null;
+        this.q = null;
+        this.pe = null;
+        this.qe = null;
+        this.coeff = null;
+    }
+
+    public boolean isPublic() {
+        return (!isSecret);
+    }
+
     /**
      * get the public key
      */
-    public @Override Key getPublic() {
-        return new RSAKey(false, n, e, null, null, null, null, null, null);
+    public @Override RSAKey getPublic() {
+        return new RSAKey(n, e);
     }
 
     // Secret: (secret, n, e, d, p, q, pe, qe, coeff)
     // Public: (secret, n, e)
     public @Override void writeKey(OutputStream out) throws IOException {
         DerOutputStream der = new DerOutputStream();
-        der.putInteger(this.secret ? 0 : 1);
+        der.putInteger(this.isSecret ? 0 : 1);
         der.putInteger(this.n);
         der.putInteger(this.e);
-        if (this.secret) {
+        if (this.isSecret) {
             der.putInteger(this.d);
             der.putInteger(this.p);
             der.putInteger(this.q);
@@ -99,33 +118,32 @@ public class RSAKey implements Key {
 
     // Secret: (secret, n, e, d, p, q, pe, qe, coeff)
     // Public: (secret, n, e)
-    public @Override Key readKey(InputStream in) throws IOException {
+    public @Override RSAKey readKey(InputStream in) throws IOException {
         DerValue der = new DerInputStream(IOUtils.toByteArray(in)).getDerValue();
         if (der.getTag() != 48) {
             throw new IOException("Not a SEQUENCE");
         }
+
         DerInputStream derIn = der.getData();
         boolean secret = der.getInteger() == 0;
         BigInteger n = getBigInteger(derIn);
         BigInteger e = getBigInteger(derIn);
-        BigInteger d = null;
-        BigInteger p = null;
-        BigInteger q = null;
-        BigInteger pe = null;
-        BigInteger qe = null;
-        BigInteger coeff = null;
+        RSAKey rsaKey = null;
         if (secret) {
-            d = getBigInteger(derIn);
-            p = getBigInteger(derIn);
-            q = getBigInteger(derIn);
-            pe = getBigInteger(derIn);
-            qe = getBigInteger(derIn);
-            coeff = getBigInteger(derIn);
+            BigInteger d = getBigInteger(derIn);
+            BigInteger p = getBigInteger(derIn);
+            BigInteger q = getBigInteger(derIn);
+            BigInteger pe = getBigInteger(derIn);
+            BigInteger qe = getBigInteger(derIn);
+            BigInteger coeff = getBigInteger(derIn);
+            rsaKey = new RSAKey(n, e, d, p, q, pe, qe, coeff);
+        } else {
+            rsaKey = new RSAKey(n, e);
         }
-        if (der.getData().available() != 0) {
+        if (derIn.available() != 0) {
             throw new IOException("Extra data available");
         }
-        return new RSAKey(secret, n, e, d, p, q, pe, qe, coeff);
+        return rsaKey;
     }
 
     private static BigInteger getBigInteger(DerInputStream derIn) {

@@ -9,14 +9,29 @@ import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * EC Cryptor base xor
- * 首先：生成随机数dk，在曲线上计算得到dk倍的点beta， beta point为公钥beta(public key)，dk为私钥
- * 加密：生成随机数rk，在曲线上计算得到rk倍的点alpha，alpha point为公钥alpha(public key)，rk为私钥
- *     ECPoint S = beta(public key) * rk，并把alpha(public key)数据放入加密数据中
- * 解密：解析得到alpha(public key)，用私钥dk解密
- *     ECPoint S = alpha(public key) * dk
+ * 首先：生成随机数dk，在曲线上计算得到dk倍的点beta， beta point(public key)为公钥，dk为私钥
  * 
- * 即：[beta(public key), dk]，[alpha(public key), rk]
- *    beta(public key) * rk = ECPoint S = alpha(public key) * dk
+ * 加密：1）生成随机数rk，在曲线上计算得到rk倍的点alpha，由椭圆曲线特性可
+ *         得出：BetaPoint(public key) * rk = ECPoint S = AlphaPoint(public key) * dk
+ * 
+ *       2）把ECPoint S作为中间对称密钥，通过HASH函数计算对称加密密钥
+ *          key = SHA-512(ECPoint S)
+ * 
+ *       3）加密：origin ⊕  key = cipher 
+ * 
+ *       4）打包加密数据Encrypted = {alpha(public key), cipher}
+ * 
+ * 解密：1）解析加密数据Encrypted = {alpha(public key), cipher}，
+ *         得到：alpha(public key)，cipher
+ * 
+ *       2）用第一步的私钥dk与alpha(public key)进行计算
+ *          得到：ECPoint S = alpha(public key) * dk
+ *          
+ *       3）通过HASH函数计算对称加密密钥
+ *          key = SHA-512(ECPoint S)
+ *          
+ *       3）解密：cipher ⊕   key = origin
+ *          原理：origin ≡ origin ⊕   key ⊕  key
  * 
  * @author Ponfee
  */

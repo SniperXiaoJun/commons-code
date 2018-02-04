@@ -184,7 +184,7 @@ public final class HashUtils {
      * @param algorithm hash算法
      * @return
      */
-    private static byte[] digest(String algorithm, byte[]... data) {
+    public static byte[] digest(String algorithm, byte[]... data) {
         MessageDigest md;
         try {
             md = MessageDigest.getInstance(algorithm);
@@ -203,7 +203,7 @@ public final class HashUtils {
      * @param algorithm hash 算法
      * @return
      */
-    private static byte[] digest(InputStream input, String algorithm) {
+    public static byte[] digest(InputStream input, String algorithm) {
         byte[] buffer = new byte[BUFF_SIZE];
 
         /*try (InputStream in = input) {
