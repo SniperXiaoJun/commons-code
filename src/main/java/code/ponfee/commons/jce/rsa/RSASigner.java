@@ -71,6 +71,7 @@ public class RSASigner {
             rsaEngine.init(false, new RSAKeyParameters(false, rsaKey.n, rsaKey.e));
         }
     }
+
     public byte[] signSha1(byte[] data) {
         return sign(data, HashAlgorithms.SHA1);
     }

@@ -124,7 +124,7 @@ public final class Bytes {
     }
 
     public static byte[] fromShort(short value) {
-        return ByteBuffer.allocate(2).putShort(value).array();
+        return ByteBuffer.allocate(Short.BYTES).putShort(value).array();
     }
 
     public static short toShort(byte[] bytes) {
@@ -132,13 +132,13 @@ public final class Bytes {
     }
 
     public static short toShort(byte[] bytes, int fromIdx) {
-        ByteBuffer buffer = ByteBuffer.allocate(2);
-        buffer.put(bytes, fromIdx, 2).flip();
+        ByteBuffer buffer = ByteBuffer.allocate(Short.BYTES);
+        buffer.put(bytes, fromIdx, Short.BYTES).flip();
         return buffer.getShort();
     }
 
     public static byte[] fromInt(int value) {
-        return ByteBuffer.allocate(4).putInt(value).array();
+        return ByteBuffer.allocate(Integer.BYTES).putInt(value).array();
     }
 
     public static int toInt(byte[] bytes) {
@@ -146,8 +146,8 @@ public final class Bytes {
     }
 
     public static int toInt(byte[] bytes, int fromIdx) {
-        ByteBuffer buffer = ByteBuffer.allocate(4);
-        buffer.put(bytes, fromIdx, 4).flip();
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
+        buffer.put(bytes, fromIdx, Integer.BYTES).flip();
         return buffer.getInt();
     }
 
@@ -157,7 +157,7 @@ public final class Bytes {
      * @return byte array
      */
     public static byte[] fromLong(long number) {
-        return ByteBuffer.allocate(8).putLong(number).array();
+        return ByteBuffer.allocate(Long.BYTES).putLong(number).array();
     }
 
     /**
@@ -167,8 +167,8 @@ public final class Bytes {
      * @return long number
      */
     public static long toLong(byte[] bytes, int fromIdx) {
-        ByteBuffer buffer = ByteBuffer.allocate(8);
-        buffer.put(bytes, fromIdx, 8).flip();
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.put(bytes, fromIdx, Long.BYTES).flip();
         return buffer.getLong();
     }
 

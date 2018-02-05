@@ -98,7 +98,7 @@ public class SymmetricCryptor {
     }
 
     public final String getKeyAsBase64() {
-        return Base64.getEncoder().encodeToString(getKey());
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(getKey());
     }
 
     /**
@@ -110,7 +110,7 @@ public class SymmetricCryptor {
     }
 
     public final String getParameterAsBase64() {
-        return Base64.getEncoder().encodeToString(getParameter());
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(getParameter());
     }
 
     public final Mode getMode() {

@@ -29,7 +29,7 @@ import code.ponfee.commons.util.SecureRandoms;
  */
 public class RSANoPaddingCryptor extends Cryptor {
 
-    private static final byte ZERO = 0;
+    private static final byte ZERO = 0x00;
 
     public @Override byte[] encrypt(byte[] input, int length, Key ek) {
         return encrypt(input, length, ek, false);
@@ -266,7 +266,7 @@ public class RSANoPaddingCryptor extends Cryptor {
         }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(cipherBlockSize);
-        baos.write(0x00); // 00
+        baos.write(ZERO); // 0x00
 
         if (rsaKey.isSecret) {
             // 私钥填充
@@ -286,7 +286,7 @@ public class RSANoPaddingCryptor extends Cryptor {
             }
         }
 
-        baos.write(0x00); // 00
+        baos.write(ZERO); // 0x00
 
         baos.write(input, from, length); // D
         return baos.toByteArray();
@@ -299,8 +299,8 @@ public class RSANoPaddingCryptor extends Cryptor {
      * @param out
      * @throws IOException
      */
-    private static void decodeBlock(byte[] input, int cipherBlockSize, OutputStream out)
-        throws IOException {
+    private static void decodeBlock(byte[] input, int cipherBlockSize, 
+                                    OutputStream out) throws IOException {
         int removedZeroLen;
         if (input[0] == ZERO) {
             removedZeroLen = 0;

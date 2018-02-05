@@ -17,7 +17,7 @@ import code.ponfee.commons.util.Bytes;
  */
 public class RSAHashCryptor extends RSANoPaddingCryptor {
 
-    private static final int SHORT_BYTE_LEN = 2;
+    private static final int SHORT_BYTES = Short.BYTES;
 
     /**
      * (origin ⊕ passwd) ⊕ passwd = origin
@@ -39,9 +39,9 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
         // 对密码进行HASH
         byte[] hashedPasswd = HashUtils.sha512(passwd.toByteArray());
 
-        int kLen = SHORT_BYTE_LEN + encryptedPasswd.length;
+        int kLen = SHORT_BYTES + encryptedPasswd.length;
         byte[] result = Arrays.copyOf(Bytes.fromShort((short) encryptedPasswd.length), kLen + length);
-        System.arraycopy(encryptedPasswd, 0, result, SHORT_BYTE_LEN, encryptedPasswd.length);
+        System.arraycopy(encryptedPasswd, 0, result, SHORT_BYTES, encryptedPasswd.length);
 
         for (int hLen = hashedPasswd.length, i = 0, j = 0; i < length; i++, j++) {
             if (j == hLen) {
@@ -58,7 +58,7 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
 
         // 获取被加密的密码数据
         int len = Bytes.toShort(input);
-        byte[] encryptedPasswd = Arrays.copyOfRange(input, SHORT_BYTE_LEN, SHORT_BYTE_LEN + len);
+        byte[] encryptedPasswd = Arrays.copyOfRange(input, SHORT_BYTES, SHORT_BYTES + len);
 
         // 解密被加密的密码数据，passwd = encryptedPasswd^d mode n
         BigInteger passwd = new BigInteger(1, encryptedPasswd).modPow(exponent, rsaKey.n);
@@ -66,8 +66,8 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
         // 对密码进行HASH
         byte[] hashedPasswd = HashUtils.sha512(passwd.toByteArray());
 
-        byte[] result = new byte[input.length - SHORT_BYTE_LEN - encryptedPasswd.length];
-        int kLen = SHORT_BYTE_LEN + encryptedPasswd.length;
+        byte[] result = new byte[input.length - SHORT_BYTES - encryptedPasswd.length];
+        int kLen = SHORT_BYTES + encryptedPasswd.length;
         for (int hLen = hashedPasswd.length, i = 0, j = 0; i < result.length; i++, j++) {
             if (j == hLen) {
                 j = 0;
@@ -112,14 +112,14 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
 
     public @Override void decrypt(InputStream input, Key dk, OutputStream output) {
         try {
-            if (input.available() < SHORT_BYTE_LEN + 1) {
+            if (input.available() < SHORT_BYTES + 1) {
                 throw new IllegalArgumentException("Invalid cipher data");
             }
 
             RSAKey rsaKey = (RSAKey) dk;
             BigInteger exponent = getExponent(rsaKey);
 
-            byte[] prefixBytes = new byte[SHORT_BYTE_LEN];
+            byte[] prefixBytes = new byte[SHORT_BYTES];
             input.read(prefixBytes);
 
             // 获取被加密的密码数据

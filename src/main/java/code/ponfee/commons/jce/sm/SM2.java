@@ -404,7 +404,7 @@ public final class SM2 {
      */
     private static class Signature implements java.io.Serializable {
         private static final long serialVersionUID = -2732762291362285185L;
-        static final int SHORT_BYTE_LEN = 2;
+        static final int SHORT_BYTES = Short.BYTES;
 
         final BigInteger r;
         final BigInteger s;
@@ -415,9 +415,9 @@ public final class SM2 {
         }
 
         Signature(byte[] signed) {
-            short rLen = Bytes.toShort(Arrays.copyOf(signed, SHORT_BYTE_LEN));
-            this.r = new BigInteger(1, Arrays.copyOfRange(signed, SHORT_BYTE_LEN, SHORT_BYTE_LEN + rLen));
-            this.s = new BigInteger(1, Arrays.copyOfRange(signed, SHORT_BYTE_LEN + rLen, signed.length));
+            short rLen = Bytes.toShort(Arrays.copyOf(signed, SHORT_BYTES));
+            this.r = new BigInteger(1, Arrays.copyOfRange(signed, SHORT_BYTES, SHORT_BYTES + rLen));
+            this.s = new BigInteger(1, Arrays.copyOfRange(signed, SHORT_BYTES + rLen, signed.length));
         }
 
         byte[] toByteArray() {
