@@ -28,28 +28,28 @@ public class EllipticCurveTest {
         System.out.println("\nTesting secp256r1===============");
         e = new EllipticCurve(ECParameters.secp256r1);
         System.out.println("New curve: " + e + " OK!");
-        System.out.println("Generator: " + e.getGenerator());
+        System.out.println("Generator: " + e.getBasePointG());
         System.out.println("N: " + e.getN());
 
         System.out.println("\nTesting decompression of compression...");
-        p1 = new ECPoint(e.getGenerator().compress(), e);
-        if (e.getGenerator().getx().compareTo(p1.getx()) == 0) {
+        p1 = new ECPoint(e.getBasePointG().compress(), e);
+        if (e.getBasePointG().getX().compareTo(p1.getX()) == 0) {
             System.out.println("x values agree...");
         } else {
             System.out.println("x values disagree...");
             System.out.println("x-before:");
-            System.out.println(e.getGenerator().gety());
+            System.out.println(e.getBasePointG().getY());
             System.out.println("y-after:");
-            System.out.println(p1.gety());
+            System.out.println(p1.getY());
         }
-        if (e.getGenerator().gety().compareTo(p1.gety()) == 0) {
+        if (e.getBasePointG().getY().compareTo(p1.getY()) == 0) {
             System.out.println("y values agree...");
         } else {
             System.out.println("y values disagree...");
             System.out.println("y-before:");
-            System.out.println(e.getGenerator().gety());
+            System.out.println(e.getBasePointG().getY());
             System.out.println("y-after:");
-            System.out.println(p1.gety());
+            System.out.println(p1.getY());
         }
     }
 }

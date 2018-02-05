@@ -148,7 +148,6 @@ public final class HmacUtils {
         }
     }
 
-    // ------------------------private methods-------------------------
     public static byte[] crypt(byte[] key, byte[] data, HmacAlgorithms alg) {
         return getInitializedMac(alg, key).doFinal(data);
     }

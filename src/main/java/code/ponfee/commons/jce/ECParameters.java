@@ -92,6 +92,17 @@ public class ECParameters implements java.io.Serializable {
         "C49D360886E704936A6678E1139D26B7819F7E90"
     );
 
+    public static final ECParameters secp256k1 = new ECParameters(
+        "secp256k1",
+        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 
+        "0", 
+        "7", 
+        "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 
+        "483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 
+        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 
+        "0"
+    );
+
     public static final ImmutableBiMap<String, ASN1ObjectIdentifier> NAME_OID_MAPPING;
     public static final ImmutableMap<String, ECParameters> EC_PARAMETERS;
     static {
@@ -135,11 +146,11 @@ public class ECParameters implements java.io.Serializable {
     public final BigInteger p; // p为素数域内点的个数
     public final BigInteger a; // a和b是其内的两个大数
     public final BigInteger b;
-    public final BigInteger gx; // x,y为G基点的坐标
+    public final BigInteger gx; // x,y为基点G的坐标
     public final BigInteger gy;
-    public final BigInteger n; // n为点G基点的阶
-    public final BigInteger S;
-    // 有时候我们还会用到h(椭圆曲线上所有点的个数p与n相除的整数部分)
+    public final BigInteger n; // n为点基点G的阶(nP=O∞)
+    public final BigInteger S; // secure random seed
+    //public final BigInteger h; // 有时候我们还会用到h(椭圆曲线上所有点的个数p与n相除的整数部分)
 
     /** build parameter */
     public transient final ECCurve curve; // the curve
@@ -158,7 +169,7 @@ public class ECParameters implements java.io.Serializable {
         this.gy = Numbers.toBigInteger(gy);
         this.n  = Numbers.toBigInteger(n);
         this.S  = Numbers.toBigInteger(S);
-        
+
         ECCurve curve = null;
         ECPoint pointG = null;
         ECDomainParameters bcSpec = null;
@@ -170,7 +181,7 @@ public class ECParameters implements java.io.Serializable {
             keyPairGenerator = new ECKeyPairGenerator();
             keyPairGenerator.init(new ECKeyGenerationParameters(bcSpec, new SecureRandom()));
         } catch (Exception ignored) {
-            //System.err.println(this.toString());
+            //System.err.println(this.toString()); // x value invalid in Fp field element
         }
 
         this.curve = curve;

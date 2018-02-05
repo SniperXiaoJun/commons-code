@@ -12,26 +12,26 @@ import code.ponfee.commons.jce.hash.HashUtils;
  * 
  * origin ≡ origin ⊕   key ⊕  key
  * 
- * 一、首先：生成随机数dk，在曲线上计算得到dk倍的点beta， beta point(public key)为公钥，dk为私钥
+ * 一、首先：生成随机数dk，在曲线上计算得到dk的倍点beta point， 
+ *        beta point(public key) = basePointG(public key) * dk，
+ *        beta point(public key)作为公钥，dk作为私钥
  * 
- * 二、加密：1）生成随机数rk，在曲线上计算得到rk倍的点alpha，由椭圆曲线特性可
- *             得出：BetaPoint(public key) * rk = ECPoint S = AlphaPoint(public key) * dk
+ * 二、加密：1）生成随机数rk，在曲线上计算得到rk的倍点gamma point，
+ *          gamma point(public key) = basePointG(public key) * rk，
+ *          由椭圆曲线特性可得出：beta point(public key) * rk = ECPoint S = gamma point(public key) * dk
  * 
- *          2）把ECPoint S作为中间对称密钥，通过HASH函数计算对称加密密钥
- *             key = SHA-512(ECPoint S)
+ *          2）ECPoint S = beta point(public key) * rk，把ECPoint S作为中间对称密钥，
+ *            通过HASH函数计算对称加密密钥：key = SHA-512(ECPoint S)
  * 
  *          3）加密：origin ⊕  key = cipher 
  * 
- *          4）打包加密数据Encrypted = {alpha(public key), cipher}
+ *          4）打包加密数据Encrypted = {gamma point(public key), cipher}
  * 
- * 三、解密：1）解析加密数据Encrypted： {alpha(public key), cipher}，
- *             得到：alpha(public key)，cipher
+ * 三、解密：1）解析加密数据Encrypted： {gamma point(public key), cipher}，得到：gamma point(public key)，cipher
  * 
- *          2）用第一步的私钥dk与alpha(public key)进行计算
- *             得到：alpha(public key) * dk = ECPoint S
+ *          2）用第一步的私钥dk与gamma point(public key)进行计算得到：ECPoint S = gamma point(public key) * dk
  * 
- *          3）通过HASH函数计算对称加密密钥
- *             key = SHA-512(ECPoint S)
+ *          3）通过HASH函数计算对称加密密钥：key = SHA-512(ECPoint S)
  * 
  *          4）解密：cipher ⊕   key = origin
  * 
@@ -50,31 +50,31 @@ public class ECCryptor extends Cryptor {
      * origin ≡ origin ⊕ data ⊕ data
      */
     public @Override byte[] encrypt(byte[] input, int length, Key ek) {
-        // ek is an Elliptic key (sk=secret, beta=public)
+        // ek is an Elliptic key (dk=secret, beta=public)
         ECKey ecKey = (ECKey) ek;
-
-        // PCS is compressed point size.
-        int offset = ecKey.curve.getPCS();
 
         // 生成随机数rk
         BigInteger rk;
         if (ecKey.curve.getN() != null) {
             rk = Cryptor.random(ecKey.curve.getN());
         } else {
-            rk = Cryptor.random(ecKey.curve.getp().bitLength() + 17);
+            rk = Cryptor.random(ecKey.curve.getP().bitLength() + 17);
         }
 
-        // 计算曲线上rk倍点alpha：ECPoint gamma = alpha(public key) * rk
-        ECPoint gamma = ecKey.curve.getGenerator().multiply(rk);
+        // 计算曲线上rk倍点gamma：ECPoint gamma = basePointG(public key) * rk
+        ECPoint gamma = ecKey.curve.getBasePointG().multiply(rk);
 
-        // 导出该rk倍点alpha(public key)
+        // PCS is compressed point size.
+        int offset = ecKey.curve.getPCS();
+
+        // 导出该rk倍点gamma point(public key)
         byte[] result = Arrays.copyOf(gamma.compress(), offset + length);
 
-        // 生成需要hash的数据：ECPoint sec = beta(public key) * rk
-        ECPoint sec = ecKey.beta.multiply(rk);
+        // 生成需要hash的数据：ECPoint S = beta point(public key) * rk
+        ECPoint secure = ecKey.beta.multiply(rk);
 
-        // 用HASH值与原文进行xor操作
-        byte[] hashed = HashUtils.sha512(sec.getx().toByteArray(), sec.gety().toByteArray());
+        // 用hash值与原文进行xor操作
+        byte[] hashed = HashUtils.sha512(secure.getX().toByteArray(), secure.getY().toByteArray());
         for (int hLen = hashed.length, i = 0, j = 0; i < length; i++, j++) {
             if (j == hLen) {
                 j = 0;
@@ -88,19 +88,19 @@ public class ECCryptor extends Cryptor {
         ECKey ecKey = (ECKey) dk;
         int offset = ecKey.curve.getPCS();
 
-        // 取出被加密的密码：alpha(public key)
+        // 取出gamma point(public key)
         byte[] gammacom = Arrays.copyOfRange(input, 0, offset);
         ECPoint gamma = new ECPoint(gammacom, ecKey.curve);
 
-        // EC解密被加密的密码：ECPoint sec = alpha(public key) * dk
-        // beta(public key) * rk = ECPoint S = alpha(public key) * dk
-        ECPoint sec = gamma.multiply(ecKey.dk);
+        // beta point(public key) * rk = ECPoint S = gamma point(public key) * dk
+        // ECPoint S = gamma point(public key) * dk
+        ECPoint secure = gamma.multiply(ecKey.dk);
 
         byte[] hashed;
-        if (sec.isZero()) {
+        if (secure.isZero()) {
             hashed = HashUtils.sha512(BigInteger.ZERO.toByteArray(), BigInteger.ZERO.toByteArray());
         } else {
-            hashed = HashUtils.sha512(sec.getx().toByteArray(), sec.gety().toByteArray());
+            hashed = HashUtils.sha512(secure.getX().toByteArray(), secure.getY().toByteArray());
         }
 
         int length = input.length - offset;

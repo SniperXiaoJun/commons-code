@@ -12,6 +12,7 @@ import java.security.Security;
 import org.apache.commons.codec.binary.Hex;
 
 import code.ponfee.commons.io.Files;
+import code.ponfee.commons.jce.HashAlgorithms;
 import code.ponfee.commons.jce.Providers;
 
 /**
@@ -61,11 +62,11 @@ public final class HashUtils {
     private static final int BUFF_SIZE = 4096;
 
     public static byte[] md5(InputStream input) {
-        return digest(input, "MD5");
+        return digest(HashAlgorithms.MD5, input);
     }
 
     public static byte[] md5(byte[] data) {
-        return digest("MD5", data);
+        return digest(HashAlgorithms.MD5, data);
     }
 
     public static String md5Hex(InputStream input) {
@@ -85,11 +86,11 @@ public final class HashUtils {
     }
 
     public static byte[] sha1(InputStream input) {
-        return digest(input, "SHA-1");
+        return digest(HashAlgorithms.SHA1, input);
     }
 
     public static byte[] sha1(byte[] data) {
-        return digest("SHA-1", data);
+        return digest(HashAlgorithms.SHA1, data);
     }
 
     public static String sha1Hex(InputStream input) {
@@ -109,7 +110,7 @@ public final class HashUtils {
     }
 
     public static byte[] sha224(byte[] data) {
-        return digest("SHA-224", data);
+        return digest(HashAlgorithms.SHA224, data);
     }
 
     public static String sha224Hex(byte[] data) {
@@ -117,7 +118,7 @@ public final class HashUtils {
     }
 
     public static byte[] sha256(byte[] data) {
-        return digest("SHA-256", data);
+        return digest(HashAlgorithms.SHA256, data);
     }
 
     public static String sha256Hex(byte[] data) {
@@ -125,7 +126,7 @@ public final class HashUtils {
     }
 
     public static byte[] sha384(byte[] data) {
-        return digest("SHA-384", data);
+        return digest(HashAlgorithms.SHA384, data);
     }
 
     public static String sha384Hex(byte[] data) {
@@ -133,7 +134,7 @@ public final class HashUtils {
     }
 
     public static byte[] sha512(byte[]... data) {
-        return digest("SHA-512", data);
+        return digest(HashAlgorithms.SHA512, data);
     }
 
     public static String sha512Hex(byte[] data) {
@@ -143,7 +144,7 @@ public final class HashUtils {
     // ---------------------------------------RipeMD---------------------------------------
     public static byte[] ripeMD128(byte[] data) {
         Security.addProvider(Providers.BC);
-        return digest("RipeMD128", data);
+        return digest(HashAlgorithms.RipeMD128, data);
     }
 
     public static String ripeMD128Hex(byte[] data) {
@@ -152,7 +153,7 @@ public final class HashUtils {
 
     public static byte[] ripeMD160(byte[] data) {
         Security.addProvider(Providers.BC);
-        return digest("RipeMD160", data);
+        return digest(HashAlgorithms.RipeMD160, data);
     }
 
     public static String ripeMD160Hex(byte[] data) {
@@ -161,7 +162,7 @@ public final class HashUtils {
 
     public static byte[] ripeMD256(byte[] data) {
         Security.addProvider(Providers.BC);
-        return digest("RipeMD256", data);
+        return digest(HashAlgorithms.RipeMD256, data);
     }
 
     public static String ripeMD256Hex(byte[] data) {
@@ -170,24 +171,23 @@ public final class HashUtils {
 
     public static byte[] ripeMD320(byte[] data) {
         Security.addProvider(Providers.BC);
-        return digest("RipeMD320", data);
+        return digest(HashAlgorithms.RipeMD320, data);
     }
 
     public static String ripeMD320Hex(byte[] data) {
         return Hex.encodeHexString(ripeMD320(data));
     }
 
-    // ---------------------------------------private methods---------------------------------------
     /**
      * 数据摘要
      * @param data      hash data of byte array
      * @param algorithm hash算法
      * @return
      */
-    public static byte[] digest(String algorithm, byte[]... data) {
+    public static byte[] digest(HashAlgorithms alg, byte[]... data) {
         MessageDigest md;
         try {
-            md = MessageDigest.getInstance(algorithm);
+            md = MessageDigest.getInstance(alg.algorithm());
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(e); // cannot happened
         }
@@ -203,7 +203,7 @@ public final class HashUtils {
      * @param algorithm hash 算法
      * @return
      */
-    public static byte[] digest(InputStream input, String algorithm) {
+    public static byte[] digest(HashAlgorithms alg, InputStream input) {
         byte[] buffer = new byte[BUFF_SIZE];
 
         /*try (InputStream in = input) {
@@ -218,7 +218,7 @@ public final class HashUtils {
 
         MessageDigest digest = null;
         try {
-            digest = MessageDigest.getInstance(algorithm);
+            digest = MessageDigest.getInstance(alg.algorithm());
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(e); // cannot happened
         }

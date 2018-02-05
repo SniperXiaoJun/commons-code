@@ -20,8 +20,11 @@ import code.ponfee.commons.util.SecureRandoms;
  *  等同证明：c^d ≡ m (mod n)
  *      因为：m^e ≡ c (mod n)
  *  于是，c可以写成：c = m^e - kn
- *  将c代入要我们要证明的那个解密规则：(me - kn)d ≡ m (mod n)
- * 
+ *  将c代入要我们要证明的那个解密规则：(m^e - kn)^d ≡ m (mod n)
+ *  等同证明：m^(ed) ≡ m (mod n)
+ *  由于：ed ≡ 1 (mod φ(n))
+ *  所以：ed = hφ(n)+1
+ *  得出：m^(hφ(n)+1) ≡ m (mod n)
  * @author Ponfee
  */
 public class RSANoPaddingCryptor extends Cryptor {
@@ -75,9 +78,9 @@ public class RSANoPaddingCryptor extends Cryptor {
     }
 
     protected byte[] encrypt(byte[] input, int length, Key ek, boolean isPadding) {
-        //return new BigInteger(1, input).modPow(rsaKey.e, rsaKey.n).toByteArray();
         RSAKey rsaKey = (RSAKey) ek;
         BigInteger exponent = getExponent(rsaKey);
+        //return new BigInteger(1, input).modPow(exponent, rsaKey.n).toByteArray();
 
         int originBlockSize = this.getOriginBlockSize(rsaKey), // 加密前原文数据块的大小
             cipherBlockSize = this.getCipherBlockSize(rsaKey); // 加密后密文数据块大小
@@ -102,14 +105,14 @@ public class RSANoPaddingCryptor extends Cryptor {
             }
             return out.toByteArray();
         } catch (IOException e) {
-            throw new SecurityException(e); // canot happened
+            throw new SecurityException(e); // cannot happened
         }
     }
 
     protected byte[] decrypt(byte[] input, Key dk, boolean isPadding) {
-        //return new BigInteger(1, input).modPow(rsaKey.d, rsaKey.n).toByteArray();
         RSAKey rsaKey = (RSAKey) dk;
         BigInteger exponent = getExponent(rsaKey);
+        //return new BigInteger(1, input).modPow(exponent, rsaKey.n).toByteArray();
 
         int cipherBlockSize = this.getCipherBlockSize(rsaKey), // 加密后密文数据块的大小
             originBlockSize = this.getOriginBlockSize(rsaKey);
@@ -138,7 +141,7 @@ public class RSANoPaddingCryptor extends Cryptor {
             }
             return output.toByteArray();
         } catch (IOException e) {
-            throw new SecurityException(e); // canot happened
+            throw new SecurityException(e); // cannot happened
         }
     }
 

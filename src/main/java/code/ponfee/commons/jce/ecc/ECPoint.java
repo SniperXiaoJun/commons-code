@@ -8,14 +8,11 @@ import java.math.BigInteger;
  */
 public class ECPoint {
 
-    public final static BigInteger TWO = new BigInteger("2");
-    public final static BigInteger THREE = new BigInteger("3");
-
-    private EllipticCurve curve;
+    private final EllipticCurve curve;
+    private final boolean zero;
 
     private BigInteger x;
     private BigInteger y;
-    private boolean iszero;
 
     // fastcache is an array of ECPoints
     private ECPoint[] fastcache = null;
@@ -26,7 +23,7 @@ public class ECPoint {
             fastcache = new ECPoint[256];
             // First point is null.
             fastcache[0] = new ECPoint(curve);
-            for (int i = 1; i < fastcache.length; i++) { // From 1 to 256
+            for (int i = 1; i < fastcache.length; i++) { // [1, 256)
                 // add the point repeatedly (Cumulative sum). P,2P,...
                 fastcache[i] = fastcache[i - 1].add(this);
             }
@@ -43,10 +40,10 @@ public class ECPoint {
         this.curve = curve;
         this.x = x;
         this.y = y;
-        if (!curve.onCurve(this)) {
+        if (!curve.isOnCurve(this)) {
             throw new IllegalArgumentException("(x,y) is not on this curve!");
         }
-        this.iszero = false;
+        this.zero = false;
     }
 
     /**
@@ -57,22 +54,23 @@ public class ECPoint {
     public ECPoint(byte[] bytes, EllipticCurve curve) {
         this.curve = curve;
         if (bytes[0] == 2) {
-            this.iszero = true;
+            this.zero = true;
             return;
         }
+
         boolean ymt = false;
-        if (bytes[0] != 0) ymt = true;
+        if (bytes[0] != 0) {
+            ymt = true;
+        }
         bytes[0] = 0;
         this.x = new BigInteger(1, bytes);
-        if (curve.getPPODBF() == null) {
-            System.err.println("ppodbf is null");
-        }
-        this.y = this.x.multiply(this.x).add(curve.geta()).multiply(this.x)
-                       .add(curve.getb()).modPow(curve.getPPODBF(), curve.getp());
+
+        this.y = this.x.multiply(this.x).add(curve.getA()).multiply(this.x)
+                       .add(curve.getB()).modPow(curve.getPSR2(), curve.getP());
         if (ymt != this.y.testBit(0)) {
-            this.y = curve.getp().subtract(this.y);
+            this.y = curve.getP().subtract(this.y);
         }
-        this.iszero = false;
+        this.zero = false;
     }
 
     /**
@@ -82,83 +80,90 @@ public class ECPoint {
     public ECPoint(EllipticCurve e) {
         this.x = this.y = BigInteger.ZERO;
         this.curve = e;
-        this.iszero = true;
+        this.zero = true;
     }
 
-    public byte[] compress() {
-        byte[] cmp = new byte[curve.getPCS()];
-        if (iszero) {
+    /**
+     * compress the point as byte array data
+     * @return byte array data of this point
+     */
+    public byte[] compress() { // 只导出x坐标，y坐标可由方程计算得到
+        byte[] cmp = new byte[this.curve.getPCS()];
+        if (this.zero) {
             cmp[0] = 2;
         }
-        byte[] xb = x.toByteArray();
-        System.arraycopy(xb, 0, cmp, curve.getPCS() - xb.length, xb.length);
-        if (y.testBit(0)) {
+        byte[] xb = this.x.toByteArray();
+        System.arraycopy(xb, 0, cmp, this.curve.getPCS() - xb.length, xb.length);
+        if (this.y.testBit(0)) {
             cmp[0] = 1;
         }
         return cmp;
     }
 
     /**
-     * Adds another elliptic curve point to this point.
+     * 在曲线上计算两点相加的第三个点：point c = point a + point b
      * @param q The point to be added
      * @return the sum of this point on the argument
      */
     public ECPoint add(ECPoint q) {
-        if (!hasCurve(q)) {
+        if (!isSameCurve(q)) {
             throw new IllegalArgumentException("the q point don't lie on "
                                              + "the same elliptic curve.");
         }
 
-        if (this.iszero) {
+        if (this.isZero()) {
             return q;
         } else if (q.isZero()) {
             return this;
         }
 
-        BigInteger y1 = this.y;
-        BigInteger y2 = q.gety();
-        BigInteger x1 = this.x;
-        BigInteger x2 = q.getx();
+        BigInteger x1 = this.x, y1 = this.y;
+        BigInteger x2 = q.getX(), y2 = q.getY();
 
         BigInteger alpha;
         if (x2.compareTo(x1) == 0) {
-            if (!(y2.compareTo(y1) == 0)) {
-                return new ECPoint(curve);
+            if (y2.compareTo(y1) != 0) {
+                return new ECPoint(curve); // return a zero point
             } else {
-                alpha = ((x1.modPow(TWO, curve.getp())).multiply(THREE)).add(curve.geta());
-                alpha = (alpha.multiply((TWO.multiply(y1)).modInverse(curve.getp()))).mod(curve.getp());
+                alpha = ((x1.modPow(EllipticCurve.TWO, curve.getP())).multiply(EllipticCurve.THREE)).add(curve.getA());
+                alpha = (alpha.multiply((EllipticCurve.TWO.multiply(y1)).modInverse(curve.getP()))).mod(curve.getP());
             }
         } else {
-            BigInteger i = x2.subtract(x1).modInverse(curve.getp());
-            alpha = y2.subtract(y1).multiply(i).mod(curve.getp());
+            BigInteger i = x2.subtract(x1).modInverse(curve.getP());
+            alpha = y2.subtract(y1).multiply(i).mod(curve.getP());
         }
 
-        BigInteger x3, y3;
-        x3 = (((alpha.modPow(TWO, curve.getp())).subtract(x2)).subtract(x1)).mod(curve.getp());
-        y3 = ((alpha.multiply(x1.subtract(x3))).subtract(y1)).mod(curve.getp());
+        BigInteger x3 = (((alpha.modPow(EllipticCurve.TWO, curve.getP())).subtract(x2)).subtract(x1)).mod(curve.getP());
+        BigInteger y3 = ((alpha.multiply(x1.subtract(x3))).subtract(y1)).mod(curve.getP());
 
         return new ECPoint(curve, x3, y3);
     }
 
-    public ECPoint multiply(BigInteger coef) {
-        int nk = coef.bitCount(); // nk in paper.
+    /**
+     * 计算k倍点
+     * @param k
+     * @return this * k
+     */
+    public ECPoint multiply(BigInteger k) {
         ECPoint result = this;
-        for (int i = nk - 1; i > 0; i--) {
-            try {
-                result = result.add(result);
-                if (coef.testBit(i)) result = result.add(this);
-            } catch (Exception e) {
-                System.err.println("Error in multiplying");
+        for (int i = k.bitCount() - 1; i > 0; i--) {
+            result = result.add(result);
+            if (k.testBit(i)) {
+                result = result.add(this);
             }
         }
         return result;
     }
 
-    public BigInteger getx() {
+    public boolean isZero() {
+        return zero;
+    }
+
+    public BigInteger getX() {
         return x;
     }
 
-    public BigInteger gety() {
+    public BigInteger getY() {
         return y;
     }
 
@@ -170,11 +175,8 @@ public class ECPoint {
         return "(" + x.toString() + ", " + y.toString() + ")";
     }
 
-    public boolean hasCurve(ECPoint p) {
+    private boolean isSameCurve(ECPoint p) {
         return this.curve.equals(p.getCurve());
     }
 
-    public boolean isZero() {
-        return iszero;
-    }
 }

@@ -319,7 +319,7 @@ public abstract class CryptoProvider {
         System.out.println("解密后：" + aes.decrypt(data));
 
         System.out.println("\n============================SM2 crypt==========================");
-        ECParameters ecParameter = ECParameters.SM2_BEST;
+        ECParameters ecParameter = ECParameters.secp256k1;
         Map<String, byte[]> sm2KeyMap = SM2.generateKeyPair(ecParameter);
         CryptoProvider sm2 = sm2PrivateKeyProvider(ecParameter, SM2.getPublicKey(sm2KeyMap), SM2.getPrivateKey(sm2KeyMap));
         data = sm2.encrypt(str);

@@ -31,105 +31,70 @@ public class ECKey implements Key {
 
         // dk is a random num.
         if (curve.getN() != null) {
-            this.dk = Cryptor.random(curve.getN());
+            this.dk = Cryptor.random(this.curve.getN());
         } else {
-            this.dk = Cryptor.random(ec.getp().bitLength() + 17);
+            this.dk = Cryptor.random(ec.getP().bitLength() + 17);
         }
 
-        // beta = generator*dk (public key)
-        beta = (curve.getGenerator()).multiply(dk);
-        beta.fastCache();
+        // beta = pointG * dk
+        this.beta = this.curve.getBasePointG().multiply(this.dk); // dk倍点beta
+        this.beta.fastCache();
     }
 
     public String toString() {
+        String str = "";
         if (secret) {
-            return ("Private key: " + dk + " " + beta + " " + curve);
-        } else {
-            return ("Public key:" + beta + " " + curve);
+            str = "Private key: " + dk;
         }
+        return str + ", Public key: " + beta + ", Curve: " + curve;
     }
 
     public @Override boolean isPublic() {
-        return (!secret);
+        return !secret;
     }
 
     public @Override void writeKey(OutputStream out) throws IOException {
         DataOutputStream output = new DataOutputStream(out);
-        curve.writeCurve(output);
-        output.writeBoolean(secret);
-        if (secret) {
-            byte[] skb = dk.toByteArray();
-            output.writeInt(skb.length);
-            output.write(skb);
+        this.curve.writeCurve(output);
+        output.writeBoolean(this.secret);
+        if (this.secret) {
+            byte[] dk0 = this.dk.toByteArray();
+            output.writeInt(dk0.length);
+            output.write(dk0);
         }
-        byte[] betab = beta.compress();
-        output.writeInt(betab.length);
-        output.write(betab);
+        byte[] beta0 = this.beta.compress();
+        output.writeInt(beta0.length);
+        output.write(beta0);
     }
 
     public @Override Key readKey(InputStream in) throws IOException {
         DataInputStream input = new DataInputStream(in);
-        ECKey k = new ECKey(new EllipticCurve(input));
-        k.secret = input.readBoolean();
-        if (k.secret) {
-            byte[] skb = new byte[input.readInt()];
-            input.read(skb);
-            k.dk = new BigInteger(1, skb);
+        ECKey key = new ECKey(new EllipticCurve(input));
+        key.secret = input.readBoolean();
+        if (key.secret) {
+            byte[] dk0 = new byte[input.readInt()];
+            input.read(dk0);
+            key.dk = new BigInteger(1, dk0);
         }
-        byte[] betab = new byte[input.readInt()];
-        input.read(betab);
-        k.beta = new ECPoint(betab, k.curve);
-        return k;
+        byte[] beta0 = new byte[input.readInt()];
+        input.read(beta0);
+        key.beta = new ECPoint(beta0, key.curve);
+        return key;
     }
 
     /**
      * get the public key
      */
     public @Override Key getPublic() {
+        if (!this.secret) {
+            return this;
+        }
+
         ECKey pubKey = new ECKey(curve);
         pubKey.beta = beta;
         pubKey.dk = BigInteger.ZERO;
         pubKey.secret = false;
-        System.gc();
         return pubKey;
     }
 
-    /**
-     * Turns this key into a public key 
-     * (does nothing if this key is public)
-     * @return
-     */
-    public Key getECPublic() {
-        ECKey pubKey = new ECKey(curve);
-        int ppodbf = curve.getPPODBF().intValue();
-        int[] k = new int[ppodbf];
-        for (int i = 0; i < ppodbf; i++) {
-            if (i == 0) {
-                k[i] = 0;
-            } else if (k[i - 1] == 0) {
-                k[i] = 1;
-            } else {
-                k[i] = 0;
-            }
-        }
-
-        ECPoint R0 = pubKey.beta;
-        ECPoint R1 = pubKey.beta.multiply(new BigInteger("2"));
-
-        for (int i = ppodbf - 1; i >= 0; i--) {
-            if (k[i] == 0) {
-                R1 = R0.add(R1);
-                R0 = R0.multiply(new BigInteger("2"));
-            } else {
-                R0 = R0.add(R1);
-                R1 = R1.multiply(new BigInteger("2"));
-            }
-        }
-
-        pubKey.beta = R0;
-        pubKey.dk = BigInteger.ZERO;
-        pubKey.secret = false;
-        System.gc();
-        return pubKey;
-    }
 }

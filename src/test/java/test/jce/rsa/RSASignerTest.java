@@ -1,5 +1,7 @@
 package test.jce.rsa;
 
+import static org.junit.Assert.assertTrue;
+
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
@@ -30,13 +32,13 @@ public class RSASignerTest {
         Stopwatch watch = Stopwatch.createStarted();
         byte[] signature = new RSASigner(dk).signSha1(origin); // 签名
 
-        System.out.println(new RSASigner(ek).verifySha1(origin, signature)); // 验证
-        System.out.println(RSACryptor.verifySha1(origin, pub, signature)); // 验证
+        assertTrue(new RSASigner(ek).verifySha1(origin, signature)); // 验证
+        assertTrue(RSACryptor.verifySha1(origin, pub, signature)); // 验证
 
         // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝验证签名
         signature = RSACryptor.signSha1(origin, pri); // 签名
-        System.out.println(RSACryptor.verifySha1(origin, pub, signature)); // 验证
-        System.out.println(new RSASigner(ek).verifySha1(origin, signature)); // 验证
+        assertTrue(RSACryptor.verifySha1(origin, pub, signature)); // 验证
+        assertTrue(new RSASigner(ek).verifySha1(origin, signature)); // 验证
 
         System.out.println(watch.stop());
     }

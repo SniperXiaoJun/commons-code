@@ -87,8 +87,7 @@ public class RSASigner {
         return verify(data, signature, HashAlgorithms.SHA256);
     }
 
-    // --------------------private methods---------------------------
-    private byte[] sign(byte[] data, HashAlgorithms alg) {
+    public byte[] sign(byte[] data, HashAlgorithms alg) {
         if (!this.rsaKey.isSecret) {
             throw new IllegalArgumentException("Sign must use private key.");
         }
@@ -99,7 +98,7 @@ public class RSASigner {
         }
 
         // data hash
-        byte[] hash = HashUtils.digest(alg.algorithm(), data);
+        byte[] hash = HashUtils.digest(alg, data);
 
         try {
             byte[] result = derEncode(hash, oid);
@@ -109,7 +108,7 @@ public class RSASigner {
         }
     }
 
-    private boolean verify(byte[] data, byte[] signature, HashAlgorithms alg) {
+    public boolean verify(byte[] data, byte[] signature, HashAlgorithms alg) {
         if (this.rsaKey.isSecret) {
             throw new IllegalArgumentException("Verify signature must use public key.");
         }
@@ -120,7 +119,7 @@ public class RSASigner {
         }
 
         // hash data
-        byte[] hash = HashUtils.digest(alg.algorithm(), data);
+        byte[] hash = HashUtils.digest(alg, data);
 
         byte[] sig;
         byte[] expected;

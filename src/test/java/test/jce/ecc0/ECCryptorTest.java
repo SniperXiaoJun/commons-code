@@ -19,16 +19,16 @@ public class ECCryptorTest {
 
     @Test
     public void testECCryptor() throws Exception {
-        Cryptor cs = new ECCryptor(new EllipticCurve(ECParameters.secp256r1));
+        Cryptor cs = new ECCryptor(new EllipticCurve(ECParameters.secp112r1));
         Key dk = cs.generateKey();
         Key ek = dk.getPublic();
-        //Key pk = ((ECKey) sk).getECPublic();
         System.out.println(dk + "\n" + ek);
 
         byte[] encrypted = cs.encrypt(origin, ek);
         byte[] decrypted = cs.decrypt(encrypted, dk);
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
+            System.out.println("=====ECCryptor Decrypted text is: \n" + new String(decrypted));
         } else {
             System.out.println("=====ECCryptor Decrypted text is: \n" + new String(decrypted));
         }
