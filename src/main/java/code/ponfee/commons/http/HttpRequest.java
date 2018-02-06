@@ -956,14 +956,10 @@ public class HttpRequest {
      * Start a 'HEAD' request to the given URL along with the query params
      *
      * @param baseUrl
-     * @param params
-     *          The query parameters to include as part of the baseUrl
-     * @param encode
-     *          true to encode the full URL
-     *
+     * @param params The query parameters to include as part of the baseUrl
+     * @param encode true to encode the full URL
      * @see #append(CharSequence, Map)
      * @see #encode(CharSequence)
-     *
      * @return request
      */
     public static HttpRequest head(CharSequence baseUrl, Map<?, ?> params, boolean encode) {
@@ -975,15 +971,11 @@ public class HttpRequest {
      * Start a 'GET' request to the given URL along with the query params
      *
      * @param baseUrl
-     * @param encode
-     *          true to encode the full URL
-     * @param params
-     *          the name/value query parameter pairs to include as part of the
-     *          baseUrl
-     *
+     * @param encode true to encode the full URL
+     * @param params the name/value query parameter pairs to include 
+     *               as part of the baseUrl
      * @see #append(CharSequence, Object...)
      * @see #encode(CharSequence)
-     *
      * @return request
      */
     public static HttpRequest head(CharSequence baseUrl,

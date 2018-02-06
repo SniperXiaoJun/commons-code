@@ -109,30 +109,23 @@ public class ECParameters implements java.io.Serializable {
         ImmutableBiMap.Builder<String, ASN1ObjectIdentifier> nameOids = ImmutableBiMap.builder();
         ImmutableMap.Builder<String, ECParameters> nameParams = ImmutableMap.builder();
         try {
-            for (Field field : SECNamedCurves.class.getDeclaredFields()) {
-                if (!"objIds".equals(field.getName())) {
-                    continue;
-                }
-                Hashtable<String, ASN1ObjectIdentifier> table = null;
-                field.setAccessible(true);
-                table = (Hashtable<String, ASN1ObjectIdentifier>) field.get(null);
-                if (table != null) {
-                    for (String name : table.keySet()) {
-                        X9ECParameters params = SECNamedCurves.getByName(name);
-                        nameOids.put(name, table.get(name));
-                        nameParams.put(name, new ECParameters(
-                              name, 
-                              Numbers.toHex(params.getCurve().getField().getCharacteristic()), 
-                              Numbers.toHex(params.getCurve().getA().toBigInteger()), 
-                              Numbers.toHex(params.getCurve().getB().toBigInteger()), 
-                              Numbers.toHex(params.getG().getXCoord().toBigInteger()), 
-                              Numbers.toHex(params.getG().getYCoord().toBigInteger()), 
-                              Numbers.toHex(params.getN()), toHex(params.getSeed())
-                            )
-                        );
-                    }
-                }
-                break;
+            Field field = SECNamedCurves.class.getDeclaredField("objIds");
+            field.setAccessible(true);
+            Hashtable<String, ASN1ObjectIdentifier> table;
+            table = (Hashtable<String, ASN1ObjectIdentifier>) field.get(null);
+            for (String name : table.keySet()) {
+                X9ECParameters params = SECNamedCurves.getByName(name);
+                nameOids.put(name, table.get(name));
+                nameParams.put(name, new ECParameters(
+                      name, 
+                      Numbers.toHex(params.getCurve().getField().getCharacteristic()), 
+                      Numbers.toHex(params.getCurve().getA().toBigInteger()), 
+                      Numbers.toHex(params.getCurve().getB().toBigInteger()), 
+                      Numbers.toHex(params.getG().getXCoord().toBigInteger()), 
+                      Numbers.toHex(params.getG().getYCoord().toBigInteger()), 
+                      Numbers.toHex(params.getN()), toHex(params.getSeed())
+                    )
+                );
             }
         } catch (Exception ignored) {
             ignored.printStackTrace();
