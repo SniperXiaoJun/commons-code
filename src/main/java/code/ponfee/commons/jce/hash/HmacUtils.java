@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Security;
+import java.security.Provider;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -97,8 +97,7 @@ public final class HmacUtils {
     }
 
     public static byte[] ripeMD128(byte[] key, byte[] data) {
-        Security.addProvider(Providers.BC);
-        return crypt(key, data, HmacAlgorithms.HmacRipeMD128);
+        return crypt(key, data, HmacAlgorithms.HmacRipeMD128, Providers.BC);
     }
 
     public static String ripeMD128Hex(byte[] key, byte[] data) {
@@ -106,8 +105,7 @@ public final class HmacUtils {
     }
 
     public static byte[] ripeMD160(byte[] key, byte[] data) {
-        Security.addProvider(Providers.BC);
-        return crypt(key, data, HmacAlgorithms.HmacRipeMD160);
+        return crypt(key, data, HmacAlgorithms.HmacRipeMD160, Providers.BC);
     }
 
     public static String ripeMD160Hex(byte[] key, byte[] data) {
@@ -115,8 +113,7 @@ public final class HmacUtils {
     }
 
     public static byte[] ripeMD256(byte[] key, byte[] data) {
-        Security.addProvider(Providers.BC);
-        return crypt(key, data, HmacAlgorithms.HmacRipeMD256);
+        return crypt(key, data, HmacAlgorithms.HmacRipeMD256, Providers.BC);
     }
 
     public static String ripeMD256Hex(byte[] key, byte[] data) {
@@ -124,8 +121,7 @@ public final class HmacUtils {
     }
 
     public static byte[] ripeMD320(byte[] key, byte[] data) {
-        Security.addProvider(Providers.BC);
-        return crypt(key, data, HmacAlgorithms.HmacRipeMD320);
+        return crypt(key, data, HmacAlgorithms.HmacRipeMD320, Providers.BC);
     }
 
     public static String ripeMD320Hex(byte[] key, byte[] data) {
@@ -133,12 +129,19 @@ public final class HmacUtils {
     }
 
     public static Mac getInitializedMac(HmacAlgorithms algorithm, byte[] key) {
+        return getInitializedMac(algorithm, null, key);
+    }
+
+    public static Mac getInitializedMac(HmacAlgorithms algorithm, 
+                                        Provider provider, byte[] key) {
         if (key == null) {
             throw new IllegalArgumentException("Null key");
         }
 
         try {
-            Mac mac = Mac.getInstance(algorithm.name());
+            Mac mac = (provider == null)
+                ? Mac.getInstance(algorithm.name()) 
+                : Mac.getInstance(algorithm.name(), provider);
             mac.init(new SecretKeySpec(key, mac.getAlgorithm()));
             return mac;
         } catch (final NoSuchAlgorithmException e) {
@@ -149,12 +152,23 @@ public final class HmacUtils {
     }
 
     public static byte[] crypt(byte[] key, byte[] data, HmacAlgorithms alg) {
-        return getInitializedMac(alg, key).doFinal(data);
+        return crypt(key, data, alg, null);
     }
 
-    public static byte[] crypt(byte[] key, InputStream input, HmacAlgorithms alg) {
+    public static byte[] crypt(byte[] key, byte[] data, 
+                               HmacAlgorithms alg, Provider provider) {
+        return getInitializedMac(alg, provider, key).doFinal(data);
+    }
+
+    public static byte[] crypt(byte[] key, InputStream input, 
+                               HmacAlgorithms alg) {
+        return crypt(key, input, alg, null);
+    }
+
+    public static byte[] crypt(byte[] key, InputStream input,
+                               HmacAlgorithms alg, Provider provider) {
         try (InputStream in = input) {
-            Mac mac = getInitializedMac(alg, key);
+            Mac mac = getInitializedMac(alg, provider, key);
             byte[] buffer = new byte[BUFF_SIZE];
             for (int len; (len = in.read(buffer)) != Files.EOF;) {
                 mac.update(buffer, 0, len);

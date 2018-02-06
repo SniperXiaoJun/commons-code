@@ -11,6 +11,7 @@ import com.google.common.io.Files;
 
 import code.ponfee.commons.http.Http;
 import code.ponfee.commons.jce.pkcs.CryptoMessageSyntax;
+import code.ponfee.commons.jce.pkcs.PKCS7Envelope;
 import code.ponfee.commons.jce.pkcs.PKCS7Signature;
 import code.ponfee.commons.jce.security.KeyStoreResolver;
 import code.ponfee.commons.jce.security.KeyStoreResolver.KeyStoreType;
@@ -39,7 +40,10 @@ public class CryptoMessageSyntaxTester {
 
         byte[] unveloped = CryptoMessageSyntax.unenvelop(enveloped, privateKey);
         System.out.println(new String(unveloped));
-        System.out.println("===============================================");
+
+        //unveloped = PKCS7Envelope.unenvelop(enveloped, cert, privateKey);
+        //System.out.println(new String(unveloped));
+        //System.out.println("===============================================");
     }
 
     public @Test void testCMSSign() throws Exception {

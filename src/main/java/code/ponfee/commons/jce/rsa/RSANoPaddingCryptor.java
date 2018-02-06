@@ -15,6 +15,8 @@ import code.ponfee.commons.jce.Key;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
+ * http://blog.51cto.com/xnuil/1698673
+ * 
  * RSA Cryptor, Without padding
  * RSA私钥解密证明：
  *  等同证明：c^d ≡ m (mod n)
@@ -58,7 +60,7 @@ public class RSANoPaddingCryptor extends Cryptor {
     }
 
     public final BigInteger getExponent(RSAKey rsaKey) {
-        return rsaKey.isSecret ? rsaKey.d : rsaKey.e;
+        return rsaKey.secret ? rsaKey.d : rsaKey.e;
     }
 
     /**
@@ -268,7 +270,7 @@ public class RSANoPaddingCryptor extends Cryptor {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(cipherBlockSize);
         baos.write(ZERO); // 0x00
 
-        if (rsaKey.isSecret) {
+        if (rsaKey.secret) {
             // 私钥填充
             baos.write(0x01); // BT
             for (int i = 2, pLen = cipherBlockSize - length - 1; i < pLen; i++) {
@@ -301,12 +303,11 @@ public class RSANoPaddingCryptor extends Cryptor {
      */
     private static void decodeBlock(byte[] input, int cipherBlockSize, 
                                     OutputStream out) throws IOException {
-        int removedZeroLen;
+        int removedZeroLen; // BigInteger to byte array maybe removed the first 0 
         if (input[0] == ZERO) {
             removedZeroLen = 0;
         } else {
-            // 前缀0已在BigInteger转byte[]时被舍去
-            removedZeroLen = 1;
+            removedZeroLen = 1; // 前缀0已在BigInteger转byte[]时被舍去
         }
 
         // 输入数据长度必须等于数据块长

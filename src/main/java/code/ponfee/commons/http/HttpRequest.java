@@ -73,7 +73,7 @@ import java.security.GeneralSecurityException;
 import java.security.PrivilegedAction;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -297,7 +297,7 @@ public class HttpRequest {
 
         } catch (GeneralSecurityException e) {
             IOException ex = new IOException("Security exception configuring SSL context");
-            throw new HttpRequestException((IOException) ex.initCause(e));
+            throw new HttpException((IOException) ex.initCause(e));
         }
     }
 
@@ -430,254 +430,6 @@ public class HttpRequest {
     }
 
     /**
-     * <p>
-     * Encodes and decodes to and from Base64 notation.
-     * </p>
-     * <p>
-     * I am placing this code in the Public Domain. Do with it as you will. This
-     * software comes with no guarantees or warranties but with plenty of
-     * well-wishing instead! Please visit <a
-     * href="http://iharder.net/base64">http://iharder.net/base64</a> periodically
-     * to check for updates or to contribute improvements.
-     * </p>
-     *
-     * @author Robert Harder
-     * @author rob@iharder.net
-     * @version 2.3.7
-     */
-    public static final class Base64 {
-
-        /** The equals sign (=) as a byte. */
-        private static final byte EQUALS_SIGN = (byte) '=';
-
-        /** Preferred encoding. */
-        private static final String PREFERRED_ENCODING = "US-ASCII";
-
-        /** The 64 valid Base64 values. */
-        private static final byte[] STANDARD_ALPHABET = { (byte) 'A', (byte) 'B',
-            (byte) 'C', (byte) 'D', (byte) 'E', (byte) 'F', (byte) 'G', (byte) 'H',
-            (byte) 'I', (byte) 'J', (byte) 'K', (byte) 'L', (byte) 'M', (byte) 'N',
-            (byte) 'O', (byte) 'P', (byte) 'Q', (byte) 'R', (byte) 'S', (byte) 'T',
-            (byte) 'U', (byte) 'V', (byte) 'W', (byte) 'X', (byte) 'Y', (byte) 'Z',
-            (byte) 'a', (byte) 'b', (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f',
-            (byte) 'g', (byte) 'h', (byte) 'i', (byte) 'j', (byte) 'k', (byte) 'l',
-            (byte) 'm', (byte) 'n', (byte) 'o', (byte) 'p', (byte) 'q', (byte) 'r',
-            (byte) 's', (byte) 't', (byte) 'u', (byte) 'v', (byte) 'w', (byte) 'x',
-            (byte) 'y', (byte) 'z', (byte) '0', (byte) '1', (byte) '2', (byte) '3',
-            (byte) '4', (byte) '5', (byte) '6', (byte) '7', (byte) '8', (byte) '9',
-            (byte) '+', (byte) '/' };
-
-        /** Defeats instantiation. */
-        private Base64() {}
-
-        /**
-         * <p>
-         * Encodes up to three bytes of the array <var>source</var> and writes the
-         * resulting four Base64 bytes to <var>destination</var>. The source and
-         * destination arrays can be manipulated anywhere along their length by
-         * specifying <var>srcOffset</var> and <var>destOffset</var>. This method
-         * does not check to make sure your arrays are large enough to accomodate
-         * <var>srcOffset</var> + 3 for the <var>source</var> array or
-         * <var>destOffset</var> + 4 for the <var>destination</var> array. The
-         * actual number of significant bytes in your array is given by
-         * <var>numSigBytes</var>.
-         * </p>
-         * <p>
-         * This is the lowest level of the encoding methods with all possible
-         * parameters.
-         * </p>
-         *
-         * @param source
-         *          the array to convert
-         * @param srcOffset
-         *          the index where conversion begins
-         * @param numSigBytes
-         *          the number of significant bytes in your array
-         * @param destination
-         *          the array to hold the conversion
-         * @param destOffset
-         *          the index where output will be put
-         * @return the <var>destination</var> array
-         * @since 1.3
-         */
-        private static byte[] encode3to4(byte[] source, int srcOffset, int numSigBytes, 
-                                         byte[] destination, int destOffset) {
-
-            int inBuff = (numSigBytes > 0 ? ((source[srcOffset] << 24) >>> 8) : 0)
-                  | (numSigBytes > 1 ? ((source[srcOffset + 1] << 24) >>> 16) : 0)
-                  | (numSigBytes > 2 ? ((source[srcOffset + 2] << 24) >>> 24) : 0);
-
-            switch (numSigBytes) {
-                case 3:
-                    destination[destOffset] = STANDARD_ALPHABET[(inBuff >>> 18)];
-                    destination[destOffset + 1] = STANDARD_ALPHABET[(inBuff >>> 12) & 0x3f];
-                    destination[destOffset + 2] = STANDARD_ALPHABET[(inBuff >>> 6) & 0x3f];
-                    destination[destOffset + 3] = STANDARD_ALPHABET[(inBuff) & 0x3f];
-                    return destination;
-
-                case 2:
-                    destination[destOffset] = STANDARD_ALPHABET[(inBuff >>> 18)];
-                    destination[destOffset + 1] = STANDARD_ALPHABET[(inBuff >>> 12) & 0x3f];
-                    destination[destOffset + 2] = STANDARD_ALPHABET[(inBuff >>> 6) & 0x3f];
-                    destination[destOffset + 3] = EQUALS_SIGN;
-                    return destination;
-
-                case 1:
-                    destination[destOffset] = STANDARD_ALPHABET[(inBuff >>> 18)];
-                    destination[destOffset + 1] = STANDARD_ALPHABET[(inBuff >>> 12) & 0x3f];
-                    destination[destOffset + 2] = EQUALS_SIGN;
-                    destination[destOffset + 3] = EQUALS_SIGN;
-                    return destination;
-
-                default:
-                    return destination;
-            }
-        }
-
-        /**
-         * Encode string as a byte array in Base64 annotation.
-         *
-         * @param string
-         * @return The Base64-encoded data as a string
-         */
-        public static String encode(String string) {
-            byte[] bytes;
-            try {
-                bytes = string.getBytes(PREFERRED_ENCODING);
-            } catch (UnsupportedEncodingException e) {
-                bytes = string.getBytes();
-            }
-            return encodeBytes(bytes);
-        }
-
-        /**
-         * Encodes a byte array into Base64 notation.
-         *
-         * @param source
-         *          The data to convert
-         * @return The Base64-encoded data as a String
-         * @throws NullPointerException
-         *           if source array is null
-         * @throws IllegalArgumentException
-         *           if source array, offset, or length are invalid
-         * @since 2.0
-         */
-        public static String encodeBytes(byte[] source) {
-            return encodeBytes(source, 0, source.length);
-        }
-
-        /**
-         * Encodes a byte array into Base64 notation.
-         *
-         * @param source
-         *          The data to convert
-         * @param off
-         *          Offset in array where conversion should begin
-         * @param len
-         *          Length of data to convert
-         * @return The Base64-encoded data as a String
-         * @throws NullPointerException
-         *           if source array is null
-         * @throws IllegalArgumentException
-         *           if source array, offset, or length are invalid
-         * @since 2.0
-         */
-        public static String encodeBytes(byte[] source, int off, int len) {
-            byte[] encoded = encodeBytesToBytes(source, off, len);
-            try {
-                return new String(encoded, PREFERRED_ENCODING);
-            } catch (UnsupportedEncodingException uue) {
-                return new String(encoded);
-            }
-        }
-
-        /**
-         * Similar to {@link #encodeBytes(byte[], int, int)} but returns a byte
-         * array instead of instantiating a String. This is more efficient if you're
-         * working with I/O streams and have large data sets to encode.
-         *
-         *
-         * @param source
-         *          The data to convert
-         * @param off
-         *          Offset in array where conversion should begin
-         * @param len
-         *          Length of data to convert
-         * @return The Base64-encoded data as a String if there is an error
-         * @throws NullPointerException
-         *           if source array is null
-         * @throws IllegalArgumentException
-         *           if source array, offset, or length are invalid
-         * @since 2.3.1
-         */
-        public static byte[] encodeBytesToBytes(byte[] source, int off, int len) {
-            if (source == null) {
-                throw new NullPointerException("Cannot serialize a null array.");
-            }
-            if (off < 0) {
-                throw new IllegalArgumentException("Cannot have negative offset: " + off);
-            }
-            if (len < 0) {
-                throw new IllegalArgumentException("Cannot have length offset: " + len);
-            }
-            if (off + len > source.length) {
-                throw new IllegalArgumentException(String.format("Cannot have offset of %d and length of %d with "
-                                                               + "array of length %d", off, len, source.length));
-            }
-
-            // Bytes needed for actual encoding
-            int encLen = (len / 3) * 4 + (len % 3 > 0 ? 4 : 0);
-
-            byte[] outBuff = new byte[encLen];
-
-            int d = 0;
-            int e = 0;
-            int len2 = len - 2;
-            for (; d < len2; d += 3, e += 4) {
-                encode3to4(source, d + off, 3, outBuff, e);
-            }
-
-            if (d < len) {
-                encode3to4(source, d + off, len - d, outBuff, e);
-                e += 4;
-            }
-
-            if (e <= outBuff.length - 1) {
-                return Arrays.copyOf(outBuff, e);
-            } else {
-                return outBuff;
-            }
-        }
-    }
-
-    /**
-     * HTTP request exception whose cause is always an {@link IOException}
-     */
-    public static class HttpRequestException extends RuntimeException {
-
-        private static final long serialVersionUID = -1170466989781746231L;
-
-        /**
-         * Create a new HttpRequestException with the given cause
-         *
-         * @param cause
-         */
-        public HttpRequestException(IOException cause) {
-            super(cause);
-        }
-
-        /**
-         * Get {@link IOException} that triggered this request exception
-         *
-         * @return {@link IOException} cause
-         */
-        @Override
-        public IOException getCause() {
-            return (IOException) super.getCause();
-        }
-    }
-
-    /**
      * Operation that handles executing a callback once complete and handling
      * nested exceptions
      *
@@ -689,10 +441,10 @@ public class HttpRequest {
          * Run operation
          *
          * @return result
-         * @throws HttpRequestException
+         * @throws HttpException
          * @throws IOException
          */
-        protected abstract V run() throws HttpRequestException, IOException;
+        protected abstract V run() throws HttpException, IOException;
 
         /**
          * Operation complete callback
@@ -701,22 +453,22 @@ public class HttpRequest {
          */
         protected abstract void done() throws IOException;
 
-        public @Override final V call() throws HttpRequestException {
+        public @Override final V call() throws HttpException {
             boolean thrown = false;
             try {
                 return run();
-            } catch (HttpRequestException e) {
+            } catch (HttpException e) {
                 thrown = true;
                 throw e;
             } catch (IOException e) {
                 thrown = true;
-                throw new HttpRequestException(e);
+                throw new HttpException(e);
             } finally {
                 try {
                     done();
                 } catch (IOException e) {
                     if (!thrown) {
-                        throw new HttpRequestException(e);
+                        throw new HttpException(e);
                     }
                 }
             }
@@ -834,15 +586,15 @@ public class HttpRequest {
      *
      * @param url
      * @return encoded URL
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public static String encode(CharSequence url)
-        throws HttpRequestException {
+        throws HttpException {
         URL parsed;
         try {
             parsed = new URL(url.toString());
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
 
         String host = parsed.getHost();
@@ -861,7 +613,7 @@ public class HttpRequest {
         } catch (URISyntaxException e) {
             IOException io = new IOException("Parsing URI failed");
             io.initCause(e);
-            throw new HttpRequestException(io);
+            throw new HttpException(io);
         }
     }
 
@@ -941,9 +693,9 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public static HttpRequest get(CharSequence url) throws HttpRequestException {
+    public static HttpRequest get(CharSequence url) throws HttpException {
         return new HttpRequest(url, METHOD_GET);
     }
 
@@ -952,9 +704,9 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public static HttpRequest get(URL url) throws HttpRequestException {
+    public static HttpRequest get(URL url) throws HttpException {
         return new HttpRequest(url, METHOD_GET);
     }
 
@@ -1002,9 +754,9 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public static HttpRequest post(CharSequence url) throws HttpRequestException {
+    public static HttpRequest post(CharSequence url) throws HttpException {
         return new HttpRequest(url, METHOD_POST);
     }
 
@@ -1013,9 +765,9 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public static HttpRequest post(URL url) throws HttpRequestException {
+    public static HttpRequest post(URL url) throws HttpException {
         return new HttpRequest(url, METHOD_POST);
     }
 
@@ -1063,9 +815,9 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public static HttpRequest put(CharSequence url) throws HttpRequestException {
+    public static HttpRequest put(CharSequence url) throws HttpException {
         return new HttpRequest(url, METHOD_PUT);
     }
 
@@ -1074,9 +826,9 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public static HttpRequest put(URL url) throws HttpRequestException {
+    public static HttpRequest put(URL url) throws HttpException {
         return new HttpRequest(url, METHOD_PUT);
     }
 
@@ -1124,9 +876,9 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public static HttpRequest delete(CharSequence url) throws HttpRequestException {
+    public static HttpRequest delete(CharSequence url) throws HttpException {
         return new HttpRequest(url, METHOD_DELETE);
     }
 
@@ -1135,9 +887,9 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public static HttpRequest delete(URL url) throws HttpRequestException {
+    public static HttpRequest delete(URL url) throws HttpException {
         return new HttpRequest(url, METHOD_DELETE);
     }
 
@@ -1183,9 +935,9 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public static HttpRequest head(CharSequence url) throws HttpRequestException {
+    public static HttpRequest head(CharSequence url) throws HttpException {
         return new HttpRequest(url, METHOD_HEAD);
     }
 
@@ -1194,9 +946,9 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public static HttpRequest head(URL url) throws HttpRequestException {
+    public static HttpRequest head(URL url) throws HttpException {
         return new HttpRequest(url, METHOD_HEAD);
     }
 
@@ -1245,10 +997,10 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public static HttpRequest options(CharSequence url)
-        throws HttpRequestException {
+        throws HttpException {
         return new HttpRequest(url, METHOD_OPTIONS);
     }
 
@@ -1257,9 +1009,9 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public static HttpRequest options(URL url) throws HttpRequestException {
+    public static HttpRequest options(URL url) throws HttpException {
         return new HttpRequest(url, METHOD_OPTIONS);
     }
 
@@ -1268,10 +1020,10 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public static HttpRequest trace(CharSequence url)
-        throws HttpRequestException {
+        throws HttpException {
         return new HttpRequest(url, METHOD_TRACE);
     }
 
@@ -1280,9 +1032,9 @@ public class HttpRequest {
      *
      * @param url
      * @return request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public static HttpRequest trace(URL url) throws HttpRequestException {
+    public static HttpRequest trace(URL url) throws HttpException {
         return new HttpRequest(url, METHOD_TRACE);
     }
 
@@ -1410,13 +1162,13 @@ public class HttpRequest {
      *
      * @param url Remote resource URL.
      * @param method HTTP request method (e.g., "GET", "POST").
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest(CharSequence url, String method) throws HttpRequestException {
+    public HttpRequest(CharSequence url, String method) throws HttpException {
         try {
             this.url = new URL(url.toString());
         } catch (MalformedURLException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
         this.requestMethod = method;
     }
@@ -1426,10 +1178,10 @@ public class HttpRequest {
      *
      * @param url Remote resource URL.
      * @param method HTTP request method (e.g., "GET", "POST").
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest(URL url, String method)
-        throws HttpRequestException {
+        throws HttpException {
         this.url = url;
         this.requestMethod = method;
     }
@@ -1449,7 +1201,7 @@ public class HttpRequest {
             connection.setRequestMethod(requestMethod);
             return connection;
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
     }
 
@@ -1498,14 +1250,14 @@ public class HttpRequest {
      * Get the status code of the response
      *
      * @return the response code
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public int code() throws HttpRequestException {
+    public int code() throws HttpException {
         try {
             closeOutput();
             return getConnection().getResponseCode();
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
     }
 
@@ -1515,9 +1267,9 @@ public class HttpRequest {
      *
      * @param output
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest code(AtomicInteger output) throws HttpRequestException {
+    public HttpRequest code(AtomicInteger output) throws HttpException {
         output.set(code());
         return this;
     }
@@ -1526,9 +1278,9 @@ public class HttpRequest {
      * Is the response code a 200 OK?
      *
      * @return true if 200, false otherwise
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public boolean ok() throws HttpRequestException {
+    public boolean ok() throws HttpException {
         return HTTP_OK == code();
     }
 
@@ -1536,9 +1288,9 @@ public class HttpRequest {
      * Is the response code a 201 Created?
      *
      * @return true if 201, false otherwise
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public boolean created() throws HttpRequestException {
+    public boolean created() throws HttpException {
         return HTTP_CREATED == code();
     }
 
@@ -1546,9 +1298,9 @@ public class HttpRequest {
      * Is the response code a 204 No Content?
      *
      * @return true if 204, false otherwise
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public boolean noContent() throws HttpRequestException {
+    public boolean noContent() throws HttpException {
         return HTTP_NO_CONTENT == code();
     }
 
@@ -1556,9 +1308,9 @@ public class HttpRequest {
      * Is the response code a 500 Internal Server Error?
      *
      * @return true if 500, false otherwise
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public boolean serverError() throws HttpRequestException {
+    public boolean serverError() throws HttpException {
         return HTTP_INTERNAL_ERROR == code();
     }
 
@@ -1566,9 +1318,9 @@ public class HttpRequest {
      * Is the response code a 400 Bad Request?
      *
      * @return true if 400, false otherwise
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public boolean badRequest() throws HttpRequestException {
+    public boolean badRequest() throws HttpException {
         return HTTP_BAD_REQUEST == code();
     }
 
@@ -1576,9 +1328,9 @@ public class HttpRequest {
      * Is the response code a 404 Not Found?
      *
      * @return true if 404, false otherwise
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public boolean notFound() throws HttpRequestException {
+    public boolean notFound() throws HttpException {
         return HTTP_NOT_FOUND == code();
     }
 
@@ -1586,23 +1338,23 @@ public class HttpRequest {
      * Is the response code a 304 Not Modified?
      *
      * @return true if 304, false otherwise
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public boolean notModified() throws HttpRequestException {
+    public boolean notModified() throws HttpException {
         return HTTP_NOT_MODIFIED == code();
     }
 
     /**
      * Get status message of the response
      * @return message   OK
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public String message() throws HttpRequestException {
+    public String message() throws HttpException {
         try {
             closeOutput();
             return getConnection().getResponseMessage();
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
     }
 
@@ -1702,15 +1454,15 @@ public class HttpRequest {
      *
      * @param charset
      * @return string
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public String body(String charset) throws HttpRequestException {
+    public String body(String charset) throws HttpException {
         ByteArrayOutputStream output = byteStream();
         try {
             copy(buffer(), output);
             return output.toString(getValidCharset(charset));
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
     }
 
@@ -1719,9 +1471,9 @@ public class HttpRequest {
      * {@link #charset()}
      *
      * @return string
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public String body() throws HttpRequestException {
+    public String body() throws HttpException {
         return body(charset());
     }
 
@@ -1731,10 +1483,10 @@ public class HttpRequest {
      *
      * @param output
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest body(AtomicReference<String> output) 
-        throws HttpRequestException {
+        throws HttpException {
         output.set(body());
         return this;
     }
@@ -1746,10 +1498,10 @@ public class HttpRequest {
      * @param output
      * @param charset
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest body(AtomicReference<String> output, String charset) 
-        throws HttpRequestException {
+        throws HttpException {
         output.set(body(charset));
         return this;
     }
@@ -1758,9 +1510,9 @@ public class HttpRequest {
      * Is the response body empty?
      *
      * @return true if the Content-Length response header is 0, false otherwise
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public boolean isBodyEmpty() throws HttpRequestException {
+    public boolean isBodyEmpty() throws HttpException {
         return contentLength() == 0;
     }
 
@@ -1768,14 +1520,14 @@ public class HttpRequest {
      * Get response as byte array
      *
      * @return byte array
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public byte[] bytes() throws HttpRequestException {
+    public byte[] bytes() throws HttpException {
         ByteArrayOutputStream output = byteStream();
         try {
             copy(buffer(), output);
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
         return output.toByteArray();
     }
@@ -1785,9 +1537,9 @@ public class HttpRequest {
      *
      * @see #bufferSize(int)
      * @return stream
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public BufferedInputStream buffer() throws HttpRequestException {
+    public BufferedInputStream buffer() throws HttpException {
         return new BufferedInputStream(stream(), bufferSize);
     }
 
@@ -1795,15 +1547,15 @@ public class HttpRequest {
      * Get stream to response body
      *
      * @return stream
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public InputStream stream() throws HttpRequestException {
+    public InputStream stream() throws HttpException {
         InputStream stream;
         if (code() < HTTP_BAD_REQUEST) {
             try {
                 stream = getConnection().getInputStream();
             } catch (IOException e) {
-                throw new HttpRequestException(e);
+                throw new HttpException(e);
             }
         } else {
             stream = getConnection().getErrorStream();
@@ -1811,7 +1563,7 @@ public class HttpRequest {
                 stream = getConnection().getInputStream();
             } catch (IOException e) {
                 if (contentLength() > 0) {
-                    throw new HttpRequestException(e);
+                    throw new HttpException(e);
                 } else {
                     stream = new ByteArrayInputStream(new byte[0]);
                 }
@@ -1824,7 +1576,7 @@ public class HttpRequest {
             try {
                 return new GZIPInputStream(stream);
             } catch (IOException e) {
-                throw new HttpRequestException(e);
+                throw new HttpException(e);
             }
         }
     }
@@ -1837,14 +1589,14 @@ public class HttpRequest {
      *
      * @param charset
      * @return reader
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public InputStreamReader reader(String charset)
-        throws HttpRequestException {
+        throws HttpException {
         try {
             return new InputStreamReader(stream(), getValidCharset(charset));
         } catch (UnsupportedEncodingException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
     }
 
@@ -1853,9 +1605,9 @@ public class HttpRequest {
      * {@link #charset()}
      *
      * @return reader
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public InputStreamReader reader() throws HttpRequestException {
+    public InputStreamReader reader() throws HttpException {
         return reader(charset());
     }
 
@@ -1867,10 +1619,10 @@ public class HttpRequest {
      * @see #bufferSize(int)
      * @param charset
      * @return reader
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public BufferedReader bufferedReader(String charset)
-        throws HttpRequestException {
+        throws HttpException {
         return new BufferedReader(reader(charset), bufferSize);
     }
 
@@ -1880,9 +1632,9 @@ public class HttpRequest {
      *
      * @see #bufferSize(int)
      * @return reader
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public BufferedReader bufferedReader() throws HttpRequestException {
+    public BufferedReader bufferedReader() throws HttpException {
         return bufferedReader(charset());
     }
 
@@ -1891,19 +1643,19 @@ public class HttpRequest {
      *
      * @param file
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest receive(File file) throws HttpRequestException {
+    public HttpRequest receive(File file) throws HttpException {
         OutputStream output;
         try {
             output = new BufferedOutputStream(new FileOutputStream(file), bufferSize);
         } catch (FileNotFoundException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
 
         return new CloseOperation<HttpRequest>(output, ignoreCloseExceptions) {
             @Override
-            protected HttpRequest run() throws HttpRequestException, IOException {
+            protected HttpRequest run() throws HttpException, IOException {
                 return receive(output);
             }
         }.call();
@@ -1914,13 +1666,13 @@ public class HttpRequest {
      *
      * @param output
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest receive(OutputStream output) throws HttpRequestException {
+    public HttpRequest receive(OutputStream output) throws HttpException {
         try {
             return copy(buffer(), output);
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
     }
 
@@ -1929,9 +1681,9 @@ public class HttpRequest {
      *
      * @param output
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest receive(PrintStream output) throws HttpRequestException {
+    public HttpRequest receive(PrintStream output) throws HttpException {
         return receive((OutputStream) output);
     }
 
@@ -1940,9 +1692,9 @@ public class HttpRequest {
      *
      * @param appendable
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest receive(Appendable appendable) throws HttpRequestException {
+    public HttpRequest receive(Appendable appendable) throws HttpException {
         BufferedReader reader = bufferedReader();
 
         return new CloseOperation<HttpRequest>(reader, ignoreCloseExceptions) {
@@ -1964,9 +1716,9 @@ public class HttpRequest {
      *
      * @param writer
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest receive(Writer writer) throws HttpRequestException {
+    public HttpRequest receive(Writer writer) throws HttpException {
         BufferedReader reader = bufferedReader();
 
         return new CloseOperation<HttpRequest>(reader, ignoreCloseExceptions) {
@@ -2052,9 +1804,9 @@ public class HttpRequest {
      *
      * @param name
      * @return response header
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public String header(String name) throws HttpRequestException {
+    public String header(String name) throws HttpException {
         closeOutputQuietly();
         return getConnection().getHeaderField(name);
     }
@@ -2063,9 +1815,9 @@ public class HttpRequest {
      * Get all the response headers
      *
      * @return map of response header names to their value(s)
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public Map<String, List<String>> headers() throws HttpRequestException {
+    public Map<String, List<String>> headers() throws HttpException {
         closeOutputQuietly();
         return getConnection().getHeaderFields();
     }
@@ -2076,9 +1828,9 @@ public class HttpRequest {
      *
      * @param name
      * @return date, -1 on failures
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public long dateHeader(String name) throws HttpRequestException {
+    public long dateHeader(String name) throws HttpException {
         return dateHeader(name, -1L);
     }
 
@@ -2089,9 +1841,9 @@ public class HttpRequest {
      * @param name
      * @param defaultValue
      * @return date, default value on failures
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public long dateHeader(String name, long defaultValue) throws HttpRequestException {
+    public long dateHeader(String name, long defaultValue) throws HttpException {
         closeOutputQuietly();
         return getConnection().getHeaderFieldDate(name, defaultValue);
     }
@@ -2102,9 +1854,9 @@ public class HttpRequest {
      *
      * @param name
      * @return header value as an integer, -1 when missing or parsing fails
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public int intHeader(String name) throws HttpRequestException {
+    public int intHeader(String name) throws HttpException {
         return intHeader(name, -1);
     }
 
@@ -2116,10 +1868,10 @@ public class HttpRequest {
      * @param defaultValue
      * @return header value as an integer, default value when missing or parsing
      *         fails
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public int intHeader(String name, int defaultValue) 
-        throws HttpRequestException {
+        throws HttpException {
         closeOutputQuietly();
         return getConnection().getHeaderFieldInt(name, defaultValue);
     }
@@ -2439,7 +2191,8 @@ public class HttpRequest {
      * @return this request
      */
     public HttpRequest basic(String name, String password) {
-        return authorization("Basic " + Base64.encode(name + ':' + password));
+        byte[] data = (name + ':' + password).getBytes(Files.US_ASCII);
+        return authorization("Basic " + Base64.getEncoder().encodeToString(data));
     }
 
     /**
@@ -2451,7 +2204,8 @@ public class HttpRequest {
      * @return this request
      */
     public HttpRequest proxyBasic(String name, String password) {
-        return proxyAuthorization("Basic " + Base64.encode(name + ':' + password));
+        byte[] data = (name + ':' + password).getBytes(Files.US_ASCII);
+        return proxyAuthorization("Basic " + Base64.getEncoder().encodeToString(data));
     }
 
     /**
@@ -2632,7 +2386,7 @@ public class HttpRequest {
      * Close output stream
      *
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      * @throws IOException
      */
     protected HttpRequest closeOutput() throws IOException {
@@ -2660,16 +2414,16 @@ public class HttpRequest {
 
     /**
      * Call {@link #closeOutput()} and re-throw a caught {@link IOException}s as
-     * an {@link HttpRequestException}
+     * an {@link HttpException}
      *
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    protected HttpRequest closeOutputQuietly() throws HttpRequestException {
+    protected HttpRequest closeOutputQuietly() throws HttpException {
         try {
             return closeOutput();
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
     }
 
@@ -2761,10 +2515,10 @@ public class HttpRequest {
      * @param filename
      * @param part
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest part(String name, String filename, String part) 
-        throws HttpRequestException {
+        throws HttpException {
         return part(name, filename, null, part);
     }
 
@@ -2777,16 +2531,16 @@ public class HttpRequest {
      *          value of the Content-Type part header
      * @param part
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest part(String name, String filename, String contentType, String part) 
-        throws HttpRequestException {
+        throws HttpException {
         try {
             startPart();
             writePartHeader(name, filename, contentType);
             output.write(part);
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
         return this;
     }
@@ -2797,10 +2551,10 @@ public class HttpRequest {
      * @param name
      * @param part
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest part(String name, Number part)
-        throws HttpRequestException {
+        throws HttpException {
         return part(name, null, part);
     }
 
@@ -2822,10 +2576,10 @@ public class HttpRequest {
      * @param name
      * @param part
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest part(String name, File part)
-        throws HttpRequestException {
+        throws HttpException {
         return part(name, null, part);
     }
 
@@ -2836,10 +2590,10 @@ public class HttpRequest {
      * @param filename
      * @param part
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest part(String name, String filename, File part) 
-        throws HttpRequestException {
+        throws HttpException {
         return part(name, filename, null, part);
     }
 
@@ -2852,16 +2606,16 @@ public class HttpRequest {
      *          value of the Content-Type part header
      * @param part
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest part(String name, String filename, String contentType, File part) 
-        throws HttpRequestException {
+        throws HttpException {
         InputStream stream;
         try {
             stream = new BufferedInputStream(new FileInputStream(part));
             incrementTotalSize(part.length());
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
         return part(name, filename, contentType, stream);
     }
@@ -2872,10 +2626,10 @@ public class HttpRequest {
      * @param name
      * @param part
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest part(String name, InputStream part)
-        throws HttpRequestException {
+        throws HttpException {
         return part(name, null, null, part);
     }
 
@@ -2888,16 +2642,16 @@ public class HttpRequest {
      *          value of the Content-Type part header
      * @param part
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest part(String name, String filename, String contentType, InputStream part)
-        throws HttpRequestException {
+        throws HttpException {
         try {
             startPart();
             writePartHeader(name, filename, contentType);
             copy(part, output);
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
         return this;
     }
@@ -2908,10 +2662,10 @@ public class HttpRequest {
      * @param name
      * @param value
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest partHeader(String name, String value)
-        throws HttpRequestException {
+        throws HttpException {
         return send(name).send(": ").send(value).send(CRLF);
     }
 
@@ -2920,15 +2674,15 @@ public class HttpRequest {
      *
      * @param input
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest send(File input) throws HttpRequestException {
+    public HttpRequest send(File input) throws HttpException {
         InputStream stream;
         try {
             stream = new BufferedInputStream(new FileInputStream(input));
             incrementTotalSize(input.length());
         } catch (FileNotFoundException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
         return send(stream);
     }
@@ -2938,9 +2692,9 @@ public class HttpRequest {
      *
      * @param input
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest send(byte[] input) throws HttpRequestException {
+    public HttpRequest send(byte[] input) throws HttpException {
         if (input == null) {
             return this;
         }
@@ -2955,14 +2709,14 @@ public class HttpRequest {
      *
      * @param input
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest send(InputStream input) throws HttpRequestException {
+    public HttpRequest send(InputStream input) throws HttpException {
         try {
             openOutput();
             copy(input, output);
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
         return this;
     }
@@ -2974,13 +2728,13 @@ public class HttpRequest {
      *
      * @param input
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest send(Reader input) throws HttpRequestException {
+    public HttpRequest send(Reader input) throws HttpException {
         try {
             openOutput();
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
 
         Writer writer = new OutputStreamWriter(output, output.encoder.charset());
@@ -3000,14 +2754,14 @@ public class HttpRequest {
      *
      * @param value
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest send(CharSequence value) throws HttpRequestException {
+    public HttpRequest send(CharSequence value) throws HttpException {
         try {
             openOutput();
             output.write(value.toString());
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
         return this;
     }
@@ -3016,14 +2770,14 @@ public class HttpRequest {
      * Create writer to request output stream
      *
      * @return writer
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public OutputStreamWriter writer() throws HttpRequestException {
+    public OutputStreamWriter writer() throws HttpException {
         try {
             openOutput();
             return new OutputStreamWriter(output, output.encoder.charset());
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
     }
 
@@ -3035,9 +2789,9 @@ public class HttpRequest {
      *
      * @param values
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest form(Map<?, ?> values) throws HttpRequestException {
+    public HttpRequest form(Map<?, ?> values) throws HttpException {
         return form(values, Files.DEFAULT_CHARSET);
     }
 
@@ -3049,9 +2803,9 @@ public class HttpRequest {
      *
      * @param entry
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest form(Entry<?, ?> entry) throws HttpRequestException {
+    public HttpRequest form(Entry<?, ?> entry) throws HttpException {
         return form(entry, Files.DEFAULT_CHARSET);
     }
 
@@ -3064,10 +2818,10 @@ public class HttpRequest {
      * @param entry
      * @param charset
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest form(Entry<?, ?> entry, String charset)
-        throws HttpRequestException {
+        throws HttpException {
         return form(entry.getKey(), entry.getValue(), charset);
     }
 
@@ -3080,9 +2834,9 @@ public class HttpRequest {
      * @param name
      * @param value
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest form(Object name, Object value) throws HttpRequestException {
+    public HttpRequest form(Object name, Object value) throws HttpException {
         return form(name, value, Files.DEFAULT_CHARSET);
     }
 
@@ -3096,10 +2850,10 @@ public class HttpRequest {
      * @param value
      * @param charset
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest form(Object name, Object value, String charset)
-        throws HttpRequestException {
+        throws HttpException {
         boolean first = !form;
         if (first) {
             contentType(CONTENT_TYPE_FORM, charset);
@@ -3117,7 +2871,7 @@ public class HttpRequest {
                 output.write(URLEncoder.encode(value.toString(), charset));
             }
         } catch (IOException e) {
-            throw new HttpRequestException(e);
+            throw new HttpException(e);
         }
         return this;
     }
@@ -3128,10 +2882,10 @@ public class HttpRequest {
      * @param values
      * @param charset
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
     public HttpRequest form(Map<?, ?> values, String charset)
-        throws HttpRequestException {
+        throws HttpException {
         if (!values.isEmpty()) {
             for (Entry<?, ?> entry : values.entrySet()) {
                 form(entry, charset);
@@ -3146,9 +2900,9 @@ public class HttpRequest {
      * This method does nothing if the current request is not a HTTPS request
      *
      * @return this request
-     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public HttpRequest trustAllCerts() throws HttpRequestException {
+    public HttpRequest trustAllCerts() throws HttpException {
         HttpURLConnection connection = getConnection();
         if (connection instanceof HttpsURLConnection) {
             ((HttpsURLConnection) connection).setSSLSocketFactory(TRUSTED_FACTORY);
@@ -3234,4 +2988,5 @@ public class HttpRequest {
         getConnection().setInstanceFollowRedirects(followRedirects);
         return this;
     }
+
 }

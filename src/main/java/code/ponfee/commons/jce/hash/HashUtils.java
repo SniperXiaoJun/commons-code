@@ -7,7 +7,7 @@ import java.nio.charset.Charset;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.Security;
+import java.security.Provider;
 
 import org.apache.commons.codec.binary.Hex;
 
@@ -143,8 +143,7 @@ public final class HashUtils {
 
     // ---------------------------------------RipeMD---------------------------------------
     public static byte[] ripeMD128(byte[] data) {
-        Security.addProvider(Providers.BC);
-        return digest(HashAlgorithms.RipeMD128, data);
+        return digest(HashAlgorithms.RipeMD128, Providers.BC, data);
     }
 
     public static String ripeMD128Hex(byte[] data) {
@@ -152,8 +151,7 @@ public final class HashUtils {
     }
 
     public static byte[] ripeMD160(byte[] data) {
-        Security.addProvider(Providers.BC);
-        return digest(HashAlgorithms.RipeMD160, data);
+        return digest(HashAlgorithms.RipeMD160, Providers.BC, data);
     }
 
     public static String ripeMD160Hex(byte[] data) {
@@ -161,8 +159,7 @@ public final class HashUtils {
     }
 
     public static byte[] ripeMD256(byte[] data) {
-        Security.addProvider(Providers.BC);
-        return digest(HashAlgorithms.RipeMD256, data);
+        return digest(HashAlgorithms.RipeMD256, Providers.BC, data);
     }
 
     public static String ripeMD256Hex(byte[] data) {
@@ -170,24 +167,31 @@ public final class HashUtils {
     }
 
     public static byte[] ripeMD320(byte[] data) {
-        Security.addProvider(Providers.BC);
-        return digest(HashAlgorithms.RipeMD320, data);
+        return digest(HashAlgorithms.RipeMD320, Providers.BC, data);
     }
 
     public static String ripeMD320Hex(byte[] data) {
         return Hex.encodeHexString(ripeMD320(data));
     }
 
+    public static byte[] digest(HashAlgorithms alg, byte[]... data) {
+        return digest(alg, null, data);
+    }
+
     /**
      * 数据摘要
-     * @param data      hash data of byte array
      * @param algorithm hash算法
+     * @param provider
+     * @param data      hash data of byte array
      * @return
      */
-    public static byte[] digest(HashAlgorithms alg, byte[]... data) {
+    public static byte[] digest(HashAlgorithms alg, Provider provider,
+                                byte[]... data) {
         MessageDigest md;
         try {
-            md = MessageDigest.getInstance(alg.algorithm());
+            md = (provider == null)
+                 ? MessageDigest.getInstance(alg.algorithm())
+                 : MessageDigest.getInstance(alg.algorithm(), provider);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(e); // cannot happened
         }
@@ -197,31 +201,37 @@ public final class HashUtils {
         return md.digest();
     }
 
+    public static byte[] digest(HashAlgorithms alg, InputStream input) {
+        return digest(alg, null, input);
+    }
+
     /**
      * 数据摘要
-     * @param data      hash data of input stream
      * @param algorithm hash 算法
+     * @param provider
+     * @param data      hash data of input stream
      * @return
      */
-    public static byte[] digest(HashAlgorithms alg, InputStream input) {
+    public static byte[] digest(HashAlgorithms alg, Provider provider, 
+                                InputStream input) {
         byte[] buffer = new byte[BUFF_SIZE];
+        MessageDigest digest = null;
+        try {
+            digest = (provider == null)
+                     ? MessageDigest.getInstance(alg.algorithm())
+                     : MessageDigest.getInstance(alg.algorithm(), provider);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e); // cannot happened
+        }
 
         /*try (InputStream in = input) {
-            MessageDigest digest = MessageDigest.getInstance(algorithm);
             for (int len; (len = in.read(buffer)) != Files.EOF;) {
                 digest.update(buffer, 0, len);
             }
             return digest.digest();
-        } catch (NoSuchAlgorithmException | IOException e) {
+        } catch (IOException e) {
             throw new IllegalArgumentException(e);
         }*/
-
-        MessageDigest digest = null;
-        try {
-            digest = MessageDigest.getInstance(alg.algorithm());
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(e); // cannot happened
-        }
 
         try (InputStream in = input; 
              DigestInputStream dIn = new DigestInputStream(input, digest)

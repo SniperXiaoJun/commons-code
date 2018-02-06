@@ -8,6 +8,7 @@ import java.security.interfaces.RSAPrivateKey;
 import org.junit.Test;
 
 import code.ponfee.commons.http.Http;
+import code.ponfee.commons.jce.pkcs.CryptoMessageSyntax;
 import code.ponfee.commons.jce.pkcs.PKCS7Envelope;
 import code.ponfee.commons.jce.pkcs.PKCS7Envelope.AlgorithmMapping;
 import code.ponfee.commons.jce.security.KeyStoreResolver;
@@ -37,6 +38,9 @@ public class PKCS7EnvelopeTester {
         byte[] unveloped = PKCS7Envelope.unenvelop(enveloped, cert, privateKey);
         System.out.println(new String(unveloped));
         //System.out.println("===============================================");
+
+        unveloped = CryptoMessageSyntax.unenvelop(enveloped, privateKey);
+        System.out.println(new String(unveloped));
 
         byte[] encrypted = RSACryptor.encrypt(data, (RSAPrivateKey)privateKey);
         //System.out.println(By`tes.hexDump(encrypted));

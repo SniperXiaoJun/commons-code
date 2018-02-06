@@ -24,7 +24,8 @@ public class HttpException extends RuntimeException {
         super(cause);
     }
 
-    protected HttpException(String message, Throwable cause, boolean enableSuppression, 
+    protected HttpException(String message, Throwable cause, 
+                            boolean enableSuppression, 
                             boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }

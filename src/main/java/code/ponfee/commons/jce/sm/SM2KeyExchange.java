@@ -46,7 +46,7 @@ public class SM2KeyExchange implements Serializable {
     }
 
     /**
-     * 密钥协商发起第一步
+     * 密钥协商第一步（甲方）
      * @return TransportEntity
      */
     public TransportEntity step1PartA() {
@@ -56,7 +56,7 @@ public class SM2KeyExchange implements Serializable {
     }
 
     /**
-     * 密钥协商响应方
+     * 密钥协商第二步（乙方）
      * @param entity1 传输实体
      * @return TransportEntity
      */
@@ -98,7 +98,7 @@ public class SM2KeyExchange implements Serializable {
     }
 
     /**
-     * 密钥协商发起方第二步
+     * 密钥协商第三步（甲方）
      * @param entity2 传输实体
      * @return TransportEntity
      */
@@ -144,7 +144,7 @@ public class SM2KeyExchange implements Serializable {
     }
 
     /**
-     * 密钥确认最后一步
+     * 密钥协商最后一（第四）步（乙方）
      * @param entity3 传输实体
      */
     public boolean step4PartB(TransportEntity entity3) {

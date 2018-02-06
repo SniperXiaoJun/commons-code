@@ -24,7 +24,7 @@ import sun.security.util.DerValue;
 public class RSAKey implements Key {
 
     // Should RSA public exponent be only in {3, 5, 17, 257 or 65537} 
-    public static final BigInteger RSA_F4 = BigInteger.valueOf(65537);
+    public static final int RSA_F4 = 65537;
 
     public final BigInteger n;
     public final BigInteger e;
@@ -36,14 +36,14 @@ public class RSAKey implements Key {
     public final BigInteger qe;
     public final BigInteger coeff;
 
-    public final boolean isSecret;
+    public final boolean secret;
 
     public RSAKey(int keySize) {
-        this(keySize, RSA_F4.intValue());
+        this(keySize, RSA_F4);
     }
 
     public RSAKey(int keySize, int e) {
-        this.isSecret = true;
+        this.secret = true;
         KeyPair pair = generateKey(keySize, e);
         this.e = pair.e;
         this.p = pair.p;
@@ -62,7 +62,7 @@ public class RSAKey implements Key {
         Preconditions.checkArgument(n != null && e != null && d != null 
                                     && p != null && q != null && pe != null 
                                     && qe != null && coeff != null);
-        this.isSecret = true;
+        this.secret = true;
         this.n = n;
         this.e = e;
         this.d = d;
@@ -75,7 +75,7 @@ public class RSAKey implements Key {
 
     public RSAKey(BigInteger n, BigInteger e) {
         Preconditions.checkArgument(n != null && e != null);
-        this.isSecret = false;
+        this.secret = false;
         this.n = n;
         this.e = e;
 
@@ -88,7 +88,11 @@ public class RSAKey implements Key {
     }
 
     public boolean isPublic() {
-        return (!isSecret);
+        return !secret;
+    }
+
+    public boolean isSecret() {
+        return secret;
     }
 
     /**
@@ -102,10 +106,10 @@ public class RSAKey implements Key {
     // Public: (secret, n, e)
     public @Override void writeKey(OutputStream out) throws IOException {
         DerOutputStream der = new DerOutputStream();
-        der.putInteger(this.isSecret ? 0 : 1);
+        der.putInteger(this.secret ? 0 : 1);
         der.putInteger(this.n);
         der.putInteger(this.e);
-        if (this.isSecret) {
+        if (this.secret) {
             der.putInteger(this.d);
             der.putInteger(this.p);
             der.putInteger(this.q);
@@ -262,11 +266,11 @@ public class RSAKey implements Key {
 
     public static void main(String[] args) {
         Stopwatch watch = Stopwatch.createStarted();
-        generateKey(4096, RSA_F4.intValue());
+        generateKey(4096, RSA_F4);
         System.out.println("generateKey1: " + watch.stop());
 
         watch.reset().start();
-        generateKey2(4096, RSA_F4.intValue());
+        generateKey2(4096, RSA_F4);
         System.out.println("generateKey2: " + watch.stop());
     }
 }

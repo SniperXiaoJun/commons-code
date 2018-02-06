@@ -56,7 +56,7 @@ public class RSAryptorTest {
         /*RSAPublicKey pub = RSAPublicKeys.toRSAPublicKey(dk.n, dk.e);
         encrypted = code.ponfee.commons.jce.security.RSACryptor.encrypt(origin, pub);*/
         RSAPrivateKey pri = RSAPrivateKeys.toRSAPrivateKey(dk.n, dk.d);
-        decrypted = code.ponfee.commons.jce.security.RSACryptor.decryptWithoutPadding(encrypted, pri);
+        decrypted = code.ponfee.commons.jce.security.RSACryptor.decryptNoPadding(encrypted, pri);
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
@@ -176,11 +176,11 @@ public class RSAryptorTest {
 
             // 2
             byte[] encrypted2 = encrypted1;
-            byte[] decrypted2 = code.ponfee.commons.jce.security.RSACryptor.decryptWithoutPadding(encrypted2, pri);
+            byte[] decrypted2 = code.ponfee.commons.jce.security.RSACryptor.decryptNoPadding(encrypted2, pri);
 
             // 3
-            byte[] encrypted3 = code.ponfee.commons.jce.security.RSACryptor.encryptWithoutPadding(data, pub);
-            byte[] decrypted3 = code.ponfee.commons.jce.security.RSACryptor.decryptWithoutPadding(encrypted3, pri);
+            byte[] encrypted3 = code.ponfee.commons.jce.security.RSACryptor.encryptNoPadding(data, pub);
+            byte[] decrypted3 = code.ponfee.commons.jce.security.RSACryptor.decryptNoPadding(encrypted3, pri);
 
             // 4
             byte[] encrypted4 = code.ponfee.commons.jce.security.RSACryptor.encrypt(data, pub);
@@ -295,7 +295,7 @@ public class RSAryptorTest {
         input = new ByteArrayInputStream(encrypted);
         output = new ByteArrayOutputStream();
         RSAPrivateKey pri = RSAPrivateKeys.toRSAPrivateKey(dk.n, dk.d);
-        code.ponfee.commons.jce.security.RSACryptor.decryptWithoutPadding(input, pri, output);
+        code.ponfee.commons.jce.security.RSACryptor.decryptNoPadding(input, pri, output);
         decrypted = output.toByteArray();
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");

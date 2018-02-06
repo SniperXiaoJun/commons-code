@@ -63,7 +63,7 @@ public class RSASigner {
 
     public RSASigner(RSAKey rsaKey) {
         this.rsaKey = rsaKey;
-        if (rsaKey.isSecret) {
+        if (rsaKey.secret) {
             // 签名
             rsaEngine.init(true, new RSAKeyParameters(true, rsaKey.n, rsaKey.d));
         } else {
@@ -89,7 +89,7 @@ public class RSASigner {
     }
 
     public byte[] sign(byte[] data, HashAlgorithms alg) {
-        if (!this.rsaKey.isSecret) {
+        if (!this.rsaKey.isSecret()) {
             throw new IllegalArgumentException("Sign must use private key.");
         }
 
@@ -110,7 +110,7 @@ public class RSASigner {
     }
 
     public boolean verify(byte[] data, byte[] signature, HashAlgorithms alg) {
-        if (this.rsaKey.isSecret) {
+        if (this.rsaKey.isSecret()) {
             throw new IllegalArgumentException("Verify signature must use public key.");
         }
 
@@ -158,6 +158,25 @@ public class RSASigner {
         }
     }
 
+    /**
+     * {@link org.bouncycastle.asn1.DERSequence}
+     * {@link org.bouncycastle.asn1.x509.DigestInfo}
+     * 
+     * DER :: {
+     *     BERTags.SEQUENCE|BERTags.CONSTRUCTED, 
+     *     totalLength,
+     *     BERTags.OBJECT_IDENTIFIER,   -- {@link ASN1ObjectIdentifier#encode}
+     *     algLength,
+     *     algBody,
+     *     BERTags.OCTET_STRING,        -- {@link org.bouncycastle.asn1.DEROctetString#encode}
+     *     digestLength,
+     *     digestBody
+     * }
+     * @param hash
+     * @param digestOid
+     * @return der encoded
+     * @throws IOException
+     */
     private byte[] derEncode(byte[] hash, ASN1ObjectIdentifier digestOid) 
         throws IOException {
         AlgorithmIdentifier algId = new AlgorithmIdentifier(digestOid, DERNull.INSTANCE);

@@ -106,7 +106,10 @@ public abstract class CryptoProvider {
             return null;
         }
 
-        return new String(decrypt(Base64.getUrlDecoder().decode(ciphertext)), charset);
+        return new String(
+                          decrypt(Base64.getUrlDecoder().decode(ciphertext)), 
+                          charset
+                   );
     }
 
     /**
@@ -151,7 +154,8 @@ public abstract class CryptoProvider {
      */
     public final boolean verify(String data, String charset, String signed) {
         return verify(data.getBytes(Charset.forName(charset)), 
-                      Base64.getUrlDecoder().decode(signed));
+                      Base64.getUrlDecoder().decode(signed)
+               );
     }
 
     /**
@@ -177,6 +181,7 @@ public abstract class CryptoProvider {
 
     /**
      * rsa private key密钥组件
+     * forbid use private key encrypt and use public key decrypt
      * @param pkcs8PrivateKey  the string of pkcs8 private key format
      * @return
      */
@@ -188,12 +193,15 @@ public abstract class CryptoProvider {
             @Override
             public byte[] encrypt(byte[] original) {
                 Preconditions.checkArgument(original != null);
+                // only support public key encrypt
+                // forbid encrypt use private key
                 return RSACryptor.encrypt(original, pubKey); // 公钥加密
             }
 
             @Override
             public byte[] decrypt(byte[] encrypted) {
                 Preconditions.checkArgument(encrypted != null);
+                // only support private key decrypt
                 return RSACryptor.decrypt(encrypted, priKey); // 私钥解密
             }
 
@@ -226,6 +234,7 @@ public abstract class CryptoProvider {
 
             @Override
             public byte[] decrypt(byte[] encrypted) {
+                // cannot support public key decrypt
                 throw new UnsupportedOperationException("cannot support decrypt.");
             }
 
@@ -284,12 +293,12 @@ public abstract class CryptoProvider {
             }
 
             @Override
-            public byte[] sign(byte[] data) { // sign data by SM2WithSM3
+            public byte[] sign(byte[] data) { // sign data by SM3WithSM2
                 return SM2.sign(ecParameter, data, ida, publicKey, privateKey);
             }
 
             @Override
-            public boolean verify(byte[] data, byte[] signed) { // verify the SM2WithSM3 signature
+            public boolean verify(byte[] data, byte[] signed) { // verify the SM3WithSM2 signature
                 return SM2.verify(ecParameter, data, ida, signed, publicKey);
             }
         };

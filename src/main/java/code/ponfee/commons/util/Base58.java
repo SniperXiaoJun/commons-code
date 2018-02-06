@@ -157,7 +157,7 @@ public class Base58 {
      * @param data  the bytes to encode
      * @return the base58-encoded string is appended checksum
      */
-    public static String encodeWithChecksum(byte[] data) {
+    public static String encodeChecked(byte[] data) {
         return encode(ArrayUtils.addAll(data, checksum(data)));
     }
 
@@ -170,7 +170,7 @@ public class Base58 {
      *
      * @param data the base58-encoded string to decode (which should include the checksum)
      */
-    public static byte[] decodeWithChecksum(String data) {
+    public static byte[] decodeChecked(String data) {
         byte[] decoded = decode(data);
         if (decoded.length < 4) {
             throw new IllegalArgumentException("Data too short.");
@@ -186,6 +186,7 @@ public class Base58 {
         return origin;
     }
 
+    // -------------------------------private methods-------------------------------
     // number -> number / 58, returns number % 58
     private static byte divmod58(byte[] number, int startAt) {
         int remainder = 0;
@@ -224,9 +225,9 @@ public class Base58 {
 
     public static void main(String[] args) {
         System.out.println(encode(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class))));
-        String base58 = encodeWithChecksum(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class)));
+        String base58 = encodeChecked(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class)));
         System.out.println(base58);
-        System.out.println(new String(decodeWithChecksum(base58)));
+        System.out.println(new String(decodeChecked(base58)));
 
         byte[] b128 = new byte[16], b0 = new byte[16], b127 = new byte[16];
         Arrays.fill(b128, (byte) -128);
@@ -244,10 +245,10 @@ public class Base58 {
         System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(b127));*/
 
         // 比特币钱包地址
-        System.out.println(Hex.encodeHexString(decodeWithChecksum("3D2oetdNuZUqQHPJmcMDDHYoqkyNVsFk9r")));
-        System.out.println(Hex.encodeHexString(decodeWithChecksum("16rCmCmbuWDhPjWTrpQGaU3EPdZF7MTdUk")));
-        System.out.println(decodeWithChecksum("1DiHDQMPFu4p84rkLn6Majj2LCZZZRQUaa").length);
-        System.out.println(decodeWithChecksum("3Nxwenay9Z8Lc9JBiywExpnEFiLp6Afp8v").length);
-        System.out.println(decodeWithChecksum("17QY6BzRnsTGKBqGdZHG1bWe1VB6MweiDH").length);
+        System.out.println(Hex.encodeHexString(decodeChecked("3D2oetdNuZUqQHPJmcMDDHYoqkyNVsFk9r")));
+        System.out.println(Hex.encodeHexString(decodeChecked("16rCmCmbuWDhPjWTrpQGaU3EPdZF7MTdUk")));
+        System.out.println(decodeChecked("1DiHDQMPFu4p84rkLn6Majj2LCZZZRQUaa").length);
+        System.out.println(decodeChecked("3Nxwenay9Z8Lc9JBiywExpnEFiLp6Afp8v").length);
+        System.out.println(decodeChecked("17QY6BzRnsTGKBqGdZHG1bWe1VB6MweiDH").length);
     }
 }

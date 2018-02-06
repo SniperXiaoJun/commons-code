@@ -1,5 +1,8 @@
 package code.ponfee.commons.jce.security;
 
+import static code.ponfee.commons.jce.RSACipherPaddings.ECB_PKCS1PADDING;
+import static code.ponfee.commons.jce.RSACipherPaddings.NONE_NOPADDING;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -141,7 +144,7 @@ public final class RSACryptor {
         return docrypt(data, key, Cipher.ENCRYPT_MODE, true);
     }
 
-    public static <T extends Key & RSAKey> byte[] encryptWithoutPadding(byte[] data, T key) {
+    public static <T extends Key & RSAKey> byte[] encryptNoPadding(byte[] data, T key) {
         return docrypt(data, key, Cipher.ENCRYPT_MODE, false);
     }
 
@@ -150,8 +153,8 @@ public final class RSACryptor {
         docrypt(input, key, out, Cipher.ENCRYPT_MODE, true);
     }
 
-    public static <T extends Key & RSAKey> void encryptWithoutPadding(InputStream input, 
-                                                                      T key, OutputStream out) {
+    public static <T extends Key & RSAKey> void encryptNoPadding(InputStream input, 
+                                                                 T key, OutputStream out) {
         docrypt(input, key, out, Cipher.ENCRYPT_MODE, false);
     }
 
@@ -165,7 +168,7 @@ public final class RSACryptor {
         return docrypt(encrypted, key, Cipher.DECRYPT_MODE, true);
     }
 
-    public static <T extends Key & RSAKey> byte[] decryptWithoutPadding(byte[] encrypted, T key) {
+    public static <T extends Key & RSAKey> byte[] decryptNoPadding(byte[] encrypted, T key) {
         return docrypt(encrypted, key, Cipher.DECRYPT_MODE, false);
     }
 
@@ -174,8 +177,8 @@ public final class RSACryptor {
         docrypt(input, key, out, Cipher.DECRYPT_MODE, true);
     }
 
-    public static <T extends Key & RSAKey> void decryptWithoutPadding(InputStream input, 
-                                                                      T key, OutputStream out) {
+    public static <T extends Key & RSAKey> void decryptNoPadding(InputStream input, 
+                                                                 T key, OutputStream out) {
         docrypt(input, key, out, Cipher.DECRYPT_MODE, false);
     }
 
@@ -190,8 +193,8 @@ public final class RSACryptor {
                                                          int cryptMode, boolean isPadding) {
         try {
             Cipher cipher = isPadding 
-                            ? Cipher.getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding") // Cipher.getInstance(key.getAlgorithm())
-                            : Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
+                ? Cipher.getInstance(key.getAlgorithm() + ECB_PKCS1PADDING.transform()) // Cipher.getInstance(key.getAlgorithm())
+                : Cipher.getInstance(key.getAlgorithm() + NONE_NOPADDING.transform(), Providers.BC);
             cipher.init(cryptMode, key);
             byte[] buffer = new byte[getBlockSize(cryptMode, key)];
             for (int len; (len = input.read(buffer)) != Files.EOF;) {
@@ -228,8 +231,8 @@ public final class RSACryptor {
         int blockSize = getBlockSize(cryptMode, key);
         try {
             Cipher cipher = isPadding 
-                            ? Cipher.getInstance(key.getAlgorithm() + "/ECB/PKCS1Padding") // Cipher.getInstance(key.getAlgorithm())
-                            : Cipher.getInstance(key.getAlgorithm() + "/None/NoPadding", Providers.BC);
+                ? Cipher.getInstance(key.getAlgorithm() + ECB_PKCS1PADDING.transform()) // Cipher.getInstance(key.getAlgorithm())
+                : Cipher.getInstance(key.getAlgorithm() + NONE_NOPADDING.transform(), Providers.BC);
 
             cipher.init(cryptMode, key);
             ByteArrayOutputStream out = new ByteArrayOutputStream(data.length);
