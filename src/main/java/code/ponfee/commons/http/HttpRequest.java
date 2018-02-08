@@ -68,6 +68,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.security.GeneralSecurityException;
 import java.security.PrivilegedAction;
@@ -368,7 +369,6 @@ public class HttpRequest {
     public interface ConnectionFactory {
         /**
          * Open an {@link HttpURLConnection} for the specified {@link URL}.
-         *
          * @throws IOException
          */
         HttpURLConnection create(URL url) throws IOException;
@@ -376,7 +376,6 @@ public class HttpRequest {
         /**
          * Open an {@link HttpURLConnection} for the specified {@link URL}
          * and {@link Proxy}.
-         *
          * @throws IOException
          */
         HttpURLConnection create(URL url, Proxy proxy) throws IOException;
@@ -659,8 +658,7 @@ public class HttpRequest {
      * given number of params must be divisible by 2.
      *
      * @param url
-     * @param params
-     *          name/value pairs
+     * @param params name/value pairs
      * @return URL with appended query params
      */
     public static String append(CharSequence url, Object... params) {
@@ -714,10 +712,8 @@ public class HttpRequest {
      * Start a 'GET' request to the given URL along with the query params
      *
      * @param baseUrl
-     * @param params
-     *          The query parameters to include as part of the baseUrl
-     * @param encode
-     *          true to encode the full URL
+     * @param params The query parameters to include as part of the baseUrl
+     * @param encode true to encode the full URL
      *
      * @see #append(CharSequence, Map)
      * @see #encode(CharSequence)
@@ -733,11 +729,9 @@ public class HttpRequest {
      * Start a 'GET' request to the given URL along with the query params
      *
      * @param baseUrl
-     * @param encode
-     *          true to encode the full URL
-     * @param params
-     *          the name/value query parameter pairs to include as part of the
-     *          baseUrl
+     * @param encode true to encode the full URL
+     * @param params the name/value query parameter pairs to 
+     *               include as part of the baseUrl
      *
      * @see #append(CharSequence, Object...)
      * @see #encode(CharSequence)
@@ -775,10 +769,8 @@ public class HttpRequest {
      * Start a 'POST' request to the given URL along with the query params
      *
      * @param baseUrl
-     * @param params
-     *          the query parameters to include as part of the baseUrl
-     * @param encode
-     *          true to encode the full URL
+     * @param params the query parameters to include as part of the baseUrl
+     * @param encode true to encode the full URL
      *
      * @see #append(CharSequence, Map)
      * @see #encode(CharSequence)
@@ -794,11 +786,9 @@ public class HttpRequest {
      * Start a 'POST' request to the given URL along with the query params
      *
      * @param baseUrl
-     * @param encode
-     *          true to encode the full URL
-     * @param params
-     *          the name/value query parameter pairs to include as part of the
-     *          baseUrl
+     * @param encode  true to encode the full URL
+     * @param params  the name/value query parameter pairs to 
+     *                include as part of the baseUrl
      *
      * @see #append(CharSequence, Object...)
      * @see #encode(CharSequence)
@@ -836,10 +826,8 @@ public class HttpRequest {
      * Start a 'PUT' request to the given URL along with the query params
      *
      * @param baseUrl
-     * @param params
-     *          the query parameters to include as part of the baseUrl
-     * @param encode
-     *          true to encode the full URL
+     * @param params the query parameters to include as part of the baseUrl
+     * @param encode true to encode the full URL
      *
      * @see #append(CharSequence, Map)
      * @see #encode(CharSequence)
@@ -855,11 +843,9 @@ public class HttpRequest {
      * Start a 'PUT' request to the given URL along with the query params
      *
      * @param baseUrl
-     * @param encode
-     *          true to encode the full URL
-     * @param params
-     *          the name/value query parameter pairs to include as part of the
-     *          baseUrl
+     * @param encode true to encode the full URL
+     * @param params the name/value query parameter pairs to 
+     *               include as part of the baseUrl
      *
      * @see #append(CharSequence, Object...)
      * @see #encode(CharSequence)
@@ -914,11 +900,9 @@ public class HttpRequest {
      * Start a 'DELETE' request to the given URL along with the query params
      *
      * @param baseUrl
-     * @param encode
-     *          true to encode the full URL
-     * @param params
-     *          the name/value query parameter pairs to include as part of the
-     *          baseUrl
+     * @param encode  true to encode the full URL
+     * @param params  the name/value query parameter pairs to 
+     *                include as part of the baseUrl
      *
      * @see #append(CharSequence, Object...)
      * @see #encode(CharSequence)
@@ -2183,7 +2167,7 @@ public class HttpRequest {
      * @return this request
      */
     public HttpRequest basic(String name, String password) {
-        byte[] data = (name + ':' + password).getBytes(Files.US_ASCII);
+        byte[] data = (name + ':' + password).getBytes(StandardCharsets.US_ASCII);
         return authorization("Basic " + Base64.getEncoder().encodeToString(data));
     }
 
@@ -2196,7 +2180,7 @@ public class HttpRequest {
      * @return this request
      */
     public HttpRequest proxyBasic(String name, String password) {
-        byte[] data = (name + ':' + password).getBytes(Files.US_ASCII);
+        byte[] data = (name + ':' + password).getBytes(StandardCharsets.US_ASCII);
         return proxyAuthorization("Basic " + Base64.getEncoder().encodeToString(data));
     }
 
@@ -2519,8 +2503,7 @@ public class HttpRequest {
      *
      * @param name
      * @param filename
-     * @param contentType
-     *          value of the Content-Type part header
+     * @param contentType value of the Content-Type part header
      * @param part
      * @return this request
      * @throws HttpException
@@ -2594,8 +2577,7 @@ public class HttpRequest {
      *
      * @param name
      * @param filename
-     * @param contentType
-     *          value of the Content-Type part header
+     * @param contentType value of the Content-Type part header
      * @param part
      * @return this request
      * @throws HttpException
@@ -2630,8 +2612,7 @@ public class HttpRequest {
      *
      * @param name
      * @param filename
-     * @param contentType
-     *          value of the Content-Type part header
+     * @param contentType value of the Content-Type part header
      * @param part
      * @return this request
      * @throws HttpException

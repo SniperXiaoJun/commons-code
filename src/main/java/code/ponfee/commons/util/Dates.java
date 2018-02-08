@@ -317,7 +317,8 @@ public class Dates {
      * @return 当前周第一天
      */
     public static Date startOfWeek(Date date) {
-        return new DateTime(date).dayOfWeek().withMinimumValue().withTimeAtStartOfDay().toDate();
+        return new DateTime(date).dayOfWeek().withMinimumValue()
+                                 .withTimeAtStartOfDay().toDate();
     }
 
     /**
@@ -326,7 +327,8 @@ public class Dates {
      * @return 当前周最后一天
      */
     public static Date endOfWeek(Date date) {
-        return new DateTime(date).dayOfWeek().withMaximumValue().millisOfDay().withMaximumValue().toDate();
+        return new DateTime(date).dayOfWeek().withMaximumValue()
+                                 .millisOfDay().withMaximumValue().toDate();
     }
 
     /**
@@ -335,7 +337,8 @@ public class Dates {
      * @return 当前月的第一天
      */
     public static Date startOfMonth(Date date) {
-        return new DateTime(date).dayOfMonth().withMinimumValue().withTimeAtStartOfDay().toDate();
+        return new DateTime(date).dayOfMonth().withMinimumValue()
+                                 .withTimeAtStartOfDay().toDate();
     }
 
     /**
@@ -344,7 +347,8 @@ public class Dates {
      * @return 当前月的最后一天
      */
     public static Date endOfMonth(Date date) {
-        return new DateTime(date).dayOfMonth().withMaximumValue().millisOfDay().withMaximumValue().toDate();
+        return new DateTime(date).dayOfMonth().withMaximumValue()
+                                 .millisOfDay().withMaximumValue().toDate();
     }
 
     /**
@@ -353,7 +357,8 @@ public class Dates {
      * @return 当前年的第一天
      */
     public static Date startOfYear(Date date) {
-        return new DateTime(date).dayOfYear().withMinimumValue().withTimeAtStartOfDay().toDate();
+        return new DateTime(date).dayOfYear().withMinimumValue()
+                                 .withTimeAtStartOfDay().toDate();
     }
 
     /**
@@ -362,7 +367,8 @@ public class Dates {
      * @return 当前年的最后一天
      */
     public static Date endOfYear(Date date) {
-        return new DateTime(date).dayOfYear().withMaximumValue().millisOfDay().withMaximumValue().toDate();
+        return new DateTime(date).dayOfYear().withMaximumValue()
+                                 .millisOfDay().withMaximumValue().toDate();
     }
 
     /**

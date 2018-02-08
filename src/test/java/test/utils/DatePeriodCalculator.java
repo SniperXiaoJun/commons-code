@@ -1,7 +1,13 @@
-package code.ponfee.commons.util;
+package test.utils;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.apache.commons.lang3.time.FastDateFormat;
+
+import code.ponfee.commons.util.DatePeriods;
+import code.ponfee.commons.util.Dates;
 
 /**
  * 周期计算
@@ -9,17 +15,17 @@ import java.util.Date;
  */
 public class DatePeriodCalculator {
 
-    private static final Date STARTING_DATE = Dates.toDate("2007-01-01 00:00:00", "yyyy-MM-dd HH:mm:ss");
+    private static final Date STARTING_DATE = Dates.toDate("2018-01-01 00:00:00", "yyyy-MM-dd HH:mm:ss");
 
     private final Date starting; // 最开始的周期（起点）时间
     private final Date target; // 待计算时间
-    private final Period period; // 周期类型
+    private final Periods period; // 周期类型
 
-    public DatePeriodCalculator(Date target, Period period) {
+    public DatePeriodCalculator(Date target, Periods period) {
         this(STARTING_DATE, target, period);
     }
 
-    public DatePeriodCalculator(Date starting, Date target, Period period) {
+    public DatePeriodCalculator(Date starting, Date target, Periods period) {
         this.starting = starting;
         this.target = target;
         this.period = period;
@@ -77,7 +83,7 @@ public class DatePeriodCalculator {
                         quantity *= 12; // 年度
                         break;
                     default:
-                        throw new IllegalArgumentException("invalid period type");
+                        //throw new IllegalArgumentException("invalid period type");
                 }
                 // 间隔月数
                 int intervalMonth = (c2.get(Calendar.YEAR) - c1.get(Calendar.YEAR)) * 12 + c2.get(Calendar.MONTH) - c1.get(Calendar.MONTH);
@@ -104,7 +110,7 @@ public class DatePeriodCalculator {
         return calculate(1, next);
     }
 
-    public static enum Period {
+    public static enum Periods {
         DAILY("每日"), // 
         WEEKLY("每周"), // 
         MONTHLY("每月"), // 
@@ -114,7 +120,7 @@ public class DatePeriodCalculator {
 
         private final String desc;
 
-        Period(String desc) {
+        Periods(String desc) {
             this.desc = desc;
         }
 
@@ -123,9 +129,60 @@ public class DatePeriodCalculator {
         }
     }
 
+    private static final FastDateFormat FORMAT = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss SSS");
     public static void main(String[] args) {
-        Date[] dates = new DatePeriodCalculator(new Date(), Period.WEEKLY).calculate(-1);
-        System.out.println(Dates.format(dates[0], "yyyy-MM-dd HH:mm:ss SSS") + "  ~  "
-            + Dates.format(dates[1], "yyyy-MM-dd HH:mm:ss SSS"));
+        for (int i = 0; i < 10; i++) {
+            int step = ThreadLocalRandom.current().nextInt(10) + 1;
+            int next = -20 + ThreadLocalRandom.current().nextInt(20);
+            Date date = Dates.random(STARTING_DATE);
+            String result;
+            Date[] dates = new DatePeriodCalculator(date, Periods.DAILY).calculate(step, next);
+            result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
+            if (result.equals(DatePeriods.DAILY.next(STARTING_DATE, date, step, next))) {
+                System.err.println("DAILY FAIL!");
+            } else {
+                System.out.println(result);
+            }
+
+            dates = new DatePeriodCalculator(date, Periods.WEEKLY).calculate(step, next);
+            result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
+            if (result.equals(DatePeriods.WEEKLY.next(STARTING_DATE, date, step, next))) {
+                System.err.println("WEEKLY FAIL!");
+            } else {
+                System.out.println(result);
+            }
+
+            dates = new DatePeriodCalculator(date, Periods.MONTHLY).calculate(step, next);
+            result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
+            if (result.equals(DatePeriods.MONTHLY.next(STARTING_DATE, date, step, next))) {
+                System.err.println("MONTHLY FAIL!");
+            } else {
+                System.out.println(result);
+            }
+
+            dates = new DatePeriodCalculator(date, Periods.QUARTERLY).calculate(step, next);
+            result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
+            if (result.equals(DatePeriods.QUARTERLY.next(STARTING_DATE, date, step, next))) {
+                System.err.println("QUARTERLY FAIL!");
+            } else {
+                System.out.println(result);
+            }
+
+            dates = new DatePeriodCalculator(date, Periods.HALF_YEARLY).calculate(step, next);
+            result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
+            if (result.equals(DatePeriods.HALF_YEARLY.next(STARTING_DATE, date, step, next))) {
+                System.err.println("HALF_YEARLY FAIL!");
+            } else {
+                System.out.println(result);
+            }
+
+            dates = new DatePeriodCalculator(date, Periods.YEARLY).calculate(step, next);
+            result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
+            if (result.equals(DatePeriods.YEARLY.next(STARTING_DATE, date, step, next))) {
+                System.err.println("YEARLY FAIL!");
+            } else {
+                System.out.println(result);
+            }
+        }
     }
 }

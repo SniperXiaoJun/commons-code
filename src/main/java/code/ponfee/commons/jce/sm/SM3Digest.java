@@ -70,8 +70,7 @@ public class SM3Digest {
     }
 
     public void update(byte in) {
-        byte[] buffer = new byte[] { in };
-        update(buffer, 0, 1);
+        update(new byte[] { in }, 0, 1);
     }
 
     /**

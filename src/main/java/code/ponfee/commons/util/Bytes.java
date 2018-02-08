@@ -4,14 +4,13 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Formatter;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
-
-import code.ponfee.commons.io.Files;
 
 /**
  * byte[]
@@ -30,20 +29,20 @@ public final class Bytes {
      * @see org.apache.commons.io.HexDump#dump(byte[], long, java.io.OutputStream, int)
      * @see sun.misc.HexDumpEncoder#encode(byte[], java.io.OutputStream);
      * 
-     * @param bytes  字节数组
+     * @param data   字节数组
      * @param block  每块大小
      * @param chunk  每行块数
      * @return
      */
-    public static String hexDump(byte[] bytes, int block, int chunk) {
+    public static String hexDump(byte[] data, int block, int chunk) {
         Formatter fmt = new Formatter(), text;
 
-        for (int i, j = 0, wid = block * chunk; j * wid < bytes.length; j++) {
+        for (int i, j = 0, wid = block * chunk; j * wid < data.length; j++) {
             fmt.format("%06x: ", j * wid); // 输出行号：“00000: ”
 
             text = new Formatter(); // 右边文本
-            for (i = 0; i < wid && (i + j * wid) < bytes.length; i++) {
-                byte b = bytes[i + j * wid];
+            for (i = 0; i < wid && (i + j * wid) < data.length; i++) {
+                byte b = data[i + j * wid];
                 fmt.format("%02X ", b); // 输出hex：“B1 ”
                 if ((i + 1) % block == 0 || i + 1 == wid) {
                     fmt.format("%s", SPACE_CHAR); // block与block间加一个空格
@@ -76,8 +75,23 @@ public final class Bytes {
         }
     }
 
-    public static String hexDump(byte[] buf) {
-        return hexDump(buf, 8, 2);
+    public static String hexDump(byte[] data) {
+        return hexDump(data, 8, 2);
+    }
+
+    public static String toBinary(byte... array) {
+        if (array == null || array.length == 0) {
+            return null;
+        }
+
+        StringBuilder builder = new StringBuilder(array.length * 8);
+        for (byte b : array) {
+            // b & 0xFF：byte转int保留bit位
+            // | 0x100：100000000，对于正数保留八位
+            // 也可以 + 0x100或leftPad(str, 8, '0')
+            builder.append(Integer.toBinaryString((b & 0xFF) | 0x100).substring(1));
+        }
+        return builder.toString();
     }
 
     public static String hexEncode(byte[] bytes) {
@@ -130,23 +144,15 @@ public final class Bytes {
     }
 
     // ----------------------------------------------base64 encode/decode-------------------------------------- //
-    private static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
-    private static final char[] BASE64_ENCODES = {
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-        'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
-    };
-    private static final byte[] BASE64_DECODES = {
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
-        52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
-        -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
-        18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28,
-        29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
-        46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1
-    };
+    public static final char[] BASE64_ENCODES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+    private static final int[] BASE64_DECODES = new int[256];
+    static {
+        Arrays.fill(BASE64_DECODES, -1);
+        for (int i = 0, len = BASE64_ENCODES.length; i < len; i++) {
+            BASE64_DECODES[BASE64_ENCODES[i]] = i;
+        }
+        BASE64_DECODES['='] = 0;
+    }
 
     /**
      * base64 encode
@@ -156,7 +162,7 @@ public final class Bytes {
      */
     @Deprecated
     public static String base64Encode(byte[] data) {
-        StringBuilder builder = new StringBuilder(data.length * 4 / 3);
+        StringBuilder builder = new StringBuilder(data.length * 4 / 3 + 2);
         for (int i = 0, len = data.length, b1, b2, b3; i < len;) {
             b1 = data[i++] & 0xFF;
             if (i == len) {
@@ -190,8 +196,8 @@ public final class Bytes {
      */
     @Deprecated
     public static byte[] base64Decode(String b64) {
-        byte[] data = b64.getBytes(Files.US_ASCII);
-        StringBuilder builder = new StringBuilder(data.length * 3 / 4);
+        byte[] data = b64.getBytes(StandardCharsets.US_ASCII);
+        StringBuilder builder = new StringBuilder(data.length * 3 / 4 + 1);
         for (int i = 0, len = data.length, b1, b2, b3, b4; i < len;) {
             /* b1 */
             do {
@@ -212,7 +218,7 @@ public final class Bytes {
             do {
                 b3 = data[i++];
                 if (b3 == 61) {
-                    return builder.toString().getBytes(ISO_8859_1);
+                    return builder.toString().getBytes(StandardCharsets.ISO_8859_1);
                 }
                 b3 = BASE64_DECODES[b3];
             } while (i < len && b3 == -1);
@@ -225,7 +231,7 @@ public final class Bytes {
             do {
                 b4 = data[i++];
                 if (b4 == 61) {
-                    return builder.toString().getBytes(ISO_8859_1);
+                    return builder.toString().getBytes(StandardCharsets.ISO_8859_1);
                 }
                 b4 = BASE64_DECODES[b4];
             } while (i < len && b4 == -1);
@@ -235,7 +241,7 @@ public final class Bytes {
             }
             builder.append((char) (((b3 & 0x03) << 6) | b4));
         }
-        return builder.toString().getBytes(ISO_8859_1);
+        return builder.toString().getBytes(StandardCharsets.ISO_8859_1);
     }
 
     /**
@@ -267,7 +273,7 @@ public final class Bytes {
      * @return char array
      */
     public static char[] toCharArray(byte[] bytes) {
-        return toCharArray(bytes, Files.US_ASCII.name());
+        return toCharArray(bytes, StandardCharsets.US_ASCII.name());
     }
 
     /**
@@ -290,7 +296,7 @@ public final class Bytes {
      * @return byte array
      */
     public static byte[] fromCharArray(char[] chars) {
-        return fromCharArray(chars, Files.US_ASCII.name());
+        return fromCharArray(chars, StandardCharsets.US_ASCII.name());
     }
 
     /**

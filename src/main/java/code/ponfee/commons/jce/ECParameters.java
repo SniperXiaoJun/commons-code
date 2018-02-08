@@ -16,7 +16,6 @@ import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 
 import code.ponfee.commons.math.Numbers;
@@ -103,11 +102,11 @@ public class ECParameters implements java.io.Serializable {
         "0"
     );
 
-    public static final ImmutableBiMap<String, ASN1ObjectIdentifier> NAME_OID_MAPPING;
+    public static final ImmutableMap<String, ASN1ObjectIdentifier> NAME_OID_MAPPING;
     public static final ImmutableMap<String, ECParameters> EC_PARAMETERS;
     static {
-        ImmutableBiMap.Builder<String, ASN1ObjectIdentifier> nameOids = ImmutableBiMap.builder();
-        ImmutableMap.Builder<String, ECParameters> nameParams = ImmutableMap.builder();
+        ImmutableMap.Builder<String, ASN1ObjectIdentifier> nameOids = ImmutableMap.builder();
+        ImmutableMap.Builder<String, ECParameters>       nameParams = ImmutableMap.builder();
         try {
             Field field = SECNamedCurves.class.getDeclaredField("objIds");
             field.setAccessible(true);

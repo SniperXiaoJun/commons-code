@@ -18,6 +18,7 @@ import code.ponfee.commons.jce.rsa.RSAHashCryptor;
 import code.ponfee.commons.jce.rsa.RSAKey;
 import code.ponfee.commons.jce.rsa.RSANoPaddingCryptor;
 import code.ponfee.commons.jce.rsa.RSAPKCS1PaddingCryptor;
+import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSAPrivateKeys;
 import code.ponfee.commons.jce.security.RSAPublicKeys;
 import code.ponfee.commons.util.IdcardResolver;
@@ -54,9 +55,9 @@ public class RSAryptorTest {
 
         watch.reset().start();
         /*RSAPublicKey pub = RSAPublicKeys.toRSAPublicKey(dk.n, dk.e);
-        encrypted = code.ponfee.commons.jce.security.RSACryptor.encrypt(origin, pub);*/
+        encrypted = RSACryptor.encrypt(origin, pub);*/
         RSAPrivateKey pri = RSAPrivateKeys.toRSAPrivateKey(dk.n, dk.d);
-        decrypted = code.ponfee.commons.jce.security.RSACryptor.decryptNoPadding(encrypted, pri);
+        decrypted = RSACryptor.decryptNoPadding(encrypted, pri);
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
@@ -86,7 +87,7 @@ public class RSAryptorTest {
         System.out.println(watch.stop());
 
         watch.reset().start();
-        decrypted = code.ponfee.commons.jce.security.RSACryptor.decrypt(encrypted, pri);
+        decrypted = RSACryptor.decrypt(encrypted, pri);
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
@@ -106,7 +107,7 @@ public class RSAryptorTest {
         System.out.println(watch.stop());
 
         watch.reset().start();
-        decrypted = code.ponfee.commons.jce.security.RSACryptor.decrypt(encrypted, pub);
+        decrypted = RSACryptor.decrypt(encrypted, pub);
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
         } else {
@@ -115,7 +116,7 @@ public class RSAryptorTest {
         System.out.println(watch.stop());
 
         // =======================================加密－解密
-        encrypted = code.ponfee.commons.jce.security.RSACryptor.encrypt(origin, pub);
+        encrypted = RSACryptor.encrypt(origin, pub);
         decrypted = cs.decrypt(encrypted, dk);
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
@@ -124,7 +125,7 @@ public class RSAryptorTest {
         }
 
         // =======================================加密－解密
-        encrypted = code.ponfee.commons.jce.security.RSACryptor.encrypt(origin, pri);
+        encrypted = RSACryptor.encrypt(origin, pri);
         decrypted = cs.decrypt(encrypted, ek);
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
@@ -136,17 +137,20 @@ public class RSAryptorTest {
     @Test
     public void testRSAHash() throws Exception {
         System.out.println("\n\ntestRSAHash======================================");
-        RSAKey dk = new RSAKey(2048);
-        Key ek = dk.getPublic();
-        RSANoPaddingCryptor cs = new RSAHashCryptor();
-        System.out.println(dk + "\n" + ek);
+        for (int i = 0; i < 100; i++) {
+            byte[] data = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(255) + 1);
 
-        byte[] encrypted = cs.encrypt(origin, origin.length, ek);
-        byte[] decrypted = cs.decrypt(encrypted, dk);
-        if (!Arrays.equals(origin, decrypted)) {
-            System.err.println("FAIL!");
-        } else {
-            print("\n\n=====RSAHashCryptor Decrypted text is: \n" + new String(decrypted));
+            RSAKey dk = new RSAKey(1024);
+            Key ek = dk.getPublic();
+            RSAHashCryptor cs = new RSAHashCryptor();
+
+            byte[] encrypted = cs.encrypt(data, ek);
+            byte[] decrypted = cs.decrypt(encrypted, dk);
+            if (!Arrays.equals(data, decrypted)) {
+                System.err.println("FAIL!");
+            } else {
+                print("\n\n=====RSAHashCryptor Decrypted text is: \n" + new String(decrypted));
+            }
         }
     }
 
@@ -176,15 +180,15 @@ public class RSAryptorTest {
 
             // 2
             byte[] encrypted2 = encrypted1;
-            byte[] decrypted2 = code.ponfee.commons.jce.security.RSACryptor.decryptNoPadding(encrypted2, pri);
+            byte[] decrypted2 = RSACryptor.decryptNoPadding(encrypted2, pri);
 
             // 3
-            byte[] encrypted3 = code.ponfee.commons.jce.security.RSACryptor.encryptNoPadding(data, pub);
-            byte[] decrypted3 = code.ponfee.commons.jce.security.RSACryptor.decryptNoPadding(encrypted3, pri);
+            byte[] encrypted3 = RSACryptor.encryptNoPadding(data, pub);
+            byte[] decrypted3 = RSACryptor.decryptNoPadding(encrypted3, pri);
 
             // 4
-            byte[] encrypted4 = code.ponfee.commons.jce.security.RSACryptor.encrypt(data, pub);
-            byte[] decrypted4 = code.ponfee.commons.jce.security.RSACryptor.decrypt(encrypted4, pri);
+            byte[] encrypted4 = RSACryptor.encrypt(data, pub);
+            byte[] decrypted4 = RSACryptor.decrypt(encrypted4, pri);
 
             // 5
             byte[] encrypted5 = cs2.encrypt(data, ek);
@@ -270,7 +274,7 @@ public class RSAryptorTest {
     @Test
     public void testRSANoPaddingStream() throws Exception {
         System.out.println("\n\ntestRSANoPaddingStream======================================");
-        RSAKey dk = new RSAKey(1024);
+        RSAKey dk = new RSAKey(2048);
         Key ek = dk.getPublic();
         RSANoPaddingCryptor cs = new RSANoPaddingCryptor();
 
@@ -295,7 +299,7 @@ public class RSAryptorTest {
         input = new ByteArrayInputStream(encrypted);
         output = new ByteArrayOutputStream();
         RSAPrivateKey pri = RSAPrivateKeys.toRSAPrivateKey(dk.n, dk.d);
-        code.ponfee.commons.jce.security.RSACryptor.decryptNoPadding(input, pri, output);
+        RSACryptor.decryptNoPadding(input, pri, output);
         decrypted = output.toByteArray();
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");
@@ -333,7 +337,7 @@ public class RSAryptorTest {
         input = new ByteArrayInputStream(encrypted);
         output = new ByteArrayOutputStream();
         RSAPrivateKey pri = RSAPrivateKeys.toRSAPrivateKey(dk.n, dk.d);
-        code.ponfee.commons.jce.security.RSACryptor.decrypt(input, pri, output);
+        RSACryptor.decrypt(input, pri, output);
         decrypted = output.toByteArray();
         if (!Arrays.equals(origin, decrypted)) {
             System.err.println("FAIL!");

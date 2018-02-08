@@ -46,8 +46,6 @@ public final class Files {
 
     public static final String DEFAULT_CHARSET = "UTF-8"; // default charset spec UTF-8
 
-    public static final Charset US_ASCII = Charset.forName("US-ASCII");
-
     public static final String SYSTEM_CHARSET = Charset.defaultCharset().name(); // charset within system
 
     public static final String DEFAULT_LINE_SEPARATOR = "\n"; // default line serarator spec \n

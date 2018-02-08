@@ -81,7 +81,7 @@ public class RSANoPaddingCryptor extends Cryptor {
 
     protected byte[] encrypt(byte[] input, int length, Key ek, boolean isPadding) {
         RSAKey rsaKey = (RSAKey) ek;
-        BigInteger exponent = getExponent(rsaKey);
+        BigInteger exponent = this.getExponent(rsaKey);
         //return new BigInteger(1, input).modPow(exponent, rsaKey.n).toByteArray();
 
         int originBlockSize = this.getOriginBlockSize(rsaKey), // 加密前原文数据块的大小
@@ -89,14 +89,16 @@ public class RSANoPaddingCryptor extends Cryptor {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(input.length);
         byte[] origin, encrypted;
+
         try {
-            for (int offset = 0, len = input.length; offset < len; offset += originBlockSize) {
+            for (int offset = 0, len = input.length, to; offset < len; offset += originBlockSize) {
+                to = min(len, offset + originBlockSize);
                 if (isPadding) {
                     // 切割并填充原文数据块
-                    origin = encodeBlock(input, offset, min(len, offset + originBlockSize), cipherBlockSize, rsaKey);
+                    origin = encodeBlock(input, offset, to, cipherBlockSize, rsaKey);
                 } else {
                     // 切割原文数据块
-                    origin = Arrays.copyOfRange(input, offset, min(len, offset + originBlockSize));
+                    origin = Arrays.copyOfRange(input, offset, to);
                 }
 
                 // 加密：encrypted = origin^e mode n
@@ -113,13 +115,14 @@ public class RSANoPaddingCryptor extends Cryptor {
 
     protected byte[] decrypt(byte[] input, Key dk, boolean isPadding) {
         RSAKey rsaKey = (RSAKey) dk;
-        BigInteger exponent = getExponent(rsaKey);
+        BigInteger exponent = this.getExponent(rsaKey);
         //return new BigInteger(1, input).modPow(exponent, rsaKey.n).toByteArray();
 
-        int cipherBlockSize = this.getCipherBlockSize(rsaKey), // 加密后密文数据块的大小
+        int cipherBlockSize = this.getCipherBlockSize(rsaKey),
             originBlockSize = this.getOriginBlockSize(rsaKey);
         ByteArrayOutputStream output = new ByteArrayOutputStream(input.length);
         byte[] encrypted, origin;
+
         try {
             for (int offset = 0, len = input.length; offset < len; offset += cipherBlockSize) {
                 // 切割密文数据块
@@ -150,9 +153,10 @@ public class RSANoPaddingCryptor extends Cryptor {
     protected void encrypt(InputStream input, Key ek, OutputStream output, boolean isPadding) {
         RSAKey rsaKey = (RSAKey) ek;
         BigInteger exponent = this.getExponent(rsaKey);
-        int cipherBlockSize = this.getCipherBlockSize(rsaKey); // 加密后密文数据块大小
+        int cipherBlockSize = this.getCipherBlockSize(rsaKey);
 
         byte[] buffer = new byte[getOriginBlockSize(rsaKey)], origin, encrypted;
+
         try {
             for (int len; (len = input.read(buffer)) != Files.EOF;) {
                 if (isPadding) {
@@ -177,11 +181,12 @@ public class RSANoPaddingCryptor extends Cryptor {
 
     protected void decrypt(InputStream input, Key dk, OutputStream output, boolean isPadding) {
         RSAKey rsaKey = (RSAKey) dk;
-        BigInteger exponent = getExponent(rsaKey);
+        BigInteger exponent = this.getExponent(rsaKey);
 
-        int cipherBlockSize = this.getCipherBlockSize(rsaKey), // 加密后密文数据块的大小
+        int cipherBlockSize = this.getCipherBlockSize(rsaKey),
             originBlockSize = this.getOriginBlockSize(rsaKey);
         byte[] buffer = new byte[cipherBlockSize], encrypted, origin;
+
         try {
             int inputLen = input.available();
             for (int len, offset = 0; (len = input.read(buffer)) != Files.EOF; offset += cipherBlockSize) {
@@ -211,20 +216,51 @@ public class RSANoPaddingCryptor extends Cryptor {
     }
 
     // --------------------------------private methods-------------------------------
+    static byte[] fixedByteArray(byte[] data, int fixedSize) {
+        if (data.length == fixedSize) {
+            return data;
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream(fixedSize);
+        try {
+            fixedByteArray(data, fixedSize, out);
+        } catch (IOException e) {
+            throw new SecurityException(e); // cannot happened
+        }
+        return out.toByteArray();
+    }
+
+    /**
+     * 
+     * @param data        the data
+     * @param fixedSize   the result of byte array length
+     * @param out         the output stream
+     * @throws IOException
+     * @see code.ponfee.commons.util.Bytes#toBinary(byte...)
+     */
     private static void fixedByteArray(byte[] data, int fixedSize, OutputStream out)
         throws IOException {
         if (data.length < fixedSize) {
+            // 当不用最前面的开头的byte 0（可以有多个）来决定符号位时，此时会被舍去，所以要加前缀0来补全
             // 加前缀0补全到固定字节数：encryptedBlockSize
             for (int i = 0, heading = fixedSize - data.length; i < heading; i++) {
                 out.write(ZERO);
             }
             out.write(data, 0, data.length);
         } else {
-            // 舍去前面的0
+            // 当最前面的位为1时，BigInteger会通过加一个byte 0来充当符号位，此时需要手动舍去
             out.write(data, data.length - fixedSize, fixedSize);
         }
     }
 
+    /**
+     * 当最前面的位为1时，BigInteger会通过加一个byte 0来充当符号位，此时需要手动舍去
+     * this method is unsafe, will be lose the prefix byte 0(one or more)
+     * @param data  the decrypted origin data
+     * @param out   the output stream
+     * @throws IOException
+     * @see code.ponfee.commons.util.Bytes#toBinary(byte...)
+     */
     private static void trimByteArray(byte[] data, OutputStream out)
         throws IOException {
         int i = 0, len = data.length;
@@ -300,14 +336,19 @@ public class RSANoPaddingCryptor extends Cryptor {
      * @param cipherBlockSize
      * @param out
      * @throws IOException
+     * @see code.ponfee.commons.util.Bytes#toBinary(byte...)
      */
     private static void decodeBlock(byte[] input, int cipherBlockSize, 
                                     OutputStream out) throws IOException {
-        int removedZeroLen; // BigInteger to byte array maybe removed the first 0 
+        // BigInteger to byte array will be removed the prefix 0 (one or more) 
+        // or added one byte 0 
+        // 0x00 [0x01 | 0x02], so signum is definite on [0x01 | 0x02] then 
+        // was removed the first 0x00
+        int removedZeroLen;
         if (input[0] == ZERO) {
             removedZeroLen = 0;
         } else {
-            removedZeroLen = 1; // 前缀0已在BigInteger转byte[]时被舍去
+            removedZeroLen = 1;
         }
 
         // 输入数据长度必须等于数据块长
@@ -328,15 +369,15 @@ public class RSANoPaddingCryptor extends Cryptor {
             if (pad == 0) {
                 break;
             }
-            if (type == 1 && pad != (byte) 0xff) {
-                throw new IllegalArgumentException("block padding incorrect");
+            if (type == 1 && pad != (byte) 0xff) { // private key padding
+                throw new IllegalArgumentException("invalid block padding");
             }
         }
 
         // get D
         start++; // data should start at the next byte
         if (start > input.length || start < 11 - removedZeroLen) {
-            throw new IllegalArgumentException("no data in block");
+            throw new IllegalArgumentException("invalid block data");
         }
         out.write(input, start, input.length - start);
     }
