@@ -7,8 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 
-import code.ponfee.commons.jce.Cryptor;
 import code.ponfee.commons.jce.Key;
+import code.ponfee.commons.util.SecureRandoms;
 
 /**
  * This is Elliptic Curve key
@@ -31,9 +31,9 @@ public class ECKey implements Key {
 
         // dk is a random num.
         if (curve.getN() != null) {
-            this.dk = Cryptor.random(this.curve.getN());
+            this.dk = SecureRandoms.random(this.curve.getN());
         } else {
-            this.dk = Cryptor.random(ec.getP().bitLength() + 17);
+            this.dk = SecureRandoms.random(ec.getP().bitLength() + 17);
         }
 
         // beta = pointG * dk

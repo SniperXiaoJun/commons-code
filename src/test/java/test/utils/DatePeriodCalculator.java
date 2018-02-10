@@ -83,7 +83,7 @@ public class DatePeriodCalculator {
                         quantity *= 12; // 年度
                         break;
                     default:
-                        //throw new IllegalArgumentException("invalid period type");
+                        // MONTHLY
                 }
                 // 间隔月数
                 int intervalMonth = (c2.get(Calendar.YEAR) - c1.get(Calendar.YEAR)) * 12 + c2.get(Calendar.MONTH) - c1.get(Calendar.MONTH);

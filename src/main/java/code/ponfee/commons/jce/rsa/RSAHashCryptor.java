@@ -7,9 +7,9 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.jce.Cryptor;
 import code.ponfee.commons.jce.Key;
 import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.util.SecureRandoms;
 
 /**
  * RSA Cryptor based sha512 xor 
@@ -30,7 +30,7 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
         BigInteger exponent = getExponent(rsaKey);
 
         // 生成随机对称密钥
-        BigInteger key = Cryptor.random(rsaKey.n); // mode是以1XX开头，key是以01X开头
+        BigInteger key = SecureRandoms.random(rsaKey.n); // mode是以1XX开头，key是以01X开头
 
         // 对密钥进行HASH
         byte[] hashedKey = HashUtils.sha512(key.toByteArray());
@@ -79,7 +79,7 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
         BigInteger exponent = getExponent(rsaKey);
 
         // 生成随机对称密钥
-        BigInteger key = Cryptor.random(rsaKey.n);
+        BigInteger key = SecureRandoms.random(rsaKey.n);
 
         // 对密钥进行HASH
         byte[] hashedKey = HashUtils.sha512(key.toByteArray());

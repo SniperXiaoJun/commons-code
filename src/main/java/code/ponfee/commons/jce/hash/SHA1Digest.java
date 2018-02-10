@@ -239,52 +239,56 @@ public class SHA1Digest {
 
         // ext-block（扩展明文分组）
         for (; i < 80; i++) {
-            this.W[i] = shiftRound(this.W[i -  3] ^ this.W[i -  8] 
-                                 ^ this.W[i - 14] ^ this.W[i - 16], 1);
+            this.W[i] = slr(this.W[i -  3] ^ this.W[i -  8] 
+                          ^ this.W[i - 14] ^ this.W[i - 16], 1);
         }
 
         int a1 = this.a, b1 = this.b,
             c1 = this.c, d1 = this.d,
             e1 = this.e;
 
+        // round one
         for (int t = 0; t < 20; t++) {
             // 将Kt+Ft(b,c,d)+(a<<5)+e+W[t]的结果赋值给临时变量tmp
-            int tmp = K0 + f0(b1, c1, d1) + shiftRound(a1, 5) + e1 + this.W[t];
+            int tmp = K0 + f0(b1, c1, d1) + slr(a1, 5) + e1 + this.W[t];
             e1 = d1; // 将链接变量d初始值赋值给链接变量e
             d1 = c1; // 将链接变量c初始值赋值给链接变量d
-            c1 = shiftRound(b1, 30); // 将链接变量b初始值循环左移30位赋值给链接变量c
+            c1 = slr(b1, 30); // 将链接变量b初始值循环左移30位赋值给链接变量c
             b1 = a1; // 将链接变量a初始值赋值给链接变量b
             a1 = tmp; // tmp赋值给a
         }
 
+        // round two
         for (int t = 20; t < 40; t++) {
-            int tmp = K1 + f1(b1, c1, d1) + shiftRound(a1, 5) + e1 + this.W[t];
+            int tmp = K1 + f1(b1, c1, d1) + slr(a1, 5) + e1 + this.W[t];
             e1 = d1;
             d1 = c1;
-            c1 = shiftRound(b1, 30);
+            c1 = slr(b1, 30);
             b1 = a1;
             a1 = tmp;
         }
 
+        // round three
         for (int t = 40; t < 60; t++) {
-            int tmp = K2 + f2(b1, c1, d1) + shiftRound(a1, 5) + e1 + this.W[t];
+            int tmp = K2 + f2(b1, c1, d1) + slr(a1, 5) + e1 + this.W[t];
             e1 = d1;
             d1 = c1;
-            c1 = shiftRound(b1, 30);
+            c1 = slr(b1, 30);
             b1 = a1;
             a1 = tmp;
         }
 
+        // round four
         for (int t = 60; t < 80; t++) {
-            int tmp = K3 + f3(b1, c1, d1) + shiftRound(a1, 5) + e1 + this.W[t];
+            int tmp = K3 + f3(b1, c1, d1) + slr(a1, 5) + e1 + this.W[t];
             e1 = d1;
             d1 = c1;
-            c1 = shiftRound(b1, 30);
+            c1 = slr(b1, 30);
             b1 = a1;
             a1 = tmp;
         }
 
-        // add
+        // add chain variable
         this.a += a1;
         this.b += b1;
         this.c += c1;
@@ -309,13 +313,14 @@ public class SHA1Digest {
     }
 
     /**
+     * shift left round
      * 循环左移位操作符Sn(X)，X是一个字，n是一个整数，0<=n<=32
      * Sn(X) = (X<<n) OR (X>>>32-n)
      * @param value
      * @param n
      * @return
      */
-    private static int shiftRound(int value, int n) {
+    private static int slr(int value, int n) {
         return value << n | value >>> (32 - n);
     }
 

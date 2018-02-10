@@ -6,6 +6,7 @@ import java.util.Arrays;
 import code.ponfee.commons.jce.Cryptor;
 import code.ponfee.commons.jce.Key;
 import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.util.SecureRandoms;
 
 /**
  * EC Cryptor based xor
@@ -56,9 +57,9 @@ public class ECCryptor extends Cryptor {
         // 生成随机数rk
         BigInteger rk;
         if (ecKey.curve.getN() != null) {
-            rk = Cryptor.random(ecKey.curve.getN());
+            rk = SecureRandoms.random(ecKey.curve.getN());
         } else {
-            rk = Cryptor.random(ecKey.curve.getP().bitLength() + 17);
+            rk = SecureRandoms.random(ecKey.curve.getP().bitLength() + 17);
         }
 
         // 计算曲线上rk倍点gamma：ECPoint gamma = basePointG(public key) * rk

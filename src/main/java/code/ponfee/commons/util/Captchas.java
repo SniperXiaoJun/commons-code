@@ -25,34 +25,33 @@ import com.sun.image.codec.jpeg.JPEGCodec;
 public class Captchas {
 
     //使用到Algerian字体，系统里没有的话需要安装字体，字体只显示大写，去掉了1,0,i,o几个容易混淆的字符
-    private static final String CODES = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+    private static final char[] CODES = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ".toCharArray();
 
     private static final Color[] COLOR_SPACES = { Color.RED, Color.CYAN, Color.GRAY, Color.LIGHT_GRAY,
         Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.WHITE, Color.PINK, Color.BLUE, Color.YELLOW };
 
     /**
      * 使用系统默认字符源生成验证码
-     * @param length 验证码长度
+     * @param size 验证码长度
      * @return
      */
-    public static String random(int length) {
-        return random(length, CODES);
+    public static String random(int size) {
+        return random(size, CODES);
     }
 
     /**
      * 使用指定源生成验证码
-     * @param length 验证码长度
+     * @param size 验证码长度
      * @param sources 验证码字符源
      * @return
      */
-    public static String random(int length, String sources) {
-        if (sources == null || sources.length() == 0) {
+    public static String random(int size, char[] sources) {
+        if (sources == null || sources.length == 0) {
             sources = CODES;
         }
-        int len = sources.length() - 1;
-        StringBuilder codes = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            codes.append(sources.charAt(SecureRandoms.nextInt(len)));
+        StringBuilder codes = new StringBuilder(size);
+        for (int i = 0, length = sources.length; i < size; i++) {
+            codes.append(sources[SecureRandoms.nextInt(length)]);
         }
         return codes.toString();
     }
@@ -109,14 +108,14 @@ public class Captchas {
         int fontSize = height - 12;
         g2.setFont(new Font("Algerian", Font.ITALIC, fontSize));
         char[] chars = code.toCharArray();
-        int verifySize = code.length();
-        for (int i = 0; i < verifySize; i++) {
+        int size = code.length();
+        for (int i = 0; i < size; i++) {
             AffineTransform affine = new AffineTransform();
             affine.setToRotation(Math.PI / 4 * ThreadLocalRandom.current().nextDouble() * 
                                  (ThreadLocalRandom.current().nextBoolean() ? 1 : -1), 
-                                 (width / verifySize) * i + fontSize / 2, height / 2);
+                                 (width / size) * i + fontSize / 2, height / 2);
             g2.setTransform(affine);
-            g2.drawChars(chars, i, 1, ((width - 10) / verifySize) * i + 5, height / 2 + fontSize / 2 - 10);
+            g2.drawChars(chars, i, 1, ((width - 10) / size) * i + 5, height / 2 + fontSize / 2 - 10);
         }
 
         g2.dispose();

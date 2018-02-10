@@ -4,14 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.security.SecureRandom;
 
 import org.apache.commons.io.IOUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 
-import code.ponfee.commons.jce.Cryptor;
 import code.ponfee.commons.jce.Key;
+import code.ponfee.commons.util.SecureRandoms;
 import sun.security.util.DerInputStream;
 import sun.security.util.DerOutputStream;
 import sun.security.util.DerValue;
@@ -22,6 +23,9 @@ import sun.security.util.DerValue;
  */
 @SuppressWarnings("restriction")
 public class RSAKey implements Key {
+
+    private static final SecureRandom SECURE_RANDOM =
+        new SecureRandom(SecureRandoms.generateSeed(24));
 
     // Should RSA public exponent be only in {3, 5, 17, 257 or 65537} 
     public static final int RSA_F4 = 65537;
@@ -177,9 +181,9 @@ public class RSAKey implements Key {
         int i = keySize + 1 >> 1;
         int j = keySize - i;
         do {
-            keyPair.p = BigInteger.probablePrime(i, Cryptor.SECURE_RANDOM);
+            keyPair.p = BigInteger.probablePrime(i, SECURE_RANDOM);
             do {
-                keyPair.q = BigInteger.probablePrime(j, Cryptor.SECURE_RANDOM);
+                keyPair.q = BigInteger.probablePrime(j, SECURE_RANDOM);
                 if (keyPair.p.compareTo(keyPair.q) < 0) {
                     BigInteger temp = keyPair.p;
                     keyPair.p = keyPair.q;
@@ -215,14 +219,14 @@ public class RSAKey implements Key {
         keyPair.e = BigInteger.valueOf(e);
         for (;;) {
             for (;;) {
-                keyPair.p = new BigInteger(keySize - qs, 1, Cryptor.SECURE_RANDOM);
+                keyPair.p = new BigInteger(keySize - qs, 1, SECURE_RANDOM);
                 if (keyPair.p.subtract(BigInteger.ONE).gcd(keyPair.e).compareTo(BigInteger.ONE) == 0
                     && keyPair.p.isProbablePrime(10)) {
                     break;
                 }
             }
             for (;;) {
-                keyPair.q = new BigInteger(qs, 1, Cryptor.SECURE_RANDOM);
+                keyPair.q = new BigInteger(qs, 1, SECURE_RANDOM);
                 if (keyPair.q.subtract(BigInteger.ONE).gcd(keyPair.e).compareTo(BigInteger.ONE) == 0
                     && keyPair.q.isProbablePrime(10)) {
                     break;

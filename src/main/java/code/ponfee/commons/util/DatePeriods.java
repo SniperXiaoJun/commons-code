@@ -137,11 +137,11 @@ public enum DatePeriods {
             this.end = end;
         }
 
-        public Date getBegin() {
+        public Date begin() {
             return begin;
         }
 
-        public Date getEnd() {
+        public Date end() {
             return end;
         }
 

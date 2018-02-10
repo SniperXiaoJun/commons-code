@@ -1,5 +1,6 @@
 package code.ponfee.commons.util;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
 
 /**
@@ -9,8 +10,8 @@ import java.security.SecureRandom;
 public final class SecureRandoms {
 
     /** SHA1PRNG */
-    private static final SecureRandom RANDOM =
-        new SecureRandom(new SecureRandom(ObjectUtils.uuid()).generateSeed(20));
+    private static final SecureRandom SECURE_RANDOM =
+        new SecureRandom(new SecureRandom(ObjectUtils.uuid()).generateSeed(24));
 
     /**
      * random byte[] array by SecureRandom
@@ -19,7 +20,7 @@ public final class SecureRandoms {
      */
     public static byte[] nextBytes(int numOfByte) {
         byte[] bytes = new byte[numOfByte];
-        RANDOM.nextBytes(bytes);
+        SECURE_RANDOM.nextBytes(bytes);
         return bytes;
     }
 
@@ -29,27 +30,47 @@ public final class SecureRandoms {
      * @return
      */
     public static int nextInt(int bound) {
-        return RANDOM.nextInt(bound);
+        return SECURE_RANDOM.nextInt(bound);
     }
 
     public static int nextInt() {
-        return RANDOM.nextInt();
+        return SECURE_RANDOM.nextInt();
     }
 
     public static long nextLong() {
-        return RANDOM.nextLong();
+        return SECURE_RANDOM.nextLong();
     }
 
     public static float nextFloat() {
-        return RANDOM.nextFloat();
+        return SECURE_RANDOM.nextFloat();
     }
 
     public static double nextDouble() {
-        return RANDOM.nextDouble();
+        return SECURE_RANDOM.nextDouble();
     }
 
     public static boolean nextBoolean() {
-        return RANDOM.nextBoolean();
+        return SECURE_RANDOM.nextBoolean();
     }
 
+    public static BigInteger random(int bitLen) {
+        BigInteger rnd;
+        do {
+            rnd = new BigInteger(bitLen, SECURE_RANDOM);
+        } while (rnd.bitLength() != bitLen);
+        return rnd;
+    }
+
+    public static BigInteger random(BigInteger mod) {
+        return random(mod.bitLength() - 1);
+    }
+
+    public static byte[] generateSeed(int numBytes) {
+        return SECURE_RANDOM.generateSeed(numBytes);
+    }
+    public static void main(String[] args) {
+        for (int i = 0; i < 1000;i++) {
+            System.out.println(SecureRandoms.nextInt(2));
+        }
+    }
 }
