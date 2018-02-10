@@ -5,8 +5,7 @@ import java.util.Arrays;
 import org.apache.commons.codec.binary.Hex;
 
 /** 
- * (c) Mads Johan Jurik
- * used with permission
+ * RipeMD160 implementation
  */
 public class RipeMD160 {
 
@@ -71,25 +70,16 @@ public class RipeMD160 {
         workingPtr++;
         if (workingPtr == 64) {
             compress(working);
-            for (int j = 0; j < 16; j++)
+            for (int j = 0; j < 16; j++) {
                 working[j] = 0;
+            }
             workingPtr = 0;
         }
         msgLen++;
     }
 
     public void update(byte[] input) {
-        for (int i = 0; i < input.length; i++) {
-            working[workingPtr >> 2] ^= ((int) input[i]) << ((workingPtr & 3) << 3);
-            workingPtr++;
-            if (workingPtr == 64) {
-                compress(working);
-                for (int j = 0; j < 16; j++)
-                    working[j] = 0;
-                workingPtr = 0;
-            }
-        }
-        msgLen += input.length;
+        this.update(input, 0, input.length);
     }
 
     public void update(byte[] input, int offset, int len) {
@@ -99,8 +89,9 @@ public class RipeMD160 {
                 workingPtr++;
                 if (workingPtr == 64) {
                     compress(working);
-                    for (int j = 0; j < 16; j++)
+                    for (int j = 0; j < 16; j++) {
                         working[j] = 0;
+                    }
                     workingPtr = 0;
                 }
             }
@@ -111,8 +102,9 @@ public class RipeMD160 {
                 workingPtr++;
                 if (workingPtr == 64) {
                     compress(working);
-                    for (int j = 0; j < 16; j++)
+                    for (int j = 0; j < 16; j++) {
                         working[j] = 0;
+                    }
                     workingPtr = 0;
                 }
             }
@@ -128,29 +120,23 @@ public class RipeMD160 {
         update(bytearray);
     }
 
-    public byte[] digest() {
+    public byte[] doFinal() {
         MDfinish(working, msgLen, 0);
         byte[] res = new byte[20];
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 20; i++) {
             res[i] = (byte) ((mdBuffer[i >> 2] >>> ((i & 3) << 3)) & 0x000000FF);
+        }
         return res;
     }
 
-    public byte[] digest(byte[] input) {
-        update(input);
-        return digest();
+    public byte[] doFinal(byte[] input) {
+        this.update(input);
+        return doFinal();
     }
 
-    public byte[] digest(byte[] input, int offset, int len) {
-        update(input, offset, len);
-        return digest();
-    }
-
-    public int[] intdigest() {
-        int[] res = new int[5];
-        for (int i = 0; i < 5; i++)
-            res[i] = mdBuffer[i];
-        return res;
+    public byte[] doFinal(byte[] input, int offset, int len) {
+        this.update(input, offset, len);
+        return doFinal();
     }
 
     private void compress(int[] X) {
@@ -284,8 +270,9 @@ public class RipeMD160 {
         if ((lswlen & 63) > 55) {
             /* length goes to next block */
             compress(X);
-            for (int i = 0; i < 14; i++)
+            for (int i = 0; i < 14; i++) {
                 X[i] = 0;
+            }
         }
 
         /* append length in bits*/
@@ -296,7 +283,7 @@ public class RipeMD160 {
 
     public static void main(String[] args) {
         RipeMD160 md = RipeMD160.getInstance();
-        String actual = Hex.encodeHexString(md.digest("1234567890".getBytes()));
+        String actual = Hex.encodeHexString(md.doFinal("1234567890".getBytes()));
         if(!"9d752daa3fb4df29837088e1e5a1acf74932e074".equals(actual)) {
             System.err.println("fail");
         } else {

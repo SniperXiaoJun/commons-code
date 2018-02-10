@@ -11,7 +11,7 @@ import org.joda.time.format.DateTimeFormat;
 import com.google.common.base.Preconditions;
 
 /**
- * 时间周期
+ * 时间周期，计算周期性的时间段
  * @author Ponfee
  */
 public enum DatePeriods {
@@ -63,14 +63,14 @@ public enum DatePeriods {
         }
     },
 
-    HALF_YEARLY() {
+    SEMIANNUAL() {
         @Override
         public Duration next(DateTime original, Date target, int step, int next) {
             return MONTHLY.next(original, target, step * 6, next);
         }
     },
 
-    YEARLY() {
+    ANNUAL() {
         @Override
         public Duration next(DateTime original, Date target, int step, int next) {
             checkArguments(original, target, step);
@@ -86,9 +86,7 @@ public enum DatePeriods {
 
     // 2018-01-01为星期一
     private static final DateTime ORIGINAL = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
-                                                           .parseDateTime("2018-01-01 00:00:00");
-
-    private static final FastDateFormat FORMAT = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss SSS");
+                                                        .parseDateTime("2018-01-01 00:00:00");
 
     /**
      * calculate the next period based original and reference target
@@ -128,6 +126,9 @@ public enum DatePeriods {
     }
 
     public static class Duration {
+        private static final FastDateFormat FORMAT = 
+            FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss SSS");
+
         private final Date begin;
         private final Date end;
 

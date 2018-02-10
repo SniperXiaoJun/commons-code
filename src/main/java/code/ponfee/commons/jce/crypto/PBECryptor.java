@@ -76,9 +76,12 @@ public class PBECryptor extends SymmetricCryptor {
 
     public PBECryptor(String algName, char[] pass, byte[] salt, 
                       int iterations, Provider provider) {
-        super(generateSecret(algName, pass), null, null, 
-              new PBEParameterSpec(salt, iterations), 
-              (provider == null) ? Providers.SunJCE : provider);
+        super( generateSecret(algName, pass), // key
+               null, // mode
+               null, //padding
+               new PBEParameterSpec(salt, iterations), // AlgorithmParameterSpec
+               (provider == null) ? Providers.SunJCE : provider // provider
+        );
     }
 
     // --------------------------getter

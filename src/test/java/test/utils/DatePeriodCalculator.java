@@ -170,7 +170,7 @@ public class DatePeriodCalculator {
 
             dates = new DatePeriodCalculator(date, Periods.HALF_YEARLY).calculate(step, next);
             result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
-            if (result.equals(DatePeriods.HALF_YEARLY.next(STARTING_DATE, date, step, next))) {
+            if (result.equals(DatePeriods.SEMIANNUAL.next(STARTING_DATE, date, step, next))) {
                 System.err.println("HALF_YEARLY FAIL!");
             } else {
                 System.out.println(result);
@@ -178,7 +178,7 @@ public class DatePeriodCalculator {
 
             dates = new DatePeriodCalculator(date, Periods.YEARLY).calculate(step, next);
             result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
-            if (result.equals(DatePeriods.YEARLY.next(STARTING_DATE, date, step, next))) {
+            if (result.equals(DatePeriods.ANNUAL.next(STARTING_DATE, date, step, next))) {
                 System.err.println("YEARLY FAIL!");
             } else {
                 System.out.println(result);

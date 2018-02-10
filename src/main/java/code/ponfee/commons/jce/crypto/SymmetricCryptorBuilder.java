@@ -63,8 +63,10 @@ public final class SymmetricCryptorBuilder {
 
     public SymmetricCryptor build() {
         if (mode != null && padding == null) {
+            // 设置了mode必须指定padding
             throw new IllegalArgumentException("padding cannot be null within mode crypto.");
         } else if (mode == null && padding != null) {
+            // 没有设置mode，不能指定padding
             throw new IllegalArgumentException("padding must be null without mode crypto.");
         }
 

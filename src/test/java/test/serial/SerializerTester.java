@@ -1,5 +1,8 @@
 package test.serial;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,6 +16,7 @@ import code.ponfee.commons.serial.JsonSerializer;
 import code.ponfee.commons.serial.KryoSerializer;
 import code.ponfee.commons.serial.Serializer;
 import code.ponfee.commons.serial.StringSerializer;
+import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
 
 public class SerializerTester {
@@ -204,5 +208,40 @@ public class SerializerTester {
         data = GzipProcessor.decompress(data);
         System.out.println("解压缩后数据：" + new String(data));
         System.out.println("compress end =======================================================耗时" + (System.currentTimeMillis() - start) + "\n");
+    }
+    
+
+    @Test
+    public void testDeserializer() {
+        String filepath = MavenProjects.getTestResourcesPath("test.txt");
+        String data = Files.toString(new File(filepath));
+        System.out.println(data);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < data.length();) {
+            char w1 = data.charAt(i++);
+            b.append(w1);
+            if (w1 == '\\') {
+                char w2 = data.charAt(i++);
+                b.append(w2);
+                if (w2 == 'x') {
+                    char w3 = data.charAt(i++);
+                    b.append(w3);
+                    char w4 = data.charAt(i++);
+                    b.append(w4);
+                    out.write(Integer.parseInt(new String(new char[] { w3, w4 }), 16));
+                    System.out.println(new String(new char[] { '0', w2, w3, w4 }));
+                }
+                out.write(w2);
+            }
+            out.write(w1);
+        }
+        
+        byte[] bytes = out.toByteArray();
+        System.out.println(Bytes.hexDump(bytes));
+        System.out.println(b.toString());
+        
+        JdkSerializer serializer = new JdkSerializer();
+        System.out.println(serializer.deserialize(bytes, String.class, false));
     }
 }

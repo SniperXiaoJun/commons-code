@@ -144,7 +144,7 @@ public final class Bytes {
     }
 
     // ----------------------------------------------base64 encode/decode-------------------------------------- //
-    public static final char[] BASE64_ENCODES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+    private static final char[] BASE64_ENCODES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     private static final int[] BASE64_DECODES = new int[256];
     static {
         Arrays.fill(BASE64_DECODES, -1);
@@ -314,7 +314,10 @@ public final class Bytes {
     }
 
     public static byte[] fromShort(short value) {
-        return ByteBuffer.allocate(Short.BYTES).putShort(value).array();
+        return new byte[] {
+            (byte) (value >>> 8), (byte) value
+        };
+        //return ByteBuffer.allocate(Short.BYTES).putShort(value).array();
     }
 
     public static short toShort(byte[] bytes) {
@@ -322,13 +325,20 @@ public final class Bytes {
     }
 
     public static short toShort(byte[] bytes, int fromIdx) {
-        ByteBuffer buffer = ByteBuffer.allocate(Short.BYTES);
-        buffer.put(bytes, fromIdx, Short.BYTES).flip();
-        return buffer.getShort();
+        return (short) (
+                      ((short) bytes[  fromIdx]) << 8 
+                    | ((short) bytes[++fromIdx] & 0xFF)
+               );
+        //ByteBuffer buffer = ByteBuffer.allocate(Short.BYTES);
+        //buffer.put(bytes, fromIdx, Short.BYTES).flip();
+        //return buffer.getShort();
     }
 
     public static byte[] fromInt(int value) {
-        return ByteBuffer.allocate(Integer.BYTES).putInt(value).array();
+        return new byte[] {
+            (byte) (value >>> 24), (byte) (value >>> 16),
+            (byte) (value >>>  8), (byte) (value       )
+        };
     }
 
     public static int toInt(byte[] bytes) {
@@ -336,18 +346,24 @@ public final class Bytes {
     }
 
     public static int toInt(byte[] bytes, int fromIdx) {
-        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
-        buffer.put(bytes, fromIdx, Integer.BYTES).flip();
-        return buffer.getInt();
+        return (bytes[  fromIdx]       ) << 24 // 转int后左移24位，刚好剩下原来的8位，故不用&0xFF
+             | (bytes[++fromIdx] & 0xFF) << 16
+             | (bytes[++fromIdx] & 0xFF) <<  8
+             | (bytes[++fromIdx] & 0xFF);
     }
 
     /**
-     * convert long number to byte array
-     * @param number the long number
+     * convert long value to byte array
+     * @param value the long number
      * @return byte array
      */
-    public static byte[] fromLong(long number) {
-        return ByteBuffer.allocate(Long.BYTES).putLong(number).array();
+    public static byte[] fromLong(long value) {
+        return new byte[] {
+            (byte) (value >>> 56), (byte) (value >>> 48),
+            (byte) (value >>> 40), (byte) (value >>> 32),
+            (byte) (value >>> 24), (byte) (value >>> 16),
+            (byte) (value >>>  8), (byte) (value       )
+        };
     }
 
     /**
@@ -357,9 +373,14 @@ public final class Bytes {
      * @return long number
      */
     public static long toLong(byte[] bytes, int fromIdx) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.put(bytes, fromIdx, Long.BYTES).flip();
-        return buffer.getLong();
+        return ((long) bytes[  fromIdx]       ) << 56
+             | ((long) bytes[++fromIdx] & 0xFF) << 48
+             | ((long) bytes[++fromIdx] & 0xFF) << 40
+             | ((long) bytes[++fromIdx] & 0xFF) << 32
+             | ((long) bytes[++fromIdx] & 0xFF) << 24
+             | ((long) bytes[++fromIdx] & 0xFF) << 16
+             | ((long) bytes[++fromIdx] & 0xFF) <<  8
+             | ((long) bytes[++fromIdx] & 0xFF);
     }
 
     /**

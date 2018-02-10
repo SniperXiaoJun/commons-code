@@ -12,11 +12,11 @@ public class SM3Digest {
     /** SM3值的长度 */
     private static final int BYTE_LENGTH = 32;
 
-    /** SM3分组长度 */
-    private static final int BLOCK_LENGTH = 64;
+    /** SM3分组块大小 */
+    private static final int BLOCK_SIZE = 64;
 
     /** 缓冲区长度 */
-    private static final int BUFFER_LENGTH = BLOCK_LENGTH * 1;
+    private static final int BUFFER_LENGTH = BLOCK_SIZE * 1;
 
     private byte[] xBuf = new byte[BUFFER_LENGTH]; // 缓冲区
     private int xBufOffset; // 缓冲区偏移量
@@ -90,11 +90,11 @@ public class SM3Digest {
     }
 
     public byte[] doFinal() {
-        byte[] B = new byte[BLOCK_LENGTH];
+        byte[] B = new byte[BLOCK_SIZE];
         byte[] buffer = new byte[xBufOffset];
         System.arraycopy(xBuf, 0, buffer, 0, buffer.length);
         byte[] tmp = SM3.padding(buffer, cntBlock);
-        for (int i = 0; i < tmp.length; i += BLOCK_LENGTH) {
+        for (int i = 0; i < tmp.length; i += BLOCK_SIZE) {
             System.arraycopy(tmp, i, B, 0, B.length);
             this.doHash(B);
         }
@@ -132,8 +132,8 @@ public class SM3Digest {
     }
 
     private void doUpdate() {
-        byte[] B = new byte[BLOCK_LENGTH];
-        for (int i = 0; i < BUFFER_LENGTH; i += BLOCK_LENGTH) {
+        byte[] B = new byte[BLOCK_SIZE];
+        for (int i = 0; i < BUFFER_LENGTH; i += BLOCK_SIZE) {
             System.arraycopy(xBuf, i, B, 0, B.length);
             doHash(B);
         }

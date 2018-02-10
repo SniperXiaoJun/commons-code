@@ -19,7 +19,7 @@ public class EncryptTester {
         //coder = EncryptorBuilder.newBuilder(Algorithm.DESede).build();
         //coder = EncryptorBuilder.newBuilder(Algorithm.RC2).key(randomBytes(5)).build();
         //coder = EncryptorBuilder.newBuilder(Algorithm.RC2).key(randomBytes(16)).mode(Mode.ECB).padding(Padding.NoPadding).provider(bc).build();
-        //coder = EncryptorBuilder.newBuilder(Algorithm.RC4).key(randomBytes(16)).mode(Mode.ECB).padding(Padding.NoPadding).provider(bc).build();
+        coder = SymmetricCryptorBuilder.newBuilder(Algorithm.TDEA).key(SecureRandoms.nextBytes(16)).provider(bc).build();
         //coder = EncryptorBuilder.newBuilder(Algorithm.AES).key(randomBytes(16)).build();
         //coder = EncryptorBuilder.newBuilder(Algorithm.AES).key(randomBytes(16)).mode(Mode.ECB).padding(Padding.PKCS5Padding).provider(bc).build();
         //coder = EncryptorBuilder.newBuilder(Algorithm.AES).key(randomBytes(16)).mode(Mode.OFB).padding(Padding.NoPadding).ivParameter(randomBytes(16)).provider(bc).build();
@@ -30,7 +30,7 @@ public class EncryptTester {
         //coder = EncryptorBuilder.newBuilder(Algorithm.DESede).key(randomBytes(16)).provider(bc).build();
         //coder = EncryptorBuilder.newBuilder(Algorithm.DESede).key(randomBytes(24)).mode(Mode.CBC).padding(Padding.PKCS5Padding).ivParameter(randomBytes(8)).build();
         //coder = EncryptorBuilder.newBuilder(Algorithm.DESede).key(Bytes.randomBytes(16)).mode(Mode.ECB).padding(Padding.PKCS5Padding).provider(bc).build();
-        coder = SymmetricCryptorBuilder.newBuilder(Algorithm.DESede).key(SecureRandoms.nextBytes(16)).mode(Mode.CBC).padding(Padding.PKCS5Padding).ivParameter(SecureRandoms.nextBytes(8)).provider(bc).build();
+        //coder = SymmetricCryptorBuilder.newBuilder(Algorithm.DESede).key(SecureRandoms.nextBytes(16)).mode(Mode.CBC).padding(Padding.PKCS5Padding).ivParameter(SecureRandoms.nextBytes(8)).provider(bc).build();
 
         byte[] encrypted = coder.encrypt("12345678".getBytes()); // 加密
         byte[] origin = coder.decrypt(encrypted); // 解密
