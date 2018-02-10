@@ -148,8 +148,6 @@ public class SHA1Digest {
 
         this.blockOffset = d.blockOffset;
         this.byteCount = d.byteCount;
-
-        System.arraycopy(d.W, 0, this.W, 0, d.W.length);
     }
 
     public static SHA1Digest getInstance() {
@@ -161,7 +159,12 @@ public class SHA1Digest {
     }
 
     public void update(byte input) {
-        this.update(new byte[] { input });
+        this.block[this.blockOffset++] = input;
+        if (this.blockOffset == BLOCK_SIZE) {
+            this.digestBlock(this.block);
+            this.blockOffset = 0;
+            this.byteCount += BLOCK_SIZE;
+        }
     }
 
     public void update(byte[] input) {
@@ -169,13 +172,9 @@ public class SHA1Digest {
     }
 
     public void update(byte[] input, int offset, int length) {
+        length = Math.min(input.length - offset, length);
         for (int i = offset, end = offset + length; i < end; i++) {
-            this.block[this.blockOffset++] = input[i];
-            if (this.blockOffset == BLOCK_SIZE) {
-                this.digestBlock(this.block);
-                this.blockOffset = 0;
-                this.byteCount += BLOCK_SIZE;
-            }
+            this.update(input[i]);
         }
     }
 
@@ -223,10 +222,6 @@ public class SHA1Digest {
 
         this.blockOffset = 0;
         this.byteCount = 0;
-
-        for (int j = 0; j < 16; j++) {
-            this.W[j] = 0;
-        }
     }
 
     public int getDigestSize() {
@@ -244,8 +239,8 @@ public class SHA1Digest {
 
         // ext-block（扩展明文分组）
         for (; i < 80; i++) {
-            this.W[i] = shiftLeft(this.W[i -  3] ^ this.W[i -  8] 
-                                ^ this.W[i - 14] ^ this.W[i - 16], 1);
+            this.W[i] = shiftRound(this.W[i -  3] ^ this.W[i -  8] 
+                                 ^ this.W[i - 14] ^ this.W[i - 16], 1);
         }
 
         int a1 = this.a, b1 = this.b,
@@ -254,37 +249,37 @@ public class SHA1Digest {
 
         for (int t = 0; t < 20; t++) {
             // 将Kt+Ft(b,c,d)+(a<<5)+e+W[t]的结果赋值给临时变量tmp
-            int tmp = K0 + f0(b1, c1, d1) + shiftLeft(a1, 5) + e1 + this.W[t];
+            int tmp = K0 + f0(b1, c1, d1) + shiftRound(a1, 5) + e1 + this.W[t];
             e1 = d1; // 将链接变量d初始值赋值给链接变量e
             d1 = c1; // 将链接变量c初始值赋值给链接变量d
-            c1 = shiftLeft(b1, 30); // 将链接变量b初始值循环左移30位赋值给链接变量c
+            c1 = shiftRound(b1, 30); // 将链接变量b初始值循环左移30位赋值给链接变量c
             b1 = a1; // 将链接变量a初始值赋值给链接变量b
             a1 = tmp; // tmp赋值给a
         }
 
         for (int t = 20; t < 40; t++) {
-            int tmp = K1 + f1(b1, c1, d1) + shiftLeft(a1, 5) + e1 + this.W[t];
+            int tmp = K1 + f1(b1, c1, d1) + shiftRound(a1, 5) + e1 + this.W[t];
             e1 = d1;
             d1 = c1;
-            c1 = shiftLeft(b1, 30);
+            c1 = shiftRound(b1, 30);
             b1 = a1;
             a1 = tmp;
         }
 
         for (int t = 40; t < 60; t++) {
-            int tmp = K2 + f2(b1, c1, d1) + shiftLeft(a1, 5) + e1 + this.W[t];
+            int tmp = K2 + f2(b1, c1, d1) + shiftRound(a1, 5) + e1 + this.W[t];
             e1 = d1;
             d1 = c1;
-            c1 = shiftLeft(b1, 30);
+            c1 = shiftRound(b1, 30);
             b1 = a1;
             a1 = tmp;
         }
 
         for (int t = 60; t < 80; t++) {
-            int tmp = K3 + f3(b1, c1, d1) + shiftLeft(a1, 5) + e1 + this.W[t];
+            int tmp = K3 + f3(b1, c1, d1) + shiftRound(a1, 5) + e1 + this.W[t];
             e1 = d1;
             d1 = c1;
-            c1 = shiftLeft(b1, 30);
+            c1 = shiftRound(b1, 30);
             b1 = a1;
             a1 = tmp;
         }
@@ -295,11 +290,6 @@ public class SHA1Digest {
         this.c += c1;
         this.d += d1;
         this.e += e1;
-
-        // reset W
-        for (int j = 0; j < 16; j++) {
-            this.W[j] = 0;
-        }
     }
 
     private static int f0(int b, int c, int d) {
@@ -318,8 +308,15 @@ public class SHA1Digest {
         return b ^ c ^ d;
     }
 
-    private static int shiftLeft(int n, int count) {
-        return n << count | n >>> (32 - count);
+    /**
+     * 循环左移位操作符Sn(X)，X是一个字，n是一个整数，0<=n<=32
+     * Sn(X) = (X<<n) OR (X>>>32-n)
+     * @param value
+     * @param n
+     * @return
+     */
+    private static int shiftRound(int value, int n) {
+        return value << n | value >>> (32 - n);
     }
 
     private static void padding0(byte[] bytes, int from, int to) {
@@ -346,19 +343,13 @@ public class SHA1Digest {
             byte[] data1 = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(65537) + 1);
             byte[] data2 = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(65537) + 1);
             byte[] data3 = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(65537) + 1);
-            byte[] data4 = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(65537) + 1);
-            byte[] data5 = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(65537) + 1);
-            byte[] data6 = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(65537) + 1);
             sha1.reset();
             sha1.update(data1);
             sha1.update(data2);
             sha1.update(data3);
-            sha1.update(data4);
-            sha1.update(data5);
-            sha1.update(data6);
-            if (!Arrays.equals(HashUtils.digest(HashAlgorithms.SHA1, data1, data2, data3, data4, data5, data6), 
-                               sha1.doFinal())) {
-                System.err.println("FAIL!" + "   " + data.length);
+            byte[] expect = HashUtils.digest(HashAlgorithms.SHA1, data1, data2, data3);
+            if (!Arrays.equals(expect, sha1.doFinal())) {
+                System.err.println("FAIL" + " --> " + data.length);
             }
         }
     }

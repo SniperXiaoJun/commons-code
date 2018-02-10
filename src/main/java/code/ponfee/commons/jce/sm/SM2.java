@@ -21,9 +21,12 @@ import code.ponfee.commons.util.MavenProjects;
 
 /**
  * new BigInteger("0") // 0为十进制数字符串表示
- * SM2非对称加密算法实现
+ * SM2 asymmetric cipher implementation
  * support encrypt/decrypt
  * and sign/verify signature
+ * 
+ * reference the internet code and refactor optimization
+ * 
  * @author Ponfee
  */
 public final class SM2 {
@@ -97,8 +100,10 @@ public final class SM2 {
     }
 
     private byte[] doFinal() {
-        byte[] p = to32ByteArray(this.point.normalize().getYCoord().toBigInteger());
-        p = this.sm3c3.doFinal();
+        this.sm3c3.update(to32ByteArray(
+            this.point.normalize().getYCoord().toBigInteger()
+        ));
+        byte[] p = this.sm3c3.doFinal();
         reset();
         return p;
     }
@@ -206,10 +211,9 @@ public final class SM2 {
 
         SM2 sm2 = new SM2(getPublicKey(ecParam, c1), getPrivateKey(privateKey));
 
-        sm2.decrypt(c2);
-        byte[] c3Actual = sm2.doFinal();
+        sm2.decrypt(c2); // 解密
 
-        if (!Arrays.equals(c3, c3Actual)) {
+        if (!Arrays.equals(c3, sm2.doFinal())) {
             throw new SecurityException("Invalid SM3 digest.");
         }
 
@@ -239,15 +243,11 @@ public final class SM2 {
         SM3Digest sm3 = SM3Digest.getInstance();
         sm3.update(calcZ(sm3, ecParam, ida, pubKey));
         sm3.update(data);
-        BigInteger e = new BigInteger(1, sm3.doFinal());
-        BigInteger k;
-        BigInteger r;
+        BigInteger e = new BigInteger(1, sm3.doFinal()), k ,r;
         do {
             k = random(ecParam.n);
-            ECPoint p1 = ecParam.pointG.multiply(k).normalize();
-            BigInteger x1 = p1.getXCoord().toBigInteger();
-            r = e.add(x1);
-            r = r.mod(ecParam.n);
+            ECPoint p = ecParam.pointG.multiply(k).normalize();
+            r = e.add(p.getXCoord().toBigInteger()).mod(ecParam.n);
         } while (r.equals(BigInteger.ZERO) || r.add(k).equals(ecParam.n));
 
         BigInteger n1 = priKey.add(BigInteger.ONE).modInverse(ecParam.n);
@@ -275,7 +275,7 @@ public final class SM2 {
     public static boolean verify(ECParameters ecParam, byte[] data, byte[] ida, 
                                  byte[] signed, byte[] publicKey) {
         Signature signature = new Signature(signed);
-        if (!isBetween(signature.r, BigInteger.ONE, ecParam.n)
+        if (   !isBetween(signature.r, BigInteger.ONE, ecParam.n)
             || !isBetween(signature.s, BigInteger.ONE, ecParam.n)) {
             return false;
         }
@@ -295,8 +295,8 @@ public final class SM2 {
         ECPoint p1 = ecParam.pointG.multiply(signature.s).normalize();
         ECPoint p2 = pubKey.multiply(t).normalize();
         BigInteger x1 = p1.add(p2).normalize().getXCoord().toBigInteger();
-        BigInteger R = e.add(x1).mod(ecParam.n);
-        return R.equals(signature.r);
+        BigInteger r = e.add(x1).mod(ecParam.n);
+        return r.equals(signature.r);
     }
 
     public static boolean checkPublicKey(byte[] publicKey) {
@@ -318,15 +318,18 @@ public final class SM2 {
 
         BigInteger x = publicKey.getXCoord().toBigInteger();
         BigInteger y = publicKey.getYCoord().toBigInteger();
-        if (isBetween(x, new BigInteger("0"), ecParam.p)
-            && isBetween(y, new BigInteger("0"), ecParam.p)) {
-            BigInteger xResult = x.pow(3).add(ecParam.a.multiply(x))
-                                         .add(ecParam.b).mod(ecParam.p);
-            BigInteger yResult = y.pow(2).mod(ecParam.p);
-            if (yResult.equals(xResult)
-                && publicKey.multiply(ecParam.n).isInfinity()) {
-                return true;
-            }
+
+        if (   !isBetween(x, BigInteger.ZERO, ecParam.p)
+            || !isBetween(y, BigInteger.ZERO, ecParam.p)) {
+            return false;
+        }
+
+        BigInteger x1 = x.pow(3).add(ecParam.a.multiply(x))
+                                .add(ecParam.b).mod(ecParam.p);
+        BigInteger y1 = y.pow(2).mod(ecParam.p);
+
+        if (y1.equals(x1) && publicKey.multiply(ecParam.n).isInfinity()) {
+            return true;
         }
 
         return false;
@@ -340,10 +343,10 @@ public final class SM2 {
      * @return
      */
     static byte[] calcZ(SM3Digest sm3, ECParameters ecParam, byte[] ida, ECPoint pubKey) {
-        int entlenA = ida.length * 8;
+        int idaBitLen = ida.length * 8;
         sm3.reset();
-        sm3.update((byte) (entlenA & 0xFF00));
-        sm3.update((byte) (entlenA & 0x00FF));
+        sm3.update((byte) (idaBitLen & 0xFF00));
+        sm3.update((byte) (idaBitLen & 0x00FF));
         sm3.update(ida);
         sm3.update(ecParam.a.toByteArray());
         sm3.update(ecParam.b.toByteArray());

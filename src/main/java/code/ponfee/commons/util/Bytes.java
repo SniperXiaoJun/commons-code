@@ -135,11 +135,9 @@ public final class Bytes {
 
         // two char -> one byte
         for (int i = 0, j = 0; j < len; i++, j += 2) {
-            int f  =  Character.digit(data[j], 16) << 4;
-                f |= Character.digit(data[j + 1], 16);
-            out[i] = (byte) (f & 0xFF);
+            out[i] = (byte) (Character.digit(data[j], 16) << 4 
+                           | Character.digit(data[j + 1], 16));
         }
-
         return out;
     }
 

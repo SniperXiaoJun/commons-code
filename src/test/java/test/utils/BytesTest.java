@@ -5,6 +5,7 @@ import java.util.Base64;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.codec.binary.Hex;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.base.Stopwatch;
@@ -67,6 +68,15 @@ public class BytesTest {
             if (!Integer.toBinaryString((b & 0xFF) + 0x100).equals(Integer.toBinaryString(b & 0xFF | 0x100))) {
                 System.err.println(i+"fail");
             }
+        }
+    }
+    
+    @Test
+    public void test3() {
+        for (int i = 0; i < 100000; i++) {
+            byte[] data = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(999));
+            String hex = Hex.encodeHexString(data);
+            Assert.assertArrayEquals(data, Bytes.hexDecode(hex));
         }
     }
 }

@@ -13,8 +13,11 @@ import code.ponfee.commons.jce.ECParameters;
 import code.ponfee.commons.util.Bytes;
 
 /**
- * SM2 key exchange
+ * SM2 key exchange implementation
  * the final, partA and partB get the same symmetric key
+ * 
+ * reference the internet code and refactor optimization
+ * 
  * @author Ponfee
  */
 public class SM2KeyExchange implements Serializable {

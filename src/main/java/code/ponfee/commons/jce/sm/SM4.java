@@ -10,7 +10,10 @@ import org.bouncycastle.util.Arrays;
 import com.google.common.base.Preconditions;
 
 /**
- * SM4对称加密算法实现
+ * SM4 symmetric cryptor implementation
+ * 
+ * reference the internet code and refactor optimization
+ * 
  * @author Ponfee
  */
 public final class SM4 {

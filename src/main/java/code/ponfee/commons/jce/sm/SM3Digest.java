@@ -4,7 +4,10 @@ import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.util.Arrays;
 
 /**
- * SM3摘要算法实现
+ * SM3 digest implementation
+ * 
+ * reference the internet code and refactor optimization
+ * 
  * @author Ponfee
  */
 public class SM3Digest {

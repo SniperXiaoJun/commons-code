@@ -1,11 +1,11 @@
 package code.ponfee.commons.jce.hash;
 
-import java.util.Arrays;
-
 import org.apache.commons.codec.binary.Hex;
 
-/** 
- * RipeMD160 implementation
+/**
+ * RipeMD160 digest implementation
+ * 
+ * @author Ponfee
  */
 public class RipeMD160 {
 
@@ -39,16 +39,16 @@ public class RipeMD160 {
         } 
     };
 
-    private static final int[] MD_BUFF = {
+    private static final int[] CHAIN_VAR = {
         0x67452301, 0xefcdab89,
         0x98badcfe, 0x10325476,
         0xc3d2e1f0
     };
 
-    private int[] mdBuffer;
+    private final int[] digest = new int[CHAIN_VAR.length];
     private int[] working;
-    private int workingPtr;
-    private int msgLen;
+    private int wOffset;
+    private int byteCount;
 
     private RipeMD160() {
         reset();
@@ -59,23 +59,23 @@ public class RipeMD160 {
     }
 
     public void reset() {
-        mdBuffer = Arrays.copyOf(MD_BUFF, MD_BUFF.length);
+        System.arraycopy(CHAIN_VAR, 0, digest, 0, CHAIN_VAR.length);
         working = new int[16];
-        workingPtr = 0;
-        msgLen = 0;
+        wOffset = 0;
+        byteCount = 0;
     }
 
     public void update(byte input) {
-        working[workingPtr >> 2] ^= ((int) input) << ((workingPtr & 3) << 3);
-        workingPtr++;
-        if (workingPtr == 64) {
-            compress(working);
+        working[wOffset >> 2] ^= ((int) input) << ((wOffset & 3) << 3);
+        wOffset++;
+        if (wOffset == 64) {
+            digestBlock(working);
             for (int j = 0; j < 16; j++) {
                 working[j] = 0;
             }
-            workingPtr = 0;
+            wOffset = 0;
         }
-        msgLen++;
+        byteCount++;
     }
 
     public void update(byte[] input) {
@@ -83,54 +83,32 @@ public class RipeMD160 {
     }
 
     public void update(byte[] input, int offset, int len) {
-        if (offset + len >= input.length) {
-            for (int i = offset; i < input.length; i++) {
-                working[workingPtr >> 2] ^= ((int) input[i]) << ((workingPtr & 3) << 3);
-                workingPtr++;
-                if (workingPtr == 64) {
-                    compress(working);
-                    for (int j = 0; j < 16; j++) {
-                        working[j] = 0;
-                    }
-                    workingPtr = 0;
-                }
-            }
-            msgLen += input.length - offset;
-        } else {
-            for (int i = offset; i < offset + len; i++) {
-                working[workingPtr >> 2] ^= ((int) input[i]) << ((workingPtr & 3) << 3);
-                workingPtr++;
-                if (workingPtr == 64) {
-                    compress(working);
-                    for (int j = 0; j < 16; j++) {
-                        working[j] = 0;
-                    }
-                    workingPtr = 0;
-                }
-            }
-            msgLen += len;
+        len = Math.min(len, input.length - offset);
+        for (int i = offset; i < offset + len; i++) {
+            this.update(input[i]);
         }
     }
 
     public void update(String s) {
-        byte[] bytearray = new byte[s.length()];
-        for (int i = 0; i < bytearray.length; i++) {
-            bytearray[i] = (byte) s.charAt(i);
+        byte[] array = new byte[s.length()];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = (byte) s.charAt(i);
         }
-        update(bytearray);
+        update(array);
     }
 
     public byte[] doFinal() {
-        MDfinish(working, msgLen, 0);
+        finish(working, byteCount, 0);
         byte[] res = new byte[20];
         for (int i = 0; i < 20; i++) {
-            res[i] = (byte) ((mdBuffer[i >> 2] >>> ((i & 3) << 3)) & 0x000000FF);
+            res[i] = (byte) ((digest[i >> 2] >>> ((i & 3) << 3)) & 0x000000FF);
         }
+        reset();
         return res;
     }
 
     public byte[] doFinal(byte[] input) {
-        this.update(input);
+        this.update(input, 0, input.length);
         return doFinal();
     }
 
@@ -139,18 +117,19 @@ public class RipeMD160 {
         return doFinal();
     }
 
-    private void compress(int[] X) {
+    // --------------------------------------------------private methods
+    private void digestBlock(int[] X) {
         int index = 0;
 
         int a, b, c, d, e;
         int A, B, C, D, E;
         int temp, s;
 
-        A = a = mdBuffer[0];
-        B = b = mdBuffer[1];
-        C = c = mdBuffer[2];
-        D = d = mdBuffer[3];
-        E = e = mdBuffer[4];
+        A = a = digest[0];
+        B = b = digest[1];
+        C = c = digest[2];
+        D = d = digest[3];
+        E = e = digest[4];
 
         for (; index < 16; index++) {
             // The 16 FF functions - round 1 */
@@ -253,15 +232,15 @@ public class RipeMD160 {
         }
 
         /* combine results */
-        D += c + mdBuffer[1]; /* final result for MDbuf[0] */
-        mdBuffer[1] = mdBuffer[2] + d + E;
-        mdBuffer[2] = mdBuffer[3] + e + A;
-        mdBuffer[3] = mdBuffer[4] + a + B;
-        mdBuffer[4] = mdBuffer[0] + b + C;
-        mdBuffer[0] = D;
+        D += c + digest[1]; /* final result for MDbuf[0] */
+        digest[1] = digest[2] + d + E;
+        digest[2] = digest[3] + e + A;
+        digest[3] = digest[4] + a + B;
+        digest[4] = digest[0] + b + C;
+        digest[0] = D;
     }
 
-    private void MDfinish(int[] array, int lswlen, int mswlen) {
+    private void finish(int[] array, int lswlen, int mswlen) {
         int[] X = array; /* message words */
 
         /* append the bit m_n == 1 */
@@ -269,7 +248,7 @@ public class RipeMD160 {
 
         if ((lswlen & 63) > 55) {
             /* length goes to next block */
-            compress(X);
+            digestBlock(X);
             for (int i = 0; i < 14; i++) {
                 X[i] = 0;
             }
@@ -278,16 +257,21 @@ public class RipeMD160 {
         /* append length in bits*/
         X[14] = lswlen << 3;
         X[15] = (lswlen >> 29) | (mswlen << 3);
-        compress(X);
+        digestBlock(X);
     }
 
     public static void main(String[] args) {
+        byte[] data = "1234567890".getBytes();
         RipeMD160 md = RipeMD160.getInstance();
-        String actual = Hex.encodeHexString(md.doFinal("1234567890".getBytes()));
+        String actual = Hex.encodeHexString(md.doFinal(data));
         if(!"9d752daa3fb4df29837088e1e5a1acf74932e074".equals(actual)) {
             System.err.println("fail");
         } else {
             System.out.println("success");
         }
+        System.out.println(Hex.encodeHexString(md.doFinal(data)));
+        System.out.println(Hex.encodeHexString(md.doFinal(data)));
+        md.update(data);
+        System.out.println(Hex.encodeHexString(md.doFinal()));
     }
 }
