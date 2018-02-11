@@ -47,7 +47,8 @@ public interface Providers {
      * provider holder
      */
     static final class ProvidersHolder {
-        private static final Map<Class<? extends Provider>, Provider> HOLDER = new ConcurrentHashMap<>(16);
+        private static final Map<Class<? extends Provider>, Provider> HOLDER =
+            new ConcurrentHashMap<>(16);
         static {
             Provider[] providers = Security.getProviders();
             if (providers != null && providers.length > 0) {

@@ -65,7 +65,8 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
         byte[] hashedKey = HashUtils.sha512(key.toByteArray());
 
         byte[] result = new byte[input.length - keyByteLen];
-        for (int hLen = hashedKey.length, rLen = result.length, i = 0, j = 0; i < rLen; i++, j++) {
+        int hLen = hashedKey.length, rLen = result.length;
+        for (int i = 0, j = 0; i < rLen; i++, j++) {
             if (j == hLen) {
                 j = 0;
             }
@@ -94,7 +95,8 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
         try {
             output.write(encryptedKey0); // encrypted key
             byte[] buffer = new byte[this.getOriginBlockSize(rsaKey)];
-            for (int hLen = hashedKey.length, len, i, j; (len = input.read(buffer)) != Files.EOF;) {
+            int hLen = hashedKey.length;
+            for (int len, i, j; (len = input.read(buffer)) != Files.EOF;) {
                 for (i = 0, j = 0; i < len; i++, j++) {
                     if (j == hLen) {
                         j = 0;
@@ -128,7 +130,8 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
             byte[] hashedKey = HashUtils.sha512(key.toByteArray());
 
             byte[] buffer = new byte[this.getCipherBlockSize(rsaKey)];
-            for (int len, hLen = hashedKey.length, i, j; (len = input.read(buffer)) != Files.EOF;) {
+            int hLen = hashedKey.length;
+            for (int len, i, j; (len = input.read(buffer)) != Files.EOF;) {
                 for (i = 0, j = 0; i < len; i++, j++) {
                     if (j == hLen) {
                         j = 0;
