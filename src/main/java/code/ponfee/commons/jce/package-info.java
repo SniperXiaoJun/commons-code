@@ -8,7 +8,7 @@
  *   你是什么：生物特征认证，FAR(False Accept Ratio)，FRR(False Reject Ratio)
  * 
  * 2、对称加密：
- *   优点：效率高、紧凑型
+ *   优点：效率高
  *   缺点：密钥成几何数增长、需要事先协商密钥
  *   类型：分组密码（DES、3DES、AES），序列密码（RC4）、盐加密（PBE）
  *   分组模式：ECB、CBC、OFB、CFB
@@ -16,7 +16,7 @@
  * 
  * 3、非对称加密：
  *   优点：密钥分发安全，公开公钥即可
- *   缺点：效率低、杂凑型
+ *   缺点：效率低
  *   算法：
  *      DH：基于离散对数的实现，主要用于密钥交换
  *      RSA：基于大整数分解的实现，Ron Rivest, Adi Shamir, Leonard Adleman（三人）

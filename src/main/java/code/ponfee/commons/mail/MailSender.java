@@ -68,7 +68,7 @@ public class MailSender {
     private String nickname;
     private final String password;
     private final String smtpHost;
-    private String charset = Files.DEFAULT_CHARSET;
+    private String charset = Files.UTF_8;
     private int retryTimes;
     private int validateTimes;
 

@@ -15,6 +15,7 @@ import java.util.List;
  * @author fupf
  */
 public abstract class CertSignedVerifier {
+
     protected final X509Certificate rootCert; // 根证书
     protected final X509CRL crl; // 吊销列表
     protected final byte[] info; // 原文信息

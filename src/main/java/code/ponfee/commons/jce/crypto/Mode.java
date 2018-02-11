@@ -17,5 +17,7 @@ package code.ponfee.commons.jce.crypto;
  * @author fupf
  */
 public enum Mode {
-    ECB, CBC, CFB, OFB, CTR/*, None*/;
+    ECB, CBC, CFB, OFB, CTR, // 
+    EAX, OCB, CFB8, CFB64, //
+    CFB128, OpenPGPCFB, GCM, CCM;
 }

@@ -30,11 +30,11 @@ public final class Bytes {
      * @see sun.misc.HexDumpEncoder#encode(byte[], java.io.OutputStream);
      * 
      * @param data   字节数组
-     * @param block  每块大小
      * @param chunk  每行块数
+     * @param block  每块大小
      * @return
      */
-    public static String hexDump(byte[] data, int block, int chunk) {
+    public static String hexDump(byte[] data, int chunk, int block) {
         Formatter fmt = new Formatter(), text;
 
         for (int i, j = 0, wid = block * chunk; j * wid < data.length; j++) {
@@ -76,7 +76,7 @@ public final class Bytes {
     }
 
     public static String hexDump(byte[] data) {
-        return hexDump(data, 8, 2);
+        return hexDump(data, 2, 8);
     }
 
     public static String toBinary(byte... array) {
@@ -445,4 +445,30 @@ public final class Bytes {
         }*/
     }
 
+    /**
+     * copy in to out
+     * 从尾部开始拷贝，in数据不足则补0，有多则舍去
+     * @param in
+     * @param inFrom
+     * @param inLen
+     * @param out
+     * @param outFrom
+     * @param outLen
+     */
+    public static void copy(byte[] in, int inFrom, int inLen,
+                            byte[] out, int outFrom, int outLen) {
+        int  inTo = Math.min(in.length, inFrom + inLen),
+            outTo = Math.min(out.length, outFrom + outLen);
+        for (int i = outTo - 1, j = inTo - 1; i >= outFrom; i--, j--) {
+            out[i] = (j < inFrom) ? 0x00 : in[j];
+        }
+    }
+
+    public static void main(String[] args) {
+        byte[] out = {-1,-1,-1,-1,-1,-1,-1,-1,-1};
+        byte[] in = {-2,-2,-2,-2,-2,-2};
+        copy(in, 0, 4, out, 2, 10);
+        System.out.println(ObjectUtils.toString(out));
+        
+    }
 }

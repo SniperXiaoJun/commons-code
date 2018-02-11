@@ -306,7 +306,7 @@ public class HttpRequest {
         if (charset != null && charset.length() > 0) {
             return charset;
         } else {
-            return Files.DEFAULT_CHARSET;
+            return Files.UTF_8;
         }
     }
 
@@ -2765,7 +2765,7 @@ public class HttpRequest {
      * @throws HttpException
      */
     public HttpRequest form(Map<?, ?> values) throws HttpException {
-        return form(values, Files.DEFAULT_CHARSET);
+        return form(values, Files.UTF_8);
     }
 
     /**
@@ -2779,7 +2779,7 @@ public class HttpRequest {
      * @throws HttpException
      */
     public HttpRequest form(Entry<?, ?> entry) throws HttpException {
-        return form(entry, Files.DEFAULT_CHARSET);
+        return form(entry, Files.UTF_8);
     }
 
     /**
@@ -2810,7 +2810,7 @@ public class HttpRequest {
      * @throws HttpException
      */
     public HttpRequest form(Object name, Object value) throws HttpException {
-        return form(name, value, Files.DEFAULT_CHARSET);
+        return form(name, value, Files.UTF_8);
     }
 
     /**

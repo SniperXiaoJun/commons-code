@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.codec.binary.Hex;
 import org.joda.time.DateTime;
@@ -173,6 +174,24 @@ public class TempTest {
         System.out.println("toLong: " + watch.stop());
     }
 
+    @org.junit.Test
+    public void test11() throws Exception {
+        int value = tableSizeFor(ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE));
+        System.out.println(Integer.toBinaryString(value));
+    }
+
+    static final int MAXIMUM_CAPACITY = 1 << 30;
+    static final int tableSizeFor(int cap) {
+        int n = cap - 1;
+        n |= n >>> 1;
+        n |= n >>> 2;
+        n |= n >>> 4;
+        n |= n >>> 8;
+        n |= n >>> 16;
+        return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+    }
+    
+    
     public static byte[] fromShort(short value) {
         return ByteBuffer.allocate(Short.BYTES).putShort(value).array();
     }

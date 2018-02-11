@@ -40,17 +40,19 @@ public final class Files {
 
     public static final int BUFF_SIZE = 8192; // file buffer size
 
-    public static final String DEFAULT_FILE_SEPARATOR = "/"; // default file separator
+    public static final Charset DEFAULT_CHARSET = Charset.defaultCharset(); // default charset
+
+    public static final String DEFAULT_ENCODING = DEFAULT_CHARSET.name(); // default encoding
+
+    public static final String UTF_8 = "UTF-8"; // UTF-8 encoding
+
+    public static final String UNIX_FILE_SEPARATOR = "/"; // unix file separator
 
     public static final String SYSTEM_FILE_SEPARATOR = File.separator; // system file separator
 
-    public static final String DEFAULT_CHARSET = "UTF-8"; // default charset spec UTF-8
+    public static final String UNIX_LINE_SEPARATOR = "\n"; // unix file line serarator spec \n
 
-    public static final String SYSTEM_CHARSET = Charset.defaultCharset().name(); // charset within system
-
-    public static final String DEFAULT_LINE_SEPARATOR = "\n"; // default line serarator spec \n
-
-    public static final String SYSTEM_LINE_SEPARATOR; // line separator of file within system
+    public static final String SYSTEM_LINE_SEPARATOR; // system file line separator
     static {
         /*String separator = java.security.AccessController.doPrivileged(
                                new sun.security.action.GetPropertyAction("line.separator"));
@@ -133,7 +135,7 @@ public final class Files {
     }
 
     public static String toString(File file) {
-        return toString(file, SYSTEM_CHARSET);
+        return toString(file, DEFAULT_ENCODING);
     }
 
     public static String toString(File file, String charset) {

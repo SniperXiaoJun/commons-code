@@ -153,7 +153,7 @@ public final class Http {
      * @return
      */
     public Http data(Map<String, ?> params) {
-        return data(params, Files.DEFAULT_CHARSET);
+        return data(params, Files.UTF_8);
     }
 
     /**
@@ -225,7 +225,7 @@ public final class Http {
     }
 
     public Http contentType(String contentType) {
-        return this.contentType(contentType, Files.DEFAULT_CHARSET);
+        return this.contentType(contentType, Files.UTF_8);
     }
 
     // ----------------------------response accept--------------------------

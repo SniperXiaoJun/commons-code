@@ -173,7 +173,7 @@ public class ZipUtils {
      */
     public static File[] unzip(String zipFile, String dest, 
                                String passwd) throws ZipException {
-        return unzip(new File(zipFile), dest, passwd, Files.DEFAULT_CHARSET);
+        return unzip(new File(zipFile), dest, passwd, Files.UTF_8);
     }
 
     /**

@@ -8,6 +8,15 @@ import code.ponfee.commons.util.MavenProjects;
 
 /**
  * RC4 implementation
+ * 
+ * 给定一个短的密码，储存在key[MAX]数组里，还有一个数组S[256]，令S[i]=i。
+ * 然后利用数组key来对数组S做一个置换，也就是对S数组里的数重新排列，排列算法为
+ * j := 0
+ * for i from 0 to 255
+ *   j := (j + S[i] + key[i mod keylength]) mod 256
+ *   swap values of S[i] and S[j]
+ * endfor
+ * 
  * @author Ponfee
  */
 public class RC4 {

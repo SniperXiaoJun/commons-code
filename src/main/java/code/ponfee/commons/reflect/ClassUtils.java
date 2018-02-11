@@ -183,7 +183,7 @@ public final class ClassUtils {
         URL url = clazz.getProtectionDomain().getCodeSource().getLocation();
         String path = null;
         try {
-            path = URLDecoder.decode(url.getPath(), Files.DEFAULT_CHARSET);
+            path = URLDecoder.decode(url.getPath(), Files.UTF_8);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -206,7 +206,7 @@ public final class ClassUtils {
         URL url = clazz.getProtectionDomain().getCodeSource().getLocation();
         String path = null;
         try {
-            path = URLDecoder.decode(url.getPath(), Files.DEFAULT_CHARSET);
+            path = URLDecoder.decode(url.getPath(), Files.UTF_8);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -225,7 +225,7 @@ public final class ClassUtils {
     public static String getClasspath() {
         String path = Thread.currentThread().getContextClassLoader().getResource("").getPath();
         try {
-            path = URLDecoder.decode(new File(path).getAbsolutePath(), Files.DEFAULT_CHARSET);
+            path = URLDecoder.decode(new File(path).getAbsolutePath(), Files.UTF_8);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

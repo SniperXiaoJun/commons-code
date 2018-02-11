@@ -19,6 +19,7 @@ import org.bouncycastle.math.ec.ECPoint;
 import com.google.common.collect.ImmutableMap;
 
 import code.ponfee.commons.math.Numbers;
+import code.ponfee.commons.util.SecureRandoms;
 
 /** 
  * Specifications completely defining an elliptic curve. Used to define an
@@ -111,7 +112,7 @@ public class ECParameters implements java.io.Serializable {
             Field field = SECNamedCurves.class.getDeclaredField("objIds");
             field.setAccessible(true);
             Hashtable<String, ASN1ObjectIdentifier> table;
-            table = (Hashtable<String, ASN1ObjectIdentifier>) field.get(null);
+            table = (Hashtable<String, ASN1ObjectIdentifier>) field.get(null); // static field
             for (String name : table.keySet()) {
                 X9ECParameters params = SECNamedCurves.getByName(name);
                 nameOids.put(name, table.get(name));
@@ -123,8 +124,7 @@ public class ECParameters implements java.io.Serializable {
                       Numbers.toHex(params.getG().getXCoord().toBigInteger()), 
                       Numbers.toHex(params.getG().getYCoord().toBigInteger()), 
                       Numbers.toHex(params.getN()), toHex(params.getSeed())
-                    )
-                );
+                ));
             }
         } catch (Exception ignored) {
             ignored.printStackTrace();
@@ -142,7 +142,7 @@ public class ECParameters implements java.io.Serializable {
     public final BigInteger gy;
     public final BigInteger n; // n为点基点G的阶(nP=O∞)
     public final BigInteger S; // secure random seed
-    //public final BigInteger h; // 有时候我们还会用到h(椭圆曲线上所有点的个数p与n相除的整数部分)
+    //public final BigInteger h; // 有时还会用到h(椭圆曲线上所有点的个数p与n相除的整数部分)
 
     /** build parameter */
     public transient final ECCurve curve; // the curve
@@ -171,7 +171,9 @@ public class ECParameters implements java.io.Serializable {
             pointG = curve.createPoint(this.gx, this.gy);
             bcSpec = new ECDomainParameters(curve, pointG, this.n);
             keyPairGenerator = new ECKeyPairGenerator();
-            keyPairGenerator.init(new ECKeyGenerationParameters(bcSpec, new SecureRandom()));
+            keyPairGenerator.init(new ECKeyGenerationParameters(
+                bcSpec, new SecureRandom(SecureRandoms.generateSeed(24))
+            ));
         } catch (Exception ignored) {
             //System.err.println(this.toString()); // x value invalid in Fp field element
         }

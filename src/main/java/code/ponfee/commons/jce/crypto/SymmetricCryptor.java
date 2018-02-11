@@ -33,16 +33,6 @@ import javax.crypto.spec.IvParameterSpec;
  * 5、加密的第1轮到第9轮的轮函数一样，包括4个操作：字节代换、行位移、列混合和轮密钥加。最后一轮迭代不执行列混合。
  * 6、字节代换：把该字节的高4位作为行值，低4位作为列值，取出S盒或者逆S盒中对应的行的元素作为输出
  * 
- * 
- * RC4：
- * 给定一个短的密码，储存在key[MAX]数组里，还有一个数组S[256]，令S[i]=i。
- * 然后利用数组key来对数组S做一个置换，也就是对S数组里的数重新排列，排列算法为
- * j := 0
- * for i from 0 to 255
- *   j := (j + S[i] + key[i mod keylength]) mod 256
- *   swap values of S[i] and S[j]
- * endfor
-
  * @author fupf
  */
 public class SymmetricCryptor {

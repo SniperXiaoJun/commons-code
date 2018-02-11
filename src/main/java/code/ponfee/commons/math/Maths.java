@@ -29,4 +29,15 @@ public class Maths {
         return Math.log(n) / Math.log(base);
     }
 
+    /**
+     * shift left round
+     * 循环左移位操作符Sn(X)，X是一个字，n是一个整数，0<=n<=32
+     * Sn(X) = (X<<n) OR (X>>>32-n)
+     * @param x
+     * @param n
+     * @return
+     */
+    public static int slr(int x, int n) {
+        return x << n | x >>> (32 - n);
+    }
 }

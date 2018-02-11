@@ -65,7 +65,7 @@ public class QuartzUtils {
         }
 
         try {
-            //CronScheduleBuilder.cronSchedule(cron);
+            //CronScheduleBuilder.cronSchedule(cronExp);
             begin = Dates.plusSeconds(begin, 1);
             CronExpression exp = new CronExpression(cronExp);
             CronTriggerImpl trigger = new CronTriggerImpl();

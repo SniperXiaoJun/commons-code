@@ -20,7 +20,7 @@ public class Wechats {
 
     // -------------------------构建微信授权地址------------------------- //
     public static final String buildAuthorizeUrl(String appid, String redirect, String state) {
-        return buildAuthorizeUrl(appid, Files.DEFAULT_CHARSET, redirect, state);
+        return buildAuthorizeUrl(appid, Files.UTF_8, redirect, state);
     }
 
     public static final String buildAuthorizeUrl(String appid, String charset, 

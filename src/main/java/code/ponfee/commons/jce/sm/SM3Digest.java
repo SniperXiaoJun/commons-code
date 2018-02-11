@@ -13,7 +13,7 @@ import org.bouncycastle.util.Arrays;
 public class SM3Digest {
 
     /** SM3值的长度 */
-    private static final int BYTE_LENGTH = 32;
+    private static final int DIGEST_SIZE = 32;
 
     /** SM3分组块大小 */
     private static final int BLOCK_SIZE = 64;
@@ -23,7 +23,7 @@ public class SM3Digest {
 
     private byte[] xBuf = new byte[BUFFER_LENGTH]; // 缓冲区
     private int xBufOffset; // 缓冲区偏移量
-    private byte[] V = Arrays.copyOf(SM3.IV, SM3.IV.length); // 初始向量
+    private byte[] iv = Arrays.copyOf(SM3.IV, SM3.IV.length); // 初始向量
     private int cntBlock = 0; // block数量
 
     private SM3Digest() {}
@@ -31,7 +31,7 @@ public class SM3Digest {
     private SM3Digest(SM3Digest t) {
         System.arraycopy(t.xBuf, 0, this.xBuf, 0, t.xBuf.length);
         this.xBufOffset = t.xBufOffset;
-        System.arraycopy(t.V, 0, this.V, 0, t.V.length);
+        System.arraycopy(t.iv, 0, this.iv, 0, t.iv.length);
     }
 
     public static SM3Digest getInstance() {
@@ -88,7 +88,7 @@ public class SM3Digest {
     }
 
     public byte[] doFinal(byte[] in) {
-        this.update(in);
+        this.update(in, 0, in.length);
         return this.doFinal();
     }
 
@@ -101,7 +101,7 @@ public class SM3Digest {
             System.arraycopy(tmp, i, B, 0, B.length);
             this.doHash(B);
         }
-        byte[] v = Arrays.copyOf(V, V.length);
+        byte[] v = Arrays.copyOf(iv, iv.length);
         this.reset();
         return v;
     }
@@ -109,11 +109,11 @@ public class SM3Digest {
     public void reset() {
         xBufOffset = 0;
         cntBlock = 0;
-        V = Arrays.copyOf(SM3.IV, SM3.IV.length);
+        iv = Arrays.copyOf(SM3.IV, SM3.IV.length);
     }
 
     public int getDigestSize() {
-        return BYTE_LENGTH;
+        return DIGEST_SIZE;
     }
 
     public String getKey(String inputStr) {
@@ -144,8 +144,8 @@ public class SM3Digest {
     }
 
     private void doHash(byte[] B) {
-        byte[] tmp = SM3.cf(V, B);
-        System.arraycopy(tmp, 0, V, 0, V.length);
+        byte[] tmp = SM3.cf(iv, B);
+        System.arraycopy(tmp, 0, iv, 0, iv.length);
         cntBlock++;
     }
 
@@ -443,30 +443,4 @@ public class SM3Digest {
         }
     }
 
-    public static void main(String[] args) {
-        String actual = Hex.encodeHexString(SM3Digest.getInstance().doFinal("0123456789".getBytes()));
-        if (!"09093b72553f5d9d622d6c62f5ffd916ee959679b1bd4d169c3e12aa8328e743".equals(actual)) {
-            System.err.println("sm3 digest error!");
-        } else {
-            System.out.println("SUCCESS!");
-        }
-
-        byte[] data = "0123456789".getBytes();
-
-        byte[] hash = SM3Digest.getInstance().doFinal(data);
-        System.out.println(Hex.encodeHexString(hash));
-
-        SM3Digest sm3 = SM3Digest.getInstance();
-
-        hash = sm3.doFinal(data);
-        System.out.println(Hex.encodeHexString(hash));
-
-        hash = sm3.doFinal(data);
-        System.out.println(Hex.encodeHexString(hash));
-
-        hash = sm3.doFinal(data);
-        System.out.println(Hex.encodeHexString(hash));
-
-        System.out.println(SM3Digest.getInstance().getKey("0123456789"));
-    }
 }

@@ -52,7 +52,7 @@ public final class WebUtils {
     }
 
     public static String getText(HttpServletRequest request) {
-        return getText(request, Files.DEFAULT_CHARSET);
+        return getText(request, Files.UTF_8);
     }
 
     /**
@@ -139,7 +139,7 @@ public final class WebUtils {
      * @param data
      */
     public static void respJson(HttpServletResponse resp, Object data) {
-        respJson(resp, data, Files.DEFAULT_CHARSET);
+        respJson(resp, data, Files.UTF_8);
     }
 
     public static void respJson(HttpServletResponse resp, Object data, String charset) {
@@ -148,7 +148,7 @@ public final class WebUtils {
 
     public static void respJsonp(HttpServletResponse response, 
                                  String callback, Object data) {
-        respJsonp(response, callback, data, Files.DEFAULT_CHARSET);
+        respJsonp(response, callback, data, Files.UTF_8);
     }
 
     /**
@@ -171,7 +171,7 @@ public final class WebUtils {
      */
     public static void response(HttpServletResponse resp, 
                                 InputStream input, String filename) {
-        response(resp, input, filename, Files.DEFAULT_CHARSET, false);
+        response(resp, input, filename, Files.UTF_8, false);
     }
 
     /**
@@ -208,7 +208,7 @@ public final class WebUtils {
      */
     public static void response(HttpServletResponse resp, 
                                 byte[] data, String filename) {
-        response(resp, data, filename, Files.DEFAULT_CHARSET, false);
+        response(resp, data, filename, Files.UTF_8, false);
     }
 
     /**

@@ -47,7 +47,7 @@ import code.ponfee.commons.jce.Providers;
  *    PKCS#8：PRIVATE KEY
  *    PKCS#8加密：ENCRYPTED PRIVATE KEY
  * 
- *   {@link org.bouncycastle.openssl.PEMParser}
+ * @see org.bouncycastle.openssl.PEMParser
  *   ("CERTIFICATE REQUEST",      new PKCS10CertificationRequestParser());
  *   ("NEW CERTIFICATE REQUEST",  new PKCS10CertificationRequestParser());
  *   ("CERTIFICATE",              new X509CertificateParser());
@@ -90,14 +90,8 @@ public final class RSAPrivateKeys {
      * @return
      */
     public static RSAPublicKey fakePublicKey(RSAPrivateKey privateKey) {
-        RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(privateKey.getModulus(), 
-                                                              privateKey.getPrivateExponent());
-        try {
-            return (RSAPublicKey) KeyFactory.getInstance(privateKey.getAlgorithm())
-                                            .generatePublic(publicKeySpec);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new SecurityException(e);
-        }
+        return RSAPublicKeys.toRSAPublicKey(privateKey.getModulus(), 
+                                            privateKey.getPrivateExponent());
     }
 
     // ----------------------------------EXTRACT PUBLIC KEY FROM PRIVATE KEY-----------------------------------

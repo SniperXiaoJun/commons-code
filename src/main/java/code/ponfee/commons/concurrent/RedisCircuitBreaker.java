@@ -165,7 +165,7 @@ public class RedisCircuitBreaker implements CircuitBreaker {
         final String key;
         final double timeMillis;
 
-        public Trace(String key, double timeMillis) {
+        Trace(String key, double timeMillis) {
             this.key = key;
             this.timeMillis = timeMillis;
         }

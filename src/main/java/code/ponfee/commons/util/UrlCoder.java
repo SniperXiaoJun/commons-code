@@ -13,7 +13,7 @@ import code.ponfee.commons.io.Files;
 public final class UrlCoder {
 
     public static String encodeURI(String url) {
-        return encodeURI(url, Files.DEFAULT_CHARSET);
+        return encodeURI(url, Files.UTF_8);
     }
 
     /**
@@ -51,7 +51,7 @@ public final class UrlCoder {
     }
 
     public static String decodeURI(String url) {
-        return decodeURI(url, Files.DEFAULT_CHARSET);
+        return decodeURI(url, Files.UTF_8);
     }
 
     /**
@@ -69,7 +69,7 @@ public final class UrlCoder {
     }
 
     public static String encodeURIComponent(String url) {
-        return encodeURIComponent(url, Files.DEFAULT_CHARSET);
+        return encodeURIComponent(url, Files.UTF_8);
     }
 
     /**
@@ -90,7 +90,7 @@ public final class UrlCoder {
     }
 
     public static String decodeURIComponent(String url) {
-        return decodeURIComponent(url, Files.DEFAULT_CHARSET);
+        return decodeURIComponent(url, Files.UTF_8);
     }
 
     /**
@@ -109,7 +109,7 @@ public final class UrlCoder {
         System.out.println(decodeURI(s));
 
         System.out.println("======================================");
-        s = encodeURIComponent("http://www.oschina.net/search?scope=bbs&q=C语言", Files.DEFAULT_CHARSET);
+        s = encodeURIComponent("http://www.oschina.net/search?scope=bbs&q=C语言", Files.UTF_8);
         System.out.println(s);
         System.out.println(decodeURIComponent(s));
 

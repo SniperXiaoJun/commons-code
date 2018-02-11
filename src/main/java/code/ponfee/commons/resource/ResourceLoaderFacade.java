@@ -68,7 +68,7 @@ public final class ResourceLoaderFacade {
      */
     public static Resource getResource(String filePath, Class<?> contextClass, String encoding) {
         if (encoding == null || encoding.length() == 0) {
-            encoding = Files.DEFAULT_CHARSET;
+            encoding = Files.UTF_8;
         }
         if (filePath == null) {
             filePath = "";
@@ -87,7 +87,7 @@ public final class ResourceLoaderFacade {
     }
 
     public static List<Resource> listResources(String extensions[], Class<?> contextClass) {
-        return listResources("", extensions, false, contextClass, Files.DEFAULT_CHARSET);
+        return listResources("", extensions, false, contextClass, Files.UTF_8);
     }
 
     public static List<Resource> listResources(String dir, String extensions[], boolean recursive) {

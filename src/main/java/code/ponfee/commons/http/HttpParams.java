@@ -25,7 +25,7 @@ public class HttpParams {
 
     // ----------------------------获取url中的参数----------------------------
     public static Map<String, String[]> parseUrlParams(String url) {
-        return parseUrlParams(url, Files.DEFAULT_CHARSET);
+        return parseUrlParams(url, Files.UTF_8);
     }
 
     public static Map<String, String[]> parseUrlParams(String url, String charset) {
@@ -35,7 +35,7 @@ public class HttpParams {
 
     // ------------------------解析query string中的请求参数-------------------------
     public static Map<String, String[]> parseParams(String queryString) {
-        return parseParams(queryString, Files.DEFAULT_CHARSET);
+        return parseParams(queryString, Files.UTF_8);
     }
 
     /**
@@ -51,7 +51,7 @@ public class HttpParams {
         }
 
         if (encoding == null) {
-            encoding = Files.DEFAULT_CHARSET;
+            encoding = Files.UTF_8;
         }
 
         String[] kv;
@@ -69,7 +69,7 @@ public class HttpParams {
      * @return
      */
     public static String buildParams(Map<String, ?> params) {
-        return HttpParams.buildParams(params, Files.DEFAULT_CHARSET);
+        return HttpParams.buildParams(params, Files.UTF_8);
     }
 
     /**

@@ -77,7 +77,7 @@ public class Strings {
     }
 
     public static long crc32(String str) {
-        return crc32(str, Files.DEFAULT_CHARSET);
+        return crc32(str, Files.UTF_8);
     }
 
     /**

@@ -17,7 +17,6 @@ import com.google.common.collect.ImmutableMap;
 
 import code.ponfee.commons.jce.ECParameters;
 import code.ponfee.commons.util.Bytes;
-import code.ponfee.commons.util.MavenProjects;
 
 /**
  * new BigInteger("0") // 0为十进制数字符串表示
@@ -36,11 +35,11 @@ public final class SM2 {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final ECPoint point;
-    private final byte[] key;
+    private final byte[] key = new byte[32];
+    private byte keyOffset;
     private SM3Digest sm3keybase;
     private SM3Digest sm3c3;
     private int ct;
-    private byte keyOffset;
 
     private SM2(ECPoint publicKey, BigInteger privateKey) {
         Preconditions.checkArgument(publicKey != null, 
@@ -49,7 +48,6 @@ public final class SM2 {
                                     "private key cannot be empty.");
 
         this.point = publicKey.multiply(privateKey); // S = [h]point
-        this.key = new byte[32];
         this.reset();
     }
 
@@ -69,11 +67,11 @@ public final class SM2 {
 
     private void nextKey() {
         SM3Digest sm3keycur = SM3Digest.getInstance(this.sm3keybase);
-        sm3keycur.update((byte) (ct >> 24 & 0xff));
-        sm3keycur.update((byte) (ct >> 16 & 0xff));
-        sm3keycur.update((byte) (ct >> 8 & 0xff));
-        sm3keycur.update((byte) (ct & 0xff));
-        sm3keycur.doFinal(key, 0);
+        sm3keycur.update((byte) (ct >>> 24));
+        sm3keycur.update((byte) (ct >>> 16));
+        sm3keycur.update((byte) (ct >>>  8));
+        sm3keycur.update((byte) (ct       ));
+        sm3keycur.doFinal(key, 0); // key
         this.keyOffset = 0;
         this.ct++;
     }
@@ -255,7 +253,7 @@ public final class SM2 {
         BigInteger n3 = n1.multiply(n2.mod(ecParam.n));
         BigInteger s = n3.mod(ecParam.n);
 
-        return new Signature(r, s).toByteArray();
+        return new Signature(r, s, ecParam.n).toByteArray();
     }
 
     public static boolean verify(byte[] data, byte[] ida, 
@@ -274,7 +272,7 @@ public final class SM2 {
      */
     public static boolean verify(ECParameters ecParam, byte[] data, byte[] ida, 
                                  byte[] signed, byte[] publicKey) {
-        Signature signature = new Signature(signed);
+        Signature signature = new Signature(signed, ecParam.n);
         if (   !isBetween(signature.r, BigInteger.ONE, ecParam.n)
             || !isBetween(signature.s, BigInteger.ONE, ecParam.n)) {
             return false;
@@ -407,25 +405,32 @@ public final class SM2 {
      */
     private static class Signature implements java.io.Serializable {
         private static final long serialVersionUID = -2732762291362285185L;
-        static final int SHORT_BYTES = Short.BYTES;
 
         final BigInteger r;
         final BigInteger s;
+        final BigInteger n;
 
-        Signature(BigInteger r, BigInteger s) {
+        Signature(BigInteger r, BigInteger s, BigInteger n) {
             this.r = r;
             this.s = s;
+            this.n = n;
         }
 
-        Signature(byte[] signed) {
-            short rLen = Bytes.toShort(Arrays.copyOf(signed, SHORT_BYTES));
-            this.r = new BigInteger(1, Arrays.copyOfRange(signed, SHORT_BYTES, SHORT_BYTES + rLen));
-            this.s = new BigInteger(1, Arrays.copyOfRange(signed, SHORT_BYTES + rLen, signed.length));
+        Signature(byte[] signed, BigInteger n) {
+            this.n = n;
+            int byteCount = (int) Math.ceil(this.n.bitLength() / 8.0);
+            this.r = new BigInteger(1, Arrays.copyOfRange(signed, 0, byteCount));
+            this.s = new BigInteger(1, Arrays.copyOfRange(signed, byteCount, byteCount << 1));
         }
 
         byte[] toByteArray() {
-            byte[] rBytes = r.toByteArray(); // fixed 32 byte length
-            return Bytes.concat(Bytes.fromShort((short) rBytes.length), rBytes, s.toByteArray());
+            int byteCount = (int) Math.ceil(this.n.bitLength() / 8.0);
+            byte[] out = new byte[byteCount * 2];
+            byte[] r1 = this.r.toByteArray();
+            byte[] s1 = this.s.toByteArray();
+            Bytes.copy(r1, 0, r1.length, out, 0, byteCount);
+            Bytes.copy(s1, 0, s1.length, out, byteCount, byteCount);
+            return out;
         }
 
         public @Override String toString() {
@@ -433,38 +438,4 @@ public final class SM2 {
         }
     }
 
-    public static void main(String[] args) {
-        //ECParameters ecParameter = ECParameters.secp256r1;
-        //ECParameters ecParameter = ECParameters.EC_PARAMETERS.get("secp256r1");
-        ECParameters ecParameter = ECParameters.EC_PARAMETERS.get("secp256k1");
-        for (int i = 0; i < 5; i++) {
-            byte[] data = MavenProjects.getMainJavaFileAsLineString(SM2.class).getBytes();
-            Map<String, byte[]> keyMap = generateKeyPair(ecParameter);
-
-            System.out.println("\n=============================加密/解密============================");
-            byte[] encrypted = encrypt(ecParameter, keyMap.get(PUBLIC_KEY), data);
-            byte[] decrypted = decrypt(ecParameter, keyMap.get(PRIVATE_KEY), encrypted);
-            System.out.println(new String(decrypted));
-
-            System.out.println("\n=============================签名/验签============================");
-            byte[] signed = sign(ecParameter, data, "IDA".getBytes(), getPublicKey(keyMap), getPrivateKey(keyMap));
-            System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(signed));
-            System.out.println(verify(ecParameter, data, "IDA".getBytes(), signed, getPublicKey(keyMap)));
-        }
-
-        byte[] data = MavenProjects.getMainJavaFileAsLineString(SM2.class).substring(0, 100).getBytes();
-        Map<String, byte[]> keyMap = generateKeyPair(ecParameter);
-        System.out.println("\ncheckPublicKey: "+checkPublicKey(ecParameter, getPublicKey(keyMap)));
-        for (int i = 0; i < 5; i++) {
-            System.out.println("\n=============================加密/解密============================");
-            byte[] encrypted = encrypt(ecParameter, keyMap.get(PUBLIC_KEY), data);
-            byte[] decrypted = decrypt(ecParameter, keyMap.get(PRIVATE_KEY), encrypted);
-            System.out.println(new String(decrypted));
-
-            System.out.println("\n=============================签名/验签============================");
-            byte[] signed = sign(ecParameter, data, "IDA".getBytes(), getPublicKey(keyMap), getPrivateKey(keyMap));
-            System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(signed));
-            System.out.println(verify(ecParameter, data, "IDA".getBytes(), signed, getPublicKey(keyMap)));
-        }
-    }
 }

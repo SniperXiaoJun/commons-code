@@ -26,8 +26,15 @@ package code.ponfee.commons.jce.crypto;
  * 11、SSF33，SSF28，SCB2(SM1)：国家密码局的隐蔽不公开的商用算法，在国内民用和商用的，除这些都不容许使用外，其他的都可以使用；
  * 12、ECC（Elliptic Curves Cryptography）：椭圆曲线密码编码学。
  * 13、TEA(Tiny Encryption Algorithm)简单高效的加密算法，加密解密速度快，实现简单。但安全性不如DES，QQ一直用tea加密
+ * 
+ * https://bouncycastle.org/documentation.html
+ * https://downloads.bouncycastle.org/fips-java/BC-FJA-UserGuide-1.0.0.pdf
+ * https://downloads.bouncycastle.org/fips-java/BC-FJA-(D)TLSUserGuide-1.0.3.pdf
+ * 
  * @author fupf
  */
 public enum Algorithm {
-    AES, DES, DESede, Blowfish, RC2, RC4, RC5, IDEA, TEA, TDEA/*, GASTI28, GOST*/;
+    AES, DES, DESede, Blowfish, RC2, RC4, RC5, //
+    IDEA, TEA, TDEA, Camellia, CAST5, GOST28147, //
+    SEED, Serpent, SHACAL2, Twofish; // 
 }

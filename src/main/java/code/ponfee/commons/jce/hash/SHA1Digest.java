@@ -6,6 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.commons.codec.binary.Hex;
 
 import code.ponfee.commons.jce.HashAlgorithms;
+import code.ponfee.commons.math.Maths;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.SecureRandoms;
@@ -63,7 +64,7 @@ import code.ponfee.commons.util.SecureRandoms;
  *   Ft(b,c,d) = (b&c)|(b&d)|(c&d)  40≤t≤59
  *   Ft(b,c,d) = b^c^d              60≤t≤79
  * 
- * 8、W[0] ~ W[19]处理：（注：S为左移位操作）
+ * 8、W[0] ~ W[19]处理：（注：S为循环左移位操作）
  *   for (int t=0; t<20; t++) {
  *     tmp=K0+F0(b,c,d)+S(5,a)+e+(sh->W[t]); // 将Kt+Ft(b,c,d)+(a<<5)+e+W[t]的结果赋值给临时变量tmp
  *     e=d;                                  // 将链接变量d初始值赋值给链接变量e
@@ -95,7 +96,7 @@ import code.ponfee.commons.util.SecureRandoms;
  *     c=S(30,b);
  *     b=a; a=tmp;
  *   }
- *   即：a,b,c,d,e ← [(a<<5)+ Ft(b,c,d)+e+Wt+Kt], a, (b<<30), c, d
+ *   即：Kt+Ft(b,c,d)+S(5,a)+e+Wt, a, S(30,b), c, d  →  a, b, c, d, e
  * 
  * 9、将循环80个步骤后的值a,b,c,d,e与原始链变量a′、b′、c′、d′、e′相加作为下一个明文分组的输入重复进行以上操作
  *   sh->a′+=a; sh->b′+=b; sh->c′+=c; 
@@ -107,13 +108,13 @@ import code.ponfee.commons.util.SecureRandoms;
  */
 public class SHA1Digest {
 
-    /** SHA-1分组块大小 */
+    /** SHA-1分组中每块的大小 */
     private static final int BLOCK_SIZE = 64;
 
-    /** SHA-1分组块大小 */
+    /** SHA-1摘要byte大小 */
     private static final int DIGEST_SIZE = 20;
 
-    /** 填充的界限 */
+    /** 填充的边界 */
     private static final int PADDING_BOUNDS = 448 / 8;
 
     /** 链变量 */
@@ -129,7 +130,7 @@ public class SHA1Digest {
     private static final int K2 = 0x8F1BBCDC;
     private static final int K3 = 0xCA62C1D6;
 
-    private final int[] W = new int[80];
+    private final  int[] work = new int[80];
     private final byte[] block = new byte[BLOCK_SIZE];
 
     private int a, b, c, d, e, blockOffset;
@@ -179,7 +180,7 @@ public class SHA1Digest {
     }
 
     public byte[] doFinal(byte[] data) {
-        this.update(data);
+        this.update(data, 0, data.length);
         return this.doFinal();
     }
 
@@ -190,14 +191,14 @@ public class SHA1Digest {
             padding0(this.block, this.blockOffset, BLOCK_SIZE); // 填充0
             this.digestBlock(this.block);
 
-            // 56 byte 0 and 8 bit length
+            // reset and repadding block
             this.blockOffset = 0;
         }
 
         padding0(this.block, this.blockOffset, PADDING_BOUNDS);
 
-        byte[] dataBitLength = Bytes.fromLong(this.byteCount << 3);
-        System.arraycopy(dataBitLength, 0, this.block, PADDING_BOUNDS, 8);
+        byte[] dataBitLen = Bytes.fromLong(this.byteCount << 3); // bit=byte*8
+        System.arraycopy(dataBitLen, 0, this.block, PADDING_BOUNDS, 8);
 
         this.digestBlock(this.block);
 
@@ -234,56 +235,56 @@ public class SHA1Digest {
 
         // sub-block（子明文分组）
         for (int j = 0; i < 16; j += 4) {
-            this.W[i++] = Bytes.toInt(data, j);
+            this.work[i++] = Bytes.toInt(data, j);
         }
 
         // ext-block（扩展明文分组）
         for (; i < 80; i++) {
-            this.W[i] = slr(this.W[i -  3] ^ this.W[i -  8] 
-                          ^ this.W[i - 14] ^ this.W[i - 16], 1);
+            this.work[i] = Maths.slr(this.work[i -  3] ^ this.work[i -  8] 
+                                   ^ this.work[i - 14] ^ this.work[i - 16], 1);
         }
 
         int a1 = this.a, b1 = this.b,
             c1 = this.c, d1 = this.d,
-            e1 = this.e;
+            e1 = this.e, t = 0, tmp;
 
         // round one
-        for (int t = 0; t < 20; t++) {
+        for (; t < 20;) {
             // 将Kt+Ft(b,c,d)+(a<<5)+e+W[t]的结果赋值给临时变量tmp
-            int tmp = K0 + f0(b1, c1, d1) + slr(a1, 5) + e1 + this.W[t];
+            tmp = K0 + f0(b1, c1, d1) + Maths.slr(a1, 5) + e1 + this.work[t++];
             e1 = d1; // 将链接变量d初始值赋值给链接变量e
             d1 = c1; // 将链接变量c初始值赋值给链接变量d
-            c1 = slr(b1, 30); // 将链接变量b初始值循环左移30位赋值给链接变量c
+            c1 = Maths.slr(b1, 30); // 将链接变量b初始值循环左移30位赋值给链接变量c
             b1 = a1; // 将链接变量a初始值赋值给链接变量b
             a1 = tmp; // tmp赋值给a
         }
 
         // round two
-        for (int t = 20; t < 40; t++) {
-            int tmp = K1 + f1(b1, c1, d1) + slr(a1, 5) + e1 + this.W[t];
+        for (; t < 40;) {
+            tmp = K1 + f1(b1, c1, d1) + Maths.slr(a1, 5) + e1 + this.work[t++];
             e1 = d1;
             d1 = c1;
-            c1 = slr(b1, 30);
+            c1 = Maths.slr(b1, 30);
             b1 = a1;
             a1 = tmp;
         }
 
         // round three
-        for (int t = 40; t < 60; t++) {
-            int tmp = K2 + f2(b1, c1, d1) + slr(a1, 5) + e1 + this.W[t];
+        for (; t < 60;) {
+            tmp = K2 + f2(b1, c1, d1) + Maths.slr(a1, 5) + e1 + this.work[t++];
             e1 = d1;
             d1 = c1;
-            c1 = slr(b1, 30);
+            c1 = Maths.slr(b1, 30);
             b1 = a1;
             a1 = tmp;
         }
 
         // round four
-        for (int t = 60; t < 80; t++) {
-            int tmp = K3 + f3(b1, c1, d1) + slr(a1, 5) + e1 + this.W[t];
+        for (; t < 80;) {
+            tmp = K3 + f3(b1, c1, d1) + Maths.slr(a1, 5) + e1 + this.work[t++];
             e1 = d1;
             d1 = c1;
-            c1 = slr(b1, 30);
+            c1 = Maths.slr(b1, 30);
             b1 = a1;
             a1 = tmp;
         }
@@ -312,18 +313,6 @@ public class SHA1Digest {
         return b ^ c ^ d;
     }
 
-    /**
-     * shift left round
-     * 循环左移位操作符Sn(X)，X是一个字，n是一个整数，0<=n<=32
-     * Sn(X) = (X<<n) OR (X>>>32-n)
-     * @param value
-     * @param n
-     * @return
-     */
-    private static int slr(int value, int n) {
-        return value << n | value >>> (32 - n);
-    }
-
     private static void padding0(byte[] bytes, int from, int to) {
         for (int i = from; i < to; i++) {
             bytes[i] = 0;
@@ -338,6 +327,9 @@ public class SHA1Digest {
     }
 
     public static void main(String[] args) {
+        System.out.println(Hex.encodeHexString(SHA1Digest.getInstance().doFinal()));
+        System.out.println(HashUtils.sha1Hex(new byte[] {}));
+
         byte[] data = MavenProjects.getMainJavaFileAsByteArray(SHA1Digest.class);
 
         SHA1Digest sha1 = SHA1Digest.getInstance();

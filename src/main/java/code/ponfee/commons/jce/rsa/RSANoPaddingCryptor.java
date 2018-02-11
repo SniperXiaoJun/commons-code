@@ -135,7 +135,7 @@ public class RSANoPaddingCryptor extends Cryptor {
                     // 解码数据块
                     decodeBlock(origin, cipherBlockSize, output);
                 } else {
-                    if (offset + cipherBlockSize < len) {
+                    if (offset + cipherBlockSize < len) { // 判断是否是最后一轮循环
                         // 固定明文长度
                         fixedByteArray(origin, originBlockSize, output);
                     } else {
@@ -216,20 +216,6 @@ public class RSANoPaddingCryptor extends Cryptor {
     }
 
     // --------------------------------private methods-------------------------------
-    static byte[] fixedByteArray(byte[] data, int fixedSize) {
-        if (data.length == fixedSize) {
-            return data;
-        }
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream(fixedSize);
-        try {
-            fixedByteArray(data, fixedSize, out);
-        } catch (IOException e) {
-            throw new SecurityException(e); // cannot happened
-        }
-        return out.toByteArray();
-    }
-
     /**
      * 
      * @param data        the data

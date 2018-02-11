@@ -3,14 +3,11 @@ package code.ponfee.commons.jce.sm;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Base64;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.util.Arrays;
 
 import com.google.common.base.Preconditions;
-
-import code.ponfee.commons.util.MavenProjects;
 
 /**
  * SM4 symmetric cryptor implementation
@@ -378,26 +375,6 @@ public final class SM4 {
             System.arraycopy(input, 0, result, 0, input.length - p);
         }
         return result;
-    }
-
-    public static void main(String[] args) throws IOException {
-        //byte[] data = Files.toString(MavenProjects.getMainJavaFile(SM4.class)).replaceAll("\r|\n", "").getBytes();
-        byte[] data = MavenProjects.getMainJavaFileAsLineString(SM4.class).substring(0, 997).getBytes();
-        byte[] key = "1234567785465466".getBytes();
-        byte[] iv = "1a345677b546d4de".getBytes();
-
-        byte[] encrypted = SM4.encrypt(key, data);
-        System.out.println(data.length + "-->" + encrypted.length + "\t|" + new String(SM4.decrypt(key, encrypted)) + "|");
-
-        encrypted = SM4.encrypt(key, iv, data);
-        System.out.println(Base64.getEncoder().encodeToString(encrypted));
-        System.out.println(data.length + "-->" + encrypted.length + "\t|" + new String(SM4.decrypt(key, iv, encrypted)) + "|");
-
-        encrypted = SM4.encrypt(false, key, data);
-        System.out.println(data.length + "-->" + encrypted.length + "\t|" + new String(SM4.decrypt(false, key, encrypted)) + "|");
-
-        encrypted = SM4.encrypt(false, key, iv, data);
-        System.out.println(data.length + "-->" + encrypted.length + "\t|" + new String(SM4.decrypt(false, key, iv, encrypted)) + "|");
     }
 
 }

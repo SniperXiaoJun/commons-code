@@ -9,6 +9,7 @@ import java.util.Arrays;
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jce.Key;
 import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
@@ -37,9 +38,9 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
 
         // 对密钥进行RSA加密，encryptedKey = key^e mode n
         byte[] encryptedKey = key.modPow(exponent, rsaKey.n).toByteArray();
-        encryptedKey = fixedByteArray(encryptedKey, keyByteLen); // mode pow之后可能被去0或加0
 
-        byte[] result = Arrays.copyOf(encryptedKey, encryptedKey.length + length);
+        byte[] result = new byte[keyByteLen + length];
+        Bytes.copy(encryptedKey, 0, encryptedKey.length, result, 0, keyByteLen); // mode pow之后可能被去0或加0
         for (int hLen = hashedKey.length, i = 0, j = 0; i < length; i++, j++) {
             if (j == hLen) {
                 j = 0;
@@ -64,7 +65,7 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
         byte[] hashedKey = HashUtils.sha512(key.toByteArray());
 
         byte[] result = new byte[input.length - keyByteLen];
-        for (int hLen = hashedKey.length, i = 0, j = 0; i < result.length; i++, j++) {
+        for (int hLen = hashedKey.length, rLen = result.length, i = 0, j = 0; i < rLen; i++, j++) {
             if (j == hLen) {
                 j = 0;
             }
@@ -86,10 +87,12 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
 
         // 对密钥进行RSA加密，encryptedKey = key^e mode n
         byte[] encryptedKey = key.modPow(exponent, rsaKey.n).toByteArray();
-        encryptedKey = fixedByteArray(encryptedKey, keyByteLen); // mode pow之后可能被去0或加0
 
+        byte[] encryptedKey0 = new byte[keyByteLen]; // mode pow之后可能被去0或加0
+        Bytes.copy(encryptedKey, 0, encryptedKey.length, encryptedKey0, 0, keyByteLen);
+        
         try {
-            output.write(encryptedKey); // encrypted key
+            output.write(encryptedKey0); // encrypted key
             byte[] buffer = new byte[this.getOriginBlockSize(rsaKey)];
             for (int hLen = hashedKey.length, len, i, j; (len = input.read(buffer)) != Files.EOF;) {
                 for (i = 0, j = 0; i < len; i++, j++) {

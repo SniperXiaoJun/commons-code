@@ -11,7 +11,6 @@ import java.security.cert.Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -57,14 +56,8 @@ public final class RSAPublicKeys {
      * @return
      */
     public static RSAPrivateKey fakePrivateKey(RSAPublicKey publicKey) {
-        RSAPrivateKeySpec spec = new RSAPrivateKeySpec(publicKey.getModulus(), 
-                                                       publicKey.getPublicExponent());
-        try {
-            return (RSAPrivateKey) KeyFactory.getInstance(publicKey.getAlgorithm())
-                                             .generatePrivate(spec);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new SecurityException(e);
-        }
+        return RSAPrivateKeys.toRSAPrivateKey(publicKey.getModulus(), 
+                                              publicKey.getPublicExponent());
     }
 
     // ----------------------------------PUBLIC KEY PKCS1 FORMAT-----------------------------------
