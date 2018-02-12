@@ -188,8 +188,8 @@ public class RSANoPaddingCryptor extends Cryptor {
         byte[] buffer = new byte[cipherBlockSize], encrypted, origin;
 
         try {
-            int inputLen = input.available();
-            for (int len, offset = 0; (len = input.read(buffer)) != Files.EOF; offset += cipherBlockSize) {
+            int len, offset = 0, inputLen = input.available();
+            for (; (len = input.read(buffer)) != Files.EOF; offset += cipherBlockSize) {
                 // 切割密文数据块
                 encrypted = Arrays.copyOfRange(buffer, 0, len);
 

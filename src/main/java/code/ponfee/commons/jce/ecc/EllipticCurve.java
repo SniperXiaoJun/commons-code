@@ -211,7 +211,7 @@ public class EllipticCurve {
     private ECPoint calculateBasePointG() {
         return null; // TODO
         /*BigInteger x = BigInteger.ONE, y, 
-                   dum = (x.modPow(THREE, this.p).add(a.multiply(x)).add(b)).mod(p); // x^3 + ax + b
+        dum = (x.modPow(THREE, this.p).add(a.multiply(x)).add(b)).mod(p); // x^3 + ax + b
         long i = 0;
         do {
             y = BigInteger.valueOf(i++);

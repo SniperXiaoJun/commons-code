@@ -33,12 +33,15 @@ public final class SM2 {
     public static final String PRIVATE_KEY = "SM2PrivateKey";
     public static final String PUBLIC_KEY = "SM2PublicKey";
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final int KEY_LENGTH = 32;
 
     private final ECPoint point;
-    private final byte[] key = new byte[32];
+    private final byte[] key = new byte[KEY_LENGTH];
+    private final SM3Digest sm3keybase = SM3Digest.getInstance(); // sm3 keybase
+    private final SM3Digest sm3c3 = SM3Digest.getInstance(); // sm3 c3
+    private final byte[] x, y;
+
     private byte keyOffset;
-    private SM3Digest sm3keybase;
-    private SM3Digest sm3c3;
     private int ct;
 
     private SM2(ECPoint publicKey, BigInteger privateKey) {
@@ -48,19 +51,19 @@ public final class SM2 {
                                     "private key cannot be empty.");
 
         this.point = publicKey.multiply(privateKey); // S = [h]point
+        this.x = to32ByteArray(this.point.normalize().getXCoord().toBigInteger());
+        this.y = to32ByteArray(this.point.normalize().getYCoord().toBigInteger());
         this.reset();
     }
 
     private void reset() {
-        this.sm3keybase = SM3Digest.getInstance();
-        this.sm3c3 = SM3Digest.getInstance();
+        this.sm3keybase.reset();
+        this.sm3keybase.update(this.x);
+        this.sm3keybase.update(this.y);
 
-        byte[] p = to32ByteArray(this.point.normalize().getXCoord().toBigInteger());
-        this.sm3keybase.update(p);
-        this.sm3c3.update(p);
+        this.sm3c3.reset();
+        this.sm3c3.update(this.x);
 
-        p = to32ByteArray(this.point.normalize().getYCoord().toBigInteger());
-        this.sm3keybase.update(p);
         this.ct = 1;
         nextKey();
     }
@@ -71,27 +74,28 @@ public final class SM2 {
         sm3keycur.update((byte) (ct >>> 16));
         sm3keycur.update((byte) (ct >>>  8));
         sm3keycur.update((byte) (ct       ));
-        sm3keycur.doFinal(key, 0); // key
+        sm3keycur.doFinal(key, 0); // update key
         this.keyOffset = 0;
         this.ct++;
     }
 
     private void encrypt(byte data[]) {
         this.sm3c3.update(data);
-        for (int i = 0; i < data.length; i++) {
-            if (keyOffset == key.length) {
+
+        for (int i = 0, len = data.length; i < len;) {
+            if (keyOffset == KEY_LENGTH) {
                 nextKey();
             }
-            data[i] ^= key[keyOffset++];
+            data[i++] ^= key[keyOffset++];
         }
     }
 
     private void decrypt(byte data[]) {
-        for (int i = 0; i < data.length; i++) {
-            if (keyOffset == key.length) {
+        for (int i = 0, len = data.length; i < len;) {
+            if (keyOffset == KEY_LENGTH) {
                 nextKey();
             }
-            data[i] ^= key[keyOffset++];
+            data[i++] ^= key[keyOffset++];
         }
 
         this.sm3c3.update(data);
@@ -418,14 +422,14 @@ public final class SM2 {
 
         Signature(byte[] signed, BigInteger n) {
             this.n = n;
-            int byteCount = (int) Math.ceil(this.n.bitLength() / 8.0);
+            int byteCount = (int) Math.ceil(this.n.bitLength() / 8.0D);
             this.r = new BigInteger(1, Arrays.copyOfRange(signed, 0, byteCount));
             this.s = new BigInteger(1, Arrays.copyOfRange(signed, byteCount, byteCount << 1));
         }
 
         byte[] toByteArray() {
-            int byteCount = (int) Math.ceil(this.n.bitLength() / 8.0);
-            byte[] out = new byte[byteCount * 2];
+            int byteCount = (int) Math.ceil(this.n.bitLength() / 8.0D);
+            byte[] out = new byte[byteCount << 1];
             byte[] r1 = this.r.toByteArray();
             byte[] s1 = this.s.toByteArray();
             Bytes.copy(r1, 0, r1.length, out, 0, byteCount);

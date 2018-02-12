@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
@@ -176,7 +175,7 @@ public final class HashUtils {
      */
     public static byte[] digest(HashAlgorithms alg, Provider provider, 
                                 InputStream input) {
-        byte[] buffer = new byte[BUFF_SIZE];
+        byte[] buff = new byte[BUFF_SIZE];
         MessageDigest digest = null;
         try {
             digest = (provider == null)
@@ -186,25 +185,25 @@ public final class HashUtils {
             throw new IllegalArgumentException(e); // cannot happened
         }
 
-        /*try (InputStream in = input) {
-            for (int len; (len = in.read(buffer)) != Files.EOF;) {
-                digest.update(buffer, 0, len);
-            }
-            return digest.digest();
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e);
-        }*/
-
-        try (InputStream in = input; 
-             DigestInputStream dIn = new DigestInputStream(input, digest)
-         ) {
-            while (dIn.read(buffer) != Files.EOF) {
-                //  do-non
+        try (InputStream in = input) {
+            for (int n; (n = in.read(buff, 0, buff.length)) != Files.EOF;) {
+                digest.update(buff, 0, n);
             }
             return digest.digest();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        /*try (InputStream in = input; 
+             DigestInputStream dIn = new DigestInputStream(input, digest)
+         ) {
+            while (dIn.read(buff, 0, buff.length) != Files.EOF) {
+                //  do-non
+            }
+            return digest.digest();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }*/
     }
 
     public static void main(String[] args) throws Exception {

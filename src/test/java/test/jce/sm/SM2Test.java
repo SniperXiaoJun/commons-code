@@ -44,8 +44,9 @@ public class SM2Test {
         //ECParameters ecParameter = ECParameters.EC_PARAMETERS.get("secp256k1");
         ECParameters ecParameter = ECParameters.SM2_BEST;
 
-        byte[] privateKey1 = Base64.getDecoder().decode("GH452IHyXZZH8ciL7oc1mJVcyM0FNlGNF5mvun8jm4s=");
-        byte[] encrypted1 = Base64.getDecoder().decode("BMzYcWfq1IlMkQ4IEYlY/uhaJ8QWFiFfGsBmWRh3SVEA+MpIpSkaZfUas5D57GaF+QWB5BBy8Om2C1Bw6R+Rc7nSaFhvnaNMpMI3AEqYYiA0UifgQxE7NMxUVoXvUs/HeQcd79XmfqwK1jwJn8jkcdrnZZtKDXCrK1qPIe6o4/mw8oPEE7ug7iV7aSYd7bsr5BEAQBNoUTBj9AmMvN24tmbAcKdwQQ==");
+        //byte[] publicKey1 = Base64.getDecoder().decode("BO4mfnJY5lS3hoOIIHprItHahfPOZJD/09/uRkqXNIvouN1XradI8sCIj6V98DmFBvIT+FQ9z83BfiNNE3GFxqo=");
+        byte[] privateKey1 = Base64.getDecoder().decode("C0FWfDf72leqqANMMig9ExGcFPOpbRHtP02z/ZtTHgk=");
+        byte[] encrypted1 = Base64.getDecoder().decode("BMY2XN12FPO9zT/4S6aeOQwQKpwbfzAzYFqN2AJvdATFh/bESg4SeytJcFFtGm+B0tbtZOIH5O2ku24+giYYDF4XdSA0m7sji9oAkPERtjMcsM3R8JyI5kh4GRa/IYva9WNWF2HHBSmFHeEfqGM7C/M3BReeI8Q6O3wIpdHFepNKpQCdj/R5iFM6sY3DQIlh6P3J8NX/wOakx5pQ");
         System.out.println(new String(SM2.decrypt(privateKey1, encrypted1)));
 
         for (int i = 0; i < 5; i++) {

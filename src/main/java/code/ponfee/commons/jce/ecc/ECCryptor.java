@@ -75,7 +75,8 @@ public class ECCryptor extends Cryptor {
         ECPoint secure = ecKey.beta.multiply(rk);
 
         // 用hash值与原文进行xor操作
-        byte[] hashed = HashUtils.sha512(secure.getX().toByteArray(), secure.getY().toByteArray());
+        byte[] hashed = HashUtils.sha512(secure.getX().toByteArray(), 
+                                         secure.getY().toByteArray());
         for (int hLen = hashed.length, i = 0, j = 0; i < length; i++, j++) {
             if (j == hLen) {
                 j = 0;
@@ -99,9 +100,11 @@ public class ECCryptor extends Cryptor {
 
         byte[] hashed;
         if (secure.isZero()) {
-            hashed = HashUtils.sha512(BigInteger.ZERO.toByteArray(), BigInteger.ZERO.toByteArray());
+            hashed = HashUtils.sha512(BigInteger.ZERO.toByteArray(), 
+                                      BigInteger.ZERO.toByteArray());
         } else {
-            hashed = HashUtils.sha512(secure.getX().toByteArray(), secure.getY().toByteArray());
+            hashed = HashUtils.sha512(secure.getX().toByteArray(), 
+                                      secure.getY().toByteArray());
         }
 
         int length = input.length - offset;

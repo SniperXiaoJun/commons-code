@@ -13,6 +13,7 @@ import code.ponfee.commons.util.SecureRandoms;
 
 /**
  * The SHA-1 digest implementation（max 2^64 bit length）
+ * http://www.oschina.net/translate/keccak-the-new-sha-3-encryption-standard
  * 
  * 异或⊕，同或⊙
  * 同或 = 异或  ^ 1
@@ -117,20 +118,20 @@ public class SHA1Digest {
     /** 填充的边界 */
     private static final int PADDING_BOUNDS = 448 / 8;
 
-    /** 链变量 */
+    /** 五个链变量A,B,C,D,E */
     private static final int A = 0x67452301;
     private static final int B = 0xEFCDAB89;
     private static final int C = 0x98BADCFE;
     private static final int D = 0x10325476;
     private static final int E = 0xC3D2E1F0;
 
-    /** 常数K */
+    /** 4个常数K */
     private static final int K0 = 0x5A827999;
     private static final int K1 = 0x6ED9EBA1;
     private static final int K2 = 0x8F1BBCDC;
     private static final int K3 = 0xCA62C1D6;
 
-    private final  int[] work = new int[80];
+    private final   int[] work = new int[80];
     private final byte[] block = new byte[BLOCK_SIZE];
 
     private int a, b, c, d, e, blockOffset;
@@ -203,11 +204,11 @@ public class SHA1Digest {
         this.digestBlock(this.block);
 
         byte[] digest = new byte[DIGEST_SIZE];
-        toByteArray(this.a, digest,  0);
-        toByteArray(this.b, digest,  4);
-        toByteArray(this.c, digest,  8);
-        toByteArray(this.d, digest, 12);
-        toByteArray(this.e, digest, 16);
+        Bytes.toByteArray(this.a, digest,  0);
+        Bytes.toByteArray(this.b, digest,  4);
+        Bytes.toByteArray(this.c, digest,  8);
+        Bytes.toByteArray(this.d, digest, 12);
+        Bytes.toByteArray(this.e, digest, 16);
 
         this.reset();
 
@@ -315,15 +316,8 @@ public class SHA1Digest {
 
     private static void padding0(byte[] bytes, int from, int to) {
         for (int i = from; i < to; i++) {
-            bytes[i] = 0;
+            bytes[i] = 0x00;
         }
-    }
-
-    public static void toByteArray(int n, byte[] bytes, int offset) {
-        bytes[  offset] = (byte) (n >>> 24);
-        bytes[++offset] = (byte) (n >>> 16);
-        bytes[++offset] = (byte) (n >>>  8);
-        bytes[++offset] = (byte) (n       );
     }
 
     public static void main(String[] args) {

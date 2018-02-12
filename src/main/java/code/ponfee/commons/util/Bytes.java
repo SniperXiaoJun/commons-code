@@ -324,9 +324,9 @@ public final class Bytes {
 
     public static short toShort(byte[] bytes, int fromIdx) {
         return (short) (
-                      ((short) bytes[  fromIdx]) << 8 
-                    | ((short) bytes[++fromIdx] & 0xFF)
-               );
+              ((short) bytes[  fromIdx]) << 8 
+            | ((short) bytes[++fromIdx] & 0xFF)
+        );
         //ByteBuffer buffer = ByteBuffer.allocate(Short.BYTES);
         //buffer.put(bytes, fromIdx, Short.BYTES).flip();
         //return buffer.getShort();
@@ -345,7 +345,7 @@ public final class Bytes {
 
     public static int toInt(byte[] bytes, int fromIdx) {
         return (bytes[  fromIdx]       ) << 24 // 转int后左移24位，刚好剩下原来的8位，故不用&0xFF
-             | (bytes[++fromIdx] & 0xFF) << 16
+             | (bytes[++fromIdx] & 0xFF) << 16 // 默认转int
              | (bytes[++fromIdx] & 0xFF) <<  8
              | (bytes[++fromIdx] & 0xFF);
     }
@@ -388,6 +388,19 @@ public final class Bytes {
      */
     public static long toLong(byte[] bytes) {
         return toLong(bytes, 0);
+    }
+
+    /**
+     * int转byte
+     * @param n
+     * @param bytes
+     * @param offset
+     */
+    public static void toByteArray(int n, byte[] bytes, int offset) {
+        bytes[  offset] = (byte) (n >>> 24);
+        bytes[++offset] = (byte) (n >>> 16);
+        bytes[++offset] = (byte) (n >>>  8);
+        bytes[++offset] = (byte) (n       );
     }
 
     /**
@@ -447,7 +460,8 @@ public final class Bytes {
 
     /**
      * copy in to out
-     * 从尾部开始拷贝，in数据不足则补0，有多则舍去
+     * 从尾部开始拷贝，in数据不足则out前面补0，
+     * 若in有多则舍去in前面的数据
      * @param in
      * @param inFrom
      * @param inLen

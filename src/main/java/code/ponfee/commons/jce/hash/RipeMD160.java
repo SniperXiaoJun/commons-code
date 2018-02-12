@@ -99,12 +99,15 @@ public class RipeMD160 {
 
     public byte[] doFinal() {
         finish(working, byteCount, 0);
-        byte[] res = new byte[20];
+        byte[] result = new byte[digest.length << 2];
+
         for (int i = 0; i < 20; i++) {
-            res[i] = (byte) ((digest[i >> 2] >>> ((i & 3) << 3)) & 0x000000FF);
+            result[i] = (byte) (digest[i >> 2] >>> ((i & 3) << 3));
         }
+
         reset();
-        return res;
+
+        return result;
     }
 
     public byte[] doFinal(byte[] input) {

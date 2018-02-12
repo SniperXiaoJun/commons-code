@@ -30,11 +30,12 @@ public final class WebContext {
     private static ThreadLocal<HttpServletResponse> response = new ThreadLocal<>();
 
     /** 用于非用户访问请求：程序内部反射调用controller方法 */
-    private static ThreadLocal<Map<String, String[]>> custparams = new ThreadLocal<Map<String, String[]>>() {
-        public @Override Map<String, String[]> initialValue() {
-            return new HashMap<>();
-        }
-    };
+    private static ThreadLocal<Map<String, String[]>> custparams =
+        new ThreadLocal<Map<String, String[]>>() {
+            public @Override Map<String, String[]> initialValue() {
+                return new HashMap<>();
+            }
+        };
 
     // -----------------------getter
     public static HttpServletRequest getRequest() {

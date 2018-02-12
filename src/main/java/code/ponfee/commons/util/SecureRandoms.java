@@ -68,9 +68,5 @@ public final class SecureRandoms {
     public static byte[] generateSeed(int numBytes) {
         return SECURE_RANDOM.generateSeed(numBytes);
     }
-    public static void main(String[] args) {
-        for (int i = 0; i < 1000;i++) {
-            System.out.println(SecureRandoms.nextInt(2));
-        }
-    }
+
 }

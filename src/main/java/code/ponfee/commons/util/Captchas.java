@@ -56,6 +56,10 @@ public class Captchas {
         return codes.toString();
     }
 
+    public static void generate(int width, OutputStream out, String code) {
+        generate(width, (int) Math.ceil(width * 0.618D), out, code);
+    }
+
     /**
      * 输出指定验证码图片流
      * @param width
@@ -105,7 +109,7 @@ public class Captchas {
         shear(g2, width, height, c);// 使图片扭曲
 
         g2.setColor(getRandColor(100, 160));
-        int fontSize = height - 12;
+        int fontSize = height - 14;
         g2.setFont(new Font("Algerian", Font.ITALIC, fontSize));
         char[] chars = code.toCharArray();
         int size = code.length();
@@ -115,7 +119,10 @@ public class Captchas {
                                  (ThreadLocalRandom.current().nextBoolean() ? 1 : -1), 
                                  (width / size) * i + fontSize / 2, height / 2);
             g2.setTransform(affine);
-            g2.drawChars(chars, i, 1, ((width - 10) / size) * i + 5, height / 2 + fontSize / 2 - 10);
+            int x = 1, y = 4;
+            g2.drawChars(chars, i, 1, 
+                         ((width - 11) / size) * i + x, 
+                         height / 2 + fontSize / 2 - y);
         }
 
         g2.dispose();
@@ -129,12 +136,8 @@ public class Captchas {
 
     //-------------------------private methods
     private static Color getRandColor(int fc, int bc) {
-        if (fc > 255) {
-            fc = 255;
-        }
-        if (bc > 255) {
-            bc = 255;
-        }
+        fc = fc > 255 ? 255 : fc;
+        bc = bc > 255 ? 255 : bc;
         int r = fc + ThreadLocalRandom.current().nextInt(bc - fc);
         int g = fc + ThreadLocalRandom.current().nextInt(bc - fc);
         int b = fc + ThreadLocalRandom.current().nextInt(bc - fc);
@@ -145,8 +148,7 @@ public class Captchas {
         int[] rgb = getRandomRgb();
         int color = 0;
         for (int c : rgb) {
-            color = color << 8;
-            color = color | c;
+            color = (color << 8) | c;
         }
         return color;
     }
@@ -197,7 +199,9 @@ public class Captchas {
 
     public static void main(String[] args) throws FileNotFoundException {
         int width = 80;
-        generate(width, (int) (width * 0.618), new FileOutputStream("D:/a.jpg"), random(4));
+        for (int i = 0; i < 100; i++) {
+            generate(width, new FileOutputStream("D:/img/"+i+".jpg"), random(4));
+        }
     }
 
 }

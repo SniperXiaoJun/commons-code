@@ -140,8 +140,9 @@ public final class HmacUtils {
 
         try {
             Mac mac = (provider == null)
-                ? Mac.getInstance(algorithm.name()) 
-                : Mac.getInstance(algorithm.name(), provider);
+                      ? Mac.getInstance(algorithm.name()) 
+                      : Mac.getInstance(algorithm.name(), provider);
+
             mac.init(new SecretKeySpec(key, mac.getAlgorithm()));
             return mac;
         } catch (final NoSuchAlgorithmException e) {

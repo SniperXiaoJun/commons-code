@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -196,10 +195,6 @@ public class TempTest {
         return ByteBuffer.allocate(Short.BYTES).putShort(value).array();
     }
 
-    public static short toShort(byte[] bytes) {
-        return toShort(bytes, 0);
-    }
-
     public static short toShort(byte[] bytes, int fromIdx) {
         ByteBuffer buffer = ByteBuffer.allocate(Short.BYTES);
         buffer.put(bytes, fromIdx, Short.BYTES).flip();
@@ -208,10 +203,6 @@ public class TempTest {
 
     public static byte[] fromInt(int value) {
         return ByteBuffer.allocate(Integer.BYTES).putInt(value).array();
-    }
-
-    public static int toInt(byte[] bytes) {
-        return toInt(bytes, 0);
     }
 
     public static int toInt(byte[] bytes, int fromIdx) {
@@ -230,7 +221,4 @@ public class TempTest {
         return buffer.getLong();
     }
 
-    public static long toLong(byte[] bytes) {
-        return toLong(bytes, 0);
-    }
 }
