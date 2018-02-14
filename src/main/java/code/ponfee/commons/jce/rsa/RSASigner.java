@@ -159,9 +159,6 @@ public class RSASigner {
     }
 
     /**
-     * {@link org.bouncycastle.asn1.DERSequence}
-     * {@link org.bouncycastle.asn1.x509.DigestInfo}
-     * 
      * DER :: {
      *     BERTags.SEQUENCE|BERTags.CONSTRUCTED, 
      *     totalLength,
@@ -172,10 +169,14 @@ public class RSASigner {
      *     digestLength,
      *     digestBody
      * }
+     * 
      * @param hash
      * @param digestOid
-     * @return der encoded
+     * @return the byte array of der encoded
      * @throws IOException
+     * @see org.bouncycastle.asn1.DERSequence
+     * @see org.bouncycastle.asn1.x509.DigestInfo
+     * @see org.bouncycastle.asn1.BERTags
      */
     private byte[] derEncode(byte[] hash, ASN1ObjectIdentifier digestOid) 
         throws IOException {

@@ -226,10 +226,10 @@ public class ECParameters implements java.io.Serializable {
     }
 
     public static void main(String[] args) {
-        System.out.println(EC_PARAMETERS.get("secp112r1").equals(secp112r1));
-        System.out.println(EC_PARAMETERS.get("secp160r1").equals(secp160r1));
-        System.out.println(EC_PARAMETERS.get("secp256r1").equals(secp256r1));
-        System.out.println(SM2_BEST.equals(fromString(SM2_BEST.toString())));
+        assert EC_PARAMETERS.get("secp112r1").equals(secp112r1);
+        assert EC_PARAMETERS.get("secp160r1").equals(secp160r1);
+        assert EC_PARAMETERS.get("secp256r1").equals(secp256r1);
+        assert SM2_BEST.equals(fromString(SM2_BEST.toString()));
         for (ECParameters param : EC_PARAMETERS.values()) {
             System.out.println(param);
         }

@@ -18,7 +18,7 @@ import code.ponfee.commons.util.Bytes;
  * 
  * @author Ponfee
  */
-public class SM2KeyExchange implements Serializable {
+public class SM2KeyExchanger implements Serializable {
 
     private static final long serialVersionUID = 8553046425593791291L;
 
@@ -33,11 +33,11 @@ public class SM2KeyExchange implements Serializable {
     private final BigInteger privateKey;
     private final byte[] Z;
 
-    public SM2KeyExchange(byte[] ida, ECPoint publicKey, BigInteger privateKey) {
+    public SM2KeyExchanger(byte[] ida, ECPoint publicKey, BigInteger privateKey) {
         this(ida, publicKey, privateKey, ECParameters.SM2_BEST);
     }
 
-    public SM2KeyExchange(byte[] ida, ECPoint publicKey, BigInteger privateKey, 
+    public SM2KeyExchanger(byte[] ida, ECPoint publicKey, BigInteger privateKey, 
                           ECParameters ecParam) {
         this.ecParam = ecParam;
         this.w = new BigInteger("2").pow((int) Math.ceil(ecParam.n.bitLength() * 1.0 / 2) - 1);

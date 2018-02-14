@@ -1,5 +1,7 @@
 package code.ponfee.commons.util;
 
+import static java.util.concurrent.ThreadLocalRandom.current;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -12,23 +14,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.concurrent.ThreadLocalRandom;
 
-import com.sun.image.codec.jpeg.ImageFormatException;
-import com.sun.image.codec.jpeg.JPEGCodec;
+import javax.imageio.ImageIO;
 
 /**
  * 图片验证码生成类
  * @author fupf
  */
-@SuppressWarnings("restriction")
 public class Captchas {
 
-    //使用到Algerian字体，系统里没有的话需要安装字体，字体只显示大写，去掉了1,0,i,o几个容易混淆的字符
+    // 使用到Algerian字体，系统里没有的话需要安装字体
+    // 去掉了1,0,i,o几个容易混淆的字符
     private static final char[] CODES = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ".toCharArray();
 
-    private static final Color[] COLOR_SPACES = { Color.RED, Color.CYAN, Color.GRAY, Color.LIGHT_GRAY,
-        Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.WHITE, Color.PINK, Color.BLUE, Color.YELLOW };
+    private static final Color[] COLOR_SPACES = {
+        Color.RED, Color.GRAY, Color.YELLOW, Color.WHITE,
+        Color.GREEN, Color.CYAN, Color.PINK, Color.BLUE,
+        Color.MAGENTA, Color.ORANGE, Color.LIGHT_GRAY
+    };
 
     /**
      * 使用系统默认字符源生成验证码
@@ -74,39 +77,39 @@ public class Captchas {
         Color[] colors = new Color[5];
         float[] fractions = new float[colors.length];
         for (int i = 0; i < colors.length; i++) {
-            colors[i] = COLOR_SPACES[ThreadLocalRandom.current().nextInt(COLOR_SPACES.length)];
-            fractions[i] = ThreadLocalRandom.current().nextFloat();
+            colors[i] = COLOR_SPACES[current().nextInt(COLOR_SPACES.length)];
+            fractions[i] = current().nextFloat();
         }
         Arrays.sort(fractions);
 
-        g2.setColor(Color.GRAY);// 设置边框色
+        g2.setColor(Color.GRAY); // 设置边框色
         g2.fillRect(0, 0, width, height);
 
         Color c = getRandColor(200, 250);
-        g2.setColor(c);// 设置背景色
+        g2.setColor(c); // 设置背景色
         g2.fillRect(0, 2, width, height - 4);
 
-        //绘制干扰线
-        g2.setColor(getRandColor(160, 200));// 设置线条的颜色
-        for (int i = 0; i < 20; i++) {
-            int x = ThreadLocalRandom.current().nextInt(width - 1);
-            int y = ThreadLocalRandom.current().nextInt(height - 1);
-            int xl = ThreadLocalRandom.current().nextInt(6) + 1;
-            int yl = ThreadLocalRandom.current().nextInt(12) + 1;
+        // 绘制干扰线
+        g2.setColor(getRandColor(160, 200)); // 设置线条的颜色
+        for (int i = 0; i < 15; i++) {
+            int x = current().nextInt(width - 1);
+            int y = current().nextInt(height - 1);
+            int xl = current().nextInt(6) + 1;
+            int yl = current().nextInt(12) + 1;
             g2.drawLine(x, y, x + xl + 40, y + yl + 20);
         }
 
         // 添加噪点
-        float yawpRate = 0.05f;// 噪声率
+        float yawpRate = 0.03f; // 噪声率
         int area = (int) (yawpRate * width * height);
         for (int i = 0; i < area; i++) {
-            int x = ThreadLocalRandom.current().nextInt(width);
-            int y = ThreadLocalRandom.current().nextInt(height);
+            int x = current().nextInt(width);
+            int y = current().nextInt(height);
             int rgb = getRandomIntColor();
             image.setRGB(x, y, rgb);
         }
 
-        shear(g2, width, height, c);// 使图片扭曲
+        shear(g2, width, height, c); // 使图片扭曲
 
         g2.setColor(getRandColor(100, 160));
         int fontSize = height - 14;
@@ -115,21 +118,27 @@ public class Captchas {
         int size = code.length();
         for (int i = 0; i < size; i++) {
             AffineTransform affine = new AffineTransform();
-            affine.setToRotation(Math.PI / 4 * ThreadLocalRandom.current().nextDouble() * 
-                                 (ThreadLocalRandom.current().nextBoolean() ? 1 : -1), 
-                                 (width / size) * i + fontSize / 2, height / 2);
+            int signum = (current().nextBoolean() ? 1 : -1);
+            affine.setToRotation(
+                Math.PI / 4 * current().nextDouble() * signum, 
+                width / size * i + fontSize / 2, 
+                height / 2
+            );
             g2.setTransform(affine);
             int x = 1, y = 4;
-            g2.drawChars(chars, i, 1, 
-                         ((width - 11) / size) * i + x, 
-                         height / 2 + fontSize / 2 - y);
+            g2.drawChars(
+                chars, i, 1, 
+                (width - 7) / size * i + x, 
+                height / 2 + fontSize / 2 - y
+            );
         }
 
         g2.dispose();
 
         try {
-            JPEGCodec.createJPEGEncoder(out).encode(image); // ImageIO.write(image, "JPEG", os);
-        } catch (ImageFormatException | IOException e) {
+            ImageIO.write(image, "JPEG", out);
+            //JPEGCodec.createJPEGEncoder(out).encode(image);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -138,27 +147,26 @@ public class Captchas {
     private static Color getRandColor(int fc, int bc) {
         fc = fc > 255 ? 255 : fc;
         bc = bc > 255 ? 255 : bc;
-        int r = fc + ThreadLocalRandom.current().nextInt(bc - fc);
-        int g = fc + ThreadLocalRandom.current().nextInt(bc - fc);
-        int b = fc + ThreadLocalRandom.current().nextInt(bc - fc);
+        int r = fc + current().nextInt(bc - fc);
+        int g = fc + current().nextInt(bc - fc);
+        int b = fc + current().nextInt(bc - fc);
         return new Color(r, g, b);
     }
 
     private static int getRandomIntColor() {
-        int[] rgb = getRandomRgb();
         int color = 0;
-        for (int c : rgb) {
+        for (int c : getRandomRgb()) {
             color = (color << 8) | c;
         }
         return color;
     }
 
     private static int[] getRandomRgb() {
-        int[] rgb = new int[3];
-        for (int i = 0; i < 3; i++) {
-            rgb[i] = ThreadLocalRandom.current().nextInt(255);
-        }
-        return rgb;
+        return new int[] {
+            current().nextInt(256),
+            current().nextInt(256),
+            current().nextInt(256)
+        };
     }
 
     private static void shear(Graphics g, int w1, int h1, Color color) {
@@ -167,12 +175,13 @@ public class Captchas {
     }
 
     private static void shearX(Graphics g, int w1, int h1, Color color) {
-        int period = ThreadLocalRandom.current().nextInt(2);
+        int period = current().nextInt(2),
+             phase = current().nextInt(2);
 
         boolean borderGap = true;
-        double frames = 1, phase = ThreadLocalRandom.current().nextInt(2);
+        double frames = (2 * Math.PI * phase) / 1.0D;
         for (int d, i = 0; i < h1; i++) {
-            d = (int) ((period >> 1) * Math.sin((double) i / period + (2 * Math.PI * phase) / frames));
+            d = (int) ((period >> 1) * Math.sin((double) i / period + frames));
             g.copyArea(0, i, w1, 1, d, 0);
             if (borderGap) {
                 g.setColor(color);
@@ -183,11 +192,12 @@ public class Captchas {
     }
 
     private static void shearY(Graphics g, int w1, int h1, Color color) {
-        int period = ThreadLocalRandom.current().nextInt(40) + 10; // 50;
+        int period = current().nextInt(40) + 10; // 50;
+        int phase = 7;
+        double frames = (2 * Math.PI * phase) / 20.0D;
         boolean borderGap = true;
-        double frames = 20, phase = 7;
         for (int d, i = 0; i < w1; i++) {
-            d = (int) ((period >> 1) * Math.sin((double) i / period + (2 * Math.PI * phase) / frames));
+            d = (int) ((period >> 1) * Math.sin((double) i / period + frames));
             g.copyArea(i, 0, 1, h1, 0, d);
             if (borderGap) {
                 g.setColor(color);

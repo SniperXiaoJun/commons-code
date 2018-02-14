@@ -275,11 +275,12 @@ public class JedisLock implements Lock, java.io.Serializable {
      */
     private byte[] generateValue() {
         UUID uuid = UUID.randomUUID();
-        byte[] value = ByteBuffer.allocate(24)
-                                 .putLong(uuid.getMostSignificantBits()) // 8 byte most bits of uuid
-                                 .putLong(uuid.getLeastSignificantBits()) // 8 byte least bits of uuid
-                                 .putLong(System.currentTimeMillis() + timeoutMillis) // 8 byte time stamp
-                                 .array(); // to byte array
+        byte[] value = ByteBuffer
+            .allocate(24)
+            .putLong(uuid.getMostSignificantBits()) // 8 byte most bits of uuid
+            .putLong(uuid.getLeastSignificantBits()) // 8 byte least bits of uuid
+            .putLong(System.currentTimeMillis() + timeoutMillis) // 8 byte time stamp
+            .array(); // to byte array
         LOCK_VALUE.set(value);
         return value;
     }

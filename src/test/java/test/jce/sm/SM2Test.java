@@ -44,9 +44,9 @@ public class SM2Test {
         //ECParameters ecParameter = ECParameters.EC_PARAMETERS.get("secp256k1");
         ECParameters ecParameter = ECParameters.SM2_BEST;
 
-        //byte[] publicKey1 = Base64.getDecoder().decode("BO4mfnJY5lS3hoOIIHprItHahfPOZJD/09/uRkqXNIvouN1XradI8sCIj6V98DmFBvIT+FQ9z83BfiNNE3GFxqo=");
-        byte[] privateKey1 = Base64.getDecoder().decode("C0FWfDf72leqqANMMig9ExGcFPOpbRHtP02z/ZtTHgk=");
-        byte[] encrypted1 = Base64.getDecoder().decode("BMY2XN12FPO9zT/4S6aeOQwQKpwbfzAzYFqN2AJvdATFh/bESg4SeytJcFFtGm+B0tbtZOIH5O2ku24+giYYDF4XdSA0m7sji9oAkPERtjMcsM3R8JyI5kh4GRa/IYva9WNWF2HHBSmFHeEfqGM7C/M3BReeI8Q6O3wIpdHFepNKpQCdj/R5iFM6sY3DQIlh6P3J8NX/wOakx5pQ");
+        //byte[] publicKey1 = Base64.getDecoder().decode("BDky9CNygRTBGh7eGdzdbxP5eGRozk4wQfFmREncwEKnYHhNy1OoBvh0wY/RMH/3ikfYejClHxlI1T+jRa0m2wU=");
+        byte[] privateKey1 = Base64.getDecoder().decode("AJaz6VNm1Wl9ba1YCEkYi36+m+8DDL4LDuLM172tg5Ao");
+        byte[] encrypted1 = Base64.getDecoder().decode("BDrcVKWOJ2J/x0YRmX99ksvwZJ5DgbgxPpwDNf3u94FH65JHuxG6U6Xp7ST7G7dsTlg6QFiSIANKyb42DvmpLpby1CU5kw0q/C4t1eH08VTAtpZrg2M6+Qz4pdOpp0iGpUp1w5ympuezCxgsEUfhDYihG5MjerLz+8Ss8qTRz3/ZpNvRJaCDk9k=");
         System.out.println(new String(SM2.decrypt(privateKey1, encrypted1)));
 
         for (int i = 0; i < 5; i++) {
@@ -81,5 +81,17 @@ public class SM2Test {
             System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(signed));
             System.out.println(SM2.verify(ecParameter, data, "IDA".getBytes(), signed, SM2.getPublicKey(keyMap)));
         }
+    }
+    
+    @Test
+    public void test4() {
+        byte[] publicKey1 = Base64.getDecoder().decode("BDky9CNygRTBGh7eGdzdbxP5eGRozk4wQfFmREncwEKnYHhNy1OoBvh0wY/RMH/3ikfYejClHxlI1T+jRa0m2wU=");
+        byte[] privateKey1 = Base64.getDecoder().decode("AJaz6VNm1Wl9ba1YCEkYi36+m+8DDL4LDuLM172tg5Ao");
+        byte[] encrypted1 = Base64.getDecoder().decode("BH8O9G5sFJroqGhDHX8caSBw0qp4pNMEaqwvVJS9juabFvTfrpTQNwM2DZhQKfUwX00VnLDzjqyP9YGnurdjC/EWmyHQH35OtFe6NmLj7IHIusL0GSZdU1gBujjx1LoPunYOFYBfR9AZRAcnYS64yiVmgps6GGc+A9/FqlMgWI69TIXngrHIUMUnP+9YToRr3JBzFdDrTTOdxCbmX9VeFHwABF7dNRO8VQkAMB0=");
+        System.out.println(new String(SM2.decrypt(privateKey1, encrypted1)));
+        
+        
+        byte[]   encrypted = SM2.encrypt(publicKey1, MavenProjects.getTestJavaFileAsByteArray(SM2Test.class));
+        System.out.println(Base64.getEncoder().encodeToString(encrypted));
     }
 }

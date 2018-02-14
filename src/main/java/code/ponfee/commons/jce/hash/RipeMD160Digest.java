@@ -3,11 +3,11 @@ package code.ponfee.commons.jce.hash;
 import org.apache.commons.codec.binary.Hex;
 
 /**
- * RipeMD160 digest implementation
+ * The RipeMD160 digest implementation
  * 
  * @author Ponfee
  */
-public class RipeMD160 {
+public class RipeMD160Digest {
 
     private static final int[][] ARG_ARRAY = {
         { 11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8,
@@ -39,23 +39,41 @@ public class RipeMD160 {
         } 
     };
 
+    /** 链变量 */
     private static final int[] CHAIN_VAR = {
         0x67452301, 0xefcdab89,
         0x98badcfe, 0x10325476,
         0xc3d2e1f0
     };
 
+    /** 分组中每块的大小 */
+    private static final int BLOCK_SIZE = 64;
+
+    /** 摘要byte大小 */
+    private static final int DIGEST_SIZE = 20;
+
     private final int[] digest = new int[CHAIN_VAR.length];
     private int[] working;
     private int wOffset;
     private int byteCount;
 
-    private RipeMD160() {
+    private RipeMD160Digest() {
         reset();
     }
 
-    public static RipeMD160 getInstance() {
-        return new RipeMD160();
+    private RipeMD160Digest(RipeMD160Digest d) {
+        System.arraycopy(d.digest, 0, this.digest, 0, d.digest.length);
+        System.arraycopy(d.working, 0, this.working, 0, d.working.length);
+        this.wOffset = d.wOffset;
+        this.byteCount = d.byteCount;
+    }
+
+    public static RipeMD160Digest getInstance() {
+        return new RipeMD160Digest();
+    }
+
+    public static RipeMD160Digest getInstance(RipeMD160Digest d) {
+        return new RipeMD160Digest(d);
     }
 
     public void reset() {
@@ -68,7 +86,7 @@ public class RipeMD160 {
     public void update(byte input) {
         working[wOffset >> 2] ^= ((int) input) << ((wOffset & 3) << 3);
         wOffset++;
-        if (wOffset == 64) {
+        if (wOffset == BLOCK_SIZE) {
             digestBlock(working);
             for (int j = 0; j < 16; j++) {
                 working[j] = 0;
@@ -101,7 +119,7 @@ public class RipeMD160 {
         finish(working, byteCount, 0);
         byte[] result = new byte[digest.length << 2];
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < DIGEST_SIZE; i++) {
             result[i] = (byte) (digest[i >> 2] >>> ((i & 3) << 3));
         }
 
@@ -122,11 +140,9 @@ public class RipeMD160 {
 
     // --------------------------------------------------private methods
     private void digestBlock(int[] X) {
-        int index = 0;
-
         int a, b, c, d, e;
         int A, B, C, D, E;
-        int temp, s;
+        int i = 0, temp, s;
 
         A = a = digest[0];
         B = b = digest[1];
@@ -134,103 +150,103 @@ public class RipeMD160 {
         D = d = digest[3];
         E = e = digest[4];
 
-        for (; index < 16; index++) {
+        for (; i < 16; i++) {
             // The 16 FF functions - round 1 */
-            temp = a + (b ^ c ^ d) + X[IDX_ARRAY[0][index]];
+            temp = a + (b ^ c ^ d) + X[IDX_ARRAY[0][i]];
             a = e;
             e = d;
             d = (c << 10) | (c >>> 22);
             c = b;
-            s = ARG_ARRAY[0][index];
+            s = ARG_ARRAY[0][i];
             b = ((temp << s) | (temp >>> (32 - s))) + a;
 
             // The 16 JJJ functions - parallel round 1 */
-            temp = A + (B ^ (C | ~D)) + X[IDX_ARRAY[1][index]] + 0x50a28be6;
+            temp = A + (B ^ (C | ~D)) + X[IDX_ARRAY[1][i]] + 0x50a28be6;
             A = E;
             E = D;
             D = (C << 10) | (C >>> 22);
             C = B;
-            s = ARG_ARRAY[1][index];
+            s = ARG_ARRAY[1][i];
             B = ((temp << s) | (temp >>> (32 - s))) + A;
         }
 
-        for (; index < 32; index++) {
+        for (; i < 32; i++) {
             // The 16 GG functions - round 2 */
-            temp = a + ((b & c) | (~b & d)) + X[IDX_ARRAY[0][index]] + 0x5a827999;
+            temp = a + ((b & c) | (~b & d)) + X[IDX_ARRAY[0][i]] + 0x5a827999;
             a = e;
             e = d;
             d = (c << 10) | (c >>> 22);
             c = b;
-            s = ARG_ARRAY[0][index];
+            s = ARG_ARRAY[0][i];
             b = ((temp << s) | (temp >>> (32 - s))) + a;
 
             // The 16 III functions - parallel round 2 */
-            temp = A + ((B & D) | (C & ~D)) + X[IDX_ARRAY[1][index]] + 0x5c4dd124;
+            temp = A + ((B & D) | (C & ~D)) + X[IDX_ARRAY[1][i]] + 0x5c4dd124;
             A = E;
             E = D;
             D = (C << 10) | (C >>> 22);
             C = B;
-            s = ARG_ARRAY[1][index];
+            s = ARG_ARRAY[1][i];
             B = ((temp << s) | (temp >>> (32 - s))) + A;
         }
 
-        for (; index < 48; index++) {
+        for (; i < 48; i++) {
             // The 16 HH functions - round 3 */
-            temp = a + ((b | ~c) ^ d) + X[IDX_ARRAY[0][index]] + 0x6ed9eba1;
+            temp = a + ((b | ~c) ^ d) + X[IDX_ARRAY[0][i]] + 0x6ed9eba1;
             a = e;
             e = d;
             d = (c << 10) | (c >>> 22);
             c = b;
-            s = ARG_ARRAY[0][index];
+            s = ARG_ARRAY[0][i];
             b = ((temp << s) | (temp >>> (32 - s))) + a;
 
             // The 16 HHH functions - parallel round 3 */
-            temp = A + ((B | ~C) ^ D) + X[IDX_ARRAY[1][index]] + 0x6d703ef3;
+            temp = A + ((B | ~C) ^ D) + X[IDX_ARRAY[1][i]] + 0x6d703ef3;
             A = E;
             E = D;
             D = (C << 10) | (C >>> 22);
             C = B;
-            s = ARG_ARRAY[1][index];
+            s = ARG_ARRAY[1][i];
             B = ((temp << s) | (temp >>> (32 - s))) + A;
         }
 
-        for (; index < 64; index++) {
+        for (; i < 64; i++) {
             // The 16 II functions - round 4 */
-            temp = a + ((b & d) | (c & ~d)) + X[IDX_ARRAY[0][index]] + 0x8f1bbcdc;
+            temp = a + ((b & d) | (c & ~d)) + X[IDX_ARRAY[0][i]] + 0x8f1bbcdc;
             a = e;
             e = d;
             d = (c << 10) | (c >>> 22);
             c = b;
-            s = ARG_ARRAY[0][index];
+            s = ARG_ARRAY[0][i];
             b = ((temp << s) | (temp >>> (32 - s))) + a;
 
             // The 16 GGG functions - parallel round 4 */
-            temp = A + ((B & C) | (~B & D)) + X[IDX_ARRAY[1][index]] + 0x7a6d76e9;
+            temp = A + ((B & C) | (~B & D)) + X[IDX_ARRAY[1][i]] + 0x7a6d76e9;
             A = E;
             E = D;
             D = (C << 10) | (C >>> 22);
             C = B;
-            s = ARG_ARRAY[1][index];
+            s = ARG_ARRAY[1][i];
             B = ((temp << s) | (temp >>> (32 - s))) + A;
         }
 
-        for (; index < 80; index++) {
+        for (; i < 80; i++) {
             // The 16 JJ functions - round 5 */
-            temp = a + (b ^ (c | ~d)) + X[IDX_ARRAY[0][index]] + 0xa953fd4e;
+            temp = a + (b ^ (c | ~d)) + X[IDX_ARRAY[0][i]] + 0xa953fd4e;
             a = e;
             e = d;
             d = (c << 10) | (c >>> 22);
             c = b;
-            s = ARG_ARRAY[0][index];
+            s = ARG_ARRAY[0][i];
             b = ((temp << s) | (temp >>> (32 - s))) + a;
 
             // The 16 FFF functions - parallel round 5 */
-            temp = A + (B ^ C ^ D) + X[IDX_ARRAY[1][index]];
+            temp = A + (B ^ C ^ D) + X[IDX_ARRAY[1][i]];
             A = E;
             E = D;
             D = (C << 10) | (C >>> 22);
             C = B;
-            s = ARG_ARRAY[1][index];
+            s = ARG_ARRAY[1][i];
             B = ((temp << s) | (temp >>> (32 - s))) + A;
         }
 
@@ -244,7 +260,7 @@ public class RipeMD160 {
     }
 
     private void finish(int[] array, int lswlen, int mswlen) {
-        int[] X = array; /* message words */
+        int[] X = array; /* 4 byte of word */
 
         /* append the bit m_n == 1 */
         X[(lswlen >> 2) & 15] ^= 1 << (((lswlen & 3) << 3) + 7);
@@ -265,7 +281,7 @@ public class RipeMD160 {
 
     public static void main(String[] args) {
         byte[] data = "1234567890".getBytes();
-        RipeMD160 md = RipeMD160.getInstance();
+        RipeMD160Digest md = RipeMD160Digest.getInstance();
         String actual = Hex.encodeHexString(md.doFinal(data));
         if(!"9d752daa3fb4df29837088e1e5a1acf74932e074".equals(actual)) {
             System.err.println("fail");

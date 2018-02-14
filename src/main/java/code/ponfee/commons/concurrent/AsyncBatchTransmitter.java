@@ -130,7 +130,7 @@ public final class AsyncBatchTransmitter<T> extends Thread {
                 this.requireDestroyWhenEnd = false;
                 this.executor = executor;
             }
-            super.setName("async-batch-transmitter-" + Integer.toHexString(hashCode()));
+            super.setName("async-batch-transmitter-thread-" + Integer.toHexString(hashCode()));
             super.setDaemon(true);
             super.start();
         }

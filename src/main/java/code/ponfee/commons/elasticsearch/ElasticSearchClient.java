@@ -250,7 +250,8 @@ public class ElasticSearchClient implements DisposableBean {
      * @return
      */
     public boolean updateSettings(String index, Settings settings) {
-        return indicesAdminClient().prepareUpdateSettings(index).setSettings(settings).get().isAcknowledged();
+        return indicesAdminClient().prepareUpdateSettings(index)
+                                   .setSettings(settings).get().isAcknowledged();
     }
 
     /**
@@ -260,8 +261,8 @@ public class ElasticSearchClient implements DisposableBean {
      * @return  是否创建成功
      */
     public boolean addAlias(String alias, String... indices) {
-        IndicesAliasesRequestBuilder builder = indicesAdminClient().prepareAliases();
-        return builder.addAlias(indices, alias).execute().isDone();
+        return indicesAdminClient().prepareAliases()
+                                   .addAlias(indices, alias).execute().isDone();
     }
 
     /**
@@ -284,7 +285,8 @@ public class ElasticSearchClient implements DisposableBean {
      * @return
      */
     public boolean removeAlias(String[] aliase, String... indices) {
-        return indicesAdminClient().prepareAliases().removeAlias(indices, aliase).execute().isDone();
+        return indicesAdminClient().prepareAliases().removeAlias(indices, aliase)
+                                   .execute().isDone();
     }
 
     /**
@@ -312,7 +314,8 @@ public class ElasticSearchClient implements DisposableBean {
      * @return
      */
     public boolean isTypesExists(String indices, String... types) {
-        return indicesAdminClient().prepareTypesExists(indices).setTypes(types).get().isExists();
+        return indicesAdminClient().prepareTypesExists(indices)
+                                   .setTypes(types).get().isExists();
     }
 
     // --------------------------------------bulk processor---------------------------------------
@@ -331,11 +334,13 @@ public class ElasticSearchClient implements DisposableBean {
      * @param entities    批量请求的数据（JSON格式）
      * @param config      批处理配置
      */
-    public <T> void bulkProcessor(String index, String type, Stream<T> entities, BulkProcessorConfiguration config) {
+    public <T> void bulkProcessor(String index, String type, Stream<T> entities, 
+                                  BulkProcessorConfiguration config) {
         BulkProcessor bulkProcessor = config.build(client);
         entities.map(x -> Optional.of(Jsons.NORMAL.serialize(x)))
                 .filter(x -> x.isPresent())
-                .map(x -> client.prepareIndex().setIndex(index).setType(type).setSource(x.get(), XContentType.JSON).request())
+                .map(x -> client.prepareIndex().setIndex(index).setType(type)
+                                               .setSource(x.get(), XContentType.JSON).request())
                 .forEach(bulkProcessor::add);
         bulkProcessor.flush();
         try {
@@ -568,7 +573,8 @@ public class ElasticSearchClient implements DisposableBean {
      * @param clazz      返回的行数据类型
      * @return
      */
-    public <T> Page<T> paginationSearch(ESQueryBuilder query, int pageNo, int pageSize, Class<T> clazz) {
+    public <T> Page<T> paginationSearch(ESQueryBuilder query, int pageNo, 
+                                        int pageSize, Class<T> clazz) {
         int from = (pageNo - 1) * pageSize;
         SearchResponse searchResp = query.pagination(client, from, pageSize);
         return buildPage(searchResp, from, pageNo, pageSize, clazz);
@@ -581,7 +587,8 @@ public class ElasticSearchClient implements DisposableBean {
      * @param pageSize  页大小
      * @return
      */
-    public Page<Map<String, Object>> paginationSearch(SearchRequestBuilder search, int pageNo, int pageSize) {
+    public Page<Map<String, Object>> paginationSearch(SearchRequestBuilder search, 
+                                                      int pageNo, int pageSize) {
         Page<Map<String, Object>> page = new Page<>();
         BeanUtils.copyProperties(this.paginationSearch(search, pageNo, pageSize, Map.class), page);
         return page;
@@ -595,7 +602,8 @@ public class ElasticSearchClient implements DisposableBean {
      * @param clazz     row object type
      * @return page result
      */
-    public <T> Page<T> paginationSearch(SearchRequestBuilder search, int pageNo, int pageSize, Class<T> clazz) {
+    public <T> Page<T> paginationSearch(SearchRequestBuilder search, int pageNo, 
+                                        int pageSize, Class<T> clazz) {
         int from = (pageNo - 1) * pageSize;
         search.setSearchType(SearchType.DFS_QUERY_THEN_FETCH); // 深度分布
         search.setFrom(from).setSize(pageSize).setExplain(false);
@@ -655,7 +663,8 @@ public class ElasticSearchClient implements DisposableBean {
      * @param size      每次滚动的数据量大小
      * @param callback  回调处理量
      */
-    public void scrollSearch(ESQueryBuilder query, int scrollSize, ScrollSearchCallback callback) {
+    public void scrollSearch(ESQueryBuilder query, int scrollSize, 
+                             ScrollSearchCallback callback) {
         SearchResponse scrollResp = query.scroll(client, scrollSize);
         this.scrollSearch(scrollResp, scrollSize, callback);
     }
@@ -667,7 +676,8 @@ public class ElasticSearchClient implements DisposableBean {
      * @param scrollSize
      * @param callback
      */
-    public void scrollSearch(SearchRequestBuilder search, int scrollSize, ScrollSearchCallback callback) {
+    public void scrollSearch(SearchRequestBuilder search, int scrollSize, 
+                             ScrollSearchCallback callback) {
         SearchResponse scrollResp = search.setSize(scrollSize).setScroll(SCROLL_TIMEOUT).get();
         this.scrollSearch(scrollResp, scrollSize, callback);
     }
@@ -783,7 +793,8 @@ public class ElasticSearchClient implements DisposableBean {
      * @param clazz
      * @return
      */
-    private <T> Page<T> buildPage(SearchResponse searchResp, int from, int pageNo, int pageSize, Class<T> clazz) {
+    private <T> Page<T> buildPage(SearchResponse searchResp, int from, 
+                                  int pageNo, int pageSize, Class<T> clazz) {
         SearchHits hits = searchResp.getHits();
         long total = hits.getTotalHits();
         List<T> result = new ArrayList<>(hits.getHits().length);
@@ -830,7 +841,8 @@ public class ElasticSearchClient implements DisposableBean {
                 int pageNo = 1;
                 do {
                     callback.nextPage(searchHits, totalRecords, totalPages, pageNo++);
-                    scrollResp = client.prepareSearchScroll(scrollResp.getScrollId()).setScroll(SCROLL_TIMEOUT).get();
+                    scrollResp = client.prepareSearchScroll(scrollResp.getScrollId())
+                                       .setScroll(SCROLL_TIMEOUT).get();
                 } while ((searchHits = scrollResp.getHits()).getHits().length != 0);
             }
         } finally {

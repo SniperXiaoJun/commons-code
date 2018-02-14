@@ -44,15 +44,23 @@ public final class SM2 {
     private byte keyOffset;
     private int ct;
 
-    private SM2(ECPoint publicKey, BigInteger privateKey) {
+    private SM2(ECPoint publicKey, BigInteger privateKey, BigInteger n) {
         Preconditions.checkArgument(publicKey != null, 
                                     "public key cannot be empty.");
         Preconditions.checkArgument(privateKey != null, 
                                     "private key cannot be empty.");
 
         this.point = publicKey.multiply(privateKey); // S = [h]point
-        this.x = to32ByteArray(this.point.normalize().getXCoord().toBigInteger());
-        this.y = to32ByteArray(this.point.normalize().getYCoord().toBigInteger());
+
+        byte[] x1 = this.point.normalize().getXCoord().toBigInteger().toByteArray();
+        byte[] y1 = this.point.normalize().getYCoord().toBigInteger().toByteArray();
+        int byteCount = (int) Math.ceil(n.bitLength() / 8.0D);
+
+        this.x = new byte[byteCount];
+        this.y = new byte[byteCount];
+        Bytes.copy(x1, 0, x1.length, this.x, 0, this.x.length);
+        Bytes.copy(y1, 0, y1.length, this.y, 0, this.y.length);
+
         this.reset();
     }
 
@@ -102,9 +110,7 @@ public final class SM2 {
     }
 
     private byte[] doFinal() {
-        this.sm3c3.update(to32ByteArray(
-            this.point.normalize().getYCoord().toBigInteger()
-        ));
+        this.sm3c3.update(this.y);
         byte[] p = this.sm3c3.doFinal();
         reset();
         return p;
@@ -173,7 +179,7 @@ public final class SM2 {
         ECPublicKeyParameters ecPub = (ECPublicKeyParameters) key.getPublic();
         ECPrivateKeyParameters ecPri = (ECPrivateKeyParameters) key.getPrivate();
 
-        SM2 sm2 = new SM2(ecParam.curve.decodePoint(publicKey), ecPri.getD());
+        SM2 sm2 = new SM2(ecParam.curve.decodePoint(publicKey), ecPri.getD(), ecParam.n);
 
         byte[] c1 = ecPub.getQ().getEncoded(false); // generate random r, C1=M+rK
         byte[] c2 = Arrays.copyOf(data, data.length); // C2=rG
@@ -211,7 +217,8 @@ public final class SM2 {
         byte[] c2 = Arrays.copyOfRange(encrypted, c1Len, c1Len + c2Len);
         byte[] c3 = Arrays.copyOfRange(encrypted, c1Len + c2Len, encrypted.length);
 
-        SM2 sm2 = new SM2(getPublicKey(ecParam, c1), getPrivateKey(privateKey));
+        SM2 sm2 = new SM2(getPublicKey(ecParam, c1), 
+                          getPrivateKey(privateKey), ecParam.n);
 
         sm2.decrypt(c2); // 解密
 
@@ -370,26 +377,6 @@ public final class SM2 {
             random = new BigInteger(128, SECURE_RANDOM);
         }
         return random;
-    }
-
-    private static byte[] to32ByteArray(BigInteger n) {
-        if (n == null) {
-            return null;
-        }
-
-        byte[] bytes = n.toByteArray();
-        if (bytes.length == 32) {
-            return bytes;
-        } else if (bytes.length > 32) {
-            return Arrays.copyOfRange(bytes, 1, 33);
-        } else {
-            byte[] result = new byte[32];
-            for (int i = 0; i < 32 - bytes.length; i++) {
-                result[i] = 0;
-            }
-            System.arraycopy(bytes, 0, result, 32 - bytes.length, bytes.length);
-            return result;
-        }
     }
 
     /**

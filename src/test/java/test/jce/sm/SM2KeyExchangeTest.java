@@ -7,8 +7,8 @@ import org.apache.commons.codec.binary.Hex;
 
 import code.ponfee.commons.jce.ECParameters;
 import code.ponfee.commons.jce.sm.SM2;
-import code.ponfee.commons.jce.sm.SM2KeyExchange;
-import code.ponfee.commons.jce.sm.SM2KeyExchange.TransportEntity;
+import code.ponfee.commons.jce.sm.SM2KeyExchanger;
+import code.ponfee.commons.jce.sm.SM2KeyExchanger.TransportEntity;
 
 public class SM2KeyExchangeTest {
 
@@ -18,11 +18,11 @@ public class SM2KeyExchangeTest {
         System.out.println("=============================密钥协商============================");
         Map<String, byte[]> keyMap = SM2.generateKeyPair(ecParameter);
         byte[] id1 = "AAAAAAAAAAAAA".getBytes();
-        SM2KeyExchange aKeyExchange = new SM2KeyExchange(id1, SM2.getPublicKey(ecParameter, SM2.getPublicKey(keyMap)), SM2.getPrivateKey(SM2.getPrivateKey(keyMap)));
+        SM2KeyExchanger aKeyExchange = new SM2KeyExchanger(id1, SM2.getPublicKey(ecParameter, SM2.getPublicKey(keyMap)), SM2.getPrivateKey(SM2.getPrivateKey(keyMap)));
 
         Map<String, byte[]> keyMap2 = SM2.generateKeyPair(ecParameter);
         byte[] id2 = "BBBBBBBBBBBBB".getBytes();
-        SM2KeyExchange bKeyExchange = new SM2KeyExchange(id2, SM2.getPublicKey(ecParameter, SM2.getPublicKey(keyMap2)), SM2.getPrivateKey(SM2.getPrivateKey(keyMap2)));
+        SM2KeyExchanger bKeyExchange = new SM2KeyExchanger(id2, SM2.getPublicKey(ecParameter, SM2.getPublicKey(keyMap2)), SM2.getPrivateKey(SM2.getPrivateKey(keyMap2)));
         TransportEntity entity1 = aKeyExchange.step1PartA();
         TransportEntity entity2 = bKeyExchange.step2PartB(entity1);
 

@@ -12,7 +12,7 @@ import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
- * The SHA-1 digest implementation（max 2^64 bit length）
+ * The SHA-1 digest implementation（maximum 2^64 bit length）
  * http://www.oschina.net/translate/keccak-the-new-sha-3-encryption-standard
  * 
  * 异或⊕，同或⊙
@@ -148,6 +148,7 @@ public class SHA1Digest {
         this.d = d.d;
         this.e = d.e;
 
+        System.arraycopy(d.block, 0, this.block, 0, BLOCK_SIZE);
         this.blockOffset = d.blockOffset;
         this.byteCount = d.byteCount;
     }
@@ -192,7 +193,7 @@ public class SHA1Digest {
             padding0(this.block, this.blockOffset, BLOCK_SIZE); // 填充0
             this.digestBlock(this.block);
 
-            // reset and repadding block
+            // reset a empty block, repadding 0x00 and bit length start 0
             this.blockOffset = 0;
         }
 

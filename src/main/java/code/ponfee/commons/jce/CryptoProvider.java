@@ -101,9 +101,9 @@ public abstract class CryptoProvider {
         }
 
         return new String(
-                          decrypt(Base64.getUrlDecoder().decode(ciphertext)), 
-                          charset
-                   );
+                  decrypt(Base64.getUrlDecoder().decode(ciphertext)), 
+                  charset
+               );
     }
 
     /**
@@ -148,7 +148,7 @@ public abstract class CryptoProvider {
      */
     public final boolean verify(String data, String charset, String signed) {
         return verify(data.getBytes(Charset.forName(charset)), 
-                      Base64.getUrlDecoder().decode(signed)
+                   Base64.getUrlDecoder().decode(signed)
                );
     }
 

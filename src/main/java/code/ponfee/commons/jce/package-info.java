@@ -2,6 +2,8 @@
  * Java Cryptography Extension提供用于加密、密钥生成和协商
  * 以及 Message Authentication Code（MAC）算法的实现<p>
  * 
+ * http://www.freebuf.com/articles/others-articles/136742.html
+ * 
  * 1、密码：
  *   你知道什么：口令（密码）、口令摘要、质询/响应
  *   你有什么：认证令牌（质询/响应令牌、时间令牌），PIN双因素认证、SSL与认证令牌、智能卡

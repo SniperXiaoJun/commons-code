@@ -393,14 +393,14 @@ public final class Bytes {
     /**
      * int转byte
      * @param n
-     * @param bytes
+     * @param out
      * @param offset
      */
-    public static void toByteArray(int n, byte[] bytes, int offset) {
-        bytes[  offset] = (byte) (n >>> 24);
-        bytes[++offset] = (byte) (n >>> 16);
-        bytes[++offset] = (byte) (n >>>  8);
-        bytes[++offset] = (byte) (n       );
+    public static void toByteArray(int n, byte[] out, int offset) {
+        out[  offset] = (byte) (n >>> 24);
+        out[++offset] = (byte) (n >>> 16);
+        out[++offset] = (byte) (n >>>  8);
+        out[++offset] = (byte) (n       );
     }
 
     /**
@@ -460,7 +460,7 @@ public final class Bytes {
 
     /**
      * copy in to out
-     * 从尾部开始拷贝，in数据不足则out前面补0，
+     * 从尾部开始拷贝in到out，in数据不足则out前面补0，
      * 若in有多则舍去in前面的数据
      * @param in
      * @param inFrom

@@ -89,7 +89,7 @@ public class WechatTokenManager implements DisposableBean {
                         wx.jsapiTicket = jsapiTicket;
                     }
                 }
-                logger.info("－－－load token form cache－－－");
+                logger.info("---load token form cache---");
             } catch (Throwable t) {
                 logger.error("load token from cache occur error", t);
             }
@@ -203,7 +203,7 @@ public class WechatTokenManager implements DisposableBean {
                 logger.error("refresh jsapi ticket occur error", t);
             }
 
-            logger.info("－－－ refresh wechat token appid: {} －－－", wx.appid);
+            logger.info("--- refresh wechat token appid: {} ---", wx.appid);
 
         } else {
             throw new FrequentlyRefreshException("wechat token refreshed is too frequent, "

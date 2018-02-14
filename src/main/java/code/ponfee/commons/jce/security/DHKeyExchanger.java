@@ -20,15 +20,17 @@ import javax.crypto.interfaces.DHPublicKey;
 
 import com.google.common.collect.ImmutableMap;
 
+import code.ponfee.commons.jce.crypto.Algorithm;
+import code.ponfee.commons.util.MavenProjects;
+
 /**
- * Diffie-Hellman加解密组件（一般用于密钥交换）
+ * Diffie-Hellman Key Exchange
  * Key-Agreement
  * @author fupf
  */
-public final class DHCryptor {
+public final class DHKeyExchanger {
 
     private static final String ALGORITHM = "DH"; // DH算法名称
-    private static final String SECRET_ALGORITHM = "DESede"; // 使用3DES对称加密
     private static final String PUBLIC_KEY = "DHPublicKey";
     private static final String PRIVATE_KEY = "DHPrivateKey";
 
@@ -150,6 +152,34 @@ public final class DHCryptor {
     }
 
     /**
+     * 双方公私钥生成（协商）对称密钥
+     * @param bPriKey
+     * @param aPubKey
+     * @return
+     */
+    public static SecretKey genSecretKey(byte[] bPriKey, byte[] aPubKey) {
+        return genSecretKey(getPrivateKey(bPriKey), getPublicKey(aPubKey));
+    }
+
+    /**
+     * 双方公私钥生成（协商）对称密钥
+     * @param bPriKey
+     * @param aPubKey
+     * @return
+     */
+    public static SecretKey genSecretKey(DHPrivateKey bPriKey, DHPublicKey aPubKey) {
+        try {
+            KeyAgreement keyAgree = KeyAgreement.getInstance(aPubKey.getAlgorithm());
+            keyAgree.init(bPriKey);
+            keyAgree.doPhase(aPubKey, true);
+            // 生成对称密钥，使用3DES对称加密，192位的AES被限制出口
+            return keyAgree.generateSecret(Algorithm.DESede.name());
+        } catch (InvalidKeyException | NoSuchAlgorithmException | IllegalStateException e) {
+            throw new SecurityException(e);
+        }
+    }
+
+    /**
      * 加密<br>
      * @param data 待加密数据
      * @param secretKey 双方公私钥协商的对称密钥
@@ -181,37 +211,10 @@ public final class DHCryptor {
         }
     }
 
-    /**
-     * 双方公私钥生成（协商）对称密钥
-     * @param bPriKey
-     * @param aPubKey
-     * @return
-     */
-    public static SecretKey genSecretKey(byte[] bPriKey, byte[] aPubKey) {
-        return genSecretKey(getPrivateKey(bPriKey), getPublicKey(aPubKey));
-    }
-
-    /**
-     * 双方公私钥生成（协商）对称密钥
-     * @param bPriKey
-     * @param aPubKey
-     * @return
-     */
-    public static SecretKey genSecretKey(DHPrivateKey bPriKey, DHPublicKey aPubKey) {
-        try {
-            KeyAgreement keyAgree = KeyAgreement.getInstance(aPubKey.getAlgorithm());
-            keyAgree.init(bPriKey);
-            keyAgree.doPhase(aPubKey, true);
-            return keyAgree.generateSecret(SECRET_ALGORITHM); // 生成本地密钥
-        } catch (InvalidKeyException | NoSuchAlgorithmException | IllegalStateException e) {
-            throw new SecurityException(e);
-        }
-    }
-
     public static void main(String[] args) {
         Map<String, DHKey> partA = initPartAKey(1024);
         Map<String, DHKey> partB = initPartBKey(getPublicKey(partA));
-        byte[] data = "123456".getBytes();
+        byte[] data = MavenProjects.getMainJavaFileAsByteArray(DHKeyExchanger.class);
 
         // 乙方加密甲方解密
         byte[] encrypted = encrypt(data, genSecretKey(getPrivateKey(partB), getPublicKey(partA)));

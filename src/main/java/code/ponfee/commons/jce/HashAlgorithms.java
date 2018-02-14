@@ -14,6 +14,10 @@ public enum HashAlgorithms {
     SHA1("SHA-1"), SHA224("SHA-224"), SHA256("SHA-256"), // 
     SHA384("SHA-384"), SHA512("SHA-512"), // 
 
+    /**
+     * @see org.bouncycastle.crypto.digests.SHA3Digest
+     * @see org.bouncycastle.jcajce.provider.digest.SHA3
+     */
     KECCAK224("KECCAK-224"), KECCAK256("KECCAK-256"), // 
     KECCAK288("KECCAK-288"), KECCAK384("KECCAK-384"), 
     KECCAK512("KECCAK-512"), //
