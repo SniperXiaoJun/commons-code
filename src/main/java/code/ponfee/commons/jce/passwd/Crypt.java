@@ -8,8 +8,6 @@ import java.util.Base64;
 
 import javax.crypto.Mac;
 
-import org.apache.commons.codec.binary.Hex;
-
 import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.jce.HmacAlgorithms;
@@ -33,23 +31,23 @@ public class Crypt {
      * create crypt
      * @param alg
      * @param passwd
-     * @param rounds
+     * @param rounds    the loop hmac count, between 1 and 255
      * @param provider
      * @return
      */
     public static String create(HmacAlgorithms alg, String passwd, 
                                 int rounds, Provider provider) {
-        Preconditions.checkArgument(rounds >= 1 && rounds <= 0xff, 
+        Preconditions.checkArgument(rounds >= 1 && rounds <= 0xFF, 
                                     "iterations must between 1 and 255");
 
-        byte[] salt = SecureRandoms.nextBytes(32);
-        long algIdx = ALGORITHM_MAPPING.inverse().get(alg) & 0xf; // maximum is 0xf
+        byte[] salt = SecureRandoms.nextBytes(16);
+        int algIdx = ALGORITHM_MAPPING.inverse().get(alg) & 0xF; // maximum is 0xf
         byte[] hashed = crypt(alg, passwd.getBytes(), salt, rounds, provider);
 
         return new StringBuilder(6 + (salt.length + hashed.length) * 4 / 3 + 4)
-                    .append(SEPARATOR).append(Long.toString(algIdx << 8L | rounds, 16))
-                    .append(SEPARATOR).append(toBase64(salt))
-                    .append(SEPARATOR).append(toBase64(hashed))
+                    .append(SEPARATOR).append(Integer.toString(algIdx << 8L | rounds, 16))
+                    .append(SEPARATOR).append(encodeBase64(salt))
+                    .append(SEPARATOR).append(encodeBase64(hashed))
                     .toString();
     }
 
@@ -70,10 +68,10 @@ public class Crypt {
             throw new IllegalArgumentException("Invalid hashed value");
         }
 
-        long params = Long.parseLong(parts[1], 16);
-        HmacAlgorithms alg = ALGORITHM_MAPPING.get((int) (params >> 8 & 0xf));
+        int params = Integer.parseInt(parts[1], 16);
+        HmacAlgorithms alg = ALGORITHM_MAPPING.get(params >> 8 & 0xF);
         byte[] salt = Base64.getUrlDecoder().decode(parts[2]);
-        byte[] testHash = crypt(alg, passwd.getBytes(), salt, (int) params & 0xff, provider);
+        byte[] testHash = crypt(alg, passwd.getBytes(), salt, params & 0xFF, provider);
 
         // compare
         return Arrays.equals(Base64.getUrlDecoder().decode(parts[3]), testHash);
@@ -97,22 +95,27 @@ public class Crypt {
         return password;
     }
 
-    private static String toBase64(byte[] data) {
+    private static String encodeBase64(byte[] data) {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
     public static void main(String[] args) {
-        long start = System.currentTimeMillis();
         String passwd = "passwd";
-        String hashed = create(passwd);
+        String hashed = create(HmacAlgorithms.HmacSHA3_256, passwd, 32, Providers.BC);
+        boolean flag = true;
         System.out.println(hashed);
+        long start = System.currentTimeMillis();
         for (int i = 0; i < 100000; i++) {
             if (!check(passwd, hashed)) {
-                System.err.println("fail");
+                flag = false;
+                break;
             }
         }
-        System.out.println(System.currentTimeMillis()-start);
-
-        System.out.println(Hex.encodeHexString(crypt(HmacAlgorithms.HmacSHA256, "password".getBytes(), "salt".getBytes(), 64, Providers.BC)));
+        System.out.println("cost: " + (System.currentTimeMillis() - start));
+        if (flag) {
+            System.out.println("success!");
+        } else {
+            System.err.println("fail!");
+        }
     }
 }

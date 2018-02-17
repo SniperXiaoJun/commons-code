@@ -21,7 +21,7 @@ public class ListOperations extends JedisOperations {
      * @return 执行 LPUSH 命令后，列表的长度。
      */
     public Long lpush(String key, Integer seconds, String... fields) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long rtn = shardedJedis.lpush(key, fields);
             expireForce(shardedJedis, key, seconds);
             return rtn;
@@ -41,7 +41,7 @@ public class ListOperations extends JedisOperations {
      * @return 执行 LPUSH 命令后，列表的长度。
      */
     public <T extends Object> Long lpushObject(byte[] key, boolean isCompress, Integer seconds, T[] objs) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             byte[][] data = new byte[objs.length][];
             for (int i = 0; i < objs.length; i++) {
                 data[i] = jedisClient.serialize(objs[i], isCompress);
@@ -72,7 +72,7 @@ public class ListOperations extends JedisOperations {
      * @return 执行 RPUSH 操作后，表的长度。
      */
     public Long rpush(String key, Integer seconds, String... fields) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long rtn = shardedJedis.rpush(key, fields);
             expireForce(shardedJedis, key, seconds);
             return rtn;
@@ -90,7 +90,7 @@ public class ListOperations extends JedisOperations {
      * @return 列表的头元素。当 key 不存在时，返回 nil 。
      */
     public String lpop(String key, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             String result = shardedJedis.lpop(key);
             if (result != null) {
                 // 存在才设置失效时间
@@ -112,7 +112,7 @@ public class ListOperations extends JedisOperations {
      */
     public <T extends Object> T lpopObject(byte[] key, Class<T> clazz,
                                            boolean isCompress, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             T result = jedisClient.deserialize(shardedJedis.lpop(key), clazz, isCompress);
             if (result != null) {
                 // 存在才设置失效时间
@@ -141,7 +141,7 @@ public class ListOperations extends JedisOperations {
      * @return 列表的尾元素。当 key 不存在时，返回 nil 。
      */
     public String rpop(String key, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             String result = shardedJedis.rpop(key);
             if (result != null) {
                 // 存在才设置失效时间
@@ -163,7 +163,7 @@ public class ListOperations extends JedisOperations {
      */
     public <T extends Object> T rpopObject(byte[] key, Class<T> clazz,
                                            boolean isCompress, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             T result = jedisClient.deserialize(shardedJedis.rpop(key), clazz, isCompress);
             if (result != null) {
                 // 存在才设置失效时间
@@ -202,7 +202,7 @@ public class ListOperations extends JedisOperations {
      */
     public long lrem(String key, int count,
         String filed, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             long rtn = shardedJedis.lrem(key, count, filed);
             if (rtn > 0) {
                 // 存在才设置失效时间
@@ -232,7 +232,7 @@ public class ListOperations extends JedisOperations {
      * @return 被移除元素的数量。因为不存在的 key 被视作空表(empty list)，所以当 key 不存在时， LREM 命令总是返回 0
      */
     public long lrem(byte[] key, int count, byte[] filed, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             long rtn = shardedJedis.lrem(key, count, filed);
             if (rtn > 0) {
                 // 存在才设置失效时间
@@ -257,7 +257,7 @@ public class ListOperations extends JedisOperations {
      * @return 列表 key 的长度。
      */
     public long llen(String key, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             long result = shardedJedis.llen(key);
             if (result > 0) {
                 // 存在才设置失效时间
@@ -286,7 +286,7 @@ public class ListOperations extends JedisOperations {
      * @return 一个列表，包含指定区间内的元素。
      */
     public List<String> lrange(String key, long start, long end, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             List<String> result = shardedJedis.lrange(key, start, end);
             expire(shardedJedis, key, seconds);
             return result;
@@ -313,7 +313,7 @@ public class ListOperations extends JedisOperations {
      */
     public <T extends Object> List<T> lrange(byte[] key, Class<T> clazz, boolean isCompress, 
                                              long start, long end, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             List<T> result = new ArrayList<>();
             List<byte[]> datas = shardedJedis.lrange(key, start, end);
             if (datas != null && !datas.isEmpty()) {

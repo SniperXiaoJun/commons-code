@@ -1,8 +1,12 @@
 package test.jce.sm;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.apache.commons.codec.binary.Hex;
+import org.junit.Assert;
 
 import code.ponfee.commons.jce.sm.SM3Digest;
+import code.ponfee.commons.util.SecureRandoms;
 
 public class SM3DigestTest {
 
@@ -30,6 +34,17 @@ public class SM3DigestTest {
         hash = sm3.doFinal(data);
         System.out.println(Hex.encodeHexString(hash));
 
-        System.out.println(SM3Digest.getInstance().getKey("0123456789"));
+        SM3Digest sm3_1 = SM3Digest.getInstance();
+        org.bouncycastle.crypto.digests.SM3Digest sm3_2 = new org.bouncycastle.crypto.digests.SM3Digest();
+        for (int i = 0; i < 100; i++) {
+            byte[] data1 = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(65537) + 1);
+            byte[] data2 = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(65537) + 1);
+            sm3_1.update(data1);
+            sm3_2.update(data1, 0, data1.length);
+            sm3_2.update(data2, 0, data2.length);
+            byte[] dig = new byte[sm3_2.getDigestSize()];
+            sm3_2.doFinal(dig, 0);
+            Assert.assertArrayEquals(sm3_1.doFinal(data2), dig);
+        }
     }
 }

@@ -33,7 +33,7 @@
 
     <simpleType name="resourceType">
         <restriction base="string">
-            <pattern value="(classpath:|classpath\*:|file:(([c-zC-Z]:)(/|\\\\)){0,1}|context:){0,1}[^:\?\|\*]*"></pattern>
+            <pattern value="(classpath:|classpath\*:|file:(([c-zC-Z]:)(/|\\\\)){0,1}|webapp:){0,1}[^:\?\|\*]*"></pattern>
         </restriction>
     </simpleType>
     

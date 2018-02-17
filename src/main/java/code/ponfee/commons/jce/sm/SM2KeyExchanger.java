@@ -21,6 +21,7 @@ import code.ponfee.commons.util.Bytes;
 public class SM2KeyExchanger implements Serializable {
 
     private static final long serialVersionUID = 8553046425593791291L;
+    private static final BigInteger TWO = BigInteger.valueOf(2);
 
     private BigInteger rA;
     private ECPoint RA;
@@ -40,7 +41,7 @@ public class SM2KeyExchanger implements Serializable {
     public SM2KeyExchanger(byte[] ida, ECPoint publicKey, BigInteger privateKey, 
                           ECParameters ecParam) {
         this.ecParam = ecParam;
-        this.w = new BigInteger("2").pow((int) Math.ceil(ecParam.n.bitLength() * 1.0 / 2) - 1);
+        this.w = TWO.pow((int) Math.ceil(ecParam.n.bitLength() * 1.0 / 2) - 1);
         this.publicKey = publicKey;
         this.privateKey = privateKey;
         this.Z = SM2.calcZ(SM3Digest.getInstance(), ecParam, ida, publicKey);
@@ -204,7 +205,6 @@ public class SM2KeyExchanger implements Serializable {
         public byte[] getK() {
             return K;
         }
-
     }
 
     /**
@@ -236,38 +236,25 @@ public class SM2KeyExchanger implements Serializable {
      * @return
      */
     private static byte[] kdf(byte[] Z, int klen) {
-        int ct = 1;
-        int end = (int) Math.ceil(klen * 1.0 / 32);
+        int ct = 1, end = (int) Math.ceil(klen * 1.0 / 32);
         SM3Digest sm3 = SM3Digest.getInstance();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            for (int i = 1; i < end; i++) {
-                sm3.update(Z);
-                sm3.update(toByteArray(ct));
-                baos.write(sm3.doFinal());
-                ct++;
-            }
-
+        for (int i = 1; i < end; i++) {
             sm3.update(Z);
-            sm3.update(toByteArray(ct));
-            byte[] last = sm3.doFinal();
-            if (klen % 32 == 0) {
-                baos.write(last);
-            } else baos.write(last, 0, klen % 32);
-            return baos.toByteArray();
-        } catch (Exception e) {
-            e.printStackTrace();
+            byte[] data = sm3.doFinal(Bytes.fromInt(ct));
+            baos.write(data, 0, data.length);
+            ct++;
         }
-        return null;
-    }
 
-    private static byte[] toByteArray(int i) {
-        byte[] byteArray = new byte[4];
-        byteArray[0] = (byte) (i >>> 24);
-        byteArray[1] = (byte) ((i & 0xFFFFFF) >>> 16);
-        byteArray[2] = (byte) ((i & 0xFFFF) >>> 8);
-        byteArray[3] = (byte) (i & 0xFF);
-        return byteArray;
+        sm3.update(Z);
+        sm3.update(Bytes.fromInt(ct));
+        byte[] last = sm3.doFinal();
+        if (klen % 32 == 0) {
+            baos.write(last, 0, last.length);
+        } else {
+            baos.write(last, 0, klen % 32);
+        }
+        return baos.toByteArray();
     }
 
 }

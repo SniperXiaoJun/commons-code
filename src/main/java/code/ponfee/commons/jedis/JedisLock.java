@@ -1,6 +1,5 @@
 package code.ponfee.commons.jedis;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -275,12 +274,33 @@ public class JedisLock implements Lock, java.io.Serializable {
      */
     private byte[] generateValue() {
         UUID uuid = UUID.randomUUID();
-        byte[] value = ByteBuffer
-            .allocate(24)
-            .putLong(uuid.getMostSignificantBits()) // 8 byte most bits of uuid
-            .putLong(uuid.getLeastSignificantBits()) // 8 byte least bits of uuid
-            .putLong(System.currentTimeMillis() + timeoutMillis) // 8 byte time stamp
-            .array(); // to byte array
+        //byte[] value = ByteBuffer
+        //    .allocate(24)
+        //    .putLong(uuid.getMostSignificantBits()) // 8 byte most bits of uuid
+        //    .putLong(uuid.getLeastSignificantBits()) // 8 byte least bits of uuid
+        //    .putLong(System.currentTimeMillis() + timeoutMillis) // 8 byte time stamp
+        //    .array();
+
+        long most = uuid.getMostSignificantBits(), 
+             last = uuid.getLeastSignificantBits(),
+             time = System.currentTimeMillis() + timeoutMillis;
+
+        byte[] value = {
+            (byte) (most >>> 56), (byte) (most >>> 48),
+            (byte) (most >>> 40), (byte) (most >>> 32),
+            (byte) (most >>> 24), (byte) (most >>> 16),
+            (byte) (most >>>  8), (byte) (most       ),
+
+            (byte) (last >>> 56), (byte) (last >>> 48),
+            (byte) (last >>> 40), (byte) (last >>> 32),
+            (byte) (last >>> 24), (byte) (last >>> 16),
+            (byte) (last >>>  8), (byte) (last       ),
+
+            (byte) (time >>> 56), (byte) (time >>> 48),
+            (byte) (time >>> 40), (byte) (time >>> 32),
+            (byte) (time >>> 24), (byte) (time >>> 16),
+            (byte) (time >>>  8), (byte) (time       )
+        };
         LOCK_VALUE.set(value);
         return value;
     }

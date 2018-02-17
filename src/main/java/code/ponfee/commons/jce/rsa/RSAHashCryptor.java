@@ -1,5 +1,8 @@
 package code.ponfee.commons.jce.rsa;
 
+import static code.ponfee.commons.jce.Providers.BC;
+import static code.ponfee.commons.jce.hash.HmacUtils.crypt;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -7,8 +10,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import code.ponfee.commons.io.Files;
+import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.Key;
-import code.ponfee.commons.jce.hash.HashUtils;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.SecureRandoms;
 
@@ -18,6 +21,9 @@ import code.ponfee.commons.util.SecureRandoms;
  */
 public class RSAHashCryptor extends RSANoPaddingCryptor {
 
+    private static final HmacAlgorithms HMAC = HmacAlgorithms.HmacKECCAK512;
+
+    
     /**
      * (origin ⊕ passwd) ⊕ passwd = origin
      * @param input
@@ -27,32 +33,35 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
      */
     public @Override byte[] encrypt(byte[] input, int length, Key ek) {
         RSAKey rsaKey = (RSAKey) ek;
-        int keyByteLen = rsaKey.n.bitLength() / 8;
+        int keyByteLen = rsaKey.n.bitLength() / 8, count = 1;
         BigInteger exponent = getExponent(rsaKey);
 
         // 生成随机对称密钥
         BigInteger key = SecureRandoms.random(rsaKey.n); // mode是以1XX开头，key是以01X开头
 
-        // 对密钥进行HASH
-        byte[] hashedKey = HashUtils.sha512(key.toByteArray());
-
         // 对密钥进行RSA加密，encryptedKey = key^e mode n
         byte[] encryptedKey = key.modPow(exponent, rsaKey.n).toByteArray();
 
         byte[] result = new byte[keyByteLen + length];
-        Bytes.copy(encryptedKey, 0, encryptedKey.length, result, 0, keyByteLen); // mode pow之后可能被去0或加0
-        for (int hLen = hashedKey.length, i = 0, j = 0; i < length; i++, j++) {
-            if (j == hLen) {
-                j = 0;
+        // mode pow之后可能被去0或加0
+        Bytes.copy(encryptedKey, 0, encryptedKey.length, result, 0, keyByteLen);
+
+        // 对密钥进行HASH
+        byte[] keyArray = key.toByteArray();
+        byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC, BC);
+        for (int keyOffset = 0, i = 0; i < length; i++) {
+            if (keyOffset == HMAC.byteSize()) {
+                keyOffset = 0;
+                hashedKey = crypt(keyArray, Bytes.fromInt(++count), HMAC, BC);
             }
-            result[keyByteLen + i] = (byte) (input[i] ^ hashedKey[j]);
+            result[keyByteLen + i] = (byte) (input[i] ^ hashedKey[keyOffset++]);
         }
         return result;
     }
 
     public @Override byte[] decrypt(byte[] input, Key dk) {
         RSAKey rsaKey = (RSAKey) dk;
-        int keyByteLen = rsaKey.n.bitLength() / 8;
+        int keyByteLen = rsaKey.n.bitLength() / 8, count = 1;
         BigInteger exponent = getExponent(rsaKey);
 
         // 获取被加密的对称密钥数据
@@ -62,46 +71,45 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
         BigInteger key = new BigInteger(1, encryptedKey).modPow(exponent, rsaKey.n);
 
         // 对密钥进行HASH
-        byte[] hashedKey = HashUtils.sha512(key.toByteArray());
-
+        byte[] keyArray = key.toByteArray();
+        byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC, BC);
         byte[] result = new byte[input.length - keyByteLen];
-        int hLen = hashedKey.length, rLen = result.length;
-        for (int i = 0, j = 0; i < rLen; i++, j++) {
-            if (j == hLen) {
-                j = 0;
+        for (int keyOffset = 0, rLen = result.length, i = 0; i < rLen; i++) {
+            if (keyOffset == HMAC.byteSize()) {
+                keyOffset = 0;
+                hashedKey = crypt(keyArray, Bytes.fromInt(++count), HMAC, BC);
             }
-            result[i] = (byte) (input[keyByteLen + i] ^ hashedKey[j]);
+            result[i] = (byte) (input[keyByteLen + i] ^ hashedKey[keyOffset++]);
         }
         return result;
     }
 
     public @Override void encrypt(InputStream input, Key ek, OutputStream output) {
         RSAKey rsaKey = (RSAKey) ek;
-        int keyByteLen = rsaKey.n.bitLength() / 8;
+        int keyByteLen = rsaKey.n.bitLength() / 8, count = 1;
         BigInteger exponent = getExponent(rsaKey);
 
         // 生成随机对称密钥
         BigInteger key = SecureRandoms.random(rsaKey.n);
-
-        // 对密钥进行HASH
-        byte[] hashedKey = HashUtils.sha512(key.toByteArray());
 
         // 对密钥进行RSA加密，encryptedKey = key^e mode n
         byte[] encryptedKey = key.modPow(exponent, rsaKey.n).toByteArray();
 
         byte[] encryptedKey0 = new byte[keyByteLen]; // mode pow之后可能被去0或加0
         Bytes.copy(encryptedKey, 0, encryptedKey.length, encryptedKey0, 0, keyByteLen);
-        
+
+        byte[] keyArray = key.toByteArray();
+        byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC, BC);
         try {
             output.write(encryptedKey0); // encrypted key
             byte[] buffer = new byte[this.getOriginBlockSize(rsaKey)];
-            int hLen = hashedKey.length;
-            for (int len, i, j; (len = input.read(buffer)) != Files.EOF;) {
-                for (i = 0, j = 0; i < len; i++, j++) {
-                    if (j == hLen) {
-                        j = 0;
+            for (int keyOffset = 0, len, i; (len = input.read(buffer)) != Files.EOF;) {
+                for (i = 0; i < len; i++) {
+                    if (keyOffset == HMAC.byteSize()) {
+                        keyOffset = 0;
+                        hashedKey = crypt(keyArray, Bytes.fromInt(++count), HMAC, BC);
                     }
-                    output.write((byte) (buffer[i] ^ hashedKey[j]));
+                    output.write((byte) (buffer[i] ^ hashedKey[keyOffset++]));
                 }
             }
             output.flush();
@@ -112,7 +120,7 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
 
     public @Override void decrypt(InputStream input, Key dk, OutputStream output) {
         RSAKey rsaKey = (RSAKey) dk;
-        int keyByteLen = rsaKey.n.bitLength() / 8;
+        int keyByteLen = rsaKey.n.bitLength() / 8, count = 1;
         BigInteger exponent = getExponent(rsaKey);
         try {
             if (input.available() < keyByteLen) {
@@ -126,17 +134,16 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
             // 解密被加密的密钥数据，key = encryptedKey^d mode n
             BigInteger key = new BigInteger(1, encryptedKey).modPow(exponent, rsaKey.n);
 
-            // 对密钥进行HASH
-            byte[] hashedKey = HashUtils.sha512(key.toByteArray());
-
             byte[] buffer = new byte[this.getCipherBlockSize(rsaKey)];
-            int hLen = hashedKey.length;
-            for (int len, i, j; (len = input.read(buffer)) != Files.EOF;) {
-                for (i = 0, j = 0; i < len; i++, j++) {
-                    if (j == hLen) {
-                        j = 0;
+            byte[] keyArray = key.toByteArray();
+            byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC, BC);
+            for (int keyOffset = 0, len, i; (len = input.read(buffer)) != Files.EOF;) {
+                for (i = 0; i < len; i++) {
+                    if (keyOffset == HMAC.byteSize()) {
+                        keyOffset = 0;
+                        hashedKey = crypt(keyArray, Bytes.fromInt(++count), HMAC, BC);
                     }
-                    output.write((byte) (buffer[i] ^ hashedKey[j]));
+                    output.write((byte) (buffer[i] ^ hashedKey[keyOffset++]));
                 }
             }
             output.flush();

@@ -33,7 +33,7 @@ public final class SM2 {
     public static final String PRIVATE_KEY = "SM2PrivateKey";
     public static final String PUBLIC_KEY = "SM2PublicKey";
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-    private static final int KEY_LENGTH = 32;
+    private static final int KEY_LENGTH = SM3Digest.getDigestSize();
 
     private final ECPoint point;
     private final byte[] key = new byte[KEY_LENGTH];
@@ -42,7 +42,7 @@ public final class SM2 {
     private final byte[] x, y;
 
     private byte keyOffset;
-    private int ct;
+    private int count;
 
     private SM2(ECPoint publicKey, BigInteger privateKey, BigInteger n) {
         Preconditions.checkArgument(publicKey != null, 
@@ -72,19 +72,19 @@ public final class SM2 {
         this.sm3c3.reset();
         this.sm3c3.update(this.x);
 
-        this.ct = 1;
+        this.count = 1;
         nextKey();
     }
 
     private void nextKey() {
         SM3Digest sm3keycur = SM3Digest.getInstance(this.sm3keybase);
-        sm3keycur.update((byte) (ct >>> 24));
-        sm3keycur.update((byte) (ct >>> 16));
-        sm3keycur.update((byte) (ct >>>  8));
-        sm3keycur.update((byte) (ct       ));
+        sm3keycur.update((byte) (count >>> 24));
+        sm3keycur.update((byte) (count >>> 16));
+        sm3keycur.update((byte) (count >>>  8));
+        sm3keycur.update((byte) (count       ));
         sm3keycur.doFinal(key, 0); // update key
         this.keyOffset = 0;
-        this.ct++;
+        this.count++;
     }
 
     private void encrypt(byte data[]) {
@@ -111,9 +111,9 @@ public final class SM2 {
 
     private byte[] doFinal() {
         this.sm3c3.update(this.y);
-        byte[] p = this.sm3c3.doFinal();
+        byte[] digest = this.sm3c3.doFinal();
         reset();
-        return p;
+        return digest;
     }
 
     public static Map<String, byte[]> generateKeyPair() {

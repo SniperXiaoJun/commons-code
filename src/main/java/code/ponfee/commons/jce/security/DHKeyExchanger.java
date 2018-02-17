@@ -26,6 +26,22 @@ import code.ponfee.commons.util.MavenProjects;
 /**
  * Diffie-Hellman Key Exchange
  * Key-Agreement
+ * 
+ * 1、生成质数p
+ * 2、找到p的原根，满足： g mod p, g^2 mod p, ..., g^(p-1) mod p
+ *    是各不相同的整数，并且以某种排列方式组成了从1到p-1的所有整数
+ * 3、对于一个整数b和质数p的一个原根g，可以找到惟一的指数i，使得
+ *    b=g^i mod p， 0<=i<=p-1，指数i称为b的以g为基数的模p的离散对数或者指数，
+ *    该值被记为ind(g ,p(b))
+ * 
+ * 4、用户A选择一个随机数作为私钥XA<p，并计算公钥YA=g^XA mod p
+ * 5、用户B选择一个随机数作为私钥XB<p，并计算公钥YB=g^XB mod p
+ * 6、(YB)^XA mod p = K = (YA)^XB mod p
+ * 7、 K = YB^XA mod p
+ *      = (g^XB mod p)^XA mod p
+ *      = (g^XB)^XA mod p          <-->  (a^b) mod p = ((a mod p)^b) mod p
+ *      = (g^XA mod p)^XB mod p
+ *      = (YA)^XB mod p
  * @author fupf
  */
 public final class DHKeyExchanger {

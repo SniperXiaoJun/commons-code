@@ -115,6 +115,8 @@ public class SHA1Digest {
     /** SHA-1摘要byte大小 */
     private static final int DIGEST_SIZE = 20;
 
+    private static final int WORK_SIZE = 80;
+
     /** 填充的边界 */
     private static final int PADDING_BOUNDS = 448 / 8;
 
@@ -131,7 +133,7 @@ public class SHA1Digest {
     private static final int K2 = 0x8F1BBCDC;
     private static final int K3 = 0xCA62C1D6;
 
-    private final   int[] work = new int[80];
+    private final  int[]  work = new int[WORK_SIZE];
     private final byte[] block = new byte[BLOCK_SIZE];
 
     private int a, b, c, d, e, blockOffset;
@@ -227,7 +229,7 @@ public class SHA1Digest {
         this.byteCount = 0;
     }
 
-    public int getDigestSize() {
+    public static int getDigestSize() {
         return DIGEST_SIZE;
     }
 
@@ -241,7 +243,7 @@ public class SHA1Digest {
         }
 
         // ext-block（扩展明文分组）
-        for (; i < 80; i++) {
+        for (; i < WORK_SIZE; i++) {
             this.work[i] = Maths.slr(this.work[i -  3] ^ this.work[i -  8] 
                                    ^ this.work[i - 14] ^ this.work[i - 16], 1);
         }
@@ -282,7 +284,7 @@ public class SHA1Digest {
         }
 
         // round four
-        for (; t < 80;) {
+        for (; t < WORK_SIZE;) {
             tmp = K3 + f3(b1, c1, d1) + Maths.slr(a1, 5) + e1 + this.work[t++];
             e1 = d1;
             d1 = c1;

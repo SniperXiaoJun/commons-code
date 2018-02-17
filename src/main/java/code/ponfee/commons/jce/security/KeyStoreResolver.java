@@ -25,12 +25,16 @@ import javax.net.ssl.TrustManagerFactory;
 
 import code.ponfee.commons.jce.cert.X509CertUtils;
 import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.util.SecureRandoms;
 
 /**
  * 密钥库解析类
  * @author fupf
  */
 public class KeyStoreResolver {
+
+    private static final SecureRandom SECURE_RANDOM =
+        new SecureRandom(SecureRandoms.generateSeed(20));
 
     public static enum KeyStoreType {
         JKS, PKCS12;
@@ -269,7 +273,7 @@ public class KeyStoreResolver {
             kmf.init(this.keyStore, toCharArray(keyPassword));
 
             SSLContext context = SSLContext.getInstance("TLS");
-            context.init(kmf.getKeyManagers(), trusts, new SecureRandom());
+            context.init(kmf.getKeyManagers(), trusts, SECURE_RANDOM);
             return context;
         } catch (Exception e) {
             throw new SecurityException(e);

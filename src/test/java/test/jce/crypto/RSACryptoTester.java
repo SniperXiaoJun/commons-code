@@ -67,7 +67,7 @@ public class RSACryptoTester {
         RSAPublicKey publicKey = RSAPublicKeys.fromPkcs8(publicKeyStr);
         test(privateKey, publicKey);
 
-        test(RSAPublicKeys.fakePrivateKey(publicKey), RSAPrivateKeys.fakePublicKey(privateKey));
+        test(RSAPublicKeys.inversePublicKey(publicKey), RSAPrivateKeys.inversePrivateKey(privateKey));
     }
 
     @Test
@@ -81,7 +81,7 @@ public class RSACryptoTester {
         RSAPublicKey publicKey = RSAPublicKeys.fromPkcs8(publicKeyStr);
         test(privateKey, publicKey);
 
-        test(RSAPublicKeys.fakePrivateKey(publicKey), RSAPrivateKeys.fakePublicKey(privateKey));
+        test(RSAPublicKeys.inversePublicKey(publicKey), RSAPrivateKeys.inversePrivateKey(privateKey));
     }
 
     @Test
@@ -95,7 +95,7 @@ public class RSACryptoTester {
         RSAPublicKey publicKey = RSAPublicKeys.fromPkcs8(publicKeyStr);
         test(privateKey, publicKey);
 
-        test(RSAPublicKeys.fakePrivateKey(publicKey), RSAPrivateKeys.fakePublicKey(privateKey));
+        test(RSAPublicKeys.inversePublicKey(publicKey), RSAPrivateKeys.inversePrivateKey(privateKey));
     }
 
     @Test
@@ -127,7 +127,7 @@ public class RSACryptoTester {
         RSAPublicKey publicKey = RSAPublicKeys.fromPkcs8(publicKeyStr);
         test(privateKey, publicKey);
 
-        test(RSAPublicKeys.fakePrivateKey(publicKey), RSAPrivateKeys.fakePublicKey(privateKey));
+        test(RSAPublicKeys.inversePublicKey(publicKey), RSAPrivateKeys.inversePrivateKey(privateKey));
     }
 
     @Test

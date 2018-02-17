@@ -41,7 +41,7 @@ public class EmailValidator {
             Lookup lookup = new Lookup(name, Type.MX);
             lookup.run();
             if (lookup.getResult() != Lookup.SUCCESSFUL) {
-                log.append("找不到MX记录\n");
+                log.append("Cannot lookup the MX record: " + name + ".\n");
                 return false;
             }
 

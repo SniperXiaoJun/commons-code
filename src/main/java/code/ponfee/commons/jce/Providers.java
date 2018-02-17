@@ -32,6 +32,8 @@ public interface Providers {
 
     // BouncyCastleProvider.PROVIDER_NAME
     Provider BC =         Providers.get(org.bouncycastle.jce.provider.BouncyCastleProvider.class);
+    Provider BC_PQC =     Providers.get(org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider.class);
+    Provider BC_JSSE =    Providers.get(org.bouncycastle.jsse.provider.BouncyCastleJsseProvider.class);
     Provider SUN =        Providers.get(sun.security.provider.Sun.class);
     Provider SunRsaSign = Providers.get(sun.security.rsa.SunRsaSign.class);
     Provider SunEC =      Providers.get(sun.security.ec.SunEC.class);

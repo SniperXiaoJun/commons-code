@@ -2,8 +2,7 @@ package code.ponfee.commons.util;
 
 import java.util.Date;
 
-import org.apache.commons.lang3.time.FastDateFormat;
-import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
 import org.joda.time.format.DateTimeFormat;
@@ -11,6 +10,14 @@ import org.joda.time.format.DateTimeFormat;
 import com.google.common.base.Preconditions;
 
 /**
+ * 1990-04-15 00:00:00这天调整了夏令时，即在4月15号0点的时候将表调快了一小时，导致这一天少了一小时。
+ * 
+ * 1986年4月，中国中央有关部门发出“在全国范围内实行夏时制的通知”，具体作法是：每年从四月中旬第一个星
+ * 期日的凌晨2时整（北京时间），将时钟拨快一小时，即将表针由2时拨至3时，夏令时开始；到九月中旬第一个
+ * 星期日的凌晨2时整（北京夏令时），再将时钟拨回一小时，即将表针由2时拨至1时，夏令时结束。从1986年到
+ * 1991年的六个年度，除1986年因是实行夏时制的第一年，从5月4日开始到9月14日结束外，其它年份均按规定的
+ * 时段施行。在夏令时开始和结束前几天，新闻媒体均刊登有关部门的通告。1992年起，夏令时暂停实行。
+ * 
  * 时间周期，计算周期性的时间段
  * @author Ponfee
  */
@@ -18,75 +25,78 @@ public enum DatePeriods {
 
     DAILY() {
         @Override
-        public Duration next(DateTime original, Date target, int step, int next) {
-            checkArguments(original, target, step);
-            DateTime origin0 = original.withTimeAtStartOfDay();
-            DateTime target0 = new DateTime(target).millisOfDay().withMaximumValue();
-            Period period = new Period(origin0, target0, PeriodType.days());
-            int interval = interval(period.getDays(), step, next);
-            DateTime begin = origin0.plusDays(interval * step);
-            return duration(begin, begin.plusDays(step));
+        Interval next0(LocalDateTime original, LocalDateTime target, int step, int next) {
+            Period period = new Period(original, target, PeriodType.days());
+            LocalDateTime begin = original.plusDays(calc(period.getDays(), step, next));
+            return new Interval(begin, begin.plusDays(step));
         }
     },
 
     WEEKLY() {
         @Override
-        public Duration next(DateTime original, Date target, int step, int next) {
-            checkArguments(original, target, step);
-            DateTime origin0 = original.withTimeAtStartOfDay();
-            DateTime target0 = new DateTime(target).millisOfDay().withMaximumValue();
-            Period period = new Period(origin0, target0, PeriodType.weeks());
-            int interval = interval(period.getWeeks(), step, next);
-            DateTime begin = origin0.plusWeeks(interval * step);
-            return duration(begin, begin.plusWeeks(step));
+        Interval next0(LocalDateTime original, LocalDateTime target, int step, int next) {
+            Period period = new Period(original, target, PeriodType.weeks());
+            LocalDateTime begin = original.plusWeeks(calc(period.getWeeks(), step, next));
+            return new Interval(begin, begin.plusWeeks(step));
         }
     },
 
     MONTHLY() {
         @Override
-        public Duration next(DateTime original, Date target, int step, int next) {
-            checkArguments(original, target, step);
-            DateTime origin0 = original.withTimeAtStartOfDay();
-            DateTime target0 = new DateTime(target).millisOfDay().withMaximumValue();
-
-            Period period = new Period(origin0, target0, PeriodType.months());
-            int interval = interval(period.getMonths(), step, next);
-            DateTime begin = origin0.plusMonths(interval * step);
-            return duration(begin, begin.plusMonths(step));
+        Interval next0(LocalDateTime original, LocalDateTime target, int step, int next) {
+            Period period = new Period(original, target, PeriodType.months());
+            LocalDateTime begin = original.plusMonths(calc(period.getMonths(), step, next));
+            return new Interval(begin, begin.plusMonths(step));
         }
     },
 
     QUARTERLY() {
         @Override
-        public Duration next(DateTime original, Date target, int step, int next) {
+        Interval next0(LocalDateTime original, LocalDateTime target, int step, int next) {
             return MONTHLY.next(original, target, step * 3, next);
         }
     },
 
     SEMIANNUAL() {
         @Override
-        public Duration next(DateTime original, Date target, int step, int next) {
+        Interval next0(LocalDateTime original, LocalDateTime target, int step, int next) {
             return MONTHLY.next(original, target, step * 6, next);
         }
     },
 
     ANNUAL() {
         @Override
-        public Duration next(DateTime original, Date target, int step, int next) {
-            checkArguments(original, target, step);
-            DateTime origin0 = original.withTimeAtStartOfDay();
-            DateTime target0 = new DateTime(target).millisOfDay().withMaximumValue();
-
-            Period period = new Period(origin0, target0, PeriodType.years());
-            int interval = interval(period.getYears(), step, next);
-            DateTime begin = origin0.plusYears(interval * step);
-            return duration(begin, begin.plusYears(step));
+        Interval next0(LocalDateTime original, LocalDateTime target, int step, int next) {
+            Period period = new Period(original, target, PeriodType.years());
+            LocalDateTime begin = original.plusYears(calc(period.getYears(), step, next));
+            return new Interval(begin, begin.plusYears(step));
         }
     };
 
-    // 2018-01-01为星期一
-    private static final DateTime ORIGINAL = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
-                                                        .parseDateTime("2018-01-01 00:00:00");
+    private static final String PATTERN = "yyyy-MM-dd HH:mm:ss SSS";
+
+    // 2018-01-01 is Monday
+    private static final LocalDateTime ORIGINAL = DateTimeFormat.forPattern(PATTERN)
+                                      .parseLocalDateTime("2018-01-01 00:00:00 000");
+
+    /**
+     * template method
+     * @param original
+     * @param target
+     * @param step
+     * @param next
+     * @return
+     */
+    public final Interval next(LocalDateTime original, LocalDateTime target, int step, int next) {
+        Preconditions.checkArgument(step > 0, "step must be positive number.");
+        Preconditions.checkArgument(!original.isAfter(target), "original cannot after target date.");
+
+        return this.next0(
+            original.millisOfDay().withMinimumValue(), 
+            target.millisOfDay().withMinimumValue(), 
+            step, next
+        );
+    }
 
     /**
      * calculate the next period based original and reference target
@@ -94,60 +104,64 @@ public enum DatePeriods {
      * @param target   the target of next reference
      * @param step     the period step
      * @param next     the next of target period
-     * @return Duration{start, end}
+     * @return Interval{begin, end}
      */
-    public abstract Duration next(DateTime original, Date target, int step, int next);
+    abstract Interval next0(LocalDateTime original, LocalDateTime target, 
+                            int step, int next);
 
-    public final Duration next(Date original, Date target, int step, int next) {
-        return next(new DateTime(original), target, step, next);
+    public final Interval next(Date original, Date target, int step, int next) {
+        return next(new LocalDateTime(original), new LocalDateTime(target), step, next);
     }
 
-    public final Duration next(Date target, int step, int next) {
-        return next(ORIGINAL, target, step, next);
+    public final Interval next(Date target, int step, int next) {
+        return next(ORIGINAL, new LocalDateTime(target), step, next);
     }
 
-    public final Duration next(Date target, int next) {
-        return next(ORIGINAL, target, 1, next);
+    public final Interval next(Date target, int next) {
+        return next(ORIGINAL, new LocalDateTime(target), 1, next);
     }
 
-    // ---------------------------------------------------------------
-    final void checkArguments(DateTime original, Date target, int step) {
-        Preconditions.checkArgument(step > 0, "step must be positive number");
-        Preconditions.checkArgument(!original.toDate().after(target));
+    private static int calc(int qty, int step, int next) {
+        return (qty / step + next) * step;
     }
 
-    final Duration duration(DateTime begin, DateTime end) {
-        return new Duration(begin.withTimeAtStartOfDay().toDate(), 
-                            end.minusMillis(1).toDate());
-    }
+    public static final class Interval {
+        //private static final FastDateFormat FORMAT = FastDateFormat.getInstance(PATTERN);
 
-    final int interval(int period, int step, int next) {
-        return period / step + next;
-    }
+        private final String begin;
+        private final String end;
+        private final Date beginDate;
+        private final Date endDate;
 
-    public static class Duration {
-        private static final FastDateFormat FORMAT = 
-            FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss SSS");
+        private Interval(LocalDateTime begin, LocalDateTime end) {
+            this.begin = begin.toString(PATTERN);
+            this.beginDate = begin.toDate();
 
-        private final Date begin;
-        private final Date end;
-
-        private Duration(Date begin, Date end) {
-            this.begin = begin;
-            this.end = end;
+            end = end.minusMillis(1);
+            this.end = end.toString(PATTERN);
+            this.endDate = end.toDate();
         }
 
-        public Date begin() {
+        public String begin() {
             return begin;
         }
 
-        public Date end() {
+        public String end() {
             return end;
+        }
+
+        public Date beginDate() {
+            return beginDate;
+        }
+
+        public Date endDate() {
+            return endDate;
         }
 
         @Override
         public String toString() {
-            return FORMAT.format(begin) + " ~ " + FORMAT.format(end);
+            return begin + " ~ " + end;
+            //return FORMAT.format(beginDate) + " ~ " + FORMAT.format(endDate);
         }
     }
 

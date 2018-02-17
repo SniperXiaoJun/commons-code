@@ -43,16 +43,33 @@ import code.ponfee.commons.util.RegexUtils;
 /**
  * <pre>
  *  mail.debug                  boolean     The initial debug mode. Default is false.
+ *  
  *  mail.from                   String      The return email address of the current user, used by the InternetAddress methodgetLocalAddress.
- *  mail.mime.address.strict    boolean     The MimeMessage class uses the InternetAddress method parseHeader to parse headers in messages. This property controls the strict flag passed to theparseHeader method. The default is true.
- *  mail.host                   String      The default host name of the mail server for both Stores and Transports. Used if themail.protocol.host property isn't set.
- *  mail.store.protocol         String      Specifies the default message access protocol. The Session methodgetStore() returns a Store object that implements this protocol. By default the first Store provider in the configuration files is returned.
- *  mail.transport.protocol     String      Specifies the default message transport protocol. The Session methodgetTransport() returns a Transport object that implements this protocol. By default the first Transport provider in the configuration files is returned.
+ *  
+ *  mail.mime.address.strict    boolean     The MimeMessage class uses the InternetAddress method parseHeader to parse headers in messages. 
+ *                                          This property controls the strict flag passed to theparseHeader method. The default is true.
+ * 
+ *  mail.host                   String      The default host name of the mail server for both Stores and Transports. Used if themail.protocol.
+ *                                          host property isn't set.
+ * 
+ *  mail.store.protocol         String      Specifies the default message access protocol. The Session methodgetStore() returns a Store object 
+ *                                          that implements this protocol. By default the first Store provider in the configuration files is returned.
+ * 
+ *  mail.transport.protocol     String      Specifies the default message transport protocol. The Session methodgetTransport() returns a Transport 
+ *                                          object that implements this protocol. By default the first Transport provider in the configuration files is returned.
+ * 
  *  mail.user                   String      The default user name to use when connecting to the mail server. Used if the mail.protocol.user property isn't set.
- *  mail.protocol.class         String      Specifies the fully qualified class name of the provider for the specified protocol. Used in cases where more than one provider for a given protocol exists; this property can be used to specify which provider to use by default. The provider must still be listed in a configuration file.
+ *  
+ *  mail.protocol.class         String      Specifies the fully qualified class name of the provider for the specified protocol. Used in cases where more than one 
+ *                                          provider for a given protocol exists; this property can be used to specify which provider to use by default. The provider 
+ *                                          must still be listed in a configuration file.
+ * 
  *  mail.protocol.host          String      The host name of the mail server for the specified protocol. Overrides the mail.host property.
+ *  
  *  mail.protocol.port          int         The port number of the mail server for the specified protocol. If not specified the protocol's default port number is used.
+ *  
  *  mail.protocol.user          String      The user name to use when connecting to mail servers using the specified protocol. Overrides themail.user property.
+ * 
  *  {@link #MailSender(String, String, String, boolean, Integer, Integer)}
  * </pre>
  * 

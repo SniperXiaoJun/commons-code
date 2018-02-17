@@ -50,7 +50,7 @@ public class ValueOperations extends JedisOperations {
      * @return 是否设置成功
      */
     public boolean set(String key, String value, int seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             String rtn = shardedJedis.setex(key, getActualExpire(seconds), value);
             return SUCCESS_MSG.equalsIgnoreCase(rtn);
         }, false, key, value, seconds);
@@ -67,7 +67,7 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public String get(String key, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             String value = shardedJedis.get(key);
             if (value != null) {
                 // 存在则设置失效时间
@@ -83,7 +83,7 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public String getAndDel(String key) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             String value = shardedJedis.get(key);
             if (value != null) {
                 shardedJedis.del(key);
@@ -98,7 +98,7 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public List<String> gets(String keyWildcard) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             CompletionService<List<String>> service = new ExecutorCompletionService<>(EXECUTOR);
             int number = 0;
             for (final Jedis jedis : shardedJedis.getAllShards()) {
@@ -145,7 +145,7 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public boolean setLong(String key, long value, int seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             String rtn = shardedJedis.setex(key, getActualExpire(seconds), String.valueOf(value));
             return SUCCESS_MSG.equalsIgnoreCase(rtn);
         }, false, key, value, seconds);
@@ -161,7 +161,7 @@ public class ValueOperations extends JedisOperations {
     }
 
     public Long getLong(String key, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long number = null;
             String value = shardedJedis.get(key);
             if (value != null) {
@@ -184,7 +184,7 @@ public class ValueOperations extends JedisOperations {
     }
 
     public String getSet(String key, String value, int seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             String oldValue = shardedJedis.getSet(key, value);
             expireForce(shardedJedis, key, seconds);
             return oldValue;
@@ -203,7 +203,7 @@ public class ValueOperations extends JedisOperations {
      * @return
      */
     public boolean setnx(String key, String value, int seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long result = shardedJedis.setnx(key, value);
             if (Numbers.equals(result, 1)) {
                 // 设置成功则需要设置失效期
@@ -231,7 +231,7 @@ public class ValueOperations extends JedisOperations {
     }
 
     public Long incrBy(String key, int step, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long rtn = shardedJedis.incrBy(key, step);
             expireForce(shardedJedis, key, seconds);
             return rtn;
@@ -249,7 +249,7 @@ public class ValueOperations extends JedisOperations {
     }
 
     public Double incrByFloat(String key, double step, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Double rtn = shardedJedis.incrByFloat(key, step);
             expireForce(shardedJedis, key, seconds);
             return rtn;
@@ -270,7 +270,7 @@ public class ValueOperations extends JedisOperations {
     }
 
     public Long decrBy(String key, int step, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long rtn = shardedJedis.decrBy(key, step);
             expireForce(shardedJedis, key, seconds);
             return rtn;
@@ -291,7 +291,7 @@ public class ValueOperations extends JedisOperations {
             return false;
         }
 
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             byte[] data = jedisClient.serialize(t, isCompress);
             String rtn = shardedJedis.setex(key, getActualExpire(seconds), data);
             return SUCCESS_MSG.equalsIgnoreCase(rtn);
@@ -320,7 +320,7 @@ public class ValueOperations extends JedisOperations {
      */
     public <T extends Object> T getObject(byte[] key, Class<T> clazz, 
                                           boolean isCompress, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             T t = jedisClient.deserialize(shardedJedis.get(key), clazz, isCompress);
             if (t != null) {
                 // 存在则设置失效时间
@@ -357,7 +357,7 @@ public class ValueOperations extends JedisOperations {
 
         byte[] value0 = isCompress ? GzipProcessor.compress(value) : value;
 
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             String rtn = shardedJedis.setex(key, getActualExpire(seconds), value0);
             return SUCCESS_MSG.equalsIgnoreCase(rtn);
         }, false, key, value0, isCompress, seconds);
@@ -379,7 +379,7 @@ public class ValueOperations extends JedisOperations {
             return null;
         }
 
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             byte[] result = shardedJedis.get(key);
             if (result != null) {
                 if (isCompress) {
@@ -409,7 +409,7 @@ public class ValueOperations extends JedisOperations {
             return null;
         }
 
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Collection<Jedis> jedisList = shardedJedis.getAllShards();
             if (jedisList == null || jedisList.isEmpty()) {
                 return null;
@@ -467,7 +467,7 @@ public class ValueOperations extends JedisOperations {
             return null;
         }
 
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Collection<Jedis> jedisList = shardedJedis.getAllShards();
             if (jedisList == null || jedisList.isEmpty()) {
                 return null;

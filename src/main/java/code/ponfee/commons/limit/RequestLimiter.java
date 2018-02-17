@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import code.ponfee.commons.jce.hash.HmacUtils;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * 请求限制器
@@ -99,11 +100,15 @@ public class RequestLimiter {
      * @param key   the cache key
      * @param code  the validation code of user input
      * @param limit the maximum fail input times
-     * @return
+     * @return chain program
      * @throws RequestLimitException
      */
     public RequestLimiter checkCode(String key, String code, int limit)
         throws RequestLimitException {
+        if (StringUtils.isEmpty(code)) {
+            throw new RequestLimitException("验证码不能为空！");
+        }
+
         String cacheKey = CACHE_CODE_KEY + key;
 
         // 1、判断验证码是否已失效
@@ -193,8 +198,7 @@ public class RequestLimiter {
      * @return
      */
     public long countAction(String key) {
-        Long count = client.valueOps().getLong(COUNT_ACTION_KEY + key);
-        return count == null ? 0 : count;
+        return ObjectUtils.ifNull(client.valueOps().getLong(COUNT_ACTION_KEY + key), 0L);
     }
 
     /**

@@ -89,6 +89,9 @@ public final class AsyncBatchTransmitter<T> extends Thread {
      * 结束
      */
     public void end() {
+        if (isEnd) {
+            return;
+        }
         this.batch.refresh();
         this.isEnd = true;
         this.batch.refresh();

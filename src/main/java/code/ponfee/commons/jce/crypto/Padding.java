@@ -8,7 +8,27 @@ package code.ponfee.commons.jce.crypto;
  * @author fupf
  */
 public enum Padding {
-    NoPadding, PKCS5Padding, PKCS7Padding, PADDING_ISO10126, //
-    ISO10126_2Padding, ISO7816_4Padding, X9_23Padding, //
-    TBCPadding, CS1Padding, CS2Padding, CS3Padding; // 
+
+    NoPadding, PKCS5Padding, PKCS7Padding, // 
+    ISO10126_Padding("ISO10126Padding"), //
+    ISO10126_2Padding("ISO10126-2Padding"), // 
+    ISO7816_4Padding("ISO7816-4Padding"), // 
+    X9_23Padding("X9.23Padding"), TBCPadding, //
+    CS1Padding, CS2Padding, CS3Padding, // 
+
+    ;
+
+    private final String padding;
+
+    private Padding() {
+        this.padding = this.name();
+    }
+
+    private Padding(String padding) {
+        this.padding = padding;
+    }
+
+    public String padding() {
+        return this.padding;
+    }
 }

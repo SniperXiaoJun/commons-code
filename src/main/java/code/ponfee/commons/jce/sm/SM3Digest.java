@@ -1,7 +1,6 @@
 package code.ponfee.commons.jce.sm;
 
-import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.util.Arrays;
+import java.util.Arrays;
 
 /**
  * SM3 digest implementation
@@ -21,17 +20,21 @@ public class SM3Digest {
     /** 缓冲区长度 */
     private static final int BUFFER_LENGTH = BLOCK_SIZE * 1;
 
-    private byte[] xBuf = new byte[BUFFER_LENGTH]; // 缓冲区
-    private int xBufOffset; // 缓冲区偏移量
-    private byte[] iv = Arrays.copyOf(SM3.IV, SM3.IV.length); // 初始向量
-    private int cntBlock = 0; // block数量
+    private final byte[] xBuf = new byte[BUFFER_LENGTH], // 缓冲区
+                           iv = new byte[SM3.IV.length]; // 初始向量
 
-    private SM3Digest() {}
+    private int xBufOffset, // 缓冲区偏移量
+                  cntBlock; // block数量
+
+    private SM3Digest() {
+        this.reset();
+    }
 
     private SM3Digest(SM3Digest t) {
         System.arraycopy(t.xBuf, 0, this.xBuf, 0, t.xBuf.length);
-        this.xBufOffset = t.xBufOffset;
         System.arraycopy(t.iv, 0, this.iv, 0, t.iv.length);
+        this.xBufOffset = t.xBufOffset;
+        this.cntBlock = t.cntBlock;
     }
 
     public static SM3Digest getInstance() {
@@ -109,29 +112,11 @@ public class SM3Digest {
     public void reset() {
         xBufOffset = 0;
         cntBlock = 0;
-        iv = Arrays.copyOf(SM3.IV, SM3.IV.length);
+        System.arraycopy(SM3.IV, 0, iv, 0, SM3.IV.length);
     }
 
-    public int getDigestSize() {
+    public static int getDigestSize() {
         return DIGEST_SIZE;
-    }
-
-    public String getKey(String inputStr) {
-        byte[] md = new byte[32];
-        byte[] msg1 = inputStr.getBytes();
-        SM3Digest sm3 = new SM3Digest();
-        sm3.update(msg1, 0, msg1.length);
-        sm3.doFinal(md, 0);
-
-        String finalStr = convertKey(Hex.encodeHexString(md), 
-                                     string2char(inputStr));
-
-        char[] arr = finalStr.toCharArray();
-        StringBuilder builder = new StringBuilder(arr.length / 2);
-        for (int i = 0; i < arr.length / 2; i++) {
-            builder.append((char) ((arr[i] + arr[arr.length - 1 - i]) % 95 + 32));
-        }
-        return builder.substring(4, 20);
     }
 
     private void doUpdate() {
@@ -147,22 +132,6 @@ public class SM3Digest {
         byte[] tmp = SM3.cf(iv, B);
         System.arraycopy(tmp, 0, iv, 0, iv.length);
         cntBlock++;
-    }
-
-    private static char string2char(String string) {
-        int n = 0;
-        for (int i = 0; i < string.length(); i++) {
-            n += string.charAt(i);
-        }
-        return (char) (n % 95 + 32);
-    }
-
-    private static String convertKey(String inStr, char c) {
-        char[] a = inStr.toCharArray();
-        for (int i = 0; i < a.length; i++) {
-            a[i] = (char) (a[i] ^ c);
-        }
-        return new String(a);
     }
 
     private static class SM3 {
@@ -407,8 +376,8 @@ public class SM3Digest {
          */
         static byte[] intToByteArray(int num) {
             return new byte[] {
-                (byte) (0xff & (num >> 0 )), (byte) (0xff & (num >> 8)),
-                (byte) (0xff & (num >> 16)), (byte) (0xff & (num >> 24))
+                (byte) (num       ), (byte) (num >>>  8),
+                (byte) (num >>> 16), (byte) (num >>> 24)
             };
         }
 
@@ -418,28 +387,24 @@ public class SM3Digest {
          * @return 一个整型数据
          */
         static int byteArrayToInt(byte[] bytes) {
-            int num = 0, temp;
-            temp = (0x000000ff & (bytes[0])) << 0;
-            num = num | temp;
-            temp = (0x000000ff & (bytes[1])) << 8;
-            num = num | temp;
-            temp = (0x000000ff & (bytes[2])) << 16;
-            num = num | temp;
-            temp = (0x000000ff & (bytes[3])) << 24;
-            return num | temp;
+            return (bytes[3]       ) << 24 // 转int后左移24位，刚好剩下原来的8位，故不用&0xFF
+                 | (bytes[2] & 0xFF) << 16 // 默认转int
+                 | (bytes[1] & 0xFF) <<  8
+                 | (bytes[0] & 0xFF);
         }
-
+        
         /**
          * 长整形转换成网络传输的字节流（字节数组）型数据
          * @param num 一个长整型数据
          * @return 4个字节的自己数组
          */
-        static byte[] longToByteArray(long num) {
-            byte[] bytes = new byte[8];
-            for (int i = 0; i < 8; i++) {
-                bytes[i] = (byte) (0xff & (num >> (i * 8)));
-            }
-            return bytes;
+        static byte[] longToByteArray(long value) {
+            return new byte[] {
+                (byte) (value       ), (byte) (value >>>  8), 
+                (byte) (value >>> 16), (byte) (value >>> 24), 
+                (byte) (value >>> 32), (byte) (value >>> 40), 
+                (byte) (value >>> 48), (byte) (value >>> 56) 
+            };
         }
     }
 

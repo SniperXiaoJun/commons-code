@@ -280,7 +280,7 @@ public final class Numbers {
      * @param segment
      * @return
      */
-    public static int[] sharding(int quantity, int segment) {
+    public static int[] average(int quantity, int segment) {
         int[] array = new int[segment];
         int remainder = quantity % segment;
         Arrays.fill(array, 0, remainder, quantity / segment + 1);
@@ -381,8 +381,9 @@ public final class Numbers {
         if (signum == -1) {
             builder.insert(0, "负");
         }
+
         // 输入的数字小数点后两位为"00"的情况，则要在最后追加特殊字符：整
-        if (!(scale > 0)) {
+        if (scale < 1) {
             builder.append("整");
         }
         return builder.toString();
@@ -409,10 +410,12 @@ public final class Numbers {
         System.out.println(lower(441656, 2));
         System.out.println(percent(0.00241, 1));
 
-        System.out.println(ObjectUtils.toString(sharding(10, 20)));
+        System.out.println(ObjectUtils.toString(average(10, 20)));
 
         double money = 2020004.01;
-        String s = chinesize(new BigDecimal(money));
-        System.out.println("[" + money + "]   ->   [" + s.toString() + "]");
+        System.out.println("[" + money + "]   ->   [" + chinesize(new BigDecimal(money)) + "]");
+
+        money = 43232;
+        System.out.println("[" + money + "]   ->   [" + chinesize(new BigDecimal(money)) + "]");
     }
 }

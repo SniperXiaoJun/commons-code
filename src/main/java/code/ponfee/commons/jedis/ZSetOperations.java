@@ -30,7 +30,7 @@ public class ZSetOperations extends JedisOperations {
      * @return 被成功添加的新成员的数量，不包括那些被更新的、已经存在的成员
      */
     public long zadd(String key, double score, String member, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             long rtn = shardedJedis.zadd(key, score, member);
             expireForce(shardedJedis, key, seconds);
             return rtn;
@@ -49,7 +49,7 @@ public class ZSetOperations extends JedisOperations {
      * @return
      */
     public long zadd(String key, Map<String, Double> scoreMembers, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             long rtn = shardedJedis.zadd(key, scoreMembers);
             expireForce(shardedJedis, key, seconds);
             return rtn;
@@ -68,7 +68,7 @@ public class ZSetOperations extends JedisOperations {
      * @return
      */
     public long zadd(byte[] key, Map<byte[], Double> scoreMembers, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             long rtn = shardedJedis.zadd(key, scoreMembers);
             expireForce(shardedJedis, key, seconds);
             return rtn;
@@ -91,7 +91,7 @@ public class ZSetOperations extends JedisOperations {
      * @return member 成员的 score 值，以字符串形式表示。
      */
     public Double zscore(String key, String member, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Double score = shardedJedis.zscore(key, member);
             expire(shardedJedis, key, seconds);
             return score;
@@ -109,7 +109,7 @@ public class ZSetOperations extends JedisOperations {
      * @return 当 key 存在且是有序集类型时，返回有序集的基数。当 key 不存在时，返回 0 。
      */
     public Long zcard(String key, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long count = shardedJedis.zcard(key);
             if (count != null && count > 0) {
                 expire(shardedJedis, key, seconds);
@@ -137,7 +137,7 @@ public class ZSetOperations extends JedisOperations {
      * @return 被移除成员的数量
      */
     public Long zremrangeByRank(String key, long start, long end, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long count = shardedJedis.zremrangeByRank(key, start, end);
             expire(shardedJedis, key, seconds);
             return count;
@@ -160,7 +160,7 @@ public class ZSetOperations extends JedisOperations {
      */
     public Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min, 
                                                  int offset, int count, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Set<Tuple> set = shardedJedis.zrevrangeByScoreWithScores(key, max, min, offset, count);
             expire(shardedJedis, key, seconds);
             return set;
@@ -180,7 +180,7 @@ public class ZSetOperations extends JedisOperations {
      * @return
      */
     public Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Set<Tuple> set = shardedJedis.zrevrangeByScoreWithScores(key, max, min);
             expire(shardedJedis, key, seconds);
             return set;
@@ -207,7 +207,7 @@ public class ZSetOperations extends JedisOperations {
      */
     public Set<Tuple> zrangeByScoreWithScores(String key, double min, double max, 
                                               int offset, int count, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Set<Tuple> set = shardedJedis.zrangeByScoreWithScores(key, min, max, offset, count);
             expire(shardedJedis, key, seconds);
             return set;
@@ -227,7 +227,7 @@ public class ZSetOperations extends JedisOperations {
      * @return 被成功移除的成员的数量，不包括被忽略的成员。
      */
     public Long zrem(String key, String member, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long rtn = shardedJedis.zrem(key, member);
             expire(shardedJedis, key, seconds);
             return rtn;
@@ -253,7 +253,7 @@ public class ZSetOperations extends JedisOperations {
      */
     public Set<String> zrevrange(String key, long start,
                                  long end, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Set<String> result = shardedJedis.zrevrange(key, start, end);
             expire(shardedJedis, key, seconds);
             return result;
@@ -278,7 +278,7 @@ public class ZSetOperations extends JedisOperations {
      * @return
      */
     public Set<String> zrange(String key, long start, long end, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Set<String> result = shardedJedis.zrange(key, start, end);
             expire(shardedJedis, key, seconds);
             return result;
@@ -300,7 +300,7 @@ public class ZSetOperations extends JedisOperations {
      * @return
      */
     public Set<Tuple> zrangeWithScores(String key, long start, long end, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Set<Tuple> result = shardedJedis.zrangeWithScores(key, start, end);
             expire(shardedJedis, key, seconds);
             return result;
@@ -320,7 +320,7 @@ public class ZSetOperations extends JedisOperations {
      * @return score 值在 min 和 max 之间的成员的数量。
      */
     public Long zcount(String key, double min, double max, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long rtn = shardedJedis.zcount(key, min, max);
             expire(shardedJedis, key, seconds);
             return rtn;
@@ -345,7 +345,7 @@ public class ZSetOperations extends JedisOperations {
      * @return member 成员的新 score 值，以字符串形式表示。
      */
     public Double zincrby(String key, String member, double score, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Double rtn = shardedJedis.zincrby(key, score, member);
             expireForce(shardedJedis, key, seconds);
             return rtn;
@@ -368,7 +368,7 @@ public class ZSetOperations extends JedisOperations {
      * @return 如果 member 是有序集 key 的成员，返回 member 的排名。如果 member 不是有序集 key 的成员，返回 nil 。
      */
     public Long zrank(String key, String member, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long rank = shardedJedis.zrank(key, member);
             expire(shardedJedis, key, seconds);
             return rank;
@@ -391,7 +391,7 @@ public class ZSetOperations extends JedisOperations {
      * @return 如果 member 是有序集 key 的成员，返回 member 的排名。如果 member 不是有序集 key 的成员，返回 nil 。
      */
     public Long zrevrank(String key, String member, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long revrank = shardedJedis.zrevrank(key, member);
             expire(shardedJedis, key, seconds);
             return revrank;
@@ -410,7 +410,7 @@ public class ZSetOperations extends JedisOperations {
      * @param seconds 被移除成员的数量
      */
     public Long zremrangeByScore(String key, long start, long end, Integer seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Long rtn = shardedJedis.zremrangeByScore(key, start, end);
             expire(shardedJedis, key, seconds);
             return rtn;

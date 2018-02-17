@@ -70,6 +70,10 @@ public final class GzipProcessor {
         return baos.toByteArray();
     }
 
+    public static void decompress(byte[] data, OutputStream output) {
+        decompress(new ByteArrayInputStream(data), output);
+    }
+
     /**
      * gzip解压缩
      * @param input

@@ -146,8 +146,10 @@ public class SimpleXmlHandler {
     /**
      * 通过Schema验证xml文件
      */
-    public static void validateByXsd(InputStream xsd, InputStream xml) {
-        try {
+    public static void validateByXsd(InputStream xsdIn, InputStream xmlIn) {
+        try (InputStream xsd = xsdIn;
+            InputStream xml = xmlIn;
+        ) {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setValidating(true);
             factory.setNamespaceAware(true);
@@ -183,19 +185,8 @@ public class SimpleXmlHandler {
                 }
                 throw new IllegalStateException(errors.toString());
             }
-        } catch (ParserConfigurationException | SAXException | DocumentException e) {
+        } catch (ParserConfigurationException | SAXException | DocumentException | IOException e) {
             throw new IllegalStateException(e);
-        } finally {
-            if (xsd != null) try {
-                xsd.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (xml != null) try {
-                xml.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 

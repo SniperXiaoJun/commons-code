@@ -16,6 +16,7 @@ import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 import code.ponfee.commons.math.Numbers;
@@ -123,7 +124,7 @@ public class ECParameters implements java.io.Serializable {
                       Numbers.toHex(params.getCurve().getB().toBigInteger()), 
                       Numbers.toHex(params.getG().getXCoord().toBigInteger()), 
                       Numbers.toHex(params.getG().getYCoord().toBigInteger()), 
-                      Numbers.toHex(params.getN()), toHex(params.getSeed())
+                      Numbers.toHex(params.getN()), encodeHex(params.getSeed())
                 ));
             }
         } catch (Exception ignored) {
@@ -204,7 +205,7 @@ public class ECParameters implements java.io.Serializable {
         );
     }
 
-    private static final String toHex(byte[] bytes) {
+    private static final String encodeHex(byte[] bytes) {
         return (bytes == null || bytes.length == 0)
                ? "0" : Hex.encodeHexString(bytes);
     }
@@ -219,17 +220,20 @@ public class ECParameters implements java.io.Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (null == obj) {
             return false;
+        }
+        if (this == obj) {
+            return true;
         }
         return this.toString().equals(obj.toString());
     }
 
     public static void main(String[] args) {
-        assert EC_PARAMETERS.get("secp112r1").equals(secp112r1);
-        assert EC_PARAMETERS.get("secp160r1").equals(secp160r1);
-        assert EC_PARAMETERS.get("secp256r1").equals(secp256r1);
-        assert SM2_BEST.equals(fromString(SM2_BEST.toString()));
+        Preconditions.checkState(EC_PARAMETERS.get("secp112r1").equals(secp112r1));
+        Preconditions.checkState(EC_PARAMETERS.get("secp160r1").equals(secp160r1));
+        Preconditions.checkState(EC_PARAMETERS.get("secp256r1").equals(secp256r1));
+        Preconditions.checkState(SM2_BEST.equals(fromString(SM2_BEST.toString())));
         for (ECParameters param : EC_PARAMETERS.values()) {
             System.out.println(param);
         }

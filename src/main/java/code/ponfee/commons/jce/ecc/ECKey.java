@@ -44,9 +44,9 @@ public class ECKey implements Key {
     public String toString() {
         String str = "";
         if (secret) {
-            str = "Private key: " + dk;
+            str = "Private key: " + dk + ", ";
         }
-        return str + ", Public key: " + beta + ", Curve: " + curve;
+        return str + "Public key: " + beta + ", Curve: " + curve;
     }
 
     public @Override boolean isPublic() {

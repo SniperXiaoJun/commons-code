@@ -41,7 +41,7 @@ public class KeysOperations extends JedisOperations {
      * @return
      */
     public Long pttl(String key) {
-        return hook(sjedis -> sjedis.pttl(key), null, key);
+        return call(sjedis -> sjedis.pttl(key), null, key);
     }
 
     /**
@@ -50,7 +50,7 @@ public class KeysOperations extends JedisOperations {
      * @return
      */
     public Set<String> keys(String keyWildcard) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             Set<String> keys = new HashSet<>();
             for (Jedis jedis : shardedJedis.getAllShards()) {
                 keys.addAll(jedis.keys(keyWildcard));
@@ -66,7 +66,7 @@ public class KeysOperations extends JedisOperations {
      * @return 是否设置成功
      */
     public boolean expire(String key, int seconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             return JedisOperations.expire(shardedJedis, key, seconds);
         }, false, key, seconds);
     }
@@ -78,7 +78,7 @@ public class KeysOperations extends JedisOperations {
      * @return 是否设置成功
      */
     public boolean pexpire(String key, int milliseconds) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             return JedisOperations.pexpire(shardedJedis, key, milliseconds);
         }, false, key, milliseconds);
     }
@@ -89,7 +89,7 @@ public class KeysOperations extends JedisOperations {
      * @return
      */
     public boolean exists(String key) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             return shardedJedis.exists(key);
         }, false, key);
     }
@@ -100,7 +100,7 @@ public class KeysOperations extends JedisOperations {
      * @return 被删除 key 的数量
      */
     public Long del(String key) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             return shardedJedis.del(key);
         }, null, key);
     }
@@ -111,7 +111,7 @@ public class KeysOperations extends JedisOperations {
      * @return 被删除 key 的数量
      */
     public Long del(byte[] key) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             return shardedJedis.del(key);
         }, null, key);
     }
@@ -122,7 +122,7 @@ public class KeysOperations extends JedisOperations {
      * @return
      */
     public Long dels(String... keys) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             if (keys == null || keys.length == 0) {
                 return 0L;
             }
@@ -163,7 +163,7 @@ public class KeysOperations extends JedisOperations {
      * @return 被删除 key 的数量
      */
     public long delWithWildcard(String keyWildcard) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             long delCounts = 0L;
             Collection<Jedis> jedisList = shardedJedis.getAllShards();
             if (jedisList == null || jedisList.isEmpty()) {
@@ -199,7 +199,7 @@ public class KeysOperations extends JedisOperations {
      * @return none (key不存在)；string (字符串)；list (列表)；set (集合)；zset (有序集)；hash (哈希表)；
      */
     public String type(String key) {
-        return hook(shardedJedis -> {
+        return call(shardedJedis -> {
             return shardedJedis.type(key);
         }, null, key);
     }

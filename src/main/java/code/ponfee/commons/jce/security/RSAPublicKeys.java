@@ -33,8 +33,9 @@ public final class RSAPublicKeys {
     public static RSAPublicKey toRSAPublicKey(BigInteger modulus, BigInteger publicExponent) {
         try {
             // 存储的就是这两个大整形数
-            return (RSAPublicKey) KeyFactory.getInstance(RSACryptor.ALG_RSA)
-                .generatePublic(new RSAPublicKeySpec(modulus, publicExponent));
+            return (RSAPublicKey) KeyFactory.getInstance(RSACryptor.ALG_RSA).generatePublic(
+                new RSAPublicKeySpec(modulus, publicExponent)
+            );
         } catch (Exception ex) {
             throw new SecurityException(ex);
         }
@@ -55,7 +56,7 @@ public final class RSAPublicKeys {
      * @param publicKey
      * @return
      */
-    public static RSAPrivateKey fakePrivateKey(RSAPublicKey publicKey) {
+    public static RSAPrivateKey inversePublicKey(RSAPublicKey publicKey) {
         return RSAPrivateKeys.toRSAPrivateKey(publicKey.getModulus(), 
                                               publicKey.getPublicExponent());
     }

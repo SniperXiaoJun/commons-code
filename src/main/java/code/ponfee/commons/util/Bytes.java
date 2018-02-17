@@ -460,8 +460,9 @@ public final class Bytes {
 
     /**
      * copy in to out
-     * 从尾部开始拷贝in到out，in数据不足则out前面补0，
-     * 若in有多则舍去in前面的数据
+     * 从尾部开始拷贝in到out：
+     *   若in数据不足则out前面补0
+     *   若in有多则舍去in前面的数据
      * @param in
      * @param inFrom
      * @param inLen

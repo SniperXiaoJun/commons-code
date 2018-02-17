@@ -1,10 +1,12 @@
 package test.utils;
 
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.joda.time.LocalDateTime;
 
 import code.ponfee.commons.util.DatePeriods;
 import code.ponfee.commons.util.Dates;
@@ -15,7 +17,8 @@ import code.ponfee.commons.util.Dates;
  */
 public class DatePeriodCalculator {
 
-    private static final Date STARTING_DATE = Dates.toDate("2018-01-01 00:00:00", "yyyy-MM-dd HH:mm:ss");
+    private static final Date STARTING_DATE = 
+        Dates.random(Dates.toDate("1970-01-01 00:00:00", "yyyy-MM-dd HH:mm:ss"));
 
     private final Date starting; // 最开始的周期（起点）时间
     private final Date target; // 待计算时间
@@ -26,8 +29,8 @@ public class DatePeriodCalculator {
     }
 
     public DatePeriodCalculator(Date starting, Date target, Periods period) {
-        this.starting = starting;
-        this.target = target;
+        this.starting = Dates.startOfDay(starting);
+        this.target = Dates.endOfDay(target);
         this.period = period;
     }
 
@@ -82,8 +85,7 @@ public class DatePeriodCalculator {
                     case YEARLY:
                         quantity *= 12; // 年度
                         break;
-                    default:
-                        // MONTHLY
+                    default: // MONTHLY
                 }
                 // 间隔月数
                 int intervalMonth = (c2.get(Calendar.YEAR) - c1.get(Calendar.YEAR)) * 12 + c2.get(Calendar.MONTH) - c1.get(Calendar.MONTH);
@@ -130,59 +132,61 @@ public class DatePeriodCalculator {
     }
 
     private static final FastDateFormat FORMAT = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss SSS");
-    public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) {
-            int step = ThreadLocalRandom.current().nextInt(10) + 1;
-            int next = -20 + ThreadLocalRandom.current().nextInt(20);
-            Date date = Dates.random(STARTING_DATE);
-            String result;
-            Date[] dates = new DatePeriodCalculator(date, Periods.DAILY).calculate(step, next);
-            result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
-            if (result.equals(DatePeriods.DAILY.next(STARTING_DATE, date, step, next))) {
-                System.err.println("DAILY FAIL!");
-            } else {
-                System.out.println(result);
-            }
+    public static void main(String[] args) throws ParseException {
+        System.out.println(FORMAT.format(new LocalDateTime(1990, 04, 15, 00, 00, 00, 000).toDate()));
+        System.out.println(FORMAT.format(FORMAT.parse("1990-04-15 00:00:00 000")));
 
-            dates = new DatePeriodCalculator(date, Periods.WEEKLY).calculate(step, next);
-            result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
-            if (result.equals(DatePeriods.WEEKLY.next(STARTING_DATE, date, step, next))) {
-                System.err.println("WEEKLY FAIL!");
-            } else {
-                System.out.println(result);
-            }
+        for (int i = 0; i < 100000; i++) {
+            int step = ThreadLocalRandom.current().nextInt(37) + 1;
+            int next = -47 + ThreadLocalRandom.current().nextInt(94);
+            Date target = Dates.random(Dates.plusSeconds(STARTING_DATE, 10));
+            String except, actual;
 
-            dates = new DatePeriodCalculator(date, Periods.MONTHLY).calculate(step, next);
-            result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
-            if (result.equals(DatePeriods.MONTHLY.next(STARTING_DATE, date, step, next))) {
-                System.err.println("MONTHLY FAIL!");
-            } else {
-                System.out.println(result);
-            }
+            except = except(Periods.DAILY, target, step, next);
+            actual = DatePeriods.DAILY.next(STARTING_DATE, target, step, next).toString();
+            print("DAILY FAIL!", except, actual, step);
 
-            dates = new DatePeriodCalculator(date, Periods.QUARTERLY).calculate(step, next);
-            result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
-            if (result.equals(DatePeriods.QUARTERLY.next(STARTING_DATE, date, step, next))) {
-                System.err.println("QUARTERLY FAIL!");
-            } else {
-                System.out.println(result);
-            }
+            except = except(Periods.WEEKLY, target, step, next);
+            actual = DatePeriods.WEEKLY.next(STARTING_DATE, target, step, next).toString();
+            print("WEEKLY FAIL!", except, actual, step);
 
-            dates = new DatePeriodCalculator(date, Periods.HALF_YEARLY).calculate(step, next);
-            result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
-            if (result.equals(DatePeriods.SEMIANNUAL.next(STARTING_DATE, date, step, next))) {
-                System.err.println("HALF_YEARLY FAIL!");
-            } else {
-                System.out.println(result);
-            }
+            except = except(Periods.MONTHLY, target, step, next);
+            actual = DatePeriods.MONTHLY.next(STARTING_DATE, target, step, next).toString();
+            print("MONTHLY FAIL!", except, actual, step);
 
-            dates = new DatePeriodCalculator(date, Periods.YEARLY).calculate(step, next);
-            result = FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
-            if (result.equals(DatePeriods.ANNUAL.next(STARTING_DATE, date, step, next))) {
-                System.err.println("YEARLY FAIL!");
-            } else {
-                System.out.println(result);
-            }
+            except = except(Periods.QUARTERLY, target, step, next);
+            actual = DatePeriods.QUARTERLY.next(STARTING_DATE, target, step, next).toString();
+            print("QUARTERLY FAIL!", except, actual, step);
+
+            except = except(Periods.HALF_YEARLY, target, step, next);
+            actual = DatePeriods.SEMIANNUAL.next(STARTING_DATE, target, step, next).toString();
+            print("SEMIANNUAL FAIL!", except, actual, step);
+
+            except = except(Periods.YEARLY, target, step, next);
+            actual = DatePeriods.ANNUAL.next(STARTING_DATE, target, step, next).toString();
+            print("ANNUAL FAIL!", except, actual, step);
+        }
+    }
+
+    private static String except(Periods p, Date target, int step, int next) {
+        Date[] dates = new DatePeriodCalculator(target, p).calculate(step, next);
+        return FORMAT.format(dates[0]) + " ~ " + FORMAT.format(dates[1]);
+    }
+
+    private static void print(String msg, String except, String actual, int step) {
+        boolean flag = true;
+        if (!flag)  {
+            return;
+        }
+        if (!except.equals(actual)) {
+            System.err.println(msg + ", step: " + step);
+            System.err.println("except: " + except);
+            System.err.println("actual: " + actual);
+            System.err.println();
+        } else if (!except.contains("00:00:00 000")) {
+            System.err.println(except);
+        } else {
+            //System.out.println(except);
         }
     }
 }

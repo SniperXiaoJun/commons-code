@@ -18,7 +18,8 @@ public class JAXWS {
         return service.getPort(clazz);
     }
 
-    public static <T> T client(Class<T> clazz, String address, String namespaceURI, String localPart) {
+    public static <T> T client(Class<T> clazz, String address, 
+                               String namespaceURI, String localPart) {
         return client(clazz, address, new QName(namespaceURI, localPart));
     }
 
@@ -30,7 +31,8 @@ public class JAXWS {
         try {
             return new URL(address);
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("invalid url address: " + address, e);
+            // cannot happened
+            throw new IllegalArgumentException("Invalid url: " + address, e);
         }
     }
 

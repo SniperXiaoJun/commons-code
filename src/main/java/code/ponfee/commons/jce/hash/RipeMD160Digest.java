@@ -279,6 +279,10 @@ public class RipeMD160Digest {
         digestBlock(X);
     }
 
+    public static int getDigestSize() {
+        return DIGEST_SIZE;
+    }
+
     public static void main(String[] args) {
         byte[] data = "1234567890".getBytes();
         RipeMD160Digest md = RipeMD160Digest.getInstance();

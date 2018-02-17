@@ -137,8 +137,8 @@ public class RSAryptorTest {
     @Test
     public void testRSAHash() throws Exception {
         System.out.println("\n\ntestRSAHash======================================");
-        for (int i = 0; i < 100; i++) {
-            byte[] data = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(255) + 1);
+        for (int i = 0; i < 10; i++) {
+            byte[] data = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(99999) + 1);
 
             RSAKey dk = new RSAKey(1024);
             Key ek = dk.getPublic();

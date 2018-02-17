@@ -1,11 +1,15 @@
 package code.ponfee.commons.jce.ecc;
 
+import static code.ponfee.commons.jce.Providers.BC;
+import static code.ponfee.commons.jce.hash.HmacUtils.crypt;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 
 import code.ponfee.commons.jce.Cryptor;
+import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.Key;
-import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
@@ -22,7 +26,7 @@ import code.ponfee.commons.util.SecureRandoms;
  *          由椭圆曲线特性可得出：beta point(public key) * rk = ECPoint S = gamma point(public key) * dk
  * 
  *          2）ECPoint S = beta point(public key) * rk，把ECPoint S作为中间对称密钥，
- *            通过HASH函数计算对称加密密钥：key = SHA-512(ECPoint S)
+ *            通过HASH函数计算对称加密密钥：key = HmacSHA-512(ECPoint S)
  * 
  *          3）加密：origin ⊕  key = cipher 
  * 
@@ -32,13 +36,15 @@ import code.ponfee.commons.util.SecureRandoms;
  * 
  *          2）用第一步的私钥dk与gamma point(public key)进行计算得到：ECPoint S = gamma point(public key) * dk
  * 
- *          3）通过HASH函数计算对称加密密钥：key = SHA-512(ECPoint S)
+ *          3）通过HASH函数计算对称加密密钥：key = HmacSHA-512(ECPoint S)
  * 
  *          4）解密：cipher ⊕   key = origin
  * 
  * @author Ponfee
  */
 public class ECCryptor extends Cryptor {
+
+    private static final HmacAlgorithms HMAC = HmacAlgorithms.HmacKECCAK512;
 
     private final EllipticCurve curve;
 
@@ -75,13 +81,16 @@ public class ECCryptor extends Cryptor {
         ECPoint secure = ecKey.beta.multiply(rk);
 
         // 用hash值与原文进行xor操作
-        byte[] hashed = HashUtils.sha512(secure.getX().toByteArray(), 
-                                         secure.getY().toByteArray());
-        for (int hLen = hashed.length, i = 0, j = 0; i < length; i++, j++) {
-            if (j == hLen) {
-                j = 0;
+        byte[] keyBytes = Bytes.concat(secure.getX().toByteArray(), 
+                                       secure.getY().toByteArray());
+        int count = 1;
+        byte[] hashed = crypt(keyBytes, Bytes.fromInt(count), HMAC, BC);
+        for (int i = 0, keyOffset = 0; i < length; i++) {
+            if (keyOffset == HMAC.byteSize()) {
+                keyOffset = 0;
+                hashed = crypt(keyBytes, Bytes.fromInt(++count), HMAC, BC);
             }
-            result[i + offset] = (byte) (input[i] ^ hashed[j]);
+            result[i + offset] = (byte) (input[i] ^ hashed[keyOffset++]);
         }
         return result;
     }
@@ -98,22 +107,23 @@ public class ECCryptor extends Cryptor {
         // ECPoint S = gamma point(public key) * dk
         ECPoint secure = gamma.multiply(ecKey.dk);
 
-        byte[] hashed;
+        byte[] keyBytes;
         if (secure.isZero()) {
-            hashed = HashUtils.sha512(BigInteger.ZERO.toByteArray(), 
-                                      BigInteger.ZERO.toByteArray());
+            keyBytes = Bytes.concat(BigInteger.ZERO.toByteArray(), 
+                                    BigInteger.ZERO.toByteArray());
         } else {
-            hashed = HashUtils.sha512(secure.getX().toByteArray(), 
-                                      secure.getY().toByteArray());
+            keyBytes = Bytes.concat(secure.getX().toByteArray(), 
+                                    secure.getY().toByteArray());
         }
-
-        int length = input.length - offset;
-        byte[] result = new byte[length];
-        for (int hLen = hashed.length, i = 0, j = 0; i < length; i++, j++) {
-            if (j == hLen) {
-                j = 0;
+        int count = 1, length = input.length - offset;
+        byte[] hashed = crypt(keyBytes, Bytes.fromInt(count), HMAC, BC),
+               result = new byte[length];
+        for (int i = 0, keyOffset = 0; i < length; i++) {
+            if (keyOffset == HMAC.byteSize()) {
+                keyOffset = 0;
+                hashed = crypt(keyBytes, Bytes.fromInt(++count), HMAC, BC);
             }
-            result[i] = (byte) (input[i + offset] ^ hashed[j]);
+            result[i] = (byte) (input[i + offset] ^ hashed[keyOffset++]);
         }
         return result;
     }

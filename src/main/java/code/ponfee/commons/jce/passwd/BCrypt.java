@@ -41,7 +41,7 @@ import code.ponfee.commons.util.SecureRandoms;
 * 
 * @author Damien Miller
 * @author Ponfee
-* @version 0.4
+* @version 0.5
 * 
 * Reference from internet and with optimization
 */
@@ -348,7 +348,7 @@ public final class BCrypt {
         StringBuilder builder = new StringBuilder(62).append(SEPARATOR)
                                         .append("2a").append(SEPARATOR);
         if (logrounds < 10) {
-            builder.append("0");
+            builder.append('0');
         }
         builder.append(Integer.toString(logrounds)).append(SEPARATOR);
 
@@ -383,7 +383,7 @@ public final class BCrypt {
 
     private static byte[] crypt(byte[] passwd, byte[] salt, int logrounds) {
         int[] ciphertext = Arrays.copyOf(CIPHERTEXT, CIPHERTEXT.length);
-        return crypt(passwd, salt, logrounds, (int[]) ciphertext);
+        return crypt(passwd, salt, logrounds, ciphertext);
     }
 
     /**
@@ -558,23 +558,27 @@ public final class BCrypt {
         } else {
             System.out.println("crypt success!");
         }
+        System.out.println();
 
         String password = "passwd";
         System.out.println(create(password, 11));
-        System.out.print("Test begin");
+        System.out.println();
+
+        System.out.println("Test begin...");
         boolean flag = true;
         String hashed = create(password, 2);
         long start = System.currentTimeMillis();
         for (int i = 0; i < 100000; i++) { // 45 seconds
             if (!check(password, hashed)) {
-                System.err.println("fail!");
                 flag = false;
                 break;
             }
         }
-        System.out.println("cost: "+(System.currentTimeMillis()-start)/1000);
+        System.out.println("cost: " + (System.currentTimeMillis() - start) / 1000);
         if (flag) {
-            System.out.println("\nTest success!");
+            System.out.println("Test success!");
+        } else {
+            System.err.println("Test fail!");
         }
     }
 }

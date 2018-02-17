@@ -31,8 +31,7 @@ public class Maths {
 
     /**
      * shift left round
-     * 循环左移位操作符Sn(X)，X是一个字，n是一个整数，0<=n<=32
-     * Sn(X) = (X<<n) OR (X>>>32-n)
+     * 循环左移位操作：0<=n<=32
      * @param x
      * @param n
      * @return

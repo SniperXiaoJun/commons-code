@@ -87,7 +87,7 @@ public class SM2Test {
     public void test4() {
         byte[] publicKey1 = Base64.getDecoder().decode("BDky9CNygRTBGh7eGdzdbxP5eGRozk4wQfFmREncwEKnYHhNy1OoBvh0wY/RMH/3ikfYejClHxlI1T+jRa0m2wU=");
         byte[] privateKey1 = Base64.getDecoder().decode("AJaz6VNm1Wl9ba1YCEkYi36+m+8DDL4LDuLM172tg5Ao");
-        byte[] encrypted1 = Base64.getDecoder().decode("BH8O9G5sFJroqGhDHX8caSBw0qp4pNMEaqwvVJS9juabFvTfrpTQNwM2DZhQKfUwX00VnLDzjqyP9YGnurdjC/EWmyHQH35OtFe6NmLj7IHIusL0GSZdU1gBujjx1LoPunYOFYBfR9AZRAcnYS64yiVmgps6GGc+A9/FqlMgWI69TIXngrHIUMUnP+9YToRr3JBzFdDrTTOdxCbmX9VeFHwABF7dNRO8VQkAMB0=");
+        byte[] encrypted1 = Base64.getDecoder().decode("BBdOqZ+7WMaYzyyEZui0b5tdfJqquXH0pMxyoSv04BzYCqKIaeXPcc/vIek8tcK4kCkp022OCZ2TW2bLgVgGvFxeMOzGUgliTQP521HmqbQaawS4FFHxGa1vy+lk9UrkOIaTiEqjIRFSB2SW4cOi3u1mwvqK8EuaYFb143K539HIuqu84Bo3RD2zIpssO+yZzduG4KDcn4iqOJ+NJ1RB5wlI1xEyyiKit6c0mVBfSnXbUkuAyml50dM=");
         System.out.println(new String(SM2.decrypt(privateKey1, encrypted1)));
         
         

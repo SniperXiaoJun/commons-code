@@ -15,8 +15,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Hex;
-
 import com.google.common.collect.ImmutableMap;
 
 /**
@@ -184,7 +182,7 @@ public final class ECDSASigner {
         Map<String, ECKey> keyMap = generateKeyPair();
         byte[] data = "123456".getBytes();
         byte[] signed = signSha1(data, getPrivateKey(keyMap));
-        System.out.println(Hex.encodeHexString(signed));
+        System.out.println(signed.length);
         System.out.println(verifySha1(data, signed, getPublicKey(keyMap)));
 
         /*byte[] encrypted = encrypt(data, getPublicKey(keyMap));

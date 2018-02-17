@@ -79,7 +79,7 @@ public class RC4 {
     public int encrypt(byte[] in, int inOff, int len, byte[] out, int outOff) {
         byte[] sBox = Arrays.copyOf(this.sBox, this.sBox.length);
 
-        // RPGA：伪随机生成算法，利用上面重新排列的S盒来产生任意长度的密钥流
+        // RPGA：伪随机生成算法，不断的重排S盒来产生任意长度的密钥流
         for (int i = 0, x = 0, y = 0; i < len; i++) {
             x = (x + 1) & 0xFF;
             y = (sBox[x] + y) & 0xFF;

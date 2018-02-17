@@ -14,6 +14,7 @@ import javax.crypto.spec.PBEKeySpec;
 import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.jce.HmacAlgorithms;
+import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
@@ -50,14 +51,14 @@ public final class PBKDF2 {
 
     /**
      * fix  salt            16 byte
-     *      iterationCount  64
+     *      iterationCount  32
      *      dkLen           32 byte
      * @param alg
      * @param password
      * @return
      */
     public static String create(HmacAlgorithms alg, char[] password) {
-        return create(alg, password, 32, 64, 32);
+        return create(alg, password, 16, 32, 32);
     }
 
     /**
@@ -79,18 +80,18 @@ public final class PBKDF2 {
         // Hash the password
         byte[] hash = pbkdf2(alg, password, salt, iterationCount, dkLen);
 
-        long algIdx = ALGORITHM_MAPPING.inverse().get(alg) & 0xf; // maximum is 0xf
-        String params = Long.toString(algIdx << 16L | iterationCount, 16);
+        int algIdx = ALGORITHM_MAPPING.inverse().get(alg) & 0xF; // maximum is 0xf
+        String params = Integer.toString(algIdx << 16L | iterationCount, 16);
 
         // format iterations:salt:hash
         return new StringBuilder(8 + (salt.length + hash.length) * 4 / 3 + 4)
                 .append(SEPARATOR).append(params)
-                .append(SEPARATOR).append(toBase64(salt))
-                .append(SEPARATOR).append(toBase64(hash))
+                .append(SEPARATOR).append(encodeBase64(salt))
+                .append(SEPARATOR).append(encodeBase64(hash))
                 .toString();
     }
 
-    private static String toBase64(byte[] data) {
+    private static String encodeBase64(byte[] data) {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
@@ -117,9 +118,9 @@ public final class PBKDF2 {
             throw new IllegalArgumentException("Invalid hashed value");
         }
 
-        long params = Long.parseLong(parts[1], 16);
-        HmacAlgorithms alg = ALGORITHM_MAPPING.get((int) (params >> 16 & 0xf));
-        int iterations = (int) params & 0xffff;
+        int params = Integer.parseInt(parts[1], 16);
+        HmacAlgorithms alg = ALGORITHM_MAPPING.get(params >> 16 & 0xf);
+        int iterations = params & 0xffff;
         byte[] salt = Base64.getUrlDecoder().decode(parts[2]);
         byte[] hash = Base64.getUrlDecoder().decode(parts[3]);
 
@@ -145,7 +146,9 @@ public final class PBKDF2 {
                                  int iterationCount, int dkLen) {
         PBEKeySpec spec = new PBEKeySpec(password, salt, iterationCount, dkLen * 8);
         try {
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2With" + alg.name());
+            SecretKeyFactory skf = SecretKeyFactory.getInstance(
+                "PBKDF2With" + alg.algorithm(), Providers.BC
+            );
             return skf.generateSecret(spec).getEncoded();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new SecurityException(e);
@@ -165,23 +168,22 @@ public final class PBKDF2 {
         System.out.println("============================================\n");
 
         // Test password validation
-        HmacAlgorithms alg = HmacAlgorithms.HmacSHA384;
-        boolean failure = false;
+        HmacAlgorithms alg = HmacAlgorithms.HmacSHA3_256;
         System.out.println("Running tests...");
         String passwd = "password";
         String hashed = create(alg, passwd);
         System.out.println(hashed);
+        boolean failure = false;
         long start = System.currentTimeMillis();
         for (int i = 0; i < 100000; i++) { // 20 seconds
             if (!check(passwd, hashed)) {
-                System.out.println("FAILURE: GOOD PASSWORD NOT ACCEPTED!");
                 failure = true;
                 break;
             }
         }
-        System.out.println("cost: "+(System.currentTimeMillis()-start)/1000);
+        System.out.println("cost: " + (System.currentTimeMillis() - start) / 1000);
         if (failure) {
-            System.out.println("TESTS FAILED!");
+            System.err.println("TESTS FAILED!");
         } else {
             System.out.println("TESTS PASSED!");
         }

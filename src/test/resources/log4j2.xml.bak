@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/2002/xmlspec/dtd/2.10/xmlspec.dtd">
 
-<!-- status : Õâ¸öÓÃÓÚÉèÖÃlog4j2×ÔÉíÄÚ²¿µÄÐÅÏ¢Êä³ö,¿ÉÒÔ²»ÉèÖÃ,µ±ÉèÖÃ³ÉtraceÊ±,»á¿´µ½log4j2ÄÚ²¿¸÷ÖÖÏêÏ¸Êä³ö monitorInterval 
-    : Log4jÄÜ¹»×Ô¶¯¼ì²âÐÞ¸ÄÅäÖÃÎÄ¼þºÍÖØÐÂÅäÖÃ±¾Éí, ÉèÖÃ¼ä¸ôÃëÊý¡£ ×¢£º±¾ÅäÖÃÎÄ¼þµÄÄ¿±êÊÇ½«²»Í¬¼¶±ðµÄÈÕÖ¾Êä³öµ½²»Í¬ÎÄ¼þ£¬×î´ó2MBÒ»¸öÎÄ¼þ£¬ 
-    ÎÄ¼þÊý¾Ý´ïµ½×î´óÖµÊ±£¬¾ÉÊý¾Ý»á±»Ñ¹Ëõ²¢·Å½øÖ¸¶¨ÎÄ¼þ¼Ð -->
+<!-- status : è¿™ä¸ªç”¨äºŽè®¾ç½®log4j2è‡ªèº«å†…éƒ¨çš„ä¿¡æ¯è¾“å‡º,å¯ä»¥ä¸è®¾ç½®,å½“è®¾ç½®æˆtraceæ—¶,ä¼šçœ‹åˆ°log4j2å†…éƒ¨å„ç§è¯¦ç»†è¾“å‡º monitorInterval 
+    : Log4jèƒ½å¤Ÿè‡ªåŠ¨æ£€æµ‹ä¿®æ”¹é…ç½®æ–‡ä»¶å’Œé‡æ–°é…ç½®æœ¬èº«, è®¾ç½®é—´éš”ç§’æ•°ã€‚ æ³¨ï¼šæœ¬é…ç½®æ–‡ä»¶çš„ç›®æ ‡æ˜¯å°†ä¸åŒçº§åˆ«çš„æ—¥å¿—è¾“å‡ºåˆ°ä¸åŒæ–‡ä»¶ï¼Œæœ€å¤§2MBä¸€ä¸ªæ–‡ä»¶ï¼Œ 
+    æ–‡ä»¶æ•°æ®è¾¾åˆ°æœ€å¤§å€¼æ—¶ï¼Œæ—§æ•°æ®ä¼šè¢«åŽ‹ç¼©å¹¶æ”¾è¿›æŒ‡å®šæ–‡ä»¶å¤¹ -->
 <Configuration status="WARN" monitorInterval="600">
 
-    <Properties> <!-- ÅäÖÃÈÕÖ¾ÎÄ¼þÊä³öÄ¿Â¼£¬´ËÅäÖÃ½«ÈÕÖ¾Êä³öµ½tomcat¸ùÄ¿Â¼ÏÂµÄÖ¸¶¨ÎÄ¼þ¼Ð -->
+    <Properties> <!-- é…ç½®æ—¥å¿—æ–‡ä»¶è¾“å‡ºç›®å½•ï¼Œæ­¤é…ç½®å°†æ—¥å¿—è¾“å‡ºåˆ°tomcatæ ¹ç›®å½•ä¸‹çš„æŒ‡å®šæ–‡ä»¶å¤¹ -->
         <Property name="LOG_HOME">${sys:catalina.home}/WebAppLogs/HHServices
         </Property>
     </Properties>
 
     <Appenders>
 
-        <!-- ÓÅÏÈ¼¶´Ó¸ßµ½µÍ·Ö±ðÊÇ OFF¡¢FATAL¡¢ERROR¡¢WARN¡¢INFO¡¢DEBUG¡¢ALL -->
-        <!-- µ¥´Ê½âÊÍ£º Match£ºÆ¥Åä DENY£º¾Ü¾ø Mismatch£º²»Æ¥Åä ACCEPT£º½ÓÊÜ -->
-        <!-- DENY£¬ÈÕÖ¾½«Á¢¼´±»Å×Æú²»ÔÙ¾­¹ýÆäËû¹ýÂËÆ÷£» NEUTRAL£¬ÓÐÐòÁÐ±íÀïµÄÏÂ¸ö¹ýÂËÆ÷¹ý½Ó×Å´¦ÀíÈÕÖ¾£» ACCEPT£¬ÈÕÖ¾»á±»Á¢¼´´¦Àí£¬²»ÔÙ¾­¹ýÊ£Óà¹ýÂËÆ÷¡£ -->
-        <!--Êä³öÈÕÖ¾µÄ¸ñÊ½
-         %d{yyyy-MM-dd HH:mm:ss, SSS} : ÈÕÖ¾Éú²úÊ±¼ä
-         %p : ÈÕÖ¾Êä³ö¸ñÊ½
-         %c : loggerµÄÃû³Æ 
-         %m : ÈÕÖ¾ÄÚÈÝ£¬¼´ logger.info("message") 
-         %n : »»ÐÐ·û 
-         %C : JavaÀàÃû
-         %L : ÈÕÖ¾Êä³öËùÔÚÐÐÊý 
-         %M : ÈÕÖ¾Êä³öËùÔÚ·½·¨Ãû 
-         hostName : ±¾µØ»úÆ÷Ãû 
-         hostAddress : ±¾µØipµØÖ· -->
+        <!-- ä¼˜å…ˆçº§ä»Žé«˜åˆ°ä½Žåˆ†åˆ«æ˜¯ OFFã€FATALã€ERRORã€WARNã€INFOã€DEBUGã€ALL -->
+        <!-- å•è¯è§£é‡Šï¼š Matchï¼šåŒ¹é… DENYï¼šæ‹’ç» Mismatchï¼šä¸åŒ¹é… ACCEPTï¼šæŽ¥å— -->
+        <!-- DENYï¼Œæ—¥å¿—å°†ç«‹å³è¢«æŠ›å¼ƒä¸å†ç»è¿‡å…¶ä»–è¿‡æ»¤å™¨ï¼› NEUTRALï¼Œæœ‰åºåˆ—è¡¨é‡Œçš„ä¸‹ä¸ªè¿‡æ»¤å™¨è¿‡æŽ¥ç€å¤„ç†æ—¥å¿—ï¼› ACCEPTï¼Œæ—¥å¿—ä¼šè¢«ç«‹å³å¤„ç†ï¼Œä¸å†ç»è¿‡å‰©ä½™è¿‡æ»¤å™¨ã€‚ -->
+        <!--è¾“å‡ºæ—¥å¿—çš„æ ¼å¼
+         %d{yyyy-MM-dd HH:mm:ss, SSS} : æ—¥å¿—ç”Ÿäº§æ—¶é—´
+         %p : æ—¥å¿—è¾“å‡ºæ ¼å¼
+         %c : loggerçš„åç§° 
+         %m : æ—¥å¿—å†…å®¹ï¼Œå³ logger.info("message") 
+         %n : æ¢è¡Œç¬¦ 
+         %C : Javaç±»å
+         %L : æ—¥å¿—è¾“å‡ºæ‰€åœ¨è¡Œæ•° 
+         %M : æ—¥å¿—è¾“å‡ºæ‰€åœ¨æ–¹æ³•å 
+         hostName : æœ¬åœ°æœºå™¨å 
+         hostAddress : æœ¬åœ°ipåœ°å€ -->
 
-        <!--Õâ¸öÊä³ö¿ØÖÆÌ¨µÄÅäÖÃ£¬ÕâÀïÊä³ö³ýÁËwarnºÍerror¼¶±ðµÄÐÅÏ¢µ½System.out -->
+        <!--è¿™ä¸ªè¾“å‡ºæŽ§åˆ¶å°çš„é…ç½®ï¼Œè¿™é‡Œè¾“å‡ºé™¤äº†warnå’Œerrorçº§åˆ«çš„ä¿¡æ¯åˆ°System.out -->
         <Console name="console_out_appender" target="SYSTEM_OUT">
-            <!-- ¿ØÖÆÌ¨Ö»Êä³ölevel¼°ÒÔÉÏ¼¶±ðµÄÐÅÏ¢(onMatch),ÆäËûµÄÖ±½Ó¾Ü¾ø(onMismatch) . -->
+            <!-- æŽ§åˆ¶å°åªè¾“å‡ºlevelåŠä»¥ä¸Šçº§åˆ«çš„ä¿¡æ¯(onMatch),å…¶ä»–çš„ç›´æŽ¥æ‹’ç»(onMismatch) . -->
             <ThresholdFilter level="DEBUG" onMatch="ACCEPT"
                 onMismatch="DENY" />
-            <!-- Êä³öÈÕÖ¾µÄ¸ñÊ½ -->
+            <!-- è¾“å‡ºæ—¥å¿—çš„æ ¼å¼ -->
             <PatternLayout pattern="%5p [%t] %d{yyyy-MM-dd HH:mm:ss} (%F:%L) %m%n" />
         </Console>
-        <!-- Õâ¸öÊä³ö¿ØÖÆÌ¨µÄÅäÖÃ£¬ÕâÀïÊä³öerror¼¶±ðµÄÐÅÏ¢µ½System.err£¬ÔÚeclipse¿ØÖÆÌ¨ÉÏ¿´µ½µÄÊÇºìÉ«ÎÄ×Ö -->
+        <!-- è¿™ä¸ªè¾“å‡ºæŽ§åˆ¶å°çš„é…ç½®ï¼Œè¿™é‡Œè¾“å‡ºerrorçº§åˆ«çš„ä¿¡æ¯åˆ°System.errï¼Œåœ¨eclipseæŽ§åˆ¶å°ä¸Šçœ‹åˆ°çš„æ˜¯çº¢è‰²æ–‡å­— -->
         <Console name="console_err_appender" target="SYSTEM_ERR">
             <ThresholdFilter level="ERROR" onMatch="ACCEPT"
                 onMismatch="DENY" />
@@ -44,20 +44,20 @@
         </Console>
 
 
-        <!-- TRACE¼¶±ðÈÕÖ¾ ; ÉèÖÃÈÕÖ¾¸ñÊ½²¢ÅäÖÃÈÕÖ¾Ñ¹Ëõ¸ñÊ½£¬Ñ¹ËõÎÄ¼þ¶ÀÁ¢·ÅÔÚÒ»¸öÎÄ¼þ¼ÐÄÚ£¬ ÈÕÆÚ¸ñÊ½²»ÄÜÎªÃ°ºÅ£¬·ñÔòÎÞ·¨Éú³É£¬ÒòÎªÎÄ¼þÃû²»ÔÊÐíÓÐÃ°ºÅ£¬´ËappenderÖ»Êä³ötrace¼¶±ðµÄÊý¾Ýµ½trace.log -->
+        <!-- TRACEçº§åˆ«æ—¥å¿— ; è®¾ç½®æ—¥å¿—æ ¼å¼å¹¶é…ç½®æ—¥å¿—åŽ‹ç¼©æ ¼å¼ï¼ŒåŽ‹ç¼©æ–‡ä»¶ç‹¬ç«‹æ”¾åœ¨ä¸€ä¸ªæ–‡ä»¶å¤¹å†…ï¼Œ æ—¥æœŸæ ¼å¼ä¸èƒ½ä¸ºå†’å·ï¼Œå¦åˆ™æ— æ³•ç”Ÿæˆï¼Œå› ä¸ºæ–‡ä»¶åä¸å…è®¸æœ‰å†’å·ï¼Œæ­¤appenderåªè¾“å‡ºtraceçº§åˆ«çš„æ•°æ®åˆ°trace.log -->
         <RollingFile name="trace_appender" immediateFlush="true"
             fileName="${LOG_HOME}/trace.log" filePattern="${LOG_HOME}/trace/trace - %d{yyyy-MM-dd HH_mm_ss}.log.gz">
             <PatternLayout>
                 <pattern>%5p [%t] %d{yyyy-MM-dd HH:mm:ss} (%F:%L) %m%n</pattern>
             </PatternLayout>
             <Policies>
-                <!-- Ã¿¸öÈÕÖ¾ÎÄ¼þ×î´ó2MB -->
+                <!-- æ¯ä¸ªæ—¥å¿—æ–‡ä»¶æœ€å¤§2MB -->
                 <SizeBasedTriggeringPolicy size="2MB" />
 
             </Policies>
             <Filters>
-                <!-- ´ËFilterÒâË¼ÊÇ£¬Ö»Êä³öTRACE¼¶±ðµÄÊý¾Ý DENY£¬ÈÕÖ¾½«Á¢¼´±»Å×Æú²»ÔÙ¾­¹ýÆäËû¹ýÂËÆ÷£» NEUTRAL£¬ÓÐÐòÁÐ±íÀïµÄÏÂ¸ö¹ýÂËÆ÷¹ý½Ó×Å´¦ÀíÈÕÖ¾£» 
-                    ACCEPT£¬ÈÕÖ¾»á±»Á¢¼´´¦Àí£¬²»ÔÙ¾­¹ýÊ£Óà¹ýÂËÆ÷¡£ -->
+                <!-- æ­¤Filteræ„æ€æ˜¯ï¼Œåªè¾“å‡ºTRACEçº§åˆ«çš„æ•°æ® DENYï¼Œæ—¥å¿—å°†ç«‹å³è¢«æŠ›å¼ƒä¸å†ç»è¿‡å…¶ä»–è¿‡æ»¤å™¨ï¼› NEUTRALï¼Œæœ‰åºåˆ—è¡¨é‡Œçš„ä¸‹ä¸ªè¿‡æ»¤å™¨è¿‡æŽ¥ç€å¤„ç†æ—¥å¿—ï¼› 
+                    ACCEPTï¼Œæ—¥å¿—ä¼šè¢«ç«‹å³å¤„ç†ï¼Œä¸å†ç»è¿‡å‰©ä½™è¿‡æ»¤å™¨ã€‚ -->
                 <ThresholdFilter level="debug" onMatch="DENY"
                     onMismatch="NEUTRAL" />
                 <ThresholdFilter level="trace" onMatch="ACCEPT"
@@ -65,22 +65,22 @@
             </Filters>
         </RollingFile>
 
-        <!-- DEBUG¼¶±ðÈÕÖ¾ ÉèÖÃÈÕÖ¾¸ñÊ½²¢ÅäÖÃÈÕÖ¾Ñ¹Ëõ¸ñÊ½£¬Ñ¹ËõÎÄ¼þ¶ÀÁ¢·ÅÔÚÒ»¸öÎÄ¼þ¼ÐÄÚ£¬ ÈÕÆÚ¸ñÊ½²»ÄÜÎªÃ°ºÅ£¬·ñÔòÎÞ·¨Éú³É£¬ÒòÎªÎÄ¼þÃû²»ÔÊÐíÓÐÃ°ºÅ£¬´ËappenderÖ»Êä³ödebug¼¶±ðµÄÊý¾Ýµ½debug.log; -->
+        <!-- DEBUGçº§åˆ«æ—¥å¿— è®¾ç½®æ—¥å¿—æ ¼å¼å¹¶é…ç½®æ—¥å¿—åŽ‹ç¼©æ ¼å¼ï¼ŒåŽ‹ç¼©æ–‡ä»¶ç‹¬ç«‹æ”¾åœ¨ä¸€ä¸ªæ–‡ä»¶å¤¹å†…ï¼Œ æ—¥æœŸæ ¼å¼ä¸èƒ½ä¸ºå†’å·ï¼Œå¦åˆ™æ— æ³•ç”Ÿæˆï¼Œå› ä¸ºæ–‡ä»¶åä¸å…è®¸æœ‰å†’å·ï¼Œæ­¤appenderåªè¾“å‡ºdebugçº§åˆ«çš„æ•°æ®åˆ°debug.log; -->
         <RollingFile name="debug_appender" immediateFlush="true"
             fileName="${LOG_HOME}/debug.log" filePattern="${LOG_HOME}/debug/debug - %d{yyyy-MM-dd HH_mm_ss}.log.gz">
             <PatternLayout>
                 <pattern>%5p [%t] %d{yyyy-MM-dd HH:mm:ss} (%F:%L) %m%n</pattern>
             </PatternLayout>
-            <Policies><!-- Ã¿¸öÈÕÖ¾ÎÄ¼þ×î´ó2MB ; -->
+            <Policies><!-- æ¯ä¸ªæ—¥å¿—æ–‡ä»¶æœ€å¤§2MB ; -->
                 <SizeBasedTriggeringPolicy size="2MB" />
 
-                <!-- Èç¹ûÆôÓÃ´ËÅäÖÃ£¬ÔòÈÕÖ¾»á°´ÎÄ¼þÃûÉú³ÉÐÂÑ¹ËõÎÄ¼þ£¬ ¼´Èç¹ûfilePatternÅäÖÃµÄÈÕÆÚ¸ñÊ½Îª %d{yyyy-MM-dd HH} 
-                    £¬ÔòÃ¿Ð¡Ê±Éú³ÉÒ»¸öÑ¹ËõÎÄ¼þ£¬ Èç¹ûfilePatternÅäÖÃµÄÈÕÆÚ¸ñÊ½Îª %d{yyyy-MM-dd} £¬ÔòÌìÉú³ÉÒ»¸öÑ¹ËõÎÄ¼þ -->
+                <!-- å¦‚æžœå¯ç”¨æ­¤é…ç½®ï¼Œåˆ™æ—¥å¿—ä¼šæŒ‰æ–‡ä»¶åç”Ÿæˆæ–°åŽ‹ç¼©æ–‡ä»¶ï¼Œ å³å¦‚æžœfilePatterné…ç½®çš„æ—¥æœŸæ ¼å¼ä¸º %d{yyyy-MM-dd HH} 
+                    ï¼Œåˆ™æ¯å°æ—¶ç”Ÿæˆä¸€ä¸ªåŽ‹ç¼©æ–‡ä»¶ï¼Œ å¦‚æžœfilePatterné…ç½®çš„æ—¥æœŸæ ¼å¼ä¸º %d{yyyy-MM-dd} ï¼Œåˆ™å¤©ç”Ÿæˆä¸€ä¸ªåŽ‹ç¼©æ–‡ä»¶ -->
                 <TimeBasedTriggeringPolicy interval="1"
                     modulate="true" />
 
             </Policies>
-            <Filters><!-- ´ËFilterÒâË¼ÊÇ£¬Ö»Êä³ödebug¼¶±ðµÄÊý¾Ý -->
+            <Filters><!-- æ­¤Filteræ„æ€æ˜¯ï¼Œåªè¾“å‡ºdebugçº§åˆ«çš„æ•°æ® -->
                 <ThresholdFilter level="info" onMatch="DENY"
                     onMismatch="NEUTRAL" />
                 <ThresholdFilter level="debug" onMatch="ACCEPT"
@@ -88,7 +88,7 @@
             </Filters>
         </RollingFile>
 
-        <!-- INFO¼¶±ðÈÕÖ¾ -->
+        <!-- INFOçº§åˆ«æ—¥å¿— -->
         <RollingFile name="info_appender" immediateFlush="true"
             fileName="${LOG_HOME}/info.log" filePattern="${LOG_HOME}/info/info - %d{yyyy-MM-dd HH_mm_ss}.log.gz">
             <PatternLayout>
@@ -105,7 +105,7 @@
             </Filters>
         </RollingFile>
 
-        <!-- WARN¼¶±ðÈÕÖ¾ -->
+        <!-- WARNçº§åˆ«æ—¥å¿— -->
         <RollingFile name="warn_appender" immediateFlush="true"
             fileName="${LOG_HOME}/warn.log" filePattern="${LOG_HOME}/warn/warn - %d{yyyy-MM-dd HH_mm_ss}.log.gz">
             <PatternLayout>
@@ -122,7 +122,7 @@
             </Filters>
         </RollingFile>
 
-        <!-- ERROR¼¶±ðÈÕÖ¾ -->
+        <!-- ERRORçº§åˆ«æ—¥å¿— -->
         <RollingFile name="error_appender" immediateFlush="true"
             fileName="${LOG_HOME}/error.log" filePattern="${LOG_HOME}/error/error - %d{yyyy-MM-dd HH_mm_ss}.log.gz">
             <PatternLayout>
@@ -139,8 +139,8 @@
     </Appenders>
 
     <Loggers>
-        <!-- ÅäÖÃÈÕÖ¾µÄ¸ù½Úµã -->
-        <!-- ¶¨Òålogger£¬Ö»ÓÐ¶¨ÒåÁËlogger²¢ÒýÈëÁËappender£¬appender²Å»áÉúÐ§ -->
+        <!-- é…ç½®æ—¥å¿—çš„æ ¹èŠ‚ç‚¹ -->
+        <!-- å®šä¹‰loggerï¼Œåªæœ‰å®šä¹‰äº†loggerå¹¶å¼•å…¥äº†appenderï¼Œappenderæ‰ä¼šç”Ÿæ•ˆ -->
         <root level="trace">
             <appender-ref ref="console_out_appender" />
             <appender-ref ref="console_err_appender" />
@@ -151,7 +151,7 @@
             <appender-ref ref="error_appender" />
         </root>
 
-        <!-- µÚÈý·½ÈÕÖ¾ÏµÍ³ -->
+        <!-- ç¬¬ä¸‰æ–¹æ—¥å¿—ç³»ç»Ÿ -->
         <logger name="org.springframework.core" level="info" />
         <logger name="org.springframework.beans" level="info" />
         <logger name="org.springframework.context" level="info" />

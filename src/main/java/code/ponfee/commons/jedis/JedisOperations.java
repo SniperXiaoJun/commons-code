@@ -33,23 +33,23 @@ abstract class JedisOperations {
     }
 
     /**
-     * 调用勾子函数：有返回值
-     * @param hook             勾子对象
+     * 回调函数：有返回值
+     * @param call             回调函数
      * @param occurErrorRtnVal 出现异常时的返回值
      * @param args             参数
      * @return
      */
-    final <T> T hook(JedisCallback<T> hook, T occurErrorRtnVal, Object... args) {
-        return hook.call(jedisClient, occurErrorRtnVal, args);
+    final <T> T call(JedisCallback<T> call, T occurErrorRtnVal, Object... args) {
+        return call.call(jedisClient, occurErrorRtnVal, args);
     }
 
     /**
      * 调用勾子函数：无返回值
-     * @param call 勾子对象
+     * @param hook 勾子对象
      * @param args 参数列表
      */
-    final void call(JedisHook call, Object... args) {
-        call.hook(jedisClient, args);
+    final void hook(JedisHook hook, Object... args) {
+        hook.hook(jedisClient, args);
     }
 
     /**
@@ -67,12 +67,11 @@ abstract class JedisOperations {
     }
 
     static int getActualExpire(int seconds) {
-        if (seconds > MAX_EXPIRE_SECONDS) {
-            seconds = MAX_EXPIRE_SECONDS;
-        } else if (seconds < MIN_EXPIRE_SECONDS) {
-            seconds = MIN_EXPIRE_SECONDS;
-        }
-        return seconds;
+        return (seconds > MAX_EXPIRE_SECONDS)
+               ? MAX_EXPIRE_SECONDS
+               : (seconds < MIN_EXPIRE_SECONDS)
+               ? MIN_EXPIRE_SECONDS 
+               : seconds;
     }
 
     /**

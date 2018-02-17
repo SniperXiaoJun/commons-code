@@ -89,7 +89,7 @@ public class SymmetricCryptor {
         StringBuilder transformation = new StringBuilder(getAlgorithm());
         if (mode != null) {
             transformation.append("/").append(mode.name())
-                          .append("/").append(padding.name());
+                          .append("/").append(padding.padding());
         }
         try {
             Cipher cipher = (provider == null) 

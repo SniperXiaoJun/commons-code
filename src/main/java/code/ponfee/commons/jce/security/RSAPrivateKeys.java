@@ -13,7 +13,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -76,8 +75,9 @@ public final class RSAPrivateKeys {
     public static RSAPrivateKey toRSAPrivateKey(BigInteger modulus, BigInteger privateExponent) {
         try {
             // 存储的就是这两个大整形数
-            return (RSAPrivateKey) KeyFactory.getInstance(RSACryptor.ALG_RSA)
-                .generatePrivate(new RSAPrivateKeySpec(modulus, privateExponent));
+            return (RSAPrivateKey) KeyFactory.getInstance(RSACryptor.ALG_RSA).generatePrivate(
+                new RSAPrivateKeySpec(modulus, privateExponent)
+            );
         } catch (Exception ex) {
             throw new SecurityException(ex);
         }
@@ -89,7 +89,7 @@ public final class RSAPrivateKeys {
      * @param publicKey
      * @return
      */
-    public static RSAPublicKey fakePublicKey(RSAPrivateKey privateKey) {
+    public static RSAPublicKey inversePrivateKey(RSAPrivateKey privateKey) {
         return RSAPublicKeys.toRSAPublicKey(privateKey.getModulus(), 
                                             privateKey.getPrivateExponent());
     }
@@ -101,13 +101,9 @@ public final class RSAPrivateKeys {
      * @return
      */
     public static RSAPublicKey extractPublicKey(RSAPrivateKey privateKey) {
-        try {
-            RSAPrivateCrtKey key = (RSAPrivateCrtKey) privateKey;
-            RSAPublicKeySpec keySpec = new RSAPublicKeySpec(key.getModulus(), key.getPublicExponent());
-            return (RSAPublicKey) KeyFactory.getInstance(key.getAlgorithm()).generatePublic(keySpec);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new SecurityException(e);
-        }
+        RSAPrivateCrtKey key = (RSAPrivateCrtKey) privateKey;
+        return RSAPublicKeys.toRSAPublicKey(key.getModulus(), 
+                                            key.getPublicExponent());
     }
 
     // ----------------------------------PRIVATE KEY PKCS1 FORMAT-----------------------------------
@@ -121,8 +117,9 @@ public final class RSAPrivateKeys {
     public static String toPkcs1(RSAPrivateKey privateKey) {
         PrivateKeyInfo privKeyInfo = PrivateKeyInfo.getInstance(privateKey.getEncoded());
         try {
-            byte[] bytes = privKeyInfo.parsePrivateKey().toASN1Primitive().getEncoded();
-            return Base64.getEncoder().encodeToString(bytes);
+            return Base64.getEncoder().encodeToString(
+                privKeyInfo.parsePrivateKey().toASN1Primitive().getEncoded()
+            );
         } catch (IOException e) {
             throw new SecurityException(e);
         }
