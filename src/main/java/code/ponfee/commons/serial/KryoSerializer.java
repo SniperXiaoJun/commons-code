@@ -70,9 +70,9 @@ public class KryoSerializer extends Serializer {
         } catch (IOException e) {
             throw new SerializationException(e);
         } finally {
+            this.releaseKryo(kryo);
             close(output, "close Output exception");
             close(gzout, "close GZIPOutputStream exception");
-            this.releaseKryo(kryo);
         }
     }
 
@@ -96,9 +96,9 @@ public class KryoSerializer extends Serializer {
         } catch (IOException e) {
             throw new SerializationException(e);
         } finally {
+            this.releaseKryo(kryo);
             close(input, "close Input exception");
             close(gzin, "close GZIPInputStream exception");
-            this.releaseKryo(kryo);
         }
     }
 
@@ -109,8 +109,8 @@ public class KryoSerializer extends Serializer {
     private void releaseKryo(Kryo kryo) {
         if (kryo != null) try {
             this.kryoPool.release(kryo);
-        } catch (Exception e) {
-            logger.error("release kryo exception", e);
+        } catch (Throwable t) {
+            logger.error("release kryo occur error", t);
         }
     }
 }

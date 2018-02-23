@@ -24,7 +24,7 @@ import code.ponfee.commons.util.SecureRandoms;
 
 /** 
  * Specifications completely defining an elliptic curve. Used to define an
- * elliptic curve by EllipticCurve.define(ECParamters ecp).
+ * elliptic curve by EllipticCurve, define(ECParamters ecp).
  * NOTE: This is designed for an elliptic curve on the form:
  * y^2 = x^3 + ax + b (mod p)
  * with fixed generator and precomputed order.

@@ -43,7 +43,7 @@ public class WrappedBigDecimal {
         return decimal.longValue();
     }
 
-    public float getfloat() {
+    public float getFloat() {
         return decimal.floatValue();
     }
 }

@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.hash;
+package code.ponfee.commons.jce.digest;
 
 import org.apache.commons.codec.binary.Hex;
 

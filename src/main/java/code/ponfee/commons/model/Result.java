@@ -57,6 +57,10 @@ public class Result<T> implements java.io.Serializable {
         return failure(code.getCode(), code.getMsg(), null);
     }
 
+    public static <T> Result<T> failure(ResultCode code, String msg) {
+        return failure(code.getCode(), msg, null);
+    }
+
     public static <T> Result<T> failure(int code, String msg) {
         return failure(code, msg, null);
     }
@@ -109,7 +113,7 @@ public class Result<T> implements java.io.Serializable {
      * 成功结果
      */
     private static final class SuccessResult extends Result<Void> {
-        static final long serialVersionUID = 6740650053476768729L;
+        private static final long serialVersionUID = 6740650053476768729L;
 
         SuccessResult() {
             super(ResultCode.SUCCESS.getCode(), ResultCode.SUCCESS.getMsg());

@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.hash;
+package code.ponfee.commons.jce.digest;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -171,8 +171,8 @@ public final class HmacUtils {
         try (InputStream in = input) {
             Mac mac = getInitializedMac(alg, provider, key);
             byte[] buffer = new byte[BUFF_SIZE];
-            for (int len; (len = in.read(buffer)) != Files.EOF;) {
-                mac.update(buffer, 0, len);
+            for (int n; (n = in.read(buffer, 0, BUFF_SIZE)) != Files.EOF;) {
+                mac.update(buffer, 0, n);
             }
             return mac.doFinal();
         } catch (IOException e) {

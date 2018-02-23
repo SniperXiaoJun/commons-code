@@ -14,7 +14,7 @@ import org.junit.Assert;
 
 import com.google.common.base.Stopwatch;
 
-import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.jce.digest.DigestUtils;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.reflect.Fields;
 import code.ponfee.commons.reflect.GenericUtils;
@@ -36,7 +36,7 @@ public class TempTest {
     
     @org.junit.Test
     public void test2() throws IOException {
-        System.out.println(HashUtils.sha256Hex(HashUtils.sha256("code.ponfee.commons.jce.hash.HashUtils".getBytes())));
+        System.out.println(DigestUtils.sha256Hex(DigestUtils.sha256("code.ponfee.commons.jce.hash.HashUtils".getBytes())));
     }
 
     @org.junit.Test

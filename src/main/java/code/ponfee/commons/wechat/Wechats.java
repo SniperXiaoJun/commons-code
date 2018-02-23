@@ -7,7 +7,7 @@ import java.util.Map;
 import code.ponfee.commons.http.Http;
 import code.ponfee.commons.http.HttpParams;
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.jce.digest.DigestUtils;
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.util.ObjectUtils;
 
@@ -235,7 +235,7 @@ public class Wechats {
         map.put("url", url.indexOf("#") == -1 ? url : url.substring(0, url.indexOf("#")));
 
         // generate sigin data
-        map.put("signature", HashUtils.sha1Hex(HttpParams.buildSigning(map)));
+        map.put("signature", DigestUtils.sha1Hex(HttpParams.buildSigning(map)));
         map.put("appid", appid);
         return map;
     }

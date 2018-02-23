@@ -8,7 +8,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.ArrayUtils;
 
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.jce.digest.DigestUtils;
 
 /**
  * https://www.jianshu.com/p/ffc97c4d2306
@@ -219,7 +219,7 @@ public class Base58 {
     }
 
     private static byte[] checksum(byte[] data) {
-        byte[] twiceSha256 = HashUtils.sha256(HashUtils.sha256(data));
+        byte[] twiceSha256 = DigestUtils.sha256(DigestUtils.sha256(data));
         return Arrays.copyOfRange(twiceSha256, 0, 4); // take previous 4 bytes
     }
 

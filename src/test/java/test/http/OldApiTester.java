@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import code.ponfee.commons.http.Http;
 import code.ponfee.commons.http.HttpParams;
-import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.jce.digest.DigestUtils;
 
 public class OldApiTester {
     private static final String URL = "http://192.168.1.49:8080/service-webapp";
@@ -29,7 +29,7 @@ public class OldApiTester {
         String time = String.valueOf(System.currentTimeMillis());
         headers.put("source", "IOS");
         headers.put("time", time);
-        headers.put("auth", HashUtils.md5Hex(SECRET + time));
+        headers.put("auth", DigestUtils.md5Hex(SECRET + time));
 
         Map<String, String> params = new HashMap<>();
         params.put("abc", "123");
@@ -46,7 +46,7 @@ public class OldApiTester {
         String time = String.valueOf(System.currentTimeMillis());
         headers.put("source", "IOS");
         headers.put("time", time);
-        headers.put("auth", HashUtils.md5Hex(SECRET + time));
+        headers.put("auth", DigestUtils.md5Hex(SECRET + time));
         headers.put("accToken", buildAcctoken(userId));
 
         Map<String, String> params = new HashMap<>();
@@ -66,7 +66,7 @@ public class OldApiTester {
         String time = String.valueOf(System.currentTimeMillis());
         headers.put("source", "IOS");
         headers.put("time", time);
-        headers.put("auth", HashUtils.md5Hex(SECRET + time));
+        headers.put("auth", DigestUtils.md5Hex(SECRET + time));
         headers.put("accToken", buildAcctoken(userId));
 
         Map<String, String> params = new HashMap<>();
@@ -85,7 +85,7 @@ public class OldApiTester {
         String time = String.valueOf(System.currentTimeMillis());
         headers.put("source", "IOS");
         headers.put("time", time);
-        headers.put("auth", HashUtils.md5Hex(SECRET + time));
+        headers.put("auth", DigestUtils.md5Hex(SECRET + time));
         headers.put("accToken", buildAcctoken(userId));
 
         Map<String, String> params = new HashMap<>();
@@ -103,7 +103,7 @@ public class OldApiTester {
         String time = String.valueOf(System.currentTimeMillis());
         headers.put("source", "IOS");
         headers.put("time", time);
-        headers.put("auth", HashUtils.md5Hex(SECRET + time));
+        headers.put("auth", DigestUtils.md5Hex(SECRET + time));
         headers.put("accToken", buildAcctoken(userId));
 
         Map<String, String> params = new HashMap<>();
@@ -120,7 +120,7 @@ public class OldApiTester {
         String time = String.valueOf(System.currentTimeMillis());
         headers.put("source", "MOBILE");
         headers.put("time", time);
-        headers.put("auth", HashUtils.md5Hex(SECRET + time));
+        headers.put("auth", DigestUtils.md5Hex(SECRET + time));
 
         Map<String, String> params = new HashMap<>();
         params.put("module", "huodong");
@@ -135,7 +135,7 @@ public class OldApiTester {
         String signing = HttpParams.buildSigning(params, new String[] { "sign" });
         if (signing.length() > 0) signing += "&";
         signing += key;
-        return HashUtils.md5Hex(signing.getBytes()).toUpperCase();
+        return DigestUtils.md5Hex(signing.getBytes()).toUpperCase();
     }
 
     // 加密

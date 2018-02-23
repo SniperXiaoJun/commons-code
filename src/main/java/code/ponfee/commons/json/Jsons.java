@@ -138,6 +138,14 @@ public final class Jsons {
         return mapper.getTypeFactory().constructParametricType(collectionClass, elementClasses);
     }
 
+    public static String toJson(Object target) {
+        return NORMAL.stringify(target);
+    }
+
+    public <T> T fromJson(String json, Class<T> target) {
+        return NORMAL.parse(json, target);
+    }
+
     private static boolean isEmpty(String str) {
         return str == null || str.length() == 0;
     }

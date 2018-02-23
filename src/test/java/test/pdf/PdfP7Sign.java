@@ -22,7 +22,7 @@ import com.itextpdf.text.pdf.security.MakeSignature.CryptoStandard;
 import com.itextpdf.text.pdf.security.PdfPKCS7;
 import com.itextpdf.text.pdf.security.TSAClient;
 
-import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.jce.digest.DigestUtils;
 import code.ponfee.commons.jce.pkcs.PKCS1Signature;
 import code.ponfee.commons.jce.security.KeyStoreResolver;
 import code.ponfee.commons.jce.security.KeyStoreResolver.KeyStoreType;
@@ -61,7 +61,7 @@ public class PdfP7Sign {
         appearance.preClose(exc);
         
         byte[] bytes1 = IOUtils.toByteArray(appearance.getRangeStream());
-        byte[] hash = HashUtils.sha1(bytes1);
+        byte[] hash = DigestUtils.sha1(bytes1);
         // ------------------------------------------------------------------//
 
         // ------------------------------------------------------------------//

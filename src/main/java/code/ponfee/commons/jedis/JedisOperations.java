@@ -14,9 +14,9 @@ import redis.clients.jedis.ShardedJedis;
  */
 abstract class JedisOperations {
 
-    private static final int MIN_EXPIRE_SECONDS = 1; // min 1 seconds
-    static final int DEFAULT_EXPIRE_SECONDS = 86400; // default 1 days
-    private static final int MAX_EXPIRE_SECONDS = 30 * DEFAULT_EXPIRE_SECONDS; // max 30 days
+    private static final int MIN_EXPIRE_SECONDS = 1; // minimum 1 seconds
+    static final int DEFAULT_EXPIRE_SECONDS = (int) TimeUnit.DAYS.toSeconds(1); // default 1 days
+    private static final int MAX_EXPIRE_SECONDS = 30 * DEFAULT_EXPIRE_SECONDS; // maximum 30 days
     static final String SUCCESS_MSG = "OK"; // 返回成功信息
     static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
     static final int BATCH_MULTIPLE = 3; // the multiple jedis server number to use batch

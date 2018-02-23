@@ -281,9 +281,9 @@ public class JedisLock implements Lock, java.io.Serializable {
         //    .putLong(System.currentTimeMillis() + timeoutMillis) // 8 byte time stamp
         //    .array();
 
-        long most = uuid.getMostSignificantBits(), 
-             last = uuid.getLeastSignificantBits(),
-             time = System.currentTimeMillis() + timeoutMillis;
+        long most  = uuid.getMostSignificantBits(), 
+             least = uuid.getLeastSignificantBits(),
+             time  = System.currentTimeMillis() + timeoutMillis;
 
         byte[] value = {
             (byte) (most >>> 56), (byte) (most >>> 48),
@@ -291,10 +291,10 @@ public class JedisLock implements Lock, java.io.Serializable {
             (byte) (most >>> 24), (byte) (most >>> 16),
             (byte) (most >>>  8), (byte) (most       ),
 
-            (byte) (last >>> 56), (byte) (last >>> 48),
-            (byte) (last >>> 40), (byte) (last >>> 32),
-            (byte) (last >>> 24), (byte) (last >>> 16),
-            (byte) (last >>>  8), (byte) (last       ),
+            (byte) (least >>> 56), (byte) (least >>> 48),
+            (byte) (least >>> 40), (byte) (least >>> 32),
+            (byte) (least >>> 24), (byte) (least >>> 16),
+            (byte) (least >>>  8), (byte) (least       ),
 
             (byte) (time >>> 56), (byte) (time >>> 48),
             (byte) (time >>> 40), (byte) (time >>> 32),

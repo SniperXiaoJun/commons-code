@@ -589,26 +589,27 @@ public class HttpRequest {
      */
     public static String encode(CharSequence url)
         throws HttpException {
-        URL parsed;
+        URL u;
         try {
-            parsed = new URL(url.toString());
+            u = new URL(url.toString());
         } catch (IOException e) {
             throw new HttpException(e);
         }
 
-        String host = parsed.getHost();
-        int port = parsed.getPort();
+        String host = u.getHost();
+        int port = u.getPort();
         if (port != -1) {
             host = host + ':' + Integer.toString(port);
         }
 
         try {
-            String encoded = new URI(parsed.getProtocol(), host, parsed.getPath(), parsed.getQuery(), null).toASCIIString();
-            int paramsStart = encoded.indexOf('?');
-            if (paramsStart > 0 && paramsStart + 1 < encoded.length()) {
-                encoded = encoded.substring(0, paramsStart + 1) + encoded.substring(paramsStart + 1).replace("+", "%2B");
+            String s = new URI(u.getProtocol(), host, u.getPath(), u.getQuery(), null)
+                            .toASCIIString();
+            int paramsStart = s.indexOf('?');
+            if (paramsStart > 0 && paramsStart + 1 < s.length()) {
+                s = s.substring(0, paramsStart + 1) + s.substring(paramsStart + 1).replace("+", "%2B");
             }
-            return encoded;
+            return s;
         } catch (URISyntaxException e) {
             IOException io = new IOException("Parsing URI failed");
             io.initCause(e);
@@ -2941,8 +2942,8 @@ public class HttpRequest {
      */
     public HttpRequest useProxy(String proxyHost, int proxyPort) {
         if (connection != null) {
-            throw new IllegalStateException("The connection has already been created. This method must be "
-                                          + "called before reading or writing to the request.");
+            throw new IllegalStateException("The connection has already been created. This "
+                         + "method must be called before reading or writing to the request.");
         }
 
         this.httpProxyHost = proxyHost;

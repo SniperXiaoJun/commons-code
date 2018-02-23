@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.common.base.Preconditions;
 
-import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.jce.digest.DigestUtils;
 
 /**
  * 缓存类
@@ -276,7 +276,7 @@ public class Cache<T> {
                 key = key.toString().toLowerCase(); // 不区分大小写（转小写）
             }
             if (compressKey) {
-                key = HashUtils.sha1Hex(key.toString()); // 压缩key
+                key = DigestUtils.sha1Hex(key.toString()); // 压缩key
             }
         }
         return key;

@@ -1,7 +1,7 @@
 package code.ponfee.commons.jce.ecc;
 
 import static code.ponfee.commons.jce.Providers.BC;
-import static code.ponfee.commons.jce.hash.HmacUtils.crypt;
+import static code.ponfee.commons.jce.digest.HmacUtils.crypt;
 
 import java.math.BigInteger;
 import java.util.Arrays;

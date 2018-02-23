@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.hash;
+package code.ponfee.commons.jce.digest;
 
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
@@ -325,13 +325,13 @@ public class SHA1Digest {
 
     public static void main(String[] args) {
         System.out.println(Hex.encodeHexString(SHA1Digest.getInstance().doFinal()));
-        System.out.println(HashUtils.sha1Hex(new byte[] {}));
+        System.out.println(DigestUtils.sha1Hex(new byte[] {}));
 
         byte[] data = MavenProjects.getMainJavaFileAsByteArray(SHA1Digest.class);
 
         SHA1Digest sha1 = SHA1Digest.getInstance();
         System.out.println(Hex.encodeHexString(sha1.doFinal(data)));
-        System.out.println(HashUtils.sha1Hex(data));
+        System.out.println(DigestUtils.sha1Hex(data));
 
         for (int i = 0; i < 1000; i++) {
             byte[] data1 = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(65537) + 1);
@@ -341,7 +341,7 @@ public class SHA1Digest {
             sha1.update(data1);
             sha1.update(data2);
             sha1.update(data3);
-            byte[] expect = HashUtils.digest(HashAlgorithms.SHA1, data1, data2, data3);
+            byte[] expect = DigestUtils.digest(HashAlgorithms.SHA1, data1, data2, data3);
             if (!Arrays.equals(expect, sha1.doFinal())) {
                 System.err.println("FAIL" + " --> " + data.length);
             }

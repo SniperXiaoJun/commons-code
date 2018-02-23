@@ -24,7 +24,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import code.ponfee.commons.jce.cert.X509CertUtils;
-import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.jce.digest.DigestUtils;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
@@ -301,7 +301,7 @@ public class KeyStoreResolver {
     public static KeyStoreResolver loadFromPem(String pem) {
         KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.JKS);
         // X509CertUtils.loadFromPem(pem) <==> X509CertUtils.loadX509Cert(pem.getBytes())
-        resolver.setCertificateEntry(HashUtils.md5Hex(pem), X509CertUtils.loadFromPem(pem));
+        resolver.setCertificateEntry(DigestUtils.md5Hex(pem), X509CertUtils.loadFromPem(pem));
         return resolver;
     }
 

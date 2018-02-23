@@ -75,7 +75,7 @@ public enum DatePeriods {
 
     private static final String PATTERN = "yyyy-MM-dd HH:mm:ss SSS";
 
-    // 2018-01-01 is Monday
+    // 2018-01-01: the first day of year, month, week
     private static final LocalDateTime ORIGINAL = DateTimeFormat.forPattern(PATTERN)
                                       .parseLocalDateTime("2018-01-01 00:00:00 000");
 

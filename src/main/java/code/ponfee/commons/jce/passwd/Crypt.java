@@ -12,7 +12,7 @@ import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.Providers;
-import code.ponfee.commons.jce.hash.HmacUtils;
+import code.ponfee.commons.jce.digest.HmacUtils;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**

@@ -5,7 +5,7 @@ import java.util.Random;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import code.ponfee.commons.jce.hash.HmacUtils;
+import code.ponfee.commons.jce.digest.HmacUtils;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.ObjectUtils;

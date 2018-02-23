@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.asm.ClassReader;
@@ -100,10 +101,11 @@ public final class ClassUtils {
         }
 
         return new StringBuilder(Modifier.toString(method.getModifiers() & Modifier.methodModifiers()))
-                    .append(" ").append(getClassName(method.getReturnType()))
-                    .append(" ").append(getClassName(method.getDeclaringClass()))
-                    .append(".").append(method.getName())
-                    .append("(").append(StringUtils.join(params.toArray(), ", ")).append(")").toString();
+                    .append(' ').append(getClassName(method.getReturnType()))
+                    .append(' ').append(getClassName(method.getDeclaringClass()))
+                    .append('.').append(method.getName())
+                    .append('(').append(StringUtils.join(params.toArray(), ", ")).append(')')
+                    .toString();
     }
 
     /**
@@ -255,13 +257,14 @@ public final class ClassUtils {
         System.out.println(getClassName(ClassUtils.class));
         System.out.println(getPackagePath("code.ponfee.commons.reflect"));
         System.out.println(getPackagePath(ClassUtils.class));
-        //Method m = ObjectUtils.class.getMethod("mergeArray", Object[][].class);
-        //Method m = ObjectUtils.class.getMethod("hexDump", byte[].class);
-        Method m = ObjectUtils.class.getMethod("map2array", List.class, String[].class);
+        //Method m = ObjectUtils.class.getMethod("shortid", int.class, char[].class);
+        Method m = ObjectUtils.class.getMethod("map2bean", Map.class, Class.class);
         //Method m = ObjectUtils.class.getMethod("uuid32");
         System.out.println(getMethodParamNames(m) == null);
         System.out.println(StringUtils.join(getMethodParamNames(m), ","));
-        System.out.println(getMethodSignature(m));
+        System.out.println("getMethodSignature: " + getMethodSignature(m));
+        System.out.println("m.toString: " + m.toString());
+        System.out.println("toGenericString: " + m.toGenericString());
 
         System.out.println("========================================");
         System.out.println(getClasspath(ClassUtils.class));

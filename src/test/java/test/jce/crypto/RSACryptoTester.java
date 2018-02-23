@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.google.common.io.Files;
 
-import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.jce.digest.DigestUtils;
 import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSACryptor.RSAKeyPair;
 import code.ponfee.commons.jce.security.RSAPrivateKeys;
@@ -31,7 +31,7 @@ public class RSACryptoTester {
         byte [] bytes = "123456".getBytes();
         byte[] signed = RSACryptor.signSha1(bytes, keyPair.getPrivateKey());
         byte[] decrypted = RSACryptor.decrypt(signed, keyPair.getPublicKey());
-        System.out.println(Hex.encodeHexString(HashUtils.sha1(bytes))); // 7c4a8d09ca3762af61e59520943dc26494f8941b
+        System.out.println(Hex.encodeHexString(DigestUtils.sha1(bytes))); // 7c4a8d09ca3762af61e59520943dc26494f8941b
         System.out.println(Hex.encodeHexString(decrypted)); // 3021300906052b0e03021a050004147c4a8d09ca3762af61e59520943dc26494f8941b
         // -------------
         
@@ -140,7 +140,7 @@ public class RSACryptoTester {
         RSAPublicKey publicKey = RSAPublicKeys.fromPkcs8(publicKeyStr);
 
         byte[] data = "1234".getBytes();
-        String sha1 = HashUtils.sha1Hex(data);
+        String sha1 = DigestUtils.sha1Hex(data);
         byte[] signature = RSACryptor.signSha1(data, privateKey);
         byte[] array = RSACryptor.decrypt(signature, publicKey);
         System.out.println(sha1);

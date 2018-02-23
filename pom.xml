@@ -170,7 +170,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>23.0</version>
+            <version>24.0-jre</version>
         </dependency>
 
         <!-- joda-time -->
@@ -275,7 +275,7 @@
         <dependency><!-- jackson -->
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.3</version>
+            <version>2.9.4</version>
         </dependency>
         <dependency><!-- hessian -->
             <groupId>com.caucho</groupId>
@@ -285,7 +285,7 @@
         <dependency><!-- fst -->
             <groupId>de.ruedigermoeller</groupId>
             <artifactId>fst</artifactId>
-            <version>2.56</version>
+            <version>2.57</version>
         </dependency>
         <!-- ====================序列化==================== -->
 
@@ -299,13 +299,13 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
-            <version>1.8.9.RELEASE</version>
+            <version>1.8.10.RELEASE</version>
         </dependency>
         <!-- redisson -->
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
-            <version>3.5.6</version>
+            <version>3.6.1</version>
         </dependency>
         <!-- ====================redis==================== -->
 

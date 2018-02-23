@@ -22,7 +22,7 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import com.google.common.collect.ImmutableMap;
 
 import code.ponfee.commons.jce.HashAlgorithms;
-import code.ponfee.commons.jce.hash.HashUtils;
+import code.ponfee.commons.jce.digest.DigestUtils;
 
 /**
  * RSA sign
@@ -99,7 +99,7 @@ public class RSASigner {
         }
 
         // data hash
-        byte[] hash = HashUtils.digest(alg, data);
+        byte[] hash = DigestUtils.digest(alg, data);
 
         try {
             byte[] result = derEncode(hash, oid);
@@ -120,7 +120,7 @@ public class RSASigner {
         }
 
         // hash data
-        byte[] hash = HashUtils.digest(alg, data);
+        byte[] hash = DigestUtils.digest(alg, data);
 
         byte[] sig;
         byte[] expected;

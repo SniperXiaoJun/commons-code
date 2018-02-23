@@ -1,7 +1,7 @@
 package code.ponfee.commons.jce.rsa;
 
 import static code.ponfee.commons.jce.Providers.BC;
-import static code.ponfee.commons.jce.hash.HmacUtils.crypt;
+import static code.ponfee.commons.jce.digest.HmacUtils.crypt;
 
 import java.io.IOException;
 import java.io.InputStream;

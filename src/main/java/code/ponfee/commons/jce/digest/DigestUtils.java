@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.hash;
+package code.ponfee.commons.jce.digest;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import code.ponfee.commons.jce.Providers;
  * hash算法封装
  * @author fupf
  */
-public final class HashUtils {
+public final class DigestUtils {
 
     private static final int BUFF_SIZE = 4096;
 
@@ -84,6 +84,10 @@ public final class HashUtils {
 
     public static String sha256Hex(byte[] data) {
         return Hex.encodeHexString(sha256(data));
+    }
+
+    public static String sha256Hex(String data, String charset) {
+        return sha256Hex(data.getBytes(Charset.forName(charset)));
     }
 
     public static byte[] sha384(byte[] data) {
@@ -186,7 +190,7 @@ public final class HashUtils {
         }
 
         try (InputStream in = input) {
-            for (int n; (n = in.read(buff, 0, buff.length)) != Files.EOF;) {
+            for (int n; (n = in.read(buff, 0, BUFF_SIZE)) != Files.EOF;) {
                 digest.update(buff, 0, n);
             }
             return digest.digest();

@@ -198,18 +198,18 @@ public final class ObjectUtils {
      */
     public static byte[] uuid() {
         UUID uuid = UUID.randomUUID();
-        long most = uuid.getMostSignificantBits(), 
-             last = uuid.getLeastSignificantBits();
+        long most  = uuid.getMostSignificantBits(), 
+             least = uuid.getLeastSignificantBits();
        return new byte[] {
            (byte) (most >>> 56), (byte) (most >>> 48),
            (byte) (most >>> 40), (byte) (most >>> 32),
            (byte) (most >>> 24), (byte) (most >>> 16),
            (byte) (most >>>  8), (byte) (most       ),
 
-           (byte) (last >>> 56), (byte) (last >>> 48),
-           (byte) (last >>> 40), (byte) (last >>> 32),
-           (byte) (last >>> 24), (byte) (last >>> 16),
-           (byte) (last >>>  8), (byte) (last       )
+           (byte) (least >>> 56), (byte) (least >>> 48),
+           (byte) (least >>> 40), (byte) (least >>> 32),
+           (byte) (least >>> 24), (byte) (least >>> 16),
+           (byte) (least >>>  8), (byte) (least       )
        };
     }
 
