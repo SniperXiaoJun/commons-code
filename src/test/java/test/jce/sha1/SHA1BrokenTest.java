@@ -6,7 +6,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.junit.Test;
 
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.jce.HashAlgorithms;
+import code.ponfee.commons.jce.DigestAlgorithms;
 import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.jce.digest.DigestUtils;
@@ -31,12 +31,12 @@ public class SHA1BrokenTest {
     public @Test void test2() {
         byte[] pdf2 = Files.toByteArray(new File(MavenProjects.getTestJavaPath("test.jce.sha1", "shattered-2.pdf")));
 
-        System.out.println(Hex.encodeHexString(DigestUtils.digest(HashAlgorithms.SHA3_256, Providers.BC, pdf2)));
-        System.out.println(Hex.encodeHexString(DigestUtils.digest(HashAlgorithms.KECCAK256, Providers.BC, pdf2)));
+        System.out.println(Hex.encodeHexString(DigestUtils.digest(DigestAlgorithms.SHA3_256, Providers.BC, pdf2)));
+        System.out.println(Hex.encodeHexString(DigestUtils.digest(DigestAlgorithms.KECCAK256, Providers.BC, pdf2)));
         System.out.println();
 
-        System.out.println(Hex.encodeHexString(DigestUtils.digest(HashAlgorithms.SHA3_512, Providers.BC, pdf2)));
-        System.out.println(Hex.encodeHexString(DigestUtils.digest(HashAlgorithms.KECCAK512, Providers.BC, pdf2)));
+        System.out.println(Hex.encodeHexString(DigestUtils.digest(DigestAlgorithms.SHA3_512, Providers.BC, pdf2)));
+        System.out.println(Hex.encodeHexString(DigestUtils.digest(DigestAlgorithms.KECCAK512, Providers.BC, pdf2)));
         System.out.println();
 
         System.out.println(Hex.encodeHexString(HmacUtils.crypt("1234".getBytes(), pdf2, HmacAlgorithms.HmacSHA3_256)));

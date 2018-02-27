@@ -11,11 +11,11 @@ import java.security.Provider;
 import org.apache.commons.codec.binary.Hex;
 
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.jce.HashAlgorithms;
+import code.ponfee.commons.jce.DigestAlgorithms;
 import code.ponfee.commons.jce.Providers;
 
 /**
- * hash算法封装
+ * digest算法封装
  * @author fupf
  */
 public final class DigestUtils {
@@ -23,11 +23,11 @@ public final class DigestUtils {
     private static final int BUFF_SIZE = 4096;
 
     public static byte[] md5(InputStream input) {
-        return digest(HashAlgorithms.MD5, input);
+        return digest(DigestAlgorithms.MD5, input);
     }
 
     public static byte[] md5(byte[] data) {
-        return digest(HashAlgorithms.MD5, data);
+        return digest(DigestAlgorithms.MD5, data);
     }
 
     public static String md5Hex(InputStream input) {
@@ -47,11 +47,11 @@ public final class DigestUtils {
     }
 
     public static byte[] sha1(InputStream input) {
-        return digest(HashAlgorithms.SHA1, input);
+        return digest(DigestAlgorithms.SHA1, input);
     }
 
     public static byte[] sha1(byte[] data) {
-        return digest(HashAlgorithms.SHA1, data);
+        return digest(DigestAlgorithms.SHA1, data);
     }
 
     public static String sha1Hex(InputStream input) {
@@ -71,7 +71,7 @@ public final class DigestUtils {
     }
 
     public static byte[] sha224(byte[] data) {
-        return digest(HashAlgorithms.SHA224, data);
+        return digest(DigestAlgorithms.SHA224, data);
     }
 
     public static String sha224Hex(byte[] data) {
@@ -79,7 +79,7 @@ public final class DigestUtils {
     }
 
     public static byte[] sha256(byte[] data) {
-        return digest(HashAlgorithms.SHA256, data);
+        return digest(DigestAlgorithms.SHA256, data);
     }
 
     public static String sha256Hex(byte[] data) {
@@ -91,7 +91,7 @@ public final class DigestUtils {
     }
 
     public static byte[] sha384(byte[] data) {
-        return digest(HashAlgorithms.SHA384, data);
+        return digest(DigestAlgorithms.SHA384, data);
     }
 
     public static String sha384Hex(byte[] data) {
@@ -99,7 +99,7 @@ public final class DigestUtils {
     }
 
     public static byte[] sha512(byte[]... data) {
-        return digest(HashAlgorithms.SHA512, data);
+        return digest(DigestAlgorithms.SHA512, data);
     }
 
     public static String sha512Hex(byte[] data) {
@@ -108,7 +108,7 @@ public final class DigestUtils {
 
     // ---------------------------------------RipeMD---------------------------------------
     public static byte[] ripeMD128(byte[] data) {
-        return digest(HashAlgorithms.RipeMD128, Providers.BC, data);
+        return digest(DigestAlgorithms.RipeMD128, Providers.BC, data);
     }
 
     public static String ripeMD128Hex(byte[] data) {
@@ -116,7 +116,7 @@ public final class DigestUtils {
     }
 
     public static byte[] ripeMD160(byte[] data) {
-        return digest(HashAlgorithms.RipeMD160, Providers.BC, data);
+        return digest(DigestAlgorithms.RipeMD160, Providers.BC, data);
     }
 
     public static String ripeMD160Hex(byte[] data) {
@@ -124,7 +124,7 @@ public final class DigestUtils {
     }
 
     public static byte[] ripeMD256(byte[] data) {
-        return digest(HashAlgorithms.RipeMD256, Providers.BC, data);
+        return digest(DigestAlgorithms.RipeMD256, Providers.BC, data);
     }
 
     public static String ripeMD256Hex(byte[] data) {
@@ -132,25 +132,25 @@ public final class DigestUtils {
     }
 
     public static byte[] ripeMD320(byte[] data) {
-        return digest(HashAlgorithms.RipeMD320, Providers.BC, data);
+        return digest(DigestAlgorithms.RipeMD320, Providers.BC, data);
     }
 
     public static String ripeMD320Hex(byte[] data) {
         return Hex.encodeHexString(ripeMD320(data));
     }
 
-    public static byte[] digest(HashAlgorithms alg, byte[]... data) {
+    public static byte[] digest(DigestAlgorithms alg, byte[]... data) {
         return digest(alg, null, data);
     }
 
     /**
      * 数据摘要
-     * @param algorithm hash算法
+     * @param algorithm digest算法
      * @param provider
-     * @param data      hash data of byte array
+     * @param data      digest data of byte array
      * @return
      */
-    public static byte[] digest(HashAlgorithms alg, Provider provider,
+    public static byte[] digest(DigestAlgorithms alg, Provider provider,
                                 byte[]... data) {
         MessageDigest md;
         try {
@@ -166,18 +166,18 @@ public final class DigestUtils {
         return md.digest();
     }
 
-    public static byte[] digest(HashAlgorithms alg, InputStream input) {
+    public static byte[] digest(DigestAlgorithms alg, InputStream input) {
         return digest(alg, null, input);
     }
 
     /**
      * 数据摘要
-     * @param algorithm hash 算法
+     * @param algorithm digest 算法
      * @param provider
-     * @param data      hash data of input stream
+     * @param data      digest data of input stream
      * @return
      */
-    public static byte[] digest(HashAlgorithms alg, Provider provider, 
+    public static byte[] digest(DigestAlgorithms alg, Provider provider, 
                                 InputStream input) {
         byte[] buff = new byte[BUFF_SIZE];
         MessageDigest digest = null;

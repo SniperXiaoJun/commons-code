@@ -21,7 +21,7 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 
 import com.google.common.collect.ImmutableMap;
 
-import code.ponfee.commons.jce.HashAlgorithms;
+import code.ponfee.commons.jce.DigestAlgorithms;
 import code.ponfee.commons.jce.digest.DigestUtils;
 
 /**
@@ -73,22 +73,22 @@ public class RSASigner {
     }
 
     public byte[] signSha1(byte[] data) {
-        return sign(data, HashAlgorithms.SHA1);
+        return sign(data, DigestAlgorithms.SHA1);
     }
 
     public boolean verifySha1(byte[] data, byte[] signature) {
-        return verify(data, signature, HashAlgorithms.SHA1);
+        return verify(data, signature, DigestAlgorithms.SHA1);
     }
 
     public byte[] signSha256(byte[] data) {
-        return sign(data, HashAlgorithms.SHA256);
+        return sign(data, DigestAlgorithms.SHA256);
     }
 
     public boolean verifySha256(byte[] data, byte[] signature) {
-        return verify(data, signature, HashAlgorithms.SHA256);
+        return verify(data, signature, DigestAlgorithms.SHA256);
     }
 
-    public byte[] sign(byte[] data, HashAlgorithms alg) {
+    public byte[] sign(byte[] data, DigestAlgorithms alg) {
         if (!this.rsaKey.isSecret()) {
             throw new IllegalArgumentException("Sign must use private key.");
         }
@@ -109,7 +109,7 @@ public class RSASigner {
         }
     }
 
-    public boolean verify(byte[] data, byte[] signature, HashAlgorithms alg) {
+    public boolean verify(byte[] data, byte[] signature, DigestAlgorithms alg) {
         if (this.rsaKey.isSecret()) {
             throw new IllegalArgumentException("Verify signature must use public key.");
         }

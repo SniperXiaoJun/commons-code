@@ -5,7 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.codec.binary.Hex;
 
-import code.ponfee.commons.jce.HashAlgorithms;
+import code.ponfee.commons.jce.DigestAlgorithms;
 import code.ponfee.commons.math.Maths;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
@@ -121,17 +121,17 @@ public class SHA1Digest {
     private static final int PADDING_BOUNDS = 448 / 8;
 
     /** 五个链变量A,B,C,D,E */
-    private static final int A = 0x67452301;
-    private static final int B = 0xEFCDAB89;
-    private static final int C = 0x98BADCFE;
-    private static final int D = 0x10325476;
-    private static final int E = 0xC3D2E1F0;
+    private static final int A = 0x67452301,
+                             B = 0xEFCDAB89,
+                             C = 0x98BADCFE,
+                             D = 0x10325476,
+                             E = 0xC3D2E1F0;
 
     /** 4个常数K */
-    private static final int K0 = 0x5A827999;
-    private static final int K1 = 0x6ED9EBA1;
-    private static final int K2 = 0x8F1BBCDC;
-    private static final int K3 = 0xCA62C1D6;
+    private static final int K0 = 0x5A827999,
+                             K1 = 0x6ED9EBA1,
+                             K2 = 0x8F1BBCDC,
+                             K3 = 0xCA62C1D6;
 
     private final  int[]  work = new int[WORK_SIZE];
     private final byte[] block = new byte[BLOCK_SIZE];
@@ -341,7 +341,7 @@ public class SHA1Digest {
             sha1.update(data1);
             sha1.update(data2);
             sha1.update(data3);
-            byte[] expect = DigestUtils.digest(HashAlgorithms.SHA1, data1, data2, data3);
+            byte[] expect = DigestUtils.digest(DigestAlgorithms.SHA1, data1, data2, data3);
             if (!Arrays.equals(expect, sha1.doFinal())) {
                 System.err.println("FAIL" + " --> " + data.length);
             }

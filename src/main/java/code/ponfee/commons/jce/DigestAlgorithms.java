@@ -4,7 +4,7 @@ package code.ponfee.commons.jce;
  * Hash算法
  * @author Ponfee
  */
-public enum HashAlgorithms {
+public enum DigestAlgorithms {
 
     MD5(16), // 
 
@@ -32,12 +32,12 @@ public enum HashAlgorithms {
     private final String algorithm;
     private final int byteSize;
 
-    private HashAlgorithms(int byteSize) {
+    private DigestAlgorithms(int byteSize) {
         this.algorithm = this.name();
         this.byteSize = byteSize;
     }
 
-    private HashAlgorithms(String algorithm, int byteSize) {
+    private DigestAlgorithms(String algorithm, int byteSize) {
         this.algorithm = algorithm;
         this.byteSize = byteSize;
     }
