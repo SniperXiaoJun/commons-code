@@ -321,35 +321,39 @@ public final class Numbers {
     private static final String[] CN_UPPER_NUMBER = { "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖" };
     private static final String[] CN_UPPER_MONETRAY_UNIT = { "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
                                                              "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
+    private static final BigDecimal MAX_VALUE = new BigDecimal("9999999999999999.995");
     /**
-     * 金额汉化
+     * 金额汉化（单位元）
      * @param amount
      * @return
      */
     public static String chinesize(BigDecimal amount) {
+        if (amount.compareTo(MAX_VALUE) >= 0) {
+            throw new IllegalArgumentException("The amount value too large.");
+        }
         int signum = amount.signum(); // 正负数：0,1,-1
         if (signum == 0) {
-            return "零元整"; // 零元整的情况
+            return "零元整";
         }
 
-        // 这里会进行金额的四舍五入
-        long number = amount.movePointRight(2).setScale(0, 4).abs().longValue();
-        long scale = number % 100; // 得到小数点后两位值
-        int numIndex = 0;
-        boolean getZero = false;
-        if (scale <= 0) { // 判断最后两位数，一共有四中情况：00 = 0, 01 = 1, 10, 11
+        // * 100
+        long number = amount.movePointRight(2).setScale(0, BigDecimal.ROUND_HALF_UP)
+                            .abs().longValue();
+        int scale = (int) (number % 100), numIndex;
+        if (scale == 0) {
             numIndex = 2;
             number = number / 100;
-            getZero = true;
-        }
-        if (scale > 0 && scale % 10 <= 0) {
+        } else if (scale % 10 == 0) {
             numIndex = 1;
             number = number / 10;
-            getZero = true;
+        } else {
+            numIndex = 0;
         }
+        boolean getZero = numIndex == 0 ? false : true;
+
         StringBuilder builder = new StringBuilder();
         for (int zeroSize = 0, numUnit = 0; number > 0; number = number / 10, ++numIndex) {
-            numUnit = (int) (number % 10); // 每次获取到最后一个数
+            numUnit = (int) (number % 10); // get the last number
             if (numUnit > 0) {
                 if ((numIndex == 9) && (zeroSize >= 3)) {
                     builder.insert(0, CN_UPPER_MONETRAY_UNIT[6]);
@@ -377,14 +381,12 @@ public final class Numbers {
             }
         }
 
-        // 如果signum == -1，则说明输入的数字为负数，就在最前面追加特殊字符：负
         if (signum == -1) {
-            builder.insert(0, "负");
+            builder.insert(0, "负"); // 负数
         }
 
-        // 输入的数字小数点后两位为"00"的情况，则要在最后追加特殊字符：整
-        if (scale < 1) {
-            builder.append("整");
+        if (scale == 0) {
+            builder.append("整"); // 整数
         }
         return builder.toString();
     }
@@ -412,10 +414,13 @@ public final class Numbers {
 
         System.out.println(ObjectUtils.toString(average(10, 20)));
 
-        double money = 2020004.01;
+        double money = 2020004.7;
         System.out.println("[" + money + "]   ->   [" + chinesize(new BigDecimal(money)) + "]");
 
-        money = 43232;
+        money = 85050414.776;
         System.out.println("[" + money + "]   ->   [" + chinesize(new BigDecimal(money)) + "]");
+
+        System.out.println(chinesize(new BigDecimal("9999999999999999.9949")));
+        System.out.println(chinesize(new BigDecimal("9999999999999999.995")));
     }
 }

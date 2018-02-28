@@ -115,7 +115,7 @@ public final class ClassUtils {
      * @return Filed object
      * @throws Exception
      */
-    public static Field getField(Class<?> clazz, String field) throws Exception {
+    public static Field getField(Class<?> clazz, String field) {
         if (clazz.isInterface() || clazz == Object.class) {
             return null;
         }
@@ -130,7 +130,7 @@ public final class ClassUtils {
             }
         } while (clazz != null && clazz != Object.class);
 
-        throw ex;
+        throw new RuntimeException(ex);
     }
 
     /**

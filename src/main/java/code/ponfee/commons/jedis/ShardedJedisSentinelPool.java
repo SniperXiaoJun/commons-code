@@ -45,11 +45,13 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
 
     private static Logger logger = LoggerFactory.getLogger(ShardedJedisSentinelPool.class);
     private static final int MAX_RETRY_SENTINEL = 10;
-    protected GenericObjectPoolConfig poolConfig;
-    protected int timeout = Protocol.DEFAULT_TIMEOUT;
+
+    protected final GenericObjectPoolConfig poolConfig;
+    protected final int timeout;
+    protected final String password;
+    protected final int database;
+
     private int sentinelRetry = 0;
-    protected String password;
-    protected int database = Protocol.DEFAULT_DATABASE;
     protected Set<MasterListener> masterListeners = new HashSet<>();
     private volatile List<HostAndPort> currentHostMasters;
 
@@ -87,8 +89,9 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
     }
 
     /**
-     * @deprecated starting from Jedis 3.0 this method will not be exposed. Resource cleanup should be
-     *             done using @see {@link redis.clients.jedis.Jedis#close()}
+     * @deprecated starting from Jedis 3.0 this method will not be exposed. 
+     *             Resource cleanup should be done using 
+     * @see {@link redis.clients.jedis.Jedis#close()}
      */
     @Override
     public void returnBrokenResource(final ShardedJedis resource) {
@@ -98,8 +101,9 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
     }
 
     /**
-     * @deprecated starting from Jedis 3.0 this method will not be exposed. Resource cleanup should be
-     *             done using @see {@link redis.clients.jedis.Jedis#close()}
+     * @deprecated starting from Jedis 3.0 this method will not be exposed. 
+     *             Resource cleanup should be done using 
+     * @see {@link redis.clients.jedis.Jedis#close()}
      */
     @Override
     public void returnResource(final ShardedJedis resource) {
@@ -331,7 +335,7 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
         protected List<String> masters;
         protected String host;
         protected int port;
-        protected long subscribeRetryWaitTimeMillis = 5000;
+        protected long retryIntervalMillis = 5000;
         protected Jedis jedis;
         protected AtomicBoolean running = new AtomicBoolean(false);
 
@@ -344,10 +348,10 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
             this.port = port;
         }
 
-        public MasterListener(List<String> masters, String host, int port, 
-                              long subscribeRetryWaitTimeMillis) {
+        public MasterListener(List<String> masters, String host, 
+                              int port, long retryIntervalMillis) {
             this(masters, host, port);
-            this.subscribeRetryWaitTimeMillis = subscribeRetryWaitTimeMillis;
+            this.retryIntervalMillis = retryIntervalMillis;
         }
 
         @Override
@@ -376,11 +380,11 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
                         @Override
                         public void onMessage(String channel, String message) {
                             logger.info("Sentinel {}:{} published: {}.", host, port, message);
-                            String[] switchMasterMsg = message.split(" ");
-                            if (switchMasterMsg.length > 3) {
-                                int index = masters.indexOf(switchMasterMsg[0]);
+                            String[] array = message.split(" ");
+                            if (array.length > 3) {
+                                int index = masters.indexOf(array[0]);
                                 if (index >= 0) {
-                                    HostAndPort newHostMaster = toHostAndPort(Arrays.asList(switchMasterMsg[3], switchMasterMsg[4]));
+                                    HostAndPort newHostMaster = toHostAndPort(Arrays.asList(array[3], array[4]));
                                     List<HostAndPort> newHostMasters = new ArrayList<>();
                                     for (int i = 0; i < masters.size(); i++) {
                                         newHostMasters.add(null);
@@ -393,18 +397,21 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
                                     for (String masterName : masters) {
                                         sb.append(masterName).append(",");
                                     }
-                                    logger.info("Ignoring message on +switch-master for master name {}, our monitor master name are [{}]", switchMasterMsg[0], sb);
+                                    logger.info("Ignoring message on +switch-master for master name {}, "
+                                              + "our monitor master name are [{}]", array[0], sb);
                                 }
                             } else {
-                                logger.error("Invalid message received on Sentinel {}:{} on channel +switch-master: {}", host, port, message);
+                                logger.error("Invalid message received on Sentinel {}:{} "
+                                           + "on channel +switch-master: {}", host, port, message);
                             }
                         }
                     }, "+switch-master");
                 } catch (JedisConnectionException e) {
                     if (running.get()) {
-                        logger.error("Lost connection to Sentinel at {}:{}. Sleeping 5000ms and retrying.", host, port);
+                        logger.error("Lost connection to Sentinel at {}:{}. "
+                                   + "Sleeping {}ms and retrying.", host, port, retryIntervalMillis);
                         try {
-                            Thread.sleep(subscribeRetryWaitTimeMillis);
+                            Thread.sleep(retryIntervalMillis);
                         } catch (InterruptedException ex) {
                             ex.printStackTrace();
                         }

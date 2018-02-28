@@ -117,6 +117,28 @@ public final class GenericUtils {
         return getActualTypeArgument(((ParameterizedType) type).getActualTypeArguments()[genericArgsIndex]);
     }
 
+    public static String getFieldGenericType(Field field) {
+        Type type = field.getGenericType();
+        if (type == null) {
+            return field.getType().getCanonicalName();
+        }
+        if (!(type instanceof ParameterizedType)) {
+            return type.getTypeName();
+        }
+
+        ParameterizedType pt = (ParameterizedType) type;
+        Type[] types = pt.getActualTypeArguments();
+        StringBuilder builder = new StringBuilder();
+        builder.append(((Class<?>) pt.getRawType()).getCanonicalName()).append("<");
+        for (int len = types.length, i = 0; i < len; i++) {
+            builder.append(types[i].getTypeName());
+            if (i != len - 1) {
+                builder.append(",");
+            }
+        }
+        return builder.append(">").toString();
+    }
+
     // --------------------------------------private methods----------------------------------
     private static Class<?> getActualTypeArgument(Type type) {
         if (type instanceof Class<?>) {

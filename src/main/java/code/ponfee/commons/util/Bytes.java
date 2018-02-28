@@ -25,9 +25,9 @@ public final class Bytes {
     private static final char[] HEX_UPPER_CODES = "0123456789ABCDEF".toCharArray();
 
     /**
-     * dump byte array like as these 
-     * @see org.apache.commons.io.HexDump#dump(byte[], long, java.io.OutputStream, int)
-     * @see sun.misc.HexDumpEncoder#encode(byte[], java.io.OutputStream);
+     * dump byte array, like as these 
+     * {@link org.apache.commons.io.HexDump#dump(byte[], long, java.io.OutputStream, int)}, 
+     * {@link sun.misc.HexDumpEncoder#encode(byte[], java.io.OutputStream);}
      * 
      * @param data   字节数组
      * @param chunk  每行块数
@@ -79,6 +79,11 @@ public final class Bytes {
         return hexDump(data, 2, 8);
     }
 
+    /**
+     * convert the byte array to binary string
+     * @param array
+     * @return
+     */
     public static String toBinary(byte... array) {
         if (array == null || array.length == 0) {
             return null;
@@ -99,7 +104,7 @@ public final class Bytes {
     }
 
     /**
-     * byte[]转hex
+     * encode the byte array the hex string 
      * @param bytes
      * @param lowercase
      * @return
@@ -120,7 +125,7 @@ public final class Bytes {
     }
 
     /**
-     * hex转byte[]
+     * decode the hex string to byte array 
      * @param hex
      * @return
      */
@@ -422,7 +427,8 @@ public final class Bytes {
      * @return a new byte array of them
      */
     public static byte[] concat(byte[] first, byte[]... rest) {
-        Preconditions.checkArgument(first != null, "the first cannot be null");
+        Preconditions.checkArgument(first != null, 
+                                    "the first array arg cannot be null");
         if (rest == null || rest.length == 0) {
             return first;
         }
@@ -461,8 +467,8 @@ public final class Bytes {
     /**
      * copy in to out
      * 从尾部开始拷贝in到out：
-     *   若in数据不足则out前面补0
-     *   若in有多则舍去in前面的数据
+     *   若in数据不足则在out前面补0
+     *   若in数据有多则舍去in前面的数据
      * @param in
      * @param inFrom
      * @param inLen
@@ -484,6 +490,5 @@ public final class Bytes {
         byte[] in = {-2,-2,-2,-2,-2,-2};
         copy(in, 0, 4, out, 2, 10);
         System.out.println(ObjectUtils.toString(out));
-        
     }
 }

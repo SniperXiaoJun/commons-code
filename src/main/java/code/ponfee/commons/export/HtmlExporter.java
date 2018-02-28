@@ -49,7 +49,8 @@ public class HtmlExporter extends AbstractExporter {
        .append("</html>                                                                                                            \n")
        .toString();
 
-    private StringBuilder html;
+    private StringBuilder html; // StringBuilder扩容：(value.length << 1) + 2
+                                // 容量如果不够，直接扩充到需要的容量大小
 
     public HtmlExporter() {
         this.html = new StringBuilder(0x2000); // 初始容量8192
@@ -167,6 +168,7 @@ public class HtmlExporter extends AbstractExporter {
     @Override
     public String export() {
         return MessageFormat.format(TEMPLATE, super.getName(), html.toString());
+        //return html.insert(0, "before").append("after").toString();
     }
 
     @Override

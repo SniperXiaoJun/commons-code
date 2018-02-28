@@ -152,7 +152,8 @@ public class JedisLock implements Lock, java.io.Serializable {
             // 仅当lockKey不存在才能设置成功并返回1，否则setnx不做任何动作返回0
             Long result = jedis.setnx(lockKey, generateValue());
             if (result != null && result.intValue() == 1) {
-                jedis.expire(lockKey, timeoutSeconds); // 成功则需要设置失效期
+                // 成功获取锁后需要设置失效期
+                jedis.expire(lockKey, JedisOperations.getActualExpire(timeoutSeconds));
                 return true;
             }
 
@@ -171,7 +172,7 @@ public class JedisLock implements Lock, java.io.Serializable {
                 tx.expire(lockKey, JedisOperations.getActualExpire(timeoutSeconds));
                 List<Object> exec = tx.exec(); // exec执行完后被监控的key会自动unwatch
                 return exec != null && !exec.isEmpty() 
-                       && Arrays.equals(value, (byte[]) exec.get(0));
+                    && Arrays.equals(value, (byte[]) exec.get(0));
             }
         }, false);
     }
@@ -217,7 +218,7 @@ public class JedisLock implements Lock, java.io.Serializable {
                 tx.exec(); // 自动unwatch
             }
 
-            LOCK_VALUE.remove(); // 释放
+            LOCK_VALUE.remove(); // 删除
         });
     }
 

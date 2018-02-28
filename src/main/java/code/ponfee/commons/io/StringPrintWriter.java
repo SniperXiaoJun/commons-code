@@ -5,6 +5,7 @@ import java.io.StringWriter;
 
 /**
  * 字符串输出类
+ * @see java.io.StringWriter
  * @author Ponfee
  */
 public class StringPrintWriter extends PrintWriter {

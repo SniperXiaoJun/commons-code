@@ -6,6 +6,7 @@ import java.security.SecureRandom;
 import java.util.Hashtable;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
@@ -213,7 +214,7 @@ public class ECParameters implements java.io.Serializable {
     
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(name).append(p)
+        return new HashCodeBuilder().append(p)
                 .append(a).append(b).append(gx).append(gy)
                 .append(n).append(S).toHashCode();
     }
@@ -226,7 +227,21 @@ public class ECParameters implements java.io.Serializable {
         if (this == obj) {
             return true;
         }
-        return this.toString().equals(obj.toString());
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        ECParameters other = (ECParameters) obj;
+        return new EqualsBuilder()
+                  .append(this.p, other.p)
+                  .append(this.a, other.a)
+                  .append(this.b, other.b)
+                  .append(this.gx, other.gx)
+                  .append(this.gy, other.gy)
+                  .append(this.n, other.n)
+                  .append(this.S, other.S)
+                  .isEquals();
+        //return EqualsBuilder.reflectionEquals(this, obj, false, null, false, "name");
     }
 
     public static void main(String[] args) {

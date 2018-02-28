@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.collect.Collects;
 import code.ponfee.commons.io.Files;
+import code.ponfee.commons.util.Base58;
 import code.ponfee.commons.util.ObjectUtils;
 import code.ponfee.commons.util.UrlCoder;
 
@@ -178,7 +179,7 @@ public class HttpParams {
      */
     public static String buildForm(String url, Map<String, ?> params) {
         StringBuilder form = new StringBuilder(256);
-        String formName = ObjectUtils.uuid22();
+        String formName = Base58.encode(ObjectUtils.uuid());
         form.append("<form action=\"").append(url).append("\" name=\"")
             .append(formName).append("\" method=\"post\">");
 

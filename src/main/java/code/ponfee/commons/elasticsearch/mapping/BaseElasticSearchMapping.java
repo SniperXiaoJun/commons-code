@@ -67,7 +67,9 @@ public abstract class BaseElasticSearchMapping implements IElasticSearchMapping 
                 getMeta());
 
         // Turn it into JsonXContent:
-        return mapping.toXContent(XContentFactory.jsonBuilder().startObject(), new ToXContent.MapParams(emptyMap())).endObject();
+        return mapping.toXContent(XContentFactory.jsonBuilder().startObject(), 
+                                  new ToXContent.MapParams(emptyMap()))
+                      .endObject();
     }
 
     private Settings.Builder getSettingsBuilder() {

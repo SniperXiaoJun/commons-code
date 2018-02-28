@@ -92,9 +92,9 @@ public final class MailSenderBuilder {
         evp.setCc(new String[] { "395191357@qq.com", "unkonwn@fdsa.com" });
         evp.setBcc(new String[] { "unkonwn@test.com" });
         //evp.addContentImage("contentid123", "d:/QQ图片20170320235130.png");
-        //evp.addAttachment("名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长.xlsx", "d:/abc.xlsx");
-        //evp.addAttachment("百度名字有点长魂牵梦萦脍少朝秦暮楚脍塔顶地额外负担要暮云春树工奇巧魂牵梦萦地魂牵梦萦城.txt", "d:/baidu.html");
-        //evp.addAttachment("字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名字有点长名.png", IOUtils.toByteArray(new FileInputStream("D:\\图片.png")));
+        //evp.addAttachment("超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试.xlsx", "d:/abc.xlsx");
+        //evp.addAttachment("超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试.txt", "d:/baidu.html");
+        //evp.addAttachment("超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试.png", IOUtils.toByteArray(new FileInputStream("D:\\图片.png")));
 
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1; i++) {

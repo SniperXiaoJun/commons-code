@@ -18,6 +18,7 @@ import redis.clients.jedis.Jedis;
  * @author fupf
  */
 public class KeysOperations extends JedisOperations {
+
     private static Logger logger = LoggerFactory.getLogger(KeysOperations.class);
 
     KeysOperations(JedisClient jedisClient) {

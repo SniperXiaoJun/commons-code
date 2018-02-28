@@ -29,6 +29,9 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.common.collect.ImmutableMap;
 
+import code.ponfee.commons.math.Maths;
+import code.ponfee.commons.math.Numbers;
+
 /**
  * 文件工具类
  * @author Ponfee
@@ -231,8 +234,75 @@ public final class Files {
             return "0";
         }
 
-        int digit = (int) (Math.log10(size) / Math.log10(1024));
-        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digit)) + FILE_UNITS[digit];
+        int digit = (int) Maths.log(size, 1024); // log1024(size)
+        return new DecimalFormat("#,##0.##").format(size / Math.pow(1024, digit)) + FILE_UNITS[digit];
+    }
+
+    private static final long KB = 1024;
+    private static final long MB = KB * 1024;
+    private static final long GB = MB * 1024;
+    private static final long TB = GB * 1024;
+    private static final long PB = TB * 1024;
+    private static final long EB = PB * 1024;
+    private static final long ZB = EB * 1024;
+    private static final long YB = ZB * 1024;
+    public static long parseHuman(String humanSize) {
+        long factor = 1L;
+        switch (humanSize.charAt(0)) {
+            case '+':
+                humanSize = humanSize.substring(1);
+                break;
+            case '-':
+                factor = -1L;
+                humanSize = humanSize.substring(1);
+                break;
+            default:
+                break;
+        }
+
+        int trim = 1;
+        // last character isn't a digit
+        char c = humanSize.charAt(humanSize.length() - 1);
+        if (c == 'B') {
+            c = humanSize.charAt(humanSize.length() - 2);
+        }
+        if (!Character.isDigit(c)) {
+            trim++;
+            switch (c) {
+                case 'K':
+                    factor *= KB;
+                    break;
+                case 'M':
+                    factor *= MB;
+                    break;
+                case 'G':
+                    factor *= GB;
+                    break;
+                case 'T':
+                    factor *= TB;
+                    break;
+                case 'P':
+                    factor *= PB;
+                    break;
+                case 'E':
+                    factor *= EB;
+                    break;
+                case 'Z':
+                    factor *= ZB;
+                    break;
+                case 'Y':
+                    factor *= YB;
+                    break;
+                default:
+                    throw new RuntimeException("Invalid unit " + c); // cannot happened
+            }
+        }
+        humanSize = humanSize.substring(0, humanSize.length() - trim);
+        try {
+            return factor * Numbers.toLong(humanSize);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Failed to parse \"" + humanSize + "\"", e);
+        }
     }
 
     // -------------------------------------windows file bom head-------------------------------------
@@ -333,43 +403,40 @@ public final class Files {
 
     // ------------------------file type---------------------------------
     private static final int SUB_PREFIX = 64;
-    public static final Map<String, String> FILE_TYPE_MAGIC;
-    static {
-        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        builder.put("jpg", "FFD8FF"); // JPEG (jpg)
-        builder.put("png", "89504E47"); // PNG (png)
-        builder.put("gif", "47494638"); // GIF (gif)
-        builder.put("tif", "49492A00"); // TIFF (tif)
-        builder.put("bmp", "424D"); // Windows Bitmap (bmp)
-        builder.put("dwg", "41433130"); // CAD (dwg)
-        builder.put("html","68746D6C3E"); // HTML (html)
-        builder.put("rtf", "7B5C727466"); // Rich Text Format (rtf)
-        builder.put("xml", "3C3F786D6C");
-        builder.put("zip", "504B0304");
-        builder.put("rar", "52617221");
-        builder.put("psd", "38425053"); // Photoshop (psd)
-        builder.put("eml", "44656C69766572792D646174653A"); // Email [thorough only] (eml)
-        builder.put("dbx", "CFAD12FEC5FD746F"); // Outlook Express (dbx)
-        builder.put("pst", "2142444E"); // Outlook (pst)
-        builder.put("xls", "D0CF11E0"); // MS Word
-        builder.put("doc", "D0CF11E0"); // MS Excel 注意：word 和 excel的文件头一样
-        builder.put("mdb", "5374616E64617264204A"); // MS Access (mdb)
-        builder.put("wpd", "FF575043"); // WordPerfect (wpd)
-        builder.put("eps", "252150532D41646F6265");
-        builder.put("ps",  "252150532D41646F6265");
-        builder.put("pdf", "255044462D312E"); // Adobe Acrobat (pdf)
-        builder.put("qdf", "AC9EBD8F"); // Quicken (qdf)
-        builder.put("pwl", "E3828596"); // Windows Password (pwl)
-        builder.put("wav", "57415645"); // Wave (wav)
-        builder.put("avi", "41564920");
-        builder.put("ram", "2E7261FD"); // Real Audio (ram)
-        builder.put("rm", "2E524D46"); // Real Media (rm)
-        builder.put("mpg", "000001BA");
-        builder.put("mov", "6D6F6F76"); // Quicktime (mov)
-        builder.put("asf", "3026B2758E66CF11"); // Windows Media (asf)
-        builder.put("mid", "4D546864"); // MIDI (mid)
-        FILE_TYPE_MAGIC = builder.build();
-    }
+    public static final Map<String, String> FILE_TYPE_MAGIC = ImmutableMap.<String, String> builder()
+        .put("jpg", "FFD8FF") // JPEG (jpg)
+        .put("png", "89504E47") // PNG (png)
+        .put("gif", "47494638") // GIF (gif)
+        .put("tif", "49492A00") // TIFF (tif)
+        .put("bmp", "424D") // Windows Bitmap (bmp)
+        .put("dwg", "41433130") // CAD (dwg)
+        .put("html","68746D6C3E") // HTML (html)
+        .put("rtf", "7B5C727466") // Rich Text Format (rtf)
+        .put("xml", "3C3F786D6C")
+        .put("zip", "504B0304")
+        .put("rar", "52617221")
+        .put("psd", "38425053") // Photoshop (psd)
+        .put("eml", "44656C69766572792D646174653A") // Email [thorough only] (eml)
+        .put("dbx", "CFAD12FEC5FD746F") // Outlook Express (dbx)
+        .put("pst", "2142444E") // Outlook (pst)
+        .put("xls", "D0CF11E0") // MS Word
+        .put("doc", "D0CF11E0") // MS Excel 注意：word 和 excel的文件头一样
+        .put("mdb", "5374616E64617264204A") // MS Access (mdb)
+        .put("wpd", "FF575043") // WordPerfect (wpd)
+        .put("eps", "252150532D41646F6265")
+        .put("ps",  "252150532D41646F6265")
+        .put("pdf", "255044462D312E") // Adobe Acrobat (pdf)
+        .put("qdf", "AC9EBD8F") // Quicken (qdf)
+        .put("pwl", "E3828596") // Windows Password (pwl)
+        .put("wav", "57415645") // Wave (wav)
+        .put("avi", "41564920")
+        .put("ram", "2E7261FD") // Real Audio (ram)
+        .put("rm", "2E524D46") // Real Media (rm)
+        .put("mpg", "000001BA")
+        .put("mov", "6D6F6F76") // Quicktime (mov)
+        .put("asf", "3026B2758E66CF11") // Windows Media (asf)
+        .put("mid", "4D546864") // MIDI (mid)
+        .build();
 
     /**
      * 猜测文件类型
@@ -410,6 +477,9 @@ public final class Files {
     public static void main(String[] args) throws IOException {
         System.out.println(File.pathSeparator);
         System.out.println(File.separator);
-        System.out.println(guessFileType(new File("d:/代码走查问题表.xlsx")));
+        String s = human(1152921504606846976L);
+        System.out.println(s);
+        System.out.println(parseHuman(s));
+        //System.out.println(guessFileType(new File("d:/代码走查问题表.xlsx")));
     }
 }

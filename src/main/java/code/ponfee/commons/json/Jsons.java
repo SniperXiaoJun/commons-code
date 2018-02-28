@@ -63,7 +63,7 @@ public final class Jsons {
     }
 
     /**
-     * 序列化成json流数据
+     * serialize the byte array of json
      * @param target  object
      * @return byte[] array
      * @throws code.ponfee.commons.json.JsonException   the exception for json
@@ -103,9 +103,10 @@ public final class Jsons {
      * @return the objects of collection
      * @throws JsonException the exception for json
      */
-    public <T> T parse(String json, Class<?> collectionClass, Class<?>... elementClasses) throws JsonException {
-        JavaType javaType = mapper.getTypeFactory().constructParametricType(collectionClass, elementClasses);
-        return parse(json, javaType);
+    public <T> T parse(String json, Class<?> collectionClass, Class<?>... elementClasses) 
+        throws JsonException {
+        return parse(json, 
+                     mapper.getTypeFactory().constructParametricType(collectionClass, elementClasses));
     }
 
     /**

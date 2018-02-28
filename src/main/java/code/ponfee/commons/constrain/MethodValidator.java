@@ -118,10 +118,6 @@ public abstract class MethodValidator extends FieldValidator {
                     builder.append(constrain(methodSign, fieldName, fieldVal, cst, fieldType));
                 }
             }
-        } catch (NoSuchFieldException e) {
-            String msg = "配置错误：不存在的字段[" + argsName[cst.index()] + "." + cst.field() + "]";
-            logger.error(msg, e);
-            builder.append(msg);
         } catch (UnsupportedOperationException | IllegalArgumentException e) {
             builder.append(e.getMessage());
         } catch (Exception e) {

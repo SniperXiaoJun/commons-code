@@ -50,16 +50,18 @@ public class Strings {
      * @return
      */
     public static String mask(String text, int start, int len, char maskChar) {
-        if (len < 1 || StringUtils.isEmpty(text) || text.length() < start) {
+        int length;
+        if (len < 1 || StringUtils.isEmpty(text)
+            || (length = text.length()) < start) {
             return text;
         }
         if (start < 0) {
             start = 0;
         }
-        if (text.length() < start + len) {
-            len = text.length() - start;
+        if (length < start + len) {
+            len = length - start;
         }
-        int end = text.length() - start - len;
+        int end = length - start - len;
         String regex = "(\\w{" + start + "})\\w{" + len + "}(\\w{" + end + "})";
         return mask(text, regex, "$1" + StringUtils.repeat(maskChar, len) + "$2");
     }
@@ -315,7 +317,8 @@ public class Strings {
      * @return
      */
     public static String replace(String inString, String oldPattern, String newPattern) {
-        if (StringUtils.isEmpty(inString) || StringUtils.isEmpty(oldPattern) || newPattern == null) {
+        if (StringUtils.isEmpty(inString) || StringUtils.isEmpty(oldPattern) 
+            || newPattern == null) {
             return inString;
         }
         StringBuilder sb = new StringBuilder();

@@ -15,7 +15,7 @@ import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 
 /**
- * 基于zip4j的zip工具类
+ * zip utility based zip4j
  * @author fupf
  */
 public class ZipUtils {
@@ -31,7 +31,7 @@ public class ZipUtils {
     public static String zip(String src) throws ZipException {
         File srcFile = new File(src);
         if (!srcFile.exists()) {
-            throw new IllegalArgumentException("source file not found: " + src);
+            throw new ZipException("source file not found: " + src);
         }
 
         String dest = srcFile.getParent() + File.separator;
@@ -80,16 +80,16 @@ public class ZipUtils {
         // validate source file
         File srcFile = new File(src);
         if (!srcFile.exists()) {
-            throw new IllegalArgumentException("source file not found: " + src);
+            throw new ZipException("source file not found: " + src);
         }
 
         // validate dest file
         if (StringUtils.isEmpty(dest)) {
-            throw new IllegalArgumentException("dest file cannot be null");
+            throw new ZipException("dest file cannot be null");
         }
         File destFile = new File(dest);
         if (destFile.exists()) {
-            throw new IllegalArgumentException("dest file exists: " + dest);
+            throw new ZipException("dest file exists: " + dest);
         }
         Files.mkdir(destFile.getParent()); // 创建父路径（如果不存在）
 
@@ -138,7 +138,7 @@ public class ZipUtils {
      */
     public static String unzip(String zipFile) throws ZipException {
         if (StringUtils.isBlank(zipFile)) {
-            throw new IllegalArgumentException("zip file cannot be null");
+            throw new ZipException("zip file cannot be null");
         }
 
         String lowercasePath = zipFile.toLowerCase();
@@ -147,7 +147,7 @@ public class ZipUtils {
             unzip(zipFile, dest);
             return dest;
         } else {
-            throw new IllegalStateException("the zip file name must be end with .zip");
+            throw new ZipException("the zip file name must be end with .zip");
         }
     }
 
@@ -191,8 +191,7 @@ public class ZipUtils {
                                String charset) throws ZipException {
         // validate zip file
         if (!zipFile.exists()) {
-            throw new IllegalArgumentException("zip file not found: " 
-                                              + zipFile.getAbsolutePath());
+            throw new ZipException("zip file not found: " + zipFile.getAbsolutePath());
         }
         ZipFile zFile = new ZipFile(zipFile);
         if (!zFile.isValidZipFile()) {
@@ -201,9 +200,9 @@ public class ZipUtils {
 
         // validate dest file path
         if (StringUtils.isEmpty(dest)) {
-            throw new IllegalArgumentException("dest file path can't be null");
+            throw new ZipException("dest file path can't be null");
         } else if (new File(dest).exists()) {
-            throw new IllegalStateException("dest file is exists: " + dest);
+            throw new ZipException("dest file is exists: " + dest);
         } else {
             Files.mkdir(dest); // 校验并创建解压缩存放目录
         }
@@ -214,7 +213,7 @@ public class ZipUtils {
         }
         if (zFile.isEncrypted()) {
             if (StringUtils.isEmpty(passwd)) {
-                throw new IllegalArgumentException("passwd can't be null");
+                throw new ZipException("passwd can't be null");
             } else {
                 zFile.setPassword(passwd.toCharArray());
             }
@@ -241,8 +240,7 @@ public class ZipUtils {
         //unzip("D:\\guiminer.zip");
         //unzip(new File("d:/aaa.zip"), "d://aaa", "123", "UTF-8");
 
-        //zip(MavenProjects.getProjectBaseDir(), null, "123");
+        zip(MavenProjects.getProjectBaseDir());
         //unzip("d:/abc.zip");
-        zip("D:\\abc.txt");
     }
 }

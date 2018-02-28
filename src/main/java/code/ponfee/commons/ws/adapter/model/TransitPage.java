@@ -28,7 +28,7 @@ public class TransitPage<T> {
     private boolean hasPreviousPage = false; // 是否有前一页
     private boolean hasNextPage = false; // 是否有下一页
     private int navigatePages; // 导航页码数
-    private int[] navigatepageNums; // 所有导航页号
+    private int[] navigatePageNums; // 所有导航页号
     private int navigateFirstPage; // 导航条上的第一页
     private int navigateLastPage; // 导航条上的最后一页
 
@@ -152,12 +152,12 @@ public class TransitPage<T> {
         this.navigatePages = navigatePages;
     }
 
-    public int[] getNavigatepageNums() {
-        return navigatepageNums;
+    public int[] getNavigatePageNums() {
+        return navigatePageNums;
     }
 
-    public void setNavigatepageNums(int[] navigatepageNums) {
-        this.navigatepageNums = navigatepageNums;
+    public void setNavigatePageNums(int[] navigatePageNums) {
+        this.navigatePageNums = navigatePageNums;
     }
 
     public int getNavigateFirstPage() {
@@ -210,7 +210,7 @@ public class TransitPage<T> {
         page.setHasPreviousPage(transit.isHasPreviousPage());
         page.setHasNextPage(transit.isHasNextPage());
         page.setNavigatePages(transit.getNavigatePages());
-        page.setNavigatepageNums(transit.getNavigatepageNums());
+        page.setNavigatePageNums(transit.getNavigatePageNums());
         page.setNavigateFirstPage(transit.getNavigateFirstPage());
         page.setNavigateLastPage(transit.getNavigateLastPage());
         return page;
@@ -231,7 +231,7 @@ public class TransitPage<T> {
         transit.setHasPreviousPage(page.isHasPreviousPage());
         transit.setHasNextPage(page.isHasNextPage());
         transit.setNavigatePages(page.getNavigatePages());
-        transit.setNavigatepageNums(page.getNavigatepageNums());
+        transit.setNavigatePageNums(page.getNavigatePageNums());
         transit.setNavigateFirstPage(page.getNavigateFirstPage());
         transit.setNavigateLastPage(page.getNavigateLastPage());
     }

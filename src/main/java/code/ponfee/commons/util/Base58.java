@@ -1,7 +1,7 @@
 package code.ponfee.commons.util;
 
 import java.math.BigInteger;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Hex;
@@ -35,13 +35,12 @@ import code.ponfee.commons.jce.digest.DigestUtils;
 public class Base58 {
 
     private static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
-
-    private static final Charset US_ASCII = Charset.forName("US-ASCII");
+    private static final int LENGTH = ALPHABET.length;
 
     private static final int[] INDEXES = new int[128];
     static {
         Arrays.fill(INDEXES, -1);
-        for (int i = 0; i < ALPHABET.length; i++) {
+        for (int i = 0; i < LENGTH; i++) {
             INDEXES[ALPHABET[i]] = i;
         }
     }
@@ -69,7 +68,7 @@ public class Base58 {
         byte[] temp = new byte[data.length * 2];
         int j = temp.length;
         for (int startAt = zeroCount; startAt < data.length;) {
-            byte mod = divmod58(data, startAt);
+            int mod = divmod58(data, startAt);
             if (data[startAt] == 0) {
                 ++startAt;
             }
@@ -86,7 +85,7 @@ public class Base58 {
             temp[--j] = (byte) ALPHABET[0];
         }
 
-        return new String(temp, j, temp.length - j, US_ASCII);
+        return new String(temp, j, temp.length - j, StandardCharsets.US_ASCII);
     }
 
     /**
@@ -187,8 +186,8 @@ public class Base58 {
     }
 
     // -------------------------------private methods-------------------------------
-    // number -> number / 58, returns number % 58
-    private static byte divmod58(byte[] number, int startAt) {
+    // number -> number / LENGTH, returns number % LENGTH
+    private static int divmod58(byte[] number, int startAt) {
         int remainder = 0;
         for (int i = startAt; i < number.length; i++) {
             // b & 0xFF再转int是为了保持二进制补码的一致性
@@ -198,11 +197,11 @@ public class Base58 {
             // new BigInteger(1, new byte[] { b }).toString(2); // 10000001
             int digit256 = number[i] & 0xFF;
             int temp = remainder * 256 + digit256;
-            number[i] = (byte) (temp / 58);
-            remainder = temp % 58;
+            number[i] = (byte) (temp / LENGTH);
+            remainder = temp % LENGTH;
         }
 
-        return (byte) remainder;
+        return remainder;
     }
 
     // number -> number / 256, returns number % 256
@@ -210,9 +209,9 @@ public class Base58 {
         int remainder = 0;
         for (int i = startAt; i < number58.length; i++) {
             int digit58 = number58[i] & 0xFF;
-            int temp = remainder * 58 + digit58;
+            int temp = remainder * LENGTH + digit58;
             number58[i] = (byte) (temp / 256);
-            remainder = temp % 256;
+            remainder = temp % 256; // & 0xFF
         }
 
         return (byte) remainder;
@@ -224,8 +223,8 @@ public class Base58 {
     }
 
     public static void main(String[] args) {
-        System.out.println(encode(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class))));
-        String base58 = encodeChecked(Files.toByteArray(MavenProjects.getMainJavaFile(Bytes.class)));
+        System.out.println(encode(Files.toByteArray(MavenProjects.getMainJavaFile(Base58.class))));
+        String base58 = encodeChecked(Files.toByteArray(MavenProjects.getMainJavaFile(Base58.class)));
         System.out.println(base58);
         System.out.println(new String(decodeChecked(base58)));
 
@@ -235,14 +234,9 @@ public class Base58 {
         Arrays.fill(b127, (byte) 127);
 
         System.out.println("==================base58==================");
-        System.out.println(encode(b128));
-        //System.out.println(encode(b0));
-        //System.out.println(encode(b127));
-
-        /*System.out.println("\n==================base64==================");
-        System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(b128));
-        System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(b0));
-        System.out.println(Base64.getUrlEncoder().withoutPadding().encodeToString(b127));*/
+        System.out.println("encode(b128)"+encode(b128));
+        System.out.println("encode(b0)"+encode(b0));
+        System.out.println("encode(b127)"+encode(b127));
 
         // 比特币钱包地址
         System.out.println(Hex.encodeHexString(decodeChecked("3D2oetdNuZUqQHPJmcMDDHYoqkyNVsFk9r")));

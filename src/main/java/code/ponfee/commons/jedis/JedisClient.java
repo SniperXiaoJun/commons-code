@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -101,7 +100,7 @@ public class JedisClient implements DisposableBean {
             if (StringUtils.isNotBlank(password)) {
                 info.setPassword(password);
             }
-            if (testConnectJedis(info)) {
+            if (testConnectJedis(info, 3)) {
                 infos.add(info);
             }
         }
@@ -148,8 +147,8 @@ public class JedisClient implements DisposableBean {
      */
     public JedisClient(GenericObjectPoolConfig poolCfg, String masters, String sentinels, 
                        String password, int timeout, Serializer serializer) {
-        List<String> master = Arrays.asList(masters.split(SEPARATOR));
-        Set<String> sentinel = new HashSet<>(Arrays.asList(sentinels.split(SEPARATOR)));
+        List<String> master = asList(masters.split(SEPARATOR));
+        Set<String> sentinel = new HashSet<>(asList(sentinels.split(SEPARATOR)));
 
         initClient(new ShardedJedisSentinelPool(poolCfg, master, sentinel, password, timeout), serializer);
     }
@@ -265,7 +264,8 @@ public class JedisClient implements DisposableBean {
             }
 
             if (part.length() > MAX_LEN) {
-                part.delete(MAX_LEN - 3, part.length()).append("...");
+                part.setLength(MAX_LEN);
+                part.append("...");
             }
             builder.append("`").append(part).append("`");
             if (i != n - 1) {
@@ -278,7 +278,7 @@ public class JedisClient implements DisposableBean {
 
     private static String toString(byte[] bytes) {
         if (bytes.length > MAX_BYTE_LEN) {
-            bytes = ArrayUtils.subarray(bytes, 0, MAX_BYTE_LEN);
+            bytes = Arrays.copyOf(bytes, MAX_BYTE_LEN);
         }
         return "b64:" + Base64.getEncoder().encodeToString(bytes);
     }
@@ -297,23 +297,45 @@ public class JedisClient implements DisposableBean {
      * @param jedisInfo
      * @return
      */
-    private static boolean testConnectJedis(JedisShardInfo jedisInfo) {
-        Jedis jedis = null;
-        try {
-            jedis = jedisInfo.createResource();
-            jedis.connect();
-            return true;
-        } catch (Exception e) {
-            logger.error("jedis cannot connect: " + jedisInfo + " - " + e.getMessage());
-            return false;
-        } finally {
-            if (jedis != null) try {
-                jedis.disconnect();
-                jedis.close();
-            } catch (Exception ignored) {
-                ignored.printStackTrace();
+    private static boolean testConnectJedis(JedisShardInfo jedisInfo, int retryTimes) {
+        do {
+            Jedis jedis = null;
+            try {
+                jedis = jedisInfo.createResource();
+                jedis.connect();
+                return true;
+            } catch (Exception e) {
+                logger.error("jedis cannot connect: " + jedisInfo + " - " + e.getMessage());
+            } finally {
+                if (jedis != null) try {
+                    jedis.disconnect();
+                    jedis.close();
+                } catch (Exception ignored) {
+                    ignored.printStackTrace();
+                }
+            }
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                logger.error("test jedis connect sleep error", e);
+                return false;
+            }
+        } while (--retryTimes > 0);
+
+        return false;
+    }
+
+    private static List<String> asList(String... array) {
+        if (array == null) {
+            return null;
+        }
+        List<String> list = new ArrayList<>(array.length);
+        for (String str : array) {
+            if (StringUtils.isNotBlank(str)) {
+                list.add(str.trim());
             }
         }
+        return list;
     }
 
     /*void closeShardedJedis(ShardedJedis shardedJedis) {

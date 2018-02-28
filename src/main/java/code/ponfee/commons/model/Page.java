@@ -1,13 +1,16 @@
 package code.ponfee.commons.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
+
+import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.reflect.GenericUtils;
 
 /**
  * 参考guthub开源的mybatis分页工具
@@ -16,7 +19,7 @@ import org.springframework.beans.BeanUtils;
  * 
  * @author fupf
  */
-public class Page<T> implements Serializable {
+public class Page<T> implements java.io.Serializable {
     private static final long serialVersionUID = 1313118491812094979L;
 
     private int pageNum; // 当前页
@@ -34,7 +37,7 @@ public class Page<T> implements Serializable {
     private boolean hasPreviousPage = false; // 是否有前一页
     private boolean hasNextPage = false; // 是否有下一页
     private int navigatePages; // 导航页码数
-    private int[] navigatepageNums; // 所有导航页号
+    private int[] navigatePageNums; // 所有导航页号
     private int navigateFirstPage; // 导航条上的第一页
     private int navigateLastPage; // 导航条上的最后一页
 
@@ -73,6 +76,9 @@ public class Page<T> implements Serializable {
                 this.endRow = this.startRow - 1 + this.size; // 计算实际的endRow（最后一页的时候特殊）
             }
         } else {
+            if (list == null) {
+                list = new ArrayList<>();
+            }
             this.pageNum = 1;
             this.pageSize = list.size();
 
@@ -85,7 +91,7 @@ public class Page<T> implements Serializable {
         }
 
         this.navigatePages = navigatePages;
-        calcNavigatepageNums(); // 计算导航页
+        calcNavigatePageNums(); // 计算导航页
         calcPage(); // 计算前后页，第一页，最后一页
         judgePageBoudary(); // 判断页面边界
     }
@@ -101,14 +107,14 @@ public class Page<T> implements Serializable {
     /**
      * 计算导航页
      */
-    private void calcNavigatepageNums() {
+    private void calcNavigatePageNums() {
         if (pages <= navigatePages) { // 当总页数小于或等于导航页码数时
-            navigatepageNums = new int[pages];
+            navigatePageNums = new int[pages];
             for (int i = 0; i < pages; i++) {
-                navigatepageNums[i] = i + 1;
+                navigatePageNums[i] = i + 1;
             }
         } else { // 当总页数大于导航页码数时
-            navigatepageNums = new int[navigatePages];
+            navigatePageNums = new int[navigatePages];
             int startNum = pageNum - navigatePages / 2;
             int endNum = pageNum + navigatePages / 2;
 
@@ -116,18 +122,18 @@ public class Page<T> implements Serializable {
                 startNum = 1;
                 // (最前navigatePages页
                 for (int i = 0; i < navigatePages; i++) {
-                    navigatepageNums[i] = startNum++;
+                    navigatePageNums[i] = startNum++;
                 }
             } else if (endNum > pages) {
                 endNum = pages;
                 // 最后navigatePages页
                 for (int i = navigatePages - 1; i >= 0; i--) {
-                    navigatepageNums[i] = endNum--;
+                    navigatePageNums[i] = endNum--;
                 }
             } else {
                 // 所有中间页
                 for (int i = 0; i < navigatePages; i++) {
-                    navigatepageNums[i] = startNum++;
+                    navigatePageNums[i] = startNum++;
                 }
             }
         }
@@ -137,9 +143,9 @@ public class Page<T> implements Serializable {
      * 计算前后页，第一页，最后一页
      */
     private void calcPage() {
-        if (navigatepageNums != null && navigatepageNums.length > 0) {
-            navigateFirstPage = navigatepageNums[0];
-            navigateLastPage = navigatepageNums[navigatepageNums.length - 1];
+        if (navigatePageNums != null && navigatePageNums.length > 0) {
+            navigateFirstPage = navigatePageNums[0];
+            navigateLastPage = navigatePageNums[navigatePageNums.length - 1];
             if (pageNum > 1) {
                 prePage = pageNum - 1;
             }
@@ -279,12 +285,12 @@ public class Page<T> implements Serializable {
         this.navigatePages = navigatePages;
     }
 
-    public int[] getNavigatepageNums() {
-        return navigatepageNums;
+    public int[] getNavigatePageNums() {
+        return navigatePageNums;
     }
 
-    public void setNavigatepageNums(int[] navigatepageNums) {
-        this.navigatepageNums = navigatepageNums;
+    public void setNavigatePageNums(int[] navigatePageNums) {
+        this.navigatePageNums = navigatePageNums;
     }
 
     public int getNavigateFirstPage() {
@@ -331,36 +337,37 @@ public class Page<T> implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("Page{");
-        builder.append("pageNum=").append(pageNum);
-        builder.append(", pageSize=").append(pageSize);
-        builder.append(", size=").append(size);
-        builder.append(", startRow=").append(startRow);
-        builder.append(", endRow=").append(endRow);
-        builder.append(", total=").append(total);
-        builder.append(", pages=").append(pages);
-        builder.append(", rows=").append(rows);
-        builder.append(", prePage=").append(prePage);
-        builder.append(", nextPage=").append(nextPage);
-        builder.append(", isFirstPage=").append(isFirstPage);
-        builder.append(", isLastPage=").append(isLastPage);
-        builder.append(", hasPreviousPage=").append(hasPreviousPage);
-        builder.append(", hasNextPage=").append(hasNextPage);
-        builder.append(", navigatePages=").append(navigatePages);
-        builder.append(", navigateFirstPage").append(navigateFirstPage);
-        builder.append(", navigateLastPage").append(navigateLastPage);
-        builder.append(", navigatepageNums=");
-        if (navigatepageNums == null) {
-            builder.append("null");
-        } else {
-            builder.append('[');
-            for (int i = 0; i < navigatepageNums.length; ++i) {
-                builder.append(i == 0 ? "" : ", ").append(navigatepageNums[i]);
-            }
-            builder.append(']');
+        return new StringBuilder(230)
+            .append(getClass().getCanonicalName()).append("@")
+            .append(Integer.toHexString(hashCode())).append("{")
+            .append("pageNum=").append(pageNum)
+            .append(",pageSize=").append(pageSize)
+            .append(",size=").append(size)
+            .append(",startRow=").append(startRow)
+            .append(",endRow=").append(endRow)
+            .append(",total=").append(total)
+            .append(",pages=").append(pages)
+            .append(",rows=").append(rowsToString())
+            .append(",prePage=").append(prePage)
+            .append(",nextPage=").append(nextPage)
+            .append(",navigatePages=").append(navigatePages)
+            .append(",navigatePageNums=").append(Arrays.toString(navigatePageNums))
+            .append("}").toString();
+    }
+
+    private static final String EMPTY_ROWS_TYPE =
+        "[" + GenericUtils.getFieldGenericType(ClassUtils.getField(Page.class, "rows")) + ",0]";
+    private String rowsToString() {
+        if (rows.isEmpty()) {
+            return EMPTY_ROWS_TYPE;
         }
-        builder.append('}');
-        return builder.toString();
+
+        T first = rows.get(0);
+        if (first == null) {
+            return EMPTY_ROWS_TYPE.substring(0, EMPTY_ROWS_TYPE.length() - 2) + rows.size() + "]";
+        }
+
+        return "[java.util.List<" + first.getClass().getCanonicalName() + ">," + rows.size() + "]";
     }
 
 }

@@ -12,7 +12,7 @@ import redis.clients.jedis.ShardedJedis;
  * jedis操作抽象类
  * @author fupf
  */
-abstract class JedisOperations {
+public abstract class JedisOperations {
 
     private static final int MIN_EXPIRE_SECONDS = 1; // minimum 1 seconds
     static final int DEFAULT_EXPIRE_SECONDS = (int) TimeUnit.DAYS.toSeconds(1); // default 1 days
@@ -52,6 +52,7 @@ abstract class JedisOperations {
         hook.hook(jedisClient, args);
     }
 
+    // --------------------------------------------------------------static methods
     /**
      * 获取分片的Jedis
      * @param shardedJedis
@@ -66,14 +67,6 @@ abstract class JedisOperations {
         return shardedJedis.getShard(key);
     }
 
-    static int getActualExpire(int seconds) {
-        return (seconds > MAX_EXPIRE_SECONDS)
-               ? MAX_EXPIRE_SECONDS
-               : (seconds < MIN_EXPIRE_SECONDS)
-               ? MIN_EXPIRE_SECONDS 
-               : seconds;
-    }
-
     /**
      * 设置过期时间，若seconds为null则不做处理
      * @param shardedJedis
@@ -81,7 +74,7 @@ abstract class JedisOperations {
      * @param seconds
      * @return
      */
-    static boolean expire(ShardedJedis shardedJedis, String key, Integer seconds) {
+    public static boolean expire(ShardedJedis shardedJedis, String key, Integer seconds) {
         if (seconds == null) {
             return false;
         }
@@ -90,7 +83,7 @@ abstract class JedisOperations {
         return Numbers.equals(shardedJedis.expire(key, getActualExpire(seconds)), 1);
     }
 
-    static boolean expire(ShardedJedis shardedJedis, byte[] key, Integer seconds) {
+    public static boolean expire(ShardedJedis shardedJedis, byte[] key, Integer seconds) {
         if (seconds == null) {
             return false;
         }
@@ -105,7 +98,7 @@ abstract class JedisOperations {
      * @param milliseconds
      * @return
      */
-    static boolean pexpire(ShardedJedis shardedJedis, String key, Integer milliseconds) {
+    public static boolean pexpire(ShardedJedis shardedJedis, String key, Integer milliseconds) {
         if (milliseconds == null) {
             return false;
         }
@@ -113,7 +106,7 @@ abstract class JedisOperations {
         return expire(shardedJedis, key, (int) TimeUnit.MILLISECONDS.toSeconds(milliseconds));
     }
 
-    static boolean pexpire(ShardedJedis shardedJedis, byte[] key, Integer milliseconds) {
+    public static boolean pexpire(ShardedJedis shardedJedis, byte[] key, Integer milliseconds) {
         if (milliseconds == null) {
             return false;
         }
@@ -128,7 +121,7 @@ abstract class JedisOperations {
      * @param seconds
      * @return
      */
-    static boolean expireForce(ShardedJedis shardedJedis, String key, Integer seconds) {
+    public static boolean expireForce(ShardedJedis shardedJedis, String key, Integer seconds) {
         if (seconds != null) {
             return Numbers.equals(shardedJedis.expire(key, getActualExpire(seconds)), 1);
         } else {
@@ -136,7 +129,7 @@ abstract class JedisOperations {
         }
     }
 
-    static boolean expireForce(ShardedJedis shardedJedis, byte[] key, Integer seconds) {
+    public static boolean expireForce(ShardedJedis shardedJedis, byte[] key, Integer seconds) {
         if (seconds != null) {
             return Numbers.equals(shardedJedis.expire(key, getActualExpire(seconds)), 1);
         } else {
@@ -151,7 +144,8 @@ abstract class JedisOperations {
      * @param milliseconds
      * @return
      */
-    static boolean pexpireForce(ShardedJedis shardedJedis, String key, Integer milliseconds) {
+    public static boolean pexpireForce(ShardedJedis shardedJedis, 
+                                       String key, Integer milliseconds) {
         if (milliseconds != null) {
             return pexpire(shardedJedis, key, milliseconds);
         } else {
@@ -159,7 +153,8 @@ abstract class JedisOperations {
         }
     }
 
-    static boolean pexpireForce(ShardedJedis shardedJedis, byte[] key, Integer milliseconds) {
+    public static boolean pexpireForce(ShardedJedis shardedJedis, 
+                                       byte[] key, Integer milliseconds) {
         if (milliseconds != null) {
             return pexpire(shardedJedis, key, milliseconds);
         } else {
@@ -172,7 +167,7 @@ abstract class JedisOperations {
      * @param shardedJedis
      * @param key
      */
-    private static boolean expireDefaultIfInfinite(ShardedJedis shardedJedis, String key) {
+    public static boolean expireDefaultIfInfinite(ShardedJedis shardedJedis, String key) {
         if (shardedJedis.ttl(key) == -1) {
             return Numbers.equals(shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS), 1);
         } else {
@@ -180,12 +175,20 @@ abstract class JedisOperations {
         }
     }
 
-    private static boolean expireDefaultIfInfinite(ShardedJedis shardedJedis, byte[] key) {
+    public static boolean expireDefaultIfInfinite(ShardedJedis shardedJedis, byte[] key) {
         if (shardedJedis.ttl(key) == -1) {
             return Numbers.equals(shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS), 1);
         } else {
             return false;
         }
+    }
+
+    public static int getActualExpire(int seconds) {
+        return (seconds > MAX_EXPIRE_SECONDS)
+               ? MAX_EXPIRE_SECONDS
+               : (seconds < MIN_EXPIRE_SECONDS)
+               ? MIN_EXPIRE_SECONDS 
+               : seconds;
     }
 
 }
