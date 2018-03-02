@@ -15,13 +15,14 @@ import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * 数字工具类
+ *
  * @author Ponfee
  */
 public final class Numbers {
 
     public static final Integer INTEGER_ZERO = Integer.valueOf(0);
 
-    // -----------------------------------to primary number------------------------------
+    // -----------------------------------------------------character convert
     public static char toChar(Object obj, char defaultVal) {
         return toWrapChar(obj, defaultVal);
     }
@@ -30,11 +31,34 @@ public final class Numbers {
         return toWrapChar(obj, '\u0000');
     }
 
+    public static Character toWrapChar(Object obj) {
+        return toWrapChar(obj, null);
+    }
+
+    public static Character toWrapChar(Object obj, Character defaultVal) {
+        if (obj == null) {
+            return defaultVal;
+        } else if (obj instanceof Character) {
+            return (Character) obj;
+        } else if (obj instanceof Number) {
+            return (char) ((Number) obj).shortValue();
+        } else if (obj instanceof byte[]) {
+            return Chars.fromByteArray((byte[]) obj);
+        } else {
+            String str = obj.toString();
+            return str.length() == 1 ? str.charAt(0) : defaultVal;
+        }
+    }
+
+    // -----------------------------------to primary number------------------------------
     public static byte toByte(Object obj) {
         return toByte(obj, (byte) 0);
     }
 
     public static byte toByte(Object obj, byte defaultVal) {
+        if (obj instanceof Byte) {
+            return (byte) obj;
+        }
         return ((Double) toDouble(obj, defaultVal)).byteValue();
     }
 
@@ -43,6 +67,9 @@ public final class Numbers {
     }
 
     public static short toShort(Object obj, short defaultVal) {
+        if (obj instanceof Short) {
+            return (short) obj;
+        }
         return ((Double) toDouble(obj, defaultVal)).shortValue();
     }
 
@@ -51,6 +78,9 @@ public final class Numbers {
     }
 
     public static int toInt(Object obj, int defaultVal) {
+        if (obj instanceof Integer) {
+            return (int) obj;
+        }
         return ((Double) toDouble(obj, defaultVal)).intValue();
     }
 
@@ -59,6 +89,9 @@ public final class Numbers {
     }
 
     public static long toLong(Object obj, long defaultVal) {
+        if (obj instanceof Long) {
+            return (long) obj;
+        }
         return ((Double) toDouble(obj, defaultVal)).longValue();
     }
 
@@ -67,11 +100,14 @@ public final class Numbers {
     }
 
     public static float toFloat(Object obj, float defaultVal) {
+        if (obj instanceof Float) {
+            return (float) obj;
+        }
         return ((Double) toDouble(obj, defaultVal)).floatValue();
     }
 
     public static double toDouble(Object obj) {
-        return toDouble(obj, 0.0D);
+        return toWrapDouble(obj, 0.0D);
     }
 
     public static double toDouble(Object obj, double defaultVal) {
@@ -79,31 +115,14 @@ public final class Numbers {
     }
 
     // -----------------------------------to wrapper number------------------------------
-    public static Character toWrapChar(Object obj, Character defaultVal) {
-        if (obj == null) {
-            return defaultVal;
-        } else if (obj instanceof Number) {
-            return (char) ((Number) obj).shortValue();
-        } else if (obj instanceof byte[]) {
-            return Chars.fromByteArray((byte[]) obj);
-        } else {
-            return obj.toString().charAt(0);
-        }
-    }
-
-    public static Character toWrapChar(Object obj) {
-        return toWrapChar(obj, null);
-    }
-
-    public static Double toWrapDouble(Number value) {
-        return value == null ? null : value.doubleValue();
-    }
-
     public static Byte toWrapByte(Object obj) {
         return toWrapByte(obj, null);
     }
 
     public static Byte toWrapByte(Object obj, Byte defaultVal) {
+        if (obj instanceof Byte) {
+            return (Byte) obj;
+        }
         Double value = toWrapDouble(obj, toWrapDouble(defaultVal));
         return value == null ? null : value.byteValue();
     }
@@ -113,6 +132,9 @@ public final class Numbers {
     }
 
     public static Short toWrapShort(Object obj, Short defaultVal) {
+        if (obj instanceof Short) {
+            return (Short) obj;
+        }
         Double value = toWrapDouble(obj, toWrapDouble(defaultVal));
         return value == null ? null : value.shortValue();
     }
@@ -122,6 +144,9 @@ public final class Numbers {
     }
 
     public static Integer toWrapInt(Object obj, Integer defaultVal) {
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        }
         Double value = toWrapDouble(obj, toWrapDouble(defaultVal));
         return value == null ? null : value.intValue();
     }
@@ -131,6 +156,9 @@ public final class Numbers {
     }
 
     public static Long toWrapLong(Object obj, Long defaultVal) {
+        if (obj instanceof Long) {
+            return (Long) obj;
+        }
         Double value = toWrapDouble(obj, toWrapDouble(defaultVal));
         return value == null ? null : value.longValue();
     }
@@ -140,6 +168,9 @@ public final class Numbers {
     }
 
     public static Float toWrapFloat(Object obj, Float defaultVal) {
+        if (obj instanceof Float) {
+            return (Float) obj;
+        }
         Double value = toWrapDouble(obj, toWrapDouble(defaultVal));
         return value == null ? null : value.floatValue();
     }
@@ -152,21 +183,28 @@ public final class Numbers {
         if (obj == null) {
             return defaultVal;
         }
-
-        if (Number.class.isInstance(obj)) {
+        if (obj instanceof Double) {
+            return (Double) obj;
+        }
+        if (obj instanceof Number) {
             return ((Number) obj).doubleValue();
         }
 
         try {
             return Double.parseDouble(obj.toString());
         } catch (NumberFormatException ignored) {
-            ignored.printStackTrace();
+            //ignored.printStackTrace();
             return defaultVal;
         }
     }
 
+    public static Double toWrapDouble(Number value) {
+        return value == null ? null : value.doubleValue();
+    }
+
     /**
      * 数字精度化
+     *
      * @param value
      * @param scale
      * @return
@@ -183,17 +221,19 @@ public final class Numbers {
 
     /**
      * 向下转单位
+     *
      * @param value
      * @param scale
      * @return
      */
     public static double lower(double value, int scale) {
         return new BigDecimal(value / Math.pow(10, scale))
-               .setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+                .setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     /**
      * 向上转单位
+     *
      * @param value
      * @param pow
      * @return
@@ -204,6 +244,7 @@ public final class Numbers {
 
     /**
      * 百分比
+     *
      * @param numerator
      * @param denominator
      * @param scale
@@ -219,6 +260,7 @@ public final class Numbers {
 
     /**
      * 百分比
+     *
      * @param value
      * @param scale
      * @return
@@ -233,6 +275,7 @@ public final class Numbers {
 
     /**
      * 数字格式化
+     *
      * @param obj
      * @return
      */
@@ -242,6 +285,7 @@ public final class Numbers {
 
     /**
      * 数字格式化
+     *
      * @param obj
      * @param format
      * @return
@@ -262,17 +306,19 @@ public final class Numbers {
 
     /**
      * 两数相加
+     *
      * @param num1
      * @param num2
      * @return
      */
     public static double add(Double num1, Double num2) {
         return ObjectUtils.ifNull(num1, 0D)
-             + ObjectUtils.ifNull(num2, 0D);
+                + ObjectUtils.ifNull(num2, 0D);
     }
 
     /**
      * 区间取值
+     *
      * @param value
      * @param min
      * @param max
@@ -290,6 +336,7 @@ public final class Numbers {
 
     /**
      * 分片
+     *
      * @param quantity
      * @param segment
      * @return
@@ -304,6 +351,7 @@ public final class Numbers {
 
     /**
      * 数字比较
+     *
      * @param a
      * @param b
      * @return
@@ -314,6 +362,7 @@ public final class Numbers {
 
     /**
      * 数字比较
+     *
      * @param a
      * @param b
      * @return
@@ -324,6 +373,7 @@ public final class Numbers {
 
     /**
      * 数字比较
+     *
      * @param a
      * @param b
      * @return
@@ -332,12 +382,14 @@ public final class Numbers {
         return (a == b) || (a != null && a.equals(b));
     }
 
-    private static final String[] CN_UPPER_NUMBER = { "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖" };
-    private static final String[] CN_UPPER_MONETRAY_UNIT = { "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
-                                                             "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟" };
+    private static final String[] CN_UPPER_NUMBER = {"零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"};
+    private static final String[] CN_UPPER_MONETRAY_UNIT = {"分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
+            "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟"};
     private static final BigDecimal MAX_VALUE = new BigDecimal("9999999999999999.995");
+
     /**
      * 金额汉化（单位元）
+     *
      * @param amount
      * @return
      */
@@ -352,7 +404,7 @@ public final class Numbers {
 
         // * 100
         long number = amount.movePointRight(2).setScale(0, BigDecimal.ROUND_HALF_UP)
-                            .abs().longValue();
+                .abs().longValue();
         int scale = (int) (number % 100), numIndex;
         if (scale == 0) {
             numIndex = 2;
@@ -407,6 +459,7 @@ public final class Numbers {
 
     /**
      * to upper hex string and remove prefix 0
+     *
      * @param num the BigInteger
      * @return upper hex string
      */
