@@ -1,6 +1,7 @@
 package code.ponfee.commons.jce.passwd;
 
-import java.nio.charset.Charset;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -49,7 +50,6 @@ public final class BCrypt {
     private BCrypt() {}
 
     private static final String SEPARATOR = "$";
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     // Blowfish parameters
     private static final int BLOWFISH_NUM_ROUNDS = 16;

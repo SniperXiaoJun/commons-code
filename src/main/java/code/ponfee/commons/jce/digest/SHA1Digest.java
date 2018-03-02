@@ -313,6 +313,13 @@ public class SHA1Digest {
         return (b & c) | (b & d) | (c & d);
     }
 
+    /**
+     * The same as f1
+     * @param b
+     * @param c
+     * @param d
+     * @return
+     */
     private static int f3(int b, int c, int d) {
         return b ^ c ^ d;
     }

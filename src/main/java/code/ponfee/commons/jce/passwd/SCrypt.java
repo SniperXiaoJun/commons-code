@@ -5,8 +5,8 @@ package code.ponfee.commons.jce.passwd;
 import static code.ponfee.commons.jce.HmacAlgorithms.ALGORITHM_MAPPING;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.System.arraycopy;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -39,7 +39,6 @@ public final class SCrypt {
     private SCrypt() {}
 
     private static final String SEPARATOR = "$";
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     // -------------------------------------------------------------------pbkdf2
     /**
@@ -82,9 +81,9 @@ public final class SCrypt {
      * in the format described in {@link SCryp}.
      * @param alg HmacAlgorithm.
      * @param passwd Password.
-     * @param N CPU cost parameter.         between 1 and 15, 2^15=32768
-     * @param r Memory cost parameter.      between 1 and 255
-     * @param p Parallelization parameter.  between 1 and 255
+     * @param N CPU cost parameter.         between 0x01 and 0x0F, 2^15=32768
+     * @param r Memory cost parameter.      between 0x01 and 0xFF
+     * @param p Parallelization parameter.  between 0x01 and 0xFF
      * @param dkLen Intended length, in octets, of the derived key.
      * @return The hashed password.
      */

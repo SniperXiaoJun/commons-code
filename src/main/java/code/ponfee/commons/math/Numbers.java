@@ -9,6 +9,8 @@ import java.util.Arrays;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.primitives.Chars;
+
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
@@ -20,6 +22,14 @@ public final class Numbers {
     public static final Integer INTEGER_ZERO = Integer.valueOf(0);
 
     // -----------------------------------to primary number------------------------------
+    public static char toChar(Object obj, char defaultVal) {
+        return toWrapChar(obj, defaultVal);
+    }
+
+    public static char toChar(Object obj) {
+        return toWrapChar(obj, '\u0000');
+    }
+
     public static byte toByte(Object obj) {
         return toByte(obj, (byte) 0);
     }
@@ -65,22 +75,26 @@ public final class Numbers {
     }
 
     public static double toDouble(Object obj, double defaultVal) {
-        if (obj == null) {
-            return defaultVal;
-        }
-
-        if (Number.class.isInstance(obj)) {
-            return ((Number) obj).doubleValue();
-        }
-
-        try {
-            return Double.parseDouble(obj.toString());
-        } catch (NumberFormatException ignored) {
-            return defaultVal;
-        }
+        return toWrapDouble(obj, defaultVal);
     }
 
     // -----------------------------------to wrapper number------------------------------
+    public static Character toWrapChar(Object obj, Character defaultVal) {
+        if (obj == null) {
+            return defaultVal;
+        } else if (obj instanceof Number) {
+            return (char) ((Number) obj).shortValue();
+        } else if (obj instanceof byte[]) {
+            return Chars.fromByteArray((byte[]) obj);
+        } else {
+            return obj.toString().charAt(0);
+        }
+    }
+
+    public static Character toWrapChar(Object obj) {
+        return toWrapChar(obj, null);
+    }
+
     public static Double toWrapDouble(Number value) {
         return value == null ? null : value.doubleValue();
     }

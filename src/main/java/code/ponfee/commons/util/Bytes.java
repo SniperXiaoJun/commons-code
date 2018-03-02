@@ -1,5 +1,8 @@
 package code.ponfee.commons.util;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkPositionIndexes;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -16,6 +19,10 @@ import com.google.common.base.Preconditions;
  * byte[]
  * 转hex：new BigInteger(1, bytes).toString(16);
  * 求与4的余数：(4 - b64.length() % 4) % 4
+ * 
+ * 左移<<:      该数对应的二进制码整体左移，左边超出的部分舍弃，右边补0
+ * 右移>>:      该数对应的二进制码整体右移，左边部分以原有标志位填充，右边超出的部分舍弃
+ * 无符号右移>>>: 该数对应的二进制码整体右移，左边部分以0填充，右边超出的部分舍弃
  * @author fupf
  */
 public final class Bytes {
@@ -464,6 +471,28 @@ public final class Bytes {
         }*/
     }
 
+    public static void reverse(byte[] array) {
+        checkNotNull(array);
+        reverse(array, 0, array.length);
+    }
+
+    /**
+     * reverse the byte array between fromIndex and toIndex
+     * @param array
+     * @param fromIndex
+     * @param toIndex
+     */
+    public static void reverse(byte[] array, int fromIndex, int toIndex) {
+        checkNotNull(array);
+        checkPositionIndexes(fromIndex, toIndex, array.length);
+        byte tmp;
+        for (int i = fromIndex, j = toIndex - 1; i < j; i++, j--) {
+            tmp = array[i];
+            array[i] = array[j];
+            array[j] = tmp;
+        }
+    }
+
     /**
      * copy in to out
      * 从尾部开始拷贝in到out：
@@ -490,5 +519,8 @@ public final class Bytes {
         byte[] in = {-2,-2,-2,-2,-2,-2};
         copy(in, 0, 4, out, 2, 10);
         System.out.println(ObjectUtils.toString(out));
+        System.out.println(toBinary(fromInt(-102)));
+        System.out.println(toBinary(fromInt(-102>>3)));
+        System.out.println(toBinary(fromInt(-102>>>3)));
     }
 }

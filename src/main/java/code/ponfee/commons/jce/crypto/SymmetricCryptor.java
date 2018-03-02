@@ -53,6 +53,7 @@ public class SymmetricCryptor {
      * 1、ECB模式时iv必须为null
      * 2、无分组对称加密模式时iv必须为null
      * 3、有分组对称加密模式时必须要有iv
+     * 4、iv must be 16 bytes long
      */
     protected final AlgorithmParameterSpec parameter;
 

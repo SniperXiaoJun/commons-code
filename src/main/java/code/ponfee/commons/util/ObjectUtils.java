@@ -1,5 +1,9 @@
 package code.ponfee.commons.util;
 
+import static com.google.common.base.CaseFormat.LOWER_CAMEL;
+import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
+import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
+
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -11,16 +15,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-
-import static com.google.common.base.CaseFormat.LOWER_CAMEL;
-import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
 
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.math.Numbers;
+import code.ponfee.commons.reflect.ClassUtils;
 
 /**
  * 公用对象工具类
@@ -45,7 +45,13 @@ public final class ObjectUtils {
      * @return
      */
     public static String toString(Object obj) {
-        return ReflectionToStringBuilder.reflectionToString(obj, ToStringStyle.JSON_STYLE);
+        return (obj == null) 
+               ? "null" 
+               : reflectionToString(obj, ToStringStyle.JSON_STYLE);
+    }
+
+    public static String toString(Object obj, String defaultStr) {
+        return (obj == null) ? defaultStr : toString(obj);
     }
 
     /**
@@ -89,7 +95,8 @@ public final class ObjectUtils {
      * @param map
      * @param bean
      */
-    public static <T> void map2bean(Map<String, ?> map, T bean) {
+    @SuppressWarnings("unchecked")
+    public static <T, E extends Enum<E>> void map2bean(Map<String, ?> map, T bean) {
         String name;
         Object value;
         Class<?> type;
@@ -109,41 +116,73 @@ public final class ObjectUtils {
 
                 value = map.get(name);
                 type = prop.getPropertyType();
-                if (type.isPrimitive() && Strings.isEmpty(value)) {
-                    continue; // 原始类型跳过
-                }
-
-                //type = ClassUtils.primitiveToWrapper(type);
-                //ClassUtils.isPrimitiveOrWrapper(type)
-                if (ClassUtils.isPrimitiveWrapper(type) && Strings.isEmpty(value)) {
-                    value = null; // 原始包装类型则设置为null
-                } else if (byte.class == type) {
-                    value = Numbers.toByte(value);
-                } else if (Byte.class == type) {
-                    value = Numbers.toWrapByte(value);
-                } else if (short.class == type) {
-                    value = Numbers.toShort(value);
-                } else if (Short.class == type) {
-                    value = Numbers.toWrapShort(value);
-                } else if (int.class == type) {
-                    value = Numbers.toInt(value);
-                } else if (Integer.class == type) {
-                    value = Numbers.toWrapInt(value);
-                } else if (long.class == type) {
-                    value = Numbers.toLong(value);
-                } else if (Long.class == type) {
-                    value = Numbers.toWrapLong(value);
-                } else if (float.class == type) {
-                    value = Numbers.toFloat(value);
-                } else if (Float.class == type) {
-                    value = Numbers.toWrapFloat(value);
-                } else if (double.class == type) {
-                    value = Numbers.toDouble(value);
-                } else if (Double.class == type) {
-                    value = Numbers.toWrapDouble(value);
-                } else if (CharSequence.class.isAssignableFrom(type) && !type.isInstance(value)) {
-                    // new String(value.toString()), new StringBuilder(value.toString())
-                    value = type.getConstructor(String.class).newInstance(value.toString());
+                if (type.isPrimitive()) {
+                    // 原始类型
+                    //type = org.apache.commons.lang3.ClassUtils.primitiveToWrapper(type);
+                    //org.apache.commons.lang3.ClassUtils.isPrimitiveOrWrapper(type)
+                    if (Strings.isEmpty(value)) {
+                        continue; // value为null或为空字符串时跳过
+                    } else if (byte.class == type) {
+                        value = Numbers.toByte(value);
+                    } else if (short.class == type) {
+                        value = Numbers.toShort(value);
+                    } else if (char.class == type) {
+                        value = Numbers.toChar(value);
+                    } else if (int.class == type) {
+                        value = Numbers.toInt(value);
+                    } else if (long.class == type) {
+                        value = Numbers.toLong(value);
+                    } else if (float.class == type) {
+                        value = Numbers.toFloat(value);
+                    } else if (double.class == type) {
+                        value = Numbers.toDouble(value);
+                    } else {
+                        // cannot to run in this place
+                    }
+                } else if (value == null) {
+                    // nothing to do: value = value
+                } else if (!type.isInstance(value)) { // 类型不一致时（此时value!=null）
+                    if (org.apache.commons.lang3.ClassUtils.isPrimitiveWrapper(type)
+                        && Strings.isEmpty(value)) {
+                        value = null; // 原始包装类型且value为空或为空字符串则设置为null
+                    } else if (Byte.class == type) {
+                        value = Numbers.toWrapByte(value);
+                    } else if (Short.class == type) {
+                        value = Numbers.toWrapShort(value);
+                    } else if (Character.class == type) {
+                        value = Numbers.toWrapChar(value);
+                    } else if (Integer.class == type) {
+                        value = Numbers.toWrapInt(value);
+                    } else if (Long.class == type) {
+                        value = Numbers.toWrapLong(value);
+                    } else if (Float.class == type) {
+                        value = Numbers.toWrapFloat(value);
+                    } else if (Double.class == type) {
+                        value = Numbers.toWrapDouble(value);
+                    } else if (type.isEnum()) {
+                        // enum class
+                        if (value instanceof Number) {
+                            value = type.getEnumConstants()[((Number) value).intValue()];
+                        } else {
+                            value = Enum.valueOf((Class<E>) type, value.toString());
+                            /*String str = value.toString();
+                            for (Object e : type.getEnumConstants()) {
+                                if (((Enum<?>) e).name().equals(str)) {
+                                    value = e;
+                                    break;
+                                }
+                            }*/
+                        }
+                    } else if (CharSequence.class.isAssignableFrom(type)) {
+                        // Construct a CharSequence
+                        // new String(value.toString()), new StringBuilder(value.toString())
+                        value = type.getConstructor(String.class).newInstance(value.toString());
+                    } else {
+                        throw new ClassCastException(ClassUtils.getClassName(value.getClass())
+                                      + " cannot be cast to " + ClassUtils.getClassName(type));
+                    }
+                } else {
+                    // nothing to do: type.isInstance(value)
                 }
 
                 // set value into bean field

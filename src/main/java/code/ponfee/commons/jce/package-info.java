@@ -15,6 +15,8 @@
  *   类型：分组密码（DES、3DES、AES），序列密码（RC4）、盐加密（PBE）
  *   分组模式：ECB、CBC、OFB、CFB
  *   填充：NoPadding, PKCS5Padding, PKCS7Padding, PADDING_ISO10126
+ *   AES要支持256位密钥：http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html
+ *                  解压后替换jre/lib/security/目录下的jar文件即可
  * 
  * 3、非对称加密：
  *   优点：密钥分发安全，公开公钥即可
@@ -58,7 +60,7 @@
  *              Nonce: x
  *              target=tragetmax/difficulty
  *     ECC：公钥160位的指纹作为钱包地址，一笔交易就是一个地址的比特币转移到另一个地址
- *     Base58：
+ *     Base58：end of 4 bytes long checksum
  * 
  * 11、国密系列：
  *   SM1：为对称加密，其加密强度与AES相当。该算法不公开，调用该算法时，需要通过加密芯片的接口进行调用

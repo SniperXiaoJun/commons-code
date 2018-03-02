@@ -212,8 +212,11 @@ public final class Http {
     // ----------------------------request contentType--------------------------
     /**
      * <pre>
-     *  发送信息至服务器时内容编码类型，默认：application/x-www-form-urlencoded
-     *  调用方式：contentType("application/json", "utf-8")
+     *  请求实体报头，发送信息至服务器时内容编码类型：
+     *    multipart/form-data，application/x-www-form-urlencoded，
+     *    application/json
+     *  默认：application/x-www-form-urlencoded
+     *  调用方式：contentType("application/json", "UTF-8")
      * </pre>
      * @param contentType
      * @param contentCharset

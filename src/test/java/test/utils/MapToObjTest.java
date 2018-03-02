@@ -1,9 +1,11 @@
 package test.utils;
 
 import java.util.Map;
+import java.util.Objects;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
+import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.EnumMemberMode;
 
 import code.ponfee.commons.util.ObjectUtils;
 
@@ -12,6 +14,7 @@ public class MapToObjTest {
     public static class A {
         private int a_b;
         private String str;
+        private EnumMemberMode mode;
 
         public A() {}
 
@@ -37,9 +40,17 @@ public class MapToObjTest {
             this.str = str;
         }
 
+        public EnumMemberMode getMode() {
+            return mode;
+        }
+
+        public void setMode(EnumMemberMode mode) {
+            this.mode = mode;
+        }
+
         @Override
         public String toString() {
-            return "A [a_b=" + a_b + ", str=" + str + "]";
+            return "A [a_b=" + a_b + ", str=" + str + ", mode=" +( mode == null ? "null" : mode.name()) + "]";
         }
 
     }
@@ -55,13 +66,13 @@ public class MapToObjTest {
         System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_HYPHEN, "testData"));//test-data
 
         A a = new A(1, "aaa");
-        Map<String, Object> map = ObjectUtils.bean2map(a);
-        System.out.println(map);
+        //Map<String, Object> map = ObjectUtils.bean2map(a);
+        //System.out.println(map);
 
-        a = ObjectUtils.map2bean(map, A.class);
-        System.out.println(a);
+        //a = ObjectUtils.map2bean(map, A.class);
+        //System.out.println(a);
 
-        a = ObjectUtils.map2bean(ImmutableMap.of("aB", 123, "str", "abc"), A.class);
+        a = ObjectUtils.map2bean(ImmutableMap.of("aB", 123, "str", "abc", "mode", "SKIP"), A.class);
         System.out.println(a);
     }
 

@@ -49,7 +49,7 @@ public final class Jsons {
     }
 
     /**
-     * 序列化 convert an object(POJO, Array, Collection, ...) to json string
+     * convert an object(POJO, Array, Collection, ...) to json string
      * @param target target object
      * @return json string
      * @throws code.ponfee.commons.json.JsonException   the exception for json
@@ -77,7 +77,7 @@ public final class Jsons {
     }
 
     /**
-     * 反序列化 deserialize a json to target class object
+     * deserialize a json to target class object
      * @param json json string
      * @param target target class
      * @return target object
@@ -97,25 +97,24 @@ public final class Jsons {
 
     /**
      * 反序列化集合对象
-     * @param json
-     * @param collectionClass
-     * @param elementClasses
+     * @param json          the json string
+     * @param collectClass  the collection class type
+     * @param elemClasses   the element class type
      * @return the objects of collection
      * @throws JsonException the exception for json
      */
-    public <T> T parse(String json, Class<?> collectionClass, Class<?>... elementClasses) 
+    public <T> T parse(String json, Class<T> collectClass, Class<?>... elemClasses)
         throws JsonException {
-        return parse(json, 
-                     mapper.getTypeFactory().constructParametricType(collectionClass, elementClasses));
+        return parse(json, createCollectionType(collectClass, elemClasses));
     }
 
     /**
      * 反序列化
      * @param json json string
      * @param javaType JavaType
-     * @see #createCollectionType(Class, Class...)
      * @return the javaType's object
      * @throws JsonException the exception for json
+     * @see #createCollectionType(Class, Class...)
      */
     public <T> T parse(String json, JavaType javaType) throws JsonException {
         if (isEmpty(json)) {
@@ -131,12 +130,14 @@ public final class Jsons {
 
     /**
      * construct collection type
-     * @param collectionClass collection class, such as ArrayList, HashMap, ...
-     * @param elementClasses element class
+     * @param collecClass collection class, such as ArrayList, HashMap, ...
+     * @param elemClasses element class
      * @return JavaType
      */
-    public JavaType createCollectionType(Class<?> collectionClass, Class<?>... elementClasses) {
-        return mapper.getTypeFactory().constructParametricType(collectionClass, elementClasses);
+    public JavaType createCollectionType(Class<?> collecClass, 
+                                         Class<?>... elemClasses) {
+        return mapper.getTypeFactory()
+                     .constructParametricType(collecClass, elemClasses);
     }
 
     public static String toJson(Object target) {
@@ -148,6 +149,6 @@ public final class Jsons {
     }
 
     private static boolean isEmpty(String str) {
-        return str == null || str.length() == 0;
+        return str == null || str.isEmpty();
     }
 }

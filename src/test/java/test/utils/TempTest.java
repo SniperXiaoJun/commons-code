@@ -99,8 +99,6 @@ public class TempTest {
         System.out.println(new DateTime().millisOfDay().withMinimumValue());
         System.out.println(new DateTime().withTimeAtStartOfDay());
         
-        
-        
         Calendar calendar = Calendar.getInstance();
         DateTime dateTime = new DateTime(2000, 1, 1, 0, 0, 0, 0);
         System.out.println(dateTime.plusDays(45).plusMonths(1).dayOfWeek()
@@ -179,6 +177,12 @@ public class TempTest {
         System.out.println(Integer.toBinaryString(value));
     }
 
+    @org.junit.Test
+    public void test12() {
+        System.out.println(Bytes.toBinary(Bytes.fromInt(MAXIMUM_CAPACITY)));
+        System.out.println(Bytes.toBinary(Bytes.fromInt(Integer.MAX_VALUE)));
+    }
+    
     static final int MAXIMUM_CAPACITY = 1 << 30;
     static final int tableSizeFor(int cap) {
         int n = cap - 1;

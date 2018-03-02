@@ -33,6 +33,7 @@ public class EllipticCurve {
      * The equation of the curve is on the form : y^2 = x^3 + ax + b.
      * @param a the value of 'a' where y^2 = x^3 + ax + b
      * @param b the value of 'b' where y^2 = x^3 + ax + b
+     * @param p the elliptic curve point in finite field
      */
     public EllipticCurve(BigInteger a, BigInteger b, BigInteger p) {
         if (!p.isProbablePrime(PRIME_SECURITY)) {

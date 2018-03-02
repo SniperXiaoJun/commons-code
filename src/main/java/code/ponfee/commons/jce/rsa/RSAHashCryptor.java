@@ -21,7 +21,7 @@ import code.ponfee.commons.util.SecureRandoms;
  */
 public class RSAHashCryptor extends RSANoPaddingCryptor {
 
-    private static final HmacAlgorithms HMAC = HmacAlgorithms.HmacKECCAK512;
+    private static final HmacAlgorithms HMAC_ALG = HmacAlgorithms.HmacSHA3_512;
 
     
     /**
@@ -48,11 +48,11 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
 
         // 对密钥进行HASH
         byte[] keyArray = key.toByteArray();
-        byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC, BC);
+        byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC_ALG, BC);
         for (int keyOffset = 0, i = 0; i < length; i++) {
-            if (keyOffset == HMAC.byteSize()) {
+            if (keyOffset == HMAC_ALG.byteSize()) {
                 keyOffset = 0;
-                hashedKey = crypt(keyArray, Bytes.fromInt(++count), HMAC, BC);
+                hashedKey = crypt(keyArray, Bytes.fromInt(++count), HMAC_ALG, BC);
             }
             result[keyByteLen + i] = (byte) (input[i] ^ hashedKey[keyOffset++]);
         }
@@ -72,12 +72,12 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
 
         // 对密钥进行HASH
         byte[] keyArray = key.toByteArray();
-        byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC, BC);
+        byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC_ALG, BC);
         byte[] result = new byte[input.length - keyByteLen];
         for (int keyOffset = 0, rLen = result.length, i = 0; i < rLen; i++) {
-            if (keyOffset == HMAC.byteSize()) {
+            if (keyOffset == HMAC_ALG.byteSize()) {
                 keyOffset = 0;
-                hashedKey = crypt(keyArray, Bytes.fromInt(++count), HMAC, BC);
+                hashedKey = crypt(keyArray, Bytes.fromInt(++count), HMAC_ALG, BC);
             }
             result[i] = (byte) (input[keyByteLen + i] ^ hashedKey[keyOffset++]);
         }
@@ -99,15 +99,15 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
         Bytes.copy(encryptedKey, 0, encryptedKey.length, encryptedKey0, 0, keyByteLen);
 
         byte[] keyArray = key.toByteArray();
-        byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC, BC);
+        byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC_ALG, BC);
         try {
             output.write(encryptedKey0); // encrypted key
             byte[] buffer = new byte[this.getOriginBlockSize(rsaKey)];
             for (int keyOffset = 0, len, i; (len = input.read(buffer)) != Files.EOF;) {
                 for (i = 0; i < len; i++) {
-                    if (keyOffset == HMAC.byteSize()) {
+                    if (keyOffset == HMAC_ALG.byteSize()) {
                         keyOffset = 0;
-                        hashedKey = crypt(keyArray, Bytes.fromInt(++count), HMAC, BC);
+                        hashedKey = crypt(keyArray, Bytes.fromInt(++count), HMAC_ALG, BC);
                     }
                     output.write((byte) (buffer[i] ^ hashedKey[keyOffset++]));
                 }
@@ -136,12 +136,12 @@ public class RSAHashCryptor extends RSANoPaddingCryptor {
 
             byte[] buffer = new byte[this.getCipherBlockSize(rsaKey)];
             byte[] keyArray = key.toByteArray();
-            byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC, BC);
+            byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC_ALG, BC);
             for (int keyOffset = 0, len, i; (len = input.read(buffer)) != Files.EOF;) {
                 for (i = 0; i < len; i++) {
-                    if (keyOffset == HMAC.byteSize()) {
+                    if (keyOffset == HMAC_ALG.byteSize()) {
                         keyOffset = 0;
-                        hashedKey = crypt(keyArray, Bytes.fromInt(++count), HMAC, BC);
+                        hashedKey = crypt(keyArray, Bytes.fromInt(++count), HMAC_ALG, BC);
                     }
                     output.write((byte) (buffer[i] ^ hashedKey[keyOffset++]));
                 }

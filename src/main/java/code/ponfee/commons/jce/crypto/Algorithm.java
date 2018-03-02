@@ -11,7 +11,7 @@ package code.ponfee.commons.jce.crypto;
  *     RC4(ARCFOUR)         key size must be between 40 and 1024 bits(stream cipher)
  * </pre>
  * 
- * 速度排名：IDEA <DES <GASTI28<GOST<AES<RC4<TEA<Blowfish
+ * 速度排名：IDEA < DES < GASTI28 < GOST < AES < RC4 < TEA < Blowfish
  * 
  * 1、DES（Data Encryption Standard）：对称算法，数据加密标准，速度较快，适用于加密大量数据的场合； 
  * 2、3DES（Triple DES）：是基于DES的对称算法，对一块数据用三个不同的密钥进行三次加密，强度更高；

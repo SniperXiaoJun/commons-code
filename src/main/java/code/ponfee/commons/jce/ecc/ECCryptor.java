@@ -44,7 +44,7 @@ import code.ponfee.commons.util.SecureRandoms;
  */
 public class ECCryptor extends Cryptor {
 
-    private static final HmacAlgorithms HMAC = HmacAlgorithms.HmacKECCAK512;
+    private static final HmacAlgorithms HMAC_ALG = HmacAlgorithms.HmacSHA3_512;
 
     private final EllipticCurve curve;
 
@@ -84,13 +84,13 @@ public class ECCryptor extends Cryptor {
         byte[] keyBytes = Bytes.concat(secure.getX().toByteArray(), 
                                        secure.getY().toByteArray());
         int count = 1;
-        byte[] hashed = crypt(keyBytes, Bytes.fromInt(count), HMAC, BC);
+        byte[] hashedKey = crypt(keyBytes, Bytes.fromInt(count), HMAC_ALG, BC);
         for (int i = 0, keyOffset = 0; i < length; i++) {
-            if (keyOffset == HMAC.byteSize()) {
+            if (keyOffset == HMAC_ALG.byteSize()) {
                 keyOffset = 0;
-                hashed = crypt(keyBytes, Bytes.fromInt(++count), HMAC, BC);
+                hashedKey = crypt(keyBytes, Bytes.fromInt(++count), HMAC_ALG, BC);
             }
-            result[i + offset] = (byte) (input[i] ^ hashed[keyOffset++]);
+            result[i + offset] = (byte) (input[i] ^ hashedKey[keyOffset++]);
         }
         return result;
     }
@@ -116,14 +116,14 @@ public class ECCryptor extends Cryptor {
                                     secure.getY().toByteArray());
         }
         int count = 1, length = input.length - offset;
-        byte[] hashed = crypt(keyBytes, Bytes.fromInt(count), HMAC, BC),
+        byte[] hashedKey = crypt(keyBytes, Bytes.fromInt(count), HMAC_ALG, BC),
                result = new byte[length];
         for (int i = 0, keyOffset = 0; i < length; i++) {
-            if (keyOffset == HMAC.byteSize()) {
+            if (keyOffset == HMAC_ALG.byteSize()) {
                 keyOffset = 0;
-                hashed = crypt(keyBytes, Bytes.fromInt(++count), HMAC, BC);
+                hashedKey = crypt(keyBytes, Bytes.fromInt(++count), HMAC_ALG, BC);
             }
-            result[i] = (byte) (input[i + offset] ^ hashed[keyOffset++]);
+            result[i] = (byte) (input[i + offset] ^ hashedKey[keyOffset++]);
         }
         return result;
     }
