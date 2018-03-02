@@ -47,4 +47,8 @@ public class SHA1BrokenTest {
         System.out.println(Hex.encodeHexString(HmacUtils.crypt("1234".getBytes(), pdf2, HmacAlgorithms.HmacKECCAK512)));
         System.out.println();
     }
+
+    public static void main(String[] args) {
+        System.out.println(12);
+    }
 }

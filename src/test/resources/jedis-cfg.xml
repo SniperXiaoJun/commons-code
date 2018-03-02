@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans 
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <!-- <bean id="jedisClient" class="code.ponfee.commons.jedis.JedisClient" destroy-method="destroy">
+    <bean id="jedisClient" class="code.ponfee.commons.jedis.JedisClient" destroy-method="destroy">
         <constructor-arg index="0">
             <bean class="redis.clients.jedis.JedisPoolConfig">
                 <property name="maxTotal" value="300" />
@@ -24,9 +24,9 @@
         <constructor-arg index="3">
             <bean class="code.ponfee.commons.serial.FstSerializer" />
         </constructor-arg>
-    </bean> -->
+    </bean>
 
-    <bean id="jedisClient" class="code.ponfee.commons.jedis.JedisClient" destroy-method="destroy">
+    <!-- <bean id="jedisClient" class="code.ponfee.commons.jedis.JedisClient" destroy-method="destroy">
         <constructor-arg index="0">
             <bean class="redis.clients.jedis.JedisPoolConfig">
                 <property name="maxTotal" value="300" />
@@ -47,5 +47,5 @@
         <constructor-arg index="4">
             <bean class="code.ponfee.commons.serial.FstSerializer" />
         </constructor-arg>
-    </bean>
+    </bean> -->
 </beans>
