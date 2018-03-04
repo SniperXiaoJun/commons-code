@@ -1,11 +1,11 @@
 package code.ponfee.commons.json;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
 
 /**
  * 基于jackson的json工具类
@@ -42,7 +42,7 @@ public final class Jsons {
         //mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         mapper.setPropertyNamingStrategy(new PropertyNamingStrategy(){
             private static final long serialVersionUID = -3401320843245849044L;
-            // todo
+            // do-something
         });
         mapper.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));*/
@@ -140,11 +140,12 @@ public final class Jsons {
                      .constructParametricType(collecClass, elemClasses);
     }
 
-    public static String toJson(Object target) {
+    // ----------------------------------------------------static methods
+    public static <T>  String toJson(T target) {
         return NORMAL.stringify(target);
     }
 
-    public <T> T fromJson(String json, Class<T> target) {
+    public static <T> T fromJson(String json, Class<T> target) {
         return NORMAL.parse(json, target);
     }
 

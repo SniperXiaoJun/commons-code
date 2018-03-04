@@ -1,22 +1,16 @@
 package code.ponfee.commons.collect;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
 import code.ponfee.commons.model.Page;
 import code.ponfee.commons.model.Result;
 import code.ponfee.commons.reflect.Fields;
 import code.ponfee.commons.util.ObjectUtils;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * 集合工具类
@@ -132,6 +126,7 @@ public class Collects {
 
     /**
      * 求两list的交集
+     * intersect([1,2,3], [2,3,4]) = [2,3]
      * @param list1
      * @param list2
      * @return
@@ -163,17 +158,38 @@ public class Collects {
     }
 
     /**
+     * two list union result
+     * @param list1
+     * @param list2
+     * @return
+     */
+    public static String[] union(List<String> list1, List<String> list2) {
+        list1 = Lists.newArrayList(list1);
+        list1.addAll(list2);
+        return list1.toArray(new String[list1.size()]);
+    }
+
+    /**
      * list差集
+     * different([1,2,3], [2,3,4]) = [1,4]
      * @param list1
      * @param list2
      * @return
      */
     public static <T> List<T> different(List<T> list1, List<T> list2) {
-        Set<T> set1 = Sets.newHashSet(list1);
+        /*Set<T> set1 = Sets.newHashSet(list1);
         Set<T> set2 = Sets.newHashSet(list2);
         List<T> diff = Lists.newArrayList(Sets.difference(set1, set2));
         diff.addAll(Sets.difference(set2, set1));
-        return diff;
+        return diff;*/
+
+        List<T> list3 = Lists.newArrayList(list1);
+        list3.removeAll(list2);
+
+        list2 = Lists.newArrayList(list2);
+        list2.removeAll(list1);
+        list3.addAll(list2);
+        return list3;
     }
 
     /**

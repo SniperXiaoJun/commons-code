@@ -51,7 +51,7 @@ public final class ObjectUtils {
      * @return
      */
     public static String toJson(Object obj) {
-        return Jsons.NORMAL.stringify(obj);
+        return Jsons.toJson(obj);
     }
 
     /**

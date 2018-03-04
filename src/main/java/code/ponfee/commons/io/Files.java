@@ -1,5 +1,12 @@
 package code.ponfee.commons.io;
 
+import code.ponfee.commons.math.Maths;
+import code.ponfee.commons.math.Numbers;
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.output.StringBuilderWriter;
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,15 +30,6 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.output.StringBuilderWriter;
-import org.apache.commons.lang3.ArrayUtils;
-
-import com.google.common.collect.ImmutableMap;
-
-import code.ponfee.commons.math.Maths;
-import code.ponfee.commons.math.Numbers;
-
 /**
  * 文件工具类
  * @author Ponfee
@@ -53,7 +51,11 @@ public final class Files {
 
     public static final String SYSTEM_FILE_SEPARATOR = File.separator; // system file separator
 
-    public static final String UNIX_LINE_SEPARATOR = "\n"; // unix file line serarator spec \n
+    public static final String UNIX_LINE_SEPARATOR = "\n"; // unix file line serarator spec \n  LF
+
+    public static final String WINDOWS_LINE_SEPARATOR = "\r\n"; // windows file line serarator spec \r\n  CRLF
+
+    public static final String MAC_LINE_SEPARATOR = "\r"; // mac file line serarator spec \r  CR
 
     public static final String SYSTEM_LINE_SEPARATOR; // system file line separator
     static {

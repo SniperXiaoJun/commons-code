@@ -1,17 +1,15 @@
 package code.ponfee.commons.math;
 
+import code.ponfee.commons.util.ObjectUtils;
+import com.google.common.primitives.Chars;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
-
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.primitives.Chars;
-
-import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * 数字工具类
@@ -383,8 +381,9 @@ public final class Numbers {
     }
 
     private static final String[] CN_UPPER_NUMBER = {"零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"};
-    private static final String[] CN_UPPER_MONETRAY_UNIT = {"分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
-            "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟"};
+    private static final String[] CN_UPPER_MONETRAY_UNIT = {
+        "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰", "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟"
+    };
     private static final BigDecimal MAX_VALUE = new BigDecimal("9999999999999999.995");
 
     /**
@@ -404,7 +403,7 @@ public final class Numbers {
 
         // * 100
         long number = amount.movePointRight(2).setScale(0, BigDecimal.ROUND_HALF_UP)
-                .abs().longValue();
+                            .abs().longValue();
         int scale = (int) (number % 100), numIndex;
         if (scale == 0) {
             numIndex = 2;
