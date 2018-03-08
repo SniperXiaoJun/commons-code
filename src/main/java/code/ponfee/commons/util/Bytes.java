@@ -323,6 +323,7 @@ public final class Bytes {
         return Charset.forName(charset).encode(buffer).array();
     }
 
+    // -----------------------------------------number convert to byte array
     public static byte[] fromShort(short value) {
         return new byte[] {
             (byte) (value >>> 8), (byte) value
@@ -336,8 +337,8 @@ public final class Bytes {
 
     public static short toShort(byte[] bytes, int fromIdx) {
         return (short) (
-              ((short) bytes[  fromIdx]) << 8 
-            | ((short) bytes[++fromIdx] & 0xFF)
+              (bytes[  fromIdx]       ) << 8 
+            | (bytes[++fromIdx] & 0xFF) 
         );
         //ByteBuffer buffer = ByteBuffer.allocate(Short.BYTES);
         //buffer.put(bytes, fromIdx, Short.BYTES).flip();
@@ -356,8 +357,8 @@ public final class Bytes {
     }
 
     public static int toInt(byte[] bytes, int fromIdx) {
-        return (bytes[  fromIdx]       ) << 24 // 转int后左移24位，刚好剩下原来的8位，故不用&0xFF
-             | (bytes[++fromIdx] & 0xFF) << 16 // 默认转int
+        return (bytes[  fromIdx]       ) << 24 // 高8位转int后左移24位，刚好剩下原来的8位，故不用&0xFF
+             | (bytes[++fromIdx] & 0xFF) << 16 // 其它转int：若为负数，则是其补码表示，故要&0xFF
              | (bytes[++fromIdx] & 0xFF) <<  8
              | (bytes[++fromIdx] & 0xFF);
     }
@@ -400,6 +401,49 @@ public final class Bytes {
      */
     public static long toLong(byte[] bytes) {
         return toLong(bytes, 0);
+    }
+
+    // ----------------------------------------float/double convert to byte array
+    public static byte[] fromFloat(float value) {
+        return fromInt(Float.floatToIntBits(value));
+    }
+
+    public static float toFloat(byte[] bytes) {
+        return toFloat(bytes, 0);
+    }
+
+    public static float toFloat(byte[] bytes, int fromIdx) {
+        return Float.intBitsToFloat(toInt(bytes, fromIdx));
+    }
+
+    public static byte[] fromDouble(double value) {
+        return fromLong(Double.doubleToLongBits(value));
+    }
+
+    public static double toDouble(byte[] bytes) {
+        return toDouble(bytes, 0);
+    }
+
+    public static double toDouble(byte[] bytes, int fromIdx) {
+        return Double.longBitsToDouble(toLong(bytes, fromIdx));
+    }
+
+    // ----------------------------------------char convert to byte array
+    public static byte[] fromChar(char value) {
+        return new byte[] {
+            (byte) (value >>> 8), (byte) value
+        };
+    }
+
+    public static char toChar(byte[] bytes) {
+        return toChar(bytes, 0);
+    }
+
+    public static char toChar(byte[] bytes, int fromIdx) {
+        return (char) (
+            (bytes[fromIdx]         ) << 8
+          | (bytes[++fromIdx] & 0xFF)
+      );
     }
 
     /**

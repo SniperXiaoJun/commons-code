@@ -59,7 +59,8 @@ public abstract class MethodValidator extends FieldValidator {
         // Method method = mSign.getMethod();
         MethodSignature ms = (MethodSignature) joinPoint.getSignature();
         Method method = joinPoint.getTarget().getClass().getMethod(ms.getName(), ms.getParameterTypes());
-        String methodSign = ClassUtils.getMethodSignature(method);
+        //String methodSign = ClassUtils.getMethodSignature(method);
+        String methodSign = method.toGenericString();
         String[] argsName = METHOD_SIGN_CACHE.get(methodSign);
         if (argsName == null) {
             // 要用到asm字节码操作，消耗性能，所以缓存

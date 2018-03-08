@@ -91,7 +91,7 @@ public class RSAKey implements Key {
         this.coeff = null;
     }
 
-    public boolean isPublic() {
+    public @Override boolean isPublic() {
         return !secret;
     }
 

@@ -148,7 +148,11 @@ public final class AsyncBatchTransmitter<T> extends Thread {
             for (;;) {
                 if (isEnd && queue.isEmpty() && cumulate() > 2 * thresholdPeriod) {
                     if (requireDestroyWhenEnd) {
-                        executor.shutdown();
+                        try {
+                            executor.shutdown();
+                        } catch (Exception ignored) {
+                            ignored.printStackTrace();
+                        }
                     }
                     break; // exit while loop when end
                 }

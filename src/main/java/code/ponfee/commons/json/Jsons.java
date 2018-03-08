@@ -149,6 +149,10 @@ public final class Jsons {
         return NORMAL.parse(json, target);
     }
 
+    public static <T> T fromJson(String json, JavaType javaType) {
+        return NORMAL.parse(json, javaType);
+    }
+
     private static boolean isEmpty(String str) {
         return str == null || str.isEmpty();
     }

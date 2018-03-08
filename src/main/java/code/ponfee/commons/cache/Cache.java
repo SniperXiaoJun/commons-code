@@ -255,8 +255,10 @@ public class Cache<T> {
      */
     public void destroy() {
         isDestroy = true;
-        if (executor != null) {
+        if (executor != null) try {
             executor.shutdown();
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
         cache.clear();
     }

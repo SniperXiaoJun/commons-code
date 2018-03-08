@@ -41,7 +41,7 @@ public class ECKey implements Key {
         this.beta.fastCache();
     }
 
-    public String toString() {
+    public @Override String toString() {
         String str = "";
         if (secret) {
             str = "Private key: " + dk + ", ";

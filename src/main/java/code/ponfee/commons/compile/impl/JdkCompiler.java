@@ -33,8 +33,7 @@ public class JdkCompiler implements JavaSourceCompiler {
 
     @Override
     public Class<?> compile(String sourceString) {
-        JavaSource source = new RegexJavaSource(sourceString);
-        return compile(source);
+        return compile(new RegexJavaSource(sourceString));
     }
 
     /**
@@ -42,6 +41,7 @@ public class JdkCompiler implements JavaSourceCompiler {
      * @param javaSource
      * @return
      */
+    @Override
     public Class<?> compileForce(JavaSource javaSource) {
         return compile(javaSource, new JdkCompilerClassLoader(this.getClass().getClassLoader()));
     }
@@ -72,7 +72,8 @@ public class JdkCompiler implements JavaSourceCompiler {
             return compileTask.compile(javaSource.getFullyQualifiedName(), javaSource.getSourceCode(), errs);
         } catch (JdkCompileException ex) {
             DiagnosticCollector<JavaFileObject> diagnostics = ex.getDiagnostics();
-            throw new CompileExprException("compile error, source : \n" + javaSource + ", " + diagnostics.getDiagnostics(), ex);
+            throw new CompileExprException("compile error, source : \n" + javaSource
+                                         + ", " + diagnostics.getDiagnostics(), ex);
         } catch (Exception ex) {
             throw new CompileExprException("compile error, source : \n" + javaSource, ex);
         }

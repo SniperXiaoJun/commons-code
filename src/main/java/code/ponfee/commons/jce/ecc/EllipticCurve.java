@@ -182,7 +182,7 @@ public class EllipticCurve {
         return this.psr2;
     }
 
-    public String toString() {
+    public @Override String toString() {
         if (name == null || name.length() == 0) {
             return "y^2 = x^3 + " + a + "x + " + b + " ( mod " + p + " )";
         } else {

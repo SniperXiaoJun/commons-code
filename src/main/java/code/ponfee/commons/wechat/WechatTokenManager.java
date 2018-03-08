@@ -159,8 +159,12 @@ public class WechatTokenManager implements DisposableBean {
         return jedisClient.valueOps().get(WECHAT_OPENID_CACHE + code);
     }
 
-    public @Override void destroy() throws Exception {
-        this.scheduled.shutdown();
+    public @Override void destroy() {
+        try {
+            this.scheduled.shutdown();
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
         this.scheduled = null;
     }
 

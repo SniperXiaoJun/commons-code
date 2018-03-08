@@ -12,4 +12,5 @@ public interface JavaSourceCompiler {
 
     Class<?> compile(JavaSource javaSource);
 
+    Class<?> compileForce(JavaSource javaSource);
 }

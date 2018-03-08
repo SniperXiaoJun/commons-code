@@ -135,7 +135,7 @@ public class ECCryptor extends Cryptor {
         return new ECKey(curve);
     }
 
-    public String toString() {
+    public @Override String toString() {
         return "ECCryptor - " + curve.toString();
     }
 

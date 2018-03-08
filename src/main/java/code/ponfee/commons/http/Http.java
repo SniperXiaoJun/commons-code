@@ -73,6 +73,8 @@ public final class Http {
     private String accept; // 接收类型
     private SSLSocketFactory sslSocketFactory; // 走SSL/TSL通道
 
+    private Map<String, List<String>> respHeaders;
+
     private Http(String url, HttpMethod method) {
         this.url = url;
         this.method = method;
@@ -129,7 +131,7 @@ public final class Http {
         return this;
     }
 
-    // ----------------------------params--------------------------
+    // ----------------------------param--------------------------
     /**
      * 最终是拼接成queryString的形式追加到url（即作为get的http请求参数）
      * get方式会有编码等问题，推荐使用data方式传参数：{@link #data(Map)}
@@ -282,11 +284,11 @@ public final class Http {
 
     // --------------------------------request------------------------------
     public <T> T request(JavaType type) {
-        return Jsons.NORMAL.parse(request(), type);
+        return Jsons.fromJson(request(), type);
     }
 
     public <T> T request(Class<T> type) {
-        return Jsons.NORMAL.parse(request(), type);
+        return Jsons.fromJson(request(), type);
     }
 
     /**
@@ -347,7 +349,34 @@ public final class Http {
         }
     }
 
-    // ----------------------------private methods--------------------------
+    // ------------------------------------------------------response heads
+    public Map<String, List<String>> getRespHeaders() {
+        return respHeaders;
+    }
+
+    public String[] getRespHeaders(String name) {
+        if (respHeaders == null) {
+            return null;
+        }
+
+        List<String> values = respHeaders.get(name);
+        if (values == null) {
+            return null;
+        }
+        return values.toArray(new String[values.size()]);
+    }
+
+    public String getRespHeader(String name) {
+        if (respHeaders == null) {
+            return null;
+        }
+
+        List<String> values = respHeaders.get(name);
+        return values == null || values.isEmpty()
+               ? null : values.get(0);
+    }
+
+    // ------------------------------------------------------private methods
     private HttpRequest request0() {
         HttpRequest request;
         switch (method) {
@@ -405,7 +434,8 @@ public final class Http {
         return request;
     }
 
-    private static void disconnect(HttpRequest request) {
+    private void disconnect(HttpRequest request) {
+        this.respHeaders = request.headers(); // get the response heads
         if (request != null) try {
             request.disconnect();
         } catch (Exception ignored) {
@@ -457,12 +487,14 @@ public final class Http {
     public static void main(String[] args) throws Exception {
         //System.out.println(Bytes.hexDump(Http.get("http://www.apachelounge.com/download/VC14/binaries/httpd-2.4.25-win64-VC14.zip").download()));
         //Http.get("https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.zip").download(new FileOutputStream("d:/elasticsearch-5.5.1.zip"));
-        System.out.println(Bytes.hexDump(Http.get("http://www.stockstar.com").download()));
+        Http http = Http.get("http://www.stockstar.com");
+        System.out.println(Bytes.hexDump(http.download()));
+        System.out.println(http.getRespHeaders());
         //Http.get("http://www.baidu.com").download("d:/baidu.html");
         //System.out.println(Http.get("http://localhost:8081/audit/getImg").data(ImmutableMap.of("imgPath", "imgPath")).request());
         //String[] params = new String[]{"{\"analyze_type\":\"mine_all_cust\",\"date_type\":4,\"class_name\":\"\"}", "{\"analyze_type\":\"mine_all_cust\",\"date_type\":4,\"class_name\":\"衬衫\"}"};
         //Http.post("http://10.118.58.156:8080/market/custgroup/kanban/count/recommend").data(ImmutableMap.of("conditions[]", params)).request();
-        @SuppressWarnings("unchecked") 
+        /*@SuppressWarnings("unchecked") 
         Map<String, Object> resp = Http.post("http://10.118.58.74:8080/uploaded/file")
                                        .addParam("param1", "test1213")
                                        .addPart("uploadFile", "abc.pdf", new File("d:/test/abc.pdf"))
@@ -473,6 +505,6 @@ public final class Http {
                                        .accept("application/json") // @ResponseBody
                                        //.setSSLSocketFactory(factory) // trust certs store
                                        .request(Map.class);
-        System.out.println(resp);
+        System.out.println(resp);*/
     }
 }

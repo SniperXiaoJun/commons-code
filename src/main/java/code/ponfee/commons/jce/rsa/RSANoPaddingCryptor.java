@@ -75,7 +75,7 @@ public class RSANoPaddingCryptor extends Cryptor {
         return new RSAKey(keySize);
     }
 
-    public String toString() {
+    public @Override String toString() {
         return this.getClass().getSimpleName();
     }
 

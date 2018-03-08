@@ -26,7 +26,7 @@ public class NullCryptor extends Cryptor {
         return new NullKey();
     }
 
-    public String toString() {
+    public @Override String toString() {
         return "NullCryptor";
     }
 

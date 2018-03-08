@@ -130,9 +130,7 @@ public final class ObjectUtils {
                     } else {
                         // cannot to run in this place
                     }
-                } else if (value == null) {
-                    // nothing to do: value = value
-                } else if (!type.isInstance(value)) { // 类型不一致时（此时value!=null）
+                } else if (value != null && !type.isInstance(value)) { // 类型不一致时
                     if (org.apache.commons.lang3.ClassUtils.isPrimitiveWrapper(type)
                         && Strings.isEmpty(value)) {
                         value = null; // 原始包装类型且value为空或为空字符串则设置为null
@@ -173,7 +171,7 @@ public final class ObjectUtils {
                                       + " cannot be cast to " + ClassUtils.getClassName(type));
                     }
                 } else {
-                    // nothing to do: type.isInstance(value)
+                    // nothing to do: value is null or type.isInstance(value)
                 }
 
                 // set value into bean field
