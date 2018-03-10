@@ -211,7 +211,7 @@ public class Base58 {
             int digit58 = number58[i] & 0xFF;
             int temp = remainder * LENGTH + digit58;
             number58[i] = (byte) (temp / 256);
-            remainder = temp % 256; // & 0xFF
+            remainder = temp & 0xFF; // % 256
         }
 
         return (byte) remainder;

@@ -48,7 +48,4 @@ public class SHA1BrokenTest {
         System.out.println();
     }
 
-    public static void main(String[] args) {
-        System.out.println(12);
-    }
 }

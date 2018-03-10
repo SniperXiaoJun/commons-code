@@ -16,11 +16,9 @@ import code.ponfee.commons.reflect.ClassUtils;
  */
 public class FstSerializer extends Serializer {
 
-    private static final ThreadLocal<FSTConfiguration> FST_CFG = new ThreadLocal<FSTConfiguration>() {
-        public @Override FSTConfiguration initialValue() {
-            return FSTConfiguration.createDefaultConfiguration();
-        }
-    };
+    // createDefaultConfiguration
+    private static final ThreadLocal<FSTConfiguration> FST_CFG =
+            ThreadLocal.withInitial(FSTConfiguration::createStructConfiguration);
 
     @Override
     public <T extends Object> byte[] serialize(T t, boolean isCompress) {
@@ -56,7 +54,7 @@ public class FstSerializer extends Serializer {
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         Map<String, Object> map = ImmutableMap.of("a", 1, "b", Lists.newArrayList("1", "2"));
-        Serializer serializer = new FstSerializer();
+        Serializer serializer = new FstSerializer(); // error
         //Serializer serializer = new JsonSerializer();
         //Serializer serializer = new HessianSerializer();
         byte[] data = serializer.serialize(map);

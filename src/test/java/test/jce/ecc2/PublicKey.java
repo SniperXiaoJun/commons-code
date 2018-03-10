@@ -247,7 +247,7 @@ final public class PublicKey {
     private static ECPoint computePoint(ECDomainParameters curveParameters, boolean yEven, BigInteger xCoordinate)
             throws SecurityException {
         final int bitCount = curveParameters.getN().bitLength();
-        if (bitCount % 8 != 0)
+        if ((bitCount & 0x07) != 0)
             throw new SecurityException(String.format("Curve does not have an even number of bytes (number of bits is: %d)", bitCount));
         final int curveLength = bitCount / 8;
         final byte[] raw = xCoordinate.toByteArray();

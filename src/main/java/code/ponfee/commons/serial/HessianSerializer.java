@@ -40,12 +40,9 @@ public class HessianSerializer extends Serializer {
                 hessian = new HessianSerializerOutput(baos);
             }
             hessian.writeObject(t);
-            hessian.flush();
             hessian.close();
             hessian = null;
             if (gzout != null) {
-                gzout.finish();
-                gzout.flush();
                 gzout.close();
                 gzout = null;
             }

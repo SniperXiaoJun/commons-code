@@ -74,7 +74,7 @@ public final class XmlWriter {
      * @return
      */
     public static List<E<?>> newElement(Object... childPairs) {
-        if (childPairs.length % 2 != 0) {
+        if ((childPairs.length & 0x01) == 1) {
             throw new XmlException("args Object array must be pair");
         }
 

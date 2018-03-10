@@ -14,7 +14,6 @@ import com.esotericsoftware.kryo.io.ByteBufferInput;
 import com.esotericsoftware.kryo.io.ByteBufferOutput;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.kryo.pool.KryoFactory;
 import com.esotericsoftware.kryo.pool.KryoPool;
 
 import code.ponfee.commons.io.ExtendedGZIPOutputStream;
@@ -31,12 +30,7 @@ public class KryoSerializer extends Serializer {
     private final KryoPool kryoPool;
 
     public KryoSerializer() {
-        this.kryoPool = new KryoPool.Builder(new KryoFactory() {
-            @Override
-            public Kryo create() {
-                return new Kryo();
-            }
-        }).softReferences().build();
+        this.kryoPool = new KryoPool.Builder(Kryo::new).softReferences().build();
     }
 
     @Override
@@ -57,12 +51,9 @@ public class KryoSerializer extends Serializer {
                 output = new ByteBufferOutput(baos, Files.BUFF_SIZE);
             }
             (kryo = getKryo()).writeObject(output, t);
-            output.flush();
             output.close();
             output = null;
             if (gzout != null) {
-                gzout.finish();
-                gzout.flush();
                 gzout.close();
                 gzout = null;
             }

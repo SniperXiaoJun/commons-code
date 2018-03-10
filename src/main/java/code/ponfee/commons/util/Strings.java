@@ -449,7 +449,7 @@ public class Strings {
         int checkSum = 0;
         for (int i = 0, len = str.length(), num; i < len; i++) {
             num = str.charAt(i) - '0'; // ascii to num  
-            if (i % 2 == 0) {
+            if ((i & 0x01) == 0) {
                 checkSum += num; // 1、将奇数位数字相加（从1开始计数）
             } else {
                 num *= 2; // 2、将偶数位数字分别乘以2，分别计算个位数和十位数之和（从1开始计数）

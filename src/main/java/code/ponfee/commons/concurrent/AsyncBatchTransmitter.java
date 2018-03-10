@@ -15,7 +15,7 @@ import com.google.common.base.Preconditions;
  * @author Ponfee
  * @param <T>
  */
-public final class AsyncBatchTransmitter<T> extends Thread {
+public final class AsyncBatchTransmitter<T> {
 
     private final Queue<T> queue = new ConcurrentLinkedQueue<>();
     private final AsyncBatchThread batch;
@@ -172,8 +172,8 @@ public final class AsyncBatchTransmitter<T> extends Thread {
                 if (list.size() == thresholdChunk 
                     || ( !list.isEmpty() && (isEnd || cumulate() > thresholdPeriod) )
                 ) {
-                    // task抛异常后： execute会输出错误信息，线程结束，后续任务会创建新线程执行
-                    //            submit不会输出错误信息，线程继续分配执行其它任务
+                    // task抛异常后：execute会输出错误信息，线程结束，后续任务会创建新线程执行
+                    //               submit不会输出错误信息，线程继续分配执行其它任务
                     executor.submit(factory.create(list, isEnd && queue.isEmpty())); // 提交到异步批量处理
                     list = new ArrayList<>(thresholdChunk);
                     refresh();

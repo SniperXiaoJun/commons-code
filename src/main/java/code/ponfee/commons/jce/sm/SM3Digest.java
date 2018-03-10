@@ -337,10 +337,10 @@ public class SM3Digest {
         }
 
         static int bitCycleLeft(int n, int bitLen) {
-            bitLen %= 32;
+            bitLen &= 0x1F; // bitLen %= 32;
             byte[] tmp = bigEndianIntToByte(n);
             int byteLen = bitLen / 8;
-            int len = bitLen % 8;
+            int len = bitLen & 0x07; // bitLen % 8
             if (byteLen > 0) {
                 tmp = byteCycleLeft(tmp, byteLen);
             }

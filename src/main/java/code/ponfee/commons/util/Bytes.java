@@ -139,7 +139,7 @@ public final class Bytes {
     public static byte[] hexDecode(String hex) {
         char[] data = hex.toCharArray();
         int len = data.length;
-        if ((len & 0x01) != 0) {
+        if ((len & 0x01) == 1) {
             throw new IllegalArgumentException("Invalid hex string.");
         }
 
@@ -273,7 +273,8 @@ public final class Bytes {
     @Deprecated
     public static byte[] base64DecodeUrlSafe(String b64) {
         b64 = StringUtils.replaceEach(b64, new String[] { "-", "_" }, new String[] { "+", "/" });
-        b64 += StringUtils.leftPad("", (4 - b64.length() % 4) % 4, '=');
+        // (4 - b64.length() % 4) % 4
+        b64 += StringUtils.leftPad("", (4 - b64.length() & 0x03) & 0x03, '=');
         return base64Decode(b64);
     }
 

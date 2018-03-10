@@ -668,7 +668,7 @@ public class HttpRequest {
             return baseUrl;
         }
 
-        if (params.length % 2 != 0) {
+        if ((params.length & 0x01) == 1) {
             throw new IllegalArgumentException("Must specify an even number of parameter names/values");
         }
 

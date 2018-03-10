@@ -439,7 +439,7 @@ public final class Numbers {
                     if (number > 0) {
                         builder.insert(0, CN_UPPER_MONETRAY_UNIT[numIndex]);
                     }
-                } else if (((numIndex - 2) % 4 == 0) && (number % 1000 > 0)) {
+                } else if ( (((numIndex - 2) & 0x03) == 0) && (number % 1000 > 0) ) {
                     builder.insert(0, CN_UPPER_MONETRAY_UNIT[numIndex]);
                 }
                 getZero = true;

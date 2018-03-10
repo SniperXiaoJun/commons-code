@@ -134,7 +134,7 @@ public class IdcardResolver {
         }
 
         // 性别提取
-        if (Character.getNumericValue(idcard.charAt(16)) % 2 != 0) {
+        if ((Character.getNumericValue(idcard.charAt(16)) & 0x01) == 1) {
             this.sex = Sex.M;
         } else {
             this.sex = Sex.F;

@@ -1,5 +1,8 @@
 package code.ponfee.commons.serial;
 
+import code.ponfee.commons.io.ExtendedGZIPOutputStream;
+import code.ponfee.commons.reflect.ClassUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -7,9 +10,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import code.ponfee.commons.io.ExtendedGZIPOutputStream;
-import code.ponfee.commons.reflect.ClassUtils;
 
 /**
  * java序例化
@@ -34,12 +34,9 @@ public class JdkSerializer extends Serializer {
                 oos = new ObjectOutputStream(baos);
             }
             oos.writeObject(t);
-            oos.flush();
             oos.close();
             oos = null;
             if (gzout != null) {
-                gzout.finish();
-                gzout.flush();
                 gzout.close();
                 gzout = null;
             }

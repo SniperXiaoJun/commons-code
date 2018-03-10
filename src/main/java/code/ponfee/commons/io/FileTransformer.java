@@ -140,16 +140,7 @@ public class FileTransformer {
         try (WrappedBufferedReader reader = new WrappedBufferedReader(source);
              WrappedBufferedWriter writer = new WrappedBufferedWriter(target);
         ) {
-            String line;
-            if (searchList != null && searchList.length > 0) {
-                while ((line = reader.readLine()) != null) {
-                    writer.writeln(StringUtils.replaceEach(line, searchList, replacementList));
-                }
-            } else {
-                while ((line = reader.readLine()) != null) {
-                    writer.writeln(line);
-                }
-            }
+            writeln(reader, writer, searchList, replacementList);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -168,16 +159,7 @@ public class FileTransformer {
         try (WrappedBufferedReader reader = new WrappedBufferedReader(source, fromCharset);
              WrappedBufferedWriter writer = new WrappedBufferedWriter(target, toCharset);
         ) {
-            String line;
-            if (searchList != null && searchList.length > 0) {
-                while ((line = reader.readLine()) != null) {
-                    writer.writeln(StringUtils.replaceEach(line, searchList, replacementList));
-                }
-            } else {
-                while ((line = reader.readLine()) != null) {
-                    writer.writeln(line);
-                }
-            }
+            writeln(reader, writer, searchList, replacementList);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -238,6 +220,22 @@ public class FileTransformer {
         detector.add(ASCIIDetector.getInstance()); // ASCIIDetector用于ASCII编码测定
         detector.add(UnicodeDetector.getInstance()); // UnicodeDetector用于Unicode家族编码的测定
         return detector;
+    }
+
+    private static void writeln(WrappedBufferedReader reader,
+                                WrappedBufferedWriter writer,
+                                String[] searchList,
+                                String[] replacementList) throws IOException {
+        String line;
+        if (searchList != null && searchList.length > 0) {
+            while ((line = reader.readLine()) != null) {
+                writer.writeln(StringUtils.replaceEach(line, searchList, replacementList));
+            }
+        } else {
+            while ((line = reader.readLine()) != null) {
+                writer.writeln(line);
+            }
+        }
     }
 
     public static void main(String[] args) throws IOException {

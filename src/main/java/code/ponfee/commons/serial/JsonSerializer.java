@@ -41,8 +41,6 @@ public class JsonSerializer extends Serializer {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream(BYTE_SIZE);
                 gzout = new ExtendedGZIPOutputStream(baos);
                 gzout.write(data, 0, data.length);
-                gzout.finish();
-                gzout.flush();
                 gzout.close();
                 gzout = null;
                 data = baos.toByteArray();

@@ -1,16 +1,26 @@
 package code.ponfee.commons.collect;
 
-import code.ponfee.commons.model.Page;
-import code.ponfee.commons.model.Result;
-import code.ponfee.commons.reflect.Fields;
-import code.ponfee.commons.util.ObjectUtils;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.poi.ss.formula.functions.T;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import java.lang.reflect.Array;
-import java.util.*;
-import java.util.Map.Entry;
+import code.ponfee.commons.model.Page;
+import code.ponfee.commons.model.Result;
+import code.ponfee.commons.reflect.Fields;
+import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * 集合工具类
@@ -124,6 +134,7 @@ public class Collects {
         return target;
     }
 
+    // ---------------------------------------the collection of intersect, union and different
     /**
      * 求两list的交集
      * intersect([1,2,3], [2,3,4]) = [2,3]
@@ -131,10 +142,10 @@ public class Collects {
      * @param list2
      * @return
      */
-    public static String[] intersect(List<String> list1, List<String> list2) {
-        list1 = Lists.newArrayList(list1);
-        list1.retainAll(list2);
-        return list1.toArray(new String[list1.size()]);
+    @SuppressWarnings({ "unchecked", "hiding" })
+    public static <T> T[] intersect(List<T> list1, List<T> list2) {
+        //list1.retainAll(list2);
+        return (T[]) list1.stream().filter(list2::contains).toArray();
     }
 
     /**
@@ -143,18 +154,9 @@ public class Collects {
      * @param list
      * @return
      */
-    public static String[] intersect(String[] array, List<String> list) {
-        return intersect(Lists.newArrayList(array), list);
-    }
-
-    /**
-     * 两数组交集
-     * @param array1
-     * @param array2
-     * @return
-     */
-    public static String[] intersect(String[] array1, String[] array2) {
-        return intersect(array1, Lists.newArrayList(array2));
+    @SuppressWarnings({ "unchecked", "hiding" })
+    public static <T> T[] intersect(T[] array, List<T> list) {
+        return (T[]) Stream.of(array).filter(list::contains).toArray();
     }
 
     /**
@@ -163,33 +165,30 @@ public class Collects {
      * @param list2
      * @return
      */
-    public static String[] union(List<String> list1, List<String> list2) {
+    @SuppressWarnings({ "unchecked", "hiding" })
+    public static <T> T[] union(List<T> list1, List<T> list2) {
         list1 = Lists.newArrayList(list1);
         list1.addAll(list2);
-        return list1.toArray(new String[list1.size()]);
+        return (T[]) list1.stream().distinct().toArray();
     }
 
     /**
      * list差集
      * different([1,2,3], [2,3,4]) = [1,4]
+     *
      * @param list1
      * @param list2
      * @return
      */
+    @SuppressWarnings({ "hiding" })
     public static <T> List<T> different(List<T> list1, List<T> list2) {
-        /*Set<T> set1 = Sets.newHashSet(list1);
-        Set<T> set2 = Sets.newHashSet(list2);
-        List<T> diff = Lists.newArrayList(Sets.difference(set1, set2));
-        diff.addAll(Sets.difference(set2, set1));
-        return diff;*/
+        List<T> list = list1.stream().filter(t -> !list2.contains(t))
+                                     .collect(Collectors.toList());
 
-        List<T> list3 = Lists.newArrayList(list1);
-        list3.removeAll(list2);
+        list.addAll(list2.stream().filter(t -> !list1.contains(t))
+                                  .collect(Collectors.toList()));
 
-        list2 = Lists.newArrayList(list2);
-        list2.removeAll(list1);
-        list3.addAll(list2);
-        return list3;
+        return list;
     }
 
     /**
@@ -201,7 +200,7 @@ public class Collects {
     public static <K, V> Map<K, V> different(Map<K, V> map1, Map<K, V> map2) {
         Set<K> set1 = map1.keySet();
         Set<K> set2 = map2.keySet();
-        Set<K> diffSet = Sets.difference(set1, set2);
+        Set<K> diffSet = Sets.newHashSet(Sets.difference(set1, set2));
         diffSet.addAll(Sets.difference(set2, set1));
         Map<K, V> result = Maps.newHashMapWithExpectedSize(diffSet.size());
         for (K key : diffSet) {
@@ -225,7 +224,7 @@ public class Collects {
         }
 
         int length = kv.length;
-        if (length % 2 != 0) {
+        if ((length & 0x01) == 1) {
             throw new IllegalArgumentException("args must be pair.");
         }
 
@@ -241,12 +240,12 @@ public class Collects {
      * @param args
      * @return
      */
-    public static <T> T[] toArray(@SuppressWarnings("unchecked") T... args) {
+    public static T[] toArray(T... args) {
         return args;
     }
 
     /**
-     * Represents array of any type as list of objects so we can easily iterate over it
+     * object to list
      * @param array of elements
      * @return list with the same elements
      */
@@ -271,7 +270,7 @@ public class Collects {
      * @param arrays
      * @return The new array of merged
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "hiding" })
     public static <T> T[] concat(T[]... arrays) {
         if (arrays == null) {
             return null;
@@ -292,7 +291,9 @@ public class Collects {
         }
 
         return list.toArray((T[]) Array.newInstance(type, list.size()));
-        //return list.toArray((T[]) new Object[list.size()]); // [Ljava.lang.Object; cannot be cast to [Ljava.lang.String;
+
+        // [Ljava.lang.Object; cannot be cast to [Ljava.lang.String;
+        //return list.toArray((T[]) new Object[list.size()]);
     }
 
 }

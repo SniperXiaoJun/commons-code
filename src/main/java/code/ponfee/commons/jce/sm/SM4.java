@@ -363,7 +363,7 @@ public final class SM4 {
 
         byte[] result;
         if (mode == ENCRYPT_MODE) {
-            int p = 16 - input.length % 16;
+            int p = 16 - input.length & 0xF; // % 16
             result = new byte[input.length + p];
             System.arraycopy(input, 0, result, 0, input.length);
             for (int i = 0; i < p; i++) {
