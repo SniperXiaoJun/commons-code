@@ -59,7 +59,7 @@ public class LongArrayList extends AbstractList<Long>
 
     @Override
     public int indexOf(Object target) {
-        if (target instanceof Integer) {
+        if (target instanceof Long) {
             int i = indexOf(array, (Long) target, start, end);
             if (i >= 0) {
                 return i - start;
@@ -70,7 +70,7 @@ public class LongArrayList extends AbstractList<Long>
 
     @Override
     public int lastIndexOf(Object target) {
-        if (target instanceof Integer) {
+        if (target instanceof Long) {
             int i = lastIndexOf(array, (Long) target, start, end);
             if (i >= 0) {
                 return i - start;

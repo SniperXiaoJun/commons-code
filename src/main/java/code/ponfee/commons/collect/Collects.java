@@ -134,7 +134,7 @@ public class Collects {
         return target;
     }
 
-    // ---------------------------------------the collection of intersect, union and different
+    // -----------------------------the collection of intersect, union and different operations
     /**
      * 求两list的交集
      * intersect([1,2,3], [2,3,4]) = [2,3]

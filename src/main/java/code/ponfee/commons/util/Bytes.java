@@ -32,14 +32,14 @@ public final class Bytes {
     private static final char[] HEX_UPPER_CODES = "0123456789ABCDEF".toCharArray();
 
     /**
-     * dump byte array, like as these 
+     * Dump byte array, like as these 
      * {@link org.apache.commons.io.HexDump#dump(byte[], long, java.io.OutputStream, int)}, 
      * {@link sun.misc.HexDumpEncoder#encode(byte[], java.io.OutputStream);}
      * 
      * @param data   字节数组
      * @param chunk  每行块数
      * @param block  每块大小
-     * @return
+     * @return Dump the byte array as hex string
      */
     public static String hexDump(byte[] data, int chunk, int block) {
         Formatter fmt = new Formatter(), text;
@@ -88,6 +88,12 @@ public final class Bytes {
 
     /**
      * convert the byte array to binary string
+     * byte:
+     *    -1: 11111111
+     *     0: 00000000
+     *   127: 01111111
+     *  -128: 10000000
+     * 
      * @param array
      * @return
      */
@@ -97,11 +103,13 @@ public final class Bytes {
         }
 
         StringBuilder builder = new StringBuilder(array.length * 8);
+        String binary;
         for (byte b : array) {
             // b & 0xFF：byte转int保留bit位
             // | 0x100：100000000，对于正数保留八位
             // 也可以 + 0x100或leftPad(str, 8, '0')
-            builder.append(Integer.toBinaryString((b & 0xFF) | 0x100).substring(1));
+            binary = Integer.toBinaryString((b & 0xFF) | 0x100);
+            builder.append(binary, 1, binary.length());
         }
         return builder.toString();
     }
@@ -539,33 +547,44 @@ public final class Bytes {
     }
 
     /**
-     * copy in to out
-     * 从尾部开始拷贝in到out：
-     *   若in数据不足则在out前面补0
-     *   若in数据有多则舍去in前面的数据
-     * @param in
-     * @param inFrom
-     * @param inLen
-     * @param out
-     * @param outFrom
-     * @param outLen
+     * copy src to dest
+     * 从尾部开始拷贝src到dest：
+     *   若src数据不足则在dest前面补0
+     *   若src数据有多则舍去src前面的数据
+     * @param src
+     * @param srcFrom
+     * @param srcLen
+     * @param dest
+     * @param destFrom
+     * @param destLen
      */
-    public static void copy(byte[] in, int inFrom, int inLen,
-                            byte[] out, int outFrom, int outLen) {
-        int  inTo = Math.min(in.length, inFrom + inLen),
-            outTo = Math.min(out.length, outFrom + outLen);
-        for (int i = outTo - 1, j = inTo - 1; i >= outFrom; i--, j--) {
-            out[i] = (j < inFrom) ? 0x00 : in[j];
+    public static void copy(byte[] src, int srcFrom, int srcLen,
+                            byte[] dest, int destFrom, int destLen) {
+        int  srcTo = Math.min(src.length, srcFrom + srcLen),
+            destTo = Math.min(dest.length, destFrom + destLen);
+        for (int i = destTo - 1, j = srcTo - 1; i >= destFrom; i--, j--) {
+            dest[i] = (j < srcFrom) ? 0x00 : src[j];
         }
     }
 
     public static void main(String[] args) {
-        byte[] out = {-1,-1,-1,-1,-1,-1,-1,-1,-1};
-        byte[] in = {-2,-2,-2,-2,-2,-2};
+        byte[] in = { -2, -2, -2, -2, -2, -2 };
+        byte[] out = { -1, -1, -1, -1, -1, -1, -1, -1, -1 };
         copy(in, 0, 4, out, 2, 10);
         System.out.println(ObjectUtils.toString(out));
+
+        System.out.println();
         System.out.println(toBinary(fromInt(-102)));
-        System.out.println(toBinary(fromInt(-102>>3)));
-        System.out.println(toBinary(fromInt(-102>>>3)));
+        System.out.println(toBinary(fromInt(-102 >> 3)));
+        System.out.println(toBinary(fromInt(-102 >>> 3)));
+
+        System.out.println();
+        System.out.println(toBinary(fromFloat(0)));
+        System.out.println(toBinary(fromFloat(Float.MIN_VALUE)));
+        System.out.println(toBinary(fromFloat(Float.MAX_VALUE)));
+        System.out.println(toBinary(fromFloat(Float.NaN)));
+        System.out.println(toBinary(fromFloat(Float.MIN_NORMAL)));
+        System.out.println(toBinary(fromFloat(Float.NEGATIVE_INFINITY)));
+        System.out.println(toBinary(fromFloat(Float.POSITIVE_INFINITY)));
     }
 }

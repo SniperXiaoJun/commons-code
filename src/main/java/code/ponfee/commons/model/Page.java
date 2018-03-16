@@ -337,7 +337,7 @@ public class Page<T> implements java.io.Serializable {
 
     @Override
     public String toString() {
-        return new StringBuilder(230)
+        return new StringBuilder(260)
             .append(getClass().getCanonicalName()).append("@")
             .append(Integer.toHexString(hashCode())).append("{")
             .append("pageNum=").append(pageNum)
@@ -370,4 +370,8 @@ public class Page<T> implements java.io.Serializable {
         return "[java.util.List<" + first.getClass().getCanonicalName() + ">," + rows.size() + "]";
     }
 
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("1","2","3","4","5","6","7","8","9","0");
+        System.out.println(new Page<>(list).toString());
+    }
 }

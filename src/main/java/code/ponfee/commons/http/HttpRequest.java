@@ -90,7 +90,6 @@ import java.util.zip.GZIPInputStream;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -267,11 +266,7 @@ public class HttpRequest {
 
     private static final String[] EMPTY_STRINGS = {};
 
-    private static final HostnameVerifier TRUSTED_VERIFIER = new HostnameVerifier() {
-        public @Override boolean verify(String hostname, SSLSession session) {
-            return true;
-        }
-    };
+    private static final HostnameVerifier TRUSTED_VERIFIER = (hostname, session) -> true;
 
     private static final SSLSocketFactory TRUSTED_FACTORY;
     static {
@@ -297,8 +292,9 @@ public class HttpRequest {
             TRUSTED_FACTORY = context.getSocketFactory();
 
         } catch (GeneralSecurityException e) {
-            IOException ex = new IOException("Security exception configuring SSL context");
-            throw new HttpException((IOException) ex.initCause(e));
+            throw new HttpException(
+                new IOException("Security exception configuring SSL context").initCause(e)
+            );
         }
     }
 
@@ -611,9 +607,7 @@ public class HttpRequest {
             }
             return s;
         } catch (URISyntaxException e) {
-            IOException io = new IOException("Parsing URI failed");
-            io.initCause(e);
-            throw new HttpException(io);
+            throw new HttpException(new IOException("Parsing URI failed").initCause(e));
         }
     }
 

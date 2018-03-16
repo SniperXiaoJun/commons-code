@@ -219,7 +219,7 @@ public class RequestLimiter {
     public static String buildNonce(String code, String salt) {
         long first = new Random(code.hashCode()).nextLong(); // 第一个nextLong值是固定的
         byte[] slatBytes = ArrayUtils.addAll(SLAT_PREFIX, salt.getBytes());
-        return HmacUtils.sha1Hex(Bytes.fromLong(first), slatBytes);
+        return HmacUtils.md5Hex(Bytes.fromLong(first), slatBytes);
     }
 
     /**

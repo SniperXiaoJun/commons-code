@@ -28,6 +28,8 @@ public class WechatTokenManager implements DisposableBean {
     /** wechat config of appid and secret */
     private static final Map<String, Wechat> WECHAT_CONFIGS = new HashMap<String, Wechat>() {
         private static final long serialVersionUID = 4891406751053897149L;
+
+        // The init code block for constructor body(non-static code block)
         {
             put(new Wechat("wx0a7a9ac2a6e0f7e7", "4516f601af973d42cbfee3b7ca7cff34"));
             //put(new Wechat("appid", "secret"));
@@ -216,7 +218,8 @@ public class WechatTokenManager implements DisposableBean {
     }
 
     /**
-     * 获取分布式锁
+     * Returns the distributed lock
+     * 
      * @param lockKey
      * @param timeout
      * @return

@@ -349,7 +349,7 @@ public final class Http {
         }
     }
 
-    // ------------------------------------------------------response heads
+    // ------------------------------------------------------response headers
     public Map<String, List<String>> getRespHeaders() {
         return respHeaders;
     }
@@ -435,11 +435,13 @@ public final class Http {
     }
 
     private void disconnect(HttpRequest request) {
-        this.respHeaders = request.headers(); // get the response heads
-        if (request != null) try {
-            request.disconnect();
-        } catch (Exception ignored) {
-            ignored.printStackTrace();
+        if (request != null) {
+            this.respHeaders = request.headers(); // get the response headers
+            try {
+                request.disconnect();
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
+            }
         }
     }
 

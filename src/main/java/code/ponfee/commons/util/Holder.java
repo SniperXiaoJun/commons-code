@@ -1,7 +1,6 @@
 package code.ponfee.commons.util;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * 变量持有，用于lambda方法体内
@@ -87,7 +86,7 @@ public final class Holder<T> {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof Optional)) {
+        if (!(obj instanceof Holder)) {
             return false;
         }
 

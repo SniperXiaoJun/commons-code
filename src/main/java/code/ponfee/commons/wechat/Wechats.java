@@ -40,14 +40,15 @@ public class Wechats {
      */
     public static final String buildAuthorizeUrl(String appid, String charset, 
                                                  String redirect, String state, String scope) {
-        String url = "https://open.weixin.qq.com/connect/oauth2/authorize";
         Map<String, String> params = new LinkedHashMap<>();
         params.put("appid", appid);
         params.put("redirect_uri", redirect);
         params.put("response_type", "code");
         params.put("scope", scope);
         params.put("state", state);
-        return HttpParams.buildUrlPath(url, charset, params) + "#wechat_redirect";
+        return HttpParams.buildUrlPath(
+                   "https://open.weixin.qq.com/connect/oauth2/authorize", charset, params
+               ) + "#wechat_redirect";
     }
 
     // -------------------------通过授权地址的回调参数code换取网页授权access_token和openId------------------------- //
@@ -221,11 +222,12 @@ public class Wechats {
     }
 
     /**
-     * 分享链接到朋友圈
-     * @param jsapiTicket
-     * @param appid
-     * @param url
-     * @return
+     * Returns the share url link to the wechat friend moments
+     * 
+     * @param jsapiTicket the jsapi ticket, {@link #getJsapiTicket(String)}
+     * @param appid       the wechat appid
+     * @param url         the url link
+     * @return the share url data with signurate give to client use
      */
     public static Map<String, String> shareUrl(String jsapiTicket, String appid, String url) {
         Map<String, String> map = new HashMap<>();
@@ -240,7 +242,7 @@ public class Wechats {
         return map;
     }
 
-    // ----------------------------private methods---------------------------
+    // -------------------------------------------------------private methods
     private static void checkError(Map<String, ?> result) {
         Object errcode = result.get("errcode");
         if (errcode != null && !"0".equals(errcode.toString())) {
