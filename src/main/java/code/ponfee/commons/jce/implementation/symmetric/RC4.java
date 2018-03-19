@@ -1,9 +1,12 @@
-package code.ponfee.commons.jce.crypto;
+package code.ponfee.commons.jce.implementation.symmetric;
 
 import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import code.ponfee.commons.jce.symmetric.Algorithm;
+import code.ponfee.commons.jce.symmetric.SymmetricCryptor;
+import code.ponfee.commons.jce.symmetric.SymmetricCryptorBuilder;
 import code.ponfee.commons.util.MavenProjects;
 
 /**

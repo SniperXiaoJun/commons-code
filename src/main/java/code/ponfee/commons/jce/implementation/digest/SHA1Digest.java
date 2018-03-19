@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.digest;
+package code.ponfee.commons.jce.implementation.digest;
 
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
@@ -6,6 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.commons.codec.binary.Hex;
 
 import code.ponfee.commons.jce.DigestAlgorithms;
+import code.ponfee.commons.jce.digest.DigestUtils;
 import code.ponfee.commons.math.Maths;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;

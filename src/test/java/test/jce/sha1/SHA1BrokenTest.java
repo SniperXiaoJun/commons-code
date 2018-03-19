@@ -11,7 +11,7 @@ import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.jce.digest.DigestUtils;
 import code.ponfee.commons.jce.digest.HmacUtils;
-import code.ponfee.commons.jce.digest.SHA1Digest;
+import code.ponfee.commons.jce.implementation.digest.SHA1Digest;
 import code.ponfee.commons.util.MavenProjects;
 
 public class SHA1BrokenTest {

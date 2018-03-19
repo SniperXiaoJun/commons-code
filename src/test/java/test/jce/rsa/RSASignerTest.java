@@ -9,8 +9,8 @@ import org.junit.Test;
 
 import com.google.common.base.Stopwatch;
 
-import code.ponfee.commons.jce.rsa.RSAKey;
-import code.ponfee.commons.jce.rsa.RSASigner;
+import code.ponfee.commons.jce.implementation.rsa.RSAKey;
+import code.ponfee.commons.jce.implementation.rsa.RSASigner;
 import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSAPrivateKeys;
 import code.ponfee.commons.jce.security.RSAPublicKeys;

@@ -1,14 +1,18 @@
 package code.ponfee.commons.json;
 
+import java.io.IOException;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-
 /**
- * 基于jackson的json工具类
+ * The jason utility based jackson
+ * 
  * @author fupf
  */
 public final class Jsons {
@@ -78,13 +82,15 @@ public final class Jsons {
 
     /**
      * deserialize a json to target class object
+     * {@code mapper.readValue(json, new TypeReference<Map<String, Object>>() {})}
+     * 
      * @param json json string
      * @param target target class
      * @return target object
      * @throws code.ponfee.commons.json.JsonException   the exception for json
      */
     public <T> T parse(String json, Class<T> target) throws JsonException {
-        if (isEmpty(json)) {
+        if (StringUtils.isEmpty(json)) {
             return null;
         }
 
@@ -96,7 +102,28 @@ public final class Jsons {
     }
 
     /**
-     * 反序列化集合对象
+     * Deserialize the json string to java object
+     * 
+     * @param json The json string
+     * @param type The TypeReference specified java type
+     * @return A java object
+     * @throws JsonException
+     */
+    public <T> T parse(String json, TypeReference<T> type) throws JsonException {
+        if (StringUtils.isEmpty(json)) {
+            return null;
+        }
+
+        try {
+            return mapper.readValue(json, type);
+        } catch (Exception e) {
+            throw new JsonException(e);
+        }
+    }
+
+    /**
+     * Deserialize the json string, specified collections class and element class
+     * 
      * @param json          the json string
      * @param collectClass  the collection class type
      * @param elemClasses   the element class type
@@ -109,7 +136,8 @@ public final class Jsons {
     }
 
     /**
-     * 反序列化
+     * Deserialize the json string to java object
+     * 
      * @param json json string
      * @param javaType JavaType
      * @return the javaType's object
@@ -117,7 +145,7 @@ public final class Jsons {
      * @see #createCollectionType(Class, Class...)
      */
     public <T> T parse(String json, JavaType javaType) throws JsonException {
-        if (isEmpty(json)) {
+        if (StringUtils.isEmpty(json)) {
             return null;
         }
 
@@ -134,14 +162,14 @@ public final class Jsons {
      * @param elemClasses element class
      * @return JavaType
      */
-    public JavaType createCollectionType(Class<?> collecClass, 
-                                         Class<?>... elemClasses) {
+    public <T> JavaType createCollectionType(Class<T> collecClass, 
+                                             Class<?>... elemClasses) {
         return mapper.getTypeFactory()
                      .constructParametricType(collecClass, elemClasses);
     }
 
     // ----------------------------------------------------static methods
-    public static <T>  String toJson(T target) {
+    public static <T> String toJson(T target) {
         return NORMAL.stringify(target);
     }
 
@@ -149,11 +177,17 @@ public final class Jsons {
         return NORMAL.parse(json, target);
     }
 
+    public static <T> T fromJson(String json, TypeReference<T> type) {
+        return NORMAL.parse(json, type);
+    }
+
     public static <T> T fromJson(String json, JavaType javaType) {
         return NORMAL.parse(json, javaType);
     }
 
-    private static boolean isEmpty(String str) {
-        return str == null || str.isEmpty();
+    public static <T> T fromJson(String json, Class<T> collectClass, 
+                                 Class<?>... elemClasses) {
+        return NORMAL.parse(json, collectClass, elemClasses);
     }
+
 }

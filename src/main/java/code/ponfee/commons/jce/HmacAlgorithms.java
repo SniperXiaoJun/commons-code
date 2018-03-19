@@ -3,7 +3,7 @@ package code.ponfee.commons.jce;
 import com.google.common.collect.ImmutableBiMap;
 
 /**
- * Hamc算法
+ * The Hamc Algorithms
  * @author Ponfee
  */
 public enum HmacAlgorithms {

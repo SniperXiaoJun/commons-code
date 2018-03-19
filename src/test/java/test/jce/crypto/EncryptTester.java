@@ -5,11 +5,11 @@ import static code.ponfee.commons.util.SecureRandoms.nextBytes;
 import java.security.Provider;
 
 import code.ponfee.commons.jce.Providers;
-import code.ponfee.commons.jce.crypto.Algorithm;
-import code.ponfee.commons.jce.crypto.Mode;
-import code.ponfee.commons.jce.crypto.Padding;
-import code.ponfee.commons.jce.crypto.SymmetricCryptor;
-import code.ponfee.commons.jce.crypto.SymmetricCryptorBuilder;
+import code.ponfee.commons.jce.symmetric.Algorithm;
+import code.ponfee.commons.jce.symmetric.Mode;
+import code.ponfee.commons.jce.symmetric.Padding;
+import code.ponfee.commons.jce.symmetric.SymmetricCryptor;
+import code.ponfee.commons.jce.symmetric.SymmetricCryptorBuilder;
 
 public class EncryptTester {
 

@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.crypto;
+package code.ponfee.commons.jce.symmetric;
 
 /**
  * 对称加密分组模式<p>

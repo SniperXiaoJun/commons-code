@@ -6,11 +6,11 @@ import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jce.CryptoProvider;
 import code.ponfee.commons.jce.ECParameters;
 import code.ponfee.commons.jce.Providers;
-import code.ponfee.commons.jce.crypto.Algorithm;
-import code.ponfee.commons.jce.crypto.Mode;
-import code.ponfee.commons.jce.crypto.Padding;
-import code.ponfee.commons.jce.crypto.SymmetricCryptorBuilder;
 import code.ponfee.commons.jce.sm.SM2;
+import code.ponfee.commons.jce.symmetric.Algorithm;
+import code.ponfee.commons.jce.symmetric.Mode;
+import code.ponfee.commons.jce.symmetric.Padding;
+import code.ponfee.commons.jce.symmetric.SymmetricCryptorBuilder;
 import code.ponfee.commons.util.MavenProjects;
 
 public class CryptoProviderTest {

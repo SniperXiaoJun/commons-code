@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.ecc;
+package code.ponfee.commons.jce.implementation.ecc;
 
 import static code.ponfee.commons.jce.Providers.BC;
 import static code.ponfee.commons.jce.digest.HmacUtils.crypt;
@@ -6,9 +6,9 @@ import static code.ponfee.commons.jce.digest.HmacUtils.crypt;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import code.ponfee.commons.jce.Cryptor;
 import code.ponfee.commons.jce.HmacAlgorithms;
-import code.ponfee.commons.jce.Key;
+import code.ponfee.commons.jce.implementation.Cryptor;
+import code.ponfee.commons.jce.implementation.Key;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.SecureRandoms;
 

@@ -19,8 +19,9 @@ import javax.crypto.SecretKey;
 
 import com.google.common.collect.ImmutableMap;
 
+import code.ponfee.commons.jce.symmetric.Algorithm;
+
 import static  code.ponfee.commons.jce.Providers.*;
-import code.ponfee.commons.jce.crypto.Algorithm;
 
 /**
  * ECDH Key Exchange

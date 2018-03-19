@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.rsa;
+package code.ponfee.commons.jce.implementation.rsa;
 
 import java.io.IOException;
 import java.util.Arrays;

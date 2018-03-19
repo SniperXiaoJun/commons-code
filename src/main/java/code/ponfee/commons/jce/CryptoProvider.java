@@ -10,11 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.jce.crypto.SymmetricCryptor;
 import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSAPrivateKeys;
 import code.ponfee.commons.jce.security.RSAPublicKeys;
 import code.ponfee.commons.jce.sm.SM2;
+import code.ponfee.commons.jce.symmetric.SymmetricCryptor;
 
 /**
  * 加解密服务提供

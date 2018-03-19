@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.rsa;
+package code.ponfee.commons.jce.implementation.rsa;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +11,7 @@ import org.apache.commons.io.IOUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 
-import code.ponfee.commons.jce.Key;
+import code.ponfee.commons.jce.implementation.Key;
 import code.ponfee.commons.util.SecureRandoms;
 import sun.security.util.DerInputStream;
 import sun.security.util.DerOutputStream;

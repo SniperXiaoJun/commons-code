@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce;
+package code.ponfee.commons.jce.implementation;
 
 /**
  * This class of the Cryptor base class

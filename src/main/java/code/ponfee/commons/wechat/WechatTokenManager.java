@@ -21,6 +21,9 @@ import code.ponfee.commons.jedis.JedisLock;
  * 
  * wechat global token and jsapi ticket manager
  * 微信accesstoken刷新会平滑过渡，官方文档给出的是5分钟
+ * http://qydev.weixin.qq.com/wiki/index.php?title=%E4%B8%BB%E5%8A%A8%E8%B0%83%E7%94%A8
+ * https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1445241432
+ * 
  * @author Ponfee
  */
 public class WechatTokenManager implements DisposableBean {

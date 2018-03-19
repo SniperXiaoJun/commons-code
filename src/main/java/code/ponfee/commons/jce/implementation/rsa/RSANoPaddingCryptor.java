@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.rsa;
+package code.ponfee.commons.jce.implementation.rsa;
 
 import static org.apache.commons.lang3.math.NumberUtils.min;
 
@@ -10,8 +10,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.jce.Cryptor;
-import code.ponfee.commons.jce.Key;
+import code.ponfee.commons.jce.implementation.Cryptor;
+import code.ponfee.commons.jce.implementation.Key;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**

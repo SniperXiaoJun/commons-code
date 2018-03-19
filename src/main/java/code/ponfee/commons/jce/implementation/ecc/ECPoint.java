@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.ecc;
+package code.ponfee.commons.jce.implementation.ecc;
 
 import java.math.BigInteger;
 

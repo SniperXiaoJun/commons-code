@@ -4,8 +4,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import code.ponfee.commons.jce.Cryptor;
-import code.ponfee.commons.jce.Key;
+import code.ponfee.commons.jce.implementation.Cryptor;
+import code.ponfee.commons.jce.implementation.Key;
 
 public class CryptoOutputStream extends OutputStream {
     private DataOutputStream out;

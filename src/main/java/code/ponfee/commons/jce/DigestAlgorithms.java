@@ -1,7 +1,8 @@
 package code.ponfee.commons.jce;
 
 /**
- * Hash算法
+ * The Digest Algorithms
+ * 
  * @author Ponfee
  */
 public enum DigestAlgorithms {

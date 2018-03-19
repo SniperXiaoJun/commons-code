@@ -3,8 +3,8 @@ package test.jce.ecc0;
 import java.math.BigInteger;
 
 import code.ponfee.commons.jce.ECParameters;
-import code.ponfee.commons.jce.ecc.ECPoint;
-import code.ponfee.commons.jce.ecc.EllipticCurve;
+import code.ponfee.commons.jce.implementation.ecc.ECPoint;
+import code.ponfee.commons.jce.implementation.ecc.EllipticCurve;
 
 public class EllipticCurveTest {
 

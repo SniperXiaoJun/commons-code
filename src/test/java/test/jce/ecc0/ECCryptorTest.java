@@ -4,12 +4,12 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import code.ponfee.commons.jce.Cryptor;
 import code.ponfee.commons.jce.ECParameters;
-import code.ponfee.commons.jce.Key;
-import code.ponfee.commons.jce.NullCryptor;
-import code.ponfee.commons.jce.ecc.ECCryptor;
-import code.ponfee.commons.jce.ecc.EllipticCurve;
+import code.ponfee.commons.jce.implementation.Cryptor;
+import code.ponfee.commons.jce.implementation.Key;
+import code.ponfee.commons.jce.implementation.NullCryptor;
+import code.ponfee.commons.jce.implementation.ecc.ECCryptor;
+import code.ponfee.commons.jce.implementation.ecc.EllipticCurve;
 import code.ponfee.commons.util.IdcardResolver;
 import code.ponfee.commons.util.MavenProjects;
 

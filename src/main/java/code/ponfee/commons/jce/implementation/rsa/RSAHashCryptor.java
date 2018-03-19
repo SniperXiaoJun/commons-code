@@ -1,4 +1,4 @@
-package code.ponfee.commons.jce.rsa;
+package code.ponfee.commons.jce.implementation.rsa;
 
 import static code.ponfee.commons.jce.Providers.BC;
 import static code.ponfee.commons.jce.digest.HmacUtils.crypt;
@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jce.HmacAlgorithms;
-import code.ponfee.commons.jce.Key;
+import code.ponfee.commons.jce.implementation.Key;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.SecureRandoms;
 

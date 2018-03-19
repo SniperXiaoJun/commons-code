@@ -13,11 +13,11 @@ import org.junit.Test;
 
 import com.google.common.base.Stopwatch;
 
-import code.ponfee.commons.jce.Key;
-import code.ponfee.commons.jce.rsa.RSAHashCryptor;
-import code.ponfee.commons.jce.rsa.RSAKey;
-import code.ponfee.commons.jce.rsa.RSANoPaddingCryptor;
-import code.ponfee.commons.jce.rsa.RSAPKCS1PaddingCryptor;
+import code.ponfee.commons.jce.implementation.Key;
+import code.ponfee.commons.jce.implementation.rsa.RSAHashCryptor;
+import code.ponfee.commons.jce.implementation.rsa.RSAKey;
+import code.ponfee.commons.jce.implementation.rsa.RSANoPaddingCryptor;
+import code.ponfee.commons.jce.implementation.rsa.RSAPKCS1PaddingCryptor;
 import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSAPrivateKeys;
 import code.ponfee.commons.jce.security.RSAPublicKeys;

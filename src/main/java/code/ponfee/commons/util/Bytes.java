@@ -530,16 +530,16 @@ public final class Bytes {
     }
 
     /**
-     * reverse the byte array between fromIndex and toIndex
+     * reverse the byte array between fromIndexInclusive and toIndexExclusive
      * @param array
-     * @param fromIndex
-     * @param toIndex
+     * @param fromIndexInclusive
+     * @param toIndexExclusive
      */
-    public static void reverse(byte[] array, int fromIndex, int toIndex) {
+    public static void reverse(byte[] array, int fromIndexInclusive, int toIndexExclusive) {
         checkNotNull(array);
-        checkPositionIndexes(fromIndex, toIndex, array.length);
+        checkPositionIndexes(fromIndexInclusive, toIndexExclusive, array.length);
         byte tmp;
-        for (int i = fromIndex, j = toIndex - 1; i < j; i++, j--) {
+        for (int i = fromIndexInclusive, j = toIndexExclusive - 1; i < j; i++, j--) {
             tmp = array[i];
             array[i] = array[j];
             array[j] = tmp;

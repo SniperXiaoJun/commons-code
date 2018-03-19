@@ -20,7 +20,7 @@ import javax.crypto.interfaces.DHPublicKey;
 
 import com.google.common.collect.ImmutableMap;
 
-import code.ponfee.commons.jce.crypto.Algorithm;
+import code.ponfee.commons.jce.symmetric.Algorithm;
 import code.ponfee.commons.util.MavenProjects;
 
 /**
