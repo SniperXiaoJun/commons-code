@@ -173,7 +173,8 @@ public class MailSender {
         try {
             MimeMessage message = new MimeMessage(session);
 
-            String from = StringUtils.isEmpty(nickname) ? user : MimeUtility.encodeText(nickname) + "<" + user + ">";
+            String from = StringUtils.isEmpty(nickname) 
+                          ? user : MimeUtility.encodeText(nickname) + "<" + user + ">";
             message.setFrom(new InternetAddress(from));
 
             Address[] t = verifyEmails(envlop.getTo()); // 发送

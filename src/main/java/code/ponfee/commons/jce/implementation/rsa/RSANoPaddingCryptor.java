@@ -18,7 +18,7 @@ import code.ponfee.commons.util.SecureRandoms;
  * http://blog.51cto.com/xnuil/1698673
  * 
  * RSA Cryptor, Without padding
- * RSA私钥解密证明：
+ * RSA私钥解密证明：费马小定理（欧拉定理特例）
  *  等同证明：c^d ≡ m (mod n)
  *      因为：m^e ≡ c (mod n)
  *  于是，c可以写成：c = m^e - kn
@@ -27,6 +27,7 @@ import code.ponfee.commons.util.SecureRandoms;
  *  由于：ed ≡ 1 (mod φ(n))
  *  所以：ed = hφ(n)+1
  *  得出：m^(hφ(n)+1) ≡ m (mod n)
+ *  
  * @author Ponfee
  */
 public class RSANoPaddingCryptor extends Cryptor {
@@ -50,7 +51,7 @@ public class RSANoPaddingCryptor extends Cryptor {
     }
 
     public int getOriginBlockSize(RSAKey rsaKey) {
-        // 减一个byte为了防止溢出
+        // 减一个byte为了防止溢出(byte array less than mod)
         // 此时BigInteger(1, byte[getOriginBlockSize(rsaKey)]) < rsaKey.n
         return rsaKey.n.bitLength() / 8 - 1;
     }
@@ -79,6 +80,7 @@ public class RSANoPaddingCryptor extends Cryptor {
         return this.getClass().getSimpleName();
     }
 
+    // ---------------------------------------------------------------do crypt methods
     protected byte[] encrypt(byte[] input, int length, Key ek, boolean isPadding) {
         RSAKey rsaKey = (RSAKey) ek;
         BigInteger exponent = this.getExponent(rsaKey);
@@ -215,7 +217,7 @@ public class RSANoPaddingCryptor extends Cryptor {
         }
     }
 
-    // --------------------------------private methods-------------------------------
+    // ---------------------------------------------------------------private methods
     /**
      * 
      * @param data        the data
@@ -278,7 +280,7 @@ public class RSANoPaddingCryptor extends Cryptor {
      * @param to     结束位置
      * @param cipherBlockSize 模字节长（modules/8）
      * @param rsaKey 密钥
-     * @return
+     * @return the encrypting block with pkcs1 padding
      */
     private static byte[] encodeBlock(byte[] input, int from, int to, 
                                       int cipherBlockSize, RSAKey rsaKey) {

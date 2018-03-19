@@ -2,7 +2,6 @@ package code.ponfee.commons.jce.sm;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.util.Arrays;
@@ -140,16 +139,12 @@ public final class SM4 {
         }
         ByteArrayInputStream bins = new ByteArrayInputStream(input);
         ByteArrayOutputStream bous = new ByteArrayOutputStream();
-        try {
-            for (int length = input.length; length > 0; length -= 16) {
-                byte[]  in = new byte[16];
-                byte[] out = new byte[16];
-                bins.read(in);
-                oneRound(sk, in, out);
-                bous.write(out);
-            }
-        } catch (IOException e) {
-            throw new SecurityException(e); // cannot happened
+        for (int length = input.length; length > 0; length -= 16) {
+            byte[] in = new byte[16];
+            byte[] out = new byte[16];
+            bins.read(in, 0, in.length);
+            oneRound(sk, in, out);
+            bous.write(out, 0, out.length);
         }
 
         byte[] output = bous.toByteArray();
@@ -184,40 +179,36 @@ public final class SM4 {
         ByteArrayInputStream bins  = new ByteArrayInputStream(input);
         ByteArrayOutputStream bous = new ByteArrayOutputStream();
         int i = 0, length = input.length;
-        try {
-            if (mode == ENCRYPT_MODE) {
-                for (; length > 0; length -= 16) {
-                    byte[] in = new byte[16];
-                    byte[] out = new byte[16];
-                    byte[] out1 = new byte[16];
+        if (mode == ENCRYPT_MODE) {
+            for (; length > 0; length -= 16) {
+                byte[] in = new byte[16];
+                byte[] out = new byte[16];
+                byte[] out1 = new byte[16];
 
-                    bins.read(in);
-                    for (i = 0; i < 16; i++) {
-                        out[i] = ((byte) (in[i] ^ iv[i]));
-                    }
-                    oneRound(sk, out, out1);
-                    System.arraycopy(out1, 0, iv, 0, 16);
-                    bous.write(out1);
+                bins.read(in, 0, in.length);
+                for (i = 0; i < 16; i++) {
+                    out[i] = ((byte) (in[i] ^ iv[i]));
                 }
-            } else {
-                byte[] temp = new byte[16];
-                for (; length > 0; length -= 16) {
-                    byte[] in   = new byte[16];
-                    byte[] out  = new byte[16];
-                    byte[] out1 = new byte[16];
-
-                    bins.read(in);
-                    System.arraycopy(in, 0, temp, 0, 16);
-                    oneRound(sk, in, out);
-                    for (i = 0; i < 16; i++) {
-                        out1[i] = ((byte) (out[i] ^ iv[i]));
-                    }
-                    System.arraycopy(temp, 0, iv, 0, 16);
-                    bous.write(out1);
-                }
+                oneRound(sk, out, out1);
+                System.arraycopy(out1, 0, iv, 0, 16);
+                bous.write(out1, 0, out1.length);
             }
-        } catch (IOException e) {
-            throw new SecurityException(e); // cannot happened
+        } else {
+            byte[] temp = new byte[16];
+            for (; length > 0; length -= 16) {
+                byte[] in = new byte[16];
+                byte[] out = new byte[16];
+                byte[] out1 = new byte[16];
+
+                bins.read(in, 0, in.length);
+                System.arraycopy(in, 0, temp, 0, 16);
+                oneRound(sk, in, out);
+                for (i = 0; i < 16; i++) {
+                    out1[i] = ((byte) (out[i] ^ iv[i]));
+                }
+                System.arraycopy(temp, 0, iv, 0, 16);
+                bous.write(out1, 0, out1.length);
+            }
         }
 
         byte[] output = bous.toByteArray();

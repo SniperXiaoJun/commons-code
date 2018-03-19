@@ -30,6 +30,12 @@ public class RC4 {
     /** variables to hold the state of the RC4  during encryption and decryption */
     private final byte[] sBox;
 
+    /**
+     * Constructs a RC4 Cryptor, input the specified key byte array 
+     * and init the sbox in this methods
+     * 
+     * @param keyBytes
+     */
     public RC4(byte[] keyBytes) {
         // KSA：密钥调度算法
         // 生成并填充s-box
@@ -50,10 +56,7 @@ public class RC4 {
         }
     }
 
-    public byte decrypt(byte in) {
-        return this.encrypt(in);
-    }
-
+    // -----------------------------------------------------------crypt one byte
     public byte encrypt(byte in) {
         byte[] sBox = Arrays.copyOf(this.sBox, this.sBox.length);
         int x = 1;
@@ -65,21 +68,23 @@ public class RC4 {
         return (byte) (in ^ sBox[(sBox[x] + sBox[y]) & 0xFF]);
     }
 
+    public byte decrypt(byte in) {
+        return this.encrypt(in);
+    }
+
+    // -----------------------------------------------------------crypt byte array
+    public byte[] encrypt(byte[] in) {
+        byte[] out = new byte[in.length];
+        this.docrypt(in, 0, in.length, out, 0);
+        return out;
+    }
+
     public byte[] decrypt(byte[] in) {
         return this.encrypt(in);
     }
 
-    public byte[] encrypt(byte[] in) {
-        byte[] out = new byte[in.length];
-        this.encrypt(in, 0, in.length, out, 0);
-        return out;
-    }
-
-    public int decrypt(byte[] in, int inOff, int len, byte[] out, int outOff) {
-        return this.encrypt(in, inOff, len, out, outOff);
-    }
-
-    public int encrypt(byte[] in, int inOff, int len, byte[] out, int outOff) {
+    // -----------------------------------------------------------private methods
+    private void docrypt(byte[] in, int inOff, int len, byte[] out, int outOff) {
         byte[] sBox = Arrays.copyOf(this.sBox, this.sBox.length);
 
         // RPGA：伪随机生成算法，不断的重排S盒来产生任意长度的密钥流
@@ -92,8 +97,6 @@ public class RC4 {
             // xor
             out[i + outOff] = (byte) (in[i + inOff] ^ sBox[(sBox[x] + sBox[y]) & 0xFF]);
         }
-
-        return len;
     }
 
     public static void main(String[] args) {

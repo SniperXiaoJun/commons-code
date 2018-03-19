@@ -229,10 +229,10 @@ public final class ObjectUtils {
         long most  = uuid.getMostSignificantBits(), 
              least = uuid.getLeastSignificantBits();
        return new byte[] {
-           (byte) (most >>> 56), (byte) (most >>> 48),
-           (byte) (most >>> 40), (byte) (most >>> 32),
-           (byte) (most >>> 24), (byte) (most >>> 16),
-           (byte) (most >>>  8), (byte) (most       ),
+           (byte) (most  >>> 56), (byte) (most  >>> 48),
+           (byte) (most  >>> 40), (byte) (most  >>> 32),
+           (byte) (most  >>> 24), (byte) (most  >>> 16),
+           (byte) (most  >>>  8), (byte) (most        ),
 
            (byte) (least >>> 56), (byte) (least >>> 48),
            (byte) (least >>> 40), (byte) (least >>> 32),

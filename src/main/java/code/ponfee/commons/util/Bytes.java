@@ -349,6 +349,7 @@ public final class Bytes {
               (bytes[  fromIdx]       ) << 8 
             | (bytes[++fromIdx] & 0xFF) 
         );
+        //return ByteBuffer.wrap(bytes, fromIdx, Short.BYTES).getLong();
         //ByteBuffer buffer = ByteBuffer.allocate(Short.BYTES);
         //buffer.put(bytes, fromIdx, Short.BYTES).flip();
         //return buffer.getShort();
@@ -511,17 +512,13 @@ public final class Bytes {
         return result;
 
         /*ByteArrayOutputStream baos = new ByteArrayOutputStream(totalLength);
-        try {
-            baos.write(first);
-            for (byte[] array : rest) {
-                if (array != null) {
-                    baos.write(array);
-                }
+        baos.write(first, 0, first.length);
+        for (byte[] array : rest) {
+            if (array != null) {
+                baos.write(array, 0, array.length);
             }
-            return baos.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException(e); // cannot happened
-        }*/
+        }
+        return baos.toByteArray();*/
     }
 
     public static void reverse(byte[] array) {

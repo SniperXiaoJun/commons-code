@@ -52,6 +52,8 @@ import code.ponfee.commons.util.Bytes;
  * </pre>
  * http://www.atool.org/httptest.php
  * 
+ * Restful：https://www.cnblogs.com/pixy/p/4838268.html
+ * 
  * http工具类
  * @author Ponfee
  */
@@ -372,7 +374,7 @@ public final class Http {
         }
 
         List<String> values = respHeaders.get(name);
-        return values == null || values.isEmpty()
+        return (values == null || values.isEmpty())
                ? null : values.get(0);
     }
 
@@ -446,14 +448,14 @@ public final class Http {
     }
 
     /**
-     * http method
+     * Http method
      */
     private static enum HttpMethod {
         GET, POST, PUT, DELETE, HEAD, TRACE, OPTIONS;
     }
 
     /**
-     * 文件
+     * File upload
      */
     private static final class MimePart {
         final String formName;    // 表单域字段名
