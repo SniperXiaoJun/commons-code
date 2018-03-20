@@ -7,9 +7,9 @@
     <bean id="jedisClient" class="code.ponfee.commons.jedis.JedisClient" destroy-method="destroy">
         <constructor-arg index="0">
             <bean class="redis.clients.jedis.JedisPoolConfig">
-                <property name="maxTotal" value="300" />
-                <property name="maxIdle" value="200" />
-                <property name="minIdle" value="100" />
+                <property name="maxTotal" value="200" />
+                <property name="maxIdle" value="10" />
+                <property name="minIdle" value="1" />
                 <property name="maxWaitMillis" value="10000" />
                 <property name="testOnBorrow" value="false" />
                 <property name="testOnReturn" value="false" />
@@ -29,9 +29,9 @@
     <!-- <bean id="jedisClient" class="code.ponfee.commons.jedis.JedisClient" destroy-method="destroy">
         <constructor-arg index="0">
             <bean class="redis.clients.jedis.JedisPoolConfig">
-                <property name="maxTotal" value="300" />
-                <property name="maxIdle" value="200" />
-                <property name="minIdle" value="100" />
+                <property name="maxTotal" value="200" />
+                <property name="maxIdle" value="10" />
+                <property name="minIdle" value="1" />
                 <property name="maxWaitMillis" value="10000" />
                 <property name="testOnBorrow" value="false" />
                 <property name="testOnReturn" value="false" />

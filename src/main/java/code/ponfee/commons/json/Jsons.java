@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * The jason utility based jackson
+ * The json utility based jackson
  * 
  * @author fupf
  */
@@ -20,10 +20,10 @@ public final class Jsons {
     /** 标准（不排除任何属性） */
     public static final Jsons NORMAL = new Jsons(null);
 
-    /** 忽略对象中值为 null */
+    /** 忽略对象中值为 null的属性*/
     public static final Jsons NON_NULL = new Jsons(JsonInclude.Include.NON_NULL);
 
-    /** 忽略对象中值为 null 或 "" 的属性 */
+    /** 忽略对象中值为 null或 ""的属性 */
     public static final Jsons NON_EMPTY = new Jsons(JsonInclude.Include.NON_EMPTY);
 
     /** 忽略对象中值为默认值的属性（慎用） */
@@ -169,8 +169,12 @@ public final class Jsons {
     }
 
     // ----------------------------------------------------static methods
-    public static <T> String toJson(T target) {
+    public static String toJson(Object target) {
         return NORMAL.stringify(target);
+    }
+
+    public static byte[] toBytes(Object target) {
+        return NORMAL.serialize(target);
     }
 
     public static <T> T fromJson(String json, Class<T> target) {

@@ -572,10 +572,13 @@ public class ExcelUtils {
             return null;
         }
         CellType cellType = cell.getCellTypeEnum();
-        if (cellType == CellType.BLANK) return null;
-        else if (cellType == CellType.BOOLEAN) return cell.getBooleanCellValue();
-        else if (cellType == CellType.ERROR) return cell.getErrorCellValue();
-        else if (cellType == CellType.FORMULA) {
+        if (cellType == CellType.BLANK) {
+            return null;
+        } else if (cellType == CellType.BOOLEAN) {
+            return cell.getBooleanCellValue();
+        } else if (cellType == CellType.ERROR) {
+            return cell.getErrorCellValue();
+        } else if (cellType == CellType.FORMULA) {
             try {
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return cell.getDateCellValue();
@@ -591,8 +594,11 @@ public class ExcelUtils {
             } else {
                 return cell.getNumericCellValue();
             }
-        } else if (cellType == CellType.STRING) return cell.getStringCellValue();
-        else return null;
+        } else if (cellType == CellType.STRING) {
+            return cell.getStringCellValue();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -742,6 +748,7 @@ public class ExcelUtils {
             this.property = property;
         }
 
+        @Override
         public int compare(final T o1, final T o2) {
             if (property == null) {
                 return internalCompare(o1, o2);

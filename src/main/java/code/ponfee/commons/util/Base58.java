@@ -218,6 +218,7 @@ public class Base58 {
     }
 
     private static byte[] checksum(byte[] data) {
+        // twice sha256
         byte[] twiceSha256 = DigestUtils.sha256(DigestUtils.sha256(data));
         return Arrays.copyOfRange(twiceSha256, 0, 4); // take previous 4 bytes
     }

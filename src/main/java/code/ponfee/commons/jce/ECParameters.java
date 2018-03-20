@@ -177,7 +177,8 @@ public class ECParameters implements java.io.Serializable {
                 bcSpec, new SecureRandom(SecureRandoms.generateSeed(24))
             ));
         } catch (Exception ignored) {
-            //System.err.println(this.toString()); // x value invalid in Fp field element
+            // x value invalid in Fp field element
+            //System.err.println(this.toString() + ", error:" + ignored.getMessage());
         }
 
         this.curve = curve;

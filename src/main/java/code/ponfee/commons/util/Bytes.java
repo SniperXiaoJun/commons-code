@@ -15,6 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
 
+import code.ponfee.commons.math.Numbers;
+
 /**
  * byte[]
  * 转hex：new BigInteger(1, bytes).toString(16);
@@ -134,7 +136,7 @@ public final class Bytes {
         // one byte -> two char
         for (int i = 0, j = 0; i < len; i++) {
             out[j++] = codes[(0xF0 & bytes[i]) >>> 4];
-            out[j++] = codes[0x0F & bytes[i]];
+            out[j++] = codes[ 0x0F & bytes[i]       ];
         }
         return new String(out);
     }
@@ -557,10 +559,15 @@ public final class Bytes {
      */
     public static void copy(byte[] src, int srcFrom, int srcLen,
                             byte[] dest, int destFrom, int destLen) {
-        int  srcTo = Math.min(src.length, srcFrom + srcLen),
-            destTo = Math.min(dest.length, destFrom + destLen);
+        copy(src, srcFrom, srcLen, dest, destFrom, destLen, Numbers.BYTE_ZERO);
+    }
+
+    public static void copy(byte[] src, int srcFrom, int srcLen, byte[] dest, 
+                            int destFrom, int destLen, byte heading) {
+        int srcTo = Math.min(src.length, srcFrom + srcLen),
+           destTo = Math.min(dest.length, destFrom + destLen);
         for (int i = destTo - 1, j = srcTo - 1; i >= destFrom; i--, j--) {
-            dest[i] = (j < srcFrom) ? 0x00 : src[j];
+            dest[i] = (j < srcFrom) ? heading : src[j];
         }
     }
 

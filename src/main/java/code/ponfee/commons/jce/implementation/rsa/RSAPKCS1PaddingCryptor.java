@@ -31,8 +31,4 @@ public class RSAPKCS1PaddingCryptor extends RSANoPaddingCryptor {
         return rsaKey.n.bitLength() / 8 - 11;
     }
 
-    public @Override int getCipherBlockSize(RSAKey rsaKey) {
-        return rsaKey.n.bitLength() / 8;
-    }
-
 }

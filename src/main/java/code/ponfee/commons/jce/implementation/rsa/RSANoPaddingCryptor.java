@@ -12,6 +12,7 @@ import java.util.Arrays;
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jce.implementation.Cryptor;
 import code.ponfee.commons.jce.implementation.Key;
+import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
@@ -31,8 +32,6 @@ import code.ponfee.commons.util.SecureRandoms;
  * @author Ponfee
  */
 public class RSANoPaddingCryptor extends Cryptor {
-
-    private static final byte ZERO = 0x00;
 
     public @Override byte[] encrypt(byte[] input, int length, Key ek) {
         return encrypt(input, length, ek, false);
@@ -219,20 +218,25 @@ public class RSANoPaddingCryptor extends Cryptor {
 
     // ---------------------------------------------------------------private methods
     /**
+     * When the BigInteger convert to byte array, if head more than two zero
+     * then was automatic trim remain one zreo, if head has not zreo then automatic 
+     * add a zreo. So we should manual control handle it, recover the origin byte 
+     * array of this BigInteger.
      * 
      * @param data        the data
      * @param fixedSize   the result of byte array length
      * @param out         the output stream
      * @throws IOException
      * @see code.ponfee.commons.util.Bytes#toBinary(byte...)
+     * @see code.ponfee.commons.util.Bytes#copy(byte[], int, int, byte[], int, int)
      */
     private static void fixedByteArray(byte[] data, int fixedSize, OutputStream out)
         throws IOException {
         if (data.length < fixedSize) {
-            // 当不用最前面的开头的byte 0（可以有多个）来决定符号位时，此时会被舍去，所以要加前缀0来补全
+            // 当最前面有多个0时，此时会被舍去只留下一个0来充当符号位，所以要加前缀0来补全
             // 加前缀0补全到固定字节数：encryptedBlockSize
             for (int i = 0, heading = fixedSize - data.length; i < heading; i++) {
-                out.write(ZERO);
+                out.write(Numbers.BYTE_ZERO);
             }
             out.write(data, 0, data.length);
         } else {
@@ -244,6 +248,7 @@ public class RSANoPaddingCryptor extends Cryptor {
     /**
      * 当最前面的位为1时，BigInteger会通过加一个byte 0来充当符号位，此时需要手动舍去
      * this method is unsafe, will be lose the prefix byte 0(one or more)
+     * 
      * @param data  the decrypted origin data
      * @param out   the output stream
      * @throws IOException
@@ -253,7 +258,7 @@ public class RSANoPaddingCryptor extends Cryptor {
         throws IOException {
         int i = 0, len = data.length;
         for (; i < len; i++) {
-            if (data[i] != ZERO) {
+            if (data[i] != Numbers.BYTE_ZERO) {
                 break;
             }
         }
@@ -292,7 +297,7 @@ public class RSANoPaddingCryptor extends Cryptor {
         }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(cipherBlockSize);
-        baos.write(ZERO); // 0x00
+        baos.write(Numbers.BYTE_ZERO); // 0x00
 
         if (rsaKey.secret) {
             // 私钥填充
@@ -307,12 +312,12 @@ public class RSANoPaddingCryptor extends Cryptor {
             for (int i = 2, pLen = cipherBlockSize - length - 1; i < pLen; i++) {
                 do {
                     b = (byte) SecureRandoms.nextInt();
-                } while (b == ZERO);
+                } while (b == Numbers.BYTE_ZERO);
                 baos.write(b);
             }
         }
 
-        baos.write(ZERO); // 0x00
+        baos.write(Numbers.BYTE_ZERO); // 0x00
 
         baos.write(input, from, length); // D
         return baos.toByteArray();
@@ -333,7 +338,7 @@ public class RSANoPaddingCryptor extends Cryptor {
         // 0x00 [0x01 | 0x02], so signum is definite on [0x01 | 0x02] then 
         // was removed the first 0x00
         int removedZeroLen;
-        if (input[0] == ZERO) {
+        if (input[0] == Numbers.BYTE_ZERO) {
             removedZeroLen = 0;
         } else {
             removedZeroLen = 1;

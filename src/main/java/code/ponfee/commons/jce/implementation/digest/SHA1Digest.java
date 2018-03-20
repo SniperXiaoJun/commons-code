@@ -8,6 +8,7 @@ import org.apache.commons.codec.binary.Hex;
 import code.ponfee.commons.jce.DigestAlgorithms;
 import code.ponfee.commons.jce.digest.DigestUtils;
 import code.ponfee.commons.math.Maths;
+import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.SecureRandoms;
@@ -327,7 +328,7 @@ public class SHA1Digest {
 
     private static void padding0(byte[] bytes, int from, int to) {
         for (int i = from; i < to; i++) {
-            bytes[i] = 0x00;
+            bytes[i] = Numbers.BYTE_ZERO;
         }
     }
 

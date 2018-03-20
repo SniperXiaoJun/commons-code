@@ -19,6 +19,8 @@ import java.util.Arrays;
 public final class Numbers {
 
     public static final Integer INTEGER_ZERO = Integer.valueOf(0);
+    public static final int     INT_ZERO     = 0;
+    public static final byte    BYTE_ZERO    = 0x00;
 
     // -----------------------------------------------------character convert
     public static char toChar(Object obj, char defaultVal) {
