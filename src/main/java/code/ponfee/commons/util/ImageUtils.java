@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,14 +24,6 @@ import com.google.common.io.Files;
  * @author fupf
  */
 public class ImageUtils {
-
-    public static void main(String[] args) throws IOException {
-        List<byte[]> list = new ArrayList<>();
-        list.add(Files.toByteArray(new File("D:\\imgs\\fox(01-19-16-51-28)(4).png")));
-        list.add(Files.toByteArray(new File("D:\\imgs\\fox(01-19-16-51-28)(6).png")));
-        list.add(Files.toByteArray(new File("D:\\imgs\\fox(01-19-16-51-28)(7).png")));
-        Files.write(mergeVertical(list, "PNG"), new File("d:/out.png"));
-    }
 
     /**
      * 获取图片大小
@@ -138,13 +131,14 @@ public class ImageUtils {
     public static byte[] transparent(byte[] bytes, int refer, int normal) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
-            ImageIcon imageIcon = new ImageIcon(ImageIO.read(new ByteArrayInputStream(bytes)));
-            BufferedImage bufferedImage = new BufferedImage(imageIcon.getIconWidth(), imageIcon.getIconHeight(), BufferedImage.TYPE_4BYTE_ABGR);
-            Graphics2D g2D = (Graphics2D) bufferedImage.getGraphics();
-            g2D.drawImage(imageIcon.getImage(), 0, 0, imageIcon.getImageObserver());
-            for (int alpha, rgb, j, i = bufferedImage.getMinX(); i < bufferedImage.getWidth(); i++) {
-                for (j = bufferedImage.getMinY(); j < bufferedImage.getHeight(); j++) {
-                    rgb = bufferedImage.getRGB(i, j);
+            ImageIcon icon = new ImageIcon(ImageIO.read(new ByteArrayInputStream(bytes)));
+            BufferedImage img = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(),
+                                                   BufferedImage.TYPE_4BYTE_ABGR);
+            Graphics2D g2D = (Graphics2D) img.getGraphics();
+            g2D.drawImage(icon.getImage(), 0, 0, icon.getImageObserver());
+            for (int alpha, rgb, j, i = img.getMinX(); i < img.getWidth(); i++) {
+                for (j = img.getMinY(); j < img.getHeight(); j++) {
+                    rgb = img.getRGB(i, j);
                     if (rgb != 0) { // 0为透明
                         if (compare(rgb, refer)) {
                             alpha = 0; // -1为白色：255 255 255
@@ -152,12 +146,12 @@ public class ImageUtils {
                             alpha = normal; // 默认设置半透明
                         }
                         rgb = (alpha << 24) | (rgb & 0x00ffffff); // 计算rgb
-                        bufferedImage.setRGB(i, j, rgb); // 重新设置rgb
+                        img.setRGB(i, j, rgb); // 重新设置rgb
                     }
                 }
             }
             //g2D.drawImage(bufferedImage, 0, 0, imageIcon.getImageObserver());
-            ImageIO.write(bufferedImage, "png", bos);
+            ImageIO.write(img, "png", bos);
             return bos.toByteArray();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -176,38 +170,14 @@ public class ImageUtils {
      * @return
      * @throws IOException
      */
-    public static String getImageType(byte[] bytes) throws IOException {
-        MemoryCacheImageInputStream mcis = null;
-        try {
-            List<String> types = new ArrayList<>();
-            mcis = new MemoryCacheImageInputStream(new ByteArrayInputStream(bytes));
-            for (Iterator<ImageReader> itr = ImageIO.getImageReaders(mcis); itr.hasNext();) {
-                types.add(itr.next().getFormatName());
-                /*if (reader instanceof com.sun.imageio.plugins.gif.GIFImageReader) {
-                    return "gif";
-                } else if (reader instanceof com.sun.imageio.plugins.jpeg.JPEGImageReader) {
-                    return "jpeg";
-                } else if (reader instanceof com.sun.imageio.plugins.png.PNGImageReader) {
-                    return "png";
-                } else if (reader instanceof com.sun.imageio.plugins.bmp.BMPImageReader) {
-                    return "bmp";
-                } else if (reader instanceof com.sun.imageio.plugins.wbmp.WBMPImageReader) {
-                    return "wbmp";
-                }*/
+    public static String[] getImageType(byte[] bytes) throws IOException {
+        List<String> types = new ArrayList<>();
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        try (MemoryCacheImageInputStream m = new MemoryCacheImageInputStream(in)) {
+            for (Iterator<ImageReader> i = ImageIO.getImageReaders(m); i.hasNext(); ) {
+                types.add(i.next().getFormatName());
             }
-            if (types.size() == 0) {
-                return null;
-            } else if (types.size() == 1) {
-                return types.get(0);
-            } else {
-                return types.toString();
-            }
-        } finally {
-            if (mcis != null) try {
-                mcis.close();
-            } catch (IOException ignored) {
-                ignored.printStackTrace();
-            }
+            return types.isEmpty() ? null : types.toArray(new String[types.size()]);
         }
     }
 
