@@ -71,9 +71,9 @@ public final class ResultCode implements Serializable {
     }
 
     public static void main(String[] args) {
-        String json = Jsons.NORMAL.stringify(create(-999, "msg"));
+        String json = Jsons.toJson(create(-999, "msg"));
         System.out.println(json);
-        ResultCode result = Jsons.NORMAL.parse(json, ResultCode.class);
-        System.out.println(Jsons.NORMAL.stringify(result));
+        ResultCode result = Jsons.fromJson(json, ResultCode.class);
+        System.out.println(Jsons.toJson(result));
     }
 }

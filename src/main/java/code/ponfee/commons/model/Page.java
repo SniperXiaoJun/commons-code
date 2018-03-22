@@ -9,9 +9,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 
-import code.ponfee.commons.reflect.ClassUtils;
-import code.ponfee.commons.reflect.GenericUtils;
-
 /**
  * 参考guthub开源的mybatis分页工具
  *   项目地址：http://git.oschina.net/free/Mybatis_PageHelper
@@ -337,7 +334,7 @@ public class Page<T> implements java.io.Serializable {
 
     @Override
     public String toString() {
-        return new StringBuilder(260)
+        return new StringBuilder(280)
             .append(getClass().getCanonicalName()).append("@")
             .append(Integer.toHexString(hashCode())).append("{")
             .append("pageNum=").append(pageNum)
@@ -355,23 +352,24 @@ public class Page<T> implements java.io.Serializable {
             .append("}").toString();
     }
 
-    private static final String EMPTY_ROWS_TYPE =
-        "[" + GenericUtils.getFieldGenericType(ClassUtils.getField(Page.class, "rows")) + ",0]";
     private String rowsToString() {
+        // GenericUtils.getFieldGenericType(ClassUtils.getField(Page.class, "rows"))
         if (rows.isEmpty()) {
-            return EMPTY_ROWS_TYPE;
+            return "List<T>(0)";
         }
 
         T first = rows.get(0);
         if (first == null) {
-            return EMPTY_ROWS_TYPE.substring(0, EMPTY_ROWS_TYPE.length() - 2) + rows.size() + "]";
+            return "List<T>(" + rows.size() + ")";
         }
 
-        return "[java.util.List<" + first.getClass().getCanonicalName() + ">," + rows.size() + "]";
+        return "List<" + first.getClass().getCanonicalName() + ">(" + rows.size() + ")";
     }
 
     public static void main(String[] args) {
         List<String> list = Arrays.asList("1","2","3","4","5","6","7","8","9","0");
         System.out.println(new Page<>(list).toString());
+        System.out.println(new Page<>().toString());
+        System.out.println(new Page<>(Arrays.asList(null,1)).toString());
     }
 }

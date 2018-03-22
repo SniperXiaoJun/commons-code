@@ -27,7 +27,7 @@ public abstract class ResultDataJsonAdapter<T> extends XmlAdapter<Result<String>
             return new Result<>(v.getCode(), v.getMsg(), null);
         }
 
-        T data = Jsons.NORMAL.parse(v.getData(), type);
+        T data = Jsons.fromJson(v.getData(), type);
         return new Result<>(v.getCode(), v.getMsg(), data);
     }
 
@@ -37,7 +37,7 @@ public abstract class ResultDataJsonAdapter<T> extends XmlAdapter<Result<String>
             return new Result<>(v.getCode(), v.getMsg(), null);
         }
 
-        String data = Jsons.NORMAL.stringify(v.getData());
+        String data = Jsons.toJson(v.getData());
         return new Result<>(v.getCode(), v.getMsg(), data);
     }
 

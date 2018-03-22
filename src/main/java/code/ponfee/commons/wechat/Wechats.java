@@ -246,7 +246,7 @@ public class Wechats {
     private static void checkError(Map<String, ?> result) {
         Object errcode = result.get("errcode");
         if (errcode != null && !"0".equals(errcode.toString())) {
-            throw new RuntimeException(Jsons.NORMAL.stringify(result));
+            throw new RuntimeException(Jsons.toJson(result));
         }
     }
 

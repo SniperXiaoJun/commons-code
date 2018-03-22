@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,20 +18,17 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Networks {
 
-    /** ip正则 */
-    private static final Pattern IP_PATTERN = Pattern.compile("^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\.(00?\\d|1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\.(00?\\d|1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\.(00?\\d|1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$");
-
     /** 掩码 */
     private static final long[] MASK = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
 
-    public static final String SERVER_IP = getSiteIp();
+    public static final String LOCAL_IP = getLocalIp();
 
     /** 
      * getMachineNetworkFlag 获取机器的MAC或者IP，优先获取MAC
      * @param ia
      * @return
      */
-    public static String getMachineNetworkFlag(InetAddress ia) {
+    public static String getMacOrIp(InetAddress ia) {
         if (ia == null) {
             try {
                 ia = InetAddress.getLocalHost();
@@ -40,11 +36,8 @@ public class Networks {
                 throw new RuntimeException(e);
             }
         }
-        String machineFlag = getMacAddress(ia);
-        if (StringUtils.isBlank(machineFlag)) {
-            machineFlag = getIpAddress(ia);
-        }
-        return machineFlag;
+        String mac = getMacAddress(ia);
+        return StringUtils.isBlank(mac) ? getIpAddress(ia) : mac;
     }
 
     /** 
@@ -62,21 +55,16 @@ public class Networks {
             throw new RuntimeException(e);
         }
 
-        StringBuffer sb = new StringBuffer("");
-        if (mac != null) {
-            for (int i = 0; i < mac.length; i++) {
-                if (i != 0) {
-                    sb.append("-");
-                }
-                // 字节转换为整数
-                int temp = mac[i] & 0xFF;
-                String str = Integer.toHexString(temp).toUpperCase();
-                if (str.length() == 1) {
-                    sb.append("0" + str);
-                } else {
-                    sb.append(str);
-                }
+        if (mac == null) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder(17);
+        for (int i = 0; i < mac.length; i++) {
+            if (i != 0) {
+                sb.append("-");
             }
+            sb.append(Bytes.hexEncode(mac[i], false));
         }
         return sb.toString();
     }
@@ -95,8 +83,8 @@ public class Networks {
      */
     public static String getHostName() {
         try {
-            for (Enumeration<NetworkInterface> itfs = NetworkInterface.getNetworkInterfaces(); itfs.hasMoreElements();) {
-                NetworkInterface net = itfs.nextElement();
+            for (Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces(); e.hasMoreElements();) {
+                NetworkInterface net = e.nextElement();
                 if (net.isLoopback()) {
                     continue;
                 }
@@ -120,11 +108,11 @@ public class Networks {
      * 获取内网IP
      * @return 内网IP
      */
-    public static String getSiteIp() {
+    public static String getLocalIp() {
         try {
-            for (Enumeration<NetworkInterface> itfs = NetworkInterface.getNetworkInterfaces(); itfs.hasMoreElements();) {
-                for (Enumeration<InetAddress> addrs = itfs.nextElement().getInetAddresses(); addrs.hasMoreElements();) {
-                    InetAddress addr = addrs.nextElement();
+            for (Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces(); e.hasMoreElements();) {
+                for (Enumeration<InetAddress> a = e.nextElement().getInetAddresses(); a.hasMoreElements();) {
+                    InetAddress addr = a.nextElement();
                     //if (addr.isSiteLocalAddress()) return addr.getHostAddress();
                     if (addr != null && Inet4Address.class.isInstance(addr)
                         && !addr.isLinkLocalAddress() && !addr.isLoopbackAddress()) {
@@ -144,12 +132,12 @@ public class Networks {
      * @return
      */
     public static long toLong(String ip) {
-        if (!IP_PATTERN.matcher(ip).matches()) {
+        if (!RegexUtils.isIp(ip)) {
             throw new IllegalArgumentException("invalid ip address[" + ip + "]");
         }
         String[] ipNums = ip.split("\\.");
         return (Long.parseLong(ipNums[0]) << 24) + (Long.parseLong(ipNums[1]) << 16)
-            + (Long.parseLong(ipNums[2]) << 8) + (Long.parseLong(ipNums[3]));
+             + (Long.parseLong(ipNums[2]) << 8) + (Long.parseLong(ipNums[3]));
     }
 
     /**
@@ -177,7 +165,7 @@ public class Networks {
      * @return
      */
     public static int ipReduce(String ip, boolean isPoint) {
-        if (!IP_PATTERN.matcher(ip).matches()) {
+        if (!RegexUtils.isIp(ip)) {
             throw new IllegalArgumentException("invalid ip address[" + ip + "]");
         }
 
@@ -206,11 +194,11 @@ public class Networks {
     }
 
     public static int ipReduce(boolean isPoint) {
-        return ipReduce(Networks.getSiteIp(), isPoint);
+        return ipReduce(Networks.getLocalIp(), isPoint);
     }
 
     public static int ipReduce() {
-        return ipReduce(Networks.getSiteIp(), true);
+        return ipReduce(Networks.getLocalIp(), true);
     }
 
     private static void bindPort(String host, int port) throws IOException {
@@ -249,7 +237,7 @@ public class Networks {
 
     public static void main(String[] args) {
         System.out.println(getMacAddress(null));
-        System.out.println(getSiteIp());
+        System.out.println(getLocalIp());
         System.out.println(toLong("255.255.255.255"));
         System.out.println(fromLong(4294912345L));
         System.out.println(ipReduce("255.255.255.255", false));

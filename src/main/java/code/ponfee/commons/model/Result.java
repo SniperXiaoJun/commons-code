@@ -106,7 +106,7 @@ public class Result<T> implements java.io.Serializable {
     }
 
     public String toJson() {
-        return Jsons.NORMAL.stringify(this);
+        return Jsons.toJson(this);
     }
 
     /**

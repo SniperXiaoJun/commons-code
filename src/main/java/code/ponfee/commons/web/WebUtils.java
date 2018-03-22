@@ -99,8 +99,9 @@ public final class WebUtils {
             // 对于通过多个代理的情况，第一个ip为客户端真实ip，多个ip按照','分割
             ip = ip.substring(0, ip.indexOf(","));
         }
+
         if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
-            ip = Networks.getSiteIp(); // 如果是本机ip
+            ip = Networks.LOCAL_IP; // 如果是本机ip
         }
         return ip;
     }
@@ -377,7 +378,7 @@ public final class WebUtils {
      * 会话跟踪
      */
     public static void setSessionTrace(String token) {
-        int maxAge = (token == null) ? 0 : 24 * 60 * 60;
+        int maxAge = (token == null) ? 0 : 86400;
         HttpServletResponse resp = getResponse();
         //result.setAuthToken(token); // to resp body
         WebUtils.addCookie(resp, SESSION_TRACE_COOKIE, token, "/", maxAge); // to cookie
@@ -416,9 +417,9 @@ public final class WebUtils {
             return null;
         }
 
-        return data instanceof CharSequence
+        return (data instanceof CharSequence)
                ? data.toString()
-               : Jsons.NORMAL.stringify(data);
+               : Jsons.toJson(data);
     }
 
     private static void respStream(HttpServletResponse resp, long size,

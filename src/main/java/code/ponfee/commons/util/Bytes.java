@@ -116,6 +116,13 @@ public final class Bytes {
         return builder.toString();
     }
 
+    public static String hexEncode(byte b, boolean lowercase) {
+        char[] codes = lowercase ? HEX_LOWER_CODES : HEX_UPPER_CODES;
+        return new String(new char[] {
+            codes[(0xF0 & b) >>> 4], codes[0x0F & b]
+        });
+    }
+
     public static String hexEncode(byte[] bytes) {
         return hexEncode(bytes, true);
     }

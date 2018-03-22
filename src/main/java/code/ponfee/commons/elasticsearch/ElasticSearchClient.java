@@ -337,7 +337,7 @@ public class ElasticSearchClient implements DisposableBean {
     public <T> void bulkProcessor(String index, String type, Stream<T> entities, 
                                   BulkProcessorConfiguration config) {
         BulkProcessor bulkProcessor = config.build(client);
-        entities.map(x -> Optional.of(Jsons.NORMAL.serialize(x)))
+        entities.map(x -> Optional.of(Jsons.toBytes(x)))
                 .filter(x -> x.isPresent())
                 .map(x -> client.prepareIndex().setIndex(index).setType(type)
                                                .setSource(x.get(), XContentType.JSON).request())
@@ -439,7 +439,7 @@ public class ElasticSearchClient implements DisposableBean {
             }
         } catch (IOException e) {
             logger.error("add docs error, index:{}, type:{}, object:{}", 
-                         index, type, Jsons.NORMAL.stringify(list), e);
+                         index, type, Jsons.toJson(list), e);
             return Result.failure(ResultCode.SERVER_ERROR);
         }
     }
@@ -472,7 +472,7 @@ public class ElasticSearchClient implements DisposableBean {
             client.update(updateRequest.doc(xcb)).get();
         } catch (IOException | InterruptedException | ExecutionException e) {
             logger.error("update docs error, index:{}, type:{}, id:{}, object:{}", 
-                         index, type, id, Jsons.NORMAL.stringify(map), e);
+                         index, type, id, Jsons.toJson(map), e);
         }
     }
 

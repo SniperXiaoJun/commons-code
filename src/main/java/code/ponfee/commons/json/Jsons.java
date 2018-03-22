@@ -103,6 +103,7 @@ public final class Jsons {
 
     /**
      * Deserialize the json string to java object
+     * {@code new TypeReference<Map<String, Object>>(){} }
      * 
      * @param json The json string
      * @param type The TypeReference specified java type
