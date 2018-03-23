@@ -19,7 +19,7 @@ public class TestConstraint {
     @Constraint(datePattern="yyyy-MM-dd", tense=Tense.FUTURE)
     private String d = "2016-05-01";
     
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         TestConstraint t = new TestConstraint();
         t.s1 = "";
         t.s2 = "1";

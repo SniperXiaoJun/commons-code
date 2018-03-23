@@ -34,7 +34,7 @@ public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<Trans
     }
 
     @Override
-    public Result<Page<Map<K, V>>> unmarshal(Result<TransitPage<MapItem>> v) throws Exception {
+    public Result<Page<Map<K, V>>> unmarshal(Result<TransitPage<MapItem>> v) {
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         } else if (v.getData().getRows() == null || v.getData().getRows().getItem() == null) {
@@ -61,7 +61,7 @@ public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<Trans
     }
 
     @Override
-    public Result<TransitPage<MapItem>> marshal(Result<Page<Map<K, V>>> v) throws Exception {
+    public Result<TransitPage<MapItem>> marshal(Result<Page<Map<K, V>>> v) {
         if (v.getData() == null || v.getData().getRows() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         }

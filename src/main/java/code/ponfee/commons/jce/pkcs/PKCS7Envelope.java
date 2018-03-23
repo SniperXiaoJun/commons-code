@@ -203,7 +203,7 @@ public final class PKCS7Envelope {
     /**
      * 算法相关
      */
-    public static enum AlgorithmMapping {
+    public enum AlgorithmMapping {
         AES128_WRAP("2.16.840.1.101.3.4.1.5", "AES", "AES", 0), //
         AES192_WRAP("2.16.840.1.101.3.4.1.25", "AES", "AES", 0), //
         AES256_WRAP("2.16.840.1.101.3.4.1.45", "AES", "AES", 0), //

@@ -36,12 +36,12 @@ public enum HmacAlgorithms {
     private final String algorithm;
     private final int byteSize;
 
-    private HmacAlgorithms(int byteSize) {
+    HmacAlgorithms(int byteSize) {
         this.algorithm = this.name();
         this.byteSize = byteSize;
     }
 
-    private HmacAlgorithms(String algorithm, int byteSize) {
+    HmacAlgorithms(String algorithm, int byteSize) {
         this.algorithm = algorithm;
         this.byteSize = byteSize;
     }

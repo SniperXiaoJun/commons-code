@@ -61,7 +61,7 @@ public class ProjectFileUtilsTester {
         }
     }
 
-    public static void main(String[] args) throws MalformedURLException, IOException {
+    public static void main(String[] args) {
         /*String s = new String(toByteArray(new URL("file:///d:/github/springmvc-demo/src/test/resources/ftl/macro.ftl").openStream()));
         System.out.println(s);*/
         String filename = "D:\\github\\jedis-clients\\src\\main\\java\\test\\TestUtils.java";

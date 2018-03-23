@@ -28,7 +28,7 @@ public abstract class ResultMapAdapter<K, V> extends XmlAdapter<Result<MapItem>,
         vtype = GenericUtils.getActualTypeArgument(this.getClass(), 1);
     }
 
-    public @Override Result<Map<K, V>> unmarshal(Result<MapItem> v) throws Exception {
+    public @Override Result<Map<K, V>> unmarshal(Result<MapItem> v) {
         if (v.getData() == null || v.getData().getItem() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         }
@@ -40,7 +40,7 @@ public abstract class ResultMapAdapter<K, V> extends XmlAdapter<Result<MapItem>,
         return new Result<>(v.getCode(), v.getMsg(), map);
     }
 
-    public @Override Result<MapItem> marshal(Result<Map<K, V>> v) throws Exception {
+    public @Override Result<MapItem> marshal(Result<Map<K, V>> v) {
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         }

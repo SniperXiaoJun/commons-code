@@ -115,7 +115,6 @@ public class View extends JFrame implements ActionListener {
         try {
             Thread.sleep(10);
         } catch (InterruptedException e) {
-            ;
         }
     }
 
@@ -125,7 +124,6 @@ public class View extends JFrame implements ActionListener {
         try {
             Thread.sleep(10);
         } catch (InterruptedException e) {
-            ;
         }
     }
 
@@ -139,7 +137,6 @@ public class View extends JFrame implements ActionListener {
             try {
                 Thread.sleep(250);
             } catch (InterruptedException E) {
-                ;
             }
 
             ENCRYPT.setVisible(false);
@@ -154,7 +151,6 @@ public class View extends JFrame implements ActionListener {
             try {
                 Thread.sleep(250);
             } catch (InterruptedException E) {
-                ;
             }
             this.setVisible(true);
 

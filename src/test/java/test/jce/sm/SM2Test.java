@@ -38,7 +38,7 @@ public class SM2Test {
     }
 
     @Test
-    public void test3() throws Exception {
+    public void test3() {
         //ECParameters ecParameter = ECParameters.secp256r1;
         //ECParameters ecParameter = ECParameters.EC_PARAMETERS.get("secp256r1");
         //ECParameters ecParameter = ECParameters.EC_PARAMETERS.get("secp256k1");

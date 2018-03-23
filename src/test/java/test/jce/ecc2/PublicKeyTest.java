@@ -329,13 +329,13 @@ public class PublicKeyTest {
     }
 
     @Test(expected = SecurityException.class)
-    public void testPublicKeyConstructorPointOnWrongCurveSadPath() throws Exception {
+    public void testPublicKeyConstructorPointOnWrongCurveSadPath() {
         BigInteger d = new BigInteger("c6b7f6bfe5bb19b1e390e55ed4ba5df8af6068d0eb89379a33f9c19aacf6c08c", 16);
         new PublicKey(secp256k1, secp256r1.getG().multiply(d));
     }
 
     @Test(expected = SecurityException.class)
-    public void testPublicKeyConstructorInvalidPointSadPath() throws Exception {
+    public void testPublicKeyConstructorInvalidPointSadPath() {
         BigInteger d = new BigInteger("c6b7f6bfe5bb19b1e390e55ed4ba5df8af6068d0eb89379a33f9c19aacf6c08c", 16);
         // FYI, you need to normalize points before trying to make them PublicKeys!
         new PublicKey(secp256k1, secp256k1.getG().multiply(d));

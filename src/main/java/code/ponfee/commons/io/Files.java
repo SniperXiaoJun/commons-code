@@ -145,7 +145,7 @@ public final class Files {
 
     public static String toString(File file, String charset) {
         try (FileInputStream in = new FileInputStream(file); 
-             FileChannel channel = in.getChannel();
+             FileChannel channel = in.getChannel()
         ) {
             ByteBuffer buffer = channel.map(MapMode.READ_ONLY, 0, channel.size());
             return Charset.forName(charset).decode(buffer).toString();
@@ -161,7 +161,7 @@ public final class Files {
      */
     public static byte[] toByteArray(File file) {
         try (FileInputStream in = new FileInputStream(file); 
-             FileChannel channel = in.getChannel();
+             FileChannel channel = in.getChannel()
         ) {
             ByteBuffer buffer = channel.map(MapMode.READ_ONLY, 0, channel.size());
             byte[] bytes = new byte[buffer.capacity()];
@@ -476,7 +476,7 @@ public final class Files {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         System.out.println(File.pathSeparator);
         System.out.println(File.separator);
         String s = human(1152921504606846976L);

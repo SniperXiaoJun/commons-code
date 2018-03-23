@@ -293,7 +293,7 @@ public class HttpRequest {
 
         } catch (GeneralSecurityException e) {
             throw new HttpException(
-                new IOException("Security exception configuring SSL context").initCause(e)
+                new IOException("Security exception configuring SSL context", e)
             );
         }
     }
@@ -607,7 +607,7 @@ public class HttpRequest {
             }
             return s;
         } catch (URISyntaxException e) {
-            throw new HttpException(new IOException("Parsing URI failed").initCause(e));
+            throw new HttpException(new IOException("Parsing URI failed", e));
         }
     }
 
@@ -1491,15 +1491,10 @@ public class HttpRequest {
      * Get response as byte array
      *
      * @return byte array
-     * @throws HttpException
      */
-    public byte[] bytes() throws HttpException {
+    public byte[] bytes() {
         ByteArrayOutputStream output = byteStream();
-        try {
-            copy(buffer(), output);
-        } catch (IOException e) {
-            throw new HttpException(e);
-        }
+        copy(buffer(), output);
         return output.toByteArray();
     }
 
@@ -1626,7 +1621,7 @@ public class HttpRequest {
 
         return new CloseOperation<HttpRequest>(output, ignoreCloseExceptions) {
             @Override
-            protected HttpRequest run() throws HttpException, IOException {
+            protected HttpRequest run() throws HttpException {
                 return receive(output);
             }
         }.call();
@@ -1637,14 +1632,9 @@ public class HttpRequest {
      *
      * @param output
      * @return this request
-     * @throws HttpException
      */
-    public HttpRequest receive(OutputStream output) throws HttpException {
-        try {
-            return copy(buffer(), output);
-        } catch (IOException e) {
-            throw new HttpException(e);
-        }
+    public HttpRequest receive(OutputStream output) {
+        return copy(buffer(), output);
     }
 
     /**
@@ -2292,7 +2282,7 @@ public class HttpRequest {
      * @return this request
      * @throws IOException
      */
-    protected HttpRequest copy(InputStream input, OutputStream output) throws IOException {
+    protected HttpRequest copy(InputStream input, OutputStream output) {
         return new CloseOperation<HttpRequest>(input, ignoreCloseExceptions) {
             public @Override HttpRequest run() throws IOException {
                 byte[] buffer = new byte[bufferSize];
@@ -2315,7 +2305,7 @@ public class HttpRequest {
      * @return this request
      * @throws IOException
      */
-    protected HttpRequest copy(Reader input, Writer output) throws IOException {
+    protected HttpRequest copy(Reader input, Writer output) {
         return new CloseOperation<HttpRequest>(input, ignoreCloseExceptions) {
             public @Override HttpRequest run() throws IOException {
                 char[] buffer = new char[bufferSize];
@@ -2453,8 +2443,7 @@ public class HttpRequest {
      * @return this request
      * @throws IOException
      */
-    protected HttpRequest writePartHeader(String name, String filename, String contentType) 
-        throws IOException {
+    protected HttpRequest writePartHeader(String name, String filename, String contentType) {
         StringBuilder partBuffer = new StringBuilder();
         partBuffer.append("form-data; name=\"").append(name);
         if (filename != null) {

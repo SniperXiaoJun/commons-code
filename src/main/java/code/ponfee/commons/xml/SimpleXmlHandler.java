@@ -148,7 +148,7 @@ public class SimpleXmlHandler {
      */
     public static void validateByXsd(InputStream xsdIn, InputStream xmlIn) {
         try (InputStream xsd = xsdIn;
-            InputStream xml = xmlIn;
+            InputStream xml = xmlIn
         ) {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setValidating(true);

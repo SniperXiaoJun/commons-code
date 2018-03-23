@@ -48,8 +48,8 @@ public class TestDDTWarehouse {
         try (InputStream input = in;
             BufferedInputStream buffInput = new BufferedInputStream(input); 
             OutputStream output = new FileOutputStream("D:/1111.csv"); 
-            BufferedOutputStream buffOutput = new BufferedOutputStream(output);
-       ) {
+            BufferedOutputStream buffOutput = new BufferedOutputStream(output)
+        ) {
            byte[] buffer = new byte[8192];
            for (int len; (len = buffInput.read(buffer)) != Files.EOF;) {
                buffOutput.write(buffer, 0, len);

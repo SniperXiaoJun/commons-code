@@ -745,7 +745,7 @@ public class ElasticSearchClient implements DisposableBean {
      * 销毁:关闭连接，释放资源
      */
     @Override
-    public void destroy() throws Exception {
+    public void destroy() {
         logger.info("closing elasticsearch client.....");
         if (client != null) try {
             client.close();

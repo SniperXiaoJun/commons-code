@@ -81,12 +81,12 @@ public class Tmeta implements Serializable {
         this.format = format;
     }
 
-    public static enum Type {
-        CHAR, NUMERIC, DATETIME;
+    public enum Type {
+        CHAR, NUMERIC, DATETIME
     }
 
-    public static enum Align {
-        LEFT, CENTER, RIGHT;
+    public enum Align {
+        LEFT, CENTER, RIGHT
     }
 
 }

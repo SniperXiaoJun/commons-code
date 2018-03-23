@@ -24,7 +24,7 @@ public class OldApiTester {
     private static final String KEY = "cde";
 
     @Test
-    public void testOldInf() throws IOException {
+    public void testOldInf() {
         Map<String, String> headers = new HashMap<>();
         String time = String.valueOf(System.currentTimeMillis());
         headers.put("source", "IOS");
@@ -40,7 +40,7 @@ public class OldApiTester {
     }
 
     @Test
-    public void testcarrychildrenaddorupd() throws IOException {
+    public void testcarrychildrenaddorupd() {
         Map<String, String> headers = new HashMap<>();
         String userId = "87";
         String time = String.valueOf(System.currentTimeMillis());
@@ -60,7 +60,7 @@ public class OldApiTester {
     }
 
     @Test
-    public void testcarrychildrendel() throws IOException {
+    public void testcarrychildrendel() {
         Map<String, String> headers = new HashMap<>();
         String userId = "87";
         String time = String.valueOf(System.currentTimeMillis());
@@ -79,7 +79,7 @@ public class OldApiTester {
     }
 
     @Test
-    public void testcarrychildrenlist() throws IOException {
+    public void testcarrychildrenlist() {
         Map<String, String> headers = new HashMap<>();
         String userId = "87";
         String time = String.valueOf(System.currentTimeMillis());
@@ -97,7 +97,7 @@ public class OldApiTester {
     }
 
     @Test
-    public void testgetUserInfo() throws IOException {
+    public void testgetUserInfo() {
         Map<String, String> headers = new HashMap<>();
         String userId = "1";
         String time = String.valueOf(System.currentTimeMillis());
@@ -115,7 +115,7 @@ public class OldApiTester {
     }
 
     @Test
-    public void testBanner() throws IOException {
+    public void testBanner() {
         Map<String, String> headers = new HashMap<>();
         String time = String.valueOf(System.currentTimeMillis());
         headers.put("source", "MOBILE");

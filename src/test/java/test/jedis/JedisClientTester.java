@@ -168,7 +168,7 @@ public class JedisClientTester {
     }
 
     @Test
-    public void testLua2() throws IOException {
+    public void testLua2() {
         String lua = "return {KEYS[1],KEYS[2],ARGV[1],ARGV[2],'bar'}";
         String sha1 = jedisClient.scriptOps().scriptLoad(lua);
         System.out.println(sha1);

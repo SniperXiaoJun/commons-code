@@ -113,7 +113,7 @@ public class ExcelUtils {
      */
     public static <T> void write(Map<String, String> headers, Collection<T> dataset,
                                  OutputStream out, String pattern) {
-        try (SXSSFWorkbook workbook = new SXSSFWorkbook();) {
+        try (SXSSFWorkbook workbook = new SXSSFWorkbook()) {
             write(workbook.createSheet(), headers, dataset, pattern);
             workbook.write(out);
         } catch (IOException e) {
@@ -433,7 +433,6 @@ public class ExcelUtils {
             if (annoCell != null && annoCell.valid().allowNull() == false) {
                 result = MessageFormat.format("the cell [{0}] can not null", columnName);
             }
-            ;
         } else if (cell.getCellTypeEnum() == CellType.BLANK && annoCell.valid().allowNull()) {
             return result;
         } else {
@@ -774,13 +773,10 @@ public class ExcelUtils {
                 return false;
             }
             if (property != null) {
-                if (!property.equals(beanComparator.property)) {
-                    return false;
-                }
+                return property.equals(beanComparator.property);
             } else {
                 return (beanComparator.property == null);
             }
-            return true;
         }
 
         @Override

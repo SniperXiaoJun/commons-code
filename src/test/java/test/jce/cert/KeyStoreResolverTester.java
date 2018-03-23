@@ -30,7 +30,7 @@ import code.ponfee.commons.util.Dates;
 
 public class KeyStoreResolverTester {
 
-    public @Test void testLoad() throws Exception {
+    public @Test void testLoad() {
         KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.PKCS12, ResourceLoaderFacade.getResource("cas_test.pfx").getStream(), "1234");
         String alias = resolver.listAlias().get(0);
         test0((RSAPrivateKey)resolver.getPrivateKey(alias, "1234"), (RSAPublicKey)resolver.getPublicKey(alias));
@@ -90,11 +90,11 @@ public class KeyStoreResolverTester {
             byte[] data = IOUtils.toByteArray(ResourceLoaderFacade.getResource("2.png").getStream());
             System.out.println("加密前：");
             System.out.println(Bytes.hexDump(ArrayUtils.subarray(data, 0, 100)));
-            byte[] encodedData = RSACryptor.encrypt(data, (RSAPublicKey) publicKey);
+            byte[] encodedData = RSACryptor.encrypt(data, publicKey);
             System.out.println("加密后：");
             System.out.println(Bytes.hexDump(ArrayUtils.subarray(encodedData, 0, 100)));
             System.out.println("解密后：");
-            System.out.println(Bytes.hexDump(ArrayUtils.subarray(RSACryptor.decrypt(encodedData, (RSAPrivateKey) privateKey), 0, 100)));
+            System.out.println(Bytes.hexDump(ArrayUtils.subarray(RSACryptor.decrypt(encodedData, privateKey), 0, 100)));
 
             System.out.println("\n\n===========================签名测试=========================");
             data = Base64.getDecoder().decode("");

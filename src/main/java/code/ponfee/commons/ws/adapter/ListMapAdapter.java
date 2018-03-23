@@ -34,7 +34,7 @@ public abstract class ListMapAdapter<K, V> extends XmlAdapter<MapItemArray, List
     }
 
     @Override
-    public List<Map<K, V>> unmarshal(MapItemArray v) throws Exception {
+    public List<Map<K, V>> unmarshal(MapItemArray v) {
         if (v == null) {
             return null;
         } else if (v.getItems() == null) {
@@ -56,7 +56,7 @@ public abstract class ListMapAdapter<K, V> extends XmlAdapter<MapItemArray, List
     }
 
     @Override
-    public MapItemArray marshal(List<Map<K, V>> v) throws Exception {
+    public MapItemArray marshal(List<Map<K, V>> v) {
         if (v == null) {
             return null;
         }

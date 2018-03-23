@@ -519,7 +519,7 @@ public class ExcelExporter extends AbstractExporter {
         Map<String, Object> highlight = (Map<String, Object>) options.get(CellStyleOptions.HIGHLIGHT);
         if (highlight != null && !highlight.isEmpty()) {
             for (List<Integer> c : (List<List<Integer>>) highlight.get("cells")) {
-                if ((int) c.get(0) == tbodyRowIdx && (int) c.get(1) == tbodyColIdx) {
+                if (c.get(0) == tbodyRowIdx && c.get(1) == tbodyColIdx) {
                     XSSFFont font = (XSSFFont) workbook.createFont();
                     font.setColor(new XSSFColor(Colors.hex2color((String) highlight.get("color"))));
                     XSSFCellStyle style = (XSSFCellStyle) workbook.createCellStyle();

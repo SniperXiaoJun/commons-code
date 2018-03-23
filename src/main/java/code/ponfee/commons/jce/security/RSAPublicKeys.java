@@ -142,7 +142,7 @@ public final class RSAPublicKeys {
      */
     public static String toPkcs8Pem(RSAPublicKey publicKey) {
         try (StringWriter stringWriter = new StringWriter(); 
-             JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
+             JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter)
         ) {
             pemWriter.writeObject(publicKey);
             pemWriter.flush();
@@ -159,7 +159,7 @@ public final class RSAPublicKeys {
      */
     public static RSAPublicKey fromPkcs8Pem(String pemPublicKey) {
         try (Reader reader = new StringReader(pemPublicKey); 
-             PEMParser pemParser = new PEMParser(reader);
+             PEMParser pemParser = new PEMParser(reader)
         ) {
             SubjectPublicKeyInfo subPkInfo = (SubjectPublicKeyInfo) pemParser.readObject();
             RSAKeyParameters param = (RSAKeyParameters) PublicKeyFactory.createKey(subPkInfo);

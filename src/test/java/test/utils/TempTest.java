@@ -35,12 +35,12 @@ public class TempTest {
     }
     
     @org.junit.Test
-    public void test2() throws IOException {
+    public void test2() {
         System.out.println(DigestUtils.sha256Hex(DigestUtils.sha256("code.ponfee.commons.jce.hash.HashUtils".getBytes())));
     }
 
     @org.junit.Test
-    public void test3() throws IOException {
+    public void test3() {
         String str = "123";
         String str2 = "123";
         Fields.put(str, "value", "abc".toCharArray());
@@ -51,7 +51,7 @@ public class TempTest {
     }
     
     @org.junit.Test
-    public void test4() throws Exception {
+    public void test4() {
         for (Class<?> clazz : new ResourceScanner("code/ponfee/commons/").scan4class()) {
             for (Method method : clazz.getMethods()) {
                 try {
@@ -66,14 +66,14 @@ public class TempTest {
     }
     
     @org.junit.Test
-    public void test5() throws Exception {
+    public void test5() {
         for (Method method : ClassUtils.class.getMethods()) {
             System.out.println(ClassUtils.getMethodSignature(method) + " --> "+method.toGenericString());
         }
     }
     
     @org.junit.Test
-    public void test6() throws Exception {
+    public void test6() {
         byte[] bytes = SecureRandoms.nextBytes(32);
         BigInteger big = new BigInteger(1, bytes);
         long start = System.currentTimeMillis();
@@ -84,7 +84,7 @@ public class TempTest {
     }
 
     @org.junit.Test
-    public void test7() throws Exception {
+    public void test7() {
         byte[] bytes = SecureRandoms.nextBytes(32);
         BigInteger big = new BigInteger(1, bytes);
         long start = System.currentTimeMillis();
@@ -95,7 +95,7 @@ public class TempTest {
     }
     
     @org.junit.Test
-    public void test8() throws Exception {
+    public void test8() {
         System.out.println(new DateTime().millisOfDay().withMinimumValue());
         System.out.println(new DateTime().withTimeAtStartOfDay());
         
@@ -108,7 +108,7 @@ public class TempTest {
     }
 
     @org.junit.Test
-    public void test9() throws Exception {
+    public void test9() {
         short svalue;
         for (int i = 0; i < 10000; i++) {
             svalue = (short) SecureRandoms.nextInt();
@@ -142,7 +142,7 @@ public class TempTest {
     }
 
     @org.junit.Test
-    public void test10() throws Exception {
+    public void test10() {
         long value = SecureRandoms.nextLong();
         byte[] bytes = SecureRandoms.nextBytes(8);
         long round = 999999999L;
@@ -172,7 +172,7 @@ public class TempTest {
     }
 
     @org.junit.Test
-    public void test11() throws Exception {
+    public void test11() {
         int value = tableSizeFor(ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE));
         System.out.println(Integer.toBinaryString(value));
     }

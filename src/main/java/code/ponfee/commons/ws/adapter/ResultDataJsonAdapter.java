@@ -22,7 +22,7 @@ public abstract class ResultDataJsonAdapter<T> extends XmlAdapter<Result<String>
     }
 
     @Override
-    public Result<T> unmarshal(Result<String> v) throws Exception {
+    public Result<T> unmarshal(Result<String> v) {
         if (StringUtils.isEmpty(v.getData())) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         }
@@ -32,7 +32,7 @@ public abstract class ResultDataJsonAdapter<T> extends XmlAdapter<Result<String>
     }
 
     @Override
-    public Result<String> marshal(Result<T> v) throws Exception {
+    public Result<String> marshal(Result<T> v) {
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         }

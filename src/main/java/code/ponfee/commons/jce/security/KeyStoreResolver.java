@@ -36,8 +36,8 @@ public class KeyStoreResolver {
     private static final SecureRandom SECURE_RANDOM =
         new SecureRandom(SecureRandoms.generateSeed(20));
 
-    public static enum KeyStoreType {
-        JKS, PKCS12;
+    public enum KeyStoreType {
+        JKS, PKCS12
     }
 
     private final KeyStore keyStore;

@@ -127,7 +127,7 @@ public class X509CertUtils {
     public static String exportToPem(java.security.cert.Certificate cert) {
         try (StringWriter writer = new StringWriter(); 
              // X509Certificate,X509CRL,KeyPair,PrivateKey,PublicKey
-             JcaPEMWriter pemWriter = new JcaPEMWriter(writer);
+             JcaPEMWriter pemWriter = new JcaPEMWriter(writer)
         ) {
             pemWriter.writeObject(cert);
             pemWriter.flush();
@@ -234,7 +234,7 @@ public class X509CertUtils {
      * @return
      * @throws IOException
      */
-    public static String getCertInfo(X509Certificate cert, X509CertInfo info) throws IOException {
+    public static String getCertInfo(X509Certificate cert, X509CertInfo info) {
         try {
             switch (info) {
                 case VERSION:
@@ -423,7 +423,7 @@ public class X509CertUtils {
             l += s.length();
             StringBuffer stringbuffer = new StringBuffer();
             for (; (s = readLine(bufferedreader)) != null && !s.startsWith("-----END"); stringbuffer.append(s)) {
-                ; // do-non
+                // do-non
             }
 
             if (s == null) {

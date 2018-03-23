@@ -334,11 +334,8 @@ public final class SM2 {
                                 .add(ecParam.b).mod(ecParam.p);
         BigInteger y1 = y.pow(2).mod(ecParam.p);
 
-        if (y1.equals(x1) && publicKey.multiply(ecParam.n).isInfinity()) {
-            return true;
-        }
+        return y1.equals(x1) && publicKey.multiply(ecParam.n).isInfinity();
 
-        return false;
     }
 
     /**

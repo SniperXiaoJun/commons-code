@@ -8,7 +8,7 @@ import code.ponfee.commons.jce.implementation.ecc.EllipticCurve;
 
 public class EllipticCurveTest {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         BigInteger a = new BigInteger("1");
         BigInteger b = new BigInteger("6");
         BigInteger mod = new BigInteger("11");

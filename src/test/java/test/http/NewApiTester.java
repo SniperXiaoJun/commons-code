@@ -13,7 +13,7 @@ public class NewApiTester {
     private static final String URL = "http://192.168.1.122:8100";
 
     @Test
-    public void testChildrenAdd() throws IOException {
+    public void testChildrenAdd() {
         String url = URL + "/account/v1/contact/childrenadd.json";
         Map<String, String> params = new HashMap<>();
         params.put("time", "1478859839449");
@@ -29,7 +29,7 @@ public class NewApiTester {
     }
 
     @Test
-    public void testChildrenUpd() throws IOException {
+    public void testChildrenUpd() {
         String url = URL + "/account/v1/contact/childrenupd.json";
         Map<String, String> params = new HashMap<>();
         params.put("time", "431121198910163461");
@@ -46,7 +46,7 @@ public class NewApiTester {
     }
 
     @Test
-    public void testChildrenDel() throws IOException {
+    public void testChildrenDel() {
         String url = URL + "/account/v1/contact/childrendel.json";
         Map<String, String> params = new HashMap<>();
         params.put("time", "1478859839449");
@@ -61,7 +61,7 @@ public class NewApiTester {
     }
 
     @Test
-    public void testChildrenlist() throws IOException {
+    public void testChildrenlist() {
         String url = URL + "/account/v1/contact/childrenlist.json";
         Map<String, String> params = new HashMap<>();
         params.put("time", "1478859839449");

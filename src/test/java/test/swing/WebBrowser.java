@@ -311,11 +311,7 @@ public class WebBrowser extends JFrame implements HyperlinkListener,
             FileFilter filter = new FileFilter() {
                     public boolean accept(File f) {
                         String fn = f.getName();
-                        if (fn.endsWith(".html") || fn.endsWith(".htm")){
-                            return true;
-                        }else {
-                            return false;
-                        }
+                        return fn.endsWith(".html") || fn.endsWith(".htm");
                     }
                     public String getDescription() { 
                         return "HTML Files"; 
@@ -344,7 +340,7 @@ public class WebBrowser extends JFrame implements HyperlinkListener,
     public void back() {
         if (currentHistoryPage > 0){
             // 访问前一页
-            visit((URL)history.get(--currentHistoryPage));
+            visit(history.get(--currentHistoryPage));
         }
         // 如果当前页面下标大于0，允许后退
         backButton.setEnabled((currentHistoryPage > 0));
@@ -356,7 +352,7 @@ public class WebBrowser extends JFrame implements HyperlinkListener,
      */
     public void forward() {
         if (currentHistoryPage < history.size( )-1){
-            visit((URL)history.get(++currentHistoryPage));
+            visit(history.get(++currentHistoryPage));
         }
         // 如果当前页面下标大于0，允许后退
         backButton.setEnabled((currentHistoryPage > 0));
@@ -369,7 +365,7 @@ public class WebBrowser extends JFrame implements HyperlinkListener,
             // 先显示为空白页
             textPane.setDocument(new javax.swing.text.html.HTMLDocument());
             // 再访问当前页
-            visit((URL)history.get(currentHistoryPage));
+            visit(history.get(currentHistoryPage));
         }
     }
   

@@ -43,7 +43,7 @@ public enum RSACipherPaddings {
 
     private final String transform;
 
-    private RSACipherPaddings(String transform) {
+    RSACipherPaddings(String transform) {
         this.transform = transform;
     }
 

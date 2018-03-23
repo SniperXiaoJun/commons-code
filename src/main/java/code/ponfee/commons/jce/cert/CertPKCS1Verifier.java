@@ -1,6 +1,5 @@
 package code.ponfee.commons.jce.cert;
 
-import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
@@ -44,7 +43,7 @@ public class CertPKCS1Verifier extends CertSignedVerifier {
             throw new SecurityException("[" + subjectCN + "]证书签名信息错误", e);
         } catch (SecurityException e) {
             throw e;
-        } catch (NoSuchAlgorithmException | InvalidKeyException | IOException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             throw new SecurityException("证书验签出错", e);
         }
     }

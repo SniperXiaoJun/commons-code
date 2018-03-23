@@ -125,7 +125,7 @@ public class JdkCompileTask<T> {
             // put it in the output map
             for (String qualifiedClassName : classes.keySet()) {
                 final Class<T> newClass = loadClass(qualifiedClassName);
-                compiled.put(qualifiedClassName, (Class<?>) newClass);
+                compiled.put(qualifiedClassName, newClass);
             }
 
             return compiled;

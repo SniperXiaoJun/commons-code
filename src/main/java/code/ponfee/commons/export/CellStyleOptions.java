@@ -6,5 +6,5 @@ package code.ponfee.commons.export;
  */
 public enum CellStyleOptions {
 
-    HIGHLIGHT, CELL_PROCESS;
+    HIGHLIGHT, CELL_PROCESS
 }

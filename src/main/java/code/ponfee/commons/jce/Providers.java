@@ -48,9 +48,8 @@ public interface Providers {
     /**
      * provider holder
      */
-    static final class ProvidersHolder {
-        private static final Map<Class<? extends Provider>, Provider> HOLDER =
-            new ConcurrentHashMap<>(16);
+    final class ProvidersHolder {
+        private static final Map<Class<? extends Provider>, Provider> HOLDER = new ConcurrentHashMap<>(16);
         static {
             Provider[] providers = Security.getProviders();
             if (providers != null && providers.length > 0) {
@@ -64,7 +63,7 @@ public interface Providers {
     /**
      * The NullProvider representing the not exists provider
      */
-    static final class NullProvider extends Provider {
+    final class NullProvider extends Provider {
         private static final long serialVersionUID = 7420890884380155994L;
         private static final NullProvider INSTANCE = new NullProvider();
 

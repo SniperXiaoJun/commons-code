@@ -258,8 +258,8 @@ public class MailEnvelope implements Serializable {
     /**
      * 邮件类型 
      */
-    static enum MailType {
-        TEXT, MIME;
+    enum MailType {
+        TEXT, MIME
     }
 
 }

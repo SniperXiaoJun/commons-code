@@ -25,7 +25,7 @@ public abstract class ResultSetAdapter<T> extends XmlAdapter<Result<ArrayItem<T>
     }
 
     @Override
-    public Result<Set<T>> unmarshal(Result<ArrayItem<T>> v) throws Exception {
+    public Result<Set<T>> unmarshal(Result<ArrayItem<T>> v) {
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         } else if (v.getData().getItem() == null) {
@@ -40,7 +40,7 @@ public abstract class ResultSetAdapter<T> extends XmlAdapter<Result<ArrayItem<T>
     }
 
     @SuppressWarnings("unchecked")
-    public @Override Result<ArrayItem<T>> marshal(Result<Set<T>> v) throws Exception {
+    public @Override Result<ArrayItem<T>> marshal(Result<Set<T>> v) {
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         }

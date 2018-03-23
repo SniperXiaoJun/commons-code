@@ -416,7 +416,7 @@ public final class Numbers {
         } else {
             numIndex = 0;
         }
-        boolean getZero = numIndex == 0 ? false : true;
+        boolean getZero = numIndex != 0;
 
         StringBuilder builder = new StringBuilder();
         for (int zeroSize = 0, numUnit = 0; number > 0; number = number / 10, ++numIndex) {

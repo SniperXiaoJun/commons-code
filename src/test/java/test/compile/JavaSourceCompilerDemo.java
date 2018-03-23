@@ -67,7 +67,7 @@ public class JavaSourceCompilerDemo {
         }
 
         @Override
-        public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
+        public CharSequence getCharContent(boolean ignoreEncodingErrors) {
             return code;
         }
     }

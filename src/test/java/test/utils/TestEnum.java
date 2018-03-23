@@ -2,11 +2,11 @@ package test.utils;
 
 public class TestEnum {
 
-    static enum A {
+    enum A {
         ONE("one");
         private String name;
 
-        private A(String name) {
+        A(String name) {
             this.name = name;
         }
 

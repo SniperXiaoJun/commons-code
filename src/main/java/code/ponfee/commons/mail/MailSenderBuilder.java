@@ -83,7 +83,7 @@ public final class MailSenderBuilder {
         return sender;
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         MailSenderBuilder builder = MailSenderBuilder.newBuilder("fupengfei163@163.com", "");
         builder.nickname("张三").connTimeout(5000).readTimeout(5000).charset("UTF-8")
                                .retryTimes(2).validateTimes(0).authRequire(false);

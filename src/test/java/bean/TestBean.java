@@ -1,10 +1,13 @@
 package bean;
 
+import code.ponfee.commons.constrain.Constraint;
+
 import java.io.Serializable;
 
 public class TestBean implements Serializable {
     static final int MAXIMUM_CAPACITY = 1 << 30;
     private static final long serialVersionUID = 1716190333294826147L;
+    @Constraint(tense = Constraint.Tense.FUTURE)
     private int i;
     private Long l;
     private String s;

@@ -12,7 +12,7 @@ C,
 D,	E{	
 	
     
-    public static void main(String[] args) throws UnsupportedEncodingException {
+    public static void main(String[] args) {
     }
     
     public static void say() {

@@ -112,7 +112,7 @@ public class DatePeriodCalculator {
         return calculate(1, next);
     }
 
-    public static enum Periods {
+    public enum Periods {
         DAILY("每日"), // 
         WEEKLY("每周"), // 
         MONTHLY("每月"), // 

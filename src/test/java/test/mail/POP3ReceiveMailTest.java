@@ -299,8 +299,8 @@ public class POP3ReceiveMailTest {
     * @throws FileNotFoundException 
     * @throws IOException 
     */
-    public static void saveAttachment(Part part, String destDir) throws UnsupportedEncodingException, MessagingException,
-        FileNotFoundException, IOException {
+    public static void saveAttachment(Part part, String destDir) throws MessagingException,
+            IOException {
         if (part.isMimeType("multipart/*")) {
             Multipart multipart = (Multipart) part.getContent(); //复杂体邮件 
             //复杂体邮件包含多个邮件体 
@@ -336,7 +336,7 @@ public class POP3ReceiveMailTest {
     * @throws IOException 
     */
     private static void saveFile(InputStream is, String destDir, String fileName)
-        throws FileNotFoundException, IOException {
+        throws IOException {
         BufferedInputStream bis = new BufferedInputStream(is);
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(destDir + fileName)));
         int len = -1;

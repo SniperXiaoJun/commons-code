@@ -20,11 +20,11 @@ public enum Padding {
 
     private final String padding;
 
-    private Padding() {
+    Padding() {
         this.padding = this.name();
     }
 
-    private Padding(String padding) {
+    Padding(String padding) {
         this.padding = padding;
     }
 

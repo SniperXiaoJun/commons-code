@@ -336,7 +336,7 @@ public final class BCrypt {
 
     /**
      * Hash a password using the OpenBSD bcrypt scheme
-     * @param password  the password to hash
+     * @param passwd  the password to hash
      * @param logrounds  the binary logarithm of the number
      *                   <code>Math.pow(2,logrounds)</code>
      * @return the hashed password (fixed 62 length string)

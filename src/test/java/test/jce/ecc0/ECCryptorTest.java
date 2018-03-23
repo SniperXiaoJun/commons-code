@@ -18,7 +18,7 @@ public class ECCryptorTest {
     private static byte[] origin = MavenProjects.getMainJavaFileAsByteArray(IdcardResolver.class);
 
     @Test
-    public void testECCryptor() throws Exception {
+    public void testECCryptor() {
         Cryptor cs = new ECCryptor(new EllipticCurve(ECParameters.secp112r1));
         Key dk = cs.generateKey();
         Key ek = dk.getPublic();
@@ -35,7 +35,7 @@ public class ECCryptorTest {
     }
 
     @Test
-    public void testNullCryptor() throws Exception {
+    public void testNullCryptor() {
         Cryptor cs = new NullCryptor();
         Key dk = cs.generateKey();
         Key ek = dk.getPublic();

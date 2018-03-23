@@ -151,7 +151,7 @@ public final class WebContext {
     )
     public static class WebContextFilter implements Filter {
 
-        public @Override void init(FilterConfig cfg) throws ServletException {}
+        public @Override void init(FilterConfig cfg) {}
 
         public @Override void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) 
             throws IOException, ServletException { 

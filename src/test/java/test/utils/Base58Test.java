@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 
 public class Base58Test extends TestCase {
     @Test
-    public void testEncode() throws Exception {
+    public void testEncode() {
         byte[] testbytes = "Hello World".getBytes();
         assertEquals("JxF12TrwUP45BMd", Base58.encode(testbytes));
         
@@ -44,7 +44,7 @@ public class Base58Test extends TestCase {
     }
 
     @Test
-    public void testDecode() throws Exception {
+    public void testDecode() {
         byte[] testbytes = "Hello World".getBytes();
         byte[] actualbytes = Base58.decode("JxF12TrwUP45BMd");
         assertTrue(new String(actualbytes), Arrays.equals(testbytes, actualbytes));

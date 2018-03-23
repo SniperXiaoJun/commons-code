@@ -100,7 +100,7 @@ public class ItextUtil {
             ItextUtil app = new ItextUtil();
             //将证书文件放入指定路径，并读取keystore ，获得私钥和证书链
             KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.PKCS12, ResourceLoaderFacade.getResource("cas_test.pfx").getStream(), "1234");
-            PrivateKey pk = (PrivateKey) resolver.getPrivateKey("1234");
+            PrivateKey pk = resolver.getPrivateKey("1234");
             Certificate[] chain = resolver.getX509CertChain();
             String src = ResourceLoaderFacade.getResource("ElasticSearch.pdf").getFilePath();  
             //封装签章信息

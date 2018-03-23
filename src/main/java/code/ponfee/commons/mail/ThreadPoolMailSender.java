@@ -80,7 +80,7 @@ public class ThreadPoolMailSender {
         }
 
         @Override
-        public Boolean call() throws Exception {
+        public Boolean call() {
             return mailSender.send(envlop);
         }
     }

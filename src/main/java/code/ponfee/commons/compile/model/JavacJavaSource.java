@@ -105,7 +105,7 @@ public class JavacJavaSource extends JavaSource {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         JavaSource javaSource = new JavacJavaSource(Files.toString("d:/CompilerSource.java"));
         //JavaSource javaSource = new JavacJavaSource(Files.toString(MavenProjects.getMainJavaFile(HttpRequest.class)));
         Class<?> clazz = new JdkCompiler().compile(javaSource);

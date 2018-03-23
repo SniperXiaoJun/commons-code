@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 
 public class RuntimeCompileTest {
 
-    public static void main(String args[]) throws IOException {
+    public static void main(String args[]) {
         StringBuffer str = new StringBuffer();
         str.append("package com.uu.rcapp.test;");
         str.append("public class HelloWorld {");

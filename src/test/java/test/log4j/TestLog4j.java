@@ -11,7 +11,7 @@ import code.ponfee.commons.util.MavenProjects;
 public class TestLog4j {
 
     private static Logger logger = LoggerFactory.getLogger(TestLog4j.class);
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         logger.trace("abcd");
         logger.info("abcd");
         logger.info(Files.toString(MavenProjects.getTestJavaFile(TestLog4j.class)));

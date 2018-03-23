@@ -33,12 +33,12 @@ public enum DigestAlgorithms {
     private final String algorithm;
     private final int byteSize;
 
-    private DigestAlgorithms(int byteSize) {
+    DigestAlgorithms(int byteSize) {
         this.algorithm = this.name();
         this.byteSize = byteSize;
     }
 
-    private DigestAlgorithms(String algorithm, int byteSize) {
+    DigestAlgorithms(String algorithm, int byteSize) {
         this.algorithm = algorithm;
         this.byteSize = byteSize;
     }

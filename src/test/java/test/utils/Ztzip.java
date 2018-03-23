@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class Ztzip {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         //org.zeroturnaround.zip.ZipUtil.pack(new File("D:\\tmp"), new File("d:/demo.zip"));
         //org.zeroturnaround.zip.ZipUtil.unexplode(new File("D:\\Recv Files.zip"));
 

@@ -103,7 +103,7 @@ public final class UrlCoder {
         return decodeURI(url, charset);
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         String s = encodeURI("http://www.oschina.net/search?scope=bbs&q=C语言");
         System.out.println(s);
         System.out.println(decodeURI(s));

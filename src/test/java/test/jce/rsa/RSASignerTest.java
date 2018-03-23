@@ -22,9 +22,9 @@ public class RSASignerTest {
     private static byte[] origin = MavenProjects.getMainJavaFileAsByteArray(IdcardResolver.class);
 
     @Test
-    public void testRSASign() throws Exception {
+    public void testRSASign() {
         RSAKey dk = new RSAKey(1024);
-        RSAKey ek = (RSAKey) dk.getPublic();
+        RSAKey ek = dk.getPublic();
         RSAPublicKey pub = RSAPublicKeys.toRSAPublicKey(dk.n, dk.e);
         RSAPrivateKey pri = RSAPrivateKeys.toRSAPrivateKey(dk.n, dk.d);
 

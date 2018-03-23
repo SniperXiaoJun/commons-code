@@ -174,7 +174,7 @@ public final class RSAPrivateKeys {
      */
     public static String toPkcs1Pem(RSAPrivateKey privateKey) {
         try (StringWriter stringWriter = new StringWriter(); 
-             JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
+             JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter)
         ) {
             pemWriter.writeObject(privateKey);
             pemWriter.flush();
@@ -191,7 +191,7 @@ public final class RSAPrivateKeys {
      */
     public static RSAPrivateKey fromPkcs1Pem(String pemPrivateKey) {
         try (Reader reader = new StringReader(pemPrivateKey); 
-             PEMParser pemParser = new PEMParser(reader);
+             PEMParser pemParser = new PEMParser(reader)
         ) {
             PEMKeyPair keyPair = (PEMKeyPair) pemParser.readObject();
             JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(Providers.BC);
@@ -258,7 +258,7 @@ public final class RSAPrivateKeys {
     public static String toEncryptedPkcs8Pem(RSAPrivateKey privateKey,
                                              OutputEncryptor outEncryptor) {
         try (StringWriter stringWriter = new StringWriter(); 
-             JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
+             JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter)
         ) {
             PrivateKeyInfo privKeyInfo = PrivateKeyInfo.getInstance(privateKey.getEncoded());
             pemWriter.writeObject(new PKCS8Generator(privKeyInfo, outEncryptor));
@@ -297,7 +297,7 @@ public final class RSAPrivateKeys {
     public static RSAPrivateKey fromEncryptedPkcs8Pem(String encryptedPem, 
                                                       InputDecryptorProvider inputDecryptor) {
         try (Reader reader = new StringReader(encryptedPem); 
-             PEMParser pemParser = new PEMParser(reader);
+             PEMParser pemParser = new PEMParser(reader)
         ) {
             PKCS8EncryptedPrivateKeyInfo encrypted = (PKCS8EncryptedPrivateKeyInfo) pemParser.readObject();
             PrivateKeyInfo pkInfo = encrypted.decryptPrivateKeyInfo(inputDecryptor);

@@ -134,7 +134,7 @@ public class ExportTester {
     }
 
     @Test
-    public void testExcel() throws FileNotFoundException, IOException {
+    public void testExcel() throws IOException {
         ExcelExporter excel = new ExcelExporter();
         List<Thead> list = new ArrayList<>();
 
@@ -254,7 +254,7 @@ public class ExportTester {
     }
 
     @Test
-    public void testExcel2() throws FileNotFoundException, IOException {
+    public void testExcel2() throws IOException {
         AbstractExporter excel = new ExcelExporter();
 
         Table table = new Table("a,b,c,d,e".split(","));

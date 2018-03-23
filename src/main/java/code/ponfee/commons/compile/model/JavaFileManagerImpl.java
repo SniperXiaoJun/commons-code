@@ -58,8 +58,7 @@ public class JavaFileManagerImpl extends ForwardingJavaFileManager<JavaFileManag
 
     @Override
     public JavaFileObject getJavaFileForOutput(Location location, String qualifiedName, 
-                                               Kind kind, FileObject outputFile)
-        throws IOException {
+                                               Kind kind, FileObject outputFile) {
         JavaFileObject file = new JavaFileObjectImpl(qualifiedName, kind);
         classLoader.add(qualifiedName, file);
         return file;

@@ -111,7 +111,7 @@ public @interface Constraint {
     /**
      * 时态（过去或将来）
      */
-    public static enum Tense {
+    enum Tense {
         PAST("过去"), FUTURE("将来"), ANY("任意"), NON(null);
 
         private String desc;

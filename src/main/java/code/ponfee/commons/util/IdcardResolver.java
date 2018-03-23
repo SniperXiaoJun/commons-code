@@ -26,15 +26,15 @@ public class IdcardResolver {
     /**
      * 证件类型
      */
-    public static enum CertType {
-        FIRST, SECOND, HONGKONG, MACAO, TAIWAN, PASSPORT;
+    public enum CertType {
+        FIRST, SECOND, HONGKONG, MACAO, TAIWAN, PASSPORT
     }
 
     /**
      * 性别：M男；F女；N未知；
      */
-    public static enum Sex {
-        M, F, N;
+    public enum Sex {
+        M, F, N
     }
 
     private String idcard; // idCard

@@ -48,7 +48,7 @@ public class SCryptTester {
     }
 
     @Test
-    public void format_0_rp_max() throws Exception {
+    public void format_0_rp_max() {
         int N = 2;
         int r = 255;
         int p = 255;

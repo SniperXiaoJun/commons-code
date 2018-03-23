@@ -26,7 +26,7 @@ public abstract class MapAdapter<K, V> extends XmlAdapter<MapEntry[], Map<K, V>>
         vtype = GenericUtils.getActualTypeArgument(this.getClass(), 1);
     }
 
-    public @Override MapEntry<K, V>[] marshal(Map<K, V> map) throws Exception {
+    public @Override MapEntry<K, V>[] marshal(Map<K, V> map) {
         if (map == null) {
             return null;
         }
@@ -39,7 +39,7 @@ public abstract class MapAdapter<K, V> extends XmlAdapter<MapEntry[], Map<K, V>>
         return entries;
     }
 
-    public @Override Map<K, V> unmarshal(MapEntry[] entries) throws Exception {
+    public @Override Map<K, V> unmarshal(MapEntry[] entries) {
         if (entries == null) {
             return null;
         }

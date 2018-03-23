@@ -108,7 +108,7 @@ final class ClassPathResourceLoader {
                         //Enumeration<ZipEntry> entries = zip.getEntries();
                         Enumeration<? extends ZipEntry> entries0 = zip.entries();
                         while (entries0.hasMoreElements()) {
-                            ZipEntry entry = (ZipEntry) entries0.nextElement();
+                            ZipEntry entry = entries0.nextElement();
                             if (!filePath.equals(entry.getName())) {
                                 continue;
                             }
@@ -221,7 +221,7 @@ final class ClassPathResourceLoader {
                         //Enumeration<ZipEntry> entries = zip.getEntries();
                         Enumeration<? extends ZipEntry> entries0 = zip.entries();
                         while (entries0.hasMoreElements()) {
-                            ZipEntry entry = (ZipEntry) entries0.nextElement();
+                            ZipEntry entry = entries0.nextElement();
                             String name = entry.getName();
                             int idx = name.lastIndexOf('/');
                             // 1、全目录匹配 或 当可递归时子目录

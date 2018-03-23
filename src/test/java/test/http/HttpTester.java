@@ -23,7 +23,7 @@ public class HttpTester {
     private static final String URL = "http://192.168.1.120:8100/";
 
     @Test
-    public void testHttps() throws Exception {
+    public void testHttps() {
         InputStream keyInput = Object.class.getResourceAsStream("d:/cert.p12");
         KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.PKCS12, keyInput, "1253089901");
         SSLSocketFactory sockFact = resolver.getSSLContext("1253089901").getSocketFactory();
@@ -50,7 +50,7 @@ public class HttpTester {
     }
 
     @Test
-    public void testParams() throws IOException {
+    public void testParams() {
         String url = URL + "account/v1/user/info.json";
         Map<String, String> params = new HashMap<>();
         params.put("time", "1478859839449");

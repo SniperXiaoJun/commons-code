@@ -89,12 +89,12 @@ public class PrivateKeyTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetTimeStampAndNonceSignatureConfigBuilderSadPath() throws Exception {
+    public void testSetTimeStampAndNonceSignatureConfigBuilderSadPath() {
         new PrivateKey.SignatureConfigBuilder().setRecover(false).setTimeStampAndNonce(true);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetTimeStampAndNonceSignatureConfigSadPath() throws Exception {
+    public void testSetTimeStampAndNonceSignatureConfigSadPath() {
         //noinspection ConstantConditions
         new PrivateKey.SignatureConfig(false, true, true, new SHA256Digest(), new SHA256Digest());
     }

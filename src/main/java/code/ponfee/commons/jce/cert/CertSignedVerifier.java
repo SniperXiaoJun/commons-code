@@ -1,6 +1,5 @@
 package code.ponfee.commons.jce.cert;
 
-import java.io.IOException;
 import java.security.SignatureException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
@@ -35,29 +34,25 @@ public abstract class CertSignedVerifier {
      * @throws CertVerifyException
      */
     public final void verify() {
-        try {
-            for (int i = 0; i < this.subjects.length; i++) {
-                String subjectCN = X509CertUtils.getCertInfo(subjects[i], X509CertInfo.SUBJECT_CN);
+        for (int i = 0; i < this.subjects.length; i++) {
+            String subjectCN = X509CertUtils.getCertInfo(subjects[i], X509CertInfo.SUBJECT_CN);
 
-                // 获取根证书
-                if (rootCert == null) {
-                    throw new SecurityException("[" + subjectCN + "]的根证未受信任");
-                }
-
-                // 校验
-                verifyCertDate(this.subjects[i]);
-                verifyIssuingSign(this.subjects[i], rootCert);
-                if (crl != null) {
-                    verifyCrlRevoke(this.subjects[i], crl);
-                }
+            // 获取根证书
+            if (rootCert == null) {
+                throw new SecurityException("[" + subjectCN + "]的根证未受信任");
             }
 
-            // 签名验证
-            if (verifySigned) {
-                verifySigned();
+            // 校验
+            verifyCertDate(this.subjects[i]);
+            verifyIssuingSign(this.subjects[i], rootCert);
+            if (crl != null) {
+                verifyCrlRevoke(this.subjects[i], crl);
             }
-        } catch (IOException e) {
-            throw new SecurityException("获取证书主题异常", e);
+        }
+
+        // 签名验证
+        if (verifySigned) {
+            verifySigned();
         }
     }
 
@@ -80,8 +75,6 @@ public abstract class CertSignedVerifier {
             throw new SecurityException("[" + subjectCN + "]已过期");
         } catch (CertificateNotYetValidException e) {
             throw new SecurityException("[" + subjectCN + "]尚未生效");
-        } catch (IOException e) {
-            throw new SecurityException("获取证书主题异常", e);
         }
     }
 
@@ -98,8 +91,6 @@ public abstract class CertSignedVerifier {
             subject.verify(root.getPublicKey());
         } catch (SignatureException e) {
             throw new SecurityException("[" + subjectCN + "]的根证未受信任");
-        } catch (IOException e) {
-            throw new SecurityException("获取证书主题异常", e);
         } catch (Exception e) {
             throw new SecurityException("根证验签出错", e);
         }
@@ -113,13 +104,9 @@ public abstract class CertSignedVerifier {
      * @throws CertVerifyException
      */
     public static void verifyCrlRevoke(X509Certificate subject, X509CRL crl) {
-        try {
-            String subjectCN = X509CertUtils.getCertInfo(subject, X509CertInfo.SUBJECT_CN);
-            if (crl.isRevoked(subject)) {
-                throw new SecurityException("[" + subjectCN + "]已被吊销");
-            }
-        } catch (IOException e) {
-            throw new SecurityException("获取证书主题异常", e);
+        String subjectCN = X509CertUtils.getCertInfo(subject, X509CertInfo.SUBJECT_CN);
+        if (crl.isRevoked(subject)) {
+            throw new SecurityException("[" + subjectCN + "]已被吊销");
         }
     }
 

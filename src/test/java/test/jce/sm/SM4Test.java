@@ -8,7 +8,7 @@ import code.ponfee.commons.util.MavenProjects;
 
 public class SM4Test {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         //byte[] data = Files.toString(MavenProjects.getMainJavaFile(SM4.class)).replaceAll("\r|\n", "").getBytes();
         byte[] data = MavenProjects.getMainJavaFileAsLineString(SM4.class).substring(0, 997).getBytes();
         byte[] key = "1234567785465466".getBytes();

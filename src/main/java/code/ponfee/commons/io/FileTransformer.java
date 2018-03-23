@@ -121,7 +121,7 @@ public class FileTransformer {
         try ( FileInputStream sourceFile = new FileInputStream(source);
               FileChannel sourceChannel = sourceFile.getChannel();
               FileOutputStream targetFile = new FileOutputStream(target);
-              FileChannel targetChannel = targetFile.getChannel();
+              FileChannel targetChannel = targetFile.getChannel()
         ) {
             sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
         } catch (IOException e) {
@@ -138,7 +138,7 @@ public class FileTransformer {
     public static void transform(File source, File target, 
                                  String[] searchList, String[] replacementList) {
         try (WrappedBufferedReader reader = new WrappedBufferedReader(source);
-             WrappedBufferedWriter writer = new WrappedBufferedWriter(target);
+             WrappedBufferedWriter writer = new WrappedBufferedWriter(target)
         ) {
             writeln(reader, writer, searchList, replacementList);
         } catch (IOException e) {
@@ -157,7 +157,7 @@ public class FileTransformer {
     public static void transform(File source, File target, String fromCharset, String toCharset, 
                                  String[] searchList, String[] replacementList) {
         try (WrappedBufferedReader reader = new WrappedBufferedReader(source, fromCharset);
-             WrappedBufferedWriter writer = new WrappedBufferedWriter(target, toCharset);
+             WrappedBufferedWriter writer = new WrappedBufferedWriter(target, toCharset)
         ) {
             writeln(reader, writer, searchList, replacementList);
         } catch (IOException e) {
@@ -238,7 +238,7 @@ public class FileTransformer {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         //System.out.println(detectBytesCharset(Streams.file2bytes("D:\\test\\2.png")));
         //System.out.println(detectBytesCharset(Streams.file2bytes("D:\\test\\lib\\cache\\Cache.java")));
 

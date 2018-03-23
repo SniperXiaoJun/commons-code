@@ -37,7 +37,7 @@ public class RSAryptorTest {
     }
 
     @Test
-    public void testRSANoPadding() throws Exception {
+    public void testRSANoPadding() {
         System.out.println("\n\ntestRSANoPadding======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
@@ -67,7 +67,7 @@ public class RSAryptorTest {
     }
 
     @Test
-    public void testRSAPKCS1Padding() throws Exception {
+    public void testRSAPKCS1Padding() {
         System.out.println("\n\ntestRSAPKCS1Padding======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
@@ -135,7 +135,7 @@ public class RSAryptorTest {
     }
 
     @Test
-    public void testRSAHash() throws Exception {
+    public void testRSAHash() {
         System.out.println("\n\ntestRSAHash======================================");
         for (int i = 0; i < 10; i++) {
             byte[] data = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(99999) + 1);
@@ -155,7 +155,7 @@ public class RSAryptorTest {
     }
 
     @Test
-    public void testRSARandom() throws Exception {
+    public void testRSARandom() {
         System.out.println("\n\ntestRSARandom======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
@@ -222,7 +222,7 @@ public class RSAryptorTest {
     }
 
     @Test
-    public void testRSAHashInverseKey() throws Exception {
+    public void testRSAHashInverseKey() {
         System.out.println("\n\ntestRSAHashInverseKey======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
@@ -239,7 +239,7 @@ public class RSAryptorTest {
     }
 
     @Test
-    public void testRSANoPaddingInverseKey() throws Exception {
+    public void testRSANoPaddingInverseKey() {
         System.out.println("\n\ntestRSANoPaddingInverseKey======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
@@ -256,7 +256,7 @@ public class RSAryptorTest {
     }
     
     @Test
-    public void testRSAPKCS1InverseKey() throws Exception {
+    public void testRSAPKCS1InverseKey() {
         System.out.println("\n\ntestRSAPKCS1InverseKey======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
@@ -272,7 +272,7 @@ public class RSAryptorTest {
         }
     }
     @Test
-    public void testRSANoPaddingStream() throws Exception {
+    public void testRSANoPaddingStream() {
         System.out.println("\n\ntestRSANoPaddingStream======================================");
         RSAKey dk = new RSAKey(2048);
         Key ek = dk.getPublic();
@@ -310,7 +310,7 @@ public class RSAryptorTest {
     }
 
     @Test
-    public void testRSAPKCS1PaddingStream() throws Exception {
+    public void testRSAPKCS1PaddingStream() {
         System.out.println("\n\ntestRSAPKCS1PaddingStream======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
@@ -348,7 +348,7 @@ public class RSAryptorTest {
     }
 
     @Test
-    public void testRSAHashStream() throws Exception {
+    public void testRSAHashStream() {
         System.out.println("\n\ntestRSAHashStream======================================");
         RSAKey dk = new RSAKey(2048);
         Key ek = dk.getPublic();

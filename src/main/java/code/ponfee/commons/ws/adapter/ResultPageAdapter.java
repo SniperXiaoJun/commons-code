@@ -21,7 +21,7 @@ public abstract class ResultPageAdapter<T> extends XmlAdapter<Result<TransitPage
     }
 
     @Override
-    public Result<Page<T>> unmarshal(Result<TransitPage<T>> v) throws Exception {
+    public Result<Page<T>> unmarshal(Result<TransitPage<T>> v) {
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         } else if (v.getData().getRows() == null || v.getData().getRows().getItem() == null) {
@@ -31,7 +31,7 @@ public abstract class ResultPageAdapter<T> extends XmlAdapter<Result<TransitPage
         return new Result<>(v.getCode(), v.getMsg(), TransitPage.recover(v.getData()));
     }
 
-    public @Override Result<TransitPage<T>> marshal(Result<Page<T>> v) throws Exception {
+    public @Override Result<TransitPage<T>> marshal(Result<Page<T>> v) {
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         } else if (v.getData().getRows() == null) {

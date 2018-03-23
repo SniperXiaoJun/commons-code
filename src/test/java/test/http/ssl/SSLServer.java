@@ -48,7 +48,7 @@ public class SSLServer extends Thread {
         }
     }
     
-    public static void main(String[] args) throws NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, KeyStoreException, UnrecoverableKeyException, KeyManagementException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, CertificateException, IOException, KeyStoreException, UnrecoverableKeyException, KeyManagementException {
         // 设置服务端信任库
         System.setProperty("javax.net.ssl.trustStore", SERVER_KEY_STORE);
         

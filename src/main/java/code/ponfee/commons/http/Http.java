@@ -450,8 +450,8 @@ public final class Http {
     /**
      * Http method
      */
-    private static enum HttpMethod {
-        GET, POST, PUT, DELETE, HEAD, TRACE, OPTIONS;
+    private enum HttpMethod {
+        GET, POST, PUT, DELETE, HEAD, TRACE, OPTIONS
     }
 
     /**
@@ -488,7 +488,7 @@ public final class Http {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         //System.out.println(Bytes.hexDump(Http.get("http://www.apachelounge.com/download/VC14/binaries/httpd-2.4.25-win64-VC14.zip").download()));
         //Http.get("https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.zip").download(new FileOutputStream("d:/elasticsearch-5.5.1.zip"));
         Http http = Http.get("http://www.stockstar.com");

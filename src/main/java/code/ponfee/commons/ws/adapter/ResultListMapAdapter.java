@@ -34,7 +34,7 @@ public abstract class ResultListMapAdapter<K, V> extends XmlAdapter<Result<MapIt
     }
 
     @Override
-    public Result<List<Map<K, V>>> unmarshal(Result<MapItemArray> v) throws Exception {
+    public Result<List<Map<K, V>>> unmarshal(Result<MapItemArray> v) {
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         } else if (v.getData().getItems() == null) {
@@ -59,7 +59,7 @@ public abstract class ResultListMapAdapter<K, V> extends XmlAdapter<Result<MapIt
     }
 
     @Override
-    public Result<MapItemArray> marshal(Result<List<Map<K, V>>> v) throws Exception {
+    public Result<MapItemArray> marshal(Result<List<Map<K, V>>> v) {
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         }

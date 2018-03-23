@@ -186,7 +186,7 @@ public final class WebUtils {
     public static void response(HttpServletResponse resp, InputStream input, 
                                 String filename, String charset, boolean isGzip) {
         try (InputStream in = input;
-             OutputStream out = resp.getOutputStream(); 
+             OutputStream out = resp.getOutputStream()
         ) {
             respStream(resp, in.available(), filename, charset);
             if (isGzip) {

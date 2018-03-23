@@ -22,5 +22,5 @@ public interface ScrollSearchCallback {
     /**
      * 无结果数据
      */
-    default void noResult() {};
+    default void noResult() {}
 }

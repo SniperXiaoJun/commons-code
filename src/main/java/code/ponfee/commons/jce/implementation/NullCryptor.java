@@ -1,6 +1,5 @@
 package code.ponfee.commons.jce.implementation;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -32,12 +31,12 @@ public class NullCryptor extends Cryptor {
 
     private static final class NullKey implements Key {
         @Override
-        public Key readKey(InputStream in) throws IOException {
+        public Key readKey(InputStream in) {
             return null;
         }
 
         @Override
-        public void writeKey(OutputStream out) throws IOException {}
+        public void writeKey(OutputStream out) {}
 
         @Override
         public Key getPublic() {
