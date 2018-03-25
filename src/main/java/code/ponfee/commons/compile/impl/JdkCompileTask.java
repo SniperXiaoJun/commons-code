@@ -54,25 +54,25 @@ public class JdkCompileTask<T> {
         this.classLoader = classLoader;
         ClassLoader loader = classLoader.getParent();
         diagnostics = new DiagnosticCollector<>();
-        final StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null);
+        StandardJavaFileManager fm = compiler.getStandardFileManager(diagnostics, null, null);
 
-        if (loader instanceof URLClassLoader
-            && (!loader.getClass().getName().equalsIgnoreCase("sun.misc.Launcher$AppClassLoader"))) {
+        if ((loader instanceof URLClassLoader)
+            && !loader.getClass().getName().equalsIgnoreCase("sun.misc.Launcher$AppClassLoader")) {
             try {
-                @SuppressWarnings("resource") URLClassLoader urlClassLoader = (URLClassLoader) loader;
+                @SuppressWarnings("resource") URLClassLoader ucl = (URLClassLoader) loader;
                 List<File> path = new ArrayList<>();
-                for (URL url : urlClassLoader.getURLs()) {
+                for (URL url : ucl.getURLs()) {
                     File file = new File(url.getFile());
                     path.add(file);
                 }
 
-                fileManager.setLocation(StandardLocation.CLASS_PATH, path);
+                fm.setLocation(StandardLocation.CLASS_PATH, path);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        javaFileManager = new JavaFileManagerImpl(fileManager, classLoader);
+        javaFileManager = new JavaFileManagerImpl(fm, classLoader);
         this.options = new ArrayList<>();
         if (options != null) { // make a save copy of input options
             for (String option : options) {
@@ -81,8 +81,9 @@ public class JdkCompileTask<T> {
         }
     }
 
-    public synchronized Class<?> compile(final String className, final CharSequence javaSource,
-        final DiagnosticCollector<JavaFileObject> diagnosticsList) throws JdkCompileException, ClassCastException {
+    public synchronized Class<?> compile(String className, CharSequence javaSource,
+                                         DiagnosticCollector<JavaFileObject> diagnosticsList)
+    throws JdkCompileException, ClassCastException {
         if (diagnosticsList != null) {
             diagnostics = diagnosticsList;
         } else {
@@ -101,20 +102,22 @@ public class JdkCompileTask<T> {
 
         List<JavaFileObject> sources = new ArrayList<>();
         for (Entry<String, CharSequence> entry : classes.entrySet()) {
-            String qualifiedClassName = entry.getKey();
+            String qcn = entry.getKey();
             CharSequence javaSource = entry.getValue();
             if (javaSource != null) {
-                final int dotPos = qualifiedClassName.lastIndexOf('.');
-                final String className = dotPos == -1 ? qualifiedClassName : qualifiedClassName.substring(dotPos + 1);
-                final String packageName = dotPos == -1 ? "" : qualifiedClassName.substring(0, dotPos);
+                final int dotPos = qcn.lastIndexOf('.');
+                final String className = dotPos == -1 ? qcn : qcn.substring(dotPos + 1);
+                final String packageName = dotPos == -1 ? "" : qcn.substring(0, dotPos);
                 final JavaFileObjectImpl source = new JavaFileObjectImpl(className, javaSource);
                 sources.add(source);
-                javaFileManager.putFileForInput(StandardLocation.SOURCE_PATH, packageName, className + JAVA_EXTENSION, source);
+                javaFileManager.putFileForInput(StandardLocation.SOURCE_PATH, packageName,
+                                                className + JAVA_EXTENSION, source);
             }
         }
 
         // Get a CompliationTask from the compiler and compile the sources
-        final CompilationTask task = compiler.getTask(null, javaFileManager, diagnostics, options, null, sources);
+        final CompilationTask task = compiler.getTask(null, javaFileManager, diagnostics,
+                                                      options, null, sources);
         final Boolean result = task.call();
         if (result == null || !result.booleanValue()) {
             throw new JdkCompileException("Compilation failed.", classes.keySet(), diagnostics);

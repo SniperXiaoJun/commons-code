@@ -539,6 +539,8 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
+                <!-- filtering用于替换资源文件(*.xml、*.properties)中的占位符(${...}) -->
+                <!-- https://blog.csdn.net/luckyzhoustar/article/details/50411962 -->
                 <filtering>false</filtering>
             </resource>
             <resource>

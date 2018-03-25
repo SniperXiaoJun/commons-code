@@ -22,7 +22,7 @@ public class JdkCompileException extends Exception {
     private String source;
 
     public JdkCompileException(String message, Set<String> qualifiedClassNames, Throwable cause,
-        DiagnosticCollector<JavaFileObject> diagnostics) {
+                               DiagnosticCollector<JavaFileObject> diagnostics) {
         super(message, cause);
         setClassNames(qualifiedClassNames);
         setDiagnostics(diagnostics);
@@ -37,14 +37,14 @@ public class JdkCompileException extends Exception {
     }
 
     public JdkCompileException(String message, Set<String> qualifiedClassNames,
-        DiagnosticCollector<JavaFileObject> diagnostics) {
+                               DiagnosticCollector<JavaFileObject> diagnostics) {
         super(message);
         setClassNames(qualifiedClassNames);
         setDiagnostics(diagnostics);
     }
 
     public JdkCompileException(Set<String> qualifiedClassNames, Throwable cause,
-        DiagnosticCollector<JavaFileObject> diagnostics) {
+                               DiagnosticCollector<JavaFileObject> diagnostics) {
         super(cause);
         setClassNames(qualifiedClassNames);
         setDiagnostics(diagnostics);

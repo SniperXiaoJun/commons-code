@@ -65,17 +65,17 @@ public class JdkCompiler implements JavaSourceCompiler {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Class<?> compile(JavaSource javaSource, JdkCompilerClassLoader classLoader) {
+    private Class<?> compile(JavaSource src, JdkCompilerClassLoader classLoader) {
         try {
             DiagnosticCollector<JavaFileObject> errs = new DiagnosticCollector<>();
             JdkCompileTask<?> compileTask = new JdkCompileTask(classLoader, options);
-            return compileTask.compile(javaSource.getFullyQualifiedName(), javaSource.getSourceCode(), errs);
+            return compileTask.compile(src.getFullyQualifiedName(), src.getSourceCode(), errs);
         } catch (JdkCompileException ex) {
             DiagnosticCollector<JavaFileObject> diagnostics = ex.getDiagnostics();
-            throw new CompileExprException("compile error, source : \n" + javaSource
+            throw new CompileExprException("compile error, source : \n" + src
                                          + ", " + diagnostics.getDiagnostics(), ex);
         } catch (Exception ex) {
-            throw new CompileExprException("compile error, source : \n" + javaSource, ex);
+            throw new CompileExprException("compile error, source : \n" + src, ex);
         }
     }
 
