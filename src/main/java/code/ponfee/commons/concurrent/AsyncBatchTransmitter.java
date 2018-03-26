@@ -53,7 +53,7 @@ public final class AsyncBatchTransmitter<T> {
 
     /**
      * batch put
-     * @param t
+     * @param ts
      * @return
      */
     public boolean put(@SuppressWarnings("unchecked") T... ts) {

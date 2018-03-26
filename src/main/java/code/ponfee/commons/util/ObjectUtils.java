@@ -31,18 +31,19 @@ public final class ObjectUtils {
     private static final char[] URL_SAFE_BASE64_CODES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
 
     /**
-     * 对象toString
-     * @param obj
-     * @return
+     * Returns object toString
+     * 
+     * @param obj the target object
+     * @return the string of object
      */
     public static String toString(Object obj) {
-        return (obj == null) 
-               ? "null" 
-               : reflectionToString(obj, ToStringStyle.JSON_STYLE);
+        return toString(obj, "null");
     }
 
     public static String toString(Object obj, String defaultStr) {
-        return (obj == null) ? defaultStr : toString(obj);
+        return (obj == null) 
+               ? defaultStr 
+               : reflectionToString(obj, ToStringStyle.JSON_STYLE);
     }
 
     /**
@@ -164,7 +165,7 @@ public final class ObjectUtils {
                         }
                     } else if (CharSequence.class.isAssignableFrom(type)) {
                         // Construct a CharSequence
-                        // new String(value.toString()), new StringBuilder(value.toString())
+                        // e.g. new String(value.toString()) and new StringBuilder(value.toString())
                         value = type.getConstructor(String.class).newInstance(value.toString());
                     } else {
                         throw new ClassCastException(ClassUtils.getClassName(value.getClass())

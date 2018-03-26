@@ -65,7 +65,7 @@ public class MailEnvelope implements Serializable {
     }
 
     public static MailEnvelope newTextInstance(String[] to, String subject, String content,
-        String[] cc, String[] bcc) {
+                                               String[] cc, String[] bcc) {
         return new MailEnvelope(MailType.TEXT, to, subject, content, cc, bcc);
     }
 
