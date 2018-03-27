@@ -17,12 +17,13 @@ import java.util.Arrays;
  * @author Ponfee
  */
 public final class Numbers {
+    private Numbers() {}
 
     public static final Integer INTEGER_ZERO = Integer.valueOf(0);
     public static final int     INT_ZERO     = 0;
     public static final byte    BYTE_ZERO    = 0x00;
 
-    // -----------------------------------------------------character convert
+    // --------------------------------------------------------------character convert
     public static char toChar(Object obj, char defaultVal) {
         return toWrapChar(obj, defaultVal);
     }
@@ -41,7 +42,7 @@ public final class Numbers {
         } else if (obj instanceof Character) {
             return (Character) obj;
         } else if (obj instanceof Number) {
-            return (char) ((Number) obj).shortValue();
+            return (char) ((Number) obj).intValue();
         } else if (obj instanceof byte[]) {
             return Chars.fromByteArray((byte[]) obj);
         } else {
@@ -50,7 +51,7 @@ public final class Numbers {
         }
     }
 
-    // -----------------------------------to primary number------------------------------
+    // -----------------------------------------------------------------to primary number
     public static byte toByte(Object obj) {
         return toByte(obj, (byte) 0);
     }
@@ -114,7 +115,7 @@ public final class Numbers {
         return toWrapDouble(obj, defaultVal);
     }
 
-    // -----------------------------------to wrapper number------------------------------
+    // -----------------------------------------------------------------to wrapper number
     public static Byte toWrapByte(Object obj) {
         return toWrapByte(obj, null);
     }
@@ -202,6 +203,7 @@ public final class Numbers {
         return value == null ? null : value.doubleValue();
     }
 
+    // ---------------------------------------------------------------------number format
     /**
      * 数字精度化
      *
@@ -313,7 +315,7 @@ public final class Numbers {
      */
     public static double add(Double num1, Double num2) {
         return ObjectUtils.ifNull(num1, 0D)
-                + ObjectUtils.ifNull(num2, 0D);
+             + ObjectUtils.ifNull(num2, 0D);
     }
 
     /**
@@ -382,8 +384,9 @@ public final class Numbers {
         return (a == b) || (a != null && a.equals(b));
     }
 
+    // --------------------------------------------------------------------------金额汉化
     private static final String[] CN_UPPER_NUMBER = {"零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"};
-    private static final String[] CN_UPPER_MONETRAY_UNIT = {
+    private static final String[] CN_UPPER_MONETARY_UNIT = {
         "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰", "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟"
     };
     private static final BigDecimal MAX_VALUE = new BigDecimal("9999999999999999.995");
@@ -423,12 +426,12 @@ public final class Numbers {
             numUnit = (int) (number % 10); // get the last number
             if (numUnit > 0) {
                 if ((numIndex == 9) && (zeroSize >= 3)) {
-                    builder.insert(0, CN_UPPER_MONETRAY_UNIT[6]);
+                    builder.insert(0, CN_UPPER_MONETARY_UNIT[6]);
                 }
                 if ((numIndex == 13) && (zeroSize >= 3)) {
-                    builder.insert(0, CN_UPPER_MONETRAY_UNIT[10]);
+                    builder.insert(0, CN_UPPER_MONETARY_UNIT[10]);
                 }
-                builder.insert(0, CN_UPPER_MONETRAY_UNIT[numIndex]);
+                builder.insert(0, CN_UPPER_MONETARY_UNIT[numIndex]);
                 builder.insert(0, CN_UPPER_NUMBER[numUnit]);
                 getZero = false;
                 zeroSize = 0;
@@ -439,10 +442,10 @@ public final class Numbers {
                 }
                 if (numIndex == 2) {
                     if (number > 0) {
-                        builder.insert(0, CN_UPPER_MONETRAY_UNIT[numIndex]);
+                        builder.insert(0, CN_UPPER_MONETARY_UNIT[numIndex]);
                     }
                 } else if ( (((numIndex - 2) & 0x03) == 0) && (number % 1000 > 0) ) {
-                    builder.insert(0, CN_UPPER_MONETRAY_UNIT[numIndex]);
+                    builder.insert(0, CN_UPPER_MONETARY_UNIT[numIndex]);
                 }
                 getZero = true;
             }

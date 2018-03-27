@@ -89,7 +89,7 @@ public class MailSender {
     private int retryTimes;
     private int validateTimes;
 
-    /** 默认发送失败日志处理 {@link #sentFailHandler(MailSentFailedLogger)} */
+    /** 默认发送失败日志处理 {@link #setSentFailedLogger(MailSentFailedLogger)} */
     private MailSentFailedLogger sentFailedLogger = new DefaultMailSentFailedLogger();
 
     private final transient Session session;

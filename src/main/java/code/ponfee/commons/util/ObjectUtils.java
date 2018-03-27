@@ -78,10 +78,6 @@ public final class ObjectUtils {
         }
     }
 
-    public static Object nullValue(Object obj, Object nullDefault) {
-        return obj == null ? nullDefault : obj;
-    }
-
     /**
      * map to javabean
      * @param map
@@ -307,7 +303,8 @@ public final class ObjectUtils {
     }
 
     /**
-     * if t is null the other
+     * Returns if t is null then other, else t
+     *
      * @param t
      * @param other
      * @return

@@ -26,7 +26,8 @@ import code.ponfee.commons.util.ObjectUtils;
  * 集合工具类
  * @author Ponfee
  */
-public class Collects {
+public final class Collects {
+    private Collects() {}
 
     /**
      * map转数组
@@ -37,7 +38,7 @@ public class Collects {
     public static Object[] map2array(Map<String, Object> map, String... fields) {
         Object[] array = new Object[fields.length];
         for (int i = 0; i < fields.length; i++) {
-            array[i] = ObjectUtils.nullValue(map.get(fields[i]), "");
+            array[i] = ObjectUtils.ifNull(map.get(fields[i]), "");
         }
         return array;
     }
@@ -75,7 +76,7 @@ public class Collects {
         Object[] result = new Object[data.size()];
         int i = 0;
         for (Entry<String, Object> entry : data.entrySet()) {
-            result[i++] = ObjectUtils.nullValue(entry.getValue(), "");
+            result[i++] = ObjectUtils.ifNull(entry.getValue(), "");
         }
         return result;
     }
@@ -101,15 +102,15 @@ public class Collects {
 
     /**
      * Result<Page<LinkedHashMap<String, Object>>>转Result<Page<Object[]>>
-     * @param source
+     * @param s
      * @return
      */
-    public static Result<Page<Object[]>> map2array(Result<Page<LinkedHashMap<String, Object>>> source) {
-        Page<LinkedHashMap<String, Object>> page = source.getData();
+    public static Result<Page<Object[]>> map2array(Result<Page<LinkedHashMap<String, Object>>> s) {
+        Page<LinkedHashMap<String, Object>> page = s.getData();
         List<Object[]> list = map2array(page.getRows());
 
         Fields.put(page, "rows", list);
-        Result<Page<Object[]>> target = new Result<>(source.getCode(), source.getMsg(), null);
+        Result<Page<Object[]>> target = new Result<>(s.getCode(), s.getMsg(), null);
         Fields.put(target, "data", page);
         return target;
     }
@@ -279,12 +280,12 @@ public class Collects {
         List<T> list = new ArrayList<>();
         Class<?> type = null;
         for (T[] array : arrays) {
-            if (array != null) {
-                if (type == null) {
-                    type = array.getClass().getComponentType();
-                }
-                list.addAll(Arrays.asList(array));
+            if (array == null) continue;
+
+            if (type == null) {
+                type = array.getClass().getComponentType();
             }
+            list.addAll(Arrays.asList(array));
         }
         if (type == null) {
             return null;

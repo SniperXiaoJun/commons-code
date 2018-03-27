@@ -146,9 +146,9 @@ public final class HmacUtils {
             mac.init(new SecretKeySpec(key, mac.getAlgorithm()));
             return mac;
         } catch (final NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException("unknown algorithm: " + algorithm);
+            throw new IllegalArgumentException("unknown algorithm: " + algorithm, e);
         } catch (final InvalidKeyException e) {
-            throw new IllegalArgumentException("invalid key: " + Hex.encodeHexString(key));
+            throw new IllegalArgumentException("invalid key: " + Hex.encodeHexString(key), e);
         }
     }
 
