@@ -603,10 +603,10 @@ public class ExcelUtils {
     /**
      * 每个sheet的写入
      *
-     * @param sheet   页签
-     * @param headers 表头
-     * @param dataset 数据集合
-     * @param pattern 日期格式
+     * @param sheet      页签
+     * @param headers    表头
+     * @param dataset    数据集合
+     * @param dateFormat 日期格式
      */
     private static <T> void write(SXSSFSheet sheet, Map<String, String> headers,
                                   Collection<T> dataset, String dateFormat) {

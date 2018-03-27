@@ -165,7 +165,7 @@ public class ZipUtils {
     /**
      * 使用给定密码解压指定的压缩文件到指定目录<p>
      * 如果指定目录不存在，可以自动创建，不合法的路径将导致异常被抛出
-     * @param zip 指定的压缩文件
+     * @param zipFile 指定的压缩文件
      * @param dest 解压目录
      * @param passwd 压缩文件的密码
      * @return 解压后文件数组

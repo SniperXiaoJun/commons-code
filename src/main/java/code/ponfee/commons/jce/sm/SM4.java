@@ -121,8 +121,9 @@ public final class SM4 {
 
     /**
      * 不带向量的加密（ECB模式）
-     * @param ctx
+     *
      * @param mode
+     * @param isPadding
      * @param key
      * @param input
      * @return
@@ -156,8 +157,9 @@ public final class SM4 {
 
     /**
      * 带向量的加密（CBC模式）
-     * @param ctx
+     *
      * @param mode
+     * @param isPadding
      * @param key
      * @param iv
      * @param input

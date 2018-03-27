@@ -313,7 +313,7 @@ public class ESQueryBuilder {
     // --------------------------------------聚合函数-------------------------------- //
     /**
      * 聚合
-     * @param aggregation
+     * @param agg
      * @return
      */
     public ESQueryBuilder aggs(AggregationBuilder agg) {

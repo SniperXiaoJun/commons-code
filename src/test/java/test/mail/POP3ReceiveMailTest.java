@@ -189,7 +189,7 @@ public class POP3ReceiveMailTest {
 
     /**
     * 判断邮件中是否包含附件
-    * @param msg 邮件内容
+    * @param part 邮件内容
     * @return 邮件中存在附件返回true，不存在返回false
     * @throws MessagingException
     * @throws IOException

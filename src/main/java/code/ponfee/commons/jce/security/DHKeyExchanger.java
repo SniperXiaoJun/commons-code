@@ -56,7 +56,7 @@ public final class DHKeyExchanger {
 
     /**
      * 初始化甲方密钥
-     * @param Keysize must be a multiple of 64, ranging from 512 to 1024 (inclusive).
+     * @param keySize must be a multiple of 64, ranging from 512 to 1024 (inclusive).
      * @return
      */
     public static Map<String, DHKey> initPartAKey(int keySize) {
@@ -74,7 +74,7 @@ public final class DHKeyExchanger {
 
     /**
      * 初始化乙方密钥
-     * @param key 甲方公钥
+     * @param partAPubKey 甲方公钥
      * @return
      */
     public static Map<String, DHKey> initPartBKey(byte[] partAPubKey) {
@@ -139,7 +139,7 @@ public final class DHKeyExchanger {
 
     /**
      * 取得私钥
-     * @param keyMap
+     * @param privateKey
      * @return
      */
     public static DHPrivateKey getPrivateKey(byte[] privateKey) {
@@ -154,7 +154,7 @@ public final class DHKeyExchanger {
 
     /**
      * 取得公钥
-     * @param keyMap
+     * @param publicKey
      * @return
      */
     public static DHPublicKey getPublicKey(byte[] publicKey) {

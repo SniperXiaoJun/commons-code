@@ -155,7 +155,7 @@ public abstract class CryptoProvider {
 
     /**
      * 对称密钥组件
-     * @param symmetricCryptor {@link SymmetricCryptor}
+     * @param symmetricKey {@link SymmetricCryptor}
      * @return
      */
     public static CryptoProvider symmetricKeyProvider(final SymmetricCryptor symmetricKey) {

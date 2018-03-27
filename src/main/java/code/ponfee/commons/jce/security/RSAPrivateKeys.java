@@ -86,7 +86,7 @@ public final class RSAPrivateKeys {
     /**
      * 对于某些jdk不支持私钥加密及验签，所以要反转私钥为公钥
      * 私钥伪造公钥来支持加密及验签
-     * @param publicKey
+     * @param privateKey
      * @return
      */
     public static RSAPublicKey inversePrivateKey(RSAPrivateKey privateKey) {
@@ -322,7 +322,7 @@ public final class RSAPrivateKeys {
 
     /**
      * get the rsa key length
-     * @param publicKey
+     * @param privateKey
      * @return
      */
     public static int getKeyLength(RSAPrivateKey privateKey) {

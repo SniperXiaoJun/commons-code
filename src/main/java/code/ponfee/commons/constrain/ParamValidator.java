@@ -36,7 +36,6 @@ public abstract class ParamValidator extends FieldValidator {
 
     /**
      * @param joinPoint
-     * @param validator
      * @return
      * @throws Throwable
      */

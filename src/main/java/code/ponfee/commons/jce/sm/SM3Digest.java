@@ -83,7 +83,6 @@ public class SM3Digest {
      * SM3结果输出
      * @param out       保存SM3结构的缓冲区
      * @param outOffset 缓冲区偏移量
-     * @return
      */
     public void doFinal(byte[] out, int outOffset) {
         byte[] tmp = this.doFinal();
@@ -198,7 +197,7 @@ public class SM3Digest {
 
         static byte[] convert(int[] arr) {
             byte[] out = new byte[arr.length * 4];
-            byte[] tmp = null;
+            byte[] tmp;
             for (int i = 0; i < arr.length; i++) {
                 tmp = bigEndianIntToByte(arr[i]);
                 System.arraycopy(tmp, 0, out, i * 4, 4);
@@ -395,7 +394,7 @@ public class SM3Digest {
         
         /**
          * 长整形转换成网络传输的字节流（字节数组）型数据
-         * @param num 一个长整型数据
+         * @param value 一个长整型数据
          * @return 4个字节的自己数组
          */
         static byte[] longToByteArray(long value) {

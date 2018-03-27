@@ -1683,7 +1683,7 @@ public class HttpRequest {
         BufferedReader reader = bufferedReader();
 
         return new CloseOperation<HttpRequest>(reader, ignoreCloseExceptions) {
-            public @Override HttpRequest run() throws IOException {
+            public @Override HttpRequest run() {
                 return copy(reader, writer);
             }
         }.call();
@@ -2429,8 +2429,7 @@ public class HttpRequest {
      * @return this request
      * @throws IOException
      */
-    protected HttpRequest writePartHeader(String name, String filename)
-        throws IOException {
+    protected HttpRequest writePartHeader(String name, String filename) {
         return writePartHeader(name, filename, null);
     }
 
@@ -2697,7 +2696,7 @@ public class HttpRequest {
         Writer writer = new OutputStreamWriter(output, output.encoder.charset());
 
         return new FlushOperation<HttpRequest>(writer) {
-            protected @Override HttpRequest run() throws IOException {
+            protected @Override HttpRequest run() {
                 return copy(input, writer);
             }
         }.call();

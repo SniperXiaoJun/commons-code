@@ -31,7 +31,6 @@ public abstract class CertSignedVerifier {
 
     /**
      * 根据加载的根证进行证书验证
-     * @throws CertVerifyException
      */
     public final void verify() {
         for (int i = 0; i < this.subjects.length; i++) {
@@ -64,7 +63,6 @@ public abstract class CertSignedVerifier {
     /**
      * 校验证书是否过期
      * @param subject
-     * @throws CertVerifyException
      */
     public static void verifyCertDate(X509Certificate subject) {
         String subjectCN = null;
@@ -80,9 +78,8 @@ public abstract class CertSignedVerifier {
 
     /**
      * 校验是否由指定根证签发
-     * @param root
      * @param subject
-     * @throws CertVerifyException
+     * @param root
      */
     public static void verifyIssuingSign(X509Certificate subject, X509Certificate root) {
         String subjectCN = null;
@@ -99,9 +96,8 @@ public abstract class CertSignedVerifier {
 
     /**
      * 校验是否已被吊销
-     * @param crl
      * @param subject
-     * @throws CertVerifyException
+     * @param crl
      */
     public static void verifyCrlRevoke(X509Certificate subject, X509CRL crl) {
         String subjectCN = X509CertUtils.getCertInfo(subject, X509CertInfo.SUBJECT_CN);

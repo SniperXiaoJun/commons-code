@@ -120,9 +120,9 @@ public final class DSASigner {
 
     /**
      * 校验数字签名
-     * @param data 原文数据
+     * @param origin 原文数据
      * @param publicKey 公钥
-     * @param sign 签名数据
+     * @param signed 签名数据
      * @return 校验成功返回true 失败返回false
      * 
      */

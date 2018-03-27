@@ -144,7 +144,7 @@ public class Strings {
         if (delimiter == null) {
             return new String[] { str };
         }
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         if ("".equals(delimiter)) {
             for (int i = 0; i < str.length(); i++) {
                 result.add(deleteAny(str.substring(i, i + 1), charsToDelete));
@@ -215,7 +215,7 @@ public class Strings {
     /**
      * 文件路径规范化，如“path/..”内部的点号
      * 注意：windows的文件分隔符“\”会替换为“/”
-     * @param 文件路径
+     * @param path 文件路径
      * @return 规范的文件路径 
      */
     public static String cleanPath(String path) {
@@ -245,7 +245,7 @@ public class Strings {
         }
 
         String[] pathArray = split(pathToUse, FOLDER_SEPARATOR);
-        List<String> pathElements = new LinkedList<String>();
+        List<String> pathElements = new LinkedList<>();
         int tops = 0;
 
         for (int i = pathArray.length - 1; i >= 0; i--) {
@@ -339,7 +339,7 @@ public class Strings {
 
     /**
      * Collection转String[]
-     * @param 集合
+     * @param collection 集合
      * @return
      */
     public static String[] toStringArray(Collection<String> collection) {
@@ -351,7 +351,7 @@ public class Strings {
 
     /**
      * Enumeration转String[]
-     * @param 枚举
+     * @param enumeration 枚举
      * @return
      */
     public static String[] toStringArray(Enumeration<String> enumeration) {

@@ -77,8 +77,9 @@ public final class SCrypt {
     }
 
     /**
-     * Hash the supplied plaintext password and generate output 
-     * in the format described in {@link SCryp}.
+     * Hash the supplied plaintext password and generate output in the format
+     * described in {@link #scrypt(HmacAlgorithms, byte[], byte[], int, int, int, int)}.
+     *
      * @param alg HmacAlgorithm.
      * @param passwd Password.
      * @param N CPU cost parameter.         between 0x01 and 0x0F, 2^15=32768

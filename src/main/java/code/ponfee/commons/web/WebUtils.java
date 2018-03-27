@@ -156,7 +156,7 @@ public final class WebUtils {
      * 响应jsonp数据
      * @param resp
      * @param callback
-     * @param json
+     * @param data
      * @param charset
      */
     public static void respJsonp(HttpServletResponse resp, String callback, 
@@ -178,7 +178,7 @@ public final class WebUtils {
     /**
      * response to input stream
      * @param resp      the HttpServletResponse
-     * @param in        the input stream
+     * @param input     the input stream
      * @param filename  the resp attachment filename
      * @param charset   the attachment filename encoding
      * @param isGzip    {@code true} to use gzip compress

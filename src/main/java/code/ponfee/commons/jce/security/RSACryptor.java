@@ -137,7 +137,7 @@ public final class RSACryptor {
      * 
      * 大数据分块加密
      * @param data 源数据
-     * @param Key
+     * @param key
      * @return
      */
     public static <T extends Key & RSAKey> byte[] encrypt(byte[] data, T key) {
@@ -252,7 +252,7 @@ public final class RSACryptor {
      * 数据签名
      * @param data
      * @param privateKey
-     * @param algId
+     * @param alg
      * @return
      */
     private static byte[] sign(byte[] data, RSAPrivateKey privateKey, RSASignAlgorithms alg) {
@@ -271,7 +271,7 @@ public final class RSACryptor {
      * @param data
      * @param publicKey
      * @param signed
-     * @param algId
+     * @param alg
      * @return
      */
     private static boolean verify(byte[] data, RSAPublicKey publicKey, 

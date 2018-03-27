@@ -110,8 +110,8 @@ public class Wechats {
      * 
      * 通过OAuth2.0方式弹出授权页面获得用户基本信息（因scope=snsapi_userinfo会弹出授权页面）
      * @see Wechats#buildAuthorizeUrl(String, String, String, String, String) set scope=snsapi_userinfo
-     * @param token  {@link #getOAuth(String, String, String)}
-     * @param openid {@link #getOAuth(String, String, String)}
+     * @param token  {@link #getOAuth2(String, String, String)}
+     * @param openid {@link #getOAuth2(String, String, String)}
      * @return
      */
     @SuppressWarnings("unchecked")

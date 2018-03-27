@@ -53,7 +53,7 @@ public class X509CertUtils {
 
     /**
      * load from cert bytes or pem bytes
-     * @param certBase64
+     * @param bytes
      * @return
      */
     public static X509Certificate loadX509Cert(byte[] bytes) {
@@ -98,7 +98,7 @@ public class X509CertUtils {
 
     /**
      * 根据证书文件流加载证书
-     * @param is
+     * @param input
      * @return
      * @throws IOException
      */
@@ -285,7 +285,7 @@ public class X509CertUtils {
 
     /**
      * 查询证书信息
-     * @param crl
+     * @param x509p
      * @param info
      * @return
      */

@@ -293,16 +293,16 @@ public final class Numbers {
      * @return
      */
     public static String format(Object obj, String format) {
-        NumberFormat formatter = new DecimalFormat(format);
+        NumberFormat fmt = new DecimalFormat(format);
         if (obj instanceof CharSequence) {
             String str = obj.toString().replaceAll(",", "");
             if (str.endsWith("%")) {
-                return formatter.format(Double.parseDouble(str.substring(0, str.length() - 1))) + "%";
+                return fmt.format(Double.parseDouble(str.substring(0, str.length() - 1))) + "%";
             } else {
-                return formatter.format(Double.parseDouble(str));
+                return fmt.format(Double.parseDouble(str));
             }
         } else {
-            return formatter.format(obj);
+            return fmt.format(obj);
         }
     }
 

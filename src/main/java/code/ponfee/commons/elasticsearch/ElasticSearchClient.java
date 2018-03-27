@@ -210,7 +210,6 @@ public class ElasticSearchClient implements DisposableBean {
     /**
      * 删除索引
      * @param index
-     * @param type
      */
     public boolean deleteIndex(String index) {
         return indicesAdminClient().prepareDelete(index).get().isAcknowledged();
@@ -291,7 +290,7 @@ public class ElasticSearchClient implements DisposableBean {
 
     /**
      * 判断索引是否存在
-     * @param aliases
+     * @param indices
      * @return
      */
     public boolean isIndicesExists(String... indices) {
@@ -659,9 +658,9 @@ public class ElasticSearchClient implements DisposableBean {
      * 滚动搜索（游标查询，针对大数据量甚至是全表查询时使用）
      * 符合条件的数据全部查询（不分页场景使用）
      * 分页查询请用paginationSearch {@link #paginationSearch(ESQueryBuilder, int, int)}
-     * @param query     查询条件
-     * @param size      每次滚动的数据量大小
-     * @param callback  回调处理量
+     * @param query       查询条件
+     * @param scrollSize  每次滚动的数据量大小
+     * @param callback    回调处理量
      */
     public void scrollSearch(ESQueryBuilder query, int scrollSize, 
                              ScrollSearchCallback callback) {

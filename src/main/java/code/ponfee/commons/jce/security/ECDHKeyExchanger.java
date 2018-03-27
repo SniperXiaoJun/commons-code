@@ -113,7 +113,7 @@ public final class ECDHKeyExchanger {
 
     /**
      * 取得私钥
-     * @param keyMap
+     * @param privateKey
      * @return
      */
     public static ECPrivateKey getPrivateKey(byte[] privateKey) {
@@ -128,7 +128,7 @@ public final class ECDHKeyExchanger {
 
     /**
      * 取得公钥
-     * @param keyMap
+     * @param publicKey
      * @return
      */
     public static ECPublicKey getPublicKey(byte[] publicKey) {

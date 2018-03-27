@@ -150,7 +150,7 @@ public class IdcardResolver {
      * @return 身份证信息数组
      */
     private static final Pattern HONGKONG = Pattern.compile("^[A-Z]{1,2}[0-9]{6}\\(?[0-9A]\\)?$");
-    private static final Pattern MACO = Pattern.compile("^[1|5|7][0-9]{6}\\(?[0-9A-Z]\\)?$");
+    private static final Pattern MACO = Pattern.compile("^(1|5|7)[0-9]{6}\\(?[0-9A-Z]\\)?$");
     private static final Pattern TAIWAN = Pattern.compile("^[a-zA-Z][0-9]{9}$");
     private boolean isHkMacTw(String idcard) {
         idcard = idcard.replaceAll("[\\(|\\)]", "");
@@ -274,7 +274,7 @@ public class IdcardResolver {
 
     /**
      * 验证生日是否有效
-     * @param birthday
+     * @param date
      * @return
      */
     private boolean verifyBirthday(String date) {

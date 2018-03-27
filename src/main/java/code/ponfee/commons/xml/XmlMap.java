@@ -71,7 +71,7 @@ public final class XmlMap extends LinkedHashMap<String, String> {
 
     /**
      * XML为Map(仅支持2级)
-     * @param readers xmlReaders
+     * @param reader xmlReader
      * @return Map对象
      */
     private Map<String, String> read(XmlReader reader) {

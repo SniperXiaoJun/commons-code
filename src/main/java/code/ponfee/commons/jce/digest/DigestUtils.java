@@ -145,7 +145,7 @@ public final class DigestUtils {
 
     /**
      * 数据摘要
-     * @param algorithm digest算法
+     * @param alg       digest算法
      * @param provider
      * @param data      digest data of byte array
      * @return
@@ -172,9 +172,9 @@ public final class DigestUtils {
 
     /**
      * 数据摘要
-     * @param algorithm digest 算法
+     * @param alg        digest 算法
      * @param provider
-     * @param data      digest data of input stream
+     * @param input      digest data of input stream
      * @return
      */
     public static byte[] digest(DigestAlgorithms alg, Provider provider, 

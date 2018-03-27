@@ -101,7 +101,6 @@ public class HashOperations extends JedisOperations {
      * 返回哈希表 key 中所有域的值
      * @param key
      * @param seconds
-     * @param isCompress
      * @return 一个包含哈希表中所有值的表
      */
     public List<String> hvals(String key, Integer seconds) {

@@ -151,9 +151,10 @@ public final class ClassUtils {
     /**
      * 包名称转目录路径名
      * getPackagePath("code.ponfee.commons.reflect")  ->  code/ponfee/commons/reflect
-     * @see org.springframework.util.ClassUtils#convertClassNameToResourcePath
-     * @param className
+     *
+     * @param packageName
      * @return
+     * @see org.springframework.util.ClassUtils#convertClassNameToResourcePath
      */
     public static String getPackagePath(String packageName) {
         return packageName.replace('.', '/');

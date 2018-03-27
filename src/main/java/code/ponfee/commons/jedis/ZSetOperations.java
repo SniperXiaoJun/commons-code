@@ -222,7 +222,7 @@ public class ZSetOperations extends JedisOperations {
     /**
      * 移除有序集 key 中的一个或多个成员，不存在的成员将被忽略。
      * @param key
-     * @param members
+     * @param member
      * @param seconds
      * @return 被成功移除的成员的数量，不包括被忽略的成员。
      */

@@ -274,7 +274,7 @@ public final class SM2 {
      * @param ecParam the ec parameter
      * @param data
      * @param ida
-     * @param signature
+     * @param signed
      * @param publicKey
      * @return
      */

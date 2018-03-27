@@ -218,8 +218,6 @@ public class ValueOperations extends JedisOperations {
     /**
      * 将 key中储存的数字值增一，如果 key 不存在，那么 key 的值会先被初始化为 0 ，然后再执行 INCR 操作。
      * @param key
-     * @param step
-     * @param seconds
      * @return 执行 INCR 命令之后 key 的值
      */
     public Long incrBy(String key) {

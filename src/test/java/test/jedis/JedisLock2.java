@@ -45,7 +45,7 @@ public class JedisLock2 {
      * @param jedis
      * @param lockKey
      *            lock key (ex. account:1, ...)
-     * @param timeoutSecs
+     * @param timeoutMsecs
      *            acquire timeout in miliseconds (default: 10000 msecs)
      */
     public JedisLock2(Jedis jedis, String lockKey, int timeoutMsecs) {
@@ -59,7 +59,7 @@ public class JedisLock2 {
      * @param jedis
      * @param lockKey
      *            lock key (ex. account:1, ...)
-     * @param timeoutSecs
+     * @param timeoutMsecs
      *            acquire timeout in miliseconds (default: 10000 msecs)
      * @param expireMsecs
      *            lock expiration in miliseconds (default: 60000 msecs)
@@ -84,7 +84,7 @@ public class JedisLock2 {
      * 
      * @param lockKey
      *            lock key (ex. account:1, ...)
-     * @param timeoutSecs
+     * @param timeoutMsecs
      *            acquire timeout in miliseconds (default: 10000 msecs)
      */
     public JedisLock2(String lockKey, int timeoutMsecs) {
@@ -96,7 +96,7 @@ public class JedisLock2 {
      * 
      * @param lockKey
      *            lock key (ex. account:1, ...)
-     * @param timeoutSecs
+     * @param timeoutMsecs
      *            acquire timeout in miliseconds (default: 10000 msecs)
      * @param expireMsecs
      *            lock expiration in miliseconds (default: 60000 msecs)
@@ -115,7 +115,6 @@ public class JedisLock2 {
     /**
      * Acquire lock.
      * 
-     * @param jedis
      * @return true if lock is acquired, false acquire timeouted
      * @throws InterruptedException
      *             in case of thread interruption
