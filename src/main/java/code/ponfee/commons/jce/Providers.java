@@ -68,7 +68,7 @@ public interface Providers {
         private static final NullProvider INSTANCE = new NullProvider();
 
         private NullProvider() {
-            super("Null", 1.0D, "null");
+            super("Null", 1.0D, "None provider");
         }
     }
 

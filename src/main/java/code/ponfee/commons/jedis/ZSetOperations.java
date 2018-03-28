@@ -3,7 +3,9 @@ package code.ponfee.commons.jedis;
 import java.util.Map;
 import java.util.Set;
 
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Tuple;
+import redis.clients.util.SafeEncoder;
 
 /**
  * redis sorted set（有序集合操作类）
@@ -58,6 +60,15 @@ public class ZSetOperations extends JedisOperations {
 
     public long zadd(String key, Map<String, Double> scoreMembers) {
         return this.zadd(key, scoreMembers, null);
+    }
+
+    public long zaddBinary(String key, Map<byte[], Double> scoreMembers, Integer seconds) {
+        return call(shardedJedis -> {
+            Jedis j = shardedJedis.getShard(key);
+            long rtn = j.zadd(SafeEncoder.encode(key), scoreMembers);
+            expireForce(shardedJedis, key, seconds);
+            return rtn;
+        }, 0L, key, scoreMembers, seconds);
     }
 
     /**

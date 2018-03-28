@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.google.common.base.Stopwatch;
 
 import code.ponfee.commons.jce.implementation.Key;
+import code.ponfee.commons.jce.implementation.rsa.AbstractRSACryptor;
 import code.ponfee.commons.jce.implementation.rsa.RSAHashCryptor;
 import code.ponfee.commons.jce.implementation.rsa.RSAKey;
 import code.ponfee.commons.jce.implementation.rsa.RSANoPaddingCryptor;
@@ -71,7 +72,7 @@ public class RSAryptorTest {
         System.out.println("\n\ntestRSAPKCS1Padding======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
-        RSANoPaddingCryptor cs = new RSAPKCS1PaddingCryptor();
+        AbstractRSACryptor cs = new RSAPKCS1PaddingCryptor();
         RSAPublicKey pub = RSAPublicKeys.toRSAPublicKey(dk.n, dk.e);
         RSAPrivateKey pri = RSAPrivateKeys.toRSAPrivateKey(dk.n, dk.d);
 
@@ -314,7 +315,7 @@ public class RSAryptorTest {
         System.out.println("\n\ntestRSAPKCS1PaddingStream======================================");
         RSAKey dk = new RSAKey(1024);
         Key ek = dk.getPublic();
-        RSANoPaddingCryptor cs = new RSAPKCS1PaddingCryptor();
+        AbstractRSACryptor cs = new RSAPKCS1PaddingCryptor();
 
         ByteArrayInputStream input = new ByteArrayInputStream(origin);
         ByteArrayOutputStream output = new ByteArrayOutputStream();

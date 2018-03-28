@@ -1,10 +1,12 @@
 package code.ponfee.commons.wechat;
 
+import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_HANDLER;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +67,8 @@ public class WechatTokenManager implements DisposableBean {
 
     public WechatTokenManager(JedisClient jedisClient) {
         this.jedisClient = jedisClient;
-        this.scheduled = Executors.newSingleThreadScheduledExecutor();
+        //this.scheduled = Executors.newSingleThreadScheduledExecutor();
+        this.scheduled = new ScheduledThreadPoolExecutor(1, CALLER_RUN_HANDLER);
 
         // refresh token from wechat schedule
         this.scheduled.scheduleAtFixedRate(() -> {

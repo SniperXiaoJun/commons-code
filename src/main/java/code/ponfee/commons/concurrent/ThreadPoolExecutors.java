@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public final class ThreadPoolExecutors {
     private ThreadPoolExecutors() {}
 
-    private static final RejectedExecutionHandler DEFAULT_HANDLER = new CallerRunsPolicy();
+    public static final RejectedExecutionHandler CALLER_RUN_HANDLER = new CallerRunsPolicy();
 
     public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime) {
         return create(corePoolSize, maximumPoolSize, keepAliveTime, 0, null, null);
@@ -63,7 +63,7 @@ public final class ThreadPoolExecutors {
 
         // rejected Handler Strategy 
         if (rejectedHandler == null) {
-            rejectedHandler = DEFAULT_HANDLER;
+            rejectedHandler = CALLER_RUN_HANDLER;
         }
 
         // create ThreadPoolExecutor instance

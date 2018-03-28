@@ -94,7 +94,8 @@ public final class ResourceLoaderFacade {
         return listResources(dir, extensions, recursive, null, null);
     }
 
-    public static List<Resource> listResources(String dir, String extensions[], boolean recursive, String encoding) {
+    public static List<Resource> listResources(String dir, String extensions[],
+                                               boolean recursive, String encoding) {
         return listResources(dir, extensions, recursive, null, encoding);
     }
 
@@ -107,7 +108,8 @@ public final class ResourceLoaderFacade {
      * @param encoding
      * @return
      */
-    public static List<Resource> listResources(String dir, String extensions[], boolean recursive, Class<?> contextClass, String encoding) {
+    public static List<Resource> listResources(String dir, String extensions[], boolean recursive,
+                                               Class<?> contextClass, String encoding) {
         if (dir == null) {
             dir = "";
         }

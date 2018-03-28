@@ -404,7 +404,7 @@ public final class Files {
     }
 
     // ------------------------file type---------------------------------
-    private static final int SUB_PREFIX = 64;
+    private static final int SUB_PREFIX = 16;
     public static final Map<String, String> FILE_TYPE_MAGIC = ImmutableMap.<String, String> builder()
         .put("jpg", "FFD8FF") // JPEG (jpg)
         .put("png", "89504E47") // PNG (png)
@@ -462,8 +462,8 @@ public final class Files {
         }
 
         String hex = Hex.encodeHexString(array, false);
-        for (Iterator<Entry<String, String>> ite = FILE_TYPE_MAGIC.entrySet().iterator(); ite.hasNext();) {
-            Entry<String, String> entry = ite.next();
+        for (Iterator<Entry<String, String>> i = FILE_TYPE_MAGIC.entrySet().iterator(); i.hasNext();) {
+            Entry<String, String> entry = i.next();
             if (hex.startsWith(entry.getValue())) {
                 return entry.getKey();
             }

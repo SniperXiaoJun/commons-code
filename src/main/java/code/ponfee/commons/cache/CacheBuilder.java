@@ -1,5 +1,7 @@
 package code.ponfee.commons.cache;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 /**
  * 缓存构建类
  * @author fupf
@@ -11,6 +13,7 @@ public final class CacheBuilder {
     private boolean compressKey = false; // （默认）不压缩key
     private int autoReleaseInSeconds = 0; // （默认0为不清除）清除无效key的的定时时间间隔
     private long keepaliveInMillis = 0; // key保留时间，0表示无限制
+    private ScheduledExecutorService executor; // 定时执行器
 
     public CacheBuilder caseSensitiveKey(boolean caseSensitiveKey) {
         this.caseSensitiveKey = caseSensitiveKey;
@@ -32,8 +35,14 @@ public final class CacheBuilder {
         return this;
     }
 
+    public CacheBuilder scheduledExecutor(ScheduledExecutorService executor) {
+        this.executor = executor;
+        return this;
+    }
+
     public <T> Cache<T> build() {
-        return new Cache<>(caseSensitiveKey, compressKey, keepaliveInMillis, autoReleaseInSeconds);
+        return new Cache<>(caseSensitiveKey, compressKey, keepaliveInMillis, 
+                           autoReleaseInSeconds, executor);
     }
 
     public static CacheBuilder newBuilder() {

@@ -32,18 +32,19 @@ public class FreqTester {
         //jedisClient = new JedisClient(poolCfg, "local1:127.0.0.1:6379", new KryoSerializer());
         jedisClient = new JedisClient(poolCfg, "127.0.0.1:6379;", new JdkSerializer());
     }
-    
+
+    // zcount "freq:trace:abc" 0 99999999999999999
     @Test
     public void test1() throws InterruptedException {
         RedisCircuitBreaker f = new RedisCircuitBreaker(jedisClient, 1, 5);
-        f.setRequestThreshold("abc", 700000);
+        f.setRequestThreshold("abc", 7000000);
         List<Thread> list = new ArrayList<>();
         AtomicBoolean flag = new AtomicBoolean(true);
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 40; i++) {
             list.add(new Thread(() -> {
                 while (flag.get()) {
                     if (!f.checkpoint("abc")) {
-                        System.err.println("error" + Thread.currentThread());
+                        System.err.println("reject req " + Thread.currentThread());
                     }
 
                     try {
@@ -57,7 +58,7 @@ public class FreqTester {
         for (Thread thread : list) {
             thread.start();
         }
-        Thread.sleep(15000);
+        Thread.sleep(900000);
         flag.set(false);
         for (Thread thread : list) {
             thread.join();

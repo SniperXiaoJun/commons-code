@@ -1,5 +1,7 @@
 package code.ponfee.commons.cache;
 
+import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_HANDLER;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -7,8 +9,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -26,6 +28,9 @@ public class Cache<T> {
 
     public static final long KEEPALIVE_FOREVER = 0; // 为0表示不失效
 
+    /** The default scheduled executor shared of class level */
+    private static volatile ScheduledExecutorService defaultExecutor;
+
     private final boolean caseSensitiveKey; // 是否忽略大小写（只针对String）
     private final boolean compressKey; // 是否压缩key（只针对String）
     private final long keepAliveInMillis; // 默认的数据保存的时间
@@ -36,7 +41,8 @@ public class Cache<T> {
     private final Lock lock = new ReentrantLock(); // 定时清理加锁
     private ScheduledExecutorService executor;
 
-    Cache(boolean caseSensitiveKey, boolean compressKey, long keepAliveInMillis, int autoReleaseInSeconds) {
+    Cache(boolean caseSensitiveKey, boolean compressKey, long keepAliveInMillis, 
+          int autoReleaseInSeconds, ScheduledExecutorService scheduleExecutor) {
         Preconditions.checkArgument(keepAliveInMillis >= 0);
         Preconditions.checkArgument(autoReleaseInSeconds >= 0);
 
@@ -45,8 +51,23 @@ public class Cache<T> {
         this.keepAliveInMillis = keepAliveInMillis;
 
         if (autoReleaseInSeconds > 0) {
+            ScheduledExecutorService executor0;
+            if (scheduleExecutor != null) {
+                this.executor = executor0 = scheduleExecutor;
+            } else {
+                if (defaultExecutor == null) {
+                    synchronized (this.getClass()) {
+                        if (defaultExecutor == null) { // double check lock
+                            defaultExecutor = new ScheduledThreadPoolExecutor(1, CALLER_RUN_HANDLER);
+                            Runtime.getRuntime().addShutdownHook(new Thread(defaultExecutor::shutdown));
+                        }
+                    }
+                }
+                executor0 = defaultExecutor;
+            }
+
             // 定时清理
-            (executor = Executors.newSingleThreadScheduledExecutor()).scheduleAtFixedRate(() -> {
+            executor0.scheduleAtFixedRate(() -> {
                 if (!lock.tryLock()) {
                     return;
                 }

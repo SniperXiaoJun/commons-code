@@ -19,7 +19,11 @@ import code.ponfee.commons.util.SecureRandoms;
  * RSA Cryptor based sha512 xor 
  * @author Ponfee
  */
-public class RSAHashCryptor extends RSANoPaddingCryptor {
+public class RSAHashCryptor extends AbstractRSACryptor {
+
+    public RSAHashCryptor() {
+        super(false);
+    }
 
     private static final HmacAlgorithms HMAC_ALG = HmacAlgorithms.HmacSHA3_512;
 
