@@ -68,16 +68,17 @@ public class Cache<T> {
 
             // 定时清理
             executor0.scheduleAtFixedRate(() -> {
+                // none exception to throw, so can not wrap try catch
                 if (!lock.tryLock()) {
                     return;
                 }
                 try {
                     long now = now();
-                    Entry<Comparable<?>, CacheValue<T>> entry;
-                    for (Iterator<Entry<Comparable<?>, CacheValue<T>>> t = cache.entrySet().iterator(); t.hasNext();) {
-                        entry = t.next();
-                        if (entry.getValue().isExpire(now)) {
-                            t.remove();
+                    CacheValue<T> value;
+                    for (Iterator<Entry<Comparable<?>, CacheValue<T>>> i = cache.entrySet().iterator(); i.hasNext();) {
+                        value = i.next().getValue();
+                        if (value.isExpire(now)) {
+                            i.remove();
                         }
                     }
                 } finally {
@@ -128,6 +129,8 @@ public class Cache<T> {
     }
 
     public void setWithAliveInMillis(Comparable<?> key, T value, int aliveInMillis) {
+        Preconditions.checkArgument(aliveInMillis > 0);
+
         this.set(key, value, now() + aliveInMillis);
     }
 
@@ -137,6 +140,10 @@ public class Cache<T> {
 
     public void set(Comparable<?> key, T value, long expireTimeMillis) {
         Preconditions.checkState(!isDestroy);
+
+        if (expireTimeMillis < KEEPALIVE_FOREVER) {
+            expireTimeMillis = KEEPALIVE_FOREVER;
+        }
 
         if (expireTimeMillis == KEEPALIVE_FOREVER || expireTimeMillis > now()) {
             cache.put(getEffectiveKey(key), new CacheValue<>(value, expireTimeMillis));
@@ -209,16 +216,17 @@ public class Cache<T> {
             return false;
         }
 
-        Entry<Comparable<?>, CacheValue<T>> entry;
-        for (Iterator<Entry<Comparable<?>, CacheValue<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
-            entry = iter.next();
-            if (entry.getValue().isAlive(now())) {
-                if ((value == null && entry.getValue().getValue() == null) ||
-                    (value != null && value.equals(entry.getValue().getValue()))) {
+        CacheValue<T> cacheValue;
+        for (Iterator<Entry<Comparable<?>, CacheValue<T>>> i = cache.entrySet().iterator(); i.hasNext();) {
+            cacheValue = i.next().getValue();
+            if (cacheValue.isAlive(now())) {
+                if (   (value == null && cacheValue.getValue() == null) 
+                    || (value != null && value.equals(cacheValue.getValue())) 
+                ) {
                     return true;
                 }
             } else {
-                iter.remove();
+                i.remove();
             }
         }
         return false;
@@ -234,13 +242,13 @@ public class Cache<T> {
         }
 
         Collection<T> values = new ArrayList<>();
-        Entry<Comparable<?>, CacheValue<T>> entry;
-        for (Iterator<Entry<Comparable<?>, CacheValue<T>>> iter = cache.entrySet().iterator(); iter.hasNext();) {
-            entry = iter.next();
-            if (entry.getValue().isAlive(now())) {
-                values.add(entry.getValue().getValue());
+        CacheValue<T> value;
+        for (Iterator<Entry<Comparable<?>, CacheValue<T>>> i = cache.entrySet().iterator(); i.hasNext();) {
+            value = i.next().getValue();
+            if (value.isAlive(now())) {
+                values.add(value.getValue());
             } else {
-                iter.remove();
+                i.remove();
             }
         }
         return values;
@@ -259,7 +267,7 @@ public class Cache<T> {
      * @return
      */
     public boolean isEmpty() {
-        return size() == 0;
+        return cache.isEmpty();
     }
 
     /**

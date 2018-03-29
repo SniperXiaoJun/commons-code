@@ -11,6 +11,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.cache.Cache;
@@ -26,10 +29,12 @@ import code.ponfee.commons.util.IdWorker;
  */
 public class RedisCircuitBreaker implements CircuitBreaker {
 
+    private static Logger logger = LoggerFactory.getLogger(RedisCircuitBreaker.class);
+
     private static final int EXPIRE_SECONDS = (int) TimeUnit.DAYS.toSeconds(30) + 1; // key的失效日期
-    private static final String TRACE_KEY_PREFIX = "freq:trace:"; // 频率缓存key前缀
+    private static final String TRACE_KEY_PREFIX = "cir:bre:"; // 频率缓存key前缀
     private static final byte[] TRACE_KEY_BYTES = TRACE_KEY_PREFIX.getBytes(); // 频率缓存key前缀
-    private static final String THRESHOLD_KEY_PREFIX = "freq:threshold:"; // 次数缓存key前缀
+    private static final String THRESHOLD_KEY_PREFIX = "freq:thrd:"; // 限制次数缓存key前缀
 
     private final JedisClient jedisClient;
     private final JedisLock lock;
@@ -38,23 +43,27 @@ public class RedisCircuitBreaker implements CircuitBreaker {
     private final int clearBeforeMillis;
 
     private final Cache<Long> confCache = CacheBuilder.newBuilder().keepaliveInMillis(120000L) // 2 minutes of cache alive
-                                                       .autoReleaseInSeconds(1800).build(); // 30 minutes to release expire cache
+                                                      .autoReleaseInSeconds(1800).build(); // 30 minutes to release expire cache
 
     private final Cache<Long> countCache = CacheBuilder.newBuilder().keepaliveInMillis(500L) // 500 millis of cache alive
                                                        .autoReleaseInSeconds(1800).build(); // 30 minutes to release expire cache
-    
+
     public RedisCircuitBreaker(JedisClient jedisClient, int clearBeforeMinutes, int autoClearInSeconds) {
         this.jedisClient = jedisClient;
         this.clearBeforeMillis = (int) TimeUnit.MINUTES.toMillis(clearBeforeMinutes);
 
-        // 定时清除记录(zrem range by score)，jedis:lock:freq:trace:clear
+        // 定时清除记录(zrem range by score)，jedis:lock:cir:bre:clear
         this.lock = new JedisLock(jedisClient, TRACE_KEY_PREFIX + "clear", autoClearInSeconds / 2);
         this.executor.scheduleAtFixedRate(() -> {
-            if (this.lock.tryLock()) { // 不用释放锁，让其自动超时
-                long beforeTimeMillis = System.currentTimeMillis() - clearBeforeMillis;
-                for (String key : jedisClient.keysOps().keys(TRACE_KEY_PREFIX + "*")) {
-                    jedisClient.zsetOps().zremrangeByScore(key, 0, beforeTimeMillis);
+            try {
+                if (this.lock.tryLock()) { // 不用释放锁，让其自动超时
+                    long beforeTimeMillis = System.currentTimeMillis() - clearBeforeMillis;
+                    for (String key : jedisClient.keysOps().keys(TRACE_KEY_PREFIX + "*")) {
+                        jedisClient.zsetOps().zremrangeByScore(key, 0, beforeTimeMillis);
+                    }
                 }
+            } catch (Throwable t) {
+                logger.error("JedisLock tryLock occur error", t);
             }
         }, autoClearInSeconds, autoClearInSeconds, TimeUnit.SECONDS);
 
@@ -75,14 +84,17 @@ public class RedisCircuitBreaker implements CircuitBreaker {
                 }
                 for (Entry<String, Map<byte[], Double>> entry : groups.entrySet()) {
                     // TRACE_KEY_PREFIX + trace.key
-                    jedisClient.zsetOps().zadd(concat(TRACE_KEY_BYTES, entry.getKey().getBytes(UTF_8)), 
-                                               entry.getValue(), EXPIRE_SECONDS);
+                    jedisClient.zsetOps().zadd(
+                        concat(TRACE_KEY_BYTES, entry.getKey().getBytes(UTF_8)), 
+                        entry.getValue(), EXPIRE_SECONDS
+                    );
+                    entry.getValue().clear();
                 }
                 groups.clear();
                 groups = null;
                 traces.clear();
             };
-        }, 100, 10000); // 100毫秒间隔，10000条∕次
+        }, 100, 5000); // 100毫秒间隔，5000条∕次
     }
 
     /**
@@ -109,13 +121,18 @@ public class RedisCircuitBreaker implements CircuitBreaker {
     }
 
     public long countByLastTime(String key, int time, TimeUnit unit) {
-        String key0 = new StringBuilder(key).append(':')
-                               .append(unit.toMillis(time)).toString();
+        long millis = unit.toMillis(time);
+        String key0 = new StringBuilder(key).append(':').append(millis).toString();
         Long count = countCache.get(key0);
         if (count == null) {
-            long now = System.currentTimeMillis();
-            count = countByRangeMillis(key, now - unit.toMillis(time), now);
-            countCache.set(key0, count);
+            synchronized (countCache) {
+                count = countCache.get(key0);
+                if (count == null) {
+                    long now = System.currentTimeMillis();
+                    count = countByRangeMillis(key, now - millis, now);
+                    countCache.set(key0, count);
+                }
+            }
         }
         return count;
     }
