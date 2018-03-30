@@ -21,7 +21,7 @@ import code.ponfee.commons.util.SecureRandoms;
  */
 public class Crypt {
 
-    private static final String SEPARATOR = "$";
+    private static final char SEPARATOR = '$';
 
     public static String create(String passwd) {
         return create(HmacAlgorithms.HmacSHA256, passwd, 32, Providers.BC);

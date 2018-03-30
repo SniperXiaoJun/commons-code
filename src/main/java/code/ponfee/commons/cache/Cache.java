@@ -74,10 +74,8 @@ public class Cache<T> {
                 }
                 try {
                     long now = now();
-                    CacheValue<T> value;
                     for (Iterator<Entry<Comparable<?>, CacheValue<T>>> i = cache.entrySet().iterator(); i.hasNext();) {
-                        value = i.next().getValue();
-                        if (value.isExpire(now)) {
+                        if (i.next().getValue().isExpire(now)) {
                             i.remove();
                         }
                     }

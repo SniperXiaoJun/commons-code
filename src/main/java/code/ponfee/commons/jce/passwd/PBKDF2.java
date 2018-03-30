@@ -34,7 +34,7 @@ import code.ponfee.commons.util.SecureRandoms;
 public final class PBKDF2 {
     private PBKDF2() {}
 
-    private static final String SEPARATOR = "$";
+    private static final char SEPARATOR = '$';
 
     /**
      * 

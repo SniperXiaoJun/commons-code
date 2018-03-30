@@ -18,6 +18,15 @@ public class JAXWS {
         return service.getPort(clazz);
     }
 
+    /**
+     * Returns a JAX-WS client
+     * 
+     * @param clazz         the webservice interface, as use {@code WebService} annotation
+     * @param address       the wsdl url as http://ip:port/ws/webserviceName?wsdl
+     * @param namespaceURI  the targetNamespace
+     * @param localPart     the name
+     * @return
+     */
     public static <T> T client(Class<T> clazz, String address, 
                                String namespaceURI, String localPart) {
         return client(clazz, address, new QName(namespaceURI, localPart));

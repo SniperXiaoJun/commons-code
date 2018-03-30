@@ -169,10 +169,10 @@ public class Dates {
      * @param end 结束时间
      * @return 时间间隔
      */
-    public static int clockdiff(Date start, Date end) {
+    public static long clockdiff(Date start, Date end) {
         Objects.requireNonNull(start, "start date non null");
         Objects.requireNonNull(end, "end date non null");
-        return (int) ((end.getTime() - start.getTime()) / 1000);
+        return (end.getTime() - start.getTime()) / 1000;
     }
 
     /**
@@ -451,8 +451,9 @@ public class Dates {
      * @return
      */
     public static Date random(Date begin, Date end) {
-        int seconds = ThreadLocalRandom.current().nextInt(clockdiff(begin, end));
-        return Dates.plusSeconds(begin, seconds);
+        long seconds = ThreadLocalRandom.current().nextLong(clockdiff(begin, end));
+        int s = seconds > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) seconds;
+        return Dates.plusSeconds(begin, s);
     }
 
     public static Date random(Date begin) {

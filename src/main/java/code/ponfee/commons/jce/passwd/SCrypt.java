@@ -38,7 +38,7 @@ import code.ponfee.commons.util.SecureRandoms;
 public final class SCrypt {
     private SCrypt() {}
 
-    private static final String SEPARATOR = "$";
+    private static final char SEPARATOR = '$';
 
     // -------------------------------------------------------------------pbkdf2
     /**

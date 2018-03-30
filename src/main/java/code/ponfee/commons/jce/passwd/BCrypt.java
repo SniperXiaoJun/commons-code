@@ -49,7 +49,7 @@ import code.ponfee.commons.util.SecureRandoms;
 public final class BCrypt {
     private BCrypt() {}
 
-    private static final String SEPARATOR = "$";
+    private static final char SEPARATOR = '$';
 
     // Blowfish parameters
     private static final int BLOWFISH_NUM_ROUNDS = 16;

@@ -26,7 +26,6 @@ import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.json.Jsons;
-import code.ponfee.commons.util.Bytes;
 
 /**
  * <pre>
@@ -488,27 +487,4 @@ public final class Http {
         }
     }
 
-    public static void main(String[] args) {
-        //System.out.println(Bytes.hexDump(Http.get("http://www.apachelounge.com/download/VC14/binaries/httpd-2.4.25-win64-VC14.zip").download()));
-        //Http.get("https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.zip").download(new FileOutputStream("d:/elasticsearch-5.5.1.zip"));
-        Http http = Http.get("http://www.stockstar.com");
-        System.out.println(Bytes.hexDump(http.download()));
-        System.out.println(http.getRespHeaders());
-        //Http.get("http://www.baidu.com").download("d:/baidu.html");
-        //System.out.println(Http.get("http://localhost:8081/audit/getImg").data(ImmutableMap.of("imgPath", "imgPath")).request());
-        //String[] params = new String[]{"{\"analyze_type\":\"mine_all_cust\",\"date_type\":4,\"class_name\":\"\"}", "{\"analyze_type\":\"mine_all_cust\",\"date_type\":4,\"class_name\":\"衬衫\"}"};
-        //Http.post("http://10.118.58.156:8080/market/custgroup/kanban/count/recommend").data(ImmutableMap.of("conditions[]", params)).request();
-        /*@SuppressWarnings("unchecked") 
-        Map<String, Object> resp = Http.post("http://10.118.58.74:8080/uploaded/file")
-                                       .addParam("param1", "test1213")
-                                       .addPart("uploadFile", "abc.pdf", new File("d:/test/abc.pdf"))
-                                       .addPart("uploadFile", "word.pdf", new File("d:/test/word.pdf"))
-                                       .contentType("multipart/form-data", "UTF-8") // <input type="file" name="upload" />
-                                       //.contentType("application/json", "UTF-8") // @RequestBody
-                                       //.contentType("application/x-www-form-urlencoded", "UTF-8") // form data
-                                       .accept("application/json") // @ResponseBody
-                                       //.setSSLSocketFactory(factory) // trust certs store
-                                       .request(Map.class);
-        System.out.println(resp);*/
-    }
 }
