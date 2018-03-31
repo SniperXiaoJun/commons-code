@@ -1,5 +1,16 @@
 package code.ponfee.commons.xml;
 
+import org.dom4j.Attribute;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.SAXValidator;
+import org.dom4j.util.XMLErrorHandler;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,18 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.dom4j.Attribute;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.SAXValidator;
-import org.dom4j.util.XMLErrorHandler;
-import org.xml.sax.SAXException;
 
 /**
  * xml工具类
@@ -147,9 +146,7 @@ public class SimpleXmlHandler {
      * 通过Schema验证xml文件
      */
     public static void validateByXsd(InputStream xsdIn, InputStream xmlIn) {
-        try (InputStream xsd = xsdIn;
-            InputStream xml = xmlIn
-        ) {
+        try (InputStream xsd = xsdIn; InputStream xml = xmlIn) {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setValidating(true);
             factory.setNamespaceAware(true);

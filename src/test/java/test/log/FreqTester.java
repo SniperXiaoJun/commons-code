@@ -1,16 +1,15 @@
 package test.log;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import code.ponfee.commons.concurrent.RedisCircuitBreaker;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.serial.JdkSerializer;
+import org.junit.Before;
+import org.junit.Test;
 import redis.clients.jedis.JedisPoolConfig;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FreqTester {
 
@@ -33,7 +32,7 @@ public class FreqTester {
         jedisClient = new JedisClient(poolCfg, "127.0.0.1:6379;", new JdkSerializer());
     }
 
-    // zcount "cir:bre:abc" 0 99999999999999999
+    // zcount "cir:bre:abc" 0 99999999999999
     @Test
     public void test1() throws InterruptedException {
         RedisCircuitBreaker f = new RedisCircuitBreaker(jedisClient, 1, 5);
@@ -63,5 +62,6 @@ public class FreqTester {
         for (Thread thread : list) {
             thread.join();
         }
+        f.destory();
     }
 }

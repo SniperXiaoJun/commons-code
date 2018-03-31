@@ -1,8 +1,15 @@
 package code.ponfee.commons.concurrent;
 
-import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_HANDLER;
+import code.ponfee.commons.cache.Cache;
+import code.ponfee.commons.cache.CacheBuilder;
+import code.ponfee.commons.jedis.JedisClient;
+import code.ponfee.commons.jedis.JedisLock;
+import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.IdWorker;
+import com.google.common.base.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,17 +18,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
-
-import code.ponfee.commons.cache.Cache;
-import code.ponfee.commons.cache.CacheBuilder;
-import code.ponfee.commons.jedis.JedisClient;
-import code.ponfee.commons.jedis.JedisLock;
-import code.ponfee.commons.util.Bytes;
-import code.ponfee.commons.util.IdWorker;
+import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_HANDLER;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Redis熔断控制器
@@ -35,6 +33,7 @@ public class RedisCircuitBreaker implements CircuitBreaker {
     private static final String TRACE_KEY_PREFIX = "cir:bre:"; // 频率缓存key前缀
     private static final byte[] TRACE_KEY_BYTES = TRACE_KEY_PREFIX.getBytes(); // 频率缓存key前缀
     private static final String THRESHOLD_KEY_PREFIX = "freq:thrd:"; // 限制次数缓存key前缀
+    private static final Map<String, Object> LOCK_MAP = new HashMap<>(); // the map for store lock object
 
     private final JedisClient jedisClient;
     private final JedisLock lock;
@@ -85,7 +84,7 @@ public class RedisCircuitBreaker implements CircuitBreaker {
                 for (Entry<String, Map<byte[], Double>> entry : groups.entrySet()) {
                     // TRACE_KEY_PREFIX + trace.key
                     jedisClient.zsetOps().zadd(
-                        concat(TRACE_KEY_BYTES, entry.getKey().getBytes(UTF_8)), 
+                        concat(TRACE_KEY_BYTES, entry.getKey().getBytes(UTF_8)),
                         entry.getValue(), EXPIRE_SECONDS
                     );
                     entry.getValue().clear();
@@ -125,7 +124,20 @@ public class RedisCircuitBreaker implements CircuitBreaker {
         String key0 = new StringBuilder(key).append(':').append(millis).toString();
         Long count = countCache.get(key0);
         if (count == null) {
-            synchronized (countCache) {
+            // get the lock for access redis
+            Object lock = LOCK_MAP.get(key0);
+            if (lock == null) {
+                synchronized (countCache) {
+                    lock = LOCK_MAP.get(key0);
+                    if (lock == null) {
+                        lock = new Object();
+                        LOCK_MAP.put(key0, lock);
+                    }
+                }
+            }
+
+            // load the freq from cache, if not hit then calculate by redis zcount
+            synchronized (lock) {
                 count = countCache.get(key0);
                 if (count == null) {
                     long now = System.currentTimeMillis();
@@ -149,7 +161,7 @@ public class RedisCircuitBreaker implements CircuitBreaker {
      * @return 是否设置成功：true是；false否；
      */
     public @Override boolean setRequestThreshold(String key, long threshold) {
-        boolean flag = jedisClient.valueOps().setLong(THRESHOLD_KEY_PREFIX + key, 
+        boolean flag = jedisClient.valueOps().setLong(THRESHOLD_KEY_PREFIX + key,
                                                       threshold, EXPIRE_SECONDS);
         if (flag) {
             confCache.set(key, threshold); // refresh key value
@@ -166,7 +178,7 @@ public class RedisCircuitBreaker implements CircuitBreaker {
     public @Override long getRequestThreshold(String key) {
         Long threshold = confCache.get(key);
         if (threshold == null) {
-            threshold = jedisClient.valueOps().getLong(THRESHOLD_KEY_PREFIX + key, 
+            threshold = jedisClient.valueOps().getLong(THRESHOLD_KEY_PREFIX + key,
                                                        EXPIRE_SECONDS);
             if (threshold == null) {
                 threshold = -1L; // -1表示无限制
@@ -182,7 +194,9 @@ public class RedisCircuitBreaker implements CircuitBreaker {
     public void destory() {
         confCache.destroy();
         countCache.destroy();
-        executor.isShutdown();
+        LOCK_MAP.clear();
+        transmitter.end();
+        executor.shutdown();
     }
 
     /**

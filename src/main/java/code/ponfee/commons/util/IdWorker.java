@@ -1,9 +1,9 @@
 package code.ponfee.commons.util;
 
+import code.ponfee.commons.reflect.Fields;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import code.ponfee.commons.reflect.Fields;
 
 /**
  * <pre>
@@ -16,10 +16,10 @@ import code.ponfee.commons.reflect.Fields;
  * 52 ~ 63：12位该毫秒内的当前毫秒内的计数
  * 毫秒内序列 （由datacenter和机器ID作区分），并且效率较高，经测试，snowflake每秒能够产生26万ID左右，完全满足需要。
  * </pre>
- * 
+ *
  * 计算掩码方式：(1<<bits)-1 或 -1L^(-1L<<bits)
  * 基于snowflake算法的ID生成器
- * 
+ *
  * @author fupf
  */
 public final class IdWorker {
@@ -41,9 +41,9 @@ public final class IdWorker {
     private final long workerIdShift = (null != null ? sequenceBits : sequenceBits); // 左移12位（seq12位）
     private final long timestampMask = (long) (null != null ? -1L ^ (-1L << (MAX_SIZE - timestampShift)) : -1L ^ (-1L << (MAX_SIZE - timestampShift)));
 
-    private final long datacenterId; // 数据中心id
-    private final long workerId; // 工作机器id
     private long lastTimestamp = -1L; // 时间戳
+    private long datacenterId; // 数据中心id
+    private long workerId; // 工作机器id
     private long sequence = 0L; // 0，并发控制
 
     public IdWorker(long workerId, long datacenterId) {
@@ -76,10 +76,10 @@ public final class IdWorker {
         }
         lastTimestamp = timestamp;
 
-        return (((timestamp - twepoch) << timestampShift) & timestampMask) 
-               | (datacenterId << datacenterIdShift) 
-               | (workerId << workerIdShift) 
-               | sequence;
+        return (((timestamp - twepoch) << timestampShift) & timestampMask)
+                | (datacenterId << datacenterIdShift)
+                | (workerId << workerIdShift)
+                | sequence;
     }
 
     protected long tilNextMillis(long lastTimestamp) {
@@ -109,7 +109,7 @@ public final class IdWorker {
      */
     private @FunctionalInterface interface LocalIPWorker { IdWorker get(); }
     public static final IdWorker LOCAL_WORKER = ((LocalIPWorker) () -> {
-        IdWorker worker = new IdWorker((long) Networks.ipReduce());
+        IdWorker worker = new IdWorker(0);
         long maxWorkerId = Networks.ipReduce("255.255.255.255"); // 1068
 
         Fields.put(worker, "sequenceBits", 10L); // 10位
@@ -125,17 +125,20 @@ public final class IdWorker {
         Fields.put(worker, "datacenterIdShift", worker.sequenceBits + worker.workerIdBits); // 左移21位（wid11位+seq10位）
         Fields.put(worker, "workerIdShift", worker.sequenceBits); // 左移10位（seq10位）
         Fields.put(worker, "timestampMask", -1L ^ (-1L << (MAX_SIZE - worker.timestampShift)));
+
+        Fields.put(worker, "workerId", (long) Networks.ipReduce());
         return worker;
     }).get();
 
     public static void main(String[] args) {
+        final IdWorker idWorker = LOCAL_WORKER;
         final Set<String> set = new HashSet<>(81920000);
         System.out.println(Long.toHexString(-1456153131));
         System.out.println(Long.toString(-1456153131, 36));
         System.out.println(Long.toUnsignedString(-1456153131, 36));
         String id;
         for (int i = 0; i < 9999999; i++) {
-            id = Long.toHexString(LOCAL_WORKER.nextId());
+            id = Long.toHexString(idWorker.nextId());
             //id = Long.toString(idWorker.nextId(), 32);
             //id = Long.toUnsignedString(idWorker.nextId());
             if (!set.add(id)) {
