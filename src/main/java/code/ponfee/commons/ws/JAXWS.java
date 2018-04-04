@@ -13,18 +13,13 @@ import javax.xml.ws.Service;
  */
 public class JAXWS {
 
-    public static <T> T client(Class<T> clazz, String address, QName qname) {
-        Service service = Service.create(newUrl(address), qname);
-        return service.getPort(clazz);
-    }
-
     /**
      * Returns a JAX-WS client
      * 
      * @param clazz         the webservice interface, as use {@code WebService} annotation
      * @param address       the wsdl url as http://ip:port/ws/webserviceName?wsdl
-     * @param namespaceURI  the targetNamespace
-     * @param localPart     the name
+     * @param namespaceURI  the targetNamespace of <b>wsdl:definitions</b> attribute
+     * @param localPart     the name of <b>wsdl:definitions</b> attribute
      * @return
      */
     public static <T> T client(Class<T> clazz, String address, 
@@ -32,17 +27,23 @@ public class JAXWS {
         return client(clazz, address, new QName(namespaceURI, localPart));
     }
 
-    public static void publish(String address, Object implementor) {
-        Endpoint.publish(address, implementor);
-    }
-
-    private static URL newUrl(String address) {
+    public static <T> T client(Class<T> clazz, String address, QName qname) {
         try {
-            return new URL(address);
+            return Service.create(new URL(address), qname).getPort(clazz);
         } catch (MalformedURLException e) {
             // cannot happened
             throw new IllegalArgumentException("Invalid url: " + address, e);
         }
+    }
+
+    /**
+     * Server publish the webservice
+     * 
+     * @param address
+     * @param implementor  the webservice interface implements class instance
+     */
+    public static void publish(String address, Object implementor) {
+        Endpoint.publish(address, implementor);
     }
 
 }

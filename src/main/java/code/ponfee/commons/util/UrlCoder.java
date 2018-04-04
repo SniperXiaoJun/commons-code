@@ -43,7 +43,7 @@ public final class UrlCoder {
                     if (k < 0) {
                         k += 256;
                     }
-                    builder.append("%" + Integer.toHexString(k).toUpperCase());
+                    builder.append('%').append(Integer.toHexString(k).toUpperCase());
                 }
             }
         }

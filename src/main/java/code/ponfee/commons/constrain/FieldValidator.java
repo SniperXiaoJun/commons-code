@@ -38,8 +38,8 @@ public class FieldValidator {
     private static final String CFG_ERR = "约束配置错误[";
     private static final String EMPTY = "";
     private static final Lock LOCK = new ReentrantLock();
-    static final Cache<String[]> METHOD_SIGN_CACHE = CacheBuilder.newBuilder().compressKey(true).build();
-    private static final Cache<CheckResult> META_CFG_CACHE = CacheBuilder.newBuilder().compressKey(true).build();
+    static final Cache<String[]> METHOD_SIGN_CACHE = CacheBuilder.newBuilder().build();
+    private static final Cache<CheckResult> META_CFG_CACHE = CacheBuilder.newBuilder().build();
 
     public static FieldValidator newInstance() {
         return new FieldValidator();

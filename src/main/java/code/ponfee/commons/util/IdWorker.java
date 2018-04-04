@@ -39,6 +39,7 @@ public final class IdWorker {
     private final long timestampShift = (null != null ? sequenceBits + workerIdBits + datacenterIdBits : sequenceBits + workerIdBits + datacenterIdBits); // 左移22位（did5位+wid5位+seq12位）
     private final long datacenterIdShift = (null != null ? sequenceBits + workerIdBits : sequenceBits + workerIdBits); // 左移17位（wid5位+seq12位）
     private final long workerIdShift = (null != null ? sequenceBits : sequenceBits); // 左移12位（seq12位）
+
     private final long timestampMask = (long) (null != null ? -1L ^ (-1L << (MAX_SIZE - timestampShift)) : -1L ^ (-1L << (MAX_SIZE - timestampShift)));
 
     private long lastTimestamp = -1L; // 时间戳
@@ -77,16 +78,16 @@ public final class IdWorker {
         lastTimestamp = timestamp;
 
         return (((timestamp - twepoch) << timestampShift) & timestampMask)
-                | (datacenterId << datacenterIdShift)
-                | (workerId << workerIdShift)
-                | sequence;
+             | (datacenterId << datacenterIdShift)
+             | (workerId << workerIdShift)
+             | sequence;
     }
 
     protected long tilNextMillis(long lastTimestamp) {
-        long timestamp = timeGen();
-        while (timestamp <= lastTimestamp) {
+        long timestamp;
+        do {
             timestamp = timeGen();
-        }
+        } while (timestamp <= lastTimestamp);
         return timestamp;
     }
 
@@ -107,26 +108,33 @@ public final class IdWorker {
      * 根据IP地址作为workerId
      * @return
      */
-    private @FunctionalInterface interface LocalIPWorker { IdWorker get(); }
+    private static @FunctionalInterface interface LocalIPWorker { IdWorker get(); }
     public static final IdWorker LOCAL_WORKER = ((LocalIPWorker) () -> {
+        long sequenceBits = 10L; // specified 10 bit length
+        long workerIdBits = 11L; // specified 11 bit length
+        long datacenterIdBits = 0L; // specified 0 bit length
+        long timestampShift = sequenceBits + workerIdBits + datacenterIdBits;
+
+        long maxWorkerId = (1L << workerIdBits) - 1; // 2047(max and mask)
+        long workerId = Networks.toLong(Networks.LOCAL_IP) & maxWorkerId;
+
         IdWorker worker = new IdWorker(0);
-        long maxWorkerId = Networks.ipReduce("255.255.255.255"); // 1068
+        Fields.put(worker, "sequenceBits", sequenceBits); // 10位
+        Fields.put(worker, "sequenceMask", (1L << sequenceBits) - 1);
 
-        Fields.put(worker, "sequenceBits", 10L); // 10位
-        Fields.put(worker, "sequenceMask", -1L ^ (-1L << worker.sequenceBits));
-
-        Fields.put(worker, "workerIdBits", (long) Long.toBinaryString(maxWorkerId).length()); // 11位
+        Fields.put(worker, "workerIdBits", workerIdBits); // 11位
         Fields.put(worker, "maxWorkerId", maxWorkerId);
 
-        Fields.put(worker, "datacenterIdBits", 0L); // 0位
-        Fields.put(worker, "maxDatacenterId", -1L ^ (-1L << worker.datacenterIdBits)); // 0
+        Fields.put(worker, "datacenterIdBits", datacenterIdBits); // 0位
+        Fields.put(worker, "maxDatacenterId", (1L << datacenterIdBits) - 1); // 0
 
-        Fields.put(worker, "timestampShift", worker.sequenceBits + worker.workerIdBits + worker.datacenterIdBits); // 左移21位（did0位+wid11位+seq10位）
-        Fields.put(worker, "datacenterIdShift", worker.sequenceBits + worker.workerIdBits); // 左移21位（wid11位+seq10位）
-        Fields.put(worker, "workerIdShift", worker.sequenceBits); // 左移10位（seq10位）
-        Fields.put(worker, "timestampMask", -1L ^ (-1L << (MAX_SIZE - worker.timestampShift)));
+        Fields.put(worker, "timestampShift", timestampShift); // 左移21位（did0位+wid11位+seq10位）
+        Fields.put(worker, "datacenterIdShift", sequenceBits + workerIdBits); // 左移21位（wid11位+seq10位）
+        Fields.put(worker, "workerIdShift", sequenceBits); // 左移10位（seq10位）
 
-        Fields.put(worker, "workerId", (long) Networks.ipReduce());
+        Fields.put(worker, "timestampMask", (1L << (MAX_SIZE - timestampShift)) - 1); // 余下的位数为：63-21=42
+
+        Fields.put(worker, "workerId", workerId);
         return worker;
     }).get();
 
@@ -138,11 +146,13 @@ public final class IdWorker {
         System.out.println(Long.toUnsignedString(-1456153131, 36));
         String id;
         for (int i = 0; i < 9999999; i++) {
-            id = Long.toHexString(idWorker.nextId());
-            //id = Long.toString(idWorker.nextId(), 32);
+            //id = Long.toHexString(idWorker.nextId());
+            id = Long.toString(idWorker.nextId(), Character.MAX_RADIX);
             //id = Long.toUnsignedString(idWorker.nextId());
+            //System.out.println(id);
             if (!set.add(id)) {
                 System.err.println(id);
+                break;
             }
         }
     }

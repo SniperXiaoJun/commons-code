@@ -45,22 +45,21 @@ public abstract class MethodValidator extends FieldValidator {
     private static Logger logger = LoggerFactory.getLogger(MethodValidator.class);
 
     /**
-     * @param joinPoint
+     * @param pjp
      * @param validator
      * @return
      * @throws Throwable
      */
-    public Object constrain(ProceedingJoinPoint joinPoint, Constraints validator) throws Throwable {
-        Object[] args = joinPoint.getArgs();
+    public Object constrain(ProceedingJoinPoint pjp, Constraints validator) throws Throwable {
+        Object[] args = pjp.getArgs();
         if (args == null || args.length == 0) {
-            return joinPoint.proceed();
+            return pjp.proceed();
         }
 
-        // Method method = mSign.getMethod();
-        MethodSignature ms = (MethodSignature) joinPoint.getSignature();
-        Method method = joinPoint.getTarget().getClass().getMethod(ms.getName(), ms.getParameterTypes());
-        //String methodSign = ClassUtils.getMethodSignature(method);
-        String methodSign = method.toGenericString();
+        MethodSignature ms = (MethodSignature) pjp.getSignature();
+        Method method = pjp.getTarget().getClass()
+                           .getMethod(ms.getName(), ms.getParameterTypes()); // ms.getMethod()
+        String methodSign = method.toGenericString(); // ClassUtils.getMethodSignature(method)
         String[] argsName = METHOD_SIGN_CACHE.get(methodSign);
         if (argsName == null) {
             // 要用到asm字节码操作，消耗性能，所以缓存
@@ -127,7 +126,7 @@ public abstract class MethodValidator extends FieldValidator {
         }
 
         if (builder.length() == 0) { // 校验成功
-            return joinPoint.proceed(); // 调用方法
+            return pjp.proceed(); // 调用方法
         } else { // 校验失败，不调用方法，进入失败处理
             if (builder.length() > MAX_MSG_SIZE) {
                 builder.setLength(MAX_MSG_SIZE - 3);

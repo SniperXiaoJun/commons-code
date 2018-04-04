@@ -14,13 +14,19 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * 网络工具类
+ * 
  * @author fupf
  */
-public class Networks {
+public final class Networks {
+    private Networks() {}
+
+    /** the max ip value*/
+    public static final long MAX_IP_VALUE = (1L << 32) - 1; // toLong("255.255.255.255")
 
     /** 掩码 */
-    private static final long[] MASK = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
+    private static final long[] MASK = { 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF };
 
+    /** local ip */
     public static final String LOCAL_IP = getLocalIp();
 
     /** 
@@ -136,8 +142,10 @@ public class Networks {
             throw new IllegalArgumentException("invalid ip address[" + ip + "]");
         }
         String[] ipNums = ip.split("\\.");
-        return (Long.parseLong(ipNums[0]) << 24) + (Long.parseLong(ipNums[1]) << 16)
-             + (Long.parseLong(ipNums[2]) << 8) + (Long.parseLong(ipNums[3]));
+        return (Long.parseLong(ipNums[0]) << 24) 
+             + (Long.parseLong(ipNums[1]) << 16)
+             + (Long.parseLong(ipNums[2]) <<  8) 
+             + (Long.parseLong(ipNums[3])      );
     }
 
     /**
@@ -146,59 +154,11 @@ public class Networks {
      * @return
      */
     public static String fromLong(long ip) {
-        StringBuilder ipAddress = new StringBuilder();
-        for (int i = 0; i < MASK.length; i++) {
-            ipAddress.insert(0, (ip & MASK[i]) >> (i * 8));
-            if (i < MASK.length - 1) {
-                ipAddress.insert(0, ".");
-            }
-        }
-        return ipAddress.toString();
-    }
-
-    /**
-     * ip最小化压缩
-     * false  max  1020
-     * true   max  1068
-     * @param ip         ip地址
-     * @param isPoint    是否要累加每个数字
-     * @return
-     */
-    public static int ipReduce(String ip, boolean isPoint) {
-        if (!RegexUtils.isIp(ip)) {
-            throw new IllegalArgumentException("invalid ip address[" + ip + "]");
-        }
-
-        String[] ipNums = ip.split("\\.");
-        int num = 0;
-        for (int i = 0; i < ipNums.length; i++) {
-            num += Integer.parseInt(ipNums[i]);
-            if (!isPoint) {
-                continue;
-            }
-
-            String[] sections = ipNums[i].split("");
-            for (int j = 0; j < sections.length; j++) {
-                if ("".equals(sections[j])) {
-                    continue;
-                }
-                num += Integer.parseInt(sections[j]);
-            }
-        }
-
-        return num;
-    }
-
-    public static int ipReduce(String ip) {
-        return ipReduce(ip, true);
-    }
-
-    public static int ipReduce(boolean isPoint) {
-        return ipReduce(Networks.getLocalIp(), isPoint);
-    }
-
-    public static int ipReduce() {
-        return ipReduce(Networks.getLocalIp(), true);
+        return new StringBuilder(15)
+            .append((ip & MASK[0]) >> 24).append('.')
+            .append((ip & MASK[1]) >> 16).append('.')
+            .append((ip & MASK[2]) >>  8).append('.')
+            .append((ip & MASK[3])      ).toString();
     }
 
     private static void bindPort(String host, int port) throws IOException {
@@ -235,12 +195,4 @@ public class Networks {
         return result;
     }
 
-    public static void main(String[] args) {
-        System.out.println(getMacAddress(null));
-        System.out.println(getLocalIp());
-        System.out.println(toLong("255.255.255.255"));
-        System.out.println(fromLong(4294912345L));
-        System.out.println(ipReduce("255.255.255.255", false));
-        System.out.println(ipReduce("255.255.255.255"));
-    }
 }

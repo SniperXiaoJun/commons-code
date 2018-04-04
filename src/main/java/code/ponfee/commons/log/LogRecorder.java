@@ -105,7 +105,7 @@ public abstract class LogRecorder {
             if (logger.isInfoEnabled()) {
                 logger.info("[exec-after]-[{}]{}-[{}]", methodName, logs, ObjectUtils.toString(retVal));
             }
-            if (logInfo.getCostTime() > alarmThresholdMillis) {
+            if (logger.isWarnEnabled() && logInfo.getCostTime() > alarmThresholdMillis) {
                 logger.warn("[exec-time]-[{}]{}-[cost {}]", methodName, logs, logInfo.getCostTime()); // 执行时间告警
             }
             return retVal;

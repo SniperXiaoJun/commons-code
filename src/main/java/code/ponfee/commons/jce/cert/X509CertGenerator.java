@@ -9,6 +9,8 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Vector;
 
+import javax.annotation.Nullable;
+
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
@@ -189,10 +191,10 @@ public class X509CertGenerator {
      * @param extensions
      * @return
      */
-    private static X509CertInfo createCertInfo(BigInteger sn, PKCS10 pkcs10, Date notBefore, 
+    private static X509CertInfo createCertInfo(@Nullable BigInteger sn, PKCS10 pkcs10, Date notBefore, 
                                                Date notAfter, CertificateExtensions extensions) {
         if (sn == null) {
-            //sn = ThreadLocalRandom.current().nextInt() & Integer.MAX_VALUE;
+            //sn = BigInteger.valueOf(ThreadLocalRandom.current().nextLong() & Long.MAX_VALUE);
             sn = new BigInteger(1, ObjectUtils.uuid());
         }
         try {
