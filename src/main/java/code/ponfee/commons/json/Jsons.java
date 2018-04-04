@@ -53,10 +53,11 @@ public final class Jsons {
     }
 
     /**
-     * convert an object(POJO, Array, Collection, ...) to json string
+     * Converts an object(POJO, Array, Collection, ...) to json string
+     *
      * @param target target object
      * @return json string
-     * @throws code.ponfee.commons.json.JsonException   the exception for json
+     * @throws JsonException   the exception for json
      */
     public String stringify(Object target) throws JsonException {
         try {
@@ -67,10 +68,11 @@ public final class Jsons {
     }
 
     /**
-     * serialize the byte array of json
+     * Serialize the byte array of json
+     *
      * @param target  object
      * @return byte[] array
-     * @throws code.ponfee.commons.json.JsonException   the exception for json
+     * @throws JsonException   the exception for json
      */
     public byte[] serialize(Object target) throws JsonException {
         try {
@@ -81,13 +83,13 @@ public final class Jsons {
     }
 
     /**
-     * deserialize a json to target class object
+     * Deserialize a json to target class object
      * {@code mapper.readValue(json, new TypeReference<Map<String, Object>>() {})}
      * 
      * @param json json string
      * @param target target class
      * @return target object
-     * @throws code.ponfee.commons.json.JsonException   the exception for json
+     * @throws JsonException   the exception for json
      */
     public <T> T parse(String json, Class<T> target) throws JsonException {
         if (StringUtils.isEmpty(json)) {
@@ -105,9 +107,9 @@ public final class Jsons {
      * Deserialize the json string to java object
      * {@code new TypeReference<Map<String, Object>>(){} }
      * 
-     * @param json The json string
-     * @param type The TypeReference specified java type
-     * @return A java object
+     * @param json the json string
+     * @param type the TypeReference specified java type
+     * @return a java object
      * @throws JsonException
      */
     public <T> T parse(String json, TypeReference<T> type) throws JsonException {
@@ -131,8 +133,8 @@ public final class Jsons {
      * @return the objects of collection
      * @throws JsonException the exception for json
      */
-    public <T> T parse(String json, Class<T> collectClass, Class<?>... elemClasses)
-        throws JsonException {
+    public <T> T parse(String json, Class<T> collectClass,
+                       Class<?>... elemClasses) throws JsonException {
         return parse(json, createCollectionType(collectClass, elemClasses));
     }
 
@@ -143,6 +145,7 @@ public final class Jsons {
      * @param javaType JavaType
      * @return the javaType's object
      * @throws JsonException the exception for json
+     *
      * @see #createCollectionType(Class, Class...)
      */
     public <T> T parse(String json, JavaType javaType) throws JsonException {
@@ -158,10 +161,11 @@ public final class Jsons {
     }
 
     /**
-     * construct collection type
+     * Constructs collection type
+     *
      * @param collecClass collection class, such as ArrayList, HashMap, ...
      * @param elemClasses element class
-     * @return JavaType
+     * @return a JavaType instance
      */
     public <T> JavaType createCollectionType(Class<T> collecClass, 
                                              Class<?>... elemClasses) {
