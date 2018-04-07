@@ -1,15 +1,15 @@
 package code.ponfee.commons.collect;
 
-import static com.google.common.base.Preconditions.checkElementIndex;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkPositionIndexes;
-
 import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.RandomAccess;
+
+import static com.google.common.base.Preconditions.checkElementIndex;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkPositionIndexes;
 
 /**
  * The primitive byte array of list
@@ -102,20 +102,22 @@ public class ByteArrayList extends AbstractList<Byte>
         if (object == this) {
             return true;
         }
-        if (object instanceof ByteArrayList) {
-            ByteArrayList that = (ByteArrayList) object;
-            int size = size();
-            if (that.size() != size) {
+
+        if (!(object instanceof ByteArrayList)) {
+            return false;
+        }
+
+        ByteArrayList that = (ByteArrayList) object;
+        int size = size();
+        if (that.size() != size) {
+            return false;
+        }
+        for (int i = 0; i < size; i++) {
+            if (array[start + i] != that.array[that.start + i]) {
                 return false;
             }
-            for (int i = 0; i < size; i++) {
-                if (array[start + i] != that.array[that.start + i]) {
-                    return false;
-                }
-            }
-            return true;
         }
-        return super.equals(object);
+        return true;
     }
 
     @Override

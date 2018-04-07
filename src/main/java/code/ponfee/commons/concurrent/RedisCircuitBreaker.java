@@ -82,6 +82,10 @@ public class RedisCircuitBreaker implements CircuitBreaker {
                     batch.put(Bytes.fromLong(IdWorker.LOCAL_WORKER.nextId()), trace.timeMillis);
                 }
                 for (Entry<String, Map<byte[], Double>> entry : groups.entrySet()) {
+                    if (entry.getValue().isEmpty()) {
+                        continue;
+                    }
+
                     // TRACE_KEY_PREFIX + trace.key
                     jedisClient.zsetOps().zadd(
                         concat(TRACE_KEY_BYTES, entry.getKey().getBytes(UTF_8)),
@@ -127,7 +131,7 @@ public class RedisCircuitBreaker implements CircuitBreaker {
             // get the lock for access redis
             Object lock = LOCK_MAP.get(key0);
             if (lock == null) {
-                synchronized (countCache) {
+                synchronized (this.getClass()) {
                     lock = LOCK_MAP.get(key0);
                     if (lock == null) {
                         lock = new Object();
@@ -194,9 +198,11 @@ public class RedisCircuitBreaker implements CircuitBreaker {
     public void destory() {
         confCache.destroy();
         countCache.destroy();
-        LOCK_MAP.clear();
         transmitter.end();
         executor.shutdown();
+        synchronized (this.getClass()) {
+            LOCK_MAP.clear();
+        }
     }
 
     /**

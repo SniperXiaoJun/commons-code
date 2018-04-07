@@ -1,5 +1,12 @@
 package code.ponfee.commons.http;
 
+import code.ponfee.commons.collect.Collects;
+import code.ponfee.commons.io.Files;
+import code.ponfee.commons.util.ObjectUtils;
+import code.ponfee.commons.util.UrlCoder;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,15 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
-
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import code.ponfee.commons.collect.Collects;
-import code.ponfee.commons.io.Files;
-import code.ponfee.commons.util.ObjectUtils;
-import code.ponfee.commons.util.UrlCoder;
 
 /**
  * http参数工具类
@@ -179,7 +177,7 @@ public class HttpParams {
      */
     public static String buildForm(String url, Map<String, ?> params) {
         StringBuilder form = new StringBuilder(256);
-        String formName = Hex.encodeHexString(ObjectUtils.uuid());
+        String formName = ObjectUtils.uuid32();
         form.append("<form action=\"").append(url).append("\" name=\"")
             .append(formName).append("\" method=\"post\">");
 
@@ -195,10 +193,8 @@ public class HttpParams {
             }
         }
 
-        return form.append("</form>")
-                   .append("<script type=\"text/javascript\">document.forms['")
-                   .append(formName)
-                   .append("'].submit();</script>")
+        return form.append("</form><script>document.forms['")
+                   .append(formName).append("'].submit();</script>")
                    .toString();
     }
 
@@ -213,10 +209,8 @@ public class HttpParams {
     }
 
     private static void buildInputElement(StringBuilder form, String name, Object value) {
-        form.append("<input type=\"hidden\" name=\"")
-            .append(name)
-            .append("\" value=\"")
-            .append(Objects.toString(value, ""))
+        form.append("<input type=\"hidden\" name=\"").append(name)
+            .append("\" value=\"").append(Objects.toString(value, ""))
             .append("\" />");
     }
 
