@@ -1,4 +1,4 @@
-package code.ponfee.commons.concurrent;
+package code.ponfee.commons.limit;
 
 import java.util.Date;
 

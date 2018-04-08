@@ -1,6 +1,6 @@
 package test.log;
 
-import code.ponfee.commons.concurrent.RedisCurrentLimiter;
+import code.ponfee.commons.limit.RedisCurrentLimiter;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.serial.JdkSerializer;
 import org.junit.Before;

@@ -1,7 +1,8 @@
-package code.ponfee.commons.concurrent;
+package code.ponfee.commons.limit;
 
 import code.ponfee.commons.cache.Cache;
 import code.ponfee.commons.cache.CacheBuilder;
+import code.ponfee.commons.concurrent.AsyncBatchTransmitter;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.JedisLock;
 import code.ponfee.commons.util.Bytes;
