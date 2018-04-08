@@ -41,6 +41,8 @@ public class FieldValidator {
     static final Cache<String[]> METHOD_SIGN_CACHE = CacheBuilder.newBuilder().build();
     private static final Cache<CheckResult> META_CFG_CACHE = CacheBuilder.newBuilder().build();
 
+    protected FieldValidator() {}
+
     public static FieldValidator newInstance() {
         return new FieldValidator();
     }

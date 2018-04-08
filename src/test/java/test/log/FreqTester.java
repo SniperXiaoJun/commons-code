@@ -1,6 +1,6 @@
 package test.log;
 
-import code.ponfee.commons.concurrent.RedisCircuitBreaker;
+import code.ponfee.commons.concurrent.RedisCurrentLimiter;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.serial.JdkSerializer;
 import org.junit.Before;
@@ -35,7 +35,7 @@ public class FreqTester {
     // zcount "cir:bre:abc" 0 99999999999999
     @Test
     public void test1() throws InterruptedException {
-        RedisCircuitBreaker f = new RedisCircuitBreaker(jedisClient, 1, 5);
+        RedisCurrentLimiter f = new RedisCurrentLimiter(jedisClient, 1, 5);
         f.setRequestThreshold("abc", 7000000);
         List<Thread> list = new ArrayList<>();
         AtomicBoolean flag = new AtomicBoolean(true);

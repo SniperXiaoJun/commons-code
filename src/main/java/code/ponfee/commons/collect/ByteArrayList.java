@@ -1,48 +1,32 @@
 package code.ponfee.commons.collect;
 
-import java.io.Serializable;
-import java.util.AbstractList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.RandomAccess;
-
 import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkPositionIndexes;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * The primitive byte array of list
+ * 
  * @author Ponfee
  */
-public class ByteArrayList extends AbstractList<Byte>
-    implements RandomAccess, Serializable {
+public class ByteArrayList extends AbstractArrayList<Byte> {
 
-    private static final long serialVersionUID = 0;
+    private static final long serialVersionUID = 8638428453599555032L;
 
     private final byte[] array;
-    private final int start;
-    private final int end;
 
     public ByteArrayList(byte[] array) {
         this(array, 0, array.length);
     }
 
     public ByteArrayList(byte[] array, int start, int end) {
+        super(start, end);
         checkNotNull(array);
         this.array = array;
-        this.start = start;
-        this.end = end;
-    }
-
-    @Override
-    public int size() {
-        return end - start;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return false;
     }
 
     @Override
@@ -102,22 +86,20 @@ public class ByteArrayList extends AbstractList<Byte>
         if (object == this) {
             return true;
         }
-
-        if (!(object instanceof ByteArrayList)) {
-            return false;
-        }
-
-        ByteArrayList that = (ByteArrayList) object;
-        int size = size();
-        if (that.size() != size) {
-            return false;
-        }
-        for (int i = 0; i < size; i++) {
-            if (array[start + i] != that.array[that.start + i]) {
+        if (object instanceof ByteArrayList) {
+            ByteArrayList that = (ByteArrayList) object;
+            int size = size();
+            if (that.size() != size) {
                 return false;
             }
+            for (int i = 0; i < size; i++) {
+                if (array[start + i] != that.array[that.start + i]) {
+                    return false;
+                }
+            }
+            return true;
         }
-        return true;
+        return super.equals(object);
     }
 
     @Override

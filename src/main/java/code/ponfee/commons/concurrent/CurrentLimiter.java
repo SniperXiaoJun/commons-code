@@ -3,10 +3,11 @@ package code.ponfee.commons.concurrent;
 import java.util.Date;
 
 /**
- * 熔断处理
+ * 限流器
+ *
  * @author fupf
  */
-public interface CircuitBreaker {
+public interface CurrentLimiter {
 
     /**
      * 校验并追踪

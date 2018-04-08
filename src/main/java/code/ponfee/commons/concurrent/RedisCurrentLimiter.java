@@ -22,12 +22,13 @@ import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_HAND
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
- * Redis熔断控制器
+ * Redis限流器
+ *
  * @author fupf
  */
-public class RedisCircuitBreaker implements CircuitBreaker {
+public class RedisCurrentLimiter implements CurrentLimiter {
 
-    private static Logger logger = LoggerFactory.getLogger(RedisCircuitBreaker.class);
+    private static Logger logger = LoggerFactory.getLogger(RedisCurrentLimiter.class);
 
     private static final int EXPIRE_SECONDS = (int) TimeUnit.DAYS.toSeconds(30) + 1; // key的失效日期
     private static final String TRACE_KEY_PREFIX = "cir:bre:"; // 频率缓存key前缀
@@ -47,7 +48,7 @@ public class RedisCircuitBreaker implements CircuitBreaker {
     private final Cache<Long> countCache = CacheBuilder.newBuilder().keepaliveInMillis(500L) // 500 millis of cache alive
                                                        .autoReleaseInSeconds(1800).build(); // 30 minutes to release expire cache
 
-    public RedisCircuitBreaker(JedisClient jedisClient, int clearBeforeMinutes, int autoClearInSeconds) {
+    public RedisCurrentLimiter(JedisClient jedisClient, int clearBeforeMinutes, int autoClearInSeconds) {
         this.jedisClient = jedisClient;
         this.clearBeforeMillis = (int) TimeUnit.MINUTES.toMillis(clearBeforeMinutes);
 

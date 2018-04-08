@@ -1,48 +1,31 @@
 package code.ponfee.commons.collect;
 
-import java.io.Serializable;
-import java.util.AbstractList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.RandomAccess;
-
 import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkPositionIndexes;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * The primitive long array of list
  * @author Ponfee
  */
-public class LongArrayList extends AbstractList<Long>
-    implements RandomAccess, Serializable {
+public class LongArrayList extends AbstractArrayList<Long> {
 
-    private static final long serialVersionUID = 0;
+    private static final long serialVersionUID = -2989143269776168553L;
 
     private final long[] array;
-    private final int start;
-    private final int end;
 
     public LongArrayList(long[] array) {
         this(array, 0, array.length);
     }
 
     public LongArrayList(long[] array, int start, int end) {
+        super(start, end);
         checkNotNull(array);
         this.array = array;
-        this.start = start;
-        this.end = end;
-    }
-
-    @Override
-    public int size() {
-        return end - start;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return false;
     }
 
     @Override
@@ -102,22 +85,20 @@ public class LongArrayList extends AbstractList<Long>
         if (object == this) {
             return true;
         }
-
-        if (!(object instanceof LongArrayList)) {
-            return false;
-        }
-
-        LongArrayList that = (LongArrayList) object;
-        int size = size();
-        if (that.size() != size) {
-            return false;
-        }
-        for (int i = 0; i < size; i++) {
-            if (array[start + i] != that.array[that.start + i]) {
+        if (object instanceof LongArrayList) {
+            LongArrayList that = (LongArrayList) object;
+            int size = size();
+            if (that.size() != size) {
                 return false;
             }
+            for (int i = 0; i < size; i++) {
+                if (array[start + i] != that.array[that.start + i]) {
+                    return false;
+                }
+            }
+            return true;
         }
-        return true;
+        return super.equals(object);
     }
 
     @Override

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import code.ponfee.commons.concurrent.CircuitBreaker;
+import code.ponfee.commons.concurrent.CurrentLimiter;
 import code.ponfee.commons.exception.Throwables;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.util.ObjectUtils;
@@ -38,7 +38,7 @@ public abstract class LogRecorder {
     private static Logger logger = LoggerFactory.getLogger(LogRecorder.class);
 
     private final int alarmThresholdMillis; // 告警阀值
-    private final CircuitBreaker circuitBreaker; // 访问频率限制
+    private final CurrentLimiter circuitBreaker; // 访问频率限制
 
     public LogRecorder() {
         this(DEFAULT_ALARM_THRESHOLD_MILLIS);
@@ -48,11 +48,11 @@ public abstract class LogRecorder {
         this(alarmThresholdMillis, null);
     }
 
-    public LogRecorder(CircuitBreaker circuitBreaker) {
+    public LogRecorder(CurrentLimiter circuitBreaker) {
         this(DEFAULT_ALARM_THRESHOLD_MILLIS, circuitBreaker);
     }
 
-    public LogRecorder(int alarmThresholdMillis, CircuitBreaker circuitBreaker) {
+    public LogRecorder(int alarmThresholdMillis, CurrentLimiter circuitBreaker) {
         Preconditions.checkArgument(alarmThresholdMillis > 0);
         this.alarmThresholdMillis = alarmThresholdMillis;
         this.circuitBreaker = circuitBreaker;
