@@ -2,6 +2,7 @@ package code.ponfee.commons.constrain;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -12,20 +13,20 @@ import java.lang.annotation.Target;
  *      `@Constraint(field = "name", notBlank = true, maxLen = 64),
  *      `@Constraint(field = "type", series = { 1, 2 })
  *  })
- *  
+ *
  *  or
- *  
+ *
  *  `@Constraint(notBlank = true, maxLen = 64)
  *  private String name;
  * </pre>
- * 
+ *
  * 参数约束
  * @author fupf
  */
-@Target({ ElementType.FIELD })
+@Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
+@Repeatable(Constraints.class)
 @Documented
-//@Repeatable(Constraints.class)
 public @interface Constraint {
 
     /**
