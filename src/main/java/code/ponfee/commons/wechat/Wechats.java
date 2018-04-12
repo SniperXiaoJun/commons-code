@@ -47,8 +47,8 @@ public class Wechats {
         params.put("scope", scope);
         params.put("state", state);
         return HttpParams.buildUrlPath(
-                   "https://open.weixin.qq.com/connect/oauth2/authorize", charset, params
-               ) + "#wechat_redirect";
+            "https://open.weixin.qq.com/connect/oauth2/authorize", charset, params
+        ) + "#wechat_redirect";
     }
 
     // -------------------------通过授权地址的回调参数code换取网页授权access_token和openId------------------------- //

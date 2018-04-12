@@ -174,6 +174,9 @@ public class SimpleXmlHandler {
                         continue;
                     }
                     errors.append(position).append(":").append(e.getTextTrim()).append("\n");
+                    if (errors.length() > 1000) {
+                        break; // break output error
+                    }
                 }
 
                 if (errors.length() > 1000) {

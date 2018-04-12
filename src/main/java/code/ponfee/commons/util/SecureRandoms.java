@@ -53,6 +53,12 @@ public final class SecureRandoms {
         return SECURE_RANDOM.nextBoolean();
     }
 
+    /**
+     * Returns a pseudo random BigInteger specified bit length
+     *
+     * @param bitLen specified bit length
+     * @return a pseudo random BigInteger
+     */
     public static BigInteger random(int bitLen) {
         BigInteger rnd;
         do {

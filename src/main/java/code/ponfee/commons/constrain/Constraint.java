@@ -37,7 +37,7 @@ public @interface Constraint {
     /**
      * 基本数据类型参数不用设值，对象类型参数为字段名
      */
-    String field() default "";
+    String field() default ""; // can not use in class filed
 
     /**
      * 校验失败时的提示信息（不设置时自动拼装为如：orderNo{null}：not allow blank;）
@@ -76,11 +76,13 @@ public @interface Constraint {
 
     /**
      * 最大值（只针对整数）
+     * the max value cannot supported Long.MAX_VALUE
      */
     long max() default Long.MAX_VALUE;
 
     /**
      * 最小值（只针对整数）
+     * the max value cannot supported Long.MIN_VALUE
      */
     long min() default Long.MIN_VALUE;
 
@@ -101,11 +103,13 @@ public @interface Constraint {
 
     /**
      * 最大值（只针对浮点数）
+     * the decimalMax value cannot supported Double.POSITIVE_INFINITY
      */
     double decimalMax() default Double.POSITIVE_INFINITY;
 
     /**
      * 最小值（只针对浮点数）
+     * the decimalMin value cannot supported Double.NEGATIVE_INFINITY
      */
     double decimalMin() default Double.NEGATIVE_INFINITY;
 

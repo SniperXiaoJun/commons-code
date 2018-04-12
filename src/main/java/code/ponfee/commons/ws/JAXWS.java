@@ -17,10 +17,10 @@ public class JAXWS {
      * Returns a JAX-WS client
      * 
      * @param clazz         the webservice interface, as use {@code WebService} annotation
-     * @param address       the wsdl url as http://ip:port/ws/webserviceName?wsdl
-     * @param namespaceURI  the targetNamespace of <b>wsdl:definitions</b> attribute
-     * @param localPart     the name of <b>wsdl:definitions</b> attribute
-     * @return
+     * @param address       the wsdl url like as http://ip:port/ws/webserviceName?wsdl
+     * @param namespaceURI  the targetNamespace of element <b>&lt;wsdl:definitions&gt;</b> attribute
+     * @param localPart     the name of element <b>&lt;wsdl:definitions&gt;</b> attribute
+     * @return client object can calls rpc
      */
     public static <T> T client(Class<T> clazz, String address, 
                                String namespaceURI, String localPart) {

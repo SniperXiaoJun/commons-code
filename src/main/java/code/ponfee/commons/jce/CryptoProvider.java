@@ -76,8 +76,8 @@ public abstract class CryptoProvider {
         }
 
         return Base64.getUrlEncoder().withoutPadding().encodeToString(
-                   this.encrypt(plaintext.getBytes(charset))
-               );
+            this.encrypt(plaintext.getBytes(charset))
+        );
     }
 
     /**
@@ -126,8 +126,8 @@ public abstract class CryptoProvider {
             return null;
         }
         return Base64.getUrlEncoder().withoutPadding().encodeToString(
-                   sign(data.getBytes(Charset.forName(charset)))
-               );
+            sign(data.getBytes(Charset.forName(charset)))
+        );
     }
 
     /**
@@ -149,8 +149,8 @@ public abstract class CryptoProvider {
      */
     public final boolean verify(String data, String charset, String signed) {
         return verify(data.getBytes(Charset.forName(charset)), 
-                   Base64.getUrlDecoder().decode(signed)
-               );
+            Base64.getUrlDecoder().decode(signed)
+        );
     }
 
     /**

@@ -225,7 +225,7 @@ public final class Collects {
         }
 
         int length = kv.length;
-        if ((length & 0x01) == 1) {
+        if ((length & 0x01) != 0) { // length % 2
             throw new IllegalArgumentException("args must be pair.");
         }
 

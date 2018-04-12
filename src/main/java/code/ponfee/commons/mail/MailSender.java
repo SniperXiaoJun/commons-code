@@ -115,12 +115,13 @@ public class MailSender {
 
         // SSL setting
         props.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        /*props.setProperty("mail.transport.protocol", "smtps");
-        props.setProperty("mail.smtp.socketFactory.fallback", "false");
-        props.setProperty("mail.smtp.port", "465");
-        props.setProperty("mail.smtp.socketFactory.port", "465");*/
 
+        //props.setProperty("mail.transport.protocol", "smtps");
+        //props.setProperty("mail.smtp.socketFactory.fallback", "false");
+        //props.setProperty("mail.smtp.port", "465");
+        //props.setProperty("mail.smtp.socketFactory.port", "465");
         //props.setProperty("mail.smtp.starttls.enable", "true"); // 网易邮箱设为false
+
         if (connTimeout != null) {
             props.setProperty("mail.smtp.connectiontimeout", connTimeout.toString());
         }
@@ -257,6 +258,7 @@ public class MailSender {
             if (sentFailedLogger != null) try {
                 sentFailedLogger.log(logid, retries, envlop, e);
             } catch (Exception ignored) {
+                ignored.printStackTrace();
             }
 
             if (MailConnectException.class.isInstance(e) && --retries > 0) {
@@ -324,9 +326,9 @@ public class MailSender {
             if (StringUtils.isBlank(email)) {
                 continue;
             } else if (!RegexUtils.isEmail(email)) {
-                logger.error("illegal email address[{}]", email);
+                logger.warn("illegal email address[{}]", email);
             } else if (!EmailValidator.verify(email, this.validateTimes)) {
-                logger.error("invalid email address[{}]", email);
+                logger.warn("invalid email address[{}]", email);
             } else {
                 addresses.add(new InternetAddress(email));
             }
@@ -338,7 +340,7 @@ public class MailSender {
      * 邮件权限验证
      */
     private static class SmtpAuth extends Authenticator {
-        private String user, password;
+        private final String user, password;
 
         SmtpAuth(String user, String password) {
             this.user = user;

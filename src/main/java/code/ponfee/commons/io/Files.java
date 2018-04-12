@@ -240,14 +240,14 @@ public final class Files {
         return new DecimalFormat("#,##0.##").format(size / Math.pow(1024, digit)) + FILE_UNITS[digit];
     }
 
-    private static final long KB = 1024;
-    private static final long MB = KB * 1024;
-    private static final long GB = MB * 1024;
-    private static final long TB = GB * 1024;
-    private static final long PB = TB * 1024;
-    private static final long EB = PB * 1024;
-    private static final long ZB = EB * 1024;
-    private static final long YB = ZB * 1024;
+    private static final long UNIT = 1024, KB = UNIT;
+    private static final long MB = KB * UNIT;
+    private static final long GB = MB * UNIT;
+    private static final long TB = GB * UNIT;
+    private static final long PB = TB * UNIT;
+    private static final long EB = PB * UNIT;
+    private static final long ZB = EB * UNIT;
+    private static final long YB = ZB * UNIT;
     public static long parseHuman(String humanSize) {
         long factor = 1L;
         switch (humanSize.charAt(0)) {

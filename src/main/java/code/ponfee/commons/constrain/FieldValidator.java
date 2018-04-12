@@ -151,7 +151,7 @@ public class FieldValidator {
             && !CharSequence.class.isAssignableFrom(type)) {
             throw new UnsupportedOperationException(CFG_ERR + name + "]：非字符类型不支持字符规则验证");
         }
-        if ((c.max() != Long.MAX_VALUE || c.min() != Long.MIN_VALUE)
+        if (!(c.max() == Long.MAX_VALUE && c.min() == Long.MIN_VALUE) // both 
             && !(Long.class.isAssignableFrom(type) || Integer.class.isAssignableFrom(type))) {
             throw new UnsupportedOperationException(CFG_ERR + name + "]：非整数类型不支持整数数值验证");
         }
@@ -159,7 +159,7 @@ public class FieldValidator {
             && !(Long.class.isAssignableFrom(type) || Integer.class.isAssignableFrom(type))) {
             throw new UnsupportedOperationException(CFG_ERR + name + "]：非整数类型不支持数列验证");
         }
-        if ((c.decimalMax() != Double.POSITIVE_INFINITY || c.decimalMin() != Double.NEGATIVE_INFINITY)
+        if (!(c.decimalMax() == Double.POSITIVE_INFINITY && c.decimalMin() == Double.NEGATIVE_INFINITY)
             && !(Double.class.isAssignableFrom(type) || Float.class.isAssignableFrom(type))) {
             throw new UnsupportedOperationException(CFG_ERR + name + "]：非浮点数类型不支持浮点数值验证");
         }
