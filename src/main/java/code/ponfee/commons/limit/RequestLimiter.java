@@ -2,6 +2,8 @@ package code.ponfee.commons.limit;
 
 import java.util.Random;
 
+import code.ponfee.commons.jce.digest.DigestUtils;
+import code.ponfee.commons.util.Strings;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -212,12 +214,14 @@ public class RequestLimiter {
     // -------------------------------用于验证码校验---------------------------------
     /**
      * 生成nonce校验码（返回到用户端）
-     * @param code
-     * @param salt
-     * @return
+     *
+     * @param code a string like as captcha code
+     * @param salt a string like as mobile phone
+     * @return a check code
      */
     public static String buildNonce(String code, String salt) {
         long first = new Random(code.hashCode()).nextLong(); // 第一个nextLong值是固定的
+        //long first = Strings.crc32(code); // DigestUtils.md5(code.getBytes())
         byte[] slatBytes = ArrayUtils.addAll(SLAT_PREFIX, salt.getBytes());
         return HmacUtils.md5Hex(Bytes.fromLong(first), slatBytes);
     }

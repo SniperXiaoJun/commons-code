@@ -37,9 +37,9 @@ public abstract class JavaSource implements Serializable {
      * @see {@link Class#getCanonicalName()}
      */
     public String getFullyQualifiedName() {
-        String name = (packageName == null || packageName.isEmpty()) 
-                      ? "" : packageName + ".";
-        return name + publicClass;
+        return (packageName == null || packageName.isEmpty())
+               ? publicClass
+               : packageName + "." + publicClass;
     }
 
 }

@@ -1,6 +1,6 @@
 package code.ponfee.commons.constrain;
 
-import static code.ponfee.commons.model.ResultCode.ILLEGAL_ARGS;
+import static code.ponfee.commons.model.ResultCode.BAD_REQUEST;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -102,7 +102,7 @@ public abstract class MethodValidator extends FieldValidator {
                     fieldVal = get.invoke(fieldVal, cst.field());
                     fieldType = fieldVal == null ? null : fieldVal.getClass();
                     fieldName = argsName[cst.index()] + "[" + cst.field() + "]";
-                    builder.append(constrain(fieldName, fieldVal, cst, fieldType));
+                    builder.append(constrain(fieldName, fieldVal, cst, fieldType)); // can not cache
                 } else {
                     // 验证java bean
                     String[] ognl = cst.field().split("\\.");
@@ -116,6 +116,10 @@ public abstract class MethodValidator extends FieldValidator {
                     }
                     fieldName = argsName[cst.index()] + "." + cst.field();
                     builder.append(constrain(methodSign, fieldName, fieldVal, cst, fieldType));
+                }
+
+                if (builder.length() > MAX_MSG_SIZE) {
+                    break;
                 }
             }
         } catch (UnsupportedOperationException | IllegalArgumentException e) {
@@ -151,7 +155,7 @@ public abstract class MethodValidator extends FieldValidator {
     protected Object returnFailed(Method method, String errMsg) {
         try {
             Constructor<?> c = method.getReturnType().getConstructor(int.class, String.class);
-            return c.newInstance(ILLEGAL_ARGS.getCode(), ILLEGAL_ARGS.getMsg() + ": " + errMsg);
+            return c.newInstance(BAD_REQUEST.getCode(), BAD_REQUEST.getMsg() + ": " + errMsg);
         } catch (Exception e) {
             throw new IllegalArgumentException(errMsg, e);
         }

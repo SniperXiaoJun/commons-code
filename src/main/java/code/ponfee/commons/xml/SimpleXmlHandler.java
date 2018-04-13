@@ -31,6 +31,7 @@ import java.util.Set;
  */
 public class SimpleXmlHandler {
 
+    private static final int MAX_ERROR_SIZE = 500;
     /**
      * <pre>
      * 待解析XML文件 格式必须符合如下规范：
@@ -174,13 +175,13 @@ public class SimpleXmlHandler {
                         continue;
                     }
                     errors.append(position).append(":").append(e.getTextTrim()).append("\n");
-                    if (errors.length() > 1000) {
+                    if (errors.length() > MAX_ERROR_SIZE) {
                         break; // break output error
                     }
                 }
 
-                if (errors.length() > 1000) {
-                    errors.setLength(997);
+                if (errors.length() > MAX_ERROR_SIZE) {
+                    errors.setLength(MAX_ERROR_SIZE - 3);
                     errors.append("...");
                 }
                 throw new IllegalStateException(errors.toString());

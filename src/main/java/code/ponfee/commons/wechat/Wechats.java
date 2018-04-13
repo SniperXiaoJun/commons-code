@@ -31,7 +31,8 @@ public class Wechats {
     /**
      * 构建授权地址
      * @param appid
-     * @param state
+     * @param state 在发送state之后，可以把state保存到Session以便用于后续回调时的比较。
+     *              这样做的目的是防止应用接受任意伪造的授权码。
      * @param scope snsapi_base不弹出授权页面，直接跳转，只能获取用户openid
      *              snsapi_userinfo弹出授权页面，可通过openid拿到昵称、性别、所在地。
      *              并且，即使在未关注的情况下，只要用户授权，也能获取其信息

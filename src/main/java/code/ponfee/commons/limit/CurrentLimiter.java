@@ -3,7 +3,7 @@ package code.ponfee.commons.limit;
 import java.util.Date;
 
 /**
- * 限流器
+ * 限流器（隔板）
  *
  * @author fupf
  */

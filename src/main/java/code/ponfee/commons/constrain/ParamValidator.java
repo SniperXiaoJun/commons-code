@@ -1,6 +1,6 @@
 package code.ponfee.commons.constrain;
 
-import static code.ponfee.commons.model.ResultCode.ILLEGAL_ARGS;
+import static code.ponfee.commons.model.ResultCode.BAD_REQUEST;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -63,6 +63,8 @@ public abstract class ParamValidator extends FieldValidator {
 
             // 方法参数注解校验
             Annotation[][] anns = method.getParameterAnnotations();
+
+            outer: // this is the label for the outer loop
             for (int i = 0; i < args.length; i++) {
                 for (Annotation ann : anns[i]) {
                     if (ann instanceof ConstrainParam) {
@@ -71,6 +73,9 @@ public abstract class ParamValidator extends FieldValidator {
                         } catch (IllegalArgumentException e) {
                             builder.append("[").append(argsName[i]).append("]").append(e.getMessage());
                         }
+                    }
+                    if (builder.length() > MAX_MSG_SIZE) {
+                        break outer;
                     }
                 }
             }
@@ -107,7 +112,7 @@ public abstract class ParamValidator extends FieldValidator {
     protected Object returnFailed(Method method, String errMsg) {
         try {
             Constructor<?> c = method.getReturnType().getConstructor(int.class, String.class);
-            return c.newInstance(ILLEGAL_ARGS.getCode(), ILLEGAL_ARGS.getMsg() + ": " + errMsg);
+            return c.newInstance(BAD_REQUEST.getCode(), BAD_REQUEST.getMsg() + ": " + errMsg);
         } catch (Exception e) {
             throw new IllegalArgumentException(errMsg, e);
         }

@@ -21,7 +21,7 @@ public class Result<T> implements java.io.Serializable {
     private String  msg;  // 返回信息
     private T       data; // 结果数据
 
-    // -----------------------constructor methods
+    // -------------------------------------------constructor methods
     public Result() {} // code is null
 
     public Result(int code, String msg) {
@@ -34,7 +34,7 @@ public class Result<T> implements java.io.Serializable {
         this.data = data;
     }
 
-    // -----------------------------static methods/success methods
+    // ---------------------------------static methods/success methods
     public static Result<Void> success() {
         return SUCCESS;
     }
@@ -47,7 +47,7 @@ public class Result<T> implements java.io.Serializable {
         return new Result<>(SUCCESS.getCode(), msg, data);
     }
 
-    // -----------------------------static methods/failure methods
+    // ---------------------------------static methods/failure methods
     public static <T> Result<T> failure(Enum<?> em) {
         return failure((int) Fields.get(em, "code"), 
                        (String) Fields.get(em, "msg"), null);
@@ -116,7 +116,7 @@ public class Result<T> implements java.io.Serializable {
         private static final long serialVersionUID = 6740650053476768729L;
 
         SuccessResult() {
-            super(ResultCode.SUCCESS.getCode(), ResultCode.SUCCESS.getMsg());
+            super(ResultCode.OK.getCode(), ResultCode.OK.getMsg());
         }
 
         @Override

@@ -34,12 +34,12 @@ import code.ponfee.commons.util.ObjectUtils;
  */
 public class FieldValidator {
 
-    static final int MAX_MSG_SIZE = 2000;
+    static final int MAX_MSG_SIZE = 500;
     private static final String CFG_ERR = "约束配置错误[";
     private static final String EMPTY = "";
     private static final Lock LOCK = new ReentrantLock();
     static final Cache<String[]> METHOD_SIGN_CACHE = CacheBuilder.newBuilder().build();
-    private static final Cache<CheckResult> META_CFG_CACHE = CacheBuilder.newBuilder().build();
+    private static final Cache<CacheResult> META_CFG_CACHE = CacheBuilder.newBuilder().build();
 
     protected FieldValidator() {}
 
@@ -80,18 +80,18 @@ public class FieldValidator {
 
     protected final String constrain(String name, String field, Object value, 
                                      Constraint cst, Class<?> type) {
-        name += "@" + field;
-        CheckResult result = META_CFG_CACHE.get(name);
+        name = new StringBuilder(name).append('@').append(field).toString();
+        CacheResult result = META_CFG_CACHE.get(name);
         if (result == null) {
             LOCK.lock();
             try {
                 if ((result = META_CFG_CACHE.get(name)) == null) {
                     try {
                         verifyMeta(field, cst, type);
-                        result = new CheckResult(true);
+                        result = new CacheResult(true);
                         META_CFG_CACHE.set(name, result);
                     } catch (Exception e) {
-                        result = new CheckResult(false, e.getMessage());
+                        result = new CacheResult(false, e.getMessage());
                         META_CFG_CACHE.set(name, result);
                         throw e;
                     }
@@ -101,36 +101,32 @@ public class FieldValidator {
             }
         }
 
-        // 配置非法
+        // 配置验证
         if (!result.flag) {
             throw new UnsupportedOperationException(result.msg);
         }
 
-        // 配置合法
-        String error = verifyValue(field, value, cst);
-        if (isNotBlank(error) && isNotBlank(cst.msg())) {
-            return cst.msg() + ";";
-        } else if (isBlank(error)) {
-            return EMPTY;
-        } else {
-            return error;
-        }
+        // 参数验证
+        return verifyValue(field, value, cst);
     }
 
+    /**
+     * Constrain without cache,
+     * use in method parameter is Map or Dictionary type
+     *
+     * @param name
+     * @param value
+     * @param cst
+     * @param type
+     * @return the constrain result, if empty string means success
+     */
     protected final String constrain(String name, Object value, 
                                      Constraint cst, Class<?> type) {
-        // 验证配置
+        // 配置验证
         verifyMeta(name, cst, type);
 
         // 参数验证
-        String error = verifyValue(name, value, cst);
-        if (isNotBlank(error) && isNotBlank(cst.msg())) {
-            return cst.msg() + ";";
-        } else if (isBlank(error)) {
-            return EMPTY;
-        } else {
-            return error;
-        }
+        return verifyValue(name, value, cst);
     }
 
     /**
@@ -146,37 +142,71 @@ public class FieldValidator {
 
         // 基本类型转包装类型（如果是）
         type = org.apache.commons.lang3.ClassUtils.primitiveToWrapper(type);
-        if ((isNotBlank(c.regExp()) || isNotBlank(c.datePattern())
-            || c.notBlank() || c.maxLen() > -1 || c.minLen() > -1)
-            && !CharSequence.class.isAssignableFrom(type)) {
+
+        // 字串类型验证
+        if (   (isNotBlank(c.regExp()) || isNotBlank(c.datePattern()) || c.notBlank() || c.maxLen() > -1 || c.minLen() > -1)
+            && !CharSequence.class.isAssignableFrom(type)
+        ) {
             throw new UnsupportedOperationException(CFG_ERR + name + "]：非字符类型不支持字符规则验证");
         }
-        if (!(c.max() == Long.MAX_VALUE && c.min() == Long.MIN_VALUE) // both 
-            && !(Long.class.isAssignableFrom(type) || Integer.class.isAssignableFrom(type))) {
+
+        // 整数类型验证
+        if (   !(c.max() == Long.MAX_VALUE && c.min() == Long.MIN_VALUE) // meet not all the conditions
+            && !(Long.class.isAssignableFrom(type) || Integer.class.isAssignableFrom(type))
+        ) {
             throw new UnsupportedOperationException(CFG_ERR + name + "]：非整数类型不支持整数数值验证");
         }
-        if ((c.series() != null && c.series().length > 0)
-            && !(Long.class.isAssignableFrom(type) || Integer.class.isAssignableFrom(type))) {
+
+        // 数列类型验证
+        if (   (c.series() != null && c.series().length > 0)
+            && !(Long.class.isAssignableFrom(type) || Integer.class.isAssignableFrom(type))
+        ) {
             throw new UnsupportedOperationException(CFG_ERR + name + "]：非整数类型不支持数列验证");
         }
-        if (!(c.decimalMax() == Double.POSITIVE_INFINITY && c.decimalMin() == Double.NEGATIVE_INFINITY)
-            && !(Double.class.isAssignableFrom(type) || Float.class.isAssignableFrom(type))) {
+
+        // 小数类型验证
+        if (   !(c.decimalMax() == Double.POSITIVE_INFINITY && c.decimalMin() == Double.NEGATIVE_INFINITY)
+            && !(Double.class.isAssignableFrom(type) || Float.class.isAssignableFrom(type))
+        ) {
             throw new UnsupportedOperationException(CFG_ERR + name + "]：非浮点数类型不支持浮点数值验证");
         }
-        if ((c.tense() != Constraint.Tense.NON && isBlank(c.datePattern()))
-            && !Date.class.isAssignableFrom(type)) {
+
+        // 时间类型验证
+        if (   (c.tense() != Constraint.Tense.NON && isBlank(c.datePattern()))
+            && !Date.class.isAssignableFrom(type)
+        ) {
             throw new UnsupportedOperationException(CFG_ERR + name + "]：非日期类型不支持时态验证");
         }
+
+        // 字串、集合类型验证
         if (c.notEmpty() && !isEmptiable(type)) {
             throw new UnsupportedOperationException(CFG_ERR + name + "非集合/字符类型不支持非空验证");
         }
     }
 
+    /**
+     * Returns the type instance value can with empty verifyValue
+     *
+     * @param type  the class type
+     * @return {@code true} means should with empty verifyValue
+     */
     private boolean isEmptiable(Class<?> type) {
-        return CharSequence.class.isAssignableFrom(type) 
-               || Collection.class.isAssignableFrom(type) 
-               || type.isArray() || Map.class.isAssignableFrom(type) 
-               || Dictionary.class.isAssignableFrom(type);
+        return CharSequence.class.isAssignableFrom(type)
+            || Collection.class.isAssignableFrom(type)
+            || type.isArray()
+            || Map.class.isAssignableFrom(type)
+            || Dictionary.class.isAssignableFrom(type);
+    }
+
+    private String verifyValue(String str, Object value, Constraint cst) {
+        String error = verify(str, value, cst);
+        if (isNotBlank(error) && isNotBlank(cst.msg())) {
+            return cst.msg() + ";";
+        } else if (isBlank(error)) {
+            return EMPTY;
+        } else {
+            return error;
+        }
     }
 
     /**
@@ -186,7 +216,7 @@ public class FieldValidator {
      * @param c
      * @return
      */
-    private String verifyValue(String n, Object v, Constraint c) {
+    private String verify(String n, Object v, Constraint c) {
         // 可以为null且值为null，则跳过验证
         if (!c.notNull() && v == null) {
             return EMPTY;
@@ -280,17 +310,17 @@ public class FieldValidator {
         return EMPTY;
     }
 
-    private static final class CheckResult {
-        private boolean flag;
-        private String msg;
+    private static final class CacheResult {
+        final boolean flag;
+        final String msg;
 
-        CheckResult(boolean flag, String msg) {
+        CacheResult(boolean flag, String msg) {
             this.flag = flag;
             this.msg = msg;
         }
 
-        CheckResult(boolean flag) {
-            this.flag = flag;
+        CacheResult(boolean flag) {
+            this(flag, null);
         }
     }
 
