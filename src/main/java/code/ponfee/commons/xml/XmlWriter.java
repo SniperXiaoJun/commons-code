@@ -1,7 +1,6 @@
 package code.ponfee.commons.xml;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -62,7 +61,8 @@ public final class XmlWriter {
     }
 
     public String build(String root) {
-        StringBuilder xml = new StringBuilder(XML_DECLARATION).append("<").append(root).append(">");
+        StringBuilder xml = new StringBuilder(XML_DECLARATION)
+                         .append("<").append(root).append(">");
         for (E<?> e : elements) {
             xml.append(e.render());
         }

@@ -41,8 +41,6 @@ public class CertPKCS1Verifier extends CertSignedVerifier {
             }
         } catch (SignatureException e) {
             throw new SecurityException("[" + subjectCN + "]证书签名信息错误", e);
-        } catch (SecurityException e) {
-            throw e;
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             throw new SecurityException("证书验签出错", e);
         }

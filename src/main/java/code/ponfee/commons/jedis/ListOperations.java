@@ -200,8 +200,7 @@ public class ListOperations extends JedisOperations {
      * @param seconds
      * @return 被移除元素的数量。因为不存在的 key 被视作空表(empty list)，所以当 key 不存在时， LREM 命令总是返回 0
      */
-    public long lrem(String key, int count,
-        String filed, Integer seconds) {
+    public long lrem(String key, int count, String filed, Integer seconds) {
         return call(shardedJedis -> {
             long rtn = shardedJedis.lrem(key, count, filed);
             if (rtn > 0) {

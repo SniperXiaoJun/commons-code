@@ -1,5 +1,10 @@
 package code.ponfee.commons.elasticsearch.exception;
 
+/**
+ * PutMappingFailedException
+ * 
+ * @author Ponfee
+ */
 public class PutMappingFailedException extends RuntimeException {
     private static final long serialVersionUID = -4073531056239274951L;
 

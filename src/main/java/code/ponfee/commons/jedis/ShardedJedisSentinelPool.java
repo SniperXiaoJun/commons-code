@@ -275,11 +275,13 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
             for (Jedis jedis : shardedJedis.getAllShards()) {
                 try {
                     jedis.quit();
-                } catch (Exception e) {
+                } catch (Exception ignored) {
+                    ignored.printStackTrace();
                 }
                 try {
                     jedis.disconnect();
-                } catch (Exception e) {
+                } catch (Exception ignored) {
+                    ignored.printStackTrace();
                 }
             }
         }

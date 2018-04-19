@@ -174,7 +174,7 @@ public final class PKCS7Envelope {
 
             // 解密
             SecretKey secretKey = new SecretKeySpec(key, algorithm.name);
-            if (iv == null || iv.length < 1) {
+            if (iv.length < 1) {
                 cipher.init(Cipher.DECRYPT_MODE, secretKey);
             } else {
                 cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));

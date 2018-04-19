@@ -138,7 +138,7 @@ public class RSAKey implements Key {
         boolean secret = der.getInteger() == 0;
         BigInteger n = getBigInteger(derIn);
         BigInteger e = getBigInteger(derIn);
-        RSAKey rsaKey = null;
+        RSAKey rsaKey;
         if (secret) {
             BigInteger d = getBigInteger(derIn);
             BigInteger p = getBigInteger(derIn);

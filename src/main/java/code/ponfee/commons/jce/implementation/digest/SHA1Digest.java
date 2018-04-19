@@ -246,8 +246,8 @@ public class SHA1Digest {
 
         // ext-block（扩展明文分组）
         for (; i < WORK_SIZE; i++) {
-            this.work[i] = Maths.slr(this.work[i -  3] ^ this.work[i -  8] 
-                                   ^ this.work[i - 14] ^ this.work[i - 16], 1);
+            this.work[i] = Maths.rotateLeft(this.work[i -  3] ^ this.work[i -  8] 
+                                          ^ this.work[i - 14] ^ this.work[i - 16], 1);
         }
 
         int a1 = this.a, b1 = this.b,
@@ -257,40 +257,40 @@ public class SHA1Digest {
         // round one
         for (; t < 20;) {
             // 将Kt+Ft(b,c,d)+(a<<5)+e+W[t]的结果赋值给临时变量tmp
-            tmp = K0 + f0(b1, c1, d1) + Maths.slr(a1, 5) + e1 + this.work[t++];
+            tmp = K0 + f0(b1, c1, d1) + Maths.rotateLeft(a1, 5) + e1 + this.work[t++];
             e1 = d1; // 将链接变量d初始值赋值给链接变量e
             d1 = c1; // 将链接变量c初始值赋值给链接变量d
-            c1 = Maths.slr(b1, 30); // 将链接变量b初始值循环左移30位赋值给链接变量c
+            c1 = Maths.rotateLeft(b1, 30); // 将链接变量b初始值循环左移30位赋值给链接变量c
             b1 = a1; // 将链接变量a初始值赋值给链接变量b
             a1 = tmp; // tmp赋值给a
         }
 
         // round two
         for (; t < 40;) {
-            tmp = K1 + f1(b1, c1, d1) + Maths.slr(a1, 5) + e1 + this.work[t++];
+            tmp = K1 + f1(b1, c1, d1) + Maths.rotateLeft(a1, 5) + e1 + this.work[t++];
             e1 = d1;
             d1 = c1;
-            c1 = Maths.slr(b1, 30);
+            c1 = Maths.rotateLeft(b1, 30);
             b1 = a1;
             a1 = tmp;
         }
 
         // round three
         for (; t < 60;) {
-            tmp = K2 + f2(b1, c1, d1) + Maths.slr(a1, 5) + e1 + this.work[t++];
+            tmp = K2 + f2(b1, c1, d1) + Maths.rotateLeft(a1, 5) + e1 + this.work[t++];
             e1 = d1;
             d1 = c1;
-            c1 = Maths.slr(b1, 30);
+            c1 = Maths.rotateLeft(b1, 30);
             b1 = a1;
             a1 = tmp;
         }
 
         // round four
         for (; t < WORK_SIZE;) {
-            tmp = K3 + f3(b1, c1, d1) + Maths.slr(a1, 5) + e1 + this.work[t++];
+            tmp = K3 + f3(b1, c1, d1) + Maths.rotateLeft(a1, 5) + e1 + this.work[t++];
             e1 = d1;
             d1 = c1;
-            c1 = Maths.slr(b1, 30);
+            c1 = Maths.rotateLeft(b1, 30);
             b1 = a1;
             a1 = tmp;
         }

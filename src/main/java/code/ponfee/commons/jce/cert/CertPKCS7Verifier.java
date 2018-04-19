@@ -97,8 +97,6 @@ public class CertPKCS7Verifier extends CertSignedVerifier {
                     throw new SecurityException("[" + subjectCN + "]验签不通过");
                 }
             }
-        } catch (SecurityException e) {
-            throw e;
         } catch (SignatureException e) {
             throw new SecurityException("[" + subjectCN + "]签名信息错误", e);
         } catch (IOException e) {

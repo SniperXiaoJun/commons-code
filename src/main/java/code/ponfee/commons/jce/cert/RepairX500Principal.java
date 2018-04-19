@@ -25,7 +25,7 @@ public class RepairX500Principal implements Principal {
 
     private static final String[] DN_STR = { "C", "ST", "L", "O", "OU", "CN", "E" };
 
-    private ByteArrayInputStream input = null;
+    private ByteArrayInputStream input;
 
     public RepairX500Principal(X500Principal principal) {
         Objects.requireNonNull(principal);
@@ -105,7 +105,7 @@ public class RepairX500Principal implements Principal {
         }
         if (itag == 0x82) {
             itag = input.read();
-            return itag << 8 + input.read();
+            return (itag << 8) + input.read();
         }
         return 0;
     }

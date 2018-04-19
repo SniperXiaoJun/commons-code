@@ -87,7 +87,7 @@ public final class PageHandler {
      */
     private static <T> Integer getInt(T params, String name) {
         try {
-            Object value = null;
+            Object value;
             if (Map.class.isInstance(params) || Dictionary.class.isInstance(params)) {
                 value = params.getClass().getMethod("get", Object.class).invoke(params, name);
             } else {

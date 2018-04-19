@@ -36,7 +36,7 @@ public class Maths {
      * @param n
      * @return
      */
-    public static int slr(int x, int n) {
-        return x << n | x >>> (32 - n);
+    public static int rotateLeft(int x, int n) {
+        return (x << n) | (x >>> (32 - n));
     }
 }

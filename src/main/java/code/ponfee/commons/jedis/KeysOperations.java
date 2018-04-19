@@ -114,7 +114,7 @@ public class KeysOperations extends JedisOperations {
     public Long del(byte[] key) {
         return call(shardedJedis -> {
             return shardedJedis.del(key);
-        }, null, key);
+        }, null, (Object) key);
     }
 
     /**

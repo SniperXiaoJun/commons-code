@@ -56,7 +56,7 @@ public class Cache<T> {
                 this.executor = executor0 = scheduleExecutor;
             } else {
                 if (defaultExecutor == null) {
-                    synchronized (this.getClass()) {
+                    synchronized (Cache.class) {
                         if (defaultExecutor == null) { // double check lock
                             defaultExecutor = new ScheduledThreadPoolExecutor(1, CALLER_RUN_HANDLER);
                             Runtime.getRuntime().addShutdownHook(new Thread(defaultExecutor::shutdown));

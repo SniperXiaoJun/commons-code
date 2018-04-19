@@ -47,7 +47,7 @@ public abstract class ParamValidator extends FieldValidator {
 
         // 参数校验
         StringBuilder builder = new StringBuilder();
-        String[] argsName = null;
+        String[] argsName;
         Method method = null;
         String methodSign = null;
         try {

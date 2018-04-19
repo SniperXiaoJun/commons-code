@@ -38,7 +38,7 @@ public class PdfWaterMark {
             reader = new PdfReader(pdf);
             stamper = new PdfStamper(reader, out);
             Image image = Image.getInstance(img);// 水印图片
-            Rectangle pageRect = null;
+            Rectangle pageRect;
             for (int n = stamper.getReader().getNumberOfPages() + 1, i = 1; i < n; i++) {
                 pageRect = stamper.getReader().getPageSizeWithRotation(i);
                 PdfContentByte content = stamper.getUnderContent(i);

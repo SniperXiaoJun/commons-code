@@ -70,7 +70,7 @@ public abstract class MethodValidator extends FieldValidator {
         // 校验开始
         StringBuilder builder = new StringBuilder();
         Class<?>[] paramTypes = method.getParameterTypes();
-        Constraint cst = null;
+        Constraint cst;
         String fieldName;
         Object fieldVal;
         Class<?> fieldType;
@@ -106,7 +106,7 @@ public abstract class MethodValidator extends FieldValidator {
                 } else {
                     // 验证java bean
                     String[] ognl = cst.field().split("\\.");
-                    Field field = null;
+                    Field field;
                     for (String s : ognl) {
                         field = ClassUtils.getField(fieldType, s);
                         fieldType = field.getType();
@@ -126,7 +126,7 @@ public abstract class MethodValidator extends FieldValidator {
             builder.append(e.getMessage());
         } catch (Exception e) {
             logger.error("参数约束校验异常", e);
-            builder.append("参数约束校验异常：" + e.getMessage());
+            builder.append("参数约束校验异常：").append(e.getMessage());
         }
 
         if (builder.length() == 0) { // 校验成功

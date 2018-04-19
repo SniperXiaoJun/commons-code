@@ -386,7 +386,7 @@ public class ExcelExporter extends AbstractExporter {
                 endRow = cursorRow.get(); // 约定非子节点不能跨行
             }
 
-            SXSSFRow colRow = null;
+            SXSSFRow colRow;
             if (rows.add(cursorRow.get())) {
                 colRow = sheet.createRow(cursorRow.get()); // 还未创建该行
                 colRow.setHeight(DEFAULT_HEIGHT);

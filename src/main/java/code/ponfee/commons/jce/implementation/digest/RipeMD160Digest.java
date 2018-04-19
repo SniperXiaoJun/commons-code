@@ -260,23 +260,21 @@ public class RipeMD160Digest {
     }
 
     private void finish(int[] array, int lswlen, int mswlen) {
-        int[] X = array; /* 4 byte of word */
-
         /* append the bit m_n == 1 */
-        X[(lswlen >> 2) & 15] ^= 1 << (((lswlen & 3) << 3) + 7);
+        array[(lswlen >> 2) & 15] ^= 1 << (((lswlen & 3) << 3) + 7);
 
         if ((lswlen & 63) > 55) {
             /* length goes to next block */
-            digestBlock(X);
+            digestBlock(array);
             for (int i = 0; i < 14; i++) {
-                X[i] = 0;
+                array[i] = 0;
             }
         }
 
         /* append length in bits*/
-        X[14] = lswlen << 3;
-        X[15] = (lswlen >> 29) | (mswlen << 3);
-        digestBlock(X);
+        array[14] = lswlen << 3;
+        array[15] = (lswlen >> 29) | (mswlen << 3);
+        digestBlock(array);
     }
 
     public static int getDigestSize() {

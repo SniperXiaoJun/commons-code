@@ -234,11 +234,9 @@ public class WechatTokenManager implements DisposableBean {
         JedisLock lock = JEDIS_LOCKS.get(lockKey);
         if (lock == null) {
             synchronized (WechatTokenManager.class) {
-                lock = JEDIS_LOCKS.get(lockKey);
-                if (lock == null) {
-                    lock = new JedisLock(jedisClient, lockKey, timeout);
-                    JEDIS_LOCKS.put(lockKey, lock);
-                }
+                lock = JEDIS_LOCKS.computeIfAbsent(
+                    lockKey, k -> new JedisLock(jedisClient, k, timeout)
+                );
             }
         }
         return lock;

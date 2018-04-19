@@ -157,7 +157,7 @@ public class X509CertUtils {
      * @return
      */
     public static X509CRL loadX509Crl(byte[] bytes) {
-        ByteArrayInputStream bais = null;
+        ByteArrayInputStream bais;
         try {
             bais = new ByteArrayInputStream(bytes);
             //构建X509工厂
@@ -395,7 +395,6 @@ public class X509CertUtils {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            inputstream = null;
         }
     }
 
@@ -441,7 +440,6 @@ public class X509CertUtils {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            inputstream = null;
         }
     }
 

@@ -245,9 +245,7 @@ public class SM3Digest {
         static int[][] expand(int[] B) {
             int  W[] = new int[68];
             int W1[] = new int[64];
-            for (int i = 0; i < B.length; i++) {
-                W[i] = B[i];
-            }
+            System.arraycopy(B, 0, W, 0, B.length);
 
             for (int i = 16; i < 68; i++) {
                 W[i] = P1(W[i - 16] 
@@ -306,11 +304,7 @@ public class SM3Digest {
         }
 
         static int P0(int X) {
-            int y = rotateLeft(X, 9);
-                y = bitCycleLeft(X, 9);
-            int z = rotateLeft(X, 17);
-                z = bitCycleLeft(X, 17);
-            return X ^ y ^ z;
+            return X ^ bitCycleLeft(X,  9) ^ bitCycleLeft(X, 17);
         }
 
         static int P1(int X) {
@@ -329,10 +323,6 @@ public class SM3Digest {
                 out[i] = in[out.length - i - 1];
             }
             return out;
-        }
-
-        static int rotateLeft(int x, int n) {
-            return (x << n) | (x >> (32 - n));
         }
 
         static int bitCycleLeft(int n, int bitLen) {

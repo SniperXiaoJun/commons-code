@@ -48,7 +48,7 @@ final class ClassPathResourceLoader {
      * @return
      */
     Resource getResource(String filePath, Class<?> contextClass, String encoding) {
-        Enumeration<URL> urls = null;
+        Enumeration<URL> urls;
         JarFile jar = null;
         ZipFile zip = null;
         try {

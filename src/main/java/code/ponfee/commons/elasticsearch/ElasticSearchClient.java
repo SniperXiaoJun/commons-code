@@ -1,23 +1,12 @@
 package code.ponfee.commons.elasticsearch;
 
-import static org.apache.commons.lang3.StringUtils.split;
-import static org.apache.commons.lang3.StringUtils.substringAfterLast;
-import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
-
+import code.ponfee.commons.elasticsearch.bulk.configuration.BulkProcessorConfiguration;
+import code.ponfee.commons.elasticsearch.mapping.IElasticSearchMapping;
+import code.ponfee.commons.json.Jsons;
+import code.ponfee.commons.model.Page;
+import code.ponfee.commons.model.Result;
+import code.ponfee.commons.model.ResultCode;
+import code.ponfee.commons.util.ObjectUtils;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
@@ -52,13 +41,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 
-import code.ponfee.commons.elasticsearch.bulk.configuration.BulkProcessorConfiguration;
-import code.ponfee.commons.elasticsearch.mapping.IElasticSearchMapping;
-import code.ponfee.commons.json.Jsons;
-import code.ponfee.commons.model.Page;
-import code.ponfee.commons.model.Result;
-import code.ponfee.commons.model.ResultCode;
-import code.ponfee.commons.util.ObjectUtils;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.StringUtils.split;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 /**
  * ElasticSearch Client

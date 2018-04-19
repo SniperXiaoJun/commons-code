@@ -110,10 +110,12 @@ public abstract class AbstractArrayList<E> extends AbstractList<E>
             this.end = end;
         }
 
+        @Override
         public boolean hasNext() {
             return start != end;
         }
 
+        @Override
         public E next() {
             return get(start++);
         }

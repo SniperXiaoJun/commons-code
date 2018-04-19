@@ -50,6 +50,7 @@ public abstract class AbstractRSACryptor extends Cryptor {
     }
 
     // ---------------------------------------------------------------do crypt methods
+    @Override
     public byte[] encrypt(byte[] input, int length, Key ek) {
         RSAKey rsaKey = (RSAKey) ek;
         BigInteger exponent = this.getExponent(rsaKey);
@@ -84,6 +85,7 @@ public abstract class AbstractRSACryptor extends Cryptor {
         }
     }
 
+    @Override
     public byte[] decrypt(byte[] input, Key dk) {
         RSAKey rsaKey = (RSAKey) dk;
         BigInteger exponent = this.getExponent(rsaKey);

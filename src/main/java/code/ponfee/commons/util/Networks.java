@@ -5,16 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
-import java.util.regex.Pattern;
 
 /**
  * 网络工具类
@@ -131,16 +127,14 @@ public final class Networks {
                     try {
                         NetworkInterface network = interfaces.nextElement();
                         Enumeration<InetAddress> addresses = network.getInetAddresses();
-                        if (addresses != null) {
-                            while (addresses.hasMoreElements()) {
-                                try {
-                                    InetAddress address = addresses.nextElement();
-                                    if (isValidHostAddress(address)) {
-                                        return address;
-                                    }
-                                } catch (Throwable e) {
-                                    logger.warn("Failed to get host address. cause: {}", e.getMessage());
+                        while (addresses.hasMoreElements()) {
+                            try {
+                                InetAddress address = addresses.nextElement();
+                                if (isValidHostAddress(address)) {
+                                    return address;
                                 }
+                            } catch (Throwable e) {
+                                logger.warn("Failed to get host address. cause: {}", e.getMessage());
                             }
                         }
                     } catch (Throwable e) {

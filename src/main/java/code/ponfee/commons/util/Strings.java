@@ -367,21 +367,15 @@ public class Strings {
      * @return
      */
     public static boolean isEmpty(Object value) {
-        if (value == null) {
-            return true;
-        }
+        return value == null
+            || (CharSequence.class.isInstance(value) && StringUtils.isEmpty((CharSequence) value));
 
-        return CharSequence.class.isInstance(value)
-               && StringUtils.isEmpty((CharSequence) value);
     }
 
     public static boolean isBlank(Object value) {
-        if (value == null) {
-            return true;
-        }
+        return value == null
+            || (CharSequence.class.isInstance(value) && StringUtils.isBlank((CharSequence) value));
 
-        return CharSequence.class.isInstance(value)
-               && StringUtils.isBlank((CharSequence) value);
     }
 
     /** 

@@ -84,11 +84,9 @@ public abstract class JedisOperations {
     }
 
     public static boolean expire(ShardedJedis shardedJedis, byte[] key, Integer seconds) {
-        if (seconds == null) {
-            return false;
-        }
+        return seconds != null
+            && Numbers.equals(shardedJedis.expire(key, getActualExpire(seconds)), 1);
 
-        return Numbers.equals(shardedJedis.expire(key, getActualExpire(seconds)), 1);
     }
 
     /**
@@ -99,19 +97,15 @@ public abstract class JedisOperations {
      * @return
      */
     public static boolean pexpire(ShardedJedis shardedJedis, String key, Integer milliseconds) {
-        if (milliseconds == null) {
-            return false;
-        }
+        return milliseconds != null
+            && expire(shardedJedis, key, (int) TimeUnit.MILLISECONDS.toSeconds(milliseconds));
 
-        return expire(shardedJedis, key, (int) TimeUnit.MILLISECONDS.toSeconds(milliseconds));
     }
 
     public static boolean pexpire(ShardedJedis shardedJedis, byte[] key, Integer milliseconds) {
-        if (milliseconds == null) {
-            return false;
-        }
+        return milliseconds != null
+            && expire(shardedJedis, key, (int) TimeUnit.MILLISECONDS.toSeconds(milliseconds));
 
-        return expire(shardedJedis, key, (int) TimeUnit.MILLISECONDS.toSeconds(milliseconds));
     }
 
     /**
@@ -168,19 +162,13 @@ public abstract class JedisOperations {
      * @param key
      */
     public static boolean expireDefaultIfInfinite(ShardedJedis shardedJedis, String key) {
-        if (shardedJedis.ttl(key) == -1) {
-            return Numbers.equals(shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS), 1);
-        } else {
-            return false;
-        }
+        return shardedJedis.ttl(key) == -1
+            && Numbers.equals(shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS), 1);
     }
 
     public static boolean expireDefaultIfInfinite(ShardedJedis shardedJedis, byte[] key) {
-        if (shardedJedis.ttl(key) == -1) {
-            return Numbers.equals(shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS), 1);
-        } else {
-            return false;
-        }
+        return shardedJedis.ttl(key) == -1
+            && Numbers.equals(shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS), 1);
     }
 
     public static int getActualExpire(int seconds) {

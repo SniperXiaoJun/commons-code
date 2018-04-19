@@ -234,7 +234,7 @@ public class SM2KeyExchanger implements Serializable {
      * @return
      */
     private static byte[] kdf(byte[] Z, int klen) {
-        int ct = 1, end = (int) Math.ceil(klen * 1.0 / 32);
+        int ct = 1, end = (int) Math.ceil(klen * 1.0D / 32.0D);
         SM3Digest sm3 = SM3Digest.getInstance();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (int i = 1; i < end; i++) {

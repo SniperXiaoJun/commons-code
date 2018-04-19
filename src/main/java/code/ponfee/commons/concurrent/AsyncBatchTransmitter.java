@@ -56,7 +56,8 @@ public final class AsyncBatchTransmitter<T> {
      * @param ts
      * @return
      */
-    public boolean put(@SuppressWarnings("unchecked") T... ts) {
+    @SafeVarargs
+    public final boolean put(T... ts) {
         if (ts == null || ts.length == 0) {
             return false;
         }

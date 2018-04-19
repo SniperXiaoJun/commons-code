@@ -74,11 +74,7 @@ public class RedisCurrentLimiter implements CurrentLimiter {
                 Map<String, Map<byte[], Double>> groups = new HashMap<>();
                 Map<byte[], Double> batch;
                 for (Trace trace : traces) {
-                    batch = groups.get(trace.key);
-                    if (batch == null) {
-                        batch = new HashMap<>();
-                        groups.put(trace.key, batch);
-                    }
+                    batch = groups.computeIfAbsent(trace.key, k -> new HashMap<>());
                     // ObjectUtils.uuid22()
                     // Long.toString(IdWorker.LOCAL_WORKER.nextId(), Character.MAX_RADIX)
                     batch.put(Bytes.fromLong(IdWorker.LOCAL_WORKER.nextId()), trace.timeMillis);
@@ -96,7 +92,6 @@ public class RedisCurrentLimiter implements CurrentLimiter {
                     entry.getValue().clear();
                 }
                 groups.clear();
-                groups = null;
                 traces.clear();
             };
         }, 100, 5000); // 100毫秒间隔，5000条∕次
@@ -118,11 +113,9 @@ public class RedisCurrentLimiter implements CurrentLimiter {
             return false; // 禁止访问
         }
 
-        if (requestThreshold < countByLastTime(key, 1, TimeUnit.MINUTES)) {
-            return false; // 超过频率
-        } else {
-            return transmitter.put(new Trace(key, System.currentTimeMillis()));
-        }
+        // 超过频率
+        return requestThreshold >= countByLastTime(key, 1, TimeUnit.MINUTES)
+            && transmitter.put(new Trace(key, System.currentTimeMillis()));
     }
 
     public long countByLastTime(String key, int time, TimeUnit unit) {
@@ -133,12 +126,8 @@ public class RedisCurrentLimiter implements CurrentLimiter {
             // get the lock for access redis
             Object lock = LOCK_MAP.get(key0);
             if (lock == null) {
-                synchronized (this.getClass()) {
-                    lock = LOCK_MAP.get(key0);
-                    if (lock == null) {
-                        lock = new Object();
-                        LOCK_MAP.put(key0, lock);
-                    }
+                synchronized (RedisCurrentLimiter.class) {
+                    lock = LOCK_MAP.computeIfAbsent(key0, k -> new Object());
                 }
             }
 
@@ -184,8 +173,8 @@ public class RedisCurrentLimiter implements CurrentLimiter {
     public @Override long getRequestThreshold(String key) {
         Long threshold = confCache.get(key);
         if (threshold == null) {
-            threshold = jedisClient.valueOps().getLong(THRESHOLD_KEY_PREFIX + key,
-                                                       EXPIRE_SECONDS);
+            threshold = jedisClient.valueOps()
+                                   .getLong(THRESHOLD_KEY_PREFIX + key, EXPIRE_SECONDS);
             if (threshold == null) {
                 threshold = -1L; // -1表示无限制
             }
@@ -202,7 +191,7 @@ public class RedisCurrentLimiter implements CurrentLimiter {
         countCache.destroy();
         transmitter.end();
         executor.shutdown();
-        synchronized (this.getClass()) {
+        synchronized (RedisCurrentLimiter.class) {
             LOCK_MAP.clear();
         }
     }

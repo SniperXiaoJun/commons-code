@@ -41,7 +41,7 @@ public final class ClassUtils {
      * @return
      */
     public static String[] getMethodParamNames(final Method method) {
-        ClassReader classReader = null;
+        ClassReader classReader;
         try {
             // 第一种方式，cannot use in jar file
             /*String name = getClassFilePath(method.getDeclaringClass());
@@ -184,7 +184,7 @@ public final class ClassUtils {
      */
     public static String getClassFilePath(Class<?> clazz) {
         URL url = clazz.getProtectionDomain().getCodeSource().getLocation();
-        String path = null;
+        String path;
         try {
             path = URLDecoder.decode(url.getPath(), Files.UTF_8);
         } catch (UnsupportedEncodingException e) {
@@ -207,7 +207,7 @@ public final class ClassUtils {
      */
     public static String getClasspath(Class<?> clazz) {
         URL url = clazz.getProtectionDomain().getCodeSource().getLocation();
-        String path = null;
+        String path;
         try {
             path = URLDecoder.decode(url.getPath(), Files.UTF_8);
         } catch (UnsupportedEncodingException e) {

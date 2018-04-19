@@ -1,6 +1,9 @@
 package code.ponfee.commons.mail;
 
-import java.util.Arrays;
+import code.ponfee.commons.concurrent.ThreadPoolExecutors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -8,11 +11,6 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 
 /**
  * 邮件通过走线程池发送

@@ -54,7 +54,7 @@ public final class CryptoMessageSyntax {
      * @return
      */
     public static byte[] sign(byte[] data, PrivateKey key, X509Certificate[] certChain) {
-        return sign(data, Arrays.asList(key), Collections.singletonList(certChain));
+        return sign(data, Collections.singletonList(key), Collections.singletonList(certChain));
     }
 
     /**

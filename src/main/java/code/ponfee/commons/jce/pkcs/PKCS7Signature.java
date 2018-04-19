@@ -54,7 +54,7 @@ public class PKCS7Signature {
      * @return
      */
     public static byte[] sign(PrivateKey[] privKeys, X509Certificate[] certs, byte[] data, boolean attach) {
-        ContentInfo contentInfo = null;
+        ContentInfo contentInfo;
         if (attach) {
             contentInfo = new ContentInfo(data);
         } else {

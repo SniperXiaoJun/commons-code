@@ -180,7 +180,7 @@ public final class SM4 {
 
         ByteArrayInputStream bins  = new ByteArrayInputStream(input);
         ByteArrayOutputStream bous = new ByteArrayOutputStream();
-        int i = 0, length = input.length;
+        int i, length = input.length;
         if (mode == ENCRYPT_MODE) {
             for (; length > 0; length -= 16) {
                 byte[] in = new byte[16];
@@ -236,23 +236,13 @@ public final class SM4 {
     }
 
     /**
-     * shift left
-     * @param x
-     * @param n
-     * @return
-     */
-    private static long shl(long x, int n) {
-        return (x & 0xFFFFFFFF) << n;
-    }
-
-    /**
      * shift left round
      * @param x
      * @param n
      * @return
      */
-    private static long slr(long x, int n) {
-        return shl(x, n) | x >>> (32 - n);
+    private static long rotateLeft(long x, int n) {
+        return ((x & 0xFFFFFFFF) << n) | (x >>> (32 - n));
     }
 
     private static void swap(long[] sk, int i) {
@@ -275,10 +265,10 @@ public final class SM4 {
         };
         long x = toLong(b, 0);
         return x 
-             ^ slr(x, 2) 
-             ^ slr(x, 10) 
-             ^ slr(x, 18) 
-             ^ slr(x, 24);
+             ^ rotateLeft(x, 2) 
+             ^ rotateLeft(x, 10) 
+             ^ rotateLeft(x, 18) 
+             ^ rotateLeft(x, 24);
     }
 
     private static long sm4F(long x0, long x1, long x2, long x3, long rk) {
@@ -294,7 +284,7 @@ public final class SM4 {
             sm4Sbox(a[2]), sm4Sbox(a[3])
         };
         long x = toLong(b, 0);
-        return x ^ slr(x, 13) ^ slr(x, 23);
+        return x ^ rotateLeft(x, 13) ^ rotateLeft(x, 23);
     }
 
     private static long[] setKey(int mode, byte[] key) {

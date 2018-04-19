@@ -1,5 +1,10 @@
 package code.ponfee.commons.elasticsearch.exception;
 
+/**
+ * CreateIndexFailedException
+ * 
+ * @author Ponfee
+ */
 public class CreateIndexFailedException extends RuntimeException {
     private static final long serialVersionUID = 4096428870265263132L;
 

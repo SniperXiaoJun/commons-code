@@ -1,15 +1,10 @@
 package code.ponfee.commons.limit;
 
-import java.util.Random;
-
-import code.ponfee.commons.jce.digest.DigestUtils;
-import code.ponfee.commons.util.Strings;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.jce.digest.HmacUtils;
 import code.ponfee.commons.jedis.JedisClient;
-import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
@@ -220,10 +215,10 @@ public class RequestLimiter {
      * @return a check code
      */
     public static String buildNonce(String code, String salt) {
-        long first = new Random(code.hashCode()).nextLong(); // 第一个nextLong值是固定的
-        //long first = Strings.crc32(code); // DigestUtils.md5(code.getBytes())
         byte[] slatBytes = ArrayUtils.addAll(SLAT_PREFIX, salt.getBytes());
-        return HmacUtils.md5Hex(Bytes.fromLong(first), slatBytes);
+        /*long first = new Random(code.hashCode()).nextLong(); // 第一个nextLong值是固定的
+        return HmacUtils.md5Hex(Bytes.fromLong(first), slatBytes);*/
+        return HmacUtils.md5Hex(code.getBytes(), slatBytes);
     }
 
     /**

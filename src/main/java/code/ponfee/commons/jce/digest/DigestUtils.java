@@ -180,7 +180,7 @@ public final class DigestUtils {
     public static byte[] digest(DigestAlgorithms alg, Provider provider, 
                                 InputStream input) {
         byte[] buff = new byte[BUFF_SIZE];
-        MessageDigest digest = null;
+        MessageDigest digest;
         try {
             digest = (provider == null)
                      ? MessageDigest.getInstance(alg.algorithm())

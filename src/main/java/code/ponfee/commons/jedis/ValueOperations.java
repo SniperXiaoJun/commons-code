@@ -107,9 +107,7 @@ public class ValueOperations extends JedisOperations {
                     continue;
                 }
 
-                service.submit(() -> {
-                    return jedis.mget(keys.toArray(new String[keys.size()]));
-                });
+                service.submit(() -> jedis.mget(keys.toArray(new String[keys.size()])));
                 number++;
             }
             List<String> result = new ArrayList<>();
@@ -419,9 +417,7 @@ public class ValueOperations extends JedisOperations {
                 resultMap = new ConcurrentHashMap<>();
                 CompletionService<List<String>> service = new ExecutorCompletionService<>(EXECUTOR);
                 for (Jedis jedis : jedisList) {
-                    service.submit(() -> {
-                        return jedis.mget(keys);
-                    });
+                    service.submit(() -> jedis.mget(keys));
                 }
                 for (; number > 0; number--) {
                     try {
@@ -477,9 +473,7 @@ public class ValueOperations extends JedisOperations {
                 resultMap = new ConcurrentHashMap<>();
                 CompletionService<List<byte[]>> service = new ExecutorCompletionService<>(EXECUTOR);
                 for (Jedis jedis : jedisList) {
-                    service.submit(() -> {
-                        return jedis.mget((byte[][]) keys);
-                    });
+                    service.submit(() -> jedis.mget((byte[][]) keys));
                 }
                 for (; number > 0; number--) {
                     try {

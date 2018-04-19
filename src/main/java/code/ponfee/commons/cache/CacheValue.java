@@ -18,11 +18,8 @@ class CacheValue<T> implements java.io.Serializable {
     }
 
     boolean isAlive(long refTimeMillis) {
-        if (Cache.KEEPALIVE_FOREVER == expireTimeMillis) {
-            return true;
-        } else {
-            return expireTimeMillis > refTimeMillis;
-        }
+        return Cache.KEEPALIVE_FOREVER == expireTimeMillis
+            || expireTimeMillis > refTimeMillis;
     }
 
     boolean isExpire(long refTimeMillis) {

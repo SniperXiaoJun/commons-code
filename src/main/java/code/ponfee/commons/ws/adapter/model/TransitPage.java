@@ -1,11 +1,10 @@
 package code.ponfee.commons.ws.adapter.model;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-
 import code.ponfee.commons.model.Page;
 import com.google.common.collect.Lists;
+
+import java.lang.reflect.Array;
+import java.util.List;
 
 /**
  * Page转换
