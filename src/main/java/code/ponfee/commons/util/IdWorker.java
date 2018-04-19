@@ -1,9 +1,9 @@
 package code.ponfee.commons.util;
 
-import code.ponfee.commons.reflect.Fields;
+import code.ponfee.commons.concurrent.MultithreadExecutor;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <pre>
@@ -14,7 +14,9 @@ import java.util.Set;
  * 42 ~ 46：5位datacenterId
  * 47 ~ 51：5位workerId（并不算标识符，实际是为线程标识），
  * 52 ~ 63：12位该毫秒内的当前毫秒内的计数
- * 毫秒内序列 （由datacenter和机器ID作区分），并且效率较高，经测试，snowflake每秒能够产生26万ID左右，完全满足需要。
+ *
+ * 毫秒内序列 （由datacenter和机器ID作区分），并且效率较高。经测试，
+ * snowflake每秒能够产生26万ID左右，完全满足需要。
  * </pre>
  *
  * 计算掩码方式：(1<<bits)-1 或 -1L^(-1L<<bits)
@@ -25,37 +27,62 @@ import java.util.Set;
 public final class IdWorker {
 
     private static final int MAX_SIZE = Long.toBinaryString(Long.MAX_VALUE).length();
-    private final long twepoch = 1451577600000L; // 起始标记时间点，作为基准
+    private static final long TWEPOCH = 1514736000000L; // 起始基准时间点(2018-01-01)
 
-    private final long sequenceBits = (null != null ? 12L : 12L); // sequence值控制在0-4095
-    private final long sequenceMask = (null != null ? -1L ^ (-1L << sequenceBits) : -1L ^ (-1L << sequenceBits)); // 111111111111(4095)
+    private final long sequenceMask;
+    private final long workerIdShift;
+    private final long datacenterIdShift;
+    private final long timestampShift;
+    private final long timestampMask;
 
-    private final long workerIdBits = (null != null ? 5L : 5L); // 5位
-    private final long maxWorkerId = (null != null ? -1L ^ (-1L << workerIdBits) : -1L ^ (-1L << workerIdBits)); // 0-31
-
-    private final long datacenterIdBits = (null != null ? 5L : 5L); // 5位
-    private final long maxDatacenterId = (null != null ? -1L ^ (-1L << datacenterIdBits) : -1L ^ (-1L << datacenterIdBits)); // 0-31
-
-    private final long timestampShift = (null != null ? sequenceBits + workerIdBits + datacenterIdBits : sequenceBits + workerIdBits + datacenterIdBits); // 左移22位（did5位+wid5位+seq12位）
-    private final long datacenterIdShift = (null != null ? sequenceBits + workerIdBits : sequenceBits + workerIdBits); // 左移17位（wid5位+seq12位）
-    private final long workerIdShift = (null != null ? sequenceBits : sequenceBits); // 左移12位（seq12位）
-
-    private final long timestampMask = (long) (null != null ? -1L ^ (-1L << (MAX_SIZE - timestampShift)) : -1L ^ (-1L << (MAX_SIZE - timestampShift)));
-
+    private final long datacenterId; // 数据中心id
+    private final long workerId; // 工作机器id
     private long lastTimestamp = -1L; // 时间戳
-    private long datacenterId; // 数据中心id
-    private long workerId; // 工作机器id
     private long sequence = 0L; // 0，并发控制
 
-    public IdWorker(long workerId, long datacenterId) {
+    public IdWorker(long workerId, long datacenterId, 
+                    int sequenceBits, int workerIdBits, int datacenterIdBits) {
+        long maxWorkerId = (1L << workerIdBits) - 1;
         if (workerId > maxWorkerId || workerId < 0) {
-            throw new IllegalArgumentException(String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
+            throw new IllegalArgumentException(
+                String.format("worker Id can't be greater than %d or less than 0", maxWorkerId)
+            );
         }
+
+        long maxDatacenterId = (1L << datacenterIdBits) - 1;
         if (datacenterId > maxDatacenterId || datacenterId < 0) {
-            throw new IllegalArgumentException(String.format("datacenter Id can't be greater than %d or less than 0", maxDatacenterId));
+            throw new IllegalArgumentException(
+                String.format("datacenter Id can't be greater than %d "
+                            + "or less than 0", maxDatacenterId)
+            );
         }
+
+        this.sequenceMask = (1L << sequenceBits) - 1;
+        this.workerIdShift = sequenceBits;
+        this.datacenterIdShift = this.workerIdShift + workerIdBits;
+        this.timestampShift = this.datacenterIdShift + datacenterIdBits;
+        this.timestampMask = (1L << (MAX_SIZE - this.timestampShift)) - 1;
+
         this.workerId = workerId;
         this.datacenterId = datacenterId;
+    }
+
+    /**
+     * sequenceBits: 12 bit, value range of 0 ~ 4095(111111111111)
+     * workerIdBits: 5 bit, value range of 0 ~ 31
+     * datacenterIdBits: 5 bit, value range of 0 ~ 31
+     * 
+     * workerIdShift: sequenceBits，左移12位(seq12位)
+     * datacenterIdShift: sequenceBits+workerIdBits，即左移17位(wid5位+seq12位)
+     * timestampShift: sequenceBits+workerIdBits+datacenterIdBits，
+     *                 即左移22位(did5位+wid5位+seq12位)
+     * timestampMask: (1L<<(MAX_SIZE-timestampShift))-1 = (1L<<41)-1
+     * 
+     * @param workerId
+     * @param datacenterId
+     */
+    public IdWorker(long workerId, long datacenterId) {
+        this(workerId, datacenterId, 12, 5, 5);
     }
 
     public IdWorker(long workerId) {
@@ -65,7 +92,10 @@ public final class IdWorker {
     public synchronized long nextId() {
         long timestamp = timeGen();
         if (timestamp < lastTimestamp) {
-            throw new RuntimeException(String.format("Clock moved backwards. Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
+            throw new RuntimeException(
+                String.format("Clock moved backwards. Refusing to generate id "
+                            + "for %d milliseconds", lastTimestamp - timestamp)
+            );
         }
         if (lastTimestamp == timestamp) {
             sequence = (sequence + 1) & sequenceMask;
@@ -77,7 +107,7 @@ public final class IdWorker {
         }
         lastTimestamp = timestamp;
 
-        return (((timestamp - twepoch) << timestampShift) & timestampMask)
+        return (((timestamp - TWEPOCH) << timestampShift) & timestampMask)
              | (datacenterId << datacenterIdShift)
              | (workerId << workerIdShift)
              | sequence;
@@ -110,51 +140,28 @@ public final class IdWorker {
      */
     private @FunctionalInterface interface LocalIPWorker { IdWorker get(); }
     public static final IdWorker LOCAL_WORKER = ((LocalIPWorker) () -> {
-        long sequenceBits = 10L; // specified 10 bit length
-        long workerIdBits = 11L; // specified 11 bit length
-        long datacenterIdBits = 0L; // specified 0 bit length
-        long timestampShift = sequenceBits + workerIdBits + datacenterIdBits;
+        int sequenceBits = 10; // specified 10 bit length
+        int workerIdBits = 11; // specified 11 bit length
+        int datacenterIdBits = 0; // specified 0 bit length
 
         long maxWorkerId = (1L << workerIdBits) - 1; // 2047(max and mask)
         long workerId = Networks.toLong(Networks.HOST_IP) & maxWorkerId;
-
-        IdWorker worker = new IdWorker(0);
-        Fields.put(worker, "sequenceBits", sequenceBits); // 10位
-        Fields.put(worker, "sequenceMask", (1L << sequenceBits) - 1);
-
-        Fields.put(worker, "workerIdBits", workerIdBits); // 11位
-        Fields.put(worker, "maxWorkerId", maxWorkerId);
-
-        Fields.put(worker, "datacenterIdBits", datacenterIdBits); // 0位
-        Fields.put(worker, "maxDatacenterId", (1L << datacenterIdBits) - 1); // 0
-
-        Fields.put(worker, "timestampShift", timestampShift); // 左移21位（did0位+wid11位+seq10位）
-        Fields.put(worker, "datacenterIdShift", sequenceBits + workerIdBits); // 左移21位（wid11位+seq10位）
-        Fields.put(worker, "workerIdShift", sequenceBits); // 左移10位（seq10位）
-
-        Fields.put(worker, "timestampMask", (1L << (MAX_SIZE - timestampShift)) - 1); // 余下的位数为：63-21=42
-
-        Fields.put(worker, "workerId", workerId);
-        return worker;
+        long datacenterId = (1L << datacenterIdBits) - 1;
+        return new IdWorker(workerId, datacenterId, sequenceBits, 
+                            workerIdBits, datacenterIdBits);
     }).get();
 
     public static void main(String[] args) {
-        final IdWorker idWorker = LOCAL_WORKER;
-        final Set<String> set = new HashSet<>(81920000);
-        System.out.println(Long.toHexString(-1456153131));
-        System.out.println(Long.toString(-1456153131, 36));
-        System.out.println(Long.toUnsignedString(-1456153131, 36));
-        String id;
-        for (int i = 0; i < 9999999; i++) {
-            //id = Long.toHexString(idWorker.nextId());
-            id = Long.toString(idWorker.nextId(), Character.MAX_RADIX);
-            //id = Long.toUnsignedString(idWorker.nextId());
-            //System.out.println(id);
-            if (!set.add(id)) {
+        Map<Long, Object> map = new ConcurrentHashMap<>(50000000);
+        Object obj = new Object();
+        IdWorker worker = LOCAL_WORKER;
+        MultithreadExecutor.exec(20, () -> {
+            long id = worker.nextId();
+            if (map.put(id, obj) != null) {
                 System.err.println(id);
-                break;
             }
-        }
+        }, 5);
+        System.out.println(map.size());
     }
 
 }

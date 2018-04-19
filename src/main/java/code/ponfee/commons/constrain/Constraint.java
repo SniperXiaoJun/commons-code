@@ -119,7 +119,7 @@ public @interface Constraint {
     enum Tense {
         PAST("过去"), FUTURE("将来"), ANY("任意"), NON(null);
 
-        private String desc;
+        private final String desc;
 
         Tense(String desc) {
             this.desc = desc;

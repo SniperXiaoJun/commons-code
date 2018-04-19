@@ -184,7 +184,9 @@ public class IdcardResolver {
      * @param idcard
      * @return
      */
-    private static final Pattern PASSPORT_REGEX = Pattern.compile("^1[45][0-9]{7}|G[0-9]{8}|P[0-9]{7}|S[0-9]{7,8}|D[0-9]+$");
+    private static final Pattern PASSPORT_REGEX = Pattern.compile(
+        "^1[45][0-9]{7}|G[0-9]{8}|P[0-9]{7}|S[0-9]{7,8}|D[0-9]+$"
+    );
     private boolean isPassport(String idcard) {
         if (PASSPORT_REGEX.matcher(idcard).matches()) {
             this.type = CertType.PASSPORT;
@@ -338,13 +340,18 @@ public class IdcardResolver {
     }
 
     /** 每位加权因子 */
-    private static final int POWER[] = { 7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2 };
+    private static final int POWER[] = { 
+        7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2 
+    };
 
     /** 校验和对照表 */
-    private static final String[] JUXTAPOSE = { "1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2" };
+    private static final String[] JUXTAPOSE = { 
+        "1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2" 
+    };
 
     /** 大陆城市 */
-    private static final Map<String, String> CITY_CODES = new ImmutableMap.Builder<String, String>()
+    private static final Map<String, String> CITY_CODES = 
+      new ImmutableMap.Builder<String, String>()
         .put("11", "北京")
         .put("12", "天津")
         .put("13", "河北")
@@ -383,7 +390,8 @@ public class IdcardResolver {
         .build();
 
     /** 台湾身份首字母对应数字 */
-    private static final Map<String, Integer> TW_FIRST_CODE = new ImmutableMap.Builder<String, Integer>()
+    private static final Map<String, Integer> TW_FIRST_CODE = 
+        new ImmutableMap.Builder<String, Integer>()
         .put("A", 10)
         .put("B", 11)
         .put("C", 12)
@@ -3931,12 +3939,14 @@ public class IdcardResolver {
         b.put(710000, "台湾省");
         b.put(810000, "香港特别行政区");
         b.put(820000, "澳门特别行政区");
+
         DISTRICT_CODE_MAPPING = b.build();
         AREA_CODE_LIST = new ArrayList<>(DISTRICT_CODE_MAPPING.keySet());
     }
 
     /** 香港身份首字母对应数字 */
-    /*private static final Map<String, Integer> HK_FIRST_CODE = new ImmutableMap.Builder<String, Integer>()
+    /*private static final Map<String, Integer> HK_FIRST_CODE = 
+        new ImmutableMap.Builder<String, Integer>()
         .put("A", 1)
         .put("B", 2)
         .put("C", 3)

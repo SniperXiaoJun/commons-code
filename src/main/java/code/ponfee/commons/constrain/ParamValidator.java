@@ -1,19 +1,18 @@
 package code.ponfee.commons.constrain;
 
-import static code.ponfee.commons.model.ResultCode.BAD_REQUEST;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-
+import code.ponfee.commons.exception.Throwables;
+import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.util.ObjectUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import code.ponfee.commons.exception.Throwables;
-import code.ponfee.commons.reflect.ClassUtils;
-import code.ponfee.commons.util.ObjectUtils;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
+import static code.ponfee.commons.model.ResultCode.BAD_REQUEST;
 
 /**
  * <pre>
@@ -53,8 +52,9 @@ public abstract class ParamValidator extends FieldValidator {
         try {
             // 缓存方法参数名
             MethodSignature mSign = (MethodSignature) joinPoint.getSignature();
-            method = joinPoint.getTarget().getClass().getMethod(mSign.getName(), mSign.getParameterTypes());
-            methodSign = ClassUtils.getMethodSignature(method);
+            method = joinPoint.getTarget().getClass()
+                              .getMethod(mSign.getName(), mSign.getParameterTypes());
+            methodSign = method.toGenericString();
             argsName = METHOD_SIGN_CACHE.get(methodSign);
             if (argsName == null) {
                 argsName = ClassUtils.getMethodParamNames(method);
