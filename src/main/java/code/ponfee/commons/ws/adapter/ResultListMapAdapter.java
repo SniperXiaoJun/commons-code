@@ -73,7 +73,7 @@ public abstract class ResultListMapAdapter<K, V> extends XmlAdapter<Result<MapIt
             MapEntry<K, V>[] item = new MapEntry[map.size()];
             int j = 0;
             for (Entry<K, V> entry : map.entrySet()) {
-                item[j++] = new MapEntry<K, V>(entry);
+                item[j++] = new MapEntry<>(entry);
             }
             items[i++] = new MapItem(item);
         }

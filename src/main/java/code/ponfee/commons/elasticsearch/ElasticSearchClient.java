@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -319,7 +320,7 @@ public class ElasticSearchClient implements DisposableBean {
 
     // --------------------------------------bulk processor---------------------------------------
     public <T> void bulkProcessor(String index, String type, T entity) {
-        bulkProcessor(index, type, Arrays.asList(entity));
+        bulkProcessor(index, type, Collections.singletonList(entity));
     }
 
     public <T> void bulkProcessor(String index, String type, List<T> entities) {
@@ -337,7 +338,7 @@ public class ElasticSearchClient implements DisposableBean {
                                   BulkProcessorConfiguration config) {
         BulkProcessor bulkProcessor = config.build(client);
         entities.map(x -> Optional.of(Jsons.toBytes(x)))
-                .filter(x -> x.isPresent())
+                .filter(Optional::isPresent)
                 .map(x -> client.prepareIndex().setIndex(index).setType(type)
                                                .setSource(x.get(), XContentType.JSON).request())
                 .forEach(bulkProcessor::add);

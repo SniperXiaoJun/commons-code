@@ -18,7 +18,8 @@ public class BulkProcessingOptions {
     private BackoffPolicy backoffPolicy;
 
     public BulkProcessingOptions(String name, int concurrentRequests, int bulkActions,
-        ByteSizeValue bulkSize, TimeValue flushInterval, BackoffPolicy backoffPolicy) {
+                                 ByteSizeValue bulkSize, TimeValue flushInterval,
+                                 BackoffPolicy backoffPolicy) {
         this.name = name;
         this.concurrentRequests = concurrentRequests;
         this.bulkActions = bulkActions;

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import code.ponfee.commons.model.Page;
+import com.google.common.collect.Lists;
 
 /**
  * Page转换
@@ -184,17 +185,14 @@ public class TransitPage<T> {
 
     public static <T> TransitPage<T> transform(Page<?> page, T[] t) {
         TransitPage<T> transit = new TransitPage<>();
-        transit.setRows(new ArrayItem<T>(t));
+        transit.setRows(new ArrayItem<>(t));
         copy(transit, page);
         return transit;
     }
 
     public static <T> Page<T> recover(TransitPage<T> transit) {
         Page<T> page = new Page<>();
-        List<T> list = new ArrayList<>();
-        for (T t : transit.getRows().getItem()) {
-            list.add(t);
-        }
+        List<T> list = Lists.newArrayList(transit.getRows().getItem());
         page.setRows(list);
         page.setPageNum(transit.getPageNum());
         page.setPageSize(transit.getPageSize());

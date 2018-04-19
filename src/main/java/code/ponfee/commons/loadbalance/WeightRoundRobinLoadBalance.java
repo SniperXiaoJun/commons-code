@@ -17,7 +17,7 @@ public class WeightRoundRobinLoadBalance extends AbstractLoadBalance {
     private final List<String> servers;
 
     public WeightRoundRobinLoadBalance(Map<String, Integer> serverMap) {
-        this.servers = new ArrayList<String>();
+        this.servers = new ArrayList<>();
         for (Entry<String, Integer> entry : serverMap.entrySet()) {
             for (int n = entry.getValue(), i = 0; i < n; i++) {
                 this.servers.add(entry.getKey());

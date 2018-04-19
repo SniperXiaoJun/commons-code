@@ -101,7 +101,7 @@ public final class WebUtils {
         }
 
         if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
-            ip = Networks.LOCAL_IP; // 如果是本机ip
+            ip = Networks.HOST_IP; // 如果是本机ip
         }
         return ip;
     }
@@ -260,11 +260,11 @@ public final class WebUtils {
      */
     public static String getUrlSuffix(HttpServletRequest req) {
         String url = req.getRequestURI();
-        if (url.indexOf(".") < 0) {
+        if (!url.contains(".")) {
             return null;
         }
 
-        String[] pathInfos = url.toString().split("/");
+        String[] pathInfos = url.split("/");
         String endUrl = pathInfos[pathInfos.length - 1];
         if (PATTERN_SUFFIX.matcher(url).find()) {
             String[] spEndUrl = endUrl.split("\\?");

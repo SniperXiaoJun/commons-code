@@ -147,7 +147,7 @@ public class KeyStoreResolver {
      */
     public List<String> listAlias() {
         try {
-            List<String> alias = new ArrayList<String>();
+            List<String> alias = new ArrayList<>();
             Enumeration<String> e = keyStore.aliases();
             while (e.hasMoreElements()) {
                 alias.add(e.nextElement());

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -53,9 +54,7 @@ public class ResourceScanner {
             paths = new String[] { "*" };
         }
 
-        for (String pkg : paths) {
-            this.scanPaths.add(pkg);
-        }
+        Collections.addAll(this.scanPaths, paths);
     }
 
     /**

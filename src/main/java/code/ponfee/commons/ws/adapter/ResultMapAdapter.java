@@ -48,7 +48,7 @@ public abstract class ResultMapAdapter<K, V> extends XmlAdapter<Result<MapItem>,
         MapEntry<K, V>[] entries = new MapEntry[v.getData().size()];
         int i = 0;
         for (Map.Entry<K, V> entry : v.getData().entrySet()) {
-            entries[i++] = new MapEntry<K, V>(entry);
+            entries[i++] = new MapEntry<>(entry);
         }
         return new Result<>(v.getCode(), v.getMsg(), new MapItem(entries));
     }

@@ -23,7 +23,7 @@ import com.google.common.collect.ImmutableMap;
 import code.ponfee.commons.elasticsearch.exception.GetMappingFailedException;
 
 /**
- * es mapping
+ * Elastic Search Mapping
  * @author fupf
  */
 public abstract class BaseElasticSearchMapping implements IElasticSearchMapping {
@@ -53,7 +53,7 @@ public abstract class BaseElasticSearchMapping implements IElasticSearchMapping 
     public XContentBuilder internalGetMapping() throws IOException {
 
         // Configure the RootObjectMapper:
-        RootObjectMapper.Builder rootObjectMapperBuilder = getRootObjectBuilder();
+        RootObjectMapper.Builder builder = getRootObjectBuilder();
 
         // Populate the Settings:
         Settings.Builder settingsBuilder = getSettingsBuilder();
@@ -61,10 +61,11 @@ public abstract class BaseElasticSearchMapping implements IElasticSearchMapping 
         // new Mapping(arg0, arg1, arg2, arg3)getSourceTransforms(),
         // Build the Mapping:
         Mapping mapping = new Mapping(
-                version,
-                rootObjectMapperBuilder.build(new Mapper.BuilderContext(settingsBuilder.build(), new ContentPath(1))),
-                getMetaDataFieldMappers(),
-                getMeta());
+            version,
+            builder.build(new Mapper.BuilderContext(settingsBuilder.build(), new ContentPath(1))),
+            getMetaDataFieldMappers(),
+            getMeta()
+        );
 
         // Turn it into JsonXContent:
         return mapping.toXContent(XContentFactory.jsonBuilder().startObject(), 
@@ -103,7 +104,7 @@ public abstract class BaseElasticSearchMapping implements IElasticSearchMapping 
 
     private ImmutableMap<String, Object> getMeta() {
 
-        ImmutableMap.Builder<String, Object> metaFieldsBuilder = new ImmutableMap.Builder<String, Object>();
+        ImmutableMap.Builder<String, Object> metaFieldsBuilder = new ImmutableMap.Builder<>();
 
         configureMetaFields(metaFieldsBuilder);
 

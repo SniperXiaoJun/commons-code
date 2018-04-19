@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -94,11 +95,7 @@ public class Page<T> implements java.io.Serializable {
     }
 
     private List<T> copy(com.github.pagehelper.Page<T> page) {
-        List<T> list = new ArrayList<>(page.size());
-        for (T t : page) {
-            list.add(t);
-        }
-        return list;
+        return Lists.newArrayList(page);
     }
 
     /**

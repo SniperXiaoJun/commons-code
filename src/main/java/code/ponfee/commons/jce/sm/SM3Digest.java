@@ -18,7 +18,7 @@ public class SM3Digest {
     private static final int BLOCK_SIZE = 64;
 
     /** 缓冲区长度 */
-    private static final int BUFFER_LENGTH = BLOCK_SIZE * 1;
+    private static final int BUFFER_LENGTH = BLOCK_SIZE;
 
     private final byte[] xBuf = new byte[BUFFER_LENGTH], // 缓冲区
                            iv = new byte[SM3.IV.length]; // 初始向量
@@ -243,7 +243,7 @@ public class SM3Digest {
         }
 
         static int[][] expand(int[] B) {
-            int W[] = new int[68];
+            int  W[] = new int[68];
             int W1[] = new int[64];
             for (int i = 0; i < B.length; i++) {
                 W[i] = B[i];

@@ -41,7 +41,7 @@ public class EmailValidator {
             Lookup lookup = new Lookup(name, Type.MX);
             lookup.run();
             if (lookup.getResult() != Lookup.SUCCESSFUL) {
-                log.append("Cannot lookup the MX record: " + name + ".\n");
+                log.append("Cannot lookup the MX record: ").append(name).append(".\n");
                 return false;
             }
 
@@ -52,48 +52,47 @@ public class EmailValidator {
                 client.connect(hosts.get(hosts.size() - 1));
                 if (!SMTPReply.isPositiveCompletion(client.getReplyCode())) {
                     client.disconnect();
-                    continue;
                 } else {
-                    log.append("MX record about " + name + " exists.\n");
-                    log.append("Connection succeeded to " + hosts.get(hosts.size() - 1) + "\n");
+                    log.append("MX record about ").append(name).append(" exists.\n");
+                    log.append("Connection succeeded to ").append(hosts.get(hosts.size() - 1)).append("\n");
                     break;
                 }
             }
 
             if (!client.isConnected()) {
-                log.append("Can't Connect These Hosts " + hosts + "\n");
+                log.append("Can't Connect These Hosts ").append(hosts).append("\n");
                 return false;
             }
 
-            log.append(client.getReplyString() + "\n");
+            log.append(client.getReplyString()).append("\n");
             if (SERVICE_READY != client.getReplyCode()) {
                 return false;
             }
 
             client.login(hostname);
-            log.append("> HELO " + hostname + "\n");
-            log.append("=" + client.getReplyString() + "\n");
+            log.append("> HELO ").append(hostname).append("\n");
+            log.append("=").append(client.getReplyString()).append("\n");
             if (ACTION_OK != client.getReplyCode()) {
                 return false;
             }
 
             client.setSender("check@" + hostname);
-            log.append("> MAIL FROM: <check@" + hostname + ">\n");
-            log.append("=" + client.getReplyString() + "\n");
+            log.append("> MAIL FROM: <check@").append(hostname).append(">\n");
+            log.append("=").append(client.getReplyString()).append("\n");
             if (ACTION_OK != client.getReplyCode()) {
                 return false;
             }
 
             client.addRecipient(email);
-            log.append("> RCPT TO: <" + email + ">\n");
-            log.append("=" + client.getReplyString() + "\n");
+            log.append("> RCPT TO: <").append(email).append(">\n");
+            log.append("=").append(client.getReplyString()).append("\n");
             if (ACTION_OK != client.getReplyCode()) {
                 return false;
             }
 
             client.logout();
             log.append("> QUIT" + "\n");
-            log.append("=" + client.getReplyString() + "\n");
+            log.append("=").append(client.getReplyString()).append("\n");
             return true;
         } catch (IOException ignored) {
             ignored.printStackTrace();

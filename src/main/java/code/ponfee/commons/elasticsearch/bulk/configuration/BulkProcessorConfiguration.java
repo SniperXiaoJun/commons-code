@@ -20,7 +20,8 @@ public class BulkProcessorConfiguration {
         this(options, new LoggingBulkProcessorListener());
     }
 
-    public BulkProcessorConfiguration(BulkProcessingOptions options, BulkProcessor.Listener listener) {
+    public BulkProcessorConfiguration(BulkProcessingOptions options,
+                                      BulkProcessor.Listener listener) {
         this.options = options;
         this.listener = listener;
     }

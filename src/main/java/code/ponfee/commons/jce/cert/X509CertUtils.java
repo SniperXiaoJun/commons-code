@@ -421,8 +421,8 @@ public class X509CertUtils {
                 throw new IOException("Unsupported encoding");
             }
             l += s.length();
-            StringBuffer stringbuffer = new StringBuffer();
-            for (; (s = readLine(bufferedreader)) != null && !s.startsWith("-----END"); stringbuffer.append(s)) {
+            StringBuilder builder = new StringBuilder();
+            for (; (s = readLine(bufferedreader)) != null && !s.startsWith("-----END"); builder.append(s)) {
                 // do-non
             }
 
@@ -430,10 +430,10 @@ public class X509CertUtils {
                 throw new IOException("Unsupported encoding");
             } else {
                 l += s.length();
-                l += stringbuffer.length();
+                l += builder.length();
                 inputstream.reset();
                 inputstream.skip(l);
-                return Base64.getDecoder().decode(stringbuffer.toString());
+                return Base64.getDecoder().decode(builder.toString());
             }
         } finally {
             if (inputstream != null) try {
@@ -450,7 +450,7 @@ public class X509CertUtils {
         int j = 0;
         boolean flag = true;
         boolean flag1 = false;
-        StringBuffer stringbuffer = new StringBuffer(80);
+        StringBuilder builder = new StringBuilder(80);
         int i;
         do {
             i = bufferedreader.read();
@@ -460,7 +460,7 @@ public class X509CertUtils {
             if (!flag1) {
                 flag1 = flag && j == ENDBOUNDARY.length;
             }
-            stringbuffer.append((char) i);
+            builder.append((char) i);
         } while (i != -1 && i != 10 && i != 13);
 
         if (!flag1 && i == -1) {
@@ -470,12 +470,12 @@ public class X509CertUtils {
             bufferedreader.mark(1);
             int k = bufferedreader.read();
             if (k == 10) {
-                stringbuffer.append((char) i);
+                builder.append((char) i);
             } else {
                 bufferedreader.reset();
             }
         }
-        return stringbuffer.toString();
+        return builder.toString();
     }
     // --------------以上是解析Base64(pem)格式证书所用到的方法 end----------------- //
 

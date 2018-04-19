@@ -207,7 +207,7 @@ public class IdcardResolver {
         int sum = iStart / 10 + (iStart % 10) * 9;
         int iteration = 8;
         for (char c : mid.toCharArray()) {
-            sum = sum + Integer.valueOf(c) * iteration--;
+            sum = sum + (int) c * iteration--;
         }
         return (10 - sum % 10) % 10 == Integer.parseInt(end);
     }
@@ -227,17 +227,17 @@ public class IdcardResolver {
         String card = idCard.replaceAll("[\\(|\\)]", "");
         int sum = 0;
         if (card.length() == 9) {
-            sum = (Integer.valueOf(card.substring(0, 1).toUpperCase().toCharArray()[0]) - 55) * 9
-                + (Integer.valueOf(card.substring(1, 2).toUpperCase().toCharArray()[0]) - 55) * 8;
+            sum = ((int) card.substring(0, 1).toUpperCase().toCharArray()[0] - 55) * 9
+                + ((int) card.substring(1, 2).toUpperCase().toCharArray()[0] - 55) * 8;
             card = card.substring(1, 9);
         } else {
-            sum = 522 + (Integer.valueOf(card.substring(0, 1).toUpperCase().toCharArray()[0]) - 55) * 8;
+            sum = 522 + ((int) card.substring(0, 1).toUpperCase().toCharArray()[0] - 55) * 8;
         }
         String mid = card.substring(1, 7);
         String end = card.substring(7, 8);
         int iteration = 7;
         for (char c : mid.toCharArray()) {
-            sum = sum + Integer.valueOf(c) * iteration--;
+            sum = sum + (int) c * iteration--;
         }
 
         if (end.toUpperCase().equals("A")) {

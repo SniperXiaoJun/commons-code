@@ -33,8 +33,8 @@ public abstract class CertSignedVerifier {
      * 根据加载的根证进行证书验证
      */
     public final void verify() {
-        for (int i = 0; i < this.subjects.length; i++) {
-            String subjectCN = X509CertUtils.getCertInfo(subjects[i], X509CertInfo.SUBJECT_CN);
+        for (X509Certificate subject : subjects) {
+            String subjectCN = X509CertUtils.getCertInfo(subject, X509CertInfo.SUBJECT_CN);
 
             // 获取根证书
             if (rootCert == null) {
@@ -42,10 +42,10 @@ public abstract class CertSignedVerifier {
             }
 
             // 校验
-            verifyCertDate(this.subjects[i]);
-            verifyIssuingSign(this.subjects[i], rootCert);
+            verifyCertDate(subject);
+            verifyIssuingSign(subject, rootCert);
             if (crl != null) {
-                verifyCrlRevoke(this.subjects[i], crl);
+                verifyCrlRevoke(subject, crl);
             }
         }
 

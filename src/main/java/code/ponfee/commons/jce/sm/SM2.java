@@ -35,7 +35,6 @@ public final class SM2 {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final int KEY_LENGTH = SM3Digest.getDigestSize();
 
-    private final ECPoint point;
     private final byte[] key = new byte[KEY_LENGTH];
     private final SM3Digest sm3keybase = SM3Digest.getInstance(); // sm3 keybase
     private final SM3Digest sm3c3 = SM3Digest.getInstance(); // sm3 c3
@@ -50,10 +49,10 @@ public final class SM2 {
         Preconditions.checkArgument(privateKey != null, 
                                     "private key cannot be empty.");
 
-        this.point = publicKey.multiply(privateKey); // S = [h]point
+        ECPoint point = publicKey.multiply(privateKey); // S = [h]point
 
-        byte[] x1 = this.point.normalize().getXCoord().toBigInteger().toByteArray();
-        byte[] y1 = this.point.normalize().getYCoord().toBigInteger().toByteArray();
+        byte[] x1 = point.normalize().getXCoord().toBigInteger().toByteArray();
+        byte[] y1 = point.normalize().getYCoord().toBigInteger().toByteArray();
         int byteCount = (int) Math.ceil(n.bitLength() / 8.0D);
 
         this.x = new byte[byteCount];

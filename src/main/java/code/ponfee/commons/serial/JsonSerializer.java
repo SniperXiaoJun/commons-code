@@ -46,8 +46,6 @@ public class JsonSerializer extends Serializer {
                 data = baos.toByteArray();
             }
             return data;
-        } catch (JsonProcessingException e) {
-            throw new SerializationException(e);
         } catch (IOException e) {
             throw new SerializationException(e);
         } finally {

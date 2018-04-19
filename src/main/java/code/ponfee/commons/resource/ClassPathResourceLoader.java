@@ -82,7 +82,7 @@ final class ClassPathResourceLoader {
                             }
                             String fileName = entry.getName();
                             fileName = fileName.replace("\\", "/");
-                            if (fileName.indexOf("/") != -1) {
+                            if (fileName.contains("/")) {
                                 fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
                             }
                             return new Resource(URLDecoder.decode(url.getFile(), encoding), 
@@ -96,7 +96,7 @@ final class ClassPathResourceLoader {
                         if (zipPath.startsWith(ResourceLoaderFacade.FS_PREFIX)) {
                             zipPath = zipPath.substring(ResourceLoaderFacade.FS_PREFIX.length());
                         }
-                        if (zipPath.indexOf(JAR_URL_SEPARATOR) == -1) {
+                        if (!zipPath.contains(JAR_URL_SEPARATOR)) {
                             continue;
                         }
                         zipPath = zipPath.substring(0, zipPath.lastIndexOf(JAR_URL_SEPARATOR));
@@ -114,7 +114,7 @@ final class ClassPathResourceLoader {
                             }
                             String fileName = entry.getName();
                             fileName = fileName.replace("\\", "/");
-                            if (fileName.indexOf("/") != -1) {
+                            if (fileName.contains("/")) {
                                 fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
                             }
                             return new Resource(URLDecoder.decode(url.getFile(), encoding), 
@@ -209,7 +209,7 @@ final class ClassPathResourceLoader {
                         if (zipPath.startsWith(ResourceLoaderFacade.FS_PREFIX)) {
                             zipPath = zipPath.substring(ResourceLoaderFacade.FS_PREFIX.length());
                         }
-                        if (zipPath.indexOf(JAR_URL_SEPARATOR) == -1) {
+                        if (!zipPath.contains(JAR_URL_SEPARATOR)) {
                             continue;
                         }
                         zipPath = zipPath.substring(0, zipPath.lastIndexOf(JAR_URL_SEPARATOR));

@@ -81,7 +81,7 @@ public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<Trans
         }
 
         TransitPage<MapItem> pageData = TransitPage.transform(page, list.toArray(new MapItem[list.size()]));
-        return new Result<TransitPage<MapItem>>(v.getCode(), v.getMsg(), pageData);
+        return new Result<>(v.getCode(), v.getMsg(), pageData);
     }
 
 }

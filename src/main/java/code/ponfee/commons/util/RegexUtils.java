@@ -48,19 +48,19 @@ public final class RegexUtils {
         }
 
         PatternMatcher matcher = new Perl5Matcher();
-        boolean isExists = false;
+
         try {
-            isExists = matcher.contains(originalStr, PATTERNS.get(regex));
+            return matcher.contains(originalStr, PATTERNS.get(regex))
+                   ? StringUtils.trimToEmpty(matcher.getMatch().group(0))
+                   : StringUtils.EMPTY;
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
-
-        return isExists 
-               ? StringUtils.trimToEmpty(matcher.getMatch().group(0))
-               : StringUtils.EMPTY;
     }
 
-    private static final Pattern PATTERN_MOBILE = Pattern.compile("^\\s*(((\\+)?86)|(\\((\\+)?86\\)))?1\\d{10}\\s*$");
+    private static final Pattern PATTERN_MOBILE = Pattern.compile(
+        "^\\s*(((\\+)?86)|(\\((\\+)?86\\)))?1\\d{10}\\s*$"
+    );
 
     /**
      * check is mobile phone
@@ -68,10 +68,7 @@ public final class RegexUtils {
      * @return {@code true} is mobile phone
      */
     public static boolean isMobilePhone(String text) {
-        if (text == null) {
-            return false;
-        }
-        return PATTERN_MOBILE.matcher(text).matches();
+        return text != null && PATTERN_MOBILE.matcher(text).matches();
     }
 
     private static final Pattern PATTERN_EMAIL = Pattern.compile(
@@ -84,10 +81,7 @@ public final class RegexUtils {
      * @return {@code true} is email address
      */
     public static boolean isEmail(String text) {
-        if (text == null) {
-            return false;
-        }
-        return PATTERN_EMAIL.matcher(text).matches();
+        return text != null && PATTERN_EMAIL.matcher(text).matches();
     }
 
     private static final Pattern PATTERN_IP = Pattern.compile(
@@ -100,10 +94,7 @@ public final class RegexUtils {
      * @return {@code true} is ip address
      */
     public static boolean isIp(String text) {
-        if (text == null) {
-            return false;
-        }
-        return PATTERN_IP.matcher(text).matches();
+        return text != null && PATTERN_IP.matcher(text).matches();
     }
 
     private static final Pattern PATTERN_USERNAME = Pattern.compile("^[0-9A-Za-z_\\-]{4,20}$");
@@ -115,10 +106,7 @@ public final class RegexUtils {
      * @return {@code true} is valid user name
      */
     public static boolean isValidUserName(String text) {
-        if (text == null) {
-            return false;
-        }
-        return PATTERN_USERNAME.matcher(text).matches();
+        return text != null && PATTERN_USERNAME.matcher(text).matches();
     }
 
     private static final String SYMBOL = "@#!%&_\\.\\?\\-\\$\\^\\*";
@@ -131,11 +119,11 @@ public final class RegexUtils {
      *   > 8-20位
      *   > 必须包含字母、数字、符号中至少2种（可选的符号包括：@#!%&_.?-$^*）
      *   > 其它模式：^(?=.*\\d)(?=.*[A-Z])(?=.*[a-z])[\\dA-Za-z@#!%&_\\.\\?\\-\\$\\^\\*]{8,20}$
-     *            ^(?=.*\\d)(?=.*[A-Za-z])[\\dA-Za-z@#!%&_\\.\\?\\-\\$\\^\\*]{8,20}$
-     * 
-     * isValidPassword("12131111") // flase: 只有数字
-     * isValidPassword("@#.@#.$^") // flase: 只有字符
-     * isValidPassword("aaaaaaaa") // flase: 只有字母
+     *            ：^(?=.*\\d)(?=.*[A-Za-z])[\\dA-Za-z@#!%&_\\.\\?\\-\\$\\^\\*]{8,20}$
+     *
+     * isValidPassword("12131111") // false: 只有数字
+     * isValidPassword("@#.@#.$^") // false: 只有字符
+     * isValidPassword("aaaaaaaa") // false: 只有字母
      * isValidPassword("121311@1") // true: 数字字符
      * isValidPassword("121311A1") // true: 数字字母
      * isValidPassword("aaaaaa.a") // true: 字母字符
@@ -143,15 +131,12 @@ public final class RegexUtils {
      * @return {@code true} is valid password
      */
     public static boolean isValidPassword(String text) {
-        if (text == null) {
-            return false;
-        }
-        return PATTERN_PASSWORD.matcher(text).matches();
+        return text != null && PATTERN_PASSWORD.matcher(text).matches();
     }
 
     public static void main(String[] args) {
         System.out.println(isValidPassword("11ABac@#!%&_.?-$^*")); // true
-        System.out.println(isValidPassword("12131111")); // flase: 数字
+        System.out.println(isValidPassword("12131111")); // false: 数字
         System.out.println(isValidPassword("1213Aa_")); // false: 7 length
         System.out.println(isValidPassword("1213Aa_11213Aa_112111")); // false: 21 length
     }

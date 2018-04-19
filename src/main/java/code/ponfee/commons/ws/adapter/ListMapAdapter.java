@@ -70,7 +70,7 @@ public abstract class ListMapAdapter<K, V> extends XmlAdapter<MapItemArray, List
             MapEntry<K, V>[] item = new MapEntry[map.size()];
             int j = 0;
             for (Entry<K, V> entry : map.entrySet()) {
-                item[j++] = new MapEntry<K, V>(entry);
+                item[j++] = new MapEntry<>(entry);
             }
             items[i++] = new MapItem(item);
         }

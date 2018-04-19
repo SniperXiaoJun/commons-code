@@ -324,7 +324,7 @@ public class MailSender {
         List<Address> addresses = new ArrayList<>();
         for (String email : emails) {
             if (StringUtils.isBlank(email)) {
-                continue;
+                // do-non
             } else if (!RegexUtils.isEmail(email)) {
                 logger.warn("illegal email address[{}]", email);
             } else if (!EmailValidator.verify(email, this.validateTimes)) {

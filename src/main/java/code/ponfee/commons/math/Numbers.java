@@ -19,7 +19,7 @@ import java.util.Arrays;
 public final class Numbers {
     private Numbers() {}
 
-    public static final Integer INTEGER_ZERO = Integer.valueOf(0);
+    public static final Integer INTEGER_ZERO = 0;
     public static final int     INT_ZERO     = 0;
     public static final byte    BYTE_ZERO    = 0x00;
 
@@ -370,7 +370,7 @@ public final class Numbers {
      * @return
      */
     public static boolean equals(Long a, Integer b) {
-        return a != null && b != null && a.intValue() == b.intValue();
+        return a != null && b != null && a.intValue() == b;
     }
 
     /**

@@ -245,7 +245,7 @@ public class MailEnvelope implements Serializable {
             builder.setLength(MAX_LEN - 3);
             str = builder.append("...").toString();
         }
-        return str.toString();
+        return str;
     }
 
     private String substr(Object o) {

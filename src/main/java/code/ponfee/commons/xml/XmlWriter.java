@@ -2,6 +2,7 @@ package code.ponfee.commons.xml;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,7 +49,7 @@ public final class XmlWriter {
     }
 
     public XmlWriter element(String parentName, E<?> child) {
-        return element(parentName, Arrays.asList(child));
+        return element(parentName, Collections.singletonList(child));
     }
 
     public XmlWriter element(String parentName, List<E<?>> children) {
@@ -95,7 +96,7 @@ public final class XmlWriter {
         if (value instanceof Number) {
             return new NumberE(name, (Number) value);
         } else if (value instanceof E<?>) {
-            return new NodeE(name, Arrays.asList((NodeE) value));
+            return new NodeE(name, Collections.singletonList((NodeE) value));
         } else {
             return new TextE(name, Objects.toString(value, null));
         }

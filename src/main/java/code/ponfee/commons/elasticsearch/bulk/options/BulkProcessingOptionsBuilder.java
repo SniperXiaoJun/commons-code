@@ -49,6 +49,7 @@ public class BulkProcessingOptionsBuilder {
     }
 
     public BulkProcessingOptions build() {
-        return new BulkProcessingOptions(name, concurrentRequests, bulkActions, bulkSize, flushInterval, backoffPolicy);
+        return new BulkProcessingOptions(name, concurrentRequests, bulkActions,
+                                         bulkSize, flushInterval, backoffPolicy);
     }
 }

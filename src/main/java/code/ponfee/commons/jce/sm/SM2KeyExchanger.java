@@ -85,8 +85,7 @@ public class SM2KeyExchanger implements Serializable {
 
         byte[] xV = V.getXCoord().toBigInteger().toByteArray();
         byte[] yV = V.getYCoord().toBigInteger().toByteArray();
-        byte[] KB = kdf(Bytes.concat(xV, yV, entity1.Z, this.Z), 16);
-        key = KB;
+        key = kdf(Bytes.concat(xV, yV, entity1.Z, this.Z), 16);
 
         SM3Digest sm3 = SM3Digest.getInstance();
         byte[] data = digest(sm3, xV, entity1.Z, this.Z, RA, RB);
@@ -122,8 +121,7 @@ public class SM2KeyExchanger implements Serializable {
 
         byte[] xU = U.getXCoord().toBigInteger().toByteArray();
         byte[] yU = U.getYCoord().toBigInteger().toByteArray();
-        byte[] KA = kdf(Bytes.concat(xU, yU, this.Z, entity2.Z), 16);
-        key = KA;
+        key = kdf(Bytes.concat(xU, yU, this.Z, entity2.Z), 16);
 
         SM3Digest sm3 = SM3Digest.getInstance();
         byte[] data = digest(sm3, xU, this.Z, entity2.Z, RA, RB);

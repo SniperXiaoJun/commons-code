@@ -1,6 +1,7 @@
 package code.ponfee.commons.mail;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -27,7 +28,7 @@ public class ThreadPoolMailSender {
     }
 
     public static boolean send(MailSender mailSender, MailEnvelope envlop, boolean async) {
-        return send(mailSender, Arrays.asList(envlop), async);
+        return send(mailSender, Collections.singletonList(envlop), async);
     }
 
     public static boolean send(MailSender mailSender, List<MailEnvelope> envlops) {

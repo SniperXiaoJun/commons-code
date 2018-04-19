@@ -21,9 +21,10 @@ public class ScriptOperations extends JedisOperations {
      * @return
      */
     public Object eval(String script, List<String> keys, List<String> args) {
-        return call(shardedJedis -> {
-            return getShard(shardedJedis, JEDIS_SCRIPT_OPS_BYTES).eval(script, keys, args);
-        }, null, script, keys, args);
+        return call(
+            sj -> getShard(sj, JEDIS_SCRIPT_OPS_BYTES).eval(script, keys, args),
+            null, script, keys, args
+        );
     }
 
     /**
@@ -32,9 +33,9 @@ public class ScriptOperations extends JedisOperations {
      * @return 给定 script 的 SHA1 校验和
      */
     public String scriptLoad(String script) {
-        return call(shardedJedis -> {
-            return getShard(shardedJedis, JEDIS_SCRIPT_OPS_BYTES).scriptLoad(script);
-        }, null, script);
+        return call(
+            sj -> getShard(sj, JEDIS_SCRIPT_OPS_BYTES).scriptLoad(script), null, script
+        );
     }
 
     /**
@@ -45,9 +46,10 @@ public class ScriptOperations extends JedisOperations {
      * @return
      */
     public Object evalsha(String sha1, List<String> keys, List<String> args) {
-        return call(shardedJedis -> {
-            return getShard(shardedJedis, JEDIS_SCRIPT_OPS_BYTES).evalsha(sha1, keys, args);
-        }, null, sha1, keys, args);
+        return call(
+            sj -> getShard(sj, JEDIS_SCRIPT_OPS_BYTES).evalsha(sha1, keys, args),
+            null, sha1, keys, args
+        );
     }
 
 }

@@ -165,10 +165,10 @@ public final class SCrypt {
 
         byte[] DK = new byte[dkLen];
         for (int i = 1; i <= n; i++) {
-            block[S.length + 0] = (byte) (i >> 24 & 0xff);
+            block[S.length    ] = (byte) (i >> 24 & 0xff);
             block[S.length + 1] = (byte) (i >> 16 & 0xff);
             block[S.length + 2] = (byte) (i >> 8  & 0xff);
-            block[S.length + 3] = (byte) (i >> 0  & 0xff);
+            block[S.length + 3] = (byte) (i       & 0xff);
 
             mac.update(block);
             try {
@@ -272,8 +272,8 @@ public final class SCrypt {
 
         int i;
         for (i = 0; i < 16; i++) {
-            B32[i]  = (B[i * 4 + 0] & 0xff) << 0;
-            B32[i] |= (B[i * 4 + 1] & 0xff) << 8;
+            B32[i]  = (B[i * 4    ] & 0xff)      ;
+            B32[i] |= (B[i * 4 + 1] & 0xff) <<  8;
             B32[i] |= (B[i * 4 + 2] & 0xff) << 16;
             B32[i] |= (B[i * 4 + 3] & 0xff) << 24;
         }
@@ -320,7 +320,7 @@ public final class SCrypt {
         }
 
         for (i = 0; i < 16; i++) {
-            B[i * 4 + 0] = (byte) (B32[i] >> 0  & 0xff);
+            B[i * 4    ] = (byte) (B32[i]       & 0xff);
             B[i * 4 + 1] = (byte) (B32[i] >> 8  & 0xff);
             B[i * 4 + 2] = (byte) (B32[i] >> 16 & 0xff);
             B[i * 4 + 3] = (byte) (B32[i] >> 24 & 0xff);
@@ -335,7 +335,7 @@ public final class SCrypt {
 
     private static int integerify(byte[] B, int Bi, int r) {
         Bi += (2 * r - 1) * 64;
-        return ((B[Bi + 0] & 0xff) <<  0)
+        return ((B[Bi    ] & 0xff)      )
              | ((B[Bi + 1] & 0xff) <<  8)
              | ((B[Bi + 2] & 0xff) << 16)
              | ((B[Bi + 3] & 0xff) << 24);

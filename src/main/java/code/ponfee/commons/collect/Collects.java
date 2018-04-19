@@ -3,6 +3,7 @@ package code.ponfee.commons.collect;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -247,19 +248,19 @@ public final class Collects {
 
     /**
      * object to list
-     * @param array of elements
+     * @param obj of elements
      * @return list with the same elements
      */
-    public static List<Object> toList(Object array) {
-        if (array == null) {
+    public static List<Object> toList(Object obj) {
+        if (obj == null) {
             return null;
-        } else if (!array.getClass().isArray()) {
-            return Arrays.asList(array);
+        } else if (!obj.getClass().isArray()) {
+            return Collections.singletonList(obj);
         } else {
-            int length = Array.getLength(array);
+            int length = Array.getLength(obj);
             List<Object> result = new ArrayList<>(length);
             for (int i = 0; i < length; i++) {
-                result.add(Array.get(array, i));
+                result.add(Array.get(obj, i));
             }
             return result;
         }

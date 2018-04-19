@@ -108,7 +108,7 @@ public final class IdWorker {
      * 根据IP地址作为workerId
      * @return
      */
-    private static @FunctionalInterface interface LocalIPWorker { IdWorker get(); }
+    private @FunctionalInterface interface LocalIPWorker { IdWorker get(); }
     public static final IdWorker LOCAL_WORKER = ((LocalIPWorker) () -> {
         long sequenceBits = 10L; // specified 10 bit length
         long workerIdBits = 11L; // specified 11 bit length
@@ -116,7 +116,7 @@ public final class IdWorker {
         long timestampShift = sequenceBits + workerIdBits + datacenterIdBits;
 
         long maxWorkerId = (1L << workerIdBits) - 1; // 2047(max and mask)
-        long workerId = Networks.toLong(Networks.LOCAL_IP) & maxWorkerId;
+        long workerId = Networks.toLong(Networks.HOST_IP) & maxWorkerId;
 
         IdWorker worker = new IdWorker(0);
         Fields.put(worker, "sequenceBits", sequenceBits); // 10位

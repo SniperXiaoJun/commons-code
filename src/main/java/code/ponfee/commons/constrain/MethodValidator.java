@@ -166,18 +166,18 @@ public abstract class MethodValidator extends FieldValidator {
         Set<String> set = new HashSet<>();
         boolean[] isArgsNullable = new boolean[args.length];
         Arrays.fill(isArgsNullable, false);
-        for (int i = 0; i < csts.length; i++) {
-            String key = "index=" + csts[i].index() + ", field=\"" + csts[i].field() + "\"";
+        for (Constraint cst : csts) {
+            String key = "index=" + cst.index() + ", field=\"" + cst.field() + "\"";
             if (!set.add(key)) {
                 throw new RuntimeException("配置错误，重复校验[" + key + "]");
             }
 
-            if (csts[i].index() > args.length - 1) {
-                throw new RuntimeException("配置错误，下标超出[index=" + csts[i].index() + "]");
+            if (cst.index() > args.length - 1) {
+                throw new RuntimeException("配置错误，下标超出[index=" + cst.index() + "]");
             }
 
-            if (StringUtils.isEmpty(csts[i].field()) && !csts[i].notNull()) {
-                isArgsNullable[csts[i].index()] = true; // 该参数可为空
+            if (StringUtils.isEmpty(cst.field()) && !cst.notNull()) {
+                isArgsNullable[cst.index()] = true; // 该参数可为空
             }
         }
         return isArgsNullable;

@@ -19,12 +19,12 @@ import code.ponfee.commons.util.ObjectUtils;
 public class Wechats {
 
     // -------------------------构建微信授权地址------------------------- //
-    public static final String buildAuthorizeUrl(String appid, String redirect, String state) {
+    public static String buildAuthorizeUrl(String appid, String redirect, String state) {
         return buildAuthorizeUrl(appid, Files.UTF_8, redirect, state);
     }
 
-    public static final String buildAuthorizeUrl(String appid, String charset, 
-                                                 String redirect, String state) {
+    public static String buildAuthorizeUrl(String appid, String charset,
+                                           String redirect, String state) {
         return buildAuthorizeUrl(appid, charset, redirect, state, "snsapi_base");
     }
 
@@ -39,8 +39,8 @@ public class Wechats {
      * @param redirect
      * @return
      */
-    public static final String buildAuthorizeUrl(String appid, String charset, 
-                                                 String redirect, String state, String scope) {
+    public static String buildAuthorizeUrl(String appid, String charset,
+                                           String redirect, String state, String scope) {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("appid", appid);
         params.put("redirect_uri", redirect);
@@ -235,7 +235,7 @@ public class Wechats {
         map.put("jsapi_ticket", jsapiTicket);
         map.put("noncestr", ObjectUtils.uuid22());
         map.put("timestamp", Long.toString(System.currentTimeMillis() / 1000));
-        map.put("url", url.indexOf("#") == -1 ? url : url.substring(0, url.indexOf("#")));
+        map.put("url", !url.contains("#") ? url : url.substring(0, url.indexOf("#")));
 
         // generate sigin data
         map.put("signature", DigestUtils.sha1Hex(HttpParams.buildSigning(map)));

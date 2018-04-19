@@ -34,7 +34,7 @@ public abstract class MapAdapter<K, V> extends XmlAdapter<MapEntry[], Map<K, V>>
         MapEntry<K, V>[] entries = new MapEntry[map.size()];
         int i = 0;
         for (Map.Entry<K, V> entry : map.entrySet()) {
-            entries[i++] = new MapEntry<K, V>(entry);
+            entries[i++] = new MapEntry<>(entry);
         }
         return entries;
     }

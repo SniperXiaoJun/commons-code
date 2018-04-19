@@ -207,7 +207,7 @@ public class ECParameters implements java.io.Serializable {
         );
     }
 
-    private static final String encodeHex(byte[] bytes) {
+    private static String encodeHex(byte[] bytes) {
         return (bytes == null || bytes.length == 0)
                ? "0" : Hex.encodeHexString(bytes);
     }

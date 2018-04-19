@@ -59,11 +59,11 @@ public abstract class JedisOperations {
      * @param key
      * @return 具体哈希片的Jedis
      */
-    public static final Jedis getShard(ShardedJedis shardedJedis, String key) {
+    public static Jedis getShard(ShardedJedis shardedJedis, String key) {
         return shardedJedis.getShard(key);
     }
 
-    public static final Jedis getShard(ShardedJedis shardedJedis, byte[] key) {
+    public static Jedis getShard(ShardedJedis shardedJedis, byte[] key) {
         return shardedJedis.getShard(key);
     }
 

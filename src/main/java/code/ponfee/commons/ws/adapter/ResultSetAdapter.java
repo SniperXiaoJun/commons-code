@@ -32,10 +32,7 @@ public abstract class ResultSetAdapter<T> extends XmlAdapter<Result<ArrayItem<T>
             return new Result<>(v.getCode(), v.getMsg(), Sets.newHashSet());
         }
 
-        Set<T> set = Sets.newHashSet();
-        for (T t : v.getData().getItem()) {
-            set.add(t);
-        }
+        Set<T> set = Sets.newHashSet(v.getData().getItem());
         return new Result<>(v.getCode(), v.getMsg(), set);
     }
 

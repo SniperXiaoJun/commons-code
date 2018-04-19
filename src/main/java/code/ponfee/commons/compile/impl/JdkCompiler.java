@@ -80,12 +80,8 @@ public class JdkCompiler implements JavaSourceCompiler {
     }
 
     public static synchronized JdkCompilerClassLoader findOrCreate(ClassLoader parent) {
-        JdkCompilerClassLoader classLoader = CLASS_LOADERS.get(parent);
-        if (classLoader == null) {
-            classLoader = new JdkCompilerClassLoader(parent);
-            CLASS_LOADERS.put(parent, classLoader);
-        }
-        return classLoader;
+        CLASS_LOADERS.computeIfAbsent(parent, JdkCompilerClassLoader::new);
+        return CLASS_LOADERS.get(parent);
     }
 
     public void setOptions(List<String> options) {

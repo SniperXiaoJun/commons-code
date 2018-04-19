@@ -34,10 +34,7 @@ public abstract class ResultListAdapter<T> extends XmlAdapter<Result<ArrayItem<T
             return new Result<>(v.getCode(), v.getMsg(), Lists.newArrayList());
         }
 
-        List<T> list = Lists.newArrayList();
-        for (T t : v.getData().getItem()) {
-            list.add(t);
-        }
+        List<T> list = Lists.newArrayList(v.getData().getItem());
         return new Result<>(v.getCode(), v.getMsg(), list);
     }
 

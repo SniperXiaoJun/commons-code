@@ -31,7 +31,6 @@ public class FileTransformer {
 
     private final File source;
     private final String sourcePath;
-    private final File target;
     private final String targetPath;
     private final String encoding;
     private final StringBuilder log = new StringBuilder(4096);
@@ -45,8 +44,8 @@ public class FileTransformer {
     public FileTransformer(String source, String target, String encoding) {
         this.source = new File(source);
         this.sourcePath = this.source.getAbsolutePath();
-        this.target = Files.mkdir(target);
-        this.targetPath = this.target.getAbsolutePath();
+        File targetDir = Files.mkdir(target);
+        this.targetPath = targetDir.getAbsolutePath();
         this.encoding = encoding;
     }
 
@@ -92,7 +91,7 @@ public class FileTransformer {
             if (StringUtils.isNotEmpty(encoding) && isMatch && (charset = guessEncoding(filepath)) != null
                 && !"void".equalsIgnoreCase(charset) && !encoding.equalsIgnoreCase(charset)) {
 
-                log.append("转换　[" + charset + "]").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("　-->　");
+                log.append("转换　[").append(charset).append("]").append(StringUtils.rightPad(filepath, FIX_LENGTH)).append("　-->　");
                 transform(file, dest, charset, encoding, searchList, replacementList);
                 log.append("[").append(encoding).append("]").append(dest.getAbsolutePath()).append("\n");
 

@@ -9,6 +9,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -53,7 +54,7 @@ public final class CryptoMessageSyntax {
      * @return
      */
     public static byte[] sign(byte[] data, PrivateKey key, X509Certificate[] certChain) {
-        return sign(data, Arrays.asList(key), Arrays.asList(new X509Certificate[][] { certChain }));
+        return sign(data, Arrays.asList(key), Collections.singletonList(certChain));
     }
 
     /**

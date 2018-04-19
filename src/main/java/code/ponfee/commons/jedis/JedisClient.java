@@ -243,7 +243,7 @@ public class JedisClient implements DisposableBean {
      * @param e    the exception
      * @param args method arguments
      */
-    static final void exception(Exception e, Object... args) {
+    static void exception(Exception e, Object... args) {
         StringBuilder builder = new StringBuilder();
         builder.append("redis operation occur error, args(");
         //builder.append(ObjectUtils.getStackTrace(5)).append("(");

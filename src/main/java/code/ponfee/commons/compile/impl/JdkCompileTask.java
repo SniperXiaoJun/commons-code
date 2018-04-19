@@ -119,7 +119,7 @@ public class JdkCompileTask<T> {
         final CompilationTask task = compiler.getTask(null, javaFileManager, diagnostics,
                                                       options, null, sources);
         final Boolean result = task.call();
-        if (result == null || !result.booleanValue()) {
+        if (result == null || !result) {
             throw new JdkCompileException("Compilation failed.", classes.keySet(), diagnostics);
         }
 
@@ -132,11 +132,7 @@ public class JdkCompileTask<T> {
             }
 
             return compiled;
-        } catch (ClassNotFoundException e) {
-            throw new JdkCompileException(classes.keySet(), e, diagnostics);
-        } catch (IllegalArgumentException e) {
-            throw new JdkCompileException(classes.keySet(), e, diagnostics);
-        } catch (SecurityException e) {
+        } catch (ClassNotFoundException | IllegalArgumentException | SecurityException e) {
             throw new JdkCompileException(classes.keySet(), e, diagnostics);
         }
     }

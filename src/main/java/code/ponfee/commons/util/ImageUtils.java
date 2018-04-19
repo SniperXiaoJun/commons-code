@@ -50,7 +50,7 @@ public class ImageUtils {
     public static byte[] mergeHorizontal(List<byte[]> imgs, String format) {
         int width = 0, height = 0;
         try {
-            List<BufferedImage> list = new ArrayList<BufferedImage>();
+            List<BufferedImage> list = new ArrayList<>();
             for (byte[] img : imgs) {
                 BufferedImage i = ImageIO.read(new ByteArrayInputStream(img));
                 width += i.getWidth();// 图片宽度
@@ -85,7 +85,7 @@ public class ImageUtils {
     public static byte[] mergeVertical(List<byte[]> imgs, String format) {
         try {
             int width = 0, height = 0;
-            List<BufferedImage> list = new ArrayList<BufferedImage>();
+            List<BufferedImage> list = new ArrayList<>();
             for (byte[] img : imgs) {
                 BufferedImage i = ImageIO.read(new ByteArrayInputStream(img));
                 height += i.getHeight();// 图片宽度
