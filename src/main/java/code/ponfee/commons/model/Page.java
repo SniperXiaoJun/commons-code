@@ -311,7 +311,7 @@ public class Page<T> implements java.io.Serializable {
         if (rows == null || rows.isEmpty() || action == null) {
             return;
         }
-        rows.stream().forEach(action);
+        rows.forEach(action);
     }
 
     /**

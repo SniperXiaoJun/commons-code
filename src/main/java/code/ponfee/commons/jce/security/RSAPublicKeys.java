@@ -3,7 +3,6 @@ package code.ponfee.commons.jce.security;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -19,7 +18,8 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+
+import code.ponfee.commons.jce.cert.X509CertUtils;
 
 /**
  * PKCS#8 PEM：PUBLIC KEY
@@ -141,15 +141,7 @@ public final class RSAPublicKeys {
      * @return
      */
     public static String toPkcs8Pem(RSAPublicKey publicKey) {
-        try (StringWriter stringWriter = new StringWriter(); 
-             JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter)
-        ) {
-            pemWriter.writeObject(publicKey);
-            pemWriter.flush();
-            return stringWriter.toString();
-        } catch (IOException e) {
-            throw new SecurityException(e);
-        }
+        return X509CertUtils.exportToPem(publicKey);
     }
 
     /**

@@ -170,8 +170,9 @@ public final class Bytes {
         return out;
     }
 
-    // ----------------------------------------------base64 encode/decode-------------------------------------- //
-    private static final char[] BASE64_ENCODES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+    // -----------------------------------------------------------------base64 encode/decode
+    private static final char[] BASE64_ENCODES =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     private static final int[] BASE64_DECODES = new int[256];
     static {
         Arrays.fill(BASE64_DECODES, -1);

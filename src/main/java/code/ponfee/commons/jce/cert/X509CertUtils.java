@@ -121,15 +121,18 @@ public class X509CertUtils {
      *           toBase64Encoded(chain[0].getEncoded())) +
      *           "\n-----END CERTIFICATE-----\n";
      * certificate export to pem format text
-     * @param cert
+     *
+     * java.security.cert.Certificate
+     * X509Certificate,X509CRL,KeyPair,PrivateKey,PublicKey
+     *
+     * @param obj
      * @return
      */
-    public static String exportToPem(java.security.cert.Certificate cert) {
-        try (StringWriter writer = new StringWriter(); 
-             // X509Certificate,X509CRL,KeyPair,PrivateKey,PublicKey
+    public static String exportToPem(Object obj) {
+        try (StringWriter writer = new StringWriter();
              JcaPEMWriter pemWriter = new JcaPEMWriter(writer)
         ) {
-            pemWriter.writeObject(cert);
+            pemWriter.writeObject(obj);
             pemWriter.flush();
             return writer.toString();
         } catch (IOException e) {

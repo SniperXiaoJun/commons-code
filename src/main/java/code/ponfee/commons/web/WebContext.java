@@ -26,19 +26,20 @@ import org.apache.commons.lang3.ArrayUtils;
 public final class WebContext {
 
     /** HTTP请求与响应 */
-    private static ThreadLocal<HttpServletRequest> request = new ThreadLocal<>();
-    private static ThreadLocal<HttpServletResponse> response = new ThreadLocal<>();
+    private static final ThreadLocal<HttpServletRequest> REQUEST = new ThreadLocal<>();
+    private static final ThreadLocal<HttpServletResponse> RESPONSE = new ThreadLocal<>();
 
     /** 用于非用户访问请求：程序内部反射调用controller方法 */
-    private static ThreadLocal<Map<String, String[]>> custparams = ThreadLocal.withInitial(HashMap::new);
+    private static final ThreadLocal<Map<String, String[]>> CUST_PARAMS =
+        ThreadLocal.withInitial(HashMap::new);
 
     // -----------------------getter
     public static HttpServletRequest getRequest() {
-        return request.get();
+        return REQUEST.get();
     }
 
     public static HttpServletResponse getResponse() {
-        return response.get();
+        return RESPONSE.get();
     }
 
     /**
@@ -51,7 +52,7 @@ public final class WebContext {
         if (null != request) {
             return request.getParameter(name);
         } else {
-            String[] values = custparams.get().get(name); // custparams.get().remove(name)
+            String[] values = CUST_PARAMS.get().get(name); // CUST_PARAMS.get().remove(name)
             return (values == null || values.length == 0) ? null : values[0];
         }
     }
@@ -62,13 +63,13 @@ public final class WebContext {
      * @param value
      */
     public static void setParameter(String name, String value) {
-        String[] values = custparams.get().get(name);
+        String[] values = CUST_PARAMS.get().get(name);
         if (values == null || values.length == 0) {
             values = new String[] { value };
         } else {
             values = ArrayUtils.add(values, value);
         }
-        custparams.get().put(name, values);
+        CUST_PARAMS.get().put(name, values);
     }
 
     /**
@@ -81,7 +82,7 @@ public final class WebContext {
         if (null != request) {
             return request.getParameterValues(name);
         } else {
-            return custparams.get().get(name);
+            return CUST_PARAMS.get().get(name);
         }
     }
 
@@ -119,19 +120,19 @@ public final class WebContext {
 
     // --------------------------setter/remover
     private static void setRequest(HttpServletRequest req) {
-        request.set(req);
+        REQUEST.set(req);
     }
 
     private static void setResponse(HttpServletResponse resp) {
-        response.set(resp);
+        RESPONSE.set(resp);
     }
 
     private static void removeRequest() {
-        request.remove();
+        REQUEST.remove();
     }
 
     private static void removeResponse() {
-        response.remove();
+        RESPONSE.remove();
     }
 
     /**

@@ -17,7 +17,7 @@ import code.ponfee.commons.compile.impl.JdkCompileTask;
 public final class JavaFileObjectImpl extends SimpleJavaFileObject {
 
     // If kind == CLASS, this stores byte code from openOutputStream
-    private ByteArrayOutputStream byteCode = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream byteCode = new ByteArrayOutputStream();
 
     // if kind == SOURCE, this contains the source text
     private final CharSequence source;

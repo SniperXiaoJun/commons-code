@@ -10,12 +10,12 @@ import org.elasticsearch.common.unit.TimeValue;
  */
 public class BulkProcessingOptions {
 
-    private String name;
-    private int concurrentRequests;
-    private int bulkActions;
-    private ByteSizeValue bulkSize;
-    private TimeValue flushInterval;
-    private BackoffPolicy backoffPolicy;
+    private final String name;
+    private final int concurrentRequests;
+    private final int bulkActions;
+    private final ByteSizeValue bulkSize;
+    private final TimeValue flushInterval;
+    private final BackoffPolicy backoffPolicy;
 
     public BulkProcessingOptions(String name, int concurrentRequests, int bulkActions,
                                  ByteSizeValue bulkSize, TimeValue flushInterval,

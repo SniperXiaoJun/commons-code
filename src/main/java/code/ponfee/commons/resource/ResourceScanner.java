@@ -44,7 +44,7 @@ public class ResourceScanner {
 
     private static Logger logger = LoggerFactory.getLogger(ResourceScanner.class);
 
-    private List<String> scanPaths = new LinkedList<>();
+    private final List<String> scanPaths = new LinkedList<>();
 
     /**
      * @param paths 扫描路径

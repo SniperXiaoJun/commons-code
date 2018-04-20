@@ -2,17 +2,13 @@ package code.ponfee.commons.constrain;
 
 import code.ponfee.commons.exception.Throwables;
 import code.ponfee.commons.reflect.ClassUtils;
-import code.ponfee.commons.util.ObjectUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-
-import static code.ponfee.commons.model.ResultCode.BAD_REQUEST;
 
 /**
  * <pre>
@@ -71,7 +67,8 @@ public abstract class ParamValidator extends FieldValidator {
                         try {
                             super.constrain(args[i]);
                         } catch (IllegalArgumentException e) {
-                            builder.append("[").append(argsName[i]).append("]").append(e.getMessage());
+                            builder.append("[").append(argsName[i]).append("]")
+                                   .append(e.getMessage());
                         }
                     }
                     if (builder.length() > MAX_MSG_SIZE) {
@@ -86,35 +83,6 @@ public abstract class ParamValidator extends FieldValidator {
             builder.append(Throwables.getStackTrace(e));
         }
 
-        if (builder.length() == 0) { // 校验成功
-            return joinPoint.proceed();
-        } else { // 校验失败，不调用方法，进入失败处理
-            if (builder.length() > MAX_MSG_SIZE) {
-                builder.setLength(MAX_MSG_SIZE - 3);
-                builder.append("...");
-            }
-            String errMsg = builder.toString();
-            if (logger.isInfoEnabled()) {
-                logger.info("[参数校验失败]-[{}]-{}-[{}]", methodSign, ObjectUtils.toString(args), errMsg);
-            }
-
-            return returnFailed(method, errMsg);
-        }
-    }
-
-    /**
-     * 参数验证错误时返回数据处理<p>
-     * 子类可覆盖此方法来自定义返回<p>
-     * @param method  验证的目标方法
-     * @param errMsg  错误信息
-     * @return
-     */
-    protected Object returnFailed(Method method, String errMsg) {
-        try {
-            Constructor<?> c = method.getReturnType().getConstructor(int.class, String.class);
-            return c.newInstance(BAD_REQUEST.getCode(), BAD_REQUEST.getMsg() + ": " + errMsg);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(errMsg, e);
-        }
+        return MethodValidator.process(builder, joinPoint, method, args, methodSign);
     }
 }

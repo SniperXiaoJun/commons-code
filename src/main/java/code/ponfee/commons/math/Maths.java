@@ -30,8 +30,7 @@ public class Maths {
     }
 
     /**
-     * shift left round
-     * 循环左移位操作：0<=n<=32
+     * rotate shift left，循环左移位操作：0<=n<=32
      * @param x
      * @param n
      * @return

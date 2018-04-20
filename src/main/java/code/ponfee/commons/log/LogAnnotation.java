@@ -38,9 +38,9 @@ public @interface LogAnnotation {
         UNDEFINED(0x0, null), ADD(0x1, "新增"), UPDATE(0x2, "更新"), 
         DELETE(0x3, "删除"), QUERY(0x4, "查询");
 
-        private int type;
+        private final int type;
 
-        private String comment;
+        private final String comment;
 
         LogType(int type, String comment) {
             this.type = type;

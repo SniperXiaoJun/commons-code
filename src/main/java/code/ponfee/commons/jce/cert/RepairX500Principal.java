@@ -25,7 +25,7 @@ public class RepairX500Principal implements Principal {
 
     private static final String[] DN_STR = { "C", "ST", "L", "O", "OU", "CN", "E" };
 
-    private ByteArrayInputStream input;
+    private final ByteArrayInputStream input;
 
     public RepairX500Principal(X500Principal principal) {
         Objects.requireNonNull(principal);

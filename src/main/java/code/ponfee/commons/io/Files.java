@@ -1,12 +1,5 @@
 package code.ponfee.commons.io;
 
-import code.ponfee.commons.math.Maths;
-import code.ponfee.commons.math.Numbers;
-import com.google.common.collect.ImmutableMap;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.output.StringBuilderWriter;
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,13 +15,21 @@ import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.function.Consumer;
+
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.output.StringBuilderWriter;
+import org.apache.commons.lang3.ArrayUtils;
+
+import com.google.common.collect.ImmutableMap;
+
+import code.ponfee.commons.math.Maths;
+import code.ponfee.commons.math.Numbers;
 
 /**
  * 文件工具类
@@ -462,8 +463,7 @@ public final class Files {
         }
 
         String hex = Hex.encodeHexString(array, false);
-        for (Iterator<Entry<String, String>> i = FILE_TYPE_MAGIC.entrySet().iterator(); i.hasNext();) {
-            Entry<String, String> entry = i.next();
+        for (Entry<String, String> entry : FILE_TYPE_MAGIC.entrySet()) {
             if (hex.startsWith(entry.getValue())) {
                 return entry.getKey();
             }

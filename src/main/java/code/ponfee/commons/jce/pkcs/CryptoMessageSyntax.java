@@ -93,6 +93,7 @@ public final class CryptoMessageSyntax {
             JcaSimpleSignerInfoVerifierBuilder builder = new JcaSimpleSignerInfoVerifierBuilder()
                                                                                  .setProvider(BC);
             for (SignerInformation signer : sign.getSignerInfos()) {
+                @SuppressWarnings("unchecked") 
                 Collection<X509CertificateHolder> chain = store.getMatches(signer.getSID()); // 证书链
                 X509CertificateHolder cert = chain.iterator().next();
                 if (!signer.verify(builder.build(cert))) {

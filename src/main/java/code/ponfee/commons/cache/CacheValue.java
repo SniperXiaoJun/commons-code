@@ -9,8 +9,8 @@ class CacheValue<T> implements java.io.Serializable {
 
     private static final long serialVersionUID = 4266458031910874821L;
 
-    private long expireTimeMillis; // 失效时间
-    private T value; // 值
+    private final long expireTimeMillis; // 失效时间
+    private final T value; // 值
 
     CacheValue(T value, long expireTimeMillis) {
         this.value = value;

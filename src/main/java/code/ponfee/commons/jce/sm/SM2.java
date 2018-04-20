@@ -45,9 +45,9 @@ public final class SM2 {
 
     private SM2(ECPoint publicKey, BigInteger privateKey, BigInteger n) {
         Preconditions.checkArgument(publicKey != null, 
-                                    "public key cannot be empty.");
+                                    "public key cannot be null.");
         Preconditions.checkArgument(privateKey != null, 
-                                    "private key cannot be empty.");
+                                    "private key cannot be null.");
 
         ECPoint point = publicKey.multiply(privateKey); // S = [h]point
 

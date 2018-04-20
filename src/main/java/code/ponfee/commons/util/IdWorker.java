@@ -154,7 +154,7 @@ public final class IdWorker {
     }).get();
 
     public static void main(String[] args) {
-        Map<Long, Object> map = new ConcurrentHashMap<>(50000000);
+        Map<Long, Object> map = new ConcurrentHashMap<>();
         Object obj = new Object();
         IdWorker worker = LOCAL_WORKER;
         MultithreadExecutor.exec(20, () -> {

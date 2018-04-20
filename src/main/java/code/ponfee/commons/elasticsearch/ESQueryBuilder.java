@@ -21,8 +21,8 @@ import org.elasticsearch.search.sort.SortOrder;
  */
 public class ESQueryBuilder {
 
-    private String[] indices; // 索引
-    private String[] types; // 类型
+    private final String[] indices; // 索引
+    private final String[] types; // 类型
     private BoolQueryBuilder boolQuery; // bool筛选条件
     private String[] fields; // 查询的字段
     private final List<SortBuilder<?>> sorts = new ArrayList<>(); // 排序

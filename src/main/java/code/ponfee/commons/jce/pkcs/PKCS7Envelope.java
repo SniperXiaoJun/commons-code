@@ -80,8 +80,12 @@ public final class PKCS7Envelope {
             X509Principal p = new X509Principal(cert.getIssuerX500Principal().getEncoded());
             DERConstructedSequence recipientInfo = new DERConstructedSequence();
             recipientInfo.addObject(new DERInteger(0));
-            recipientInfo.addObject(new IssuerAndSerialNumber(new X509Name(p.getName()), new DERInteger(cert.getSerialNumber())));
-            recipientInfo.addObject(new AlgorithmIdentifier(new DERObjectIdentifier(OID_RSA_ECB_PKCS1PADDING), null));
+            recipientInfo.addObject(
+                new IssuerAndSerialNumber(new X509Name(p.getName()), new DERInteger(cert.getSerialNumber()))
+            );
+            recipientInfo.addObject(
+                new AlgorithmIdentifier(new DERObjectIdentifier(OID_RSA_ECB_PKCS1PADDING), null)
+            );
             recipientInfo.addObject(new DEROctetString(encKey));
             DERSet recipientInfos = new DERSet(recipientInfo);
 
@@ -131,14 +135,16 @@ public final class PKCS7Envelope {
         }
         EnvelopedData ed = fastPkcs7.getEnvelopedData();
         if (ed == null) {
-            throw new SecurityException("invalid pkcs#7 envloped-data wrong header " + fastPkcs7.getContentType());
+            throw new SecurityException("invalid pkcs#7 envloped-data wrong header "
+                                      + fastPkcs7.getContentType());
         }
 
         RecipientInfo recipientInfo = (RecipientInfo) ed.getVRecipientInfo().get(0);
 
         // 获取公钥证书序列号并校验
         Item item = recipientInfo.getIssuerAndSerialNumber();
-        org.bjca.jce.fastparser.IssuerAndSerialNumber iasn = new org.bjca.jce.fastparser.IssuerAndSerialNumber(envelopeddata, item);
+        org.bjca.jce.fastparser.IssuerAndSerialNumber iasn =
+                new org.bjca.jce.fastparser.IssuerAndSerialNumber(envelopeddata, item);
         item = iasn.getIssuer();
         /*byte[] ss = new byte[item.length];
         ss = DerUtil.getItemDataAndTag(envelopeddata, item);*/

@@ -52,7 +52,7 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
     protected final int database;
 
     private int sentinelRetry = 0;
-    protected Set<MasterListener> masterListeners = new HashSet<>();
+    protected final Set<MasterListener> masterListeners = new HashSet<>();
     private volatile List<HostAndPort> currentHostMasters;
 
     public ShardedJedisSentinelPool(List<String> masters, Set<String> sentinels) {
@@ -253,9 +253,9 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
      * PoolableObjectFactory custom impl.
      */
     protected static class ShardedJedisFactory implements PooledObjectFactory<ShardedJedis> {
-        private List<JedisShardInfo> shards;
-        private Hashing algo;
-        private Pattern keyTagPattern;
+        private final List<JedisShardInfo> shards;
+        private final Hashing algo;
+        private final Pattern keyTagPattern;
 
         public ShardedJedisFactory(List<JedisShardInfo> shards, Hashing algo, Pattern keyTagPattern) {
             this.shards = shards;
@@ -334,12 +334,12 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
 
     protected class MasterListener extends Thread {
 
-        protected List<String> masters;
-        protected String host;
-        protected int port;
+        protected final List<String> masters;
+        protected final String host;
+        protected final int port;
         protected long retryIntervalMillis = 5000;
         protected Jedis jedis;
-        protected AtomicBoolean running = new AtomicBoolean(false);
+        protected final AtomicBoolean running = new AtomicBoolean(false);
 
         public MasterListener(List<String> masters, String host, int port) {
             Preconditions.checkArgument(masters != null && !masters.isEmpty());

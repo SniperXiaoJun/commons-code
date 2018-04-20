@@ -385,9 +385,12 @@ public final class Numbers {
     }
 
     // --------------------------------------------------------------------------金额汉化
-    private static final String[] CN_UPPER_NUMBER = {"零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"};
+    private static final String[] CN_UPPER_NUMBER = {
+        "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"
+    };
     private static final String[] CN_UPPER_MONETARY_UNIT = {
-        "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰", "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟"
+        "分", "角", "元", "拾", "佰", "仟", "万", "拾", "佰",
+        "仟", "亿", "拾", "佰", "仟", "兆", "拾", "佰", "仟"
     };
     private static final BigDecimal MAX_VALUE = new BigDecimal("9999999999999999.995");
 
