@@ -73,9 +73,15 @@ import code.ponfee.commons.jce.Providers;
 public final class RSAPrivateKeys {
     private RSAPrivateKeys() {}
 
+    /**
+     * Build RSAPrivateKey with modulus and privateExponent
+     *
+     * @param modulus
+     * @param privateExponent
+     * @return the RSAPrivateKey
+     */
     public static RSAPrivateKey toRSAPrivateKey(BigInteger modulus, BigInteger privateExponent) {
         try {
-            // 存储的就是这两个大整形数
             return (RSAPrivateKey) KeyFactory.getInstance(RSACryptor.ALG_RSA).generatePrivate(
                 new RSAPrivateKeySpec(modulus, privateExponent)
             );
@@ -90,7 +96,7 @@ public final class RSAPrivateKeys {
      * @param privateKey
      * @return
      */
-    public static RSAPublicKey inversePrivateKey(RSAPrivateKey privateKey) {
+    public static RSAPublicKey inverse(RSAPrivateKey privateKey) {
         return RSAPublicKeys.toRSAPublicKey(privateKey.getModulus(), 
                                             privateKey.getPrivateExponent());
     }

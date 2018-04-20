@@ -1,5 +1,6 @@
 package test.log;
 
+import code.ponfee.commons.concurrent.MultithreadExecutor;
 import code.ponfee.commons.limit.RedisCurrentLimiter;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.serial.JdkSerializer;
@@ -37,31 +38,17 @@ public class FreqTester {
     public void test1() throws InterruptedException {
         RedisCurrentLimiter f = new RedisCurrentLimiter(jedisClient, 1, 5);
         f.setRequestThreshold("abc", 7000000);
-        List<Thread> list = new ArrayList<>();
-        AtomicBoolean flag = new AtomicBoolean(true);
-        for (int i = 0; i < 50; i++) {
-            list.add(new Thread(() -> {
-                while (flag.get()) {
-                    if (!f.checkpoint("abc")) {
-                        System.err.println("reject req " + Thread.currentThread());
-                    }
 
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }));
-        }
-        for (Thread thread : list) {
-            thread.start();
-        }
-        Thread.sleep(300000);
-        flag.set(false);
-        for (Thread thread : list) {
-            thread.join();
-        }
-        f.destory();
+        MultithreadExecutor.exec(20, ()->{
+            if (!f.checkpoint("abc")) {
+                System.err.println("reject req " + Thread.currentThread());
+            }
+
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }, 20);
     }
 }

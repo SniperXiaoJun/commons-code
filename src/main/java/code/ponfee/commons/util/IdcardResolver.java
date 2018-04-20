@@ -3961,7 +3961,6 @@ public class IdcardResolver {
         .build();*/
 
     public static void main(String[] args) {
-        System.out.println(DISTRICT_CODE_MAPPING.size());
         System.out.println(Integer.valueOf('1'));
         System.out.println(Character.getNumericValue('1'));
 

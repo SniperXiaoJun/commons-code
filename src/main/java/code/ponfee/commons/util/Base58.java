@@ -34,7 +34,9 @@ import code.ponfee.commons.jce.digest.DigestUtils;
  */
 public class Base58 {
 
-    private static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
+    private static final char[] ALPHABET =
+        "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
+
     private static final int LENGTH = ALPHABET.length;
 
     private static final int[] INDEXES = new int[128];

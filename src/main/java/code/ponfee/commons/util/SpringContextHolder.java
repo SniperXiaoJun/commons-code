@@ -1,14 +1,14 @@
 package code.ponfee.commons.util;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * <pre>
@@ -27,7 +27,9 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
 
     @Override
     public void setApplicationContext(ApplicationContext c) throws BeansException {
-        HOLDER.add(c);
+        synchronized (SpringContextHolder.class) {
+            HOLDER.add(c);
+        }
     }
 
     /**
@@ -167,7 +169,9 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
 
     @Override
     public void destroy() {
-        HOLDER.clear();
+        synchronized (SpringContextHolder.class) {
+            HOLDER.clear();
+        }
     }
 
     private static <T> T throwOrReturn(BeansException ex, T t) {

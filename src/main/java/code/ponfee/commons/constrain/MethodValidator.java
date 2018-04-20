@@ -1,16 +1,7 @@
 package code.ponfee.commons.constrain;
 
-import code.ponfee.commons.model.ResultCode;
-import code.ponfee.commons.reflect.ClassUtils;
-import code.ponfee.commons.reflect.Fields;
-import code.ponfee.commons.util.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.reflect.MethodSignature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static code.ponfee.commons.model.ResultCode.BAD_REQUEST;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -19,7 +10,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static code.ponfee.commons.model.ResultCode.BAD_REQUEST;
+import org.apache.commons.lang3.StringUtils;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import code.ponfee.commons.model.ResultCode;
+import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.reflect.Fields;
+import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * <pre>
@@ -27,11 +27,13 @@ import static code.ponfee.commons.model.ResultCode.BAD_REQUEST;
  * e.g.：
  *    1.开启spring切面特性：<aop:aspectj-autoproxy />
  *    2.编写子类：
- *        `@Component
- *        `@Aspect
+ *        ＠Component
+ *        ＠Aspect
  *        public class TestMethodValidator extends MethodValidator {
- *            `@Around(value = "execution(public * code.ponfee.xxx.service.impl.*Impl.*(..)) && `@annotation(cst)", argNames = "pjp,cst")
- *            public `@Override Object constrain(ProceedingJoinPoint pjp, Constraints cst) throws Throwable {
+ *            ＠Around(value = "execution(public * code.ponfee.xxx.service.impl.*Impl.*(..)) 
+ *                    && ＠annotation(cst)", argNames = "pjp,cst")
+ *            public ＠Override Object constrain(ProceedingJoinPoint pjp, Constraints cst) 
+ *                throws Throwable {
  *                return super.constrain(pjp, cst);
  *            }
  *        }
@@ -151,8 +153,8 @@ public abstract class MethodValidator extends FieldValidator {
         }
 
         try {
-            Constructor<?> c = method.getReturnType().getConstructor(ResultCode.class, String.class);
-            return c.newInstance(BAD_REQUEST, BAD_REQUEST.getMsg() + ": " + errMsg);
+            return method.getReturnType().getConstructor(ResultCode.class, String.class)
+                         .newInstance(BAD_REQUEST, BAD_REQUEST.getMsg() + ": " + errMsg);
         } catch (Exception e) {
             throw new IllegalArgumentException(errMsg, e);
         }

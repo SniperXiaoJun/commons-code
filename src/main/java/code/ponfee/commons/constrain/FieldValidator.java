@@ -112,7 +112,7 @@ public class FieldValidator {
 
     /**
      * Constrain without cache,
-     * use in method parameter is Map or Dictionary type
+     * only use in method parameter is Map or Dictionary type
      *
      * @param name
      * @param value

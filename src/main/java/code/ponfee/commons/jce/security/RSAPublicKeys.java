@@ -30,9 +30,15 @@ import code.ponfee.commons.jce.cert.X509CertUtils;
 public final class RSAPublicKeys {
     private RSAPublicKeys() {}
 
+    /**
+     * Build RSAPublicKey with modulus and publicExponent
+     *
+     * @param modulus
+     * @param publicExponent
+     * @return the RSAPublicKey
+     */
     public static RSAPublicKey toRSAPublicKey(BigInteger modulus, BigInteger publicExponent) {
         try {
-            // 存储的就是这两个大整形数
             return (RSAPublicKey) KeyFactory.getInstance(RSACryptor.ALG_RSA).generatePublic(
                 new RSAPublicKeySpec(modulus, publicExponent)
             );
@@ -56,7 +62,7 @@ public final class RSAPublicKeys {
      * @param publicKey
      * @return
      */
-    public static RSAPrivateKey inversePublicKey(RSAPublicKey publicKey) {
+    public static RSAPrivateKey inverse(RSAPublicKey publicKey) {
         return RSAPrivateKeys.toRSAPrivateKey(publicKey.getModulus(), 
                                               publicKey.getPublicExponent());
     }

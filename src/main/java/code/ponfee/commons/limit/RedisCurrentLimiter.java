@@ -123,19 +123,11 @@ public class RedisCurrentLimiter implements CurrentLimiter {
         String key0 = new StringBuilder(key).append(':').append(millis).toString();
         Long count = countCache.get(key0);
         if (count == null) {
-            // get the lock for access redis
-            Object lock = LOCK_MAP.get(key0);
-            if (lock == null) {
-                synchronized (RedisCurrentLimiter.class) {
-                    lock = LOCK_MAP.computeIfAbsent(key0, k -> new Object());
-                }
-            }
-
-            // load the freq from cache, if not hit then calculate by redis zcount
-            synchronized (lock) {
+            synchronized (getLock(key0)) {
                 count = countCache.get(key0);
                 if (count == null) {
                     long now = System.currentTimeMillis();
+                    // load the freq from cache, if not hit then calculate by redis zcount
                     count = countByRangeMillis(key, now - millis, now);
                     countCache.set(key0, count);
                 }
@@ -173,12 +165,17 @@ public class RedisCurrentLimiter implements CurrentLimiter {
     public @Override long getRequestThreshold(String key) {
         Long threshold = confCache.get(key);
         if (threshold == null) {
-            threshold = jedisClient.valueOps()
-                                   .getLong(THRESHOLD_KEY_PREFIX + key, EXPIRE_SECONDS);
-            if (threshold == null) {
-                threshold = -1L; // -1表示无限制
+            synchronized (getLock(key)) {
+                threshold = confCache.get(key);
+                if (threshold == null) {
+                    threshold = jedisClient.valueOps()
+                                           .getLong(THRESHOLD_KEY_PREFIX + key, EXPIRE_SECONDS);
+                    if (threshold == null) {
+                        threshold = -1L; // -1表示无限制
+                    }
+                    confCache.set(key, threshold); // put into local cache
+                }
             }
-            confCache.set(key, threshold); // put into local cache
         }
         return threshold;
     }
@@ -194,6 +191,17 @@ public class RedisCurrentLimiter implements CurrentLimiter {
         synchronized (RedisCurrentLimiter.class) {
             LOCK_MAP.clear();
         }
+    }
+
+    private Object getLock(String key) {
+        // get the lock for access redis
+        Object lock = LOCK_MAP.get(key);
+        if (lock == null) {
+            synchronized (RedisCurrentLimiter.class) {
+                lock = LOCK_MAP.computeIfAbsent(key, k -> new Object());
+            }
+        }
+        return lock;
     }
 
     /**
