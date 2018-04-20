@@ -1,6 +1,7 @@
 package code.ponfee.commons.util;
 
-import static java.util.Calendar.YEAR;
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,9 +12,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.ImmutableMap;
+import static java.util.Calendar.YEAR;
 
 /**
  * 身份证解析及生成
@@ -253,7 +252,9 @@ public class IdcardResolver {
 
     /**
      * <p>18位身份证验证</p>
-     * 根据〖中华人民共和国国家标准 GB 11643-1999〗中有关公民身份号码的规定，公民身份号码是特征组合码，由十七位数字本体码和一位数字校验码组成。
+     * 根据〖中华人民共和国国家标准 GB 11643-1999〗中有关公民身份号码的规定，公民身份号码是特征组合码，
+     * 由十七位数字本体码和一位数字校验码组成。
+     *
      * 排列顺序从左至右依次为：六位数字地址码，八位数字出生日期码，三位数字顺序码和一位数字校验码。
      * 第十八位数字(校验码)的计算方法为：
      * 1.将前面的身份证号码17位数分别乘以不同的系数。从第一位到第十七位的系数分别为：7 9 10 5 8 4 2 1 6 3 7 9 10 5 8 4 2

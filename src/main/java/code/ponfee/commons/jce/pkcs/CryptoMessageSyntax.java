@@ -1,18 +1,5 @@
 package code.ponfee.commons.jce.pkcs;
 
-import static code.ponfee.commons.jce.Providers.BC;
-
-import java.io.IOException;
-import java.security.PrivateKey;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -23,7 +10,6 @@ import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
-import org.bouncycastle.cms.CMSTypedData;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.SignerInformation;
@@ -39,13 +25,26 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.util.Store;
 
+import java.io.IOException;
+import java.security.PrivateKey;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
+import static code.ponfee.commons.jce.Providers.BC;
+
 /**
  * 加密消息语法：Cryptography Message Syntax
  * @author fupf
  */
 public final class CryptoMessageSyntax {
 
-    // -----------------------------------------sign/verify----------------------------------
+    // ---------------------------------------------------------------------------sign/verify
     /**
      * 附原文签名（单人）
      * @param data
@@ -91,14 +90,15 @@ public final class CryptoMessageSyntax {
         try {
             CMSSignedData sign = new CMSSignedData(signed); // 构建PKCS#7签名数据处理对象
             Store<?> store = sign.getCertificates();
-            for (Iterator<?> iter = sign.getSignerInfos().getSigners().iterator(); iter.hasNext();) {
-                SignerInformation signer = (SignerInformation) iter.next();
-                @SuppressWarnings("unchecked") Collection<?> certChain = store.getMatches(signer.getSID()); // 证书链
-                X509CertificateHolder cert = (X509CertificateHolder) certChain.iterator().next();
-                if (!signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert))) {
-                    String certSN = Hex.encodeHexString(cert.getSerialNumber().toByteArray());
-                    String certDN = cert.getSubject().toString();
-                    throw new SecurityException("signature verify fail[" + certSN + ", " + certDN + "]");
+            JcaSimpleSignerInfoVerifierBuilder builder = new JcaSimpleSignerInfoVerifierBuilder()
+                                                                                 .setProvider(BC);
+            for (SignerInformation signer : sign.getSignerInfos()) {
+                Collection<X509CertificateHolder> chain = store.getMatches(signer.getSID()); // 证书链
+                X509CertificateHolder cert = chain.iterator().next();
+                if (!signer.verify(builder.build(cert))) {
+                    String sn = Hex.encodeHexString(cert.getSerialNumber().toByteArray());
+                    String dn = cert.getSubject().toString();
+                    throw new SecurityException("signature verify fail[" + sn + ", " + dn + "]");
                 }
             }
         } catch (OperatorCreationException | CertificateException | CMSException e) {
@@ -106,7 +106,7 @@ public final class CryptoMessageSyntax {
         }
     }
 
-    // -----------------------------------------envelop/unenvelop----------------------------------
+    // ---------------------------------------------------------------------------envelop/unenvelop
     /**
      * 构造数字信封
      * 
@@ -129,11 +129,15 @@ public final class CryptoMessageSyntax {
     public static byte[] envelop(byte[] data, X509Certificate cert, ASN1ObjectIdentifier alg) {
         try {
             //添加数字信封
-            CMSTypedData msg = new CMSProcessableByteArray(data);
             CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
-            edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(cert).setProvider(BC));
-            CMSEnvelopedData ed = edGen.generate(msg, new JceCMSContentEncryptorBuilder(alg).setProvider(BC).build());
-            return ed.getEncoded();
+            edGen.addRecipientInfoGenerator(
+                new JceKeyTransRecipientInfoGenerator(cert).setProvider(BC)
+            );
+
+            return edGen.generate(
+                    new CMSProcessableByteArray(data),
+                    new JceCMSContentEncryptorBuilder(alg).setProvider(BC).build()
+            ).getEncoded();
         } catch (CertificateEncodingException | CMSException | IOException e) {
             throw new SecurityException(e);
         }
@@ -148,12 +152,14 @@ public final class CryptoMessageSyntax {
     public static byte[] unenvelop(byte[] enveloped, PrivateKey privateKey) {
         try {
             // 获取密文
-            RecipientInformationStore recipients = new CMSEnvelopedData(enveloped).getRecipientInfos();
-            Iterator<?> iter = recipients.getRecipients().iterator();
+            RecipientInformationStore ris = new CMSEnvelopedData(enveloped).getRecipientInfos();
+
+            Iterator<RecipientInformation> iterator = ris.getRecipients().iterator();
             // 解密
-            if (iter.hasNext()) {
-                RecipientInformation recipient = (RecipientInformation) iter.next();
-                return recipient.getContent(new JceKeyTransEnvelopedRecipient(privateKey).setProvider(BC));
+            if (iterator.hasNext()) {
+                return iterator.next().getContent(
+                    new JceKeyTransEnvelopedRecipient(privateKey).setProvider(BC)
+                );
             } else {
                 return null;
             }

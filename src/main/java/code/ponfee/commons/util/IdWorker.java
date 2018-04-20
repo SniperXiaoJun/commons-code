@@ -35,12 +35,13 @@ public final class IdWorker {
     private final long timestampShift;
     private final long timestampMask;
 
-    private final long datacenterId; // 数据中心id
-    private final long workerId; // 工作机器id
+    private final int datacenterId; // 数据中心id
+    private final int workerId; // 工作机器id
+
     private long lastTimestamp = -1L; // 时间戳
     private long sequence = 0L; // 0，并发控制
 
-    public IdWorker(long workerId, long datacenterId, 
+    public IdWorker(int workerId, int datacenterId,
                     int sequenceBits, int workerIdBits, int datacenterIdBits) {
         long maxWorkerId = (1L << workerIdBits) - 1;
         if (workerId > maxWorkerId || workerId < 0) {
@@ -81,11 +82,11 @@ public final class IdWorker {
      * @param workerId
      * @param datacenterId
      */
-    public IdWorker(long workerId, long datacenterId) {
+    public IdWorker(int workerId, int datacenterId) {
         this(workerId, datacenterId, 12, 5, 5);
     }
 
-    public IdWorker(long workerId) {
+    public IdWorker(int workerId) {
         this(workerId, 0);
     }
 
@@ -144,10 +145,11 @@ public final class IdWorker {
         int workerIdBits = 11; // specified 11 bit length
         int datacenterIdBits = 0; // specified 0 bit length
 
-        long maxWorkerId = (1L << workerIdBits) - 1; // 2047(max and mask)
-        long workerId = Networks.toLong(Networks.HOST_IP) & maxWorkerId;
-        long datacenterId = (1L << datacenterIdBits) - 1;
-        return new IdWorker(workerId, datacenterId, sequenceBits, 
+        int maxWorkerId = (int) (1L << workerIdBits) - 1; // 2047(max and mask)
+        int workerId = (int) Networks.toLong(Networks.HOST_IP) & maxWorkerId;
+        int datacenterId = (int) (1L << datacenterIdBits) - 1;
+
+        return new IdWorker(workerId, datacenterId, sequenceBits,
                             workerIdBits, datacenterIdBits);
     }).get();
 
