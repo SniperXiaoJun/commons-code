@@ -74,8 +74,7 @@ public class IdcardResolver {
      * @return
      */
     private boolean resolve(String idcard) {
-        return isSecond(idcard) || isFirst(idcard) || 
-             isHkMacTw(idcard) || isPassport(idcard);
+        return isSecond(idcard) || isFirst(idcard) || isPassport(idcard) || isOther(idcard);
     }
 
     /**
@@ -144,6 +143,23 @@ public class IdcardResolver {
     }
 
     /**
+     * 护照验证
+     * @param idcard
+     * @return
+     */
+    private static final Pattern PASSPORT_REGEX = Pattern.compile(
+        "^1[45][0-9]{7}|G[0-9]{8}|P[0-9]{7}|S[0-9]{7,8}|D[0-9]+$"
+    );
+    private boolean isPassport(String idcard) {
+        if (PASSPORT_REGEX.matcher(idcard).matches()) {
+            this.type = CertType.PASSPORT;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * 验证10位身份编码是否合法
      * @param idCard 身份编码
      * @return 身份证信息数组
@@ -151,7 +167,7 @@ public class IdcardResolver {
     private static final Pattern HONGKONG = Pattern.compile("^[A-Z]{1,2}[0-9]{6}\\(?[0-9A]\\)?$");
     private static final Pattern MACO = Pattern.compile("^(1|5|7)[0-9]{6}\\(?[0-9A-Z]\\)?$");
     private static final Pattern TAIWAN = Pattern.compile("^[a-zA-Z][0-9]{9}$");
-    private boolean isHkMacTw(String idcard) {
+    private boolean isOther(String idcard) {
         idcard = idcard.replaceAll("[\\(|\\)]", "");
 
         if (HONGKONG.matcher(idcard).matches()) { // 香港
@@ -176,23 +192,6 @@ public class IdcardResolver {
         } else {
             return false;
         }
-    }
-
-    /**
-     * 护照验证
-     * @param idcard
-     * @return
-     */
-    private static final Pattern PASSPORT_REGEX = Pattern.compile(
-        "^1[45][0-9]{7}|G[0-9]{8}|P[0-9]{7}|S[0-9]{7,8}|D[0-9]+$"
-    );
-    private boolean isPassport(String idcard) {
-        if (PASSPORT_REGEX.matcher(idcard).matches()) {
-            this.type = CertType.PASSPORT;
-            return true;
-        }
-
-        return false;
     }
 
     /**

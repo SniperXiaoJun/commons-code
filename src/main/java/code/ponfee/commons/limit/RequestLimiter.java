@@ -140,7 +140,7 @@ public class RequestLimiter {
     /**
      * cache captcha of server generate
      * @param key
-     * @param captcha the image cptcha code of server generate
+     * @param captcha the image captcha code of server generate
      * @param expire  缓存有效时间
      * @return
      */
@@ -157,7 +157,7 @@ public class RequestLimiter {
      * @param key  the cache key
      * @param captcha  the captcha
      * @param caseSensitive  is case sensitive
-     * @return true|flase
+     * @return true|false
      */
     public boolean checkCaptcha(String key, String captcha, boolean caseSensitive) {
         String value = client.valueOps().getAndDel(CACHE_CAPTCHA_KEY + key);
@@ -177,10 +177,11 @@ public class RequestLimiter {
     /**
      * 计数周期内的行为<p>
      * 用于登录失败达到一定次数后锁定账户等场景<p>
+     *
      * @param key
      * @param period
      */
-    public void incrAction(String key, int period) {
+    public void traceAction(String key, int period) {
         key = INCR_ACTION_KEY + key;
         long times = client.valueOps().incrBy(key);
         if (times == 1) {

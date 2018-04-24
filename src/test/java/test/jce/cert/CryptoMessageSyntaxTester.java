@@ -38,9 +38,10 @@ public class CryptoMessageSyntaxTester {
         System.out.println("enveloped len------------" + enveloped.length);
         System.out.println("===============================================");
 
-        byte[] unveloped = CryptoMessageSyntax.unenvelop(enveloped, privateKey);
+        byte[] unveloped = CryptoMessageSyntax.unenvelop(enveloped, cert, privateKey);
         System.out.println(new String(unveloped));
 
+        // 用PKCS7Envelope解会报错
         //unveloped = PKCS7Envelope.unenvelop(enveloped, cert, privateKey);
         //System.out.println(new String(unveloped));
         //System.out.println("===============================================");

@@ -36,6 +36,9 @@ import code.ponfee.commons.util.SecureRandoms;
 /**
  * 数字信封（不带签名）
  * 支持的算法有：RC4，DESede
+ * 
+ * CryptoMessageSyntax可以解PKCS7Envelope加密的数字信封
+ * 
  * @author fupf
  */
 @SuppressWarnings("deprecation")
@@ -145,7 +148,6 @@ public final class PKCS7Envelope {
         Item item = recipientInfo.getIssuerAndSerialNumber();
         org.bjca.jce.fastparser.IssuerAndSerialNumber iasn =
                 new org.bjca.jce.fastparser.IssuerAndSerialNumber(envelopeddata, item);
-        item = iasn.getIssuer();
         /*byte[] ss = new byte[item.length];
         ss = DerUtil.getItemDataAndTag(envelopeddata, item);*/
         if (!cert.getSerialNumber().equals(iasn.getSerialNumber().getSerialNumber())) {

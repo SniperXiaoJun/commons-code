@@ -33,15 +33,15 @@ public class MultithreadExecutor {
         }
 
         try {
-            Thread.sleep(sleepSeconds * 1000);
+            Thread.sleep(sleepSeconds * 1000); // main thread sleep
             flag.set(false);
 
             for (Thread thread : threads) {
                 thread.join();
             }
+            logger.info("multi thread execute duration: {}", watch.stop().toString());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        logger.info("multi thread execute duration: {}", watch.stop().toString());
     }
 }

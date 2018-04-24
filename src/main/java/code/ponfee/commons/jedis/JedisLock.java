@@ -138,7 +138,7 @@ public class JedisLock implements Lock, java.io.Serializable {
             if (tryLock()) {
                 break;
             }
-            TimeUnit.MILLISECONDS.sleep(sleepMillis);
+            TimeUnit.MILLISECONDS.sleep(sleepMillis); // to sleep for prevent endless loop
         }
     }
 

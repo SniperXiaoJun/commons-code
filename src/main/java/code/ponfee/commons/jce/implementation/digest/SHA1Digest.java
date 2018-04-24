@@ -1,5 +1,7 @@
 package code.ponfee.commons.jce.implementation.digest;
 
+import static code.ponfee.commons.math.Numbers.BYTE_ZERO;
+
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -8,7 +10,6 @@ import org.apache.commons.codec.binary.Hex;
 import code.ponfee.commons.jce.DigestAlgorithms;
 import code.ponfee.commons.jce.digest.DigestUtils;
 import code.ponfee.commons.math.Maths;
-import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.SecureRandoms;
@@ -194,17 +195,21 @@ public class SHA1Digest {
         this.byteCount += this.blockOffset;
         this.block[this.blockOffset++] = -128; // 填充：先补1000 0000
         if (this.blockOffset > PADDING_BOUNDS) {
-            padding0(this.block, this.blockOffset, BLOCK_SIZE); // 填充0
+            Arrays.fill(this.block, this.blockOffset, BLOCK_SIZE, BYTE_ZERO); // 填充0
             this.digestBlock(this.block);
 
             // reset a empty block, repadding 0x00 and bit length start 0
             this.blockOffset = 0;
         }
 
-        padding0(this.block, this.blockOffset, PADDING_BOUNDS);
+        Arrays.fill(this.block, this.blockOffset, PADDING_BOUNDS, BYTE_ZERO);
 
-        byte[] dataBitLen = Bytes.fromLong(this.byteCount << 3); // bit=byte*8
-        System.arraycopy(dataBitLen, 0, this.block, PADDING_BOUNDS, 8);
+        long dataBitLen = this.byteCount << 3; // bit=byte*8
+
+        // dataBitLen value to byte array and padding in block tail
+        for (int i = 0, j = (Long.BYTES - 1) * 8; i < Long.BYTES; i++, j -= 8) {
+            this.block[PADDING_BOUNDS + i] = (byte) (dataBitLen >>> j);
+        }
 
         this.digestBlock(this.block);
 
@@ -241,23 +246,23 @@ public class SHA1Digest {
 
         // sub-block（子明文分组）
         for (int j = 0; i < 16; j += 4) {
-            this.work[i++] = Bytes.toInt(data, j);
+            work[i++] = Bytes.toInt(data, j);
         }
 
         // ext-block（扩展明文分组）
         for (; i < WORK_SIZE; i++) {
-            this.work[i] = Maths.rotateLeft(this.work[i -  3] ^ this.work[i -  8] 
-                                          ^ this.work[i - 14] ^ this.work[i - 16], 1);
+            work[i] = Maths.rotateLeft(work[i -  3] ^ work[i -  8] 
+                                     ^ work[i - 14] ^ work[i - 16], 1);
         }
 
         int a1 = this.a, b1 = this.b,
             c1 = this.c, d1 = this.d,
             e1 = this.e, t = 0, tmp;
 
-        // round one
-        for (; t < 20;) {
+        // round first
+        for (; t < 20; t++) {
             // 将Kt+Ft(b,c,d)+(a<<5)+e+W[t]的结果赋值给临时变量tmp
-            tmp = K0 + f0(b1, c1, d1) + Maths.rotateLeft(a1, 5) + e1 + this.work[t++];
+            tmp = K0 + f0(b1, c1, d1) + Maths.rotateLeft(a1, 5) + e1 + work[t];
             e1 = d1; // 将链接变量d初始值赋值给链接变量e
             d1 = c1; // 将链接变量c初始值赋值给链接变量d
             c1 = Maths.rotateLeft(b1, 30); // 将链接变量b初始值循环左移30位赋值给链接变量c
@@ -265,9 +270,9 @@ public class SHA1Digest {
             a1 = tmp; // tmp赋值给a
         }
 
-        // round two
-        for (; t < 40;) {
-            tmp = K1 + f1(b1, c1, d1) + Maths.rotateLeft(a1, 5) + e1 + this.work[t++];
+        // round second
+        for (; t < 40; t++) {
+            tmp = K1 + f1(b1, c1, d1) + Maths.rotateLeft(a1, 5) + e1 + work[t];
             e1 = d1;
             d1 = c1;
             c1 = Maths.rotateLeft(b1, 30);
@@ -275,9 +280,9 @@ public class SHA1Digest {
             a1 = tmp;
         }
 
-        // round three
-        for (; t < 60;) {
-            tmp = K2 + f2(b1, c1, d1) + Maths.rotateLeft(a1, 5) + e1 + this.work[t++];
+        // round third
+        for (; t < 60; t++) {
+            tmp = K2 + f2(b1, c1, d1) + Maths.rotateLeft(a1, 5) + e1 + work[t];
             e1 = d1;
             d1 = c1;
             c1 = Maths.rotateLeft(b1, 30);
@@ -285,9 +290,9 @@ public class SHA1Digest {
             a1 = tmp;
         }
 
-        // round four
-        for (; t < WORK_SIZE;) {
-            tmp = K3 + f3(b1, c1, d1) + Maths.rotateLeft(a1, 5) + e1 + this.work[t++];
+        // round fourth
+        for (; t < WORK_SIZE; t++) {
+            tmp = K3 + f3(b1, c1, d1) + Maths.rotateLeft(a1, 5) + e1 + work[t];
             e1 = d1;
             d1 = c1;
             c1 = Maths.rotateLeft(b1, 30);
@@ -317,12 +322,6 @@ public class SHA1Digest {
 
     private static int f3(int b, int c, int d) {
         return f1(b, c, d);
-    }
-
-    private static void padding0(byte[] bytes, int from, int to) {
-        for (int i = from; i < to; i++) {
-            bytes[i] = Numbers.BYTE_ZERO;
-        }
     }
 
     public static void main(String[] args) {

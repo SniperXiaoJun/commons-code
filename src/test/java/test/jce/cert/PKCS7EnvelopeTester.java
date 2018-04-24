@@ -39,7 +39,7 @@ public class PKCS7EnvelopeTester {
         System.out.println(new String(unveloped));
         //System.out.println("===============================================");
 
-        unveloped = CryptoMessageSyntax.unenvelop(enveloped, privateKey);
+        unveloped = CryptoMessageSyntax.unenvelop(enveloped, cert, privateKey);
         System.out.println(new String(unveloped));
 
         byte[] encrypted = RSACryptor.encrypt(data, (RSAPrivateKey)privateKey);
