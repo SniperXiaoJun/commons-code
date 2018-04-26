@@ -50,6 +50,9 @@ import code.ponfee.commons.util.Strings;
 
 /**
  * excel导出
+ *
+ * SXSSFWorkbook（size>65536），XSSFWorkbook（.xlsx），HSSFWorkbook（.xls）
+ *
  * @author fupf
  */
 public class ExcelExporter extends AbstractExporter {
@@ -228,7 +231,8 @@ public class ExcelExporter extends AbstractExporter {
 
             // 合计数据
             for (int i = 0; i < tfoots.length; i++) {
-                createCell(row, i + mergeNum, styles.get(mergeNum + i), theads.get(mergeNum + i).getTmeta(), tfoots[i]);
+                createCell(row, i + mergeNum, styles.get(mergeNum + i),
+                           theads.get(mergeNum + i).getTmeta(), tfoots[i]);
             }
         }
 
@@ -261,7 +265,8 @@ public class ExcelExporter extends AbstractExporter {
         images.put(getName(), endRow + 2);
 
         SXSSFDrawing drawing = sheet.createDrawingPatriarch();
-        XSSFClientAnchor anchor = new XSSFClientAnchor(0, 0, width, height, startCol, startRow, (short) endCol, endRow);
+        XSSFClientAnchor anchor = new XSSFClientAnchor(0, 0, width, height, startCol,
+                                                       startRow, (short) endCol, endRow);
 
         anchor.setAnchorType(AnchorType.DONT_MOVE_AND_RESIZE);
         drawing.createPicture(anchor, workbook.addPicture(imageBytes, SXSSFWorkbook.PICTURE_TYPE_PNG));

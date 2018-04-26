@@ -413,10 +413,6 @@ public final class WebUtils {
      * @return
      */
     private static String toJson(Object data) {
-        if (data == null) {
-            return null;
-        }
-
         return (data instanceof CharSequence)
                ? data.toString()
                : Jsons.toJson(data);
@@ -430,4 +426,5 @@ public final class WebUtils {
         resp.setHeader("Content-Disposition", "attachment;filename=" + filename);
         resp.setCharacterEncoding(charset);
     }
+
 }

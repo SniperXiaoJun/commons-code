@@ -174,36 +174,35 @@ public class Captchas {
         shearY(g, w1, h1, color);
     }
 
-    private static void shearX(Graphics g, int w1, int h1, Color color) {
+    private static void shearX(Graphics g, int w, int h, Color color) {
         int period = current().nextInt(2),
              phase = current().nextInt(2);
-
-        boolean borderGap = true;
         double frames = (2 * Math.PI * phase) / 1.0D;
-        for (int d, i = 0; i < h1; i++) {
+
+        for (int d, i = 0; i < h; i++) {
             d = (int) ((period >> 1) * Math.sin((double) i / period + frames));
-            g.copyArea(0, i, w1, 1, d, 0);
-            if (borderGap) {
-                g.setColor(color);
-                g.drawLine(d, i, 0, i);
-                g.drawLine(d + w1, i, w1, i);
-            }
+            g.copyArea(0, i, w, 1, d, 0);
+            //if (current().nextBoolean()) {
+            g.setColor(color);
+            g.drawLine(d, i, 0, i);
+            g.drawLine(d + w, i, w, i);
+            //}
         }
     }
 
-    private static void shearY(Graphics g, int w1, int h1, Color color) {
-        int period = current().nextInt(40) + 10; // 50;
-        int phase = 7;
+    private static void shearY(Graphics g, int w, int h, Color color) {
+        int period = current().nextInt(40) + 10, // 50
+            phase = 7;
         double frames = (2 * Math.PI * phase) / 20.0D;
-        boolean borderGap = true;
-        for (int d, i = 0; i < w1; i++) {
+
+        for (int d, i = 0; i < w; i++) {
             d = (int) ((period >> 1) * Math.sin((double) i / period + frames));
-            g.copyArea(i, 0, 1, h1, 0, d);
-            if (borderGap) {
-                g.setColor(color);
-                g.drawLine(i, d, i, 0);
-                g.drawLine(i, d + h1, i, h1);
-            }
+            g.copyArea(i, 0, 1, h, 0, d);
+            //if (current().nextBoolean()) {
+            g.setColor(color);
+            g.drawLine(i, d, i, 0);
+            g.drawLine(i, d + h, i, h);
+            //}
         }
     }
 

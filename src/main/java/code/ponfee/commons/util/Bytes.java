@@ -461,7 +461,7 @@ public final class Bytes {
 
     public static char toChar(byte[] bytes, int fromIdx) {
         return (char) (
-            (bytes[fromIdx]         ) << 8
+            (bytes[  fromIdx]       ) << 8
           | (bytes[++fromIdx] & 0xFF)
       );
     }
@@ -570,6 +570,23 @@ public final class Bytes {
         copy(src, srcFrom, srcLen, dest, destFrom, destLen, Numbers.BYTE_ZERO);
     }
 
+    /**
+     * copy src to dest
+     * 从尾部开始拷贝src到dest：
+     *   若src数据不足则在dest前面补0
+     *   若src数据有多则舍去src前面的数据
+     *
+     * 若src不够，则dest前面以heading填充
+     * 若dest不够，则src前面数据舍弃
+     *
+     * @param src
+     * @param srcFrom
+     * @param srcLen
+     * @param dest
+     * @param destFrom
+     * @param destLen
+     * @param heading
+     */
     public static void copy(byte[] src, int srcFrom, int srcLen, byte[] dest, 
                             int destFrom, int destLen, byte heading) {
         int srcTo = Math.min(src.length, srcFrom + srcLen),

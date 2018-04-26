@@ -186,6 +186,7 @@ public class JedisLock implements Lock, java.io.Serializable {
         timeout = unit.toNanos(timeout);
         long startTime = System.nanoTime();
         for (;;) {
+            // Thread.currentThread().isInterrupted(): ClearInterrupted -> false
             if (Thread.interrupted()) {
                 throw new InterruptedException();
             }

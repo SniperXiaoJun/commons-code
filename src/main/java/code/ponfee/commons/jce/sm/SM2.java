@@ -345,7 +345,7 @@ public final class SM2 {
      * @return
      */
     static byte[] calcZ(SM3Digest sm3, ECParameters ecParam, byte[] ida, ECPoint pubKey) {
-        int idaBitLen = ida.length * 8;
+        int idaBitLen = ida.length << 3; // ida.length*8
         sm3.reset();
         sm3.update((byte) (idaBitLen & 0xFF00));
         sm3.update((byte) (idaBitLen & 0x00FF));

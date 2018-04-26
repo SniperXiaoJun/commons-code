@@ -42,6 +42,9 @@ import code.ponfee.commons.util.MavenProjects;
  *      = (g^XB)^XA mod p          <-->  (a^b) mod p = ((a mod p)^b) mod p
  *      = (g^XA mod p)^XB mod p
  *      = (YA)^XB mod p
+ *
+ * g^(a*b) mod p = g^(b*a) mod p
+ *
  * @author fupf
  */
 public final class DHKeyExchanger {

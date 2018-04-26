@@ -121,12 +121,11 @@ public final class Networks {
             logger.warn("Failed to get local host address. cause: {} ", e.getMessage());
         }
         try {
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            if (interfaces != null) {
-                while (interfaces.hasMoreElements()) {
+            Enumeration<NetworkInterface> inters = NetworkInterface.getNetworkInterfaces();
+            if (inters != null) {
+                while (inters.hasMoreElements()) {
                     try {
-                        NetworkInterface network = interfaces.nextElement();
-                        Enumeration<InetAddress> addresses = network.getInetAddresses();
+                        Enumeration<InetAddress> addresses = inters.nextElement().getInetAddresses();
                         while (addresses.hasMoreElements()) {
                             try {
                                 InetAddress address = addresses.nextElement();

@@ -205,12 +205,12 @@ public class MailSender {
                     message.setText(content);
                 }
             } else { // 复杂格式Multipart
-                MimeMultipart mainPart = new MimeMultipart();
+                MimeMultipart mainPart = new MimeMultipart("mixed");
                 if (!isEmpty(envlop.getContent())) { // 正文
                     BodyPart contentPart = new MimeBodyPart();
                     contentPart.setContent(envlop.getContent(), "text/html;charset=" + charset);
                     mainPart.addBodyPart(contentPart);
-                    mainPart.setSubType("alternative");
+                    mainPart.setSubType("alternative"); // 超文本内容
 
                     if (!isEmpty(envlop.getContentImages())) { // 正文嵌入图片
                         // <img src="cid:f32rf213fdsr31242fdsa" />
@@ -220,12 +220,11 @@ public class MailSender {
                             imagePart.setHeader("Content-ID", image.getKey());
                             mainPart.addBodyPart(imagePart);
                         }
+                        mainPart.setSubType("related"); // 内嵌资源（图片）
 
-                        mainPart.setSubType("related");
                         MimeBodyPart bodyPart = new MimeBodyPart();
                         bodyPart.setContent(mainPart);
-
-                        mainPart = new MimeMultipart(bodyPart);
+                        mainPart = new MimeMultipart("mixed", bodyPart);
                     }
                 }
 
@@ -239,7 +238,7 @@ public class MailSender {
                         attachmentPart.setFileName(MimeUtility.encodeText(attachment.getKey(), charset, "B"));
                         mainPart.addBodyPart(attachmentPart);
                     }
-                    mainPart.setSubType("mixed");
+                    mainPart.setSubType("mixed"); // 含有附件
                 }
 
                 message.setContent(mainPart);

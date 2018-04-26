@@ -23,16 +23,16 @@
  *   缺点：效率低
  *   算法：
  *      DH：基于离散对数的实现，主要用于密钥交换
- *      RSA：基于大整数分解的实现，Ron Rivest, Adi Shamir, Leonard Adleman（三人）
+ *      RSA：基于大整数分解的实现，Ron [R]ivest, Adi [S]hamir, Leonard [A]dleman（三人）
  *          https://www.kancloud.cn/kancloud/rsa_algorithm/48488
  *      DSA：基于整数有限域离散对数难题（特点是两个素数公开），Digital Signature Algorithm，顾名思义只用于数字签名
  *      ECC：基于椭圆曲线算法，指在取代RSA
- *   填充：RSA_PKCS1_PADDING（ blocklen=keysize/8–11）、RSA_PKCS1_OAEP_PADDING(keysize-41)、RSA_NO_PADDING
+ *   填充：RSA_PKCS1_PADDING（blocklen=keysize/8–11）、RSA_PKCS1_OAEP_PADDING(keysize-41)、RSA_NO_PADDING
  *   签名/验签：PKCS1及填充、PKCS7格式（附原文|不附原文）
  * 
  * 4、对称与非对称结合：数字信封envelop，结构体，（带签名|不带签名）
  * 
- * 5、数字证书：ASN1、X509、p7b、p7r、p10、p12、PEM、DER等
+ * 5、数字证书：ASN1、X509、p7b、p7r、p10、p12、PEM、DER等概念
  * 
  * 6、BASE64编码：3个字节切分为4个字节后每字节最高位补00  0 ~ 63, “=”，并与编码表对照
  *         前生：解决邮件只能发ASCII码问题
@@ -50,15 +50,50 @@
  * 9、时间戳、签章
  * 
  * 10、区块链：
- *     https://anders.com/blockchain/
- *     SHA256：SHA256(SHA256(version + prev_hash + merkle_root + ntime + nbits + x )) < TARGET
- *              block的版本 version
- *              上一个block的hash值: prev_hash
- *              需要写入的交易记录的hash树的值: merkle_root
- *              更新时间: ntime
- *              当前难度: nbits
- *              Nonce: x
- *              target=tragetmax/difficulty
+ *     https://anders.com/blockchain，https://www.zhihu.com/question/22075219
+ *     SHA256：
+ *          block_header = version + previous_block_hash + merkle_root + time + target_bits + nonce
+ *          for i in range(0, 2^32):
+ *              if sha256(sha256(block_header)) < target_bits:
+ *                  break
+ *              else:
+ *                  continue
+
+ *          version：block的版本（静态常数）
+ *          previous_block_hash：上一个block的hash值（前一区块已经是打包好的）
+ *          merkle_root：需要写入的交易记录的hash树的值（根据本次交易包含的交易列表得到）
+ *          time：更新时间（utc时间：取打包时的时间，也不需要很精确，前后几十秒也都可以）
+ *          target_bits：当前难度
+ *          nonce：从0试到最大值2^32
+ *
+ *          target_bits：TARGET_MAX/difficulty，创世区块时的difficulty=1
+ *          TARGET_MAX=0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+ *
+ *          ┌─────────────────────────────────────────────┐
+ *          │Tx: abcd...1234                              │
+ *          ├─────────────────────┬───────────────────────┤
+ *          │         TxIn        │         TxOut         │
+ *          ├─────────────┬───────┼──────┬────────────────┤
+ *          │prev hash    │index  │btc   │pkScript        │
+ *          ├─────────────┼───────┼──────┼────────────────┤
+ *          │2016...a3c5  │3      │0.15  │OP_DUP a1b2...  │<─┐
+ *          ├─────────────┼───────┼──────┼────────────────┤  │
+ *          │2015...b6d8  │1      │0.08  │OP_DUP c3d4...  │  │
+ *          └─────────────┴───────┴──────┴────────────────┘  │
+ *          ┌────────────────────────────────────────────────┘
+ *          │  ┌─────────────────────────────────────────────┐
+ *          │  │Tx: a1b2...e8f9                              │
+ *          │  ├─────────────────────┬───────────────────────┤
+ *          │  │         TxIn        │         TxOut         │
+ *          │  ├─────────────┬───────┼──────┬────────────────┤
+ *          │  │prev hash    │index  │btc   │pkScript        │
+ *          │  ├─────────────┼───────┼──────┼────────────────┤
+ *          └──│abcd...1234  │0      │0.15  │OP_DUP 3456...  │
+ *             ├─────────────┼───────┼──────┼────────────────┤
+ *             │cdef...5678  │2      │0.02  │OP_DUP 9876...  │
+ *             └─────────────┴───────┴──────┴────────────────┘
+ *
+ *
  *     ECC：公钥160位的指纹作为钱包地址，一笔交易就是一个地址的比特币转移到另一个地址
  *     Base58：end of 4 bytes long checksum
  * 

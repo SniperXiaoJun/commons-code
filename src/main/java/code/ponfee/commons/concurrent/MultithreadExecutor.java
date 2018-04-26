@@ -39,9 +39,10 @@ public class MultithreadExecutor {
             for (Thread thread : threads) {
                 thread.join();
             }
-            logger.info("multi thread execute duration: {}", watch.stop().toString());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        } finally {
+            logger.info("multi thread execute duration: {}", watch.stop());
         }
     }
 }
