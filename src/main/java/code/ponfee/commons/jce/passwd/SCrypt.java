@@ -99,7 +99,7 @@ public final class SCrypt {
         byte[] derived = scrypt(alg, passwd.getBytes(UTF_8), salt, 1 << N, r, p, dkLen);
         String params = Integer.toString(algIdx << 20 | N << 16 | r << 8 | p, 16);
 
-        return new StringBuilder(12 + (salt.length + derived.length) * 4 / 3 + 4)
+        return new StringBuilder(12 + ((salt.length + derived.length) << 2) / 3 + 4)
                         .append(SEPARATOR).append("s0").append(SEPARATOR)
                         .append(params).append(SEPARATOR)
                         .append(encodeBase64(salt)).append(SEPARATOR)
@@ -123,10 +123,10 @@ public final class SCrypt {
         byte[] salt = Base64.getUrlDecoder().decode(parts[3]);
         byte[] actual = Base64.getUrlDecoder().decode(parts[4]);
 
-        int algIdx = params >> 20 & 0xF ,
-                 N = params >> 16 & 0xF ,
-                 r = params >>  8 & 0xFF,
-                 p = params       & 0xFF;
+        int algIdx = (params >> 20) & 0xF ,
+                 N = (params >> 16) & 0xF ,
+                 r = (params >>  8) & 0xFF,
+                 p = (params      ) & 0xFF;
 
         byte[] except = scrypt(ALGORITHM_MAPPING.get(algIdx), 
                                passwd.getBytes(UTF_8), salt, 
@@ -212,54 +212,55 @@ public final class SCrypt {
             throw new IllegalArgumentException("Parameter N is too large");
         }
 
-        byte[] B  = pbkdf2(alg, P, S, 1, p * 128 * r);
-        byte[] XY = new byte[256 * r],
-               V  = new byte[128 * r * N];
+        byte[] B  = pbkdf2(alg, P, S, 1, (p << 7) * r);
+        byte[] XY = new byte[r << 8],
+               V  = new byte[(r << 7) * N];
 
         for (int i = 0; i < p; i++) {
-            smix(B, i * 128 * r, r, N, V, XY);
+            smix(B, (i << 7) * r, r, N, V, XY);
         }
 
         return pbkdf2(alg, P, B, 1, dkLen);
     }
 
     private static void smix(byte[] B, int Bi, int r, int N, byte[] V, byte[] XY) {
-        int i, Xi = 0, Yi = 128 * r;
+        int i, Xi = 0, Yi = r << 7;
 
-        arraycopy(B, Bi, XY, Xi, 128 * r);
+        arraycopy(B, Bi, XY, Xi, Yi);
 
         for (i = 0; i < N; i++) {
-            arraycopy(XY, Xi, V, i * (128 * r), 128 * r);
+            arraycopy(XY, Xi, V, i * Yi, Yi);
             blockmix_salsa8(XY, Xi, Yi, r);
         }
 
         for (i = 0; i < N; i++) {
             int j = integerify(XY, Xi, r) & (N - 1);
-            blockxor(V, j * (128 * r), XY, Xi, 128 * r);
+            blockxor(V, j * Yi, XY, Xi, Yi);
             blockmix_salsa8(XY, Xi, Yi, r);
         }
 
-        arraycopy(XY, Xi, B, Bi, 128 * r);
+        arraycopy(XY, Xi, B, Bi, Yi);
     }
 
     private static void blockmix_salsa8(byte[] BY, int Bi, int Yi, int r) {
         byte[] X = new byte[64];
 
-        arraycopy(BY, Bi + (2 * r - 1) * 64, X, 0, 64);
+        arraycopy(BY, Bi + ((2 * r - 1) << 6), X, 0, 64);
 
-        int i;
-        for (i = 0; i < 2 * r; i++) {
-            blockxor(BY, i * 64, X, 0, 64);
+        int i, n, m;
+        for (i = 0, n = r << 1; i < n; i++) {
+            m = i << 6;
+            blockxor(BY, m, X, 0, 64);
             salsa20_8(X);
-            arraycopy(X, 0, BY, Yi + (i * 64), 64);
+            arraycopy(X, 0, BY, Yi + m, 64);
         }
 
         for (i = 0; i < r; i++) {
-            arraycopy(BY, Yi + (i * 2) * 64, BY, Bi + (i * 64), 64);
+            arraycopy(BY, Yi + (i << 7), BY, Bi + (i << 6), 64);
         }
 
         for (i = 0; i < r; i++) {
-            arraycopy(BY, Yi + (i * 2 + 1) * 64, BY, Bi + (i + r) * 64, 64);
+            arraycopy(BY, Yi + (((i << 1) + 1) << 6), BY, Bi + ((i + r) << 6), 64);
         }
     }
 
@@ -272,10 +273,10 @@ public final class SCrypt {
 
         int i;
         for (i = 0; i < 16; i++) {
-            B32[i]  = (B[i * 4    ] & 0xff)      ;
-            B32[i] |= (B[i * 4 + 1] & 0xff) <<  8;
-            B32[i] |= (B[i * 4 + 2] & 0xff) << 16;
-            B32[i] |= (B[i * 4 + 3] & 0xff) << 24;
+            B32[i]  = (B[(i << 2)    ] & 0xff)      ;
+            B32[i] |= (B[(i << 2) + 1] & 0xff) <<  8;
+            B32[i] |= (B[(i << 2) + 2] & 0xff) << 16;
+            B32[i] |= (B[(i << 2) + 3] & 0xff) << 24;
         }
 
         arraycopy(B32, 0, x, 0, 16);
@@ -320,10 +321,10 @@ public final class SCrypt {
         }
 
         for (i = 0; i < 16; i++) {
-            B[i * 4    ] = (byte) (B32[i]       & 0xff);
-            B[i * 4 + 1] = (byte) (B32[i] >> 8  & 0xff);
-            B[i * 4 + 2] = (byte) (B32[i] >> 16 & 0xff);
-            B[i * 4 + 3] = (byte) (B32[i] >> 24 & 0xff);
+            B[(i << 2)    ] = (byte) (B32[i]       & 0xff);
+            B[(i << 2) + 1] = (byte) (B32[i] >> 8  & 0xff);
+            B[(i << 2) + 2] = (byte) (B32[i] >> 16 & 0xff);
+            B[(i << 2) + 3] = (byte) (B32[i] >> 24 & 0xff);
         }
     }
 
@@ -334,7 +335,7 @@ public final class SCrypt {
     }
 
     private static int integerify(byte[] B, int Bi, int r) {
-        Bi += (2 * r - 1) * 64;
+        Bi += ((2 * r - 1) << 6);
         return ((B[Bi    ] & 0xff)      )
              | ((B[Bi + 1] & 0xff) <<  8)
              | ((B[Bi + 2] & 0xff) << 16)

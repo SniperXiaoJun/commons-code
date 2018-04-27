@@ -44,8 +44,8 @@ public class Crypt {
         int algIdx = ALGORITHM_MAPPING.inverse().get(alg) & 0xF; // maximum is 0xf
         byte[] hashed = crypt(alg, passwd.getBytes(), salt, rounds, provider);
 
-        return new StringBuilder(6 + (salt.length + hashed.length) * 4 / 3 + 4)
-                    .append(SEPARATOR).append(Integer.toString(algIdx << 8L | rounds, 16))
+        return new StringBuilder(6 + ((salt.length + hashed.length) << 2) / 3 + 4)
+                    .append(SEPARATOR).append(Integer.toString((algIdx << 8) | rounds, 16))
                     .append(SEPARATOR).append(encodeBase64(salt))
                     .append(SEPARATOR).append(encodeBase64(hashed))
                     .toString();

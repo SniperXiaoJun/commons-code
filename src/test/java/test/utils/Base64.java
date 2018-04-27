@@ -200,7 +200,7 @@ public final class Base64 {
         }
 
         // Bytes needed for actual encoding
-        int encLen = (len / 3) * 4 + (len % 3 > 0 ? 4 : 0);
+        int encLen = ((len / 3) << 2) + (len % 3 > 0 ? 4 : 0);
 
         byte[] outBuff = new byte[encLen];
 

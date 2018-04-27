@@ -84,7 +84,7 @@ public final class PBKDF2 {
         String params = Integer.toString(algIdx << 16L | iterationCount, 16);
 
         // format iterations:salt:hash
-        return new StringBuilder(8 + (salt.length + hash.length) * 4 / 3 + 4)
+        return new StringBuilder(8 + ((salt.length + hash.length) << 2) / 3 + 4)
                 .append(SEPARATOR).append(params)
                 .append(SEPARATOR).append(encodeBase64(salt))
                 .append(SEPARATOR).append(encodeBase64(hash))
@@ -144,7 +144,7 @@ public final class PBKDF2 {
      */
     private static byte[] pbkdf2(HmacAlgorithms alg, char[] password, byte[] salt,
                                  int iterationCount, int dkLen) {
-        PBEKeySpec spec = new PBEKeySpec(password, salt, iterationCount, dkLen * 8);
+        PBEKeySpec spec = new PBEKeySpec(password, salt, iterationCount, dkLen << 3);
         try {
             SecretKeyFactory skf = SecretKeyFactory.getInstance(
                 "PBKDF2With" + alg.algorithm(), Providers.BC

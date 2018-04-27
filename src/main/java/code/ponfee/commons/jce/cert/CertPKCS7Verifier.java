@@ -68,7 +68,7 @@ public class CertPKCS7Verifier extends CertSignedVerifier {
         this.pkcs7 = pkcs7;
 
         SignerInfo[] signs = pkcs7.getSignerInfos();
-        Map<BigInteger, X509Certificate> certs = new HashMap<>(signs.length * 2);
+        Map<BigInteger, X509Certificate> certs = new HashMap<>(signs.length << 1);
         for (X509Certificate cert : pkcs7.getCertificates()) {
             certs.put(cert.getSerialNumber(), cert);
         }

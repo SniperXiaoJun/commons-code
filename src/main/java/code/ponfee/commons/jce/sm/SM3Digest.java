@@ -166,15 +166,15 @@ public class SM3Digest {
          * @return
          */
         static byte[] padding(byte[] in, int bLen) {
-            int k = 448 - (8 * in.length + 1) % 512;
+            int k = 448 - (((in.length << 3) + 1) & 0x1FF); // % 512
             if (k < 0) {
-                k = 960 - (8 * in.length + 1) % 512;
+                k = 960 - (((in.length << 3) + 1) & 0x1FF);
             }
             k += 1;
             byte[] padd = new byte[k / 8];
             padd[0] = (byte) 0x80;
-            long n = in.length * 8 + bLen * 512;
-            byte[] out = new byte[in.length + k / 8 + 64 / 8];
+            long n = (in.length << 3) + (bLen << 9);
+            byte[] out = new byte[in.length + k / 8 + 8];
             int pos = 0;
             System.arraycopy(in, 0, out, 0, in.length);
             pos += in.length;
@@ -196,11 +196,11 @@ public class SM3Digest {
         }
 
         static byte[] convert(int[] arr) {
-            byte[] out = new byte[arr.length * 4];
+            byte[] out = new byte[arr.length << 2];
             byte[] tmp;
             for (int i = 0; i < arr.length; i++) {
                 tmp = bigEndianIntToByte(arr[i]);
-                System.arraycopy(tmp, 0, out, i * 4, 4);
+                System.arraycopy(tmp, 0, out, i << 2, 4);
             }
             return out;
         }

@@ -15,11 +15,11 @@ import java.util.Enumeration;
 /**
  * 网络工具类
  *
- * isAnyLocalAddress  通配符地址         IPv4的通配符地址是0.0.0.0
+ * isAnyLocalAddress  通配符地址        IPv4的通配符地址是0.0.0.0
  * isLoopbackAddress  回环地址          IPv4的的范围是127.0.0.0 ~ 127.255.255.255    IPv6的是0:0:0:0:0:0:0:1,也可以简写成::1
  * isLinkLocalAddress 本地连接地址       IPv4的的范围是169.254.0.0 ~ 169.254.255.255  IPv6的前12位是FE8，其他的位可以是任意取值
  * isSiteLocalAddress 地区本地地址       IPv4的分为三段:10.0.0.0 ~ 10.255.255.255等   IPv6的地区本地地址的前12位是FEC，其他的位可以是任意取值
- * isMulticastAddress 广播地址           IPv4的范围是224.0.0.0 ~ 239.255.255.255     IPv6的第一个字节是FF，其他的字节可以是任意值
+ * isMulticastAddress 广播地址          IPv4的范围是224.0.0.0 ~ 239.255.255.255     IPv6的第一个字节是FF，其他的字节可以是任意值
  * isMCGlobal         全球范围的广播地址
  * isMCLinkLocal      子网广播地址
  * isMCNodeLocal      本地接口广播地址

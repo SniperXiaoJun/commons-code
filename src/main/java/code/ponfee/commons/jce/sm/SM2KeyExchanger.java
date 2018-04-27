@@ -1,14 +1,14 @@
 package code.ponfee.commons.jce.sm;
 
+import code.ponfee.commons.jce.ECParameters;
+import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.SecureRandoms;
+import org.bouncycastle.math.ec.ECPoint;
+
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Arrays;
-
-import org.bouncycastle.math.ec.ECPoint;
-
-import code.ponfee.commons.jce.ECParameters;
-import code.ponfee.commons.util.Bytes;
 
 /**
  * SM2 key exchange implementation
@@ -52,7 +52,7 @@ public class SM2KeyExchanger implements Serializable {
      * @return TransportEntity
      */
     public TransportEntity step1PartA() {
-        rA = SM2.random(ecParam.n);
+        rA = SecureRandoms.random(ecParam.n);
         RA = ecParam.pointG.multiply(rA).normalize();
         return new TransportEntity(RA.getEncoded(false), null, Z, publicKey);
     }
@@ -63,7 +63,7 @@ public class SM2KeyExchanger implements Serializable {
      * @return TransportEntity
      */
     public TransportEntity step2PartB(TransportEntity entity1) {
-        BigInteger rB = SM2.random(ecParam.n);
+        BigInteger rB = SecureRandoms.random(ecParam.n);
         ECPoint RB = ecParam.pointG.multiply(rB).normalize();
         this.rA = rB;
         this.RA = RB;

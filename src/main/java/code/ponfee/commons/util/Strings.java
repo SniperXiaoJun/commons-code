@@ -390,7 +390,7 @@ public class Strings {
             return camelCaseName;
         }
 
-        StringBuilder result = new StringBuilder(camelCaseName.length() * 2);
+        StringBuilder result = new StringBuilder(camelCaseName.length() << 1);
         result.append(Character.toLowerCase(camelCaseName.charAt(0)));
         for (int i = 1, len = camelCaseName.length(); i < len; i++) {
             char ch = camelCaseName.charAt(i);

@@ -2,6 +2,8 @@ package code.ponfee.commons.math;
 
 /**
  * 数学算术
+ * 取模：Modulo Operation
+ *
  * @author Ponfee
  */
 public class Maths {

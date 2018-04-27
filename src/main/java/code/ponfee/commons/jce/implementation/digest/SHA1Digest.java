@@ -207,7 +207,7 @@ public class SHA1Digest {
         long dataBitLen = this.byteCount << 3; // bit=byte*8
 
         // dataBitLen value to byte array and padding in block tail
-        for (int i = 0, j = (Long.BYTES - 1) * 8; i < Long.BYTES; i++, j -= 8) {
+        for (int i = 0, j = (Long.BYTES - 1) << 3; i < Long.BYTES; i++, j -= 8) {
             this.block[PADDING_BOUNDS + i] = (byte) (dataBitLen >>> j);
         }
 

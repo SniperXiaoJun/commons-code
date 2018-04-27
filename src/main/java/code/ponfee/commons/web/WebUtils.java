@@ -1,5 +1,17 @@
 package code.ponfee.commons.web;
 
+import code.ponfee.commons.io.Files;
+import code.ponfee.commons.io.GzipProcessor;
+import code.ponfee.commons.json.Jsons;
+import code.ponfee.commons.util.Networks;
+import code.ponfee.commons.util.UrlCoder;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -8,19 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import code.ponfee.commons.io.Files;
-import code.ponfee.commons.io.GzipProcessor;
-import code.ponfee.commons.json.Jsons;
-import code.ponfee.commons.util.Networks;
-import code.ponfee.commons.util.UrlCoder;
 
 /**
  * web工具类
@@ -75,23 +74,24 @@ public final class WebUtils {
      * @return
      */
     public static String getClientIp(HttpServletRequest req) {
+        boolean invalid = true;
         String ip = req.getHeader("x-forwarded-for");
-        if (StringUtils.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+        if (invalid && (invalid = isInvalidIp(ip))) {
             ip = req.getHeader("Proxy-Client-IP");
         }
-        if (StringUtils.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+        if (invalid && (invalid = isInvalidIp(ip))) {
             ip = req.getHeader("WL-Proxy-Client-IP");
         }
-        if (StringUtils.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+        if (invalid && (invalid = isInvalidIp(ip))) {
             ip = req.getHeader("HTTP_CLIENT_IP");
         }
-        if (StringUtils.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+        if (invalid && (invalid = isInvalidIp(ip))) {
             ip = req.getHeader("HTTP_X_FORWARDED_FOR");
         }
-        if (StringUtils.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+        if (invalid && (invalid = isInvalidIp(ip))) {
             ip = req.getHeader("X-Real-IP");
         }
-        if (StringUtils.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+        if (invalid && (invalid = isInvalidIp(ip))) {
             ip = req.getRemoteAddr();
         }
 
@@ -100,7 +100,7 @@ public final class WebUtils {
             ip = ip.substring(0, ip.indexOf(","));
         }
 
-        if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
+        if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) {
             ip = Networks.HOST_IP; // 如果是本机ip
         }
         return ip;
@@ -355,55 +355,54 @@ public final class WebUtils {
     }
 
     /**
-     * 获取request
-     * @return
+     * Returns the string of web application context path
+     *
+     * @param request the HttpServletRequest
+     * @return web application context path
      */
-    public static HttpServletRequest getRequest() {
-        // <listener><listener-class>org.springframework.web.context.request.RequestContextListener</listener-class></listener>
-        //return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        return WebContext.getRequest();
+    public static String getContextPath(HttpServletRequest request) {
+        return getContextPath(request.getServletContext());
     }
 
     /**
-     * 
-     * 获取response
-     * @return
+     * Returns the string of web application context path
+     *
+     * @param context the ServletContext
+     * @return web application context path
      */
-    public static HttpServletResponse getResponse() {
-        // return ((ServletWebRequest)RequestContextHolder.getRequestAttributes()).getResponse();
-        return WebContext.getResponse();
+    public static String getContextPath(ServletContext context) {
+        /*if (context.getMajorVersion() == 2 && context.getMinorVersion() < 5) {
+            return null;
+        }*/
+        String contextPath = context.getContextPath();
+        return StringUtils.isEmpty(contextPath) ? "/" : contextPath;
     }
 
     /**
      * 会话跟踪
      */
-    public static void setSessionTrace(String token) {
+    public static void setSessionTrace(HttpServletResponse response, String token) {
         int maxAge = (token == null) ? 0 : 86400;
-        HttpServletResponse resp = getResponse();
-        //result.setAuthToken(token); // to resp body
-        WebUtils.addCookie(resp, SESSION_TRACE_COOKIE, token, "/", maxAge); // to cookie
-        WebUtils.addHeader(resp, SESSION_TRACE_HEADER, token); // to header
-    }
-
-    public static String getSessionTrace() {
-        return getSessionTrace(getRequest());
+        //result.setAuthToken(token); // to response body
+        WebUtils.addCookie(response, SESSION_TRACE_COOKIE, token, "/", maxAge); // to cookie
+        WebUtils.addHeader(response, SESSION_TRACE_HEADER, token); // to header
     }
 
     /**
      * 会话跟踪
      */
-    public static String getSessionTrace(HttpServletRequest req) {
-        String authToken = req.getParameter(SESSION_TRACE_PARAME); // from param
+    public static String getSessionTrace(HttpServletRequest request) {
+        String authToken = request.getParameter(SESSION_TRACE_PARAME); // from param
         if (authToken != null) {
             return authToken;
         }
 
-        authToken = WebUtils.getCookie(req, SESSION_TRACE_COOKIE); // from cooike
+        authToken = WebUtils.getCookie(request, SESSION_TRACE_COOKIE); // from cooike
         if (authToken != null) {
             return authToken;
         }
 
-        return WebUtils.getHeader(req, SESSION_TRACE_HEADER); // from header;
+        return WebUtils.getHeader(request, SESSION_TRACE_HEADER); // from header;
     }
 
     // ----------------------------------private methods----------------------------------
@@ -427,4 +426,7 @@ public final class WebUtils {
         resp.setCharacterEncoding(charset);
     }
 
+    private static boolean isInvalidIp(String ip) {
+        return StringUtils.isBlank(ip) || "unknown".equalsIgnoreCase(ip);
+    }
 }

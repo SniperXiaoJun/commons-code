@@ -34,7 +34,7 @@ public final class MessageFormats {
     }
 
     public static String format(String text, Object... args) {
-        Map<String, Object> map = new HashMap<>(args.length * 2);
+        Map<String, Object> map = new HashMap<>(args.length << 1);
         Matcher matcher = PATTERN.matcher(text);
         for (int n = args.length, i = 0; i < n && matcher.find(); i++) {
             map.put(matcher.group(2), args[i]);

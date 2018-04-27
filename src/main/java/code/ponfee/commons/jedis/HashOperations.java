@@ -53,6 +53,35 @@ public class HashOperations extends JedisOperations {
     }
 
     /**
+     * 将 key的值设为value，当且仅当key不存在；若给定的 key已经存在，则 SETNX不做任何动作。
+     * 返回：1成功；0失败；
+     *
+     * @param key
+     * @param field
+     * @param value
+     * @param seconds
+     * @return {@code true} then hset success
+     */
+    public boolean hsetnx(String key, String field,
+                          String value, Integer seconds) {
+        if (value == null) {
+            return false;
+        }
+
+        return call(shardedJedis -> {
+            boolean flag = Numbers.equals(shardedJedis.hsetnx(key, field, value), 1);
+            if (flag) {
+                expireForce(shardedJedis, key, seconds);
+            }
+            return flag;
+        }, false, key, field, value, seconds);
+    }
+
+    public boolean hsetnx(String key, String field, String value) {
+        return this.hsetnx(key, field, value, null);
+    }
+
+    /**
      * 返回哈希表 key 中给定域 field 的值。
      * @param key
      * @param field

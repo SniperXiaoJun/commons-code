@@ -41,13 +41,13 @@ public class RSAHashCryptor extends AbstractRSACryptor {
         BigInteger exponent = getExponent(rsaKey);
 
         // 生成随机对称密钥
-        BigInteger key = SecureRandoms.random(rsaKey.n); // mode是以1XX开头，key是以01X开头
+        BigInteger key = SecureRandoms.random(rsaKey.n); // mod是以1XX开头，key是以01X开头
 
-        // 对密钥进行RSA加密，encryptedKey = key^e mode n
+        // 对密钥进行RSA加密，encryptedKey = key^e mod n
         byte[] encryptedKey = key.modPow(exponent, rsaKey.n).toByteArray();
 
         byte[] result = new byte[keyByteLen + length];
-        // mode pow之后可能被去0或加0
+        // mod pow之后可能被去0或加0
         Bytes.copy(encryptedKey, 0, encryptedKey.length, result, 0, keyByteLen);
 
         // 对密钥进行HASH
@@ -71,7 +71,7 @@ public class RSAHashCryptor extends AbstractRSACryptor {
         // 获取被加密的对称密钥数据
         byte[] encryptedKey = Arrays.copyOfRange(input, 0, keyByteLen);
 
-        // 解密被加密的密钥数据，key = encryptedKey^d mode n
+        // 解密被加密的密钥数据，key = encryptedKey^d mod n
         BigInteger key = new BigInteger(1, encryptedKey).modPow(exponent, rsaKey.n);
 
         // 对密钥进行HASH
@@ -96,10 +96,10 @@ public class RSAHashCryptor extends AbstractRSACryptor {
         // 生成随机对称密钥
         BigInteger key = SecureRandoms.random(rsaKey.n);
 
-        // 对密钥进行RSA加密，encryptedKey = key^e mode n
+        // 对密钥进行RSA加密，encryptedKey = key^e mod n
         byte[] encryptedKey = key.modPow(exponent, rsaKey.n).toByteArray();
 
-        byte[] encryptedKey0 = new byte[keyByteLen]; // mode pow之后可能被去0或加0
+        byte[] encryptedKey0 = new byte[keyByteLen]; // mod pow之后可能被去0或加0
         Bytes.copy(encryptedKey, 0, encryptedKey.length, encryptedKey0, 0, keyByteLen);
 
         byte[] keyArray = key.toByteArray();
@@ -135,7 +135,7 @@ public class RSAHashCryptor extends AbstractRSACryptor {
             byte[] encryptedKey = new byte[keyByteLen];
             input.read(encryptedKey);
 
-            // 解密被加密的密钥数据，key = encryptedKey^d mode n
+            // 解密被加密的密钥数据，key = encryptedKey^d mod n
             BigInteger key = new BigInteger(1, encryptedKey).modPow(exponent, rsaKey.n);
 
             byte[] buffer = new byte[this.getCipherBlockSize(rsaKey)];

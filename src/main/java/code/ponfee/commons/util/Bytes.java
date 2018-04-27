@@ -104,7 +104,7 @@ public final class Bytes {
             return null;
         }
 
-        StringBuilder builder = new StringBuilder(array.length * 8);
+        StringBuilder builder = new StringBuilder(array.length << 3);
         String binary;
         for (byte b : array) {
             // b & 0xFF：byte转int保留bit位
@@ -190,7 +190,7 @@ public final class Bytes {
      */
     @Deprecated
     public static String base64Encode(byte[] data) {
-        StringBuilder builder = new StringBuilder(data.length * 4 / 3 + 2);
+        StringBuilder builder = new StringBuilder((data.length << 2) / 3 + 2);
         for (int i = 0, len = data.length, b1, b2, b3; i < len;) {
             b1 = data[i++] & 0xFF;
             if (i == len) {

@@ -421,7 +421,7 @@ public final class BCrypt {
             }
         }
 
-        byte[] result = new byte[clen * 4];
+        byte[] result = new byte[clen << 2];
         for (i = 0, j = 0; i < clen; i++) {
             result[j++] = (byte) ((cdata[i] >> 24) & 0xff);
             result[j++] = (byte) ((cdata[i] >> 16) & 0xff);

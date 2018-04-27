@@ -113,7 +113,7 @@ public class ByteArrayList extends AbstractArrayList<Byte> {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(size() * 4);
+        StringBuilder builder = new StringBuilder(size() << 2);
         builder.append('[').append(array[start]);
         for (int i = start + 1; i < end; i++) {
             builder.append(",").append(array[i]);

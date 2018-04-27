@@ -104,7 +104,7 @@ public abstract class MethodValidator extends FieldValidator {
                     fieldVal = get.invoke(fieldVal, cst.field());
                     fieldType = fieldVal == null ? null : fieldVal.getClass();
                     fieldName = argsName[cst.index()] + "[" + cst.field() + "]";
-                    builder.append(constrain(fieldName, fieldVal, cst, fieldType)); // can not cache
+                    builder.append(constrain(fieldName, fieldVal, cst, fieldType)); // cannot cache
                 } else {
                     // 验证java bean
                     String[] ognl = cst.field().split("\\.");
@@ -149,14 +149,15 @@ public abstract class MethodValidator extends FieldValidator {
         }
         String errMsg = builder.toString();
         if (logger.isInfoEnabled()) {
-            logger.info("[参数校验失败]-[{}]-{}-[{}]", methodSign, ObjectUtils.toString(args), errMsg);
+            logger.info("[args check not pass]-[{}]-{}-[{}]",
+                        methodSign, ObjectUtils.toString(args), errMsg);
         }
 
         try {
             return method.getReturnType().getConstructor(ResultCode.class, String.class)
                          .newInstance(BAD_REQUEST, BAD_REQUEST.getMsg() + ": " + errMsg);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(errMsg, e);
+        } catch (Throwable t) {
+            throw new IllegalArgumentException(errMsg, t);
         }
     }
 

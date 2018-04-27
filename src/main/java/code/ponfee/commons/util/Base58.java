@@ -67,7 +67,7 @@ public class Base58 {
         }
 
         // The actual encoding.
-        byte[] temp = new byte[data.length * 2];
+        byte[] temp = new byte[data.length << 1];
         int j = temp.length;
         for (int startAt = zeroCount; startAt < data.length;) {
             int mod = divmod58(data, startAt);
@@ -198,7 +198,7 @@ public class Base58 {
             // Integer.toBinaryString(b & 0xFF) --> 10000001
             // new BigInteger(1, new byte[] { b }).toString(2); // 10000001
             int digit256 = number[i] & 0xFF;
-            int temp = remainder * 256 + digit256;
+            int temp = (remainder << 8) + digit256;
             number[i] = (byte) (temp / LENGTH);
             remainder = temp % LENGTH;
         }

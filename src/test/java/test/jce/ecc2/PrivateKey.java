@@ -241,7 +241,7 @@ final public class PrivateKey {
 
     private byte[] signHash(byte[] hash, SignatureConfig config)
             throws SecurityException {
-        if (hash.length * 8 > curveParameters.getN().bitLength())
+        if ((hash.length << 3) > curveParameters.getN().bitLength())
             throw new SecurityException("Hash must not have more bytes than the curve specifies");
         final HMacDSAKCalculator rng = deterministicKGenerator(hash, config.rfc6979Digest);
         final BigInteger z = new BigInteger(1, hash);

@@ -57,7 +57,7 @@ public class PdfP7Sign {
 
         int estimatedSize = 8192;
         HashMap<PdfName, Integer> exc = new HashMap<PdfName, Integer>();
-        exc.put(PdfName.CONTENTS, new Integer(estimatedSize * 2 + 2));
+        exc.put(PdfName.CONTENTS, new Integer((estimatedSize << 1) + 2));
         appearance.preClose(exc);
         
         byte[] bytes1 = IOUtils.toByteArray(appearance.getRangeStream());

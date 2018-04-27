@@ -202,14 +202,11 @@ public class ValueOperations extends JedisOperations {
      */
     public boolean setnx(String key, String value, int seconds) {
         return call(shardedJedis -> {
-            Long result = shardedJedis.setnx(key, value);
-            if (Numbers.equals(result, 1)) {
-                // 设置成功则需要设置失效期
-                expireForce(shardedJedis, key, seconds);
-                return true;
-            } else {
-                return false;
+            boolean flag = Numbers.equals(shardedJedis.setnx(key, value), 1);
+            if (flag) {
+                expireForce(shardedJedis, key, seconds); // 设置成功则需要设置失效期
             }
+            return flag;
         }, false, key, value, seconds);
     }
 

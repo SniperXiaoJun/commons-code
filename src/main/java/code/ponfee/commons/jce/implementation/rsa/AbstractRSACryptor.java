@@ -73,7 +73,7 @@ public abstract class AbstractRSACryptor extends Cryptor {
                     origin = Arrays.copyOfRange(input, offset, to);
                 }
 
-                // 加密：encrypted = origin^e mode n
+                // 加密：encrypted = origin^e mod n
                 encrypted = new BigInteger(1, origin).modPow(exponent, rsaKey.n).toByteArray();
 
                 // 固定密文长度
@@ -101,7 +101,7 @@ public abstract class AbstractRSACryptor extends Cryptor {
                 // 切割密文数据块
                 encrypted = Arrays.copyOfRange(input, offset, min(len, offset + cipherBlockSize));
 
-                // 解密：origin = encrypted^d mode n
+                // 解密：origin = encrypted^d mod n
                 origin = new BigInteger(1, encrypted).modPow(exponent, rsaKey.n).toByteArray();
 
                 if (isPadding) {
@@ -140,7 +140,7 @@ public abstract class AbstractRSACryptor extends Cryptor {
                     origin = Arrays.copyOfRange(buffer, 0, len);
                 }
 
-                // 加密：encrypted = origin^e mode n
+                // 加密：encrypted = origin^e mod n
                 encrypted = new BigInteger(1, origin).modPow(exponent, rsaKey.n).toByteArray();
 
                 // 固定密文长度
@@ -166,7 +166,7 @@ public abstract class AbstractRSACryptor extends Cryptor {
                 // 切割密文数据块
                 encrypted = Arrays.copyOfRange(buffer, 0, len);
 
-                // 解密：origin = encrypted^d mode n
+                // 解密：origin = encrypted^d mod n
                 origin = new BigInteger(1, encrypted).modPow(exponent, rsaKey.n).toByteArray();
 
                 if (isPadding) {
@@ -275,7 +275,7 @@ public abstract class AbstractRSACryptor extends Cryptor {
      * @param input  数据
      * @param from   开始位置
      * @param to     结束位置
-     * @param cipherBlockSize 模字节长（modules/8）
+     * @param cipherBlockSize 模字节长（modulo/8）
      * @param rsaKey 密钥
      * @return the encrypting block with pkcs1 padding
      */

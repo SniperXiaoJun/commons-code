@@ -35,10 +35,13 @@ public final class WebContext {
 
     // -----------------------getter
     public static HttpServletRequest getRequest() {
+        // <listener><listener-class>org.springframework.web.context.request.RequestContextListener</listener-class></listener>
+        //return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         return REQUEST.get();
     }
 
     public static HttpServletResponse getResponse() {
+        // return ((ServletWebRequest)RequestContextHolder.getRequestAttributes()).getResponse();
         return RESPONSE.get();
     }
 

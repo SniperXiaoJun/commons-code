@@ -1,22 +1,20 @@
 package code.ponfee.commons.jce.sm;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Map;
-
+import code.ponfee.commons.jce.ECParameters;
+import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.SecureRandoms;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.math.ec.ECPoint;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-
-import code.ponfee.commons.jce.ECParameters;
-import code.ponfee.commons.util.Bytes;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Map;
 
 /**
  * new BigInteger("0") // 0为十进制数字符串表示
@@ -32,7 +30,6 @@ public final class SM2 {
 
     public static final String PRIVATE_KEY = "SM2PrivateKey";
     public static final String PUBLIC_KEY = "SM2PublicKey";
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final int KEY_LENGTH = SM3Digest.getDigestSize();
 
     private final byte[] key = new byte[KEY_LENGTH];
@@ -250,7 +247,7 @@ public final class SM2 {
         sm3.update(data);
         BigInteger e = new BigInteger(1, sm3.doFinal()), k ,r;
         do {
-            k = random(ecParam.n);
+            k = SecureRandoms.random(ecParam.n);
             ECPoint p = ecParam.pointG.multiply(k).normalize();
             r = e.add(p.getXCoord().toBigInteger()).mod(ecParam.n);
         } while (r.equals(BigInteger.ZERO) || r.add(k).equals(ecParam.n));
@@ -280,8 +277,8 @@ public final class SM2 {
     public static boolean verify(ECParameters ecParam, byte[] data, byte[] ida, 
                                  byte[] signed, byte[] publicKey) {
         Signature signature = new Signature(signed, ecParam.n);
-        if (   !isBetween(signature.r, BigInteger.ONE, ecParam.n)
-            || !isBetween(signature.s, BigInteger.ONE, ecParam.n)) {
+        if (   isNotBetween(signature.r, BigInteger.ONE, ecParam.n)
+            || isNotBetween(signature.s, BigInteger.ONE, ecParam.n)) {
             return false;
         }
 
@@ -324,8 +321,8 @@ public final class SM2 {
         BigInteger x = publicKey.getXCoord().toBigInteger();
         BigInteger y = publicKey.getYCoord().toBigInteger();
 
-        if (   !isBetween(x, BigInteger.ZERO, ecParam.p)
-            || !isBetween(y, BigInteger.ZERO, ecParam.p)) {
+        if (   isNotBetween(x, BigInteger.ZERO, ecParam.p)
+            || isNotBetween(y, BigInteger.ZERO, ecParam.p)) {
             return false;
         }
 
@@ -334,7 +331,6 @@ public final class SM2 {
         BigInteger y1 = y.pow(2).mod(ecParam.p);
 
         return y1.equals(x1) && publicKey.multiply(ecParam.n).isInfinity();
-
     }
 
     /**
@@ -360,28 +356,14 @@ public final class SM2 {
     }
 
     /**
-     * generate the random which is lesser than max number
-     * @param max
-     * @return BigInteger
-     */
-    static BigInteger random(BigInteger max) {
-        BigInteger random = new BigInteger(256, SECURE_RANDOM);
-        while (random.compareTo(max) >= 0) {
-            random = new BigInteger(128, SECURE_RANDOM);
-        }
-        return random;
-    }
-
-    /**
-     * check the number is between min(inclusion) and max(exclusion)
+     * check the number is not between min(inclusion) and max(exclusion)
      * @param number the value
-     * @param min   the min number, inclusion
-     * @param max   the max number, exclusion
-     * @return {@code true} is between
+     * @param min   the minimum number, inclusion
+     * @param max   the maximum number, exclusion
+     * @return {@code true} is not between
      */
-    private static boolean isBetween(BigInteger number, BigInteger min, 
-                                     BigInteger max) {
-        return number.compareTo(min) >= 0 && number.compareTo(max) < 0;
+    private static boolean isNotBetween(BigInteger number, BigInteger min, BigInteger max) {
+        return number.compareTo(min) < 0 || number.compareTo(max) >= 0;
     }
 
     /**

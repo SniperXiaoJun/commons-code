@@ -200,12 +200,10 @@ public class FieldValidator {
 
     private String verifyValue(String str, Object value, Constraint cst) {
         String error = verify(str, value, cst);
-        if (isNotBlank(error) && isNotBlank(cst.msg())) {
-            return cst.msg() + ";";
-        } else if (isBlank(error)) {
-            return EMPTY;
+        if (isNotBlank(error)) { // verify result is not pass
+            return isNotBlank(cst.msg()) ? cst.msg() + ";" : error;
         } else {
-            return error;
+            return EMPTY;
         }
     }
 

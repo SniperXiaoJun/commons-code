@@ -46,7 +46,7 @@ public class RC4 {
 
         // 置换s-box
         for (int i = 0, j = 0, k = 0, keyLen = keyBytes.length; i < STATE_LENGTH; i++) {
-            j = (j + sBox[i] + keyBytes[k++]) & 0xFF; // & 0xFF -> mode sboxLen
+            j = (j + sBox[i] + keyBytes[k++]) & 0xFF; // & 0xFF -> modulo sboxLen
 
             ArrayUtils.swap(this.sBox, i, j);
 

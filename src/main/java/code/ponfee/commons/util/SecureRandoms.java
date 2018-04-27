@@ -67,6 +67,13 @@ public final class SecureRandoms {
         return rnd;
     }
 
+    /**
+     * Returns a pseudo random BigInteger, the bit length
+     * equals mod's bit length - 1
+     *
+     * @param mod the modulo of maximum bounds
+     * @return a pseudo random BigInteger
+     */
     public static BigInteger random(BigInteger mod) {
         return random(mod.bitLength() - 1);
     }
