@@ -1,14 +1,14 @@
 package code.ponfee.commons.mail;
 
-import static code.ponfee.commons.util.ObjectUtils.isEmpty;
-
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Properties;
+import code.ponfee.commons.collect.Collects;
+import code.ponfee.commons.io.Files;
+import code.ponfee.commons.mail.MailEnvelope.MailType;
+import code.ponfee.commons.util.ObjectUtils;
+import code.ponfee.commons.util.RegexUtils;
+import com.sun.mail.util.MailConnectException;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -27,18 +27,15 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Properties;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sun.mail.util.MailConnectException;
-
-import code.ponfee.commons.collect.Collects;
-import code.ponfee.commons.io.Files;
-import code.ponfee.commons.mail.MailEnvelope.MailType;
-import code.ponfee.commons.util.ObjectUtils;
-import code.ponfee.commons.util.RegexUtils;
+import static code.ponfee.commons.util.ObjectUtils.isEmpty;
 
 /**
  * <pre>
@@ -80,6 +77,11 @@ public class MailSender {
 
     private static final int SEND_TIMEOUT_SLEEP = 2000;
     private static Logger logger = LoggerFactory.getLogger(MailSender.class);
+
+    static {
+        // 修复附件文件名过长显示为“ATT_0266BE.dat”
+        System.setProperty("mail.mime.splitlongparameters", "false");
+    }
 
     private final String user;
     private String nickname;

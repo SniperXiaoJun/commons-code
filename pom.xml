@@ -256,14 +256,12 @@
 
 
         <!-- ====================邮件相关==================== -->
-        <!-- java mail，解决附件文件名太长导致显示ATT_01CAA8.dat这种格式的错误附件名 -->
         <dependency>
             <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail.system</artifactId>
-            <version>1.5.5</version>
-            <!-- <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/javax.mail-1.5.5.jar</systemPath> -->
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.1</version>
         </dependency>
+
         <!-- dns邮箱验证 -->
         <dependency>
             <groupId>dnsjava</groupId>

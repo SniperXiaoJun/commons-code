@@ -1,18 +1,16 @@
 package code.ponfee.commons.log;
 
-import java.lang.reflect.Method;
-
+import code.ponfee.commons.exception.Throwables;
+import code.ponfee.commons.limit.CurrentLimiter;
+import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.util.ObjectUtils;
+import com.google.common.base.Preconditions;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
-import code.ponfee.commons.limit.CurrentLimiter;
-import code.ponfee.commons.exception.Throwables;
-import code.ponfee.commons.reflect.ClassUtils;
-import code.ponfee.commons.util.ObjectUtils;
+import java.lang.reflect.Method;
 
 /**
  * <pre>
@@ -29,7 +27,7 @@ import code.ponfee.commons.util.ObjectUtils;
  *     }
  * </pre>
  * 
- * 日志管理切面处理
+ * 日志记录切处理
  * @author fupf
  */
 public abstract class LogRecorder {

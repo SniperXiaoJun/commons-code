@@ -1,5 +1,10 @@
 package code.ponfee.commons.mail;
 
+import org.apache.commons.io.IOUtils;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+
 /**
  * 邮件发送构建类
  * @author fupf
@@ -83,18 +88,18 @@ public final class MailSenderBuilder {
         return sender;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         MailSenderBuilder builder = MailSenderBuilder.newBuilder("fupengfei163@163.com", "");
         builder.nickname("张三").connTimeout(5000).readTimeout(5000).charset("UTF-8")
-                               .retryTimes(2).validateTimes(0).authRequire(false);
+               .retryTimes(2).validateTimes(0).authRequire(false);
         MailSender sender = builder.build();
-        MailEnvelope evp = MailEnvelope.newMimeInstance("fupengfei163@163.com", "图片", "<img src=\"cid:contentid123\" />");
-        evp.setCc(new String[] { "395191357@qq.com", "unkonwn@fdsa.com" });
-        evp.setBcc(new String[] { "unkonwn@test.com" });
-        //evp.addContentImage("contentid123", "d:/QQ图片20170320235130.png");
-        //evp.addAttachment("超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试.xlsx", "d:/abc.xlsx");
-        //evp.addAttachment("超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试.txt", "d:/baidu.html");
-        //evp.addAttachment("超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试.png", IOUtils.toByteArray(new FileInputStream("D:\\图片.png")));
+        MailEnvelope evp = MailEnvelope.newMimeInstance("395191357@qq.com", "图片", "<img src=\"cid:contentid123\" />");
+        evp.setCc(new String[] { "fupengfei.china@gmail.com", "unkonwn@fdsa.com" });
+        evp.setBcc(new String[] { "fupengfei163@163.com", "abcdefdsfdsaf@abc.com" });
+        evp.addContentImage("contentid123", "d:/20150820140846195.jpg");
+        evp.addAttachment("超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试.xlsx", "d:/346576876987432534.xlsx");
+        evp.addAttachment("超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试.html", "d:/百度一下，你就知道.html");
+        evp.addAttachment("超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试超长中文名测试.pdf", IOUtils.toByteArray(new FileInputStream("D:\\LearnElasticSearch.pdf")));
 
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1; i++) {

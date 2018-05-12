@@ -15,7 +15,7 @@ public class LogInfo implements java.io.Serializable {
     private Object args; // 调用参数
     private Object retVal; // 返回值
     private String exception; // 异常信息
-    private int costTime; // 调用消耗时间（毫秒）
+    private int costTime; // 调用耗时（毫秒）
 
     public LogInfo() {}
 
