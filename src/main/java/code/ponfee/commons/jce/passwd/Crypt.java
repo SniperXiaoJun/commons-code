@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.jce.digest.HmacUtils;
+import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
@@ -89,7 +90,9 @@ public class Crypt {
     private static byte[] crypt(HmacAlgorithms alg, byte[] password, 
                                 byte[] salt, int rounds, Provider provider) {
         Mac mac = HmacUtils.getInitializedMac(alg, provider, salt);
-        for (int i = 0; i < rounds; i++) {
+        password = mac.doFinal(password);
+        for (int i = 1; i < rounds; i++) {
+            mac.update(Bytes.fromInt(i));
             password = mac.doFinal(password);
         }
         return password;

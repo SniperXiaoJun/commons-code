@@ -126,7 +126,7 @@ public abstract class LogRecorder {
      * @param logInfo
      */
     protected void log(LogInfo logInfo) {
-        // do no thing
+        // no-thing to do
     }
 
     private String getLogs(LogAnnotation log) {
@@ -134,9 +134,12 @@ public abstract class LogRecorder {
             return "";
         }
 
-        return new StringBuilder("-[").append(log.type())
-                                      .append(log.desc() != null ? "," + log.desc() : "")
-                                      .append("]").toString();
+        StringBuilder builder = new StringBuilder("-[");
+        builder.append(log.type());
+        if (log.desc() != null) {
+            builder.append(',').append(log.desc());
+        }
+        return builder.append(']').toString();
     }
 
 }

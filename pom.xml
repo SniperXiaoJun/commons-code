@@ -176,7 +176,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>24.1-jre</version>
+            <version>25.0-jre</version>
         </dependency>
 
         <!-- joda-time -->
@@ -497,6 +497,7 @@
             <groupId>jdk-lib</groupId>
             <artifactId>tools</artifactId>
             <version>1.8.0_121</version>
+            <scope>compile</scope>
             <!-- <scope>system</scope>
             <systemPath>${pom.basedir}/lib/jdk-tools-1.8.0_121.jar</systemPath> -->
         </dependency>

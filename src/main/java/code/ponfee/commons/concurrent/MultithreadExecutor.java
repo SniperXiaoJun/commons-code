@@ -23,7 +23,7 @@ public class MultithreadExecutor {
         Thread[] threads = new Thread[threadCount];
         for (int i = 0; i < threadCount; i++) {
             threads[i] = new Thread(() -> {
-                while (flag.get()) {
+                while (flag.get() && !Thread.interrupted()) {
                     executable.exec();
                 }
             });
@@ -40,6 +40,7 @@ public class MultithreadExecutor {
                 thread.join();
             }
         } catch (InterruptedException e) {
+            flag.set(false);
             throw new RuntimeException(e);
         } finally {
             logger.info("multi thread execute duration: {}", watch.stop());

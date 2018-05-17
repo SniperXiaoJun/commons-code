@@ -79,14 +79,14 @@ public class MailSender {
     private static Logger logger = LoggerFactory.getLogger(MailSender.class);
 
     static {
-        // 修复附件文件名过长显示为“ATT_0266BE.dat”
+        // 修复附件文件名过长显示为“ATT_0266BE.dat”的问题
         System.setProperty("mail.mime.splitlongparameters", "false");
     }
 
     private final String user;
-    private String nickname;
     private final String password;
     private final String smtpHost;
+    private String nickname;
     private String charset = Files.UTF_8;
     private int retryTimes;
     private int validateTimes;

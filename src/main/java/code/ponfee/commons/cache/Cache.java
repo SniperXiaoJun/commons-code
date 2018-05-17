@@ -37,9 +37,9 @@ public class Cache<T> {
     private final Map<Comparable<?>, CacheValue<T>> cache = new ConcurrentHashMap<>(); // 缓存容器
 
     private volatile boolean isDestroy = false; // 是否被销毁
-    private DateProvider dateProvider = DateProvider.SYSTEM;
     private final Lock lock = new ReentrantLock(); // 定时清理加锁
     private ScheduledExecutorService executor;
+    private DateProvider dateProvider = DateProvider.SYSTEM;
 
     Cache(boolean caseSensitiveKey, boolean compressKey, long keepAliveInMillis, 
           int autoReleaseInSeconds, ScheduledExecutorService scheduleExecutor) {
@@ -214,9 +214,11 @@ public class Cache<T> {
         for (Iterator<Entry<Comparable<?>, CacheValue<T>>> i = cache.entrySet().iterator(); i.hasNext();) {
             cacheValue = i.next().getValue();
             if (cacheValue.isAlive(now())) {
-                if (   (value == null && cacheValue.getValue() == null) 
-                    || (value != null && value.equals(cacheValue.getValue())) 
-                ) {
+                if (value == null) {
+                    if (cacheValue.getValue() == null) {
+                        return true;
+                    }
+                } else if (value.equals(cacheValue.getValue())) {
                     return true;
                 }
             } else {
