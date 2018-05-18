@@ -157,7 +157,7 @@ public class HttpParams {
         }
 
         // 拼接待签名串，blank string to prevent if signingMap is empty
-        StringBuilder signing = new StringBuilder("");
+        StringBuilder signing = new StringBuilder();
         for (Map.Entry<String, String> entry : signingMap.entrySet()) {
             signing.append(entry.getKey()).append('=').append(wrapChar)
                    .append(entry.getValue()).append(wrapChar).append('&');

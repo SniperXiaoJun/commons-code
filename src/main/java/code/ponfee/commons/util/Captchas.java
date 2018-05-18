@@ -75,12 +75,9 @@ public class Captchas {
         Graphics2D g2 = image.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         Color[] colors = new Color[5];
-        float[] fractions = new float[colors.length];
         for (int i = 0; i < colors.length; i++) {
             colors[i] = COLOR_SPACES[current().nextInt(COLOR_SPACES.length)];
-            fractions[i] = current().nextFloat();
         }
-        Arrays.sort(fractions);
 
         g2.setColor(Color.GRAY); // 设置边框色
         g2.fillRect(0, 0, width, height);

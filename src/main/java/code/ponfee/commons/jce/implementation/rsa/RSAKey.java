@@ -1,21 +1,21 @@
 package code.ponfee.commons.jce.implementation.rsa;
 
+import code.ponfee.commons.jce.implementation.Key;
+import code.ponfee.commons.util.SecureRandoms;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
+import org.apache.commons.io.IOUtils;
+import sun.security.util.DerInputStream;
+import sun.security.util.DerOutputStream;
+import sun.security.util.DerValue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import org.apache.commons.io.IOUtils;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
-
-import code.ponfee.commons.jce.implementation.Key;
-import code.ponfee.commons.util.SecureRandoms;
-import sun.security.util.DerInputStream;
-import sun.security.util.DerOutputStream;
-import sun.security.util.DerValue;
+import static java.math.BigInteger.ONE;
 
 /**
  * The RSA Key
@@ -191,10 +191,10 @@ public class RSAKey implements Key {
                 }
                 keyPair.n = keyPair.p.multiply(keyPair.q);
             } while (keyPair.n.bitLength() != keySize);
-            keyPair.p1 = keyPair.p.subtract(BigInteger.ONE);
-            keyPair.q1 = keyPair.q.subtract(BigInteger.ONE);
+            keyPair.p1 = keyPair.p.subtract(ONE);
+            keyPair.q1 = keyPair.q.subtract(ONE);
             keyPair.phi = keyPair.p1.multiply(keyPair.q1);
-        } while (!keyPair.e.gcd(keyPair.phi).equals(BigInteger.ONE));
+        } while (!keyPair.e.gcd(keyPair.phi).equals(ONE));
 
         keyPair.d = keyPair.e.modInverse(keyPair.phi);
         keyPair.pe = keyPair.d.mod(keyPair.p1);
@@ -218,29 +218,25 @@ public class RSAKey implements Key {
         int qs = keySize >> 1;
         keyPair.e = BigInteger.valueOf(e);
         for (;;) {
-            for (;;) {
+            do {
                 keyPair.p = new BigInteger(keySize - qs, 1, SECURE_RANDOM);
-                if (keyPair.p.subtract(BigInteger.ONE).gcd(keyPair.e).compareTo(BigInteger.ONE) == 0
-                    && keyPair.p.isProbablePrime(10)) {
-                    break;
-                }
-            }
-            for (;;) {
+            } while (keyPair.p.subtract(ONE).gcd(keyPair.e).compareTo(ONE) != 0
+                     || !keyPair.p.isProbablePrime(10));
+
+            do {
                 keyPair.q = new BigInteger(qs, 1, SECURE_RANDOM);
-                if (keyPair.q.subtract(BigInteger.ONE).gcd(keyPair.e).compareTo(BigInteger.ONE) == 0
-                    && keyPair.q.isProbablePrime(10)) {
-                    break;
-                }
-            }
+            } while (keyPair.q.subtract(ONE).gcd(keyPair.e).compareTo(ONE) != 0
+                     || !keyPair.q.isProbablePrime(10));
+
             if (keyPair.p.compareTo(keyPair.q) <= 0) {
                 BigInteger t = keyPair.p;
                 keyPair.p = keyPair.q;
                 keyPair.q = t;
             }
-            keyPair.p1 = keyPair.p.subtract(BigInteger.ONE);
-            keyPair.q1 = keyPair.q.subtract(BigInteger.ONE);
+            keyPair.p1 = keyPair.p.subtract(ONE);
+            keyPair.q1 = keyPair.q.subtract(ONE);
             keyPair.phi = keyPair.p1.multiply(keyPair.q1);
-            if (keyPair.phi.gcd(keyPair.e).compareTo(BigInteger.ONE) == 0) {
+            if (keyPair.phi.gcd(keyPair.e).compareTo(ONE) == 0) {
                 keyPair.n = keyPair.p.multiply(keyPair.q);
                 keyPair.d = keyPair.e.modInverse(keyPair.phi);
                 keyPair.pe = keyPair.d.mod(keyPair.p1);

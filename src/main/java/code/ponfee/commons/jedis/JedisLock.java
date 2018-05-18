@@ -115,10 +115,7 @@ public class JedisLock implements Lock, java.io.Serializable {
      * 等待锁直到获取
      */
     public @Override void lock() {
-        for (;;) {
-            if (tryLock()) {
-                break;
-            }
+        while (!tryLock()) {
             try {
                 TimeUnit.MILLISECONDS.sleep(sleepMillis);
             } catch (InterruptedException e) {

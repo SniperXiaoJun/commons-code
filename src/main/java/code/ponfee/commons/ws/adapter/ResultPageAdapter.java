@@ -25,7 +25,7 @@ public abstract class ResultPageAdapter<T> extends XmlAdapter<Result<TransitPage
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         } else if (v.getData().getRows() == null || v.getData().getRows().getItem() == null) {
-            return new Result<>(v.getCode(), v.getMsg(), new Page<T>());
+            return new Result<>(v.getCode(), v.getMsg(), new Page<>());
         }
 
         return new Result<>(v.getCode(), v.getMsg(), TransitPage.recover(v.getData()));
@@ -35,7 +35,7 @@ public abstract class ResultPageAdapter<T> extends XmlAdapter<Result<TransitPage
         if (v.getData() == null) {
             return new Result<>(v.getCode(), v.getMsg(), null);
         } else if (v.getData().getRows() == null) {
-            return new Result<>(v.getCode(), v.getMsg(), new TransitPage<T>());
+            return new Result<>(v.getCode(), v.getMsg(), new TransitPage<>());
         }
 
         return new Result<>(v.getCode(), v.getMsg(), TransitPage.transform(v.getData(), type));

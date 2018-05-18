@@ -167,7 +167,7 @@ public final class XmlWriter {
 
         @Override
         protected String value() {
-            StringBuilder content = new StringBuilder("");
+            StringBuilder content = new StringBuilder();
             for (E<?> e : value) {
                 if (e != null) {
                     content.append(e.render());
