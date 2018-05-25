@@ -12,13 +12,14 @@
 /**/.DS_Store
 
 # Maven
-/log/
 /**/target/
-out/
 
-#webapp
+# Webapp
 /**/src/main/webapp/WEB-INF/classes/
 
 # Others
+/log/
+/logs/
+/out/
 /**/bin/
 /**/.myeclipse

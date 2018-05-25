@@ -1,3 +1,11 @@
+/* __________              _____                                          *\
+** \______   \____   _____/ ____\____   ____        Ponfee's code         **
+**  |     ___/  _ \ /    \   __\/ __ \_/ __ \       (c) 2017-2018, MIT    **
+**  |    |  (  <_> )   |  \  | \  ___/\  ___/       http://www.ponfee.cn  **
+**  |____|   \____/|___|  /__|  \___  >\___  >                            **
+**                      \/          \/     \/                             **
+\*                                                                        */
+
 package code.ponfee.commons.jce;
 
 import java.nio.charset.Charset;
@@ -159,6 +167,7 @@ public abstract class CryptoProvider {
      * @return
      */
     public static CryptoProvider symmetricKeyProvider(final SymmetricCryptor symmetricKey) {
+        // the symmetricKey is thread-safe
         return new CryptoProvider() {
             @Override
             public byte[] encrypt(byte[] original) {
@@ -175,8 +184,9 @@ public abstract class CryptoProvider {
     }
 
     /**
-     * rsa private key密钥组件
+     * RSA private key密钥组件
      * forbid use private key encrypt and use public key decrypt
+     * 
      * @param pkcs8PrivateKey  the string of pkcs8 private key format
      * @return
      */
@@ -189,7 +199,7 @@ public abstract class CryptoProvider {
             public byte[] encrypt(byte[] original) {
                 Preconditions.checkArgument(original != null);
                 // only support public key encrypt
-                // forbid encrypt use private key
+                // forbid encrypt with private key
                 return RSACryptor.encrypt(original, pubKey); // 公钥加密
             }
 

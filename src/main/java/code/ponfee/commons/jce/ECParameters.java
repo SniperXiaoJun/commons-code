@@ -24,12 +24,15 @@ import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.util.SecureRandoms;
 
 /** 
- * Specifications completely defining an elliptic curve. Used to define an
- * elliptic curve by EllipticCurve, define(ECParamters ecp).
- * NOTE: This is designed for an elliptic curve on the form:
- * y^2 = x^3 + ax + b (mod p)
+ * Specifications completely defining an elliptic curve. 
+ * Used to define an elliptic curve by EllipticCurve, 
+ * define(ECParamters ecp). 
+ * NOTE: This is designed for an elliptic curve on the form: 
+ *   <b>y^2 = x^3 + ax + b (mod p)</b>
  * with fixed generator and precomputed order.
+ * 
  * {@link SECNamedCurves#getByName(String)}
+ * 
  * @author Ponfee
 */
 @SuppressWarnings("unchecked")
@@ -222,14 +225,11 @@ public class ECParameters implements java.io.Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (null == obj) {
+        if (!(obj instanceof ECParameters)) {
             return false;
         }
         if (this == obj) {
             return true;
-        }
-        if (this.getClass() != obj.getClass()) {
-            return false;
         }
 
         ECParameters other = (ECParameters) obj;
