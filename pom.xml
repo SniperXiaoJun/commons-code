@@ -32,7 +32,7 @@
                 </repository>
             </distributionManagement>
             <properties>
-                <publish.version>1.0.0-SNAPSHOT</publish.version>
+                <publish.version>1.4-SNAPSHOT</publish.version>
                 <separator>;</separator>
             </properties>
         </profile>
@@ -45,7 +45,7 @@
                 </repository>
             </distributionManagement>
             <properties>
-                <publish.version>1.0.0</publish.version>
+                <publish.version>1.4</publish.version>
                 <separator>:</separator>
             </properties>
         </profile>
