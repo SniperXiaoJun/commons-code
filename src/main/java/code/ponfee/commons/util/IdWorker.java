@@ -162,6 +162,7 @@ public final class IdWorker {
             if (map.put(id, obj) != null) {
                 System.err.println(id);
             }
+            //Thread.currentThread().interrupt();
         }, 5);
         System.out.println(map.size());
     }

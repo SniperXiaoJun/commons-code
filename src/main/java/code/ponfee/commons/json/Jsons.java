@@ -1,14 +1,13 @@
 package code.ponfee.commons.json;
 
-import java.io.IOException;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.IOException;
 
 /**
  * The json utility based jackson
@@ -126,7 +125,9 @@ public final class Jsons {
 
     /**
      * Deserialize the json string, specified collections class and element class
-     * 
+     *
+     * eg: parse(json, Map.class, String.class, Object.class);
+     *
      * @param json          the json string
      * @param collectClass  the collection class type
      * @param elemClasses   the element class type
