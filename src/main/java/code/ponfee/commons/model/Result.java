@@ -34,6 +34,14 @@ public class Result<T> implements java.io.Serializable {
         this.data = data;
     }
 
+    public Result(ResultCode code, String msg) {
+        this(code.getCode(), msg, null);
+    }
+
+    public Result(ResultCode code) {
+        this(code.getCode(), code.getMsg(), null);
+    }
+
     // ---------------------------------static methods/success methods
     public static Result<Void> success() {
         return SUCCESS;

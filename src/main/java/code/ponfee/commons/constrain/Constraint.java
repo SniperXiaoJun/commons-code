@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Repeatable(Constraints.class)
+@Repeatable(Constraints.class) // 当只有一个Constraint时要包上Constraints
 @Documented
 public @interface Constraint {
 
