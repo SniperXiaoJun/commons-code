@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>${project.encoding}</project.build.sourceEncoding>
         <spring.version>4.3.17.RELEASE</spring.version>
         <poi.version>3.17</poi.version>
-        <log4j2.version>2.10.0</log4j2.version>
+        <log4j2.version>2.11.0</log4j2.version>
         <slf4j.version>1.7.25</slf4j.version>
         <bouncycastle.version>1.59</bouncycastle.version>
     </properties>
@@ -156,7 +156,8 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.0</version>
+            <version>4.0.1</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- dom4j -->

@@ -1,16 +1,17 @@
 package code.ponfee.commons.log;
 
-import code.ponfee.commons.exception.Throwables;
-import code.ponfee.commons.limit.CurrentLimiter;
-import code.ponfee.commons.reflect.ClassUtils;
-import code.ponfee.commons.util.ObjectUtils;
-import com.google.common.base.Preconditions;
+import java.lang.reflect.Method;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
+import com.google.common.base.Preconditions;
+
+import code.ponfee.commons.exception.Throwables;
+import code.ponfee.commons.limit.CurrentLimiter;
+import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * <pre>
@@ -76,7 +77,8 @@ public abstract class LogRecorder {
     public Object around(ProceedingJoinPoint pjp, LogAnnotation log) throws Throwable {
         MethodSignature m = (MethodSignature) pjp.getSignature();
         Method method = pjp.getTarget().getClass().getMethod(m.getName(), m.getParameterTypes());
-        String methodName = ClassUtils.getMethodSignature(method);
+        //String methodName = ClassUtils.getMethodSignature(method);
+        String methodName = method.toGenericString();
 
         // request volume threshold
         if (circuitBreaker != null && log != null && log.enabled()
@@ -108,7 +110,7 @@ public abstract class LogRecorder {
             }
             return retVal;
         } catch (Throwable e) {
-            logger.error("[exec-throwing]-[{}]{}-{}", methodName, logs, ObjectUtils.toString(logInfo.getArgs()), e);
+            logger.error("[exec-throw]-[{}]{}-{}", methodName, logs, ObjectUtils.toString(logInfo.getArgs()), e);
             logInfo.setCostTime((int) (System.currentTimeMillis() - start));
             logInfo.setException(Throwables.getStackTrace(e));
             throw e; // 向外抛
