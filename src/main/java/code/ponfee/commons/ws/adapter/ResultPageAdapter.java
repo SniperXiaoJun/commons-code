@@ -9,8 +9,11 @@ import code.ponfee.commons.ws.adapter.model.TransitPage;
 
 /**
  * Result<Page<T>>转换器
- * @author fupf
  * @param <T>
+ * 
+ * @see java.util.Collections.PageableAdapter
+ * 
+ * @author fupf
  */
 public abstract class ResultPageAdapter<T> extends XmlAdapter<Result<TransitPage<T>>, Result<Page<T>>> {
 

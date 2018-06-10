@@ -18,9 +18,10 @@ import code.ponfee.commons.ws.adapter.model.MapItemArray;
 
 /**
  * Result<List<Map<K,V>>转换器
- * @author fupf
  * @param <K>
  * @param <V>
+ * 
+ * @author fupf
  */
 @SuppressWarnings("unchecked")
 public abstract class ResultListMapAdapter<K, V> extends XmlAdapter<Result<MapItemArray>, Result<List<Map<K, V>>>> {

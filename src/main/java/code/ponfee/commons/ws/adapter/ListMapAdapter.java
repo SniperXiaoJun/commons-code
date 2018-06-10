@@ -17,9 +17,10 @@ import code.ponfee.commons.ws.adapter.model.MapItemArray;
 
 /**
  * List<Map<K,V>转换器
- * @author fupf
  * @param <K>
  * @param <V>
+ * 
+ * @author Ponfee
  */
 //@XmlSeeAlso({ Object[][].class }) 在@WebService注解的接口中加上此注解
 @SuppressWarnings("unchecked")

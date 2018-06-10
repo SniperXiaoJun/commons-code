@@ -101,6 +101,7 @@ public abstract class MethodValidator extends FieldValidator {
                 } else if (Map.class.isInstance(fieldVal) || Dictionary.class.isInstance(fieldVal)) {
                     // 验证map对象
                     Method get = fieldVal.getClass().getMethod("get", Object.class);
+                    get.setAccessible(true); // ImmutableMap must be set accessible true
                     fieldVal = get.invoke(fieldVal, cst.field());
                     fieldType = fieldVal == null ? null : fieldVal.getClass();
                     fieldName = argsName[cst.index()] + "[" + cst.field() + "]";

@@ -7,5 +7,7 @@
  *
  *  若还无法转换，可在接口类（interface）上加注解：@XmlSeeAlso({ String[].class, Object[].class, Object[][].class, SomeBean[].class })
  * </pre>
+ * 
+ * @author Ponfee
  */
 package code.ponfee.commons.ws.adapter;

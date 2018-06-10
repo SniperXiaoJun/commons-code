@@ -14,7 +14,7 @@ import java.util.Set;
  * <pre>
  * ContextLoaderListener的beanfactory是DispatcherServlet的parent
  * spring上下文无法访问spring mvc上下文，但spring mvc上下文却能访问spring上下文
- *   解决方案1：在DispatcherServlet配置bean aware，如<bean id="bean" class="xxx.BeanImpl"/>
+ *   解决方案1：在DispatcherServlet配置bean aware，如<bean id="beanId" class="xx.BeanImpl"/>
  *   解决方案2：Set<ApplicationContext>
  * </pre>
  * 
@@ -181,6 +181,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
             throw ex;
         }
     }
+
     /**
      * 检查ApplicationContext不为空.
      */

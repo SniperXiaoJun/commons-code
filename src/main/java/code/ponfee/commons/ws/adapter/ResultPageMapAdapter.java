@@ -18,9 +18,12 @@ import code.ponfee.commons.ws.adapter.model.TransitPage;
 
 /**
  * Result<Page<Map<K, V>>>转换器
- * @author fupf
  * @param <K>
  * @param <V>
+ * 
+ * @see java.util.Collections.PageableAdapter
+ * 
+ * @author fupf
  */
 @SuppressWarnings("unchecked")
 public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<TransitPage<MapItem>>, Result<Page<Map<K, V>>>> {

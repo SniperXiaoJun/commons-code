@@ -13,8 +13,9 @@ import code.ponfee.commons.ws.adapter.model.ArrayItem;
 
 /**
  * Result<Set<T>>转换器
- * @author fupf
  * @param <T>
+ * 
+ * @author fupf
  */
 public abstract class ResultSetAdapter<T> extends XmlAdapter<Result<ArrayItem<T>>, Result<Set<T>>> {
 

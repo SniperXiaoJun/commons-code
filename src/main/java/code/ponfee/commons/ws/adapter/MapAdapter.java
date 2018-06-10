@@ -11,9 +11,10 @@ import code.ponfee.commons.ws.adapter.model.MapEntry;
 
 /**
  * Map<K,V>转换器
- * @author fupf
  * @param <K>
  * @param <V>
+ * 
+ * @author Ponfee
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class MapAdapter<K, V> extends XmlAdapter<MapEntry[], Map<K, V>> {
