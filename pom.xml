@@ -21,32 +21,51 @@
 
     <profiles>
         <profile>
+            <!-- clean deploy -Dmaven.test.skip=true -P deve -->
             <id>deve</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <distributionManagement>
                 <repository>
-                    <id>snapshots</id>
-                    <url>http://127.0.0.1:8081/nexus/content/repositories/snapshots</url>
+                    <!-- sf-nexus-snapshots要与setting.xml中的server对应 -->
+                    <!-- <servers>
+                        <server>
+                            <id>sf-nexus-snapshots</id>
+                            <username>username</username>
+                            <password>password</password>
+                        </server>
+                    </servers> -->
+                    <id>sf-nexus-snapshots</id>
+                    <url>http://nexus.sf-express.com/nexus/content/repositories/snapshots/</url>
                 </repository>
             </distributionManagement>
             <properties>
-                <publish.version>1.4-SNAPSHOT</publish.version>
+                <publish.version>1.7-SNAPSHOT</publish.version>
                 <separator>;</separator>
             </properties>
         </profile>
         <profile>
+            <!-- clean deploy -Dmaven.test.skip=true -P prod -->
             <id>prod</id>
             <distributionManagement>
                 <repository>
-                    <id>releases</id>
-                    <url>http://127.0.0.1:8081/nexus/content/repositories/releases</url>
+                    <!-- sf-nexus-releases要与setting.xml中的server对应 -->
+                    <!-- <servers>
+                        <server>
+                            <id>sf-nexus-releases</id>
+                            <username>username</username>
+                            <password>password</password>
+                        </server>
+                    </servers> -->
+                    <id>sf-nexus-releases</id>
+                    <url>http://nexus.sf-express.com/nexus/content/repositories/releases/</url>
                 </repository>
             </distributionManagement>
             <properties>
-                <publish.version>1.4</publish.version>
-                <separator>:</separator>
+                <publish.version>1.7</publish.version>
+                <separator>;</separator>
+                <!-- <separator>:</separator> -->
             </properties>
         </profile>
     </profiles>
