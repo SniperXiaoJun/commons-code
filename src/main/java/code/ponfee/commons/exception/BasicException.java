@@ -10,16 +10,10 @@ public class BasicException extends RuntimeException {
     /** 错误编码 */
     private Integer code;
 
-    /**
-     * 默认构造函数
-     */
     public BasicException() {
         super();
     }
 
-    /**
-     * 默认构造函数
-     */
     public BasicException(Integer code) {
         super();
         this.code = code;
@@ -87,7 +81,7 @@ public class BasicException extends RuntimeException {
         super(message, cause, enableSuppression, writableStackTrace);
         this.code = code;
     }
-    
+
     /**
      * 取得错误编码
      * @return

@@ -55,15 +55,15 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
 
     /**
      * 通过类获取bean
-     * @param clszz
+     * @param clazz
      * @return
      */
-    public static <T> T getBean(Class<T> clszz) {
+    public static <T> T getBean(Class<T> clazz) {
         assertContextInjected();
         BeansException ex = null;
         for (ApplicationContext c : HOLDER) {
             try {
-                T bean = c.getBean(clszz);
+                T bean = c.getBean(clazz);
                 if (bean != null) {
                     return bean;
                 }
@@ -76,15 +76,15 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
 
     /**
      * @param name
-     * @param clszz
+     * @param clazz
      * @return
      */
-    public static <T> T getBean(String name, Class<T> clszz) {
+    public static <T> T getBean(String name, Class<T> clazz) {
         assertContextInjected();
         BeansException ex = null;
         for (ApplicationContext c : HOLDER) {
             try {
-                T bean = c.getBean(name, clszz);
+                T bean = c.getBean(name, clazz);
                 if (bean != null) {
                     return bean;
                 }

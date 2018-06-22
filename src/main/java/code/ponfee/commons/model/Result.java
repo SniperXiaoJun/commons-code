@@ -55,6 +55,15 @@ public class Result<T> implements java.io.Serializable {
         return new Result<>(SUCCESS.getCode(), msg, data);
     }
 
+    @SuppressWarnings("unchecked")
+    public <E> Result<E> copy() {
+        return copy((E) getData());
+    }
+
+    public <E> Result<E> copy(E data) {
+        return new Result<>(getCode(), getMsg(), data);
+    }
+
     // ---------------------------------static methods/failure methods
     public static <T> Result<T> failure(Enum<?> em) {
         return failure((int) Fields.get(em, "code"), 

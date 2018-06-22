@@ -1,5 +1,6 @@
 package code.ponfee.commons.jedis;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -304,6 +305,31 @@ public class ValueOperations extends JedisOperations {
     }
 
     /**
+     * 对象序例化并缓存
+     * @param key
+     * @param t
+     * @param isCompress
+     * @param seconds
+     * @return
+     */
+    public <T extends Object> boolean setObject(String key, T t,
+                                                boolean isCompress, int seconds) {
+        return setObject(key.getBytes(StandardCharsets.UTF_8), t, isCompress, seconds);
+    }
+
+    public <T extends Object> boolean setObject(String key, T t, boolean isCompress) {
+        return setObject(key, t, isCompress, DEFAULT_EXPIRE_SECONDS);
+    }
+
+    public <T extends Object> boolean setObject(String key, T t, int seconds) {
+        return setObject(key, t, true, seconds);
+    }
+
+    public <T extends Object> boolean setObject(String key, T t) {
+        return setObject(key, t, true, DEFAULT_EXPIRE_SECONDS);
+    }
+
+    /**
      * 获取缓存数据并反序例化为对象
      * @param key
      * @param clazz
@@ -333,6 +359,42 @@ public class ValueOperations extends JedisOperations {
 
     public <T extends Object> T getObject(byte[] key, Class<T> clazz) {
         return getObject(key, clazz, true, null);
+    }
+
+    /**
+     * 获取缓存数据并反序例化为对象
+     * 
+     * @param key
+     * @param clazz
+     * @param isCompress
+     * @param seconds
+     * @return
+     */
+    public <T extends Object> T getObject(String key, Class<T> clazz, 
+                                          boolean isCompress, Integer seconds) {
+        return getObject(key.getBytes(StandardCharsets.UTF_8), clazz, isCompress, seconds);
+    }
+
+    public <T extends Object> T getObject(String key, Class<T> clazz, boolean isCompress) {
+        return getObject(key, clazz, isCompress, null);
+    }
+
+    public <T extends Object> T getObject(String key, Class<T> clazz, Integer seconds) {
+        return getObject(key, clazz, true, seconds);
+    }
+
+    public <T extends Object> T getObject(String key, Class<T> clazz) {
+        return getObject(key, clazz, true, null);
+    }
+
+    public boolean set(byte[] key, byte[] value, int seconds) {
+        if (value == null || key == null) {
+            return false;
+        }
+        return call(shardedJedis -> {
+            String rtn = shardedJedis.setex(key, getActualExpire(seconds), value);
+            return SUCCESS_MSG.equalsIgnoreCase(rtn);
+        }, false, key, value, seconds);
     }
 
     /**

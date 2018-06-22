@@ -103,6 +103,27 @@ public final class Jsons {
     }
 
     /**
+     * Deserialize a json to target class object
+     * {@code mapper.readValue(json, new TypeReference<Map<String, Object>>() {})}
+     * 
+     * @param json the byte array
+     * @param target target class
+     * @return target object
+     * @throws JsonException   the exception for json
+     */
+    public <T> T parse(byte[] json, Class<T> target) throws JsonException {
+        if (json == null || json.length == 0) {
+            return null;
+        }
+
+        try {
+            return mapper.readValue(json, target);
+        } catch (IOException e) {
+            throw new JsonException(e);
+        }
+    }
+
+    /**
      * Deserialize the json string to java object
      * {@code new TypeReference<Map<String, Object>>(){} }
      * 
@@ -113,6 +134,27 @@ public final class Jsons {
      */
     public <T> T parse(String json, TypeReference<T> type) throws JsonException {
         if (StringUtils.isEmpty(json)) {
+            return null;
+        }
+
+        try {
+            return mapper.readValue(json, type);
+        } catch (Exception e) {
+            throw new JsonException(e);
+        }
+    }
+
+    /**
+     * Deserialize the json string to java object
+     * {@code new TypeReference<Map<String, Object>>(){} }
+     * 
+     * @param json the json byte array
+     * @param type the TypeReference specified java type
+     * @return a java object
+     * @throws JsonException
+     */
+    public <T> T parse(byte[] json, TypeReference<T> type) throws JsonException {
+        if (json == null || json.length == 0) {
             return null;
         }
 
@@ -187,7 +229,15 @@ public final class Jsons {
         return NORMAL.parse(json, target);
     }
 
+    public static <T> T fromJson(byte[] json, Class<T> target) {
+        return NORMAL.parse(json, target);
+    }
+
     public static <T> T fromJson(String json, TypeReference<T> type) {
+        return NORMAL.parse(json, type);
+    }
+
+    public static <T> T fromJson(byte[] json, TypeReference<T> type) {
         return NORMAL.parse(json, type);
     }
 

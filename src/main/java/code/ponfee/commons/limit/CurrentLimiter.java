@@ -4,6 +4,8 @@ import java.util.Date;
 
 /**
  * 限流器（隔板）
+ * 
+ * {@link https://www.cnblogs.com/softidea/p/6229543.html}
  *
  * @author fupf
  */

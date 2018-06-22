@@ -50,6 +50,10 @@ public final class DigestUtils {
         return digest(DigestAlgorithms.SHA1, input);
     }
 
+    public static byte[] sha1(String data) {
+        return digest(DigestAlgorithms.SHA1, data.getBytes());
+    }
+
     public static byte[] sha1(byte[] data) {
         return digest(DigestAlgorithms.SHA1, data);
     }

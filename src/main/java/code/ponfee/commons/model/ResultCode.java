@@ -56,10 +56,12 @@ public final class ResultCode implements Serializable {
     private static final long serialVersionUID = -679746150956111045L;
 
     /** 公用结果码 */
-    public static final ResultCode OK                 = create0(200, "成功");
+    public static final ResultCode OK                 = create0(200, "OK");
     public static final ResultCode CREATED            = create0(201, "已创建");
     public static final ResultCode NO_CONTENT         = create0(204, "无内容");
     public static final ResultCode REST_CONTENT       = create0(205, "请重置");
+
+    public static final ResultCode REDIRECT           = create0(301, "重定向");
 
     public static final ResultCode BAD_REQUEST        = create0(400, "请求错误");
     public static final ResultCode UNAUTHORIZED       = create0(401, "未授权");

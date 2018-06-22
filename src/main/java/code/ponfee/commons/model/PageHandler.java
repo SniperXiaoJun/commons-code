@@ -1,5 +1,6 @@
 package code.ponfee.commons.model;
 
+import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Map;
 
@@ -89,7 +90,9 @@ public final class PageHandler {
         try {
             Object value;
             if (Map.class.isInstance(params) || Dictionary.class.isInstance(params)) {
-                value = params.getClass().getMethod("get", Object.class).invoke(params, name);
+                Method get = params.getClass().getMethod("get", Object.class);
+                get.setAccessible(true); // ImmutableMap must be set accessible true
+                value = get.invoke(params, name);
             } else {
                 value = Fields.get(params, name);
             }

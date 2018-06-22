@@ -331,7 +331,15 @@ public final class BCrypt {
     };
 
     public static String create(String passwd) {
+        return create(passwd.getBytes(UTF_8), 10);
+    }
+
+    public static String create(byte[] passwd) {
         return create(passwd, 10);
+    }
+
+    public static String create(String passwd, int logrounds) {
+        return create(passwd.getBytes(UTF_8), logrounds);
     }
 
     /**
@@ -341,7 +349,7 @@ public final class BCrypt {
      *                   <code>Math.pow(2,logrounds)</code>
      * @return the hashed password (fixed 62 length string)
      */
-    public static String create(String passwd, int logrounds) {
+    public static String create(byte[] passwd, int logrounds) {
         Preconditions.checkArgument(logrounds >= 2 && logrounds <= 20, 
                                     "logrounds must between 2 and 20.");
 
@@ -355,8 +363,12 @@ public final class BCrypt {
         byte[] salt = SecureRandoms.nextBytes(16);
         builder.append(encodeBase64(salt)).append(SEPARATOR);
 
-        byte[] hashed = crypt(passwd.getBytes(UTF_8), salt, logrounds);
+        byte[] hashed = crypt(passwd, salt, logrounds);
         return builder.append(encodeBase64(hashed)).toString();
+    }
+
+    public static boolean check(String passwd, String hashed) {
+        return check(passwd.getBytes(UTF_8), hashed);
     }
 
     /**
@@ -365,7 +377,7 @@ public final class BCrypt {
      * @param hashed  the previously-hashed password
      * @return  true if the passwords match, false otherwise
      */
-    public static boolean check(String passwd, String hashed) {
+    public static boolean check(byte[] passwd, String hashed) {
         String[] parts = hashed.split("\\" + SEPARATOR);
         if (parts.length != 5 || !"2a".equals(parts[1])) {
             throw new IllegalArgumentException("Invalid hashed value: " + hashed);
@@ -376,7 +388,7 @@ public final class BCrypt {
         byte[] actual = Base64.getUrlDecoder().decode(parts[4]);
 
         // crypt passwd by salt
-        byte[] expect = crypt(passwd.getBytes(UTF_8), salt, logrounds);
+        byte[] expect = crypt(passwd, salt, logrounds);
 
         return Arrays.equals(actual, expect);
     }
@@ -566,7 +578,7 @@ public final class BCrypt {
 
         System.out.println("Test begin...");
         boolean flag = true;
-        String hashed = create(password, 2);
+        String hashed = create(password, 5);
         long start = System.currentTimeMillis();
         for (int i = 0; i < 100000; i++) { // 45 seconds
             if (!check(password, hashed)) {

@@ -468,6 +468,10 @@ public class Strings {
         return StringUtils.isEmpty(str) ? defaultStr : str;
     }
 
+    public static String ifBlank(String str, String defaultStr) {
+        return StringUtils.isBlank(str) ? defaultStr : str;
+    }
+
     /**
      * <p>Escapes the characters in a <code>String</code> to be suitable to pass to
      * an SQL query.</p>

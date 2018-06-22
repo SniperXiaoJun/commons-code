@@ -23,7 +23,7 @@ public class LeastActiveLoadBalance extends AbstractLoadBalance {
         this.servers.sort(Comparator.comparing(e -> e.getValue().get()));
 
         //this.servers.sort(Comparator.comparing(Entry::getValue));
-        //this.servers.sort(Comparator.comparing(e -> e.getValue()));
+        //this.servers.sort(Comparator.comparing(e -> e.getValue().get()));
         //this.servers.sort((o1, o2) -> o1.getValue().compareTo(o2.getValue()));
         //Collections.sort(servers, Comparator.comparing(Entry<String, Integer>::getValue));
     }

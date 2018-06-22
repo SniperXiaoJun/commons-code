@@ -14,12 +14,20 @@
 # Maven
 /**/target/
 
+# Gradle
+/**/.gradle/
+gradle/
+
 # Webapp
 /**/src/main/webapp/WEB-INF/classes/
 
 # Others
-/log/
-/logs/
-/out/
-/**/bin/
+/**/.svn/
 /**/.myeclipse
+/**/.externalToolBuilders/
+/**/.recommenders/
+/**/.metadata/
+out/
+build/
+bin/
+logs/

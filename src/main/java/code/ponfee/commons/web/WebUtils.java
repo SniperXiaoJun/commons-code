@@ -29,10 +29,10 @@ public final class WebUtils {
 
     private final static Pattern PATTERN_SUFFIX = Pattern.compile("\\S*[?]\\S*");
 
-    /** session trace */
-    public static final String SESSION_TRACE_HEADER = "X-Auth-Token";
-    public static final String SESSION_TRACE_COOKIE = "auth_token";
-    public static final String SESSION_TRACE_PARAME = "authToken";
+    /** authorization */
+    public static final String AUTH_HEADER = "X-Auth-Token";
+    public static final String AUTH_COOKIE = "auth_token";
+    public static final String AUTH_PARAME = "authToken";
 
     /**
      * get the http servlet request parameters
@@ -238,17 +238,22 @@ public final class WebUtils {
 
     /**
      * 允许跨站
+     * 
      * @param resp
      */
     public static void cors(HttpServletRequest req, HttpServletResponse resp) {
         String origin = req.getHeader("Origin");
-        resp.setHeader("Access-Control-Allow-Origin", StringUtils.isEmpty(origin) ? "*" : origin);
-        resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+        origin = StringUtils.isEmpty(origin) ? "*" : origin;
+        resp.setHeader("Access-Control-Allow-Origin", origin);
+
+        String headers = req.getHeader("Access-Control-Allow-Headers");
+        headers = StringUtils.isEmpty(headers) 
+                  ? "Origin,No-Cache,X-Requested-With,If-Modified-Since,Pragma,Expires,Last-Modified,Cache-Control,Content-Type,X-E4M-With" 
+                  : headers;
+        resp.setHeader("Access-Control-Allow-Headers", headers);
+
+        resp.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
         resp.setHeader("Access-Control-Max-Age", "0");
-        resp.setHeader("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, "
-                                                     + "If-Modified-Since, Pragma, Expires, "
-                                                     + "Last-Modified, Cache-Control, "
-                                                     + "Content-Type, X-E4M-With");
         resp.setHeader("Access-Control-Allow-Credentials", "true");
         resp.setHeader("XDomainRequestAllowed", "1");
     }
@@ -286,12 +291,35 @@ public final class WebUtils {
             return null;
         }
 
-        for (Cookie c : cookies) {
-            if (name.equals(c.getName())) {
-                return c.getValue();
+        for (Cookie cookie : cookies) {
+            if (name.equals(cookie.getName())) {
+                return cookie.getValue();
             }
         }
         return null;
+    }
+
+    /**
+     * Delete the cookie by spec name
+     * @param req
+     * @param resp
+     * @param name
+     */
+    public static void delCookie(HttpServletRequest req, 
+                                 HttpServletResponse resp, String name) {
+        Cookie[] cookies = req.getCookies();
+        if (cookies == null) {
+            return;
+        }
+
+        for (Cookie cookie : cookies) {
+            if (name.equals(cookie.getName())) {
+                cookie.setMaxAge(0);
+                cookie.setValue(null);
+                resp.addCookie(cookie);
+                return;
+            }
+        }
     }
 
     /**
@@ -384,25 +412,25 @@ public final class WebUtils {
     public static void setSessionTrace(HttpServletResponse response, String token) {
         int maxAge = (token == null) ? 0 : 86400;
         //result.setAuthToken(token); // to response body
-        WebUtils.addCookie(response, SESSION_TRACE_COOKIE, token, "/", maxAge); // to cookie
-        WebUtils.addHeader(response, SESSION_TRACE_HEADER, token); // to header
+        WebUtils.addCookie(response, AUTH_COOKIE, token, "/", maxAge); // to cookie
+        WebUtils.addHeader(response, AUTH_HEADER, token); // to header
     }
 
     /**
      * 会话跟踪
      */
     public static String getSessionTrace(HttpServletRequest request) {
-        String authToken = request.getParameter(SESSION_TRACE_PARAME); // from param
+        String authToken = request.getParameter(AUTH_PARAME); // from param
         if (authToken != null) {
             return authToken;
         }
 
-        authToken = WebUtils.getCookie(request, SESSION_TRACE_COOKIE); // from cooike
+        authToken = WebUtils.getCookie(request, AUTH_COOKIE); // from cooike
         if (authToken != null) {
             return authToken;
         }
 
-        return WebUtils.getHeader(request, SESSION_TRACE_HEADER); // from header;
+        return WebUtils.getHeader(request, AUTH_HEADER); // from header;
     }
 
     // ----------------------------------private methods----------------------------------

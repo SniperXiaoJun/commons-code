@@ -37,7 +37,7 @@ public abstract class LogRecorder {
     private static Logger logger = LoggerFactory.getLogger(LogRecorder.class);
 
     private final int alarmThresholdMillis; // 告警阀值
-    private final CurrentLimiter circuitBreaker; // 访问频率限制
+    private final CurrentLimiter limiter; // 访问频率限制
 
     public LogRecorder() {
         this(DEFAULT_ALARM_THRESHOLD_MILLIS);
@@ -54,7 +54,7 @@ public abstract class LogRecorder {
     public LogRecorder(int alarmThresholdMillis, CurrentLimiter circuitBreaker) {
         Preconditions.checkArgument(alarmThresholdMillis > 0);
         this.alarmThresholdMillis = alarmThresholdMillis;
-        this.circuitBreaker = circuitBreaker;
+        this.limiter = circuitBreaker;
     }
 
     /**
@@ -81,8 +81,8 @@ public abstract class LogRecorder {
         String methodName = method.toGenericString();
 
         // request volume threshold
-        if (circuitBreaker != null && log != null && log.enabled()
-            && !circuitBreaker.checkpoint(methodName)) {
+        if (limiter != null && log != null && log.enabled()
+            && !limiter.checkpoint(methodName)) {
             throw new IllegalStateException("request denied");
         }
 

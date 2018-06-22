@@ -135,6 +135,7 @@ public final class RegexUtils {
     }
 
     public static void main(String[] args) {
+        System.out.println(isValidPassword(null)); // false
         System.out.println(isValidPassword("11ABac@#!%&_.?-$^*")); // true
         System.out.println(isValidPassword("12131111")); // false: 数字
         System.out.println(isValidPassword("1213Aa_")); // false: 7 length

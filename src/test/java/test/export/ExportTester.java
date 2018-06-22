@@ -27,6 +27,7 @@ import code.ponfee.commons.export.Tmeta.Align;
 import code.ponfee.commons.export.Tmeta.Type;
 import code.ponfee.commons.io.FileTransformer;
 import code.ponfee.commons.io.Files;
+import code.ponfee.commons.json.Jsons;
 
 public class ExportTester {
     private int multiple = 20;
@@ -73,6 +74,7 @@ public class ExportTester {
         list.add(new Thead("指标完成率", 35, 12));
 
         Table table = new Table(list);
+        System.out.println(Jsons.toJson(table.getThead()));
         table.setCaption("abc");
         table.setTobdy(Lists.newArrayList(new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
                                           new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},

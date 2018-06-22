@@ -3,6 +3,7 @@ package code.ponfee.commons.collect;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.stream.Stream;
 
 import org.apache.poi.ss.formula.functions.T;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -194,6 +196,20 @@ public final class Collects {
     }
 
     /**
+     * The two set different elements
+     * 
+     * @param set1
+     * @param set2
+     * @return
+     */
+    @SuppressWarnings("hiding")
+    public static <T> Set<T> different(Set<T> set1, Set<T> set2) {
+        Set<T> diffSet = Sets.newHashSet(Sets.difference(set1, set2));
+        diffSet.addAll(Sets.difference(set2, set1));
+        return diffSet;
+    }
+
+    /**
      * map差集
      * @param map1
      * @param map2
@@ -296,6 +312,23 @@ public final class Collects {
 
         // [Ljava.lang.Object; cannot be cast to [Ljava.lang.String;
         //return list.toArray((T[]) new Object[list.size()]);
+    }
+
+    /**
+     * Returns the ImmutableList of merged collection and object
+     * 
+     * @param coll
+     * @param t
+     * @return
+     */
+    @SuppressWarnings("hiding")
+    public static <T> List<T> add(Collection<T> coll, T t) {
+        ImmutableList.Builder<T> builder = ImmutableList.builder();
+        if (coll != null) {
+            builder.addAll(coll);
+        }
+        builder.add(t);
+        return builder.build();
     }
 
 }
