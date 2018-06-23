@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.export.Tmeta.Type;
 import code.ponfee.commons.math.Numbers;
-import code.ponfee.commons.tree.NodeFlat;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
@@ -66,8 +65,8 @@ public class HtmlExporter extends AbstractExporter {
      */
     @Override
     public void build(Table table) {
-        List<NodeFlat<Integer>> flats = table.getThead();
-        if (flats == null || flats.isEmpty()) {
+        List<Thead> thead = table.getThead();
+        if (thead == null || thead.isEmpty()) {
             throw new IllegalArgumentException("thead can't be null");
         }
 
@@ -80,21 +79,17 @@ public class HtmlExporter extends AbstractExporter {
         }
 
         // thead
-        buildComplexThead(flats);
+        buildComplexThead(thead, table.getMaxTheadLevel());
 
-        int totalLeafCount = flats.get(0).getChildLeafCount();
-        if (ObjectUtils.isEmpty(table.getTobdy()) 
-            && ObjectUtils.isEmpty(table.getTfoot())) {
+        if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
             html.append("<tfoot><tr><td colspan=\"")
-                .append(totalLeafCount)
+                .append(table.getTotalLeafCount())
                 .append("\" style=\"color:red;padding:3px;font-size:14px;\">")
                 .append(NO_RESULT_TIP)
                 .append("</td></tr></tfoot>");
         } else {
 
             super.nonEmpty();
-
-            List<NodeFlat<Integer>> thead = flats.subList(1, flats.size());
 
             // tbody-----------
             List<Object[]> tbody = table.getTobdy();
@@ -107,9 +102,9 @@ public class HtmlExporter extends AbstractExporter {
                     for (m = datas.length, j = 0; j < m; j++) {
                         html.append("<td");
 
-                        processMeta(datas[j], tmeta(thead, j), i, j, table.getOptions()); // 样式
+                        processMeta(datas[j], thead.get(j).getTmeta(), i, j, table.getOptions()); // 样式
 
-                        html.append(">").append(formatData(datas[j], tmeta(thead, j))).append("</td>");
+                        html.append(">").append(formatData(datas[j], thead.get(j).getTmeta())).append("</td>");
                     }
                     html.append("</tr>");
                 }
@@ -122,11 +117,11 @@ public class HtmlExporter extends AbstractExporter {
                 hasTfoot = true;
                 html.append("<tfoot><tr>");
 
-                if (table.getTfoot().length > totalLeafCount) {
+                if (table.getTfoot().length > table.getTotalLeafCount()) {
                     throw new IllegalStateException("tfoot data length cannot more than total leaf count.");
                 }
 
-                int merge = totalLeafCount - table.getTfoot().length;
+                int merge = table.getTotalLeafCount() - table.getTfoot().length;
                 if (merge > 0) {
                     html.append("<th colspan=\"")
                         .append(merge)
@@ -136,10 +131,10 @@ public class HtmlExporter extends AbstractExporter {
                 for (int i = 0; i < table.getTfoot().length; i++) {
                     html.append("<th");
 
-                    processMeta(table.getTfoot()[i], tmeta(thead, merge + i));
+                    processMeta(table.getTfoot()[i], thead.get(merge + i).getTmeta());
 
                     html.append(">")
-                        .append(formatData(table.getTfoot()[i], tmeta(thead, merge + i)))
+                        .append(formatData(table.getTfoot()[i], thead.get(merge + i).getTmeta()))
                         .append("</th>");
                 }
                 html.append("</tr></tfoot>");
@@ -149,7 +144,7 @@ public class HtmlExporter extends AbstractExporter {
             if (StringUtils.isNotBlank(table.getComment())) {
                 StringBuilder builder = new StringBuilder();
                 String[] comments = table.getComment().split(";");
-                builder.append("<tr><td colspan=\"").append(totalLeafCount);
+                builder.append("<tr><td colspan=\"").append(table.getTotalLeafCount());
                 builder.append("\" style=\"color:red; padding:3px;font-size:14px;\">");
                 builder.append("<div style=\"font-weight:bold;\">备注：</div>");
                 for (String comment : comments) {
@@ -208,33 +203,31 @@ public class HtmlExporter extends AbstractExporter {
     }*/
 
     // 复合表头
-    private void buildComplexThead(List<NodeFlat<Integer>> flats) {
+    private void buildComplexThead(List<Thead> thead, int maxTheadLevel) {
         html.append("<thead><tr>");
-        int lastLevel = 1, treeMaxDepth = flats.get(0).getTreeMaxDepth() - 1, cellLevel;
-        for (NodeFlat<Integer> flat : flats.subList(1, flats.size())) {
-            cellLevel = flat.getLevel() - 1;
-            if (lastLevel < cellLevel) {
+        int level = 1;
+        for (Thead cell : thead) {
+            if (level < cell.getNodeLevel()) {
                 html.append("</tr><tr>");
-                lastLevel = cellLevel;
+                level = cell.getNodeLevel();
             }
             html.append("<th");
-            if (flat.isLeaf()) { // 叶子节点，跨行
-
-                if (treeMaxDepth - cellLevel > 0) {
-                    html.append(" rowspan=\"").append(treeMaxDepth - cellLevel + 1).append("\"");
+            if (cell.isLeaf()) { // 叶子节点，跨行
+                if (maxTheadLevel - cell.getNodeLevel() > 0) {
+                    html.append(" rowspan=\"")
+                        .append(maxTheadLevel - cell.getNodeLevel() + 1)
+                        .append("\"");
                 }
             } else { // 非叶子节点，跨列
-                if (flat.getChildLeafCount() > 1) {
-                    html.append(" colspan=\"").append(flat.getChildLeafCount()).append("\"");
+                if (cell.getChildLeafCount() > 1) {
+                    html.append(" colspan=\"")
+                        .append(cell.getChildLeafCount())
+                        .append("\"");
                 }
             }
-            html.append(">").append(((Thead) flat.getAttach()).getName()).append("</th>");
+            html.append(">").append(cell.getName()).append("</th>");
         }
         html.append("</tr></thead>");
-    }
-
-    private Tmeta tmeta(List<NodeFlat<Integer>> thead, int index) {
-        return ((Thead) thead.get(index).getAttach()).getTmeta();
     }
 
     private void processMeta(Object value, Tmeta tmeta) {

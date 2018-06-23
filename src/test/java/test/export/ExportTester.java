@@ -1,5 +1,6 @@
 package test.export;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -28,11 +30,13 @@ import code.ponfee.commons.export.Tmeta.Type;
 import code.ponfee.commons.io.FileTransformer;
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.json.Jsons;
+import code.ponfee.commons.util.Captchas;
 
 public class ExportTester {
+
     private int multiple = 20;
-    @Test
-    public void testHtml1() throws IOException {
+
+    public @Test void testHtml1() throws IOException {
         AbstractExporter html = new HtmlExporter();
         AbstractExporter csv = new CsvExporter();
         List<Thead> list = new ArrayList<>();
@@ -117,21 +121,21 @@ public class ExportTester {
         table.setCaption("bnm");
         html.build(table);
 
-        System.out.println(html.setName("报表").export());
-        IOUtils.write((String) csv.export(), new FileOutputStream("d://csv.csv"), "UTF-8");
-        Files.addBOM("d:/csv.csv");
+        IOUtils.write((String) html.setName("报表").export(), new FileOutputStream("d://testHtml1.html"), "UTF-8");
+        Files.addBOM("d:/testHtml1.html");
+        IOUtils.write((String) csv.export(), new FileOutputStream("d://testHtml1.csv"), "UTF-8");
+        Files.addBOM("d:/testHtml1.csv");
 
         html.close();
         csv.close();
     }
 
     @Test
-    public void testHtml2() {
+    public void testHtml2() throws FileNotFoundException, IOException {
         AbstractExporter html = new HtmlExporter();
-
-        Table table = new Table("a,b,c,d,e".split(","));
-        html.build(table);
-        System.out.println(html.export());
+        html.build(new Table("a,b,c,d,e".split(",")));
+        IOUtils.write((String) html.export(), new FileOutputStream("d://testHtml2.html"), "UTF-8");
+        Files.addBOM("d:/testHtml2.html");
         html.close();
     }
 
@@ -227,10 +231,14 @@ public class ExportTester {
 
         // ------------------------------------------
         excel.setName("图表");
-        excel.insertImage(com.google.common.io.Files.toByteArray(new File("d:/test/2.png")));
-        excel.insertImage(com.google.common.io.Files.toByteArray(new File("d:/test/2.png")));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Captchas.generate(200, baos, RandomStringUtils.randomAlphanumeric(10));
+        excel.insertImage(baos.toByteArray());
+        baos = new ByteArrayOutputStream();
+        Captchas.generate(200, baos, RandomStringUtils.randomAlphanumeric(10));
+        excel.insertImage(baos.toByteArray());
 
-        OutputStream out = new FileOutputStream("d:/abc.xlsx");
+        OutputStream out = new FileOutputStream("d:/abc1.xlsx");
         excel.write(out);
         out.close();
         excel.close();
@@ -240,8 +248,8 @@ public class ExportTester {
         // -------------------------csv
         CsvExporter csv = new CsvExporter();
         csv.build(table1);
-        IOUtils.write(csv.export().toString(), new FileOutputStream("d://csv.csv"), "UTF-8");
-        Files.addBOM(new File("d://csv.csv"));
+        IOUtils.write(csv.export().toString(), new FileOutputStream("d://testExcel.csv"), "UTF-8");
+        Files.addBOM(new File("d://testExcel.csv"));
         csv.close();
         System.out.println("========================================csv: " + (System.currentTimeMillis() - start));
         
@@ -249,8 +257,8 @@ public class ExportTester {
         HtmlExporter html = new HtmlExporter();
         html.build(table1);
         html.setName("test");
-        String s = html.export();
-        System.out.println(s);
+        IOUtils.write((String) html.export(), new FileOutputStream("d://testExcel.html"), "UTF-8");
+        Files.addBOM("d:/testExcel.html");
         html.close();
         System.out.println("========================================html: " + (System.currentTimeMillis() - start));
     }
@@ -266,11 +274,11 @@ public class ExportTester {
         table.setTobdy(data);
         excel.setName("21321");
         excel.build(table);
-        IOUtils.write((byte[]) excel.export(), new FileOutputStream("d:/123.xlsx"));
+        IOUtils.write((byte[]) excel.export(), new FileOutputStream("d:/testExcel2.xlsx"));
         excel.close();
     }
 
     public static void main(String[] args) {
-        System.out.println(FileTransformer.guessEncoding("d:/csv.csv"));
+        System.out.println(FileTransformer.guessEncoding("d:/csv3.csv"));
     }
 }

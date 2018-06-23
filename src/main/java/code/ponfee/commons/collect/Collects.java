@@ -321,9 +321,8 @@ public final class Collects {
      * @param t
      * @return
      */
-    @SuppressWarnings("hiding")
-    public static <T> List<T> add(Collection<T> coll, T t) {
-        ImmutableList.Builder<T> builder = ImmutableList.builder();
+    public static <E> List<E> add(Collection<E> coll, E t) {
+        ImmutableList.Builder<E> builder = ImmutableList.builder();
         if (coll != null) {
             builder.addAll(coll);
         }

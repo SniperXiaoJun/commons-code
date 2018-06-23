@@ -3,7 +3,6 @@ package code.ponfee.commons.export;
 import java.util.List;
 
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.tree.NodeFlat;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
@@ -29,17 +28,14 @@ public class CsvExporter extends AbstractExporter {
         if (csv.length() > 0) {
             throw new UnsupportedOperationException("only support signle table");
         }
-
-        List<NodeFlat<Integer>> flats = table.getThead();
-        if (flats == null || flats.isEmpty()) {
+        if (table.getThead() == null || table.getThead().isEmpty()) {
             throw new IllegalArgumentException("thead can't be null");
         }
 
         // build table thead
-        buildComplexThead(flats);
+        buildComplexThead(table.getThead(), table.getMaxTheadLevel());
 
-        if (ObjectUtils.isEmpty(table.getTobdy()) 
-            && ObjectUtils.isEmpty(table.getTfoot())) {
+        if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
             csv.append(NO_RESULT_TIP);
             return;
         } 
@@ -65,12 +61,11 @@ public class CsvExporter extends AbstractExporter {
         // tfoot---------
         if (table.getTfoot() != null && table.getTfoot().length > 0) {
 
-            NodeFlat<Integer> root = flats.get(0);
-            if (table.getTfoot().length > root.getChildLeafCount()) {
+            if (table.getTfoot().length > table.getTotalLeafCount()) {
                 throw new IllegalStateException("tfoot data length cannot more than total leaf count.");
             }
 
-            int n = root.getChildLeafCount(), m = table.getTfoot().length, mergeNum = n - m;
+            int n = table.getTotalLeafCount(), m = table.getTfoot().length, mergeNum = n - m;
             for (int i = 0; i < mergeNum; i++) {
                 if (i == mergeNum - 1) {
                     csv.append("合计");
@@ -99,10 +94,10 @@ public class CsvExporter extends AbstractExporter {
         csv = null;
     }
 
-    private void buildComplexThead(List<NodeFlat<Integer>> flats) {
-        for (NodeFlat<Integer> cell : flats.subList(1, flats.size())) {
+    private void buildComplexThead(List<Thead> thead, int maxTheadLevel) {
+        for (Thead cell : thead) {
             if (cell.isLeaf()) {
-                csv.append(((Thead) cell.getAttach()).getName()).append(csvSeparator);
+                csv.append(cell.getName()).append(csvSeparator);
             }
         }
         csv.deleteCharAt(csv.length() - 1);

@@ -42,7 +42,6 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 
 import code.ponfee.commons.export.Tmeta.Type;
 import code.ponfee.commons.math.Numbers;
-import code.ponfee.commons.tree.NodeFlat;
 import code.ponfee.commons.util.Colors;
 import code.ponfee.commons.util.Dates;
 import code.ponfee.commons.util.ImageUtils;
@@ -149,13 +148,12 @@ public class ExcelExporter extends AbstractExporter {
     @Override
     public void build(Table table) {
         // 1、校验表头是否为空
-        List<NodeFlat<Integer>> flats = table.getThead();
-        if (flats == null || flats.isEmpty()) {
+        if (table.getThead() == null || table.getThead().isEmpty()) {
             throw new IllegalArgumentException("thead can't be null");
         }
 
-        // 2、获取工作簿
         String name = this.getName();
+        // 2、获取工作簿
         SXSSFSheet sheet = getSheet(name);
 
         // 3、判断工作簿是否已创建过行数据
@@ -185,16 +183,15 @@ public class ExcelExporter extends AbstractExporter {
             freezes.put(name, new Freeze(1, cursorRow.get())); // 叶子节点只占一列，故colSplit=1
         }
 
-        int totalLeafCount = flats.get(0).getChildLeafCount();
         // 6、判断是否有数据
         if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
-            createBlankRow(NO_RESULT_TIP, sheet, tipStyle, cursorRow, totalLeafCount);
+            createBlankRow(NO_RESULT_TIP, sheet, tipStyle, cursorRow, table.getTotalLeafCount());
             return;
         }
 
         super.nonEmpty();
-        List<NodeFlat<Integer>> thead = flats.subList(1, flats.size());
-        List<XSSFCellStyle> styles = createStyles(thead);
+        List<XSSFCellStyle> styles = createStyles(table.getThead());
+        List<Thead> theads = table.getThead();
         SXSSFRow row;
 
         // 7、处理tbody数据
@@ -207,7 +204,7 @@ public class ExcelExporter extends AbstractExporter {
                 row.setHeight(DEFAULT_HEIGHT);
                 data = tbody.get(i);
                 for (m = data.length, j = 0; j < m; j++) {
-                    createCell(row, j, styles.get(j), tmeta(thead, j), data[j], i, j, options);
+                    createCell(row, j, styles.get(j), theads.get(j).getTmeta(), data[j], i, j, options);
                 }
             }
         }
@@ -219,12 +216,12 @@ public class ExcelExporter extends AbstractExporter {
             row = sheet.createRow(rowNum);
             row.setHeight(DEFAULT_HEIGHT);
 
-            if (table.getTfoot().length > totalLeafCount) {
+            if (table.getTfoot().length > table.getTotalLeafCount()) {
                 throw new IllegalStateException("tfoot data length cannot more than total leaf count.");
             }
 
             // 合计单元格
-            int mergeNum = totalLeafCount - table.getTfoot().length;
+            int mergeNum = table.getTotalLeafCount() - table.getTfoot().length;
             for (int i = 0; i < mergeNum; i++) {
                 createCell(row, i, tfootMergeStyle, (i == 0) ? "合计" : null);
             }
@@ -235,13 +232,13 @@ public class ExcelExporter extends AbstractExporter {
             // 合计数据
             for (int i = 0; i < tfoots.length; i++) {
                 createCell(row, i + mergeNum, styles.get(mergeNum + i),
-                           tmeta(thead, mergeNum + i), tfoots[i]);
+                           theads.get(mergeNum + i).getTmeta(), tfoots[i]);
             }
         }
 
         // 9、文字注释
         if (StringUtils.isNotBlank(table.getComment())) {
-            createBlankRow(table.getComment(), sheet, tipStyle, cursorRow, totalLeafCount);
+            createBlankRow(table.getComment(), sheet, tipStyle, cursorRow, table.getTotalLeafCount());
         }
     }
 
@@ -370,32 +367,24 @@ public class ExcelExporter extends AbstractExporter {
 
     // 复合表头
     private void buildComplexThead(Table table, SXSSFSheet sheet, CursorRow cursorRow) {
-        List<NodeFlat<Integer>> flats = table.getThead();
-        NodeFlat<Integer> root = flats.get(0);
-        int totalLeafCount = root.getChildLeafCount();
-        List<NodeFlat<Integer>> thead = flats.subList(1, flats.size());
-
         // create caption
-        createBlankRow(table.getCaption(), sheet, titleStyle, cursorRow, totalLeafCount);
-
-        //sheet.trackAllColumnsForAutoSizing();
+        createBlankRow(table.getCaption(), sheet, titleStyle, cursorRow, table.getTotalLeafCount());
 
         // 约定非叶子节点不能跨行
         Set<Integer> rows = new HashSet<>();
-        int beginCol, endRow, endCol, lastLevel = 1;
-        int cellLevel, treeMaxDepth = root.getTreeMaxDepth() - 1; 
-        for (int n = thead.size(), i = 0; i < n; i++) {
-            NodeFlat<?> flat = thead.get(i);
-            cellLevel = flat.getLevel() - 1;
-            if (cellLevel > lastLevel) {
-                lastLevel = cellLevel;
+        int beginCol, endRow, endCol, nodeLevel = 1;
+        //sheet.trackAllColumnsForAutoSizing();
+        for (int n = table.getThead().size(), i = 0; i < n; i++) {
+            Thead cell = table.getThead().get(i);
+            if (cell.getNodeLevel() > nodeLevel) {
+                nodeLevel = cell.getNodeLevel();
                 cursorRow.increment();
             }
 
-            beginCol = flat.getLeftLeafCount();
-            endCol = beginCol + flat.getChildLeafCount() - 1;
-            if (flat.isLeaf()) {
-                endRow = cursorRow.get() + treeMaxDepth - cellLevel;
+            beginCol = cell.getLeftLeafCount();
+            endCol = beginCol + cell.getChildLeafCount() - 1;
+            if (cell.isLeaf()) {
+                endRow = cursorRow.get() + table.getMaxTheadLevel() - cell.getNodeLevel();
                 sheet.setColumnWidth(beginCol, DEFAULT_WIDTH);
                 //sheet.autoSizeColumn(beginCol);
             } else {
@@ -409,7 +398,7 @@ public class ExcelExporter extends AbstractExporter {
             } else {
                 colRow = sheet.getRow(cursorRow.get());
             }
-            createCell(colRow, beginCol, headStyle, ((Thead) flat.getAttach()).getName());
+            createCell(colRow, beginCol, headStyle, cell.getName());
 
             // -----------------------------设置被合并单元格的样式------------------------------ //
             for (int b = beginCol + 1; b <= endCol; b++) { // 列
@@ -433,10 +422,6 @@ public class ExcelExporter extends AbstractExporter {
             // -----------------------------设置被合并单元格的样式------------------------------ //
         }
         cursorRow.increment();
-    }
-
-    private Tmeta tmeta(List<NodeFlat<Integer>> thead, int index) {
-        return ((Thead) thead.get(index).getAttach()).getTmeta();
     }
 
     /**
@@ -562,10 +547,10 @@ public class ExcelExporter extends AbstractExporter {
      * @param thead
      * @return
      */
-    private List<XSSFCellStyle> createStyles(List<NodeFlat<Integer>> thead) {
+    private List<XSSFCellStyle> createStyles(List<Thead> thead) {
         List<XSSFCellStyle> styles = new ArrayList<>();
-        for (NodeFlat<?> flat : thead) {
-            if (!flat.isLeaf()) {
+        for (Thead cell : thead) {
+            if (!cell.isLeaf()) {
                 continue; // 非叶子节点
             }
 
@@ -573,7 +558,7 @@ public class ExcelExporter extends AbstractExporter {
             styles.add(style);
             style.cloneStyleFrom(dataStyle);
 
-            Tmeta tmeta = ((Thead) flat.getAttach()).getTmeta();
+            Tmeta tmeta = cell.getTmeta();
             if (tmeta != null) {
                 switch (tmeta.getAlign()) { // 对齐方式
                     case LEFT:
