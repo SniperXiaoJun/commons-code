@@ -20,10 +20,10 @@ import org.springframework.beans.BeanUtils;
 public class Page<T> implements java.io.Serializable {
     private static final long serialVersionUID = 1313118491812094979L;
 
-    private int pageNum; // 当前页
+    private int pageNum; // 当前页（start 1）
     private int pageSize; // 每页的数量
     private int size; // 当前页的数量
-    private int startRow; // 当前页面第一个元素在数据库中的行号
+    private int startRow; // 当前页面第一个元素在数据库中的行号（start 1）
     private int endRow; // 当前页面最后一个元素在数据库中的行号
     private long total; // 总记录数
     private int pages; // 总页数

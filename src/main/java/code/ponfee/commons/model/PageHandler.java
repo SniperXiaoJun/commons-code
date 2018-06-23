@@ -12,11 +12,15 @@ import code.ponfee.commons.reflect.Fields;
 /**
  * 分页参数处理类
  * 基于github上的mybatis分页工具
+ * https://github.com/pagehelper/Mybatis-PageHelper/blob/master/wikis/zh/HowToUse.md
+ * 
  * @author fupf
  */
 public final class PageHandler {
 
     public static final PageHandler NORMAL = new PageHandler("pageNum", "pageSize", "offset", "limit");
+    private static final int MAX_SIZE = 1000;
+    private static final int MIN_SIZE = 0;
 
     private final String paramPageNum;
     private final String paramPageSize;
@@ -40,11 +44,14 @@ public final class PageHandler {
             pageSize = 0;
         }
 
-        // 分页处理
+        // 分页处理，pageSizeZero：默认值为false，当该参数设置为true时，如果pageSize=0或者
+        // RowBounds.limit=0就会查询出全部的结果（相当于没有执行分页查询，但是返回结果仍然是Page类型）
         if (pageSize != null) {
-            startPage(getInt(params, paramPageNum), pageSize);
+            startPage(getInt(params, paramPageNum), 
+                      Numbers.bounds(pageSize, MIN_SIZE, MAX_SIZE));
         } else {
-            offsetPage(getInt(params, paramOffset), limit);
+            offsetPage(getInt(params, paramOffset), 
+                       Numbers.bounds(limit, MIN_SIZE, MAX_SIZE));
         }
     }
 
