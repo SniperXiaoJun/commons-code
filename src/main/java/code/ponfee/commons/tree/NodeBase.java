@@ -150,7 +150,24 @@ public class NodeBase<T extends java.io.Serializable & Comparable<T>>
     }
 
     private NodeBase<T> innermostAttach(NodeBase<T> attach) {
-        if (attach == null || attach.attach == null) {
+        if (attach == null) {
+            return null;
+        }
+        if (attach.attach == null) {
+            /*attach.nid = this.nid;
+            attach.pid = this.pid;
+            attach.orders = this.orders;
+            attach.enabled = this.enabled;
+            
+            attach.available = this.available;
+            attach.level = this.level;
+            attach.path = (this.path != null)
+                          ? Lists.newArrayList(this.path) : null;
+            
+            attach.treeNodeCount = this.treeNodeCount;
+            attach.childLeafCount = this.childLeafCount;
+            attach.treeMaxDepth = this.treeMaxDepth;
+            attach.leftLeafCount = this.leftLeafCount;*/
             return attach;
         }
         return innermostAttach(attach.attach);

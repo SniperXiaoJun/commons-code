@@ -255,13 +255,13 @@ public class NodeTree<T extends java.io.Serializable & Comparable<T>>
                 child.count();
 
                 // 3、统计子叶子节点数量及整棵树节点的数量
+                sumChildLeafCount += child.childLeafCount;
                 maxChildTreeDepth = NumberUtils.max(maxChildTreeDepth, child.treeMaxDepth);
                 sumTreeNodeCount += child.treeNodeCount;
-                sumChildLeafCount += child.childLeafCount;
             }
+            this.childLeafCount = sumChildLeafCount; // 子节点的叶子节点之和
             this.treeMaxDepth = maxChildTreeDepth + 1; // 为子节点的上一层级
             this.treeNodeCount = sumTreeNodeCount + 1; // 要包含节点本身
-            this.childLeafCount = sumChildLeafCount; // 子节点的叶子节点之和
         } else { // 叶子节点
             this.treeNodeCount = 1;
             this.childLeafCount = 1;
