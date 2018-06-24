@@ -164,7 +164,8 @@ public class NodeTree<T extends java.io.Serializable & Comparable<T>>
         // current "this" is parent: AbstractNode parent = this;
 
         Set<Integer> uniqueOrders = Sets.newHashSet();
-        for (Iterator<E> iter = nodes.iterator(); iter.hasNext();) { // find child nodes for the current node
+        // find child nodes for the current node
+        for (Iterator<E> iter = nodes.iterator(); iter.hasNext();) {
             AbstractNode<T> node = iter.next();
 
             if (!ignoreOrphan && AbstractNode.isEmpty(node.getPid())) {
