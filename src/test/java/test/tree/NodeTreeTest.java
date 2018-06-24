@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.tree.NamedNode;
-import code.ponfee.commons.tree.NodeBase;
+import code.ponfee.commons.tree.AbstractNode;
 import code.ponfee.commons.tree.NodeTree;
 
 /**
@@ -26,7 +26,7 @@ public class NodeTreeTest {
 
     @Test
     public void test1() {
-        List<NodeBase<String>> list = new ArrayList<>();
+        List<AbstractNode<String>> list = new ArrayList<>();
         list.add(new NamedNode<String>("100000", null, 1, true, "nid100000"));
         list.add(new NamedNode<String>("100010", "100000", 2, true, "nid100010"));
         list.add(new NamedNode<String>("100011", "100010", 3, false, "nid100011"));
@@ -41,7 +41,7 @@ public class NodeTreeTest {
 
         list.add(new NamedNode<String>("400000", null, 5, true, "nid400000"));
         NodeTree<String> subtree = new NodeTree<>("400010", "400000", 1, true);
-        List<NodeBase<String>> list1 = new ArrayList<>();
+        List<AbstractNode<String>> list1 = new ArrayList<>();
         list1.add(new NamedNode<String>("400011", "400010", 2, true,  "nid400011"));
         list1.add(new NamedNode<String>("400012", "400010", 3, false, "nid400012"));
         subtree.build(list1);
@@ -62,14 +62,14 @@ public class NodeTreeTest {
 
     @Test
     public void test2() {
-        List<NodeBase<String>> list = new ArrayList<>();
+        List<AbstractNode<String>> list = new ArrayList<>();
         list.add(new NamedNode<String>("a", "b", 2, true, "")); // 节点循环依赖
         list.add(new NamedNode<String>("b", "a", 2, true, ""));
     }
 
     @Test
     public void test3() {
-        List<NodeBase<String>> list = new ArrayList<>();
+        List<AbstractNode<String>> list = new ArrayList<>();
         list.add(new NamedNode<String>("100001", null, 2, true, "nid100010")); // 节点编号不能为空
         list.add(new NamedNode<String>(null, "100001", 2, true, "nid100010"));
         NodeTree<String> root = new NodeTree<>(NodeTree.DEFAULT_ROOT_NAME);
@@ -79,7 +79,7 @@ public class NodeTreeTest {
     
     @Test
     public void test4() {
-        List<NodeBase<String>> list = new ArrayList<>();
+        List<AbstractNode<String>> list = new ArrayList<>();
         list.add(new NamedNode<String>("100000", "notfound", 1, true, "nid100000")); // 无效的孤儿节点
 
         new NodeTree<>(NodeTree.DEFAULT_ROOT_NAME).build(list);

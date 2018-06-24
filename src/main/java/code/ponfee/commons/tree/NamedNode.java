@@ -14,7 +14,7 @@ package code.ponfee.commons.tree;
  * @author Ponfee
  */
 public class NamedNode<T extends java.io.Serializable & Comparable<T>>
-    extends NodeBase<T> {
+    extends AbstractNode<T> {
 
     private static final long serialVersionUID = 7891325205513770857L;
 

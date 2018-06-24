@@ -1,17 +1,16 @@
 package code.ponfee.commons.export;
 
-import code.ponfee.commons.tree.NodeBase;
+import code.ponfee.commons.tree.NamedNode;
 
 /**
  * 表头
  * 
  * @author fupf
  */
-public class Thead extends NodeBase<Integer> {
+public class Thead extends NamedNode<Integer> {
 
     private static final long serialVersionUID = 1898674740598755648L;
 
-    private final String name; // 列名称
     private final Tmeta tmeta; // 列配置信息
 
     public Thead(String name, Integer nid, Integer pid, Tmeta tmeta) {
@@ -36,14 +35,10 @@ public class Thead extends NodeBase<Integer> {
      */
     public Thead(Integer nid, Integer pid, int orders, 
                  String name, Tmeta tmeta) {
-        super(nid, pid, orders, true, null);
-        this.name = name;
+        super(nid, pid, orders, true, name);
         this.tmeta = tmeta;
     }
 
-    public String getName() {
-        return name;
-    }
 
     public Tmeta getTmeta() {
         return tmeta;

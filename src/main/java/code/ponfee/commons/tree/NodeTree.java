@@ -30,7 +30,7 @@ import code.ponfee.commons.reflect.Fields;
  * @author Ponfee
  */
 public class NodeTree<T extends java.io.Serializable & Comparable<T>>
-    extends NodeBase<T> {
+    extends AbstractNode<T> {
 
     private static final long serialVersionUID = -9081626363752680404L;
     public static final String DEFAULT_ROOT_NAME = "__ROOT__";
@@ -66,13 +66,13 @@ public class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * 
      * @param node  as a tree root node
      */
-    public NodeTree(NodeBase<T> node) {
+    public NodeTree(AbstractNode<T> node) {
         super(node.getNid(), node.getPid(), 
               node.getOrders(), node.isEnabled(), node);
         super.available = node.isAvailable();
     }
 
-    public <E extends NodeBase<T>> NodeTree<T> build(List<E> nodes) {
+    public <E extends AbstractNode<T>> NodeTree<T> build(List<E> nodes) {
         build(nodes, false);
         return this;
     }
@@ -83,15 +83,15 @@ public class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * @param nodes        子节点列表
      * @param ignoreOrphan {@code true}忽略孤儿节点
      */
-    public <E extends NodeBase<T>> NodeTree<T> build(List<E> list, 
+    public <E extends AbstractNode<T>> NodeTree<T> build(List<E> list, 
                                                      boolean ignoreOrphan) {
         Set<T> nodeIds = Sets.newHashSet(Arrays.asList(this.nid));
 
         // 1、预处理
-        List<NodeBase<T>> nodes = before(list);
+        List<AbstractNode<T>> nodes = before(list);
 
         // 2、检查是否存在重复节点
-        for (NodeBase<T> n : nodes) {
+        for (AbstractNode<T> n : nodes) {
             if (!nodeIds.add(n.getNid())) {
                 throw new RuntimeException("重复的节点：" + n.getNid());
             }
@@ -146,9 +146,9 @@ public class NodeTree<T extends java.io.Serializable & Comparable<T>>
     }
 
     // -----------------------------------------------------------private methods
-    private <E extends NodeBase<T>> List<NodeBase<T>> before(List<E> nodes) {
-        List<NodeBase<T>> list = new ArrayList<>();
-        for (NodeBase<T> node : nodes) {
+    private <E extends AbstractNode<T>> List<AbstractNode<T>> before(List<E> nodes) {
+        List<AbstractNode<T>> list = new ArrayList<>();
+        for (AbstractNode<T> node : nodes) {
             if (node instanceof NodeTree) {
                 List<NodeFlat<T>> flat = ((NodeTree<T>) node).flatInherit();
                 list.addAll(flat);
@@ -159,15 +159,15 @@ public class NodeTree<T extends java.io.Serializable & Comparable<T>>
         return list;
     }
 
-    private <E extends NodeBase<T>> void build0(
+    private <E extends AbstractNode<T>> void build0(
         List<E> nodes, boolean ignoreOrphan, T mountPidIfNull) {
         // current "this" is parent: AbstractNode parent = this;
 
         Set<Integer> uniqueOrders = Sets.newHashSet();
         for (Iterator<E> iter = nodes.iterator(); iter.hasNext();) { // find child nodes for the current node
-            NodeBase<T> node = iter.next();
+            AbstractNode<T> node = iter.next();
 
-            if (!ignoreOrphan && NodeBase.isEmpty(node.getPid())) {
+            if (!ignoreOrphan && AbstractNode.isEmpty(node.getPid())) {
                 // 不忽略孤儿节点且节点的父节点为空，则其父节点视为根节点（挂载到根节点下）
                 Fields.put(node, "pid", mountPidIfNull);
             }
