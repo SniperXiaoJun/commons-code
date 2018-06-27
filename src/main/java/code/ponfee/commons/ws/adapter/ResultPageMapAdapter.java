@@ -39,9 +39,9 @@ public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<Trans
     @Override
     public Result<Page<Map<K, V>>> unmarshal(Result<TransitPage<MapItem>> v) {
         if (v.getData() == null) {
-            return new Result<>(v.getCode(), v.getMsg(), null);
+            return v.copy();
         } else if (v.getData().getRows() == null || v.getData().getRows().getItem() == null) {
-            return new Result<>(v.getCode(), v.getMsg(), new Page<>());
+            return v.copy(new Page<>());
         }
 
         List<Map<K, V>> list = Lists.newArrayList();
@@ -58,7 +58,7 @@ public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<Trans
         }
 
         Fields.put(page, "rows", list);
-        Result<Page<Map<K, V>>> result = new Result<>(v.getCode(), v.getMsg(), null);
+        Result<Page<Map<K, V>>> result = v.copy(null);
         Fields.put(result, "data", page);
         return result;
     }
@@ -66,7 +66,7 @@ public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<Trans
     @Override
     public Result<TransitPage<MapItem>> marshal(Result<Page<Map<K, V>>> v) {
         if (v.getData() == null || v.getData().getRows() == null) {
-            return new Result<>(v.getCode(), v.getMsg(), null);
+            return v.copy(null);
         }
 
         List<MapItem> list = Lists.newArrayList();
@@ -84,7 +84,7 @@ public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<Trans
         }
 
         TransitPage<MapItem> pageData = TransitPage.transform(page, list.toArray(new MapItem[list.size()]));
-        return new Result<>(v.getCode(), v.getMsg(), pageData);
+        return v.copy(pageData);
     }
 
 }

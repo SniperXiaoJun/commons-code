@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 import org.apache.poi.ss.formula.functions.T;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -113,7 +115,7 @@ public final class Collects {
         List<Object[]> list = map2array(page.getRows());
 
         Fields.put(page, "rows", list);
-        Result<Page<Object[]>> target = new Result<>(s.getCode(), s.getMsg(), null);
+        Result<Page<Object[]>> target = s.copy(null);
         Fields.put(target, "data", page);
         return target;
     }
@@ -133,9 +135,90 @@ public final class Collects {
         }
 
         Fields.put(page, "rows", list);
-        Result<Page<Object[]>> target = new Result<>(source.getCode(), source.getMsg(), null);
+        Result<Page<Object[]>> target = source.copy(null);
         Fields.put(target, "data", page);
         return target;
+    }
+
+    /**
+     * 指定对象字段fieldA的值作为key，字段fieldB的值作为value
+     * 
+     * @param bean
+     * @param keyField
+     * @param valueField
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <K, V, E> Map<K, V> flatMap(E bean, String keyField, String valueField) {
+        if (bean == null) {
+            return null;
+        }
+        return ImmutableMap.of((K) Fields.get(bean, keyField), (V) Fields.get(bean, valueField));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <K, V, E> Map<K, V> flatMap(List<E> beans, String keyField, String valueField) {
+        if (beans == null) {
+            return null;
+        }
+        Map<K, V> map = new HashMap<>();
+        for (E bean : beans) {
+            map.put((K) Fields.get(bean, keyField), (V) Fields.get(bean, valueField));
+        }
+        return map;
+    }
+
+    /**
+     * 获取对象指定字段的值
+     * 
+     * @param beans
+     * @param field
+     * @return
+     */
+    @SuppressWarnings({ "unchecked", "hiding" })
+    public static <T, E> List<T> flatList(List<E> beans, String field) {
+        if (beans == null) {
+            return null;
+        }
+        List<T> list = new ArrayList<>(beans.size());
+        for (E bean : beans) {
+            list.add((T) Fields.get(bean, field));
+        }
+        return list;
+    }
+
+    public static <E> List<Object[]> flatList(List<E> beans, String... fields) {
+        if (beans == null || fields == null || fields.length == 0) {
+            return null;
+        }
+
+        List<Object[]> list = new ArrayList<>(beans.size());
+        for (E bean : beans) {
+            Object[] array = new Object[fields.length];
+            for (int i = 0; i < fields.length; i++) {
+                array[i] = Fields.get(bean, fields[i]);
+            }
+            list.add(array);
+        }
+        return list;
+    }
+
+    /**
+     * 将对象指定字段转为map
+     * 
+     * @param bean
+     * @param fields
+     * @return
+     */
+    public static <E> Map<String, Object> ofMap(E bean, String... fields) {
+        if (bean == null || fields == null) {
+            return null;
+        }
+        Map<String, Object> result = new HashMap<>(fields.length);
+        for (String field : fields) {
+            result.put(field, Fields.get(bean, field));
+        }
+        return result;
     }
 
     // -----------------------------the collection of intersect, union and different operations

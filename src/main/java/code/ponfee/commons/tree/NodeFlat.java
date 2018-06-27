@@ -13,7 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 /**
  * 节点扁平结构
  * 
- * @author 01367825
+ * @author Ponfee
  */
 public class NodeFlat<T extends java.io.Serializable & Comparable<T>>
     extends AbstractNode<T> {

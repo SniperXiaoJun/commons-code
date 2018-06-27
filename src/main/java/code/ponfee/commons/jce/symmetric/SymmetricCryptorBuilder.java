@@ -12,6 +12,7 @@ import code.ponfee.commons.util.SecureRandoms;
 
 /**
  * 对称加密构建类
+ * 
  * @author fupf
  */
 public final class SymmetricCryptorBuilder {
@@ -21,7 +22,9 @@ public final class SymmetricCryptorBuilder {
     private Mode mode; // 分组加密模式
     private Padding padding; // 填充
     private IvParameterSpec iv; // 填充向量
-    private Provider provider; // 加密服务提供方
+
+    /**加密服务提供方 {@link code.ponfee.commons.jce.Providers} */
+    private Provider provider;
 
     private SymmetricCryptorBuilder(Algorithm algorithm) {
         this.algorithm = algorithm;

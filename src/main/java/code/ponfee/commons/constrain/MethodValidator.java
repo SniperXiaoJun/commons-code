@@ -164,7 +164,7 @@ public abstract class MethodValidator extends FieldValidator {
 
     // -------------------------------------------------------------------------private methods
     private boolean[] argsNullable(Object[] args, Constraint[] csts) {
-        Set<String> set = new HashSet<>();
+        Set<String> set = new HashSet<>(csts.length);
         boolean[] isArgsNullable = new boolean[args.length];
         Arrays.fill(isArgsNullable, false);
         for (Constraint cst : csts) {

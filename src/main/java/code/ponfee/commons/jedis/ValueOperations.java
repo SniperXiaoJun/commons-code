@@ -297,11 +297,11 @@ public class ValueOperations extends JedisOperations {
     }
 
     public <T extends Object> boolean setObject(byte[] key, T t, int seconds) {
-        return setObject(key, t, true, seconds);
+        return setObject(key, t, false, seconds);
     }
 
     public <T extends Object> boolean setObject(byte[] key, T t) {
-        return setObject(key, t, true, DEFAULT_EXPIRE_SECONDS);
+        return setObject(key, t, false, DEFAULT_EXPIRE_SECONDS);
     }
 
     /**
@@ -322,11 +322,11 @@ public class ValueOperations extends JedisOperations {
     }
 
     public <T extends Object> boolean setObject(String key, T t, int seconds) {
-        return setObject(key, t, true, seconds);
+        return setObject(key, t, false, seconds);
     }
 
     public <T extends Object> boolean setObject(String key, T t) {
-        return setObject(key, t, true, DEFAULT_EXPIRE_SECONDS);
+        return setObject(key, t, false, DEFAULT_EXPIRE_SECONDS);
     }
 
     /**
@@ -354,11 +354,11 @@ public class ValueOperations extends JedisOperations {
     }
 
     public <T extends Object> T getObject(byte[] key, Class<T> clazz, Integer seconds) {
-        return getObject(key, clazz, true, seconds);
+        return getObject(key, clazz, false, seconds);
     }
 
     public <T extends Object> T getObject(byte[] key, Class<T> clazz) {
-        return getObject(key, clazz, true, null);
+        return getObject(key, clazz, false, null);
     }
 
     /**
@@ -380,11 +380,11 @@ public class ValueOperations extends JedisOperations {
     }
 
     public <T extends Object> T getObject(String key, Class<T> clazz, Integer seconds) {
-        return getObject(key, clazz, true, seconds);
+        return getObject(key, clazz, false, seconds);
     }
 
     public <T extends Object> T getObject(String key, Class<T> clazz) {
-        return getObject(key, clazz, true, null);
+        return getObject(key, clazz, false, null);
     }
 
     public boolean set(byte[] key, byte[] value, int seconds) {
@@ -419,7 +419,7 @@ public class ValueOperations extends JedisOperations {
     }
 
     public boolean set(String key, byte[] value, int seconds) {
-        return this.set(key.getBytes(), value, true, seconds);
+        return this.set(key.getBytes(), value, false, seconds);
     }
 
     /**
@@ -451,7 +451,7 @@ public class ValueOperations extends JedisOperations {
     }
 
     public byte[] get(byte[] key) {
-        return this.get(key, true, null);
+        return this.get(key, false, null);
     }
 
     /**
@@ -574,7 +574,7 @@ public class ValueOperations extends JedisOperations {
     }
 
     public Map<byte[], byte[]> mget(byte[]... keys) {
-        return this.mget(true, keys);
+        return this.mget(false, keys);
     }
 
     /**
@@ -600,6 +600,6 @@ public class ValueOperations extends JedisOperations {
     }
 
     public <T extends Object> Map<byte[], T> mgetObject(Class<T> clazz, byte[]... keys) {
-        return this.mgetObject(clazz, true, keys);
+        return this.mgetObject(clazz, false, keys);
     }
 }

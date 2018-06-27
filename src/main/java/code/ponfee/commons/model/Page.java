@@ -8,6 +8,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -304,11 +306,20 @@ public class Page<T> implements java.io.Serializable {
     }
 
     /**
+     * 判断是否无数据
+     * 
+     * @return
+     */
+    public boolean isEmpty() {
+        return CollectionUtils.isEmpty(rows);
+    }
+
+    /**
      * 处理
      * @param action
      */
     public void process(Consumer<T> action) {
-        if (rows == null || rows.isEmpty() || action == null) {
+        if (isEmpty() || action == null) {
             return;
         }
         rows.forEach(action);
@@ -322,7 +333,7 @@ public class Page<T> implements java.io.Serializable {
     public <E> Page<E> transform(Function<T, E> mapper) {
         Page<E> page = new Page<>();
         BeanUtils.copyProperties(this, page);
-        if (rows == null || rows.isEmpty() || mapper == null) {
+        if (isEmpty() || mapper == null) {
             return page;
         }
         page.setRows(rows.stream().map(mapper).collect(Collectors.toList()));

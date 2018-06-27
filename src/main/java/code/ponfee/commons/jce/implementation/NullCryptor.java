@@ -26,7 +26,7 @@ public class NullCryptor extends Cryptor {
     }
 
     public @Override String toString() {
-        return "NullCryptor";
+        return NullCryptor.class.getSimpleName();
     }
 
     private static final class NullKey implements Key {

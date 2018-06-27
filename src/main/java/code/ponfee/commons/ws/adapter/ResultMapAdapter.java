@@ -31,19 +31,19 @@ public abstract class ResultMapAdapter<K, V> extends XmlAdapter<Result<MapItem>,
 
     public @Override Result<Map<K, V>> unmarshal(Result<MapItem> v) {
         if (v.getData() == null || v.getData().getItem() == null) {
-            return new Result<>(v.getCode(), v.getMsg(), null);
+            return v.copy(null);
         }
 
         Map<K, V> map = Maps.newLinkedHashMap();
         for (MapEntry<K, V> e : v.getData().getItem()) {
             map.put(e.getKey(), e.getValue());
         }
-        return new Result<>(v.getCode(), v.getMsg(), map);
+        return v.copy(map);
     }
 
     public @Override Result<MapItem> marshal(Result<Map<K, V>> v) {
         if (v.getData() == null) {
-            return new Result<>(v.getCode(), v.getMsg(), null);
+            return v.copy(null);
         }
 
         MapEntry<K, V>[] entries = new MapEntry[v.getData().size()];
@@ -51,7 +51,7 @@ public abstract class ResultMapAdapter<K, V> extends XmlAdapter<Result<MapItem>,
         for (Map.Entry<K, V> entry : v.getData().entrySet()) {
             entries[i++] = new MapEntry<>(entry);
         }
-        return new Result<>(v.getCode(), v.getMsg(), new MapItem(entries));
+        return v.copy(new MapItem(entries));
     }
 
 }

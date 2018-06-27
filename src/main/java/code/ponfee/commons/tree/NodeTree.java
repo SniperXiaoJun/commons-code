@@ -9,7 +9,6 @@
 package code.ponfee.commons.tree;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -83,33 +82,31 @@ public class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * @param nodes        子节点列表
      * @param ignoreOrphan {@code true}忽略孤儿节点
      */
+    @SuppressWarnings("unchecked")
     public <E extends AbstractNode<T>> NodeTree<T> build(List<E> list, 
-                                                     boolean ignoreOrphan) {
-        Set<T> nodeIds = Sets.newHashSet(Arrays.asList(this.nid));
+                                                         boolean ignoreOrphan) {
+        Set<T> nodeNids = Sets.newHashSet(this.nid);
 
         // 1、预处理
         List<AbstractNode<T>> nodes = before(list);
 
         // 2、检查是否存在重复节点
         for (AbstractNode<T> n : nodes) {
-            if (!nodeIds.add(n.getNid())) {
+            if (!nodeNids.add(n.getNid())) {
                 throw new RuntimeException("重复的节点：" + n.getNid());
             }
         }
 
         // 3、以此节点为根构建节点树
+        Set<T> foundNids = Sets.newHashSet(this.nid);
         this.level = 1; // reset with 1
         this.path = null; // reset with null
         this.leftLeafCount = 0; // reset with 0
-        this.build0(nodes, ignoreOrphan, this.nid);
+        this.build0(nodes, ignoreOrphan, this.nid, foundNids);
 
         // 4、检查是否存在孤儿节点
         if (!ignoreOrphan) {
-            Set<T> checkIds = Sets.newHashSet();
-            for (NodeFlat<T> nf : this.flatInherit()) {
-                checkIds.add(nf.getNid());
-            }
-            Set<T> diff = Collects.different(nodeIds, checkIds);
+            Set<T> diff = Collects.different(nodeNids, foundNids);
             if (CollectionUtils.isNotEmpty(diff)) {
                 throw new RuntimeException("无效的孤儿节点：" + diff);
             }
@@ -159,8 +156,8 @@ public class NodeTree<T extends java.io.Serializable & Comparable<T>>
         return list;
     }
 
-    private <E extends AbstractNode<T>> void build0(
-        List<E> nodes, boolean ignoreOrphan, T mountPidIfNull) {
+    private <E extends AbstractNode<T>> void build0(List<E> nodes, boolean ignoreOrphan, 
+                                                    T mountPidIfNull, Set<T> foundNids) {
         // current "this" is parent: AbstractNode parent = this;
 
         Set<Integer> uniqueOrders = Sets.newHashSet();
@@ -181,7 +178,7 @@ public class NodeTree<T extends java.io.Serializable & Comparable<T>>
                 }
 
                 if (!uniqueOrders.add(node.getOrders())) {
-                    throw new RuntimeException("节点次序重复：" + node.getNid());
+                    throw new RuntimeException("兄弟节点次序重复：" + node.getNid());
                 }
 
                 if (this.children == null) {
@@ -195,6 +192,7 @@ public class NodeTree<T extends java.io.Serializable & Comparable<T>>
                 child.setLevel(this.level + 1);
                 this.children.add(child); // 挂载子节点
 
+                foundNids.add(node.getNid());
                 iter.remove(); // remove the found child node
             }
         }
@@ -205,7 +203,7 @@ public class NodeTree<T extends java.io.Serializable & Comparable<T>>
 
             // recursion to build child tree
             for (NodeTree<T> nt : this.children) {
-                nt.build0(nodes, ignoreOrphan, mountPidIfNull);
+                nt.build0(nodes, ignoreOrphan, mountPidIfNull, foundNids);
             }
         }
 

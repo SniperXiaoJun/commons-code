@@ -30,23 +30,23 @@ public abstract class ResultListAdapter<T> extends XmlAdapter<Result<ArrayItem<T
     @Override
     public Result<List<T>> unmarshal(Result<ArrayItem<T>> v) {
         if (v.getData() == null) {
-            return new Result<>(v.getCode(), v.getMsg(), null);
+            return v.copy(null);
         } else if (v.getData().getItem() == null) {
-            return new Result<>(v.getCode(), v.getMsg(), Lists.newArrayList());
+            return v.copy(Lists.newArrayList());
         }
 
         List<T> list = Lists.newArrayList(v.getData().getItem());
-        return new Result<>(v.getCode(), v.getMsg(), list);
+        return v.copy(list);
     }
 
     @SuppressWarnings("unchecked")
     public @Override Result<ArrayItem<T>> marshal(Result<List<T>> v) {
         if (v.getData() == null) {
-            return new Result<>(v.getCode(), v.getMsg(), null);
+            return v.copy(null);
         }
 
         T[] array = v.getData().toArray((T[]) Array.newInstance(type, v.getData().size()));
-        return new Result<>(v.getCode(), v.getMsg(), new ArrayItem<>(array));
+        return v.copy(new ArrayItem<>(array));
     }
 
 }

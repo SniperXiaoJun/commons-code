@@ -40,6 +40,7 @@ public class NodeTreeTest {
         list.add(new NamedNode<>("300000", null, 4, true, "nid300000"));
 
         list.add(new NamedNode<>("400000", null, 5, true, "nid400000"));
+
         NodeTree<String> subtree = new NodeTree<>("400010", "400000", 1, true);
         List<AbstractNode<String>> list1 = new ArrayList<>();
         list1.add(new NamedNode<>("400011", "400010", 2, true,  "nid400011"));
