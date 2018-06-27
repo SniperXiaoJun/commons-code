@@ -15,7 +15,7 @@ import org.apache.commons.collections4.CollectionUtils;
  * 
  * @author Ponfee
  */
-public class NodeFlat<T extends java.io.Serializable & Comparable<T>>
+public final class NodeFlat<T extends java.io.Serializable & Comparable<T>>
     extends AbstractNode<T> {
 
     private static final long serialVersionUID = 5191371614061952661L;

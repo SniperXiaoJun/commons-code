@@ -19,6 +19,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -150,7 +152,7 @@ public class ExcelExporter extends AbstractExporter {
     public void build(Table table) {
         // 1、校验表头是否为空
         List<NodeFlat<Integer>> flats = table.getThead();
-        if (flats == null || flats.isEmpty()) {
+        if (CollectionUtils.isEmpty(flats)) {
             throw new IllegalArgumentException("thead can't be null");
         }
 
@@ -187,7 +189,7 @@ public class ExcelExporter extends AbstractExporter {
 
         int totalLeafCount = flats.get(0).getChildLeafCount();
         // 6、判断是否有数据
-        if (ObjectUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
+        if (CollectionUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
             createBlankRow(NO_RESULT_TIP, sheet, tipStyle, cursorRow, totalLeafCount);
             return;
         }
@@ -199,7 +201,7 @@ public class ExcelExporter extends AbstractExporter {
 
         // 7、处理tbody数据
         List<Object[]> tbody = table.getTobdy();
-        if (tbody != null && !tbody.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(tbody)) {
             Map<CellStyleOptions, Object> options = table.getOptions();
             Object[] data;
             for (int i = 0, n = tbody.size(), j, m; i < n; i++) {
@@ -531,13 +533,13 @@ public class ExcelExporter extends AbstractExporter {
     @SuppressWarnings("unchecked")
     private void processOptions(SXSSFCell cell, int tbodyRowIdx, int tbodyColIdx, 
                                 Map<CellStyleOptions, Object> options) {
-        if (options == null || options.isEmpty()) {
+        if (MapUtils.isEmpty(options)) {
             return;
         }
 
         // 单元格高亮显示
         Map<String, Object> highlight = (Map<String, Object>) options.get(CellStyleOptions.HIGHLIGHT);
-        if (highlight != null && !highlight.isEmpty()) {
+        if (MapUtils.isNotEmpty(highlight)) {
             for (List<Integer> c : (List<List<Integer>>) highlight.get("cells")) {
                 if (c.get(0) == tbodyRowIdx && c.get(1) == tbodyColIdx) {
                     XSSFFont font = (XSSFFont) workbook.createFont();

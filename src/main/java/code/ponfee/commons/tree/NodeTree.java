@@ -28,7 +28,7 @@ import code.ponfee.commons.reflect.Fields;
  * 
  * @author Ponfee
  */
-public class NodeTree<T extends java.io.Serializable & Comparable<T>>
+public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
     extends AbstractNode<T> {
 
     private static final long serialVersionUID = -9081626363752680404L;

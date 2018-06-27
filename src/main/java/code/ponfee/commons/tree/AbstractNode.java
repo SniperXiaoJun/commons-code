@@ -34,7 +34,7 @@ public abstract class AbstractNode<T extends java.io.Serializable & Comparable<T
 
     protected boolean available; // 是否可用（parent.available && enabled）
     protected int level; // 节点层级（以根节点为1开始，往下逐级加1）
-    protected List<T> path; // 节点路径（父节点在前）
+    protected List<T> path; // 节点路径list<nid>（父节点在前，末尾一个是节点本身的nid）
 
     protected int childLeafCount; // 子叶子节点数量（若为叶子节点，则为1）
     protected int leftLeafCount; // 左叶子节点数量
