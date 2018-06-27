@@ -72,8 +72,8 @@ public class DataExtractorBuilder {
                 //
                 // xls: application/vnd.ms-excel
                 //      application/msword application/x-xls
-                return new ExcelExtractor<>(inputStream, ExcelType.from(extension), 
-                                            headers, firstDataRow, maxFileSize, 0);
+                return new ExcelExtractor<>(inputStream, headers, firstDataRow, maxFileSize, 
+                                            ExcelType.from(extension), 0);
             } else {
                 throw new RuntimeException("File content type not supported: " + fileName);
             }

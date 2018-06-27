@@ -27,7 +27,7 @@ public abstract class DataExtractor<T> {
         this.maxFileSize = maxFileSize;
     }
 
-    protected abstract void extract(RowProcessor<T> processor) throws IOException;
+    public abstract void extract(RowProcessor<T> processor) throws IOException;
 
     public final List<T> extract() throws IOException {
         List<T> list = new ArrayList<>();

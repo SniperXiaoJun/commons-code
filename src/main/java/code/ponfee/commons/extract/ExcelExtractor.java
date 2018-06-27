@@ -24,58 +24,62 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class ExcelExtractor<T> extends DataExtractor<T> {
 
-    private final Workbook workbook;
     private final int sheetIndex;
+    private final ExcelType type;
 
-    public ExcelExtractor(InputStream inputStream, ExcelType type, String[] headers,
-                          int firstDataRow, long maxFileSize) throws IOException {
-        this(inputStream, type, headers, firstDataRow, maxFileSize, 0);
+    public ExcelExtractor(InputStream inputStream, String[] headers, 
+                          int firstDataRow, long maxFileSize, ExcelType type)  {
+        this(inputStream, headers, firstDataRow, maxFileSize, type, 0);
     }
 
-    public ExcelExtractor(InputStream inputStream, ExcelType type, String[] headers, 
-            int firstDataRow, long maxFileSize, int sheetIndex) throws IOException {
+    public ExcelExtractor(InputStream inputStream, String[] headers, int firstDataRow, 
+                          long maxFileSize, ExcelType type, int sheetIndex) {
         super(inputStream, headers, firstDataRow, maxFileSize);
+        this.type = type;
         this.sheetIndex = sheetIndex;
-        switch (type) {
-            case XLS:
-                this.workbook = new HSSFWorkbook(input);
-                break;
-            case XLSX:
-                this.workbook = new XSSFWorkbook(input);
-                break;
-            default:
-                throw new RuntimeException("Unknown excel type: " + type);
-        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void extract(RowProcessor<T> processor) {
-        T data;
-        Sheet sheet = this.workbook.getSheetAt(sheetIndex);
-        for (int n = sheet.getLastRowNum(), i = 0, m, j; i <= n; i++) {
-            Row row = sheet.getRow(i);
-            if (row == null) {
-                continue;
-            }
+    public void extract(RowProcessor<T> processor) throws IOException {
+        Workbook wb;
+        switch (type) {
+            case XLS:
+                wb = new HSSFWorkbook(input);
+                break;
+            case XLSX:
+                wb = new XSSFWorkbook(input);
+                break;
+            default:
+                throw new RuntimeException("Unknown excel type: " + type);
+        }
+        try (Workbook workbook = wb) {
+            T data;
+            Sheet sheet = wb.getSheetAt(sheetIndex);
+            for (int n = sheet.getLastRowNum(), i = 0, m, j; i <= n; i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) {
+                    continue;
+                }
 
-            String[] array = columnNumber > 1 ? new String[columnNumber] : null;
-            String str = null;
-            for (m = row.getLastCellNum(), j = 0; j <= m && j < columnNumber; j++) {
-                str = getCellValueAsString(row.getCell(j, CREATE_NULL_AS_BLANK));
+                String[] array = columnNumber > 1 ? new String[columnNumber] : null;
+                String str = null;
+                for (m = row.getLastCellNum(), j = 0; j <= m && j < columnNumber; j++) {
+                    str = getCellValueAsString(row.getCell(j, CREATE_NULL_AS_BLANK));
+                    if (columnNumber > 1) {
+                        array[j] = str;
+                    }
+                }
                 if (columnNumber > 1) {
-                    array[j] = str;
+                    for (; j < columnNumber; j++) {
+                        array[j] = StringUtils.EMPTY;
+                    }
+                    data = (T) array;
+                } else {
+                    data = (T) str;
                 }
+                processor.process(i, data);
             }
-            if (columnNumber > 1) {
-                for (; j < columnNumber; j++) {
-                    array[j] = StringUtils.EMPTY;
-                }
-                data = (T) array;
-            } else {
-                data = (T) str;
-            }
-            processor.process(i, data);
         }
     }
 
@@ -115,7 +119,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
     public static void main(String[] args) throws Exception {
         //List<String> list = extractData(new FileInputStream("d:/大屏批量配置-data-2.xlsx"), "xlsx", 0, 1);
         ExcelExtractor<String[]> ex = new ExcelExtractor<>(new FileInputStream("d:/abcd.xlsx"), 
-            ExcelType.XLSX, new String[] {"a", "b"}, 1, 10000, 0);
+                                                           new String[] {"a", "b"}, 1, 10000, ExcelType.XLSX, 0);
         for (String[] s : ex.extract()) {
             System.out.println(StringUtils.join(s, ", "));
         }

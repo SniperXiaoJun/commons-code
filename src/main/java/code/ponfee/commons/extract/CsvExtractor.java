@@ -23,7 +23,7 @@ public class CsvExtractor<T> extends DataExtractor<T> {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void extract(RowProcessor<T> processor) throws IOException {
+    public void extract(RowProcessor<T> processor) throws IOException {
         try (BOMInputStream bom = new BOMInputStream(input); 
              Reader reader = new InputStreamReader(bom)
         ) {
