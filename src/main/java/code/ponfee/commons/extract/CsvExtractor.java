@@ -32,7 +32,8 @@ public class CsvExtractor<T> extends DataExtractor<T> {
     @SuppressWarnings("unchecked")
     @Override
     public void extract(RowProcessor<T> processor) throws IOException {
-        try (BOMInputStream bom = new BOMInputStream(input); 
+        try (InputStream stream = input;
+             BOMInputStream bom = new BOMInputStream(stream); 
              Reader reader = new InputStreamReader(bom)
         ) {
             Iterable<CSVRecord> records = CSVFormat.DEFAULT.withHeader(headers).parse(reader);

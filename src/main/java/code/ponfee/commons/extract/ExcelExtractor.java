@@ -42,20 +42,11 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
     @SuppressWarnings("unchecked")
     @Override
     public void extract(RowProcessor<T> processor) throws IOException {
-        Workbook wb;
-        switch (type) {
-            case XLS:
-                wb = new HSSFWorkbook(input);
-                break;
-            case XLSX:
-                wb = new XSSFWorkbook(input);
-                break;
-            default:
-                throw new RuntimeException("Unknown excel type: " + type);
-        }
-        try (Workbook workbook = wb) {
+        try (InputStream stream = input;
+             Workbook workbook = readWorkbook(stream)
+        ) {
             T data;
-            Sheet sheet = wb.getSheetAt(sheetIndex);
+            Sheet sheet = workbook.getSheetAt(sheetIndex);
             for (int n = sheet.getLastRowNum(), i = startRow, m, j; i <= n; i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) {
@@ -115,6 +106,17 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
             case ERROR: // 故障
             default:
                 return StringUtils.EMPTY;
+        }
+    }
+
+    private Workbook readWorkbook(InputStream input) throws IOException {
+        switch (type) {
+            case XLS:
+                return new HSSFWorkbook(input);
+            case XLSX:
+                return new XSSFWorkbook(input);
+            default:
+                throw new RuntimeException("Unknown excel type: " + type);
         }
     }
 

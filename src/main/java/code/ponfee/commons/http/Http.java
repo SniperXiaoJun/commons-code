@@ -191,7 +191,7 @@ public final class Http {
      * 文件上传
      * @param formName 表单名称
      * @param fileName 附件名称
-     * @param partType 附件类型
+     * @param partType 附件类型，value of the Content-Type part header
      * @param mimePart 上传数据
      * @return
      */

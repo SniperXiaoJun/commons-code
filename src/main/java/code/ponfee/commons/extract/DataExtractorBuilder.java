@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.ImmutableList;
 
@@ -61,31 +60,26 @@ public class DataExtractorBuilder {
 
     public <T> DataExtractor<T> build() throws FileTooBigException, IOException {
         String extension = FilenameUtils.getExtension(fileName).toLowerCase();
-        //try (InputStream inputStream = input) {
-            long fileSize = input.available();
-            if (maxFileSize > 0 && fileSize > maxFileSize) {
-                throw new FileTooBigException("文件大小：" + Files.human(fileSize) 
-                                            + "，已经超过：" + Files.human(maxFileSize));
-            }
-            if (StringUtils.isBlank(contentType)
-                || CONTENT_TYPE_TEXT.equalsIgnoreCase(contentType)
-                || CSV_EXTENSION.contains(extension)) {
-                // csv, txt文本格式数据
-                return new CsvExtractor<>(input, headers, startRow, maxFileSize);
-            } else if (EXCEL_EXTENSION.contains(extension)) {
-                // content-type
-                // xlsx: application/vnd.openxmlformats-officedocument.wordprocessingml.document
-                //       application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-                //
-                // xls: application/vnd.ms-excel
-                //      application/msword application/x-xls
-                return new ExcelExtractor<>(input, headers, startRow, maxFileSize, 
-                                            ExcelType.from(extension), sheetIndex);
-            } else {
-                throw new RuntimeException("File content type not supported: " + fileName);
-            }
-        //} catch (IOException e) {
-        //    throw new RuntimeException("文件数据提取出现异常", e);
-        //}
+        long fileSize = input.available();
+        if (maxFileSize > 0 && fileSize > maxFileSize) {
+            throw new FileTooBigException("文件大小：" + Files.human(fileSize) 
+                                        + "，已经超过：" + Files.human(maxFileSize));
+        }
+        if (CONTENT_TYPE_TEXT.equalsIgnoreCase(contentType)
+            || CSV_EXTENSION.contains(extension)) {
+            // csv, txt文本格式数据
+            return new CsvExtractor<>(input, headers, startRow, maxFileSize);
+        } else if (EXCEL_EXTENSION.contains(extension)) {
+            // content-type
+            // xlsx: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+            //       application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+            //
+            // xls: application/vnd.ms-excel
+            //      application/msword application/x-xls
+            return new ExcelExtractor<>(input, headers, startRow, maxFileSize, 
+                                        ExcelType.from(extension), sheetIndex);
+        } else {
+            throw new RuntimeException("File content type not supported: " + fileName);
+        }
     }
 }
