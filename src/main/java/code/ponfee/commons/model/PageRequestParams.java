@@ -1,5 +1,10 @@
 package code.ponfee.commons.model;
 
+import static code.ponfee.commons.model.PageHandler.DEFAULT_PAGE_NUM;
+import static code.ponfee.commons.model.PageHandler.DEFAULT_PAGE_SIZE;
+import static code.ponfee.commons.model.PageHandler.DEFAULT_OFFSET;
+import static code.ponfee.commons.model.PageHandler.DEFAULT_LIMIT;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +21,7 @@ public class PageRequestParams implements java.io.Serializable {
     private static final long serialVersionUID = 6176654946390797217L;
 
     public static final Set<String> PAGE_PARAMS = ImmutableSet.of(
-        "pageNum", "pageSize", "offset", "limit"
+        DEFAULT_PAGE_NUM, DEFAULT_PAGE_SIZE, DEFAULT_OFFSET, DEFAULT_LIMIT
     );
 
     public static final String SORT_PARAM = "sort";

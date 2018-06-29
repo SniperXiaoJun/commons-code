@@ -1,14 +1,13 @@
 package code.ponfee.commons.extract;
 
 /**
- * 行处理
+ * 行验证
  * 
  * @author Ponfee
  * @param <T>
  */
 @FunctionalInterface
-public interface RowProcessor<T> {
+public interface RowValidator<T> {
 
-    void process(int rowNumber, T rowData);
-
+    String verify(int rowNumber, T rowData);
 }

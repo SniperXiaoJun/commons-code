@@ -12,6 +12,7 @@ public class Thead extends NamedNode<Integer> {
     private static final long serialVersionUID = 1898674740598755648L;
 
     private final Tmeta tmeta; // 列配置信息
+    private String field; // 字段（用于对象）
 
     public Thead(String name, Integer nid, Integer pid, Tmeta tmeta) {
         this(nid, pid, nid, name, tmeta);
@@ -42,6 +43,14 @@ public class Thead extends NamedNode<Integer> {
 
     public Tmeta getTmeta() {
         return tmeta;
+    }
+
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
     }
 
 }

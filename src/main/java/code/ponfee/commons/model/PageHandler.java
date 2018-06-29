@@ -18,7 +18,14 @@ import code.ponfee.commons.reflect.Fields;
  */
 public final class PageHandler {
 
-    public static final PageHandler NORMAL = new PageHandler("pageNum", "pageSize", "offset", "limit");
+    public static final String DEFAULT_PAGE_NUM = "pageNum";
+    public static final String DEFAULT_PAGE_SIZE = "pageSize";
+    public static final String DEFAULT_OFFSET = "offset";
+    public static final String DEFAULT_LIMIT = "limit";
+
+    public static final PageHandler NORMAL = new PageHandler(
+        DEFAULT_PAGE_NUM, DEFAULT_PAGE_SIZE, DEFAULT_OFFSET, DEFAULT_LIMIT
+    );
     private static final int MAX_SIZE = 1000;
     private static final int MIN_SIZE = 0;
 

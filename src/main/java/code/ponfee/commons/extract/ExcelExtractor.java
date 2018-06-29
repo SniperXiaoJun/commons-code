@@ -28,13 +28,13 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
     private final ExcelType type;
 
     public ExcelExtractor(InputStream inputStream, String[] headers, 
-                          int firstDataRow, long maxFileSize, ExcelType type)  {
-        this(inputStream, headers, firstDataRow, maxFileSize, type, 0);
+                          int startRow, long maxFileSize, ExcelType type) {
+        this(inputStream, headers, startRow, maxFileSize, type, 0);
     }
 
-    public ExcelExtractor(InputStream inputStream, String[] headers, int firstDataRow, 
+    public ExcelExtractor(InputStream input, String[] headers, int startRow, 
                           long maxFileSize, ExcelType type, int sheetIndex) {
-        super(inputStream, headers, firstDataRow, maxFileSize);
+        super(input, headers, startRow, maxFileSize);
         this.type = type;
         this.sheetIndex = sheetIndex;
     }
@@ -56,7 +56,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
         try (Workbook workbook = wb) {
             T data;
             Sheet sheet = wb.getSheetAt(sheetIndex);
-            for (int n = sheet.getLastRowNum(), i = 0, m, j; i <= n; i++) {
+            for (int n = sheet.getLastRowNum(), i = startRow, m, j; i <= n; i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) {
                     continue;
@@ -78,7 +78,9 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
                 } else {
                     data = (T) str;
                 }
-                processor.process(i, data);
+                if (isNotEmpty(data)) {
+                    processor.process(i, data);
+                }
             }
         }
     }
@@ -117,9 +119,11 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
     }
 
     public static void main(String[] args) throws Exception {
+        String[] headers = new String[] {"a", "b"};
+        //String[] headers = new String[] {"a"};
         //List<String> list = extractData(new FileInputStream("d:/大屏批量配置-data-2.xlsx"), "xlsx", 0, 1);
         ExcelExtractor<String[]> ex = new ExcelExtractor<>(new FileInputStream("d:/abcd.xlsx"), 
-                                                           new String[] {"a", "b"}, 1, 10000, ExcelType.XLSX, 0);
+                                                           headers, 1, 10000, ExcelType.XLSX, 0);
         for (String[] s : ex.extract()) {
             System.out.println(StringUtils.join(s, ", "));
         }

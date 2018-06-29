@@ -5,7 +5,7 @@ package code.ponfee.commons.extract;
  * 
  * @author Ponfee
  */
-public class FileTooBigException extends RuntimeException {
+public class FileTooBigException extends Exception {
 
     private static final long serialVersionUID = 2154768302918164161L;
 
