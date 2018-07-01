@@ -20,7 +20,7 @@ public final class NodeFlat<T extends java.io.Serializable & Comparable<T>>
 
     private static final long serialVersionUID = 5191371614061952661L;
 
-    private boolean leaf; // 是否叶子节点
+    private final boolean leaf; // 是否叶子节点
 
     public NodeFlat(NodeTree<T> nt) {
         super(nt.getNid(), nt.getPid(), nt.getOrders(), 
@@ -41,10 +41,6 @@ public final class NodeFlat<T extends java.io.Serializable & Comparable<T>>
     // ----------------------------------------------getter/setter
     public boolean isLeaf() {
         return leaf;
-    }
-
-    public void setLeaf(boolean leaf) {
-        this.leaf = leaf;
     }
 
 }

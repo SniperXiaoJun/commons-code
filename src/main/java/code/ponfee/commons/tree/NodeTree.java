@@ -8,11 +8,11 @@
 
 package code.ponfee.commons.tree;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -34,7 +34,8 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
     private static final long serialVersionUID = -9081626363752680404L;
     public static final String DEFAULT_ROOT_NAME = "__ROOT__";
 
-    private List<NodeTree<T>> children; // 子节点列表（为null则是叶子节点）
+    // 子节点列表（为空列表则是叶子节点）
+    private final List<NodeTree<T>> children = Lists.newArrayList();
 
     /**
      * 构造空结点作为根节点
@@ -98,18 +99,15 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
         }
 
         // 3、以此节点为根构建节点树
-        Set<T> foundNids = Sets.newHashSet(this.nid);
         this.level = 1; // reset with 1
         this.path = null; // reset with null
         this.leftLeafCount = 0; // reset with 0
-        this.build0(nodes, ignoreOrphan, this.nid, foundNids);
+        this.build0(nodes, ignoreOrphan, this.nid);
 
         // 4、检查是否存在孤儿节点
-        if (!ignoreOrphan) {
-            Set<T> diff = Collects.different(nodeNids, foundNids);
-            if (CollectionUtils.isNotEmpty(diff)) {
-                throw new RuntimeException("无效的孤儿节点：" + diff);
-            }
+        if (!ignoreOrphan && CollectionUtils.isNotEmpty(nodes)) {
+            List<T> nids = nodes.stream().map(n -> n.getNid()).collect(Collectors.toList());
+            throw new RuntimeException("无效的孤儿节点：" + nids);
         }
 
         // 5、统计
@@ -126,7 +124,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * @return
      */
     public List<NodeFlat<T>> flatInherit() {
-        List<NodeFlat<T>> collect = new ArrayList<>();
+        List<NodeFlat<T>> collect = Lists.newArrayList();
         inherit(collect);
         return collect;
     }
@@ -144,7 +142,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
 
     // -----------------------------------------------------------private methods
     private <E extends AbstractNode<T>> List<AbstractNode<T>> before(List<E> nodes) {
-        List<AbstractNode<T>> list = new ArrayList<>();
+        List<AbstractNode<T>> list = Lists.newArrayList();
         for (AbstractNode<T> node : nodes) {
             if (node instanceof NodeTree) {
                 List<NodeFlat<T>> flat = ((NodeTree<T>) node).flatInherit();
@@ -153,11 +151,16 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
                 list.add(node.copy());
             }
         }
+        if (CollectionUtils.isNotEmpty(this.children)) {
+            List<NodeFlat<T>> flat = this.flatInherit();
+            list.addAll(flat.subList(1, flat.size()));
+            this.children.clear();
+        }
         return list;
     }
 
-    private <E extends AbstractNode<T>> void build0(List<E> nodes, boolean ignoreOrphan, 
-                                                    T mountPidIfNull, Set<T> foundNids) {
+    private <E extends AbstractNode<T>> void build0(
+        List<E> nodes, boolean ignoreOrphan, T mountPidIfNull) {
         // current "this" is parent: AbstractNode parent = this;
 
         Set<Integer> uniqueOrders = Sets.newHashSet();
@@ -165,7 +168,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
         for (Iterator<E> iter = nodes.iterator(); iter.hasNext();) {
             AbstractNode<T> node = iter.next();
 
-            if (!ignoreOrphan && AbstractNode.isEmpty(node.getPid())) {
+            if (!ignoreOrphan && super.isEmpty(node.getPid())) {
                 // 不忽略孤儿节点且节点的父节点为空，则其父节点视为根节点（挂载到根节点下）
                 Fields.put(node, "pid", mountPidIfNull);
             }
@@ -181,9 +184,6 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
                     throw new RuntimeException("兄弟节点次序重复：" + node.getNid());
                 }
 
-                if (this.children == null) {
-                    this.children = new ArrayList<>();
-                }
                 NodeTree<T> child = new NodeTree<>(node);
                 child.setAvailable(this.available && child.isEnabled());
 
@@ -192,7 +192,6 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
                 child.setLevel(this.level + 1);
                 this.children.add(child); // 挂载子节点
 
-                foundNids.add(node.getNid());
                 iter.remove(); // remove the found child node
             }
         }
@@ -203,7 +202,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
 
             // recursion to build child tree
             for (NodeTree<T> nt : this.children) {
-                nt.build0(nodes, ignoreOrphan, mountPidIfNull, foundNids);
+                nt.build0(nodes, ignoreOrphan, mountPidIfNull);
             }
         }
 
@@ -255,7 +254,8 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
 
                 // 3、统计子叶子节点数量及整棵树节点的数量
                 sumChildLeafCount += child.childLeafCount;
-                maxChildTreeDepth = NumberUtils.max(maxChildTreeDepth, child.treeMaxDepth);
+                maxChildTreeDepth = NumberUtils.max(maxChildTreeDepth, 
+                                                    child.treeMaxDepth);
                 sumTreeNodeCount += child.treeNodeCount;
             }
             this.childLeafCount = sumChildLeafCount; // 子节点的叶子节点之和
@@ -271,10 +271,6 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
     // -----------------------------------------------getter/setter
     public List<NodeTree<T>> getChildren() {
         return children;
-    }
-
-    public void setChildren(List<NodeTree<T>> children) {
-        this.children = children;
     }
 
 }

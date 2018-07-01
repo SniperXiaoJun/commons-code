@@ -34,7 +34,7 @@ public abstract class AbstractNode<T extends java.io.Serializable & Comparable<T
 
     protected boolean available; // 是否可用（parent.available && enabled）
     protected int level; // 节点层级（以根节点为1开始，往下逐级加1）
-    protected List<T> path; // 节点路径list<nid>（父节点在前，末尾一个是节点本身的nid）
+    protected List<T> path; // 节点路径list<nid>（父节点在前，末尾元素是节点本身的nid）
 
     protected int childLeafCount; // 子叶子节点数量（若为叶子节点，则为1）
     protected int leftLeafCount; // 左叶子节点数量
@@ -42,7 +42,7 @@ public abstract class AbstractNode<T extends java.io.Serializable & Comparable<T
     protected int treeMaxDepth; // 节点树的最大深度（包括自身层级）
 
     public AbstractNode(T nid, T pid, int orders, 
-                    boolean enabled, AbstractNode<T> attach) {
+                        boolean enabled, AbstractNode<T> attach) {
         Preconditions.checkArgument(!isEmpty(nid), "节点编号不能为空");
 
         this.nid = nid;
@@ -186,10 +186,10 @@ public abstract class AbstractNode<T extends java.io.Serializable & Comparable<T
         return innermostAttach(attach.attach);
     }
 
-    public static <E extends java.io.Serializable & Comparable<E>> boolean isEmpty(E e) {
-        if (e instanceof CharSequence) {
-            return StringUtils.isBlank((CharSequence) e);
+    public boolean isEmpty(T id) {
+        if (id instanceof CharSequence) {
+            return StringUtils.isBlank((CharSequence) id);
         }
-        return e == null;
+        return id == null;
     }
 }

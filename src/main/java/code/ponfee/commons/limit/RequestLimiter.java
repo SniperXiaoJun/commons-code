@@ -73,8 +73,8 @@ public class RequestLimiter {
      * @param limit
      * @throws RequestLimitException 
      */
-    public RequestLimiter limitThreshold(String key, int period, int limit, String message)
-        throws RequestLimitException {
+    public RequestLimiter limitThreshold(String key, int period, 
+        int limit, String message) throws RequestLimitException {
         checkLimit(CHECK_THRE_KEY + key, period, limit, message);
         return this;
     }

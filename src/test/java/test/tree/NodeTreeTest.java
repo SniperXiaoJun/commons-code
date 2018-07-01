@@ -82,6 +82,7 @@ public class NodeTreeTest {
     public void test4() {
         List<AbstractNode<String>> list = new ArrayList<>();
         list.add(new NamedNode<>("100000", "notfound", 1, true, "nid100000")); // 无效的孤儿节点
+        list.add(new NamedNode<>("200000", "notfound", 1, true, "nid200000")); // 无效的孤儿节点
 
         new NodeTree<>(NodeTree.DEFAULT_ROOT_NAME).build(list);
     }
