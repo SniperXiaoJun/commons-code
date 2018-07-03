@@ -14,9 +14,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -34,7 +37,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
     private static final long serialVersionUID = -9081626363752680404L;
     public static final String DEFAULT_ROOT_NAME = "__ROOT__";
 
-    // 子节点列表（为空列表则是叶子节点）
+    // 子节点列表（空列表则表示为叶子节点）
     private final List<NodeTree<T>> children = Lists.newArrayList();
 
     /**
@@ -84,8 +87,10 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * @param ignoreOrphan {@code true}忽略孤儿节点
      */
     @SuppressWarnings("unchecked")
-    public <E extends AbstractNode<T>> NodeTree<T> build(List<E> list, 
+    public <E extends AbstractNode<T>> NodeTree<T> build(@Nonnull List<E> list, 
                                                          boolean ignoreOrphan) {
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(list));
+
         Set<T> nodeNids = Sets.newHashSet(this.nid);
 
         // 1、预处理
@@ -170,7 +175,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
 
             if (!ignoreOrphan && super.isEmpty(node.getPid())) {
                 // 不忽略孤儿节点且节点的父节点为空，则其父节点视为根节点（挂载到根节点下）
-                Fields.put(node, "pid", mountPidIfNull);
+                Fields.put(node, "pid", mountPidIfNull); // pid is final modify
             }
 
             if (this.nid.equals(node.getPid())) {

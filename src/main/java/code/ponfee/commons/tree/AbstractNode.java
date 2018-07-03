@@ -26,24 +26,24 @@ public abstract class AbstractNode<T extends java.io.Serializable & Comparable<T
 
     private static final long serialVersionUID = -4116799955526185765L;
 
-    protected final T nid; // 节点ID
-    protected final T pid; // 父节点ID
+    protected final T nid; // node id
+    protected final T pid; // parent node id
     protected final int orders; // 节点次序（只用于兄弟节点间的排序）
     protected final boolean enabled; // 状态：false无效；true有效；
-    protected final /*transient*/ AbstractNode<T> attach; // 附加节点（附加信息）
+    protected final /*transient*/ AbstractNode<T> attach; // 附加节点（附加信息，与业务相关）
 
     protected boolean available; // 是否可用（parent.available && enabled）
     protected int level; // 节点层级（以根节点为1开始，往下逐级加1）
     protected List<T> path; // 节点路径list<nid>（父节点在前，末尾元素是节点本身的nid）
 
-    protected int childLeafCount; // 子叶子节点数量（若为叶子节点，则为1）
-    protected int leftLeafCount; // 左叶子节点数量
+    protected int childLeafCount; // 子叶子节点数量（若为叶子节点则为1）
+    protected int leftLeafCount; // 左叶子节点数量（在其左边的所有叶子节点数量）
     protected int treeNodeCount; // 整棵树的节点数量（包括根节点）
     protected int treeMaxDepth; // 节点树的最大深度（包括自身层级）
 
     public AbstractNode(T nid, T pid, int orders, 
                         boolean enabled, AbstractNode<T> attach) {
-        Preconditions.checkArgument(!isEmpty(nid), "节点编号不能为空");
+        Preconditions.checkArgument(isNotEmpty(nid), "节点编号不能为空");
 
         this.nid = nid;
         this.pid = pid;
@@ -191,5 +191,9 @@ public abstract class AbstractNode<T extends java.io.Serializable & Comparable<T
             return StringUtils.isBlank((CharSequence) id);
         }
         return id == null;
+    }
+
+    public boolean isNotEmpty(T id) {
+        return !isEmpty(id);
     }
 }

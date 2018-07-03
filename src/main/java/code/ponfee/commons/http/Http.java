@@ -66,8 +66,8 @@ public final class Http {
     private final List<MimePart> parts        = new ArrayList<>(); // http文件上传
 
     private String data; // 请求data
-    private int connectTimeout = 1000 * 5; // 连接超时时间
-    private int readTimeout = 1000 * 5; // 读取返回数据超时时间
+    private int connectTimeout = 1000 * 3; // 连接超时时间
+    private int readTimeout = 1000 * 7; // 读取返回数据超时时间（socket timeout）
     private Boolean encode = Boolean.TRUE; // 是否编码
     private String contentType; // 请求内容类型
     private String contentCharset; // 请求内容编码
@@ -353,6 +353,10 @@ public final class Http {
     // ------------------------------------------------------response headers
     public Map<String, List<String>> getRespHeaders() {
         return respHeaders;
+    }
+
+    public Map<String, String> getReqHeaders() {
+        return headers;
     }
 
     public String[] getRespHeaders(String name) {

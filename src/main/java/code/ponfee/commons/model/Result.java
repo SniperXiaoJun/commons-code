@@ -9,6 +9,9 @@ import code.ponfee.commons.reflect.Fields;
 
 /**
  * 返回结果数据结构体封装类
+ * 
+ * @see org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).build()
+ * 
  * @param <T>
  * @author fupf
  */

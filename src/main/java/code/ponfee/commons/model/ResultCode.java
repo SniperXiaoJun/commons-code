@@ -49,16 +49,21 @@ import code.ponfee.commons.json.Jsons;
  * https://baike.baidu.com/item/HTTP%E7%8A%B6%E6%80%81%E7%A0%81/5053660?fr=aladdin
  *
  * 公用错误码区间[000 ~ 999]
+ * 
+ * @see org.springframework.http.HttpStatus
  *
  * @author fupf
  */
 public final class ResultCode implements Serializable {
     private static final long serialVersionUID = -679746150956111045L;
 
+    private static final int SYS_CODE_MIN = 0;
+    private static final int SYS_CODE_MAX = 999;
+
     /** 公用结果码 */
     public static final ResultCode OK                 = create0(200, "OK");
-    public static final ResultCode CREATED            = create0(201, "已创建");
-    public static final ResultCode NO_CONTENT         = create0(204, "无内容");
+    public static final ResultCode CREATED            = create0(201, "已创建"); // POST
+    public static final ResultCode NO_CONTENT         = create0(204, "无内容"); // PUT, PATCH, DELETE
     public static final ResultCode REST_CONTENT       = create0(205, "请重置");
 
     public static final ResultCode REDIRECT           = create0(301, "重定向");
@@ -66,8 +71,8 @@ public final class ResultCode implements Serializable {
     public static final ResultCode BAD_REQUEST        = create0(400, "请求错误");
     public static final ResultCode UNAUTHORIZED       = create0(401, "未授权");
     public static final ResultCode FORBIDDEN          = create0(403, "拒绝访问");
-    public static final ResultCode NOT_FOUND          = create0(404, "资源未找到");
-    public static final ResultCode CLIENT_TIMEOUT     = create0(408, "请求超时");
+    public static final ResultCode NOT_FOUND          = create0(404, "资源未找到"); // GET return null
+    public static final ResultCode REQUEST_TIMEOUT    = create0(408, "请求超时");
     public static final ResultCode OPS_CONFLICT       = create0(409, "操作冲突");
 
     public static final ResultCode SERVER_ERROR       = create0(500, "服务器错误");
@@ -97,6 +102,10 @@ public final class ResultCode implements Serializable {
      * @return
      */
     private static ResultCode create0(int code, String msg) {
+        if (code < SYS_CODE_MIN || code > SYS_CODE_MAX) {
+            throw new IllegalArgumentException("the sys code must between " 
+                              + SYS_CODE_MIN + " and " + SYS_CODE_MAX + ".");
+        }
         return new ResultCode(code, msg);
     }
 
@@ -107,8 +116,9 @@ public final class ResultCode implements Serializable {
      * @return
      */
     public static ResultCode create(int code, String msg) {
-        if (code >= 0 && code < 1000) {
-            throw new IllegalArgumentException("the code must not between 0 and 999.");
+        if (code >= SYS_CODE_MIN && code <= SYS_CODE_MAX) {
+            throw new IllegalArgumentException("the biz code cannot between " 
+                                + SYS_CODE_MIN + " and " + SYS_CODE_MAX + ".");
         }
         return new ResultCode(code, msg);
     }

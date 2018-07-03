@@ -34,6 +34,7 @@ public class PageRequestParams implements java.io.Serializable {
 
     private String sort;
 
+    // 包含pageNum、pageSize、offset、limit、sort
     private final Map<String, Object> params = new LinkedHashMap<>();
 
     public int getPageNum() {
@@ -41,6 +42,7 @@ public class PageRequestParams implements java.io.Serializable {
     }
 
     public void setPageNum(int pageNum) {
+        //this.put(DEFAULT_PAGE_NUM, pageNum);
         this.pageNum = pageNum;
     }
 
@@ -49,6 +51,7 @@ public class PageRequestParams implements java.io.Serializable {
     }
 
     public void setPageSize(int pageSize) {
+        //this.put(DEFAULT_PAGE_SIZE, pageSize);
         this.pageSize = pageSize;
     }
 
@@ -57,6 +60,7 @@ public class PageRequestParams implements java.io.Serializable {
     }
 
     public void setOffset(int offset) {
+        //this.put(DEFAULT_OFFSET, offset);
         this.offset = offset;
     }
 
@@ -65,6 +69,7 @@ public class PageRequestParams implements java.io.Serializable {
     }
 
     public void setLimit(int limit) {
+        //this.put(DEFAULT_LIMIT, limit);
         this.limit = limit;
     }
 
@@ -73,6 +78,7 @@ public class PageRequestParams implements java.io.Serializable {
     }
 
     public void setSort(String sort) {
+        //this.put(PageRequestParams.SORT_PARAM, sort);
         this.sort = sort;
     }
 

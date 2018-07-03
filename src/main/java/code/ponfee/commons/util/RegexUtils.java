@@ -25,7 +25,8 @@ public final class RegexUtils {
     private RegexUtils() {}
 
     private static final LoadingCache<String, org.apache.oro.text.regex.Pattern> PATTERNS =
-        CacheBuilder.newBuilder().softValues().build(new CacheLoader<String, org.apache.oro.text.regex.Pattern>() {
+        CacheBuilder.newBuilder().softValues()
+                    .build(new CacheLoader<String, org.apache.oro.text.regex.Pattern>() {
             @Override
             public org.apache.oro.text.regex.Pattern load(String pattern) {
                 try {
@@ -58,9 +59,9 @@ public final class RegexUtils {
         }
     }
 
-    private static final Pattern PATTERN_MOBILE = Pattern.compile(
-        "^\\s*(((\\+)?86)|(\\((\\+)?86\\)))?1\\d{10}\\s*$"
-    );
+    // ----------------------------------------------------------mobile phone regexp
+    public static final String REGEXP_MOBILE = "^\\s*(((\\+)?86)|(\\((\\+)?86\\)))?1\\d{10}\\s*$";
+    public static final Pattern PATTERN_MOBILE = Pattern.compile(REGEXP_MOBILE);
 
     /**
      * check is mobile phone
@@ -71,9 +72,10 @@ public final class RegexUtils {
         return text != null && PATTERN_MOBILE.matcher(text).matches();
     }
 
-    private static final Pattern PATTERN_EMAIL = Pattern.compile(
-        "^\\w+((-\\w+)|(\\.\\w+))*\\@[A-Za-z0-9]+((\\.|-)[A-Za-z0-9]+)*\\.[A-Za-z0-9]+$"
-    );
+    // ----------------------------------------------------------email regexp
+    public static final String REGEXP_EMAIL = "^\\w+((-\\w+)|(\\.\\w+))*\\@[A-Za-z0-9]+((\\.|-)"
+                                            + "[A-Za-z0-9]+)*\\.[A-Za-z0-9]+$";
+    public static final Pattern PATTERN_EMAIL = Pattern.compile(REGEXP_EMAIL);
 
     /**
      * 校验是否邮箱地址
@@ -84,9 +86,10 @@ public final class RegexUtils {
         return text != null && PATTERN_EMAIL.matcher(text).matches();
     }
 
-    private static final Pattern PATTERN_IP = Pattern.compile(
-        "((?:(?:25[0-5]|2[0-4]\\d|((1\\d{2})|([1-9]?\\d)))\\.){3}(?:25[0-5]|2[0-4]\\d|((1\\d{2})|([1-9]?\\d))))"
-    );
+    // ----------------------------------------------------------ip regexp
+    public static final String REGEXP_IP = "((?:(?:25[0-5]|2[0-4]\\d|((1\\d{2})|([1-9]?\\d)))\\.){3}"
+                                         + "(?:25[0-5]|2[0-4]\\d|((1\\d{2})|([1-9]?\\d))))";
+    private static final Pattern PATTERN_IP = Pattern.compile(REGEXP_IP);
 
     /**
      * 校验是否ip地址
@@ -97,7 +100,9 @@ public final class RegexUtils {
         return text != null && PATTERN_IP.matcher(text).matches();
     }
 
-    private static final Pattern PATTERN_USERNAME = Pattern.compile("^[0-9A-Za-z_\\-]{4,20}$");
+    // ----------------------------------------------------------username regexp
+    public static final String REGEXP_USERNAME = "^[0-9A-Za-z_\\-]{4,20}$";
+    public static final Pattern PATTERN_USERNAME = Pattern.compile(REGEXP_USERNAME);
 
     /**
      * 校验是否是有效的用户名
@@ -109,10 +114,11 @@ public final class RegexUtils {
         return text != null && PATTERN_USERNAME.matcher(text).matches();
     }
 
+    // ----------------------------------------------------------password regexp
     private static final String SYMBOL = "@#!%&_\\.\\?\\-\\$\\^\\*";
-    private static final Pattern PATTERN_PASSWORD = Pattern.compile(
-        "^((?=.*\\d)(?=.*[A-Za-z])|(?=.*\\d)(?=.*[" + SYMBOL + "])|(?=.*[A-Za-z])(?=.*[" + SYMBOL + "]))[\\dA-Za-z" + SYMBOL + "]{8,20}$"
-    );
+    public static final String REGEXP_PASSWORD = "^((?=.*\\d)(?=.*[A-Za-z])|(?=.*\\d)(?=.*[" + SYMBOL 
+                         + "])|(?=.*[A-Za-z])(?=.*[" + SYMBOL + "]))[\\dA-Za-z" + SYMBOL + "]{8,20}$";
+    public static final Pattern PATTERN_PASSWORD = Pattern.compile(REGEXP_PASSWORD);
 
     /**
      * 校验是否是有效的密码：

@@ -11,6 +11,8 @@ package code.ponfee.commons.tree;
 /**
  * 带名称的节点
  * 
+ * The AbstractNode.attach example
+ * 
  * @author Ponfee
  */
 public class NamedNode<T extends java.io.Serializable & Comparable<T>>

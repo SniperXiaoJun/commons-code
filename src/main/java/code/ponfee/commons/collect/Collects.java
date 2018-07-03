@@ -401,15 +401,15 @@ public final class Collects {
      * Returns the ImmutableList of merged collection and object
      * 
      * @param coll
-     * @param t
+     * @param obj
      * @return
      */
-    public static <E> List<E> add(Collection<E> coll, E t) {
+    public static <E> List<E> add(Collection<E> coll, E obj) {
         ImmutableList.Builder<E> builder = ImmutableList.builder();
         if (coll != null) {
             builder.addAll(coll);
         }
-        builder.add(t);
+        builder.add(obj);
         return builder.build();
     }
 
