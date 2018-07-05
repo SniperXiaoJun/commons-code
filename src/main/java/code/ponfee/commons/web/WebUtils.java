@@ -116,6 +116,16 @@ public final class WebUtils {
     }
 
     /**
+     * Returns the web browser user-agent
+     * 
+     * @param req the HttpServletRequest
+     * @return web browser user-agent
+     */
+    public static String userAgent(HttpServletRequest req) {
+        return req.getHeader("USER-AGENT");
+    }
+
+    /**
      * 响应数据到请求客户端
      * @param resp
      * @param contentType
@@ -248,7 +258,8 @@ public final class WebUtils {
 
         String headers = req.getHeader("Access-Control-Allow-Headers");
         headers = StringUtils.isEmpty(headers) 
-                  ? "Origin,No-Cache,X-Requested-With,If-Modified-Since,Pragma,Expires,Last-Modified,Cache-Control,Content-Type,X-E4M-With" 
+                  ? "Origin,No-Cache,X-Requested-With,If-Modified-Since,Pragma,"
+                  + "Expires,Last-Modified,Cache-Control,Content-Type,X-E4M-With" 
                   : headers;
         resp.setHeader("Access-Control-Allow-Headers", headers);
 
@@ -447,10 +458,12 @@ public final class WebUtils {
 
     private static void respStream(HttpServletResponse resp, long size,
                                    String filename, String charset) {
-        filename = UrlCoder.encodeURIComponent(filename, charset);
+        filename = UrlCoder.encodeURIComponent(filename, charset); // others web browse
+        //filename = new String(filename.getBytes(StandardCharsets.UTF_8), 
+        //                      StandardCharsets.ISO_8859_1); // firefox web browse
         resp.setContentType("application/octet-stream");
         resp.setHeader("Content-Length", Long.toString(size));
-        resp.setHeader("Content-Disposition", "attachment;filename=" + filename);
+        resp.setHeader("Content-Disposition", "form-data; name=\"attachment\";filename=\"" + filename + "\"");
         resp.setCharacterEncoding(charset);
     }
 

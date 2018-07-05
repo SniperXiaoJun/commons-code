@@ -395,8 +395,8 @@ public class X509CertUtils {
         } finally {
             if (inputstream != null) try {
                 inputstream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
         }
     }
@@ -440,8 +440,8 @@ public class X509CertUtils {
         } finally {
             if (inputstream != null) try {
                 inputstream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
         }
     }

@@ -129,8 +129,8 @@ public class SimpleXmlHandler {
         } finally {
             if (xml != null) try {
                 xml.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
         }
     }

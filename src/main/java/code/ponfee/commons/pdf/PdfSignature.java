@@ -80,13 +80,13 @@ public class PdfSignature {
         } finally {
             if (reader != null) try {
                 reader.close();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
             }
             if (stamper != null) try {
                 stamper.close();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
             }
         }
     }

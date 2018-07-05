@@ -52,8 +52,8 @@ public class PdfWaterMark {
         } finally {
             if (stamper != null) try {
                 stamper.close();
-            } catch (DocumentException | IOException e) {
-                e.printStackTrace();
+            } catch (DocumentException | IOException ignored) {
+                ignored.printStackTrace();
             }
             if (reader != null) {
                 reader.close();
@@ -102,8 +102,8 @@ public class PdfWaterMark {
         } finally {
             if (stamper != null) try {
                 stamper.close();
-            } catch (DocumentException | IOException e) {
-                e.printStackTrace();
+            } catch (DocumentException | IOException ignored) {
+                ignored.printStackTrace();
             }
             if (reader != null) {
                 reader.close();

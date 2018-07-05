@@ -353,13 +353,13 @@ public final class Files {
         } finally {
             if (bos != null) try {
                 bos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
             if (output != null) try {
                 output.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
         }
     }
@@ -398,13 +398,13 @@ public final class Files {
         } finally {
             if (bos != null) try {
                 bos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
             if (output != null) try {
                 output.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
         }
     }

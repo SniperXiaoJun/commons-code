@@ -7,11 +7,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * The model convert to dto
+ * Converts model to the data transform object
  * 
  * @author Ponfee
- * @param <F>
- * @param <T>
+ * @param <F> from(source)
+ * @param <T> to  (target)
  */
 public abstract class AbstractDataConverter<F, T> implements Function<F, T> {
 
@@ -62,7 +62,7 @@ public abstract class AbstractDataConverter<F, T> implements Function<F, T> {
 
     // ----------------------------------------------other methods
     public @Override final T apply(F from) {
-        return convert(from);
+        return this.convert(from);
     }
 
     // -----------------------------------------------static methods

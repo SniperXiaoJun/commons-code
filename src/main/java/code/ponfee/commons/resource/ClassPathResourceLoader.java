@@ -134,13 +134,13 @@ final class ClassPathResourceLoader {
         } finally {
             if (jar != null) try {
                 jar.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
             if (zip != null) try {
                 zip.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
         }
     }
@@ -250,13 +250,13 @@ final class ClassPathResourceLoader {
         } finally {
             if (jar != null) try {
                 jar.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
             if (zip != null) try {
                 zip.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
         }
     }
@@ -295,8 +295,8 @@ final class ClassPathResourceLoader {
         } finally {
             if (input != null) try {
                 input.close();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
             }
         }
     }

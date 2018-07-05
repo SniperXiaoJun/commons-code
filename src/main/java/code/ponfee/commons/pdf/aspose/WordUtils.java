@@ -88,8 +88,8 @@ public final class WordUtils {
         } finally {
             if (words != null) try {
                 words.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
         }
     }

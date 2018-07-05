@@ -213,8 +213,8 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
                     try {
                         logger.warn("retry connect {}", invalid);
                         Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    } catch (InterruptedException ignored) {
+                        ignored.printStackTrace();
                     }
                     fetched = false;
                     sentinelRetry++;
@@ -414,8 +414,8 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
                                    + "Sleeping {}ms and retrying.", host, port, retryIntervalMillis);
                         try {
                             Thread.sleep(retryIntervalMillis);
-                        } catch (InterruptedException ex) {
-                            ex.printStackTrace();
+                        } catch (InterruptedException ignored) {
+                            ignored.printStackTrace();
                         }
                     } else {
                         logger.info("Unsubscribing from Sentinel at {}:{}", host, port);

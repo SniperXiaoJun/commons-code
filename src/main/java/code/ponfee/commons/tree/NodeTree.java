@@ -111,7 +111,8 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
 
         // 4、检查是否存在孤儿节点
         if (!ignoreOrphan && CollectionUtils.isNotEmpty(nodes)) {
-            List<T> nids = nodes.stream().map(n -> n.getNid()).collect(Collectors.toList());
+            List<T> nids = nodes.stream().map(n -> n.getNid())
+                                         .collect(Collectors.toList());
             throw new RuntimeException("无效的孤儿节点：" + nids);
         }
 

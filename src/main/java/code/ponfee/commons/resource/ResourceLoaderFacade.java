@@ -12,7 +12,6 @@ import code.ponfee.commons.util.Strings;
  * <ul>
  *   <li>
  *    <span>classpath:</span>
- *      filePath默认为""<p>
  *      当以“/”开头时contextClass只起到jar包定位的作用（且会去掉“/”）<p>
  *      不以“/”开头时contextClass还起到package相对路径的作用<p>
  *   </li>
@@ -86,6 +85,13 @@ public final class ResourceLoaderFacade {
         }
     }
 
+    /**
+     * 路径默认为空串
+     * 
+     * @param extensions
+     * @param contextClass
+     * @return
+     */
     public static List<Resource> listResources(String extensions[], Class<?> contextClass) {
         return listResources("", extensions, false, contextClass, Files.UTF_8);
     }
