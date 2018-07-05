@@ -1,22 +1,12 @@
 package code.ponfee.commons.elasticsearch;
 
-import static org.apache.commons.lang3.StringUtils.split;
-import static org.apache.commons.lang3.StringUtils.substringAfterLast;
-import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
-
+import code.ponfee.commons.elasticsearch.bulk.configuration.BulkProcessorConfiguration;
+import code.ponfee.commons.elasticsearch.mapping.IElasticSearchMapping;
+import code.ponfee.commons.json.Jsons;
+import code.ponfee.commons.model.Page;
+import code.ponfee.commons.model.Result;
+import code.ponfee.commons.model.ResultCode;
+import code.ponfee.commons.util.ObjectUtils;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
@@ -35,7 +25,7 @@ import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -51,17 +41,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 
-import code.ponfee.commons.elasticsearch.bulk.configuration.BulkProcessorConfiguration;
-import code.ponfee.commons.elasticsearch.mapping.IElasticSearchMapping;
-import code.ponfee.commons.json.Jsons;
-import code.ponfee.commons.model.Page;
-import code.ponfee.commons.model.Result;
-import code.ponfee.commons.model.ResultCode;
-import code.ponfee.commons.util.ObjectUtils;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.StringUtils.split;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 /**
  * ElasticSearch Client
- * 
  * @author fupf
  */
 public class ElasticSearchClient implements DisposableBean {
@@ -91,7 +90,7 @@ public class ElasticSearchClient implements DisposableBean {
             try {
                 InetAddress hostName = InetAddress.getByName(substringBeforeLast(clusterNode, ":"));
                 int port = Integer.parseInt(substringAfterLast(clusterNode, ":"));
-                client.addTransportAddress(new InetSocketTransportAddress(hostName, port));
+                client.addTransportAddress(new TransportAddress(hostName, port));
             } catch (UnknownHostException e) {
                 logger.error("Cannot Connect ElasticSearch Node: {}, {}", clusterName, clusterNode, e);
             }
@@ -151,6 +150,7 @@ public class ElasticSearchClient implements DisposableBean {
      * @param mapping
      * @return
      */
+    @SuppressWarnings("deprecation")
     public boolean createIndex(String index, String settings, String type, String mapping) {
         // Settings settings = Settings.builder().put("index.number_of_shards", 3)
         //                                       .put("index.number_of_replicas", 2).build();
@@ -196,6 +196,7 @@ public class ElasticSearchClient implements DisposableBean {
      * @param type
      * @param mapping  json格式的mapping
      */
+    @SuppressWarnings("deprecation")
     public boolean putMapping(String index, String type, String mapping) {
         XContentType contentType = XContentFactory.xContentType(mapping);
         /*try {
@@ -909,7 +910,7 @@ public class ElasticSearchClient implements DisposableBean {
                 .endObject() // }
               .endObject() // }
             .endObject(); // }
-        System.out.println(mapping.string());
+        System.out.println(((ByteArrayOutputStream)mapping.getOutputStream()).toByteArray().length);
     }
 
 }

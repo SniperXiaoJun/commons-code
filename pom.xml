@@ -45,7 +45,7 @@
                 </repository>
             </distributionManagement>
             <properties>
-                <publish.version>1.12-SNAPSHOT</publish.version>
+                <publish.version>1.13-SNAPSHOT</publish.version>
                 <separator>;</separator>
             </properties>
         </profile>
@@ -67,7 +67,7 @@
                 </repository>
             </distributionManagement>
             <properties>
-                <publish.version>1.12</publish.version>
+                <publish.version>1.13</publish.version>
                 <separator>;</separator>
                 <!-- <separator>:</separator> -->
             </properties>
@@ -232,7 +232,8 @@
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>transport</artifactId>
-            <version>6.3.0</version>
+            <!-- <version>6.3.0</version> 9.2.24.v20180105的jetty报错 -->
+            <version>5.6.10</version>
         </dependency>
 
         <dependency>
@@ -314,7 +315,7 @@
         <dependency><!-- kryo -->
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
-            <version>4.0.1</version>
+            <version>4.0.2</version>
         </dependency>
         <dependency><!-- jackson -->
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -358,12 +359,12 @@
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>
-            <version>3.4.5</version>
+            <version>3.4.6</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis-spring</artifactId>
-            <version>1.3.1</version>
+            <version>1.3.2</version>
         </dependency>
         <!-- mybatis分页 -->
         <dependency>
@@ -540,7 +541,7 @@
         <dependency>
             <groupId>org.zeroturnaround</groupId>
             <artifactId>zt-zip</artifactId>
-            <version>1.12</version>
+            <version>1.13</version>
             <type>jar</type>
             <exclusions>
                 <exclusion>
@@ -563,7 +564,7 @@
         <dependency>
             <groupId>com.lmax</groupId>
             <artifactId>disruptor</artifactId>
-            <version>3.3.7</version>
+            <version>3.4.2</version>
         </dependency>
     </dependencies>
 

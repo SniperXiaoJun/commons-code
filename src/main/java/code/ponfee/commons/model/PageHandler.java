@@ -5,6 +5,7 @@ import java.util.Dictionary;
 import java.util.Map;
 
 import com.github.pagehelper.PageHelper;
+import com.google.common.collect.ImmutableMap;
 
 import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.reflect.Fields;
@@ -22,6 +23,11 @@ public final class PageHandler {
     public static final String DEFAULT_PAGE_SIZE = "pageSize";
     public static final String DEFAULT_OFFSET = "offset";
     public static final String DEFAULT_LIMIT = "limit";
+
+    public static final Map<String, Object> QUERY_ALL_PARAMS = ImmutableMap.of(
+        DEFAULT_PAGE_NUM, 1, DEFAULT_PAGE_SIZE, 0, // start page number is 1
+        DEFAULT_OFFSET, 0, DEFAULT_LIMIT, 0 // start offset is 0
+    );
 
     public static final PageHandler NORMAL = new PageHandler(
         DEFAULT_PAGE_NUM, DEFAULT_PAGE_SIZE, DEFAULT_OFFSET, DEFAULT_LIMIT

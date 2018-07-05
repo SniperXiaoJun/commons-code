@@ -378,7 +378,9 @@ public class ExcelExporter extends AbstractExporter {
         List<NodeFlat<Integer>> thead = flats.subList(1, flats.size());
 
         // create caption
-        createBlankRow(table.getCaption(), sheet, titleStyle, cursorRow, totalLeafCount);
+        if (StringUtils.isNotBlank(table.getCaption())) {
+            createBlankRow(table.getCaption(), sheet, titleStyle, cursorRow, totalLeafCount);
+        }
 
         //sheet.trackAllColumnsForAutoSizing();
 

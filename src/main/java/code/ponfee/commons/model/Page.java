@@ -1,5 +1,6 @@
 package code.ponfee.commons.model;
 
+import java.beans.Transient;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -310,7 +311,7 @@ public class Page<T> implements java.io.Serializable {
      * 
      * @return
      */
-    public boolean isEmpty() {
+    public @Transient boolean isEmpty() {
         return CollectionUtils.isEmpty(rows);
     }
 
