@@ -25,7 +25,7 @@ import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -89,7 +90,7 @@ public class ElasticSearchClient implements DisposableBean {
             try {
                 InetAddress hostName = InetAddress.getByName(substringBeforeLast(clusterNode, ":"));
                 int port = Integer.parseInt(substringAfterLast(clusterNode, ":"));
-                client.addTransportAddress(new InetSocketTransportAddress(hostName, port));
+                client.addTransportAddress(new TransportAddress(hostName, port));
             } catch (UnknownHostException e) {
                 logger.error("Cannot Connect ElasticSearch Node: {}, {}", clusterName, clusterNode, e);
             }
@@ -123,20 +124,42 @@ public class ElasticSearchClient implements DisposableBean {
 
     /**
      * 创建索引，指定setting，设置type的mapping
+     * 
+     * @param index
+     * @param settings
+     * @param type
+     * @param mapping
+     * @param contentType
+     * @return
+     */
+    public boolean createIndex(String index, String settings, String type, 
+                               String mapping, XContentType contentType) {
+        CreateIndexRequestBuilder req = indicesAdminClient().prepareCreate(index);
+        if (settings != null) {
+            req.setSettings(settings, contentType);
+        }
+        return req.addMapping(type, mapping, contentType).get().isAcknowledged();
+    }
+
+    /**
+     * 创建索引，指定setting，设置type的mapping
+     * 
      * @param index
      * @param settings
      * @param type
      * @param mapping
      * @return
      */
+    @SuppressWarnings("deprecation")
     public boolean createIndex(String index, String settings, String type, String mapping) {
         // Settings settings = Settings.builder().put("index.number_of_shards", 3)
         //                                       .put("index.number_of_replicas", 2).build();
+        XContentType contentType = XContentFactory.xContentType(settings);
         CreateIndexRequestBuilder req = indicesAdminClient().prepareCreate(index);
         if (settings != null) {
-            req.setSettings(settings, XContentFactory.xContentType(settings));
+            req.setSettings(settings, contentType);
         }
-        return req.addMapping(type, mapping, XContentFactory.xContentType(mapping)).get().isAcknowledged();
+        return req.addMapping(type, mapping, contentType).get().isAcknowledged();
     }
 
     /**
@@ -173,19 +196,24 @@ public class ElasticSearchClient implements DisposableBean {
      * @param type
      * @param mapping  json格式的mapping
      */
+    @SuppressWarnings("deprecation")
     public boolean putMapping(String index, String type, String mapping) {
+        XContentType contentType = XContentFactory.xContentType(mapping);
         /*try {
             PutMappingRequest mappingRequest = Requests.putMappingRequest(index).type(type);
-            mappingRequest.source(mapping, XContentFactory.xContentType(mapping));
+            mappingRequest.source(mapping, contentType);
             return indicesAdminClient().putMapping(mappingRequest).actionGet().isAcknowledged(); // 创建索引结构
         } catch (Exception e) {
             logger.error("put mapping error: {} {} {}", index, type, mapping);
             indicesAdminClient().prepareDelete(index);
             return false;
         }*/
+        return putMapping(index, type, mapping, contentType);
+    }
+
+    public boolean putMapping(String index, String type, String mapping, XContentType contentType) {
         return indicesAdminClient().preparePutMapping(index).setType(type)
-                                   .setSource(mapping, XContentFactory.xContentType(mapping))
-                                   .get().isAcknowledged();
+                                   .setSource(mapping, contentType).get().isAcknowledged();
     }
 
     /**
@@ -195,14 +223,9 @@ public class ElasticSearchClient implements DisposableBean {
      * @return
      */
     public boolean putMapping(String indexName, IElasticSearchMapping esMapping) {
-        String mapping0;
-        try {
-            mapping0 = esMapping.getMapping().string();
-        } catch (IOException e) {
-            throw new RuntimeException("es mapping error");
-        }
+        XContentBuilder contentType = esMapping.getMapping();
         PutMappingRequest putMappingRequest = new PutMappingRequest(indexName).type(esMapping.getIndexType())
-                                                  .source(mapping0, XContentFactory.xContentType(mapping0));
+                                                  .source(contentType, contentType.contentType());
         return indicesAdminClient().putMapping(putMappingRequest).actionGet().isAcknowledged();
     }
 
@@ -697,7 +720,7 @@ public class ElasticSearchClient implements DisposableBean {
         List<T> result = new ArrayList<>((int) scrollResp.getHits().getTotalHits());
         this.scrollSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecords, totalPages, pageNo) -> {
             for (SearchHit hit : searchHits.getHits()) {
-                result.add(convertFromMap(hit.getSource(), clazz));
+                result.add(convertFromMap(hit.getSourceAsMap(), clazz));
             }
         });
         return result;
@@ -719,7 +742,7 @@ public class ElasticSearchClient implements DisposableBean {
         List<T> result = new ArrayList<>((int) scrollResp.getHits().getTotalHits());
         this.scrollSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecords, totalPages, pageNo) -> {
             for (SearchHit hit : searchHits.getHits()) {
-                result.add(convertFromMap(hit.getSource(), clazz));
+                result.add(convertFromMap(hit.getSourceAsMap(), clazz));
             }
         });
         return result;
@@ -797,7 +820,7 @@ public class ElasticSearchClient implements DisposableBean {
         long total = hits.getTotalHits();
         List<T> result = new ArrayList<>(hits.getHits().length);
         for (SearchHit hit : hits) {
-            result.add(convertFromMap(hit.getSource(), clazz));
+            result.add(convertFromMap(hit.getSourceAsMap(), clazz));
         }
         Page<T> page = new Page<>(result);
         page.setTotal(total);
@@ -887,7 +910,7 @@ public class ElasticSearchClient implements DisposableBean {
                 .endObject() // }
               .endObject() // }
             .endObject(); // }
-        System.out.println(mapping.string());
+        System.out.println(((ByteArrayOutputStream)mapping.getOutputStream()).toByteArray().length);
     }
 
 }
