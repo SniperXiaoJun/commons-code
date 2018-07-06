@@ -196,7 +196,7 @@ public class RequestLimiter {
      * @return
      */
     public long countAction(String key) {
-        return ObjectUtils.ifNull(client.valueOps().getLong(COUNT_ACTION_KEY + key), 0L);
+        return ObjectUtils.orElse(client.valueOps().getLong(COUNT_ACTION_KEY + key), 0L);
     }
 
     /**

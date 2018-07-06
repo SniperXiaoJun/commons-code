@@ -21,7 +21,7 @@ public abstract class JedisOperations {
     static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
     static final int BATCH_MULTIPLE = 3; // the multiple jedis server number to use batch
 
-    static final ExecutorService EXECUTOR = ThreadPoolExecutors.create(0, 20, 60, 0, "jedis-ops-furture");
+    static final ExecutorService EXECUTOR = ThreadPoolExecutors.create(1, 30, 300, 0, "jedis-ops-furture");
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(EXECUTOR::shutdown));
     }

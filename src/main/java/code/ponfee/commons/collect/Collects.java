@@ -43,7 +43,7 @@ public final class Collects {
     public static Object[] map2array(Map<String, Object> map, String... fields) {
         Object[] array = new Object[fields.length];
         for (int i = 0; i < fields.length; i++) {
-            array[i] = ObjectUtils.ifNull(map.get(fields[i]), "");
+            array[i] = ObjectUtils.orElse(map.get(fields[i]), "");
         }
         return array;
     }
@@ -81,7 +81,7 @@ public final class Collects {
         Object[] result = new Object[data.size()];
         int i = 0;
         for (Entry<String, Object> entry : data.entrySet()) {
-            result[i++] = ObjectUtils.ifNull(entry.getValue(), "");
+            result[i++] = ObjectUtils.orElse(entry.getValue(), "");
         }
         return result;
     }

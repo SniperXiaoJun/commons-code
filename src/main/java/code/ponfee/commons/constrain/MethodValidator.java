@@ -16,7 +16,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import code.ponfee.commons.model.ResultCode;
+import code.ponfee.commons.model.Result;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.reflect.Fields;
 import code.ponfee.commons.util.ObjectUtils;
@@ -154,12 +154,17 @@ public abstract class MethodValidator extends FieldValidator {
                         methodSign, ObjectUtils.toString(args), errMsg);
         }
 
-        try {
+        if (method.getReturnType() == Result.class) {
+            return Result.failure(BAD_REQUEST, BAD_REQUEST.getMsg() + ": " + errMsg);
+        } else {
+            throw new IllegalArgumentException(errMsg);
+        }
+        /*try {
             return method.getReturnType().getConstructor(ResultCode.class, String.class)
                          .newInstance(BAD_REQUEST, BAD_REQUEST.getMsg() + ": " + errMsg);
         } catch (Throwable t) {
             throw new IllegalArgumentException(errMsg, t);
-        }
+        }*/
     }
 
     // -------------------------------------------------------------------------private methods

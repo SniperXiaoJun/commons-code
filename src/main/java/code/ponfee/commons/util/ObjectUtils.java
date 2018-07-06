@@ -309,7 +309,7 @@ public final class ObjectUtils {
      * @param other
      * @return
      */
-    public static <T> T ifNull(T t, T other) {
+    public static <T> T orElse(T t, T other) {
         return t != null ? t : other;
     }
 

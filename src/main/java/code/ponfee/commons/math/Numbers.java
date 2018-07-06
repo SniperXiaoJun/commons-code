@@ -314,8 +314,8 @@ public final class Numbers {
      * @return
      */
     public static double add(Double num1, Double num2) {
-        return ObjectUtils.ifNull(num1, 0D)
-             + ObjectUtils.ifNull(num2, 0D);
+        return ObjectUtils.orElse(num1, 0D)
+             + ObjectUtils.orElse(num2, 0D);
     }
 
     /**

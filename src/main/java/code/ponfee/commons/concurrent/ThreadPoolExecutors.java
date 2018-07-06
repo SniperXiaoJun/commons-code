@@ -67,8 +67,13 @@ public final class ThreadPoolExecutors {
         }
 
         // create ThreadPoolExecutor instance
-        return new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.SECONDS, 
-                                      workQueue, threadFactory, rejectedHandler);
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+            corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.SECONDS, 
+            workQueue, threadFactory, rejectedHandler
+        );
+        executor.allowCoreThreadTimeOut(true); // 设置允许核心线程超时关闭
+
+        return executor;
     }
 
 }

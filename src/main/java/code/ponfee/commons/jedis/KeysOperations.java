@@ -144,14 +144,14 @@ public class KeysOperations extends JedisOperations {
                 }
                 for (; number > 0; number--) {
                     try {
-                        delCounts += ObjectUtils.ifNull(service.take().get(), 0L);
+                        delCounts += ObjectUtils.orElse(service.take().get(), 0L);
                     } catch (InterruptedException | ExecutionException e) {
                         logger.error("Jedis del occur error", e);
                     }
                 }
             } else {
                 for (String key : keys) {
-                    delCounts += ObjectUtils.ifNull(shardedJedis.del(key), 0L);
+                    delCounts += ObjectUtils.orElse(shardedJedis.del(key), 0L);
                 }
             }
             return delCounts;
@@ -185,7 +185,7 @@ public class KeysOperations extends JedisOperations {
             }
             for (; number > 0; number--) {
                 try {
-                    delCounts += ObjectUtils.ifNull(service.take().get(), 0L);
+                    delCounts += ObjectUtils.orElse(service.take().get(), 0L);
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Jedis del by wildcard occur error", e);
                 }

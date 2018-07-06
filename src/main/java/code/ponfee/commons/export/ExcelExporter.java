@@ -264,7 +264,7 @@ public class ExcelExporter extends AbstractExporter {
         super.nonEmpty();
 
         SXSSFSheet sheet = getSheet(getName());
-        int startRow = images.get(getName()) == null ? 1 : images.get(getName()), startCol = 1;
+        int startRow = ObjectUtils.orElse(images.get(getName()), 1), startCol = 1;
         int endCol = startCol + (int) Math.round(((double) width) / RATE_WIDTH);
         int endRow = startRow + (int) Math.round(((double) height) / RATE_HEIGHT);
         images.put(getName(), endRow + 2);
@@ -510,7 +510,7 @@ public class ExcelExporter extends AbstractExporter {
                 cell.setCellValue((Calendar) value);
             } else {
                 String str = value.toString();
-                String format = ObjectUtils.ifNull(tmeta.getFormat(), Dates.DEFAULT_DATE_FORMAT);
+                String format = ObjectUtils.orElse(tmeta.getFormat(), Dates.DEFAULT_DATE_FORMAT);
                 try {
                     cell.setCellValue(DateUtils.parseDate(str, format));
                 } catch (ParseException e) {
