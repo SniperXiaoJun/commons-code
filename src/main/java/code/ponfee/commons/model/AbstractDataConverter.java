@@ -1,17 +1,18 @@
 package code.ponfee.commons.model;
 
-import static code.ponfee.commons.reflect.GenericUtils.getActualTypeArgument;
-
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static code.ponfee.commons.reflect.GenericUtils.getActualTypeArgument;
+
 /**
  * Converts model to the data transform object
  * 
- * @author Ponfee
  * @param <F> from(source)
  * @param <T> to  (target)
+ * 
+ * @author Ponfee
  */
 public abstract class AbstractDataConverter<F, T> implements Function<F, T> {
 
@@ -72,7 +73,7 @@ public abstract class AbstractDataConverter<F, T> implements Function<F, T> {
         }
 
         try {
-            T to = (T) clazz.getConstructor().newInstance();
+            T to = clazz.getConstructor().newInstance();
             org.springframework.beans.BeanUtils.copyProperties(from, to);
             //org.apache.commons.beanutils.BeanUtils.copyProperties(to, from);
             //org.apache.commons.beanutils.PropertyUtils.copyProperties(to, from);

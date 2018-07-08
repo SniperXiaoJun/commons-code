@@ -1,17 +1,16 @@
 package code.ponfee.commons.extract;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-
+import code.ponfee.commons.json.Jsons;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 
-import code.ponfee.commons.json.Jsons;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 /**
  * Csv file data extractor
@@ -65,8 +64,8 @@ public class CsvExtractor<T> extends DataExtractor<T> {
     }
 
     public static void main(String[] args) throws Exception {
-        String[] headers = {"区域", "分公司", "项目数"};
-        CsvExtractor<String[]> csv = new CsvExtractor<>(new FileInputStream("D:\\csv.csv"), headers);
+        String[] headers = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"};
+        CsvExtractor<String[]> csv = new CsvExtractor<>(new FileInputStream("D:\\testExcel.csv"), headers);
         System.out.println(Jsons.toJson(csv.extract()));
     }
 }

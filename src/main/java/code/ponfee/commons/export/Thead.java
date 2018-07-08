@@ -12,7 +12,7 @@ public class Thead extends NamedNode<Integer> {
     private static final long serialVersionUID = 1898674740598755648L;
 
     private final Tmeta tmeta; // 列配置信息
-    private String field; // 字段（用于对象）
+    private String field; // 字段（对应类的字段）
 
     public Thead(String name, Integer nid, Integer pid, Tmeta tmeta) {
         this(nid, pid, nid, name, tmeta);
@@ -27,6 +27,7 @@ public class Thead extends NamedNode<Integer> {
     }
 
     /**
+     * The Thead class Constructor
      * 
      * @param nid
      * @param pid

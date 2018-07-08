@@ -23,11 +23,13 @@ public class NamedNode<T extends java.io.Serializable & Comparable<T>>
     private final String name; // 节点名称
 
     /**
+     * Speic the NameNode class Constructor
+     * 
      * @param nid
      * @param pid
      * @param orders
      * @param enabled
-     * @param attach
+     * @param name
      */
     public NamedNode(T nid, T pid, int orders, 
                      boolean enabled, String name) {

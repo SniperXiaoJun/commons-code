@@ -1,11 +1,11 @@
 package code.ponfee.commons.extract;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * The fiel data extractor
@@ -33,7 +33,7 @@ public abstract class DataExtractor<T> {
 
     public final List<T> extract() throws IOException {
         List<T> list = new ArrayList<>();
-        this.extract((rowNumber, data) -> list.add((T) data));
+        this.extract((rowNumber, data) -> list.add(data));
         return list;
     }
 

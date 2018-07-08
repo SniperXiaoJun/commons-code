@@ -36,7 +36,7 @@ public final class Holder<T> {
      * @return {@code true} add success, {@code false} add fail
      */
     public boolean add(T value) {
-        if (this.value == null) {
+        if (this.value == null && value != null) {
             this.value = value;
             return true;
         }

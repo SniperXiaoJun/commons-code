@@ -32,7 +32,6 @@
             </activation>
             <distributionManagement>
                 <repository>
-                    <!-- sf-nexus-snapshots要与setting.xml中的server对应 -->
                     <!-- <servers>
                         <server>
                             <id>sf-nexus-snapshots</id>
@@ -54,7 +53,6 @@
             <id>prod</id>
             <distributionManagement>
                 <repository>
-                    <!-- sf-nexus-releases要与setting.xml中的server对应 -->
                     <!-- <servers>
                         <server>
                             <id>sf-nexus-releases</id>
