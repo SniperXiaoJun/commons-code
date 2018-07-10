@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import static code.ponfee.commons.reflect.GenericUtils.getActualTypeArgument;
 
 /**
- * Converts model to the data transform object
+ * Converts model to the data transfer object
  * 
  * @param <F> from(source)
  * @param <T> to  (target)
@@ -84,51 +84,51 @@ public abstract class AbstractDataConverter<F, T> implements Function<F, T> {
         }
     }
 
-    public static <F, T> T convert(F from, Function<F, T> mapper) {
+    public static <F, T> T convert(F from, Function<F, T> converter) {
         if (from == null) {
             return null;
         }
-        return mapper.apply(from);
+        return converter.apply(from);
     }
 
     public static <F, T> List<T> convert(
-        List<F> list, Function<F, T> mapper) {
+        List<F> list, Function<F, T> converter) {
         if (list == null) {
             return null;
         }
-        return list.stream().map(mapper).collect(Collectors.toList());
+        return list.stream().map(converter).collect(Collectors.toList());
     }
 
     public static <F, T> Page<T> convert(
-        Page<F> page, Function<F, T> mapper) {
+        Page<F> page, Function<F, T> converter) {
         if (page == null) {
             return null;
         }
-        return page.transform(mapper);
+        return page.transform(converter);
     }
 
     public static <F, T> Result<T> convertResultBean(
-        Result<F> result, Function<F, T> mapper) {
+        Result<F> result, Function<F, T> converter) {
         if (result == null) {
             return null;
         }
-        return result.copy(mapper.apply(result.getData()));
+        return result.copy(converter.apply(result.getData()));
     }
 
     public static <F, T> Result<List<T>> convertResultList(
-        Result<List<F>> result, Function<F, T> mapper) {
+        Result<List<F>> result, Function<F, T> converter) {
         if (result == null) {
             return null;
         }
-        return result.copy(convert(result.getData(), mapper));
+        return result.copy(convert(result.getData(), converter));
     }
 
     public static <F, T> Result<Page<T>> convertResultPage(
-        Result<Page<F>> result, Function<F, T> mapper) {
+        Result<Page<F>> result, Function<F, T> converter) {
         if (result == null) {
             return null;
         }
-        return result.copy(convert(result.getData(), mapper));
+        return result.copy(convert(result.getData(), converter));
     }
 
 }

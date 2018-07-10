@@ -290,6 +290,14 @@ public final class WebUtils {
         }
     }
 
+    public static String xssReplace(String text) {
+        return StringUtils.replaceEach(
+            text, 
+            new String[] { "<", ">", "%3c", "%3e" }, 
+            new String[] { "&lt;", "&gt;", "&lt;", "&gt;" }
+        );
+    }
+
     /**
      * get cookie value
      * @param req

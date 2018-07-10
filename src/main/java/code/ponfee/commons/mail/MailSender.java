@@ -70,6 +70,8 @@ import static code.ponfee.commons.util.ObjectUtils.isEmpty;
  *  {@link #MailSender(String, String, String, boolean, Integer, Integer)}
  * </pre>
  * 
+ * {@link javax.mail.internet.ParameterList#splitLongParameters }
+ * 
  * smtp邮件发送
  * @author fupf
  */
@@ -86,6 +88,7 @@ public class MailSender {
     private final String user;
     private final String password;
     private final String smtpHost;
+    private int port = -1;
     private String nickname;
     private String charset = Files.UTF_8;
     private int retryTimes;
@@ -161,6 +164,10 @@ public class MailSender {
         this.nickname = nickname;
     }
 
+    void setPort(int port) {
+        this.port = port;
+    }
+
     void setSentFailedLogger(MailSentFailedLogger sentFailedLogger) {
         if (sentFailedLogger != null) {
             this.sentFailedLogger = sentFailedLogger;
@@ -185,7 +192,7 @@ public class MailSender {
             Address[] b = verifyEmails(envlop.getBcc()); // 密送
             Address[] r = verifyEmails(envlop.getReply()); // 回复
             if (isEmpty(t) && isEmpty(c) && isEmpty(b)) {
-                throw new IllegalArgumentException("to, cc and bcc can't be all empty.");
+                throw new IllegalArgumentException("to, cc and bcc cannot be all empty.");
             }
 
             if (!isEmpty(t)) {
@@ -252,7 +259,7 @@ public class MailSender {
 
             //Transport.send(message);
             transport = session.getTransport("smtp");
-            transport.connect(smtpHost, user, password);
+            transport.connect(smtpHost, port, user, password);
             transport.sendMessage(message, message.getAllRecipients());
             return true;
         } catch (MessagingException | UnsupportedEncodingException e) {

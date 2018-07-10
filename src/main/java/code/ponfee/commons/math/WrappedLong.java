@@ -27,7 +27,7 @@ public class WrappedLong {
         this.value -= number;
     }
 
-    public Long getValue() {
+    public synchronized Long getValue() {
         return value;
     }
 

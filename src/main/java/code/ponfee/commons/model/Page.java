@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -320,7 +321,8 @@ public class Page<T> implements java.io.Serializable {
      * @param action
      */
     public void process(Consumer<T> action) {
-        if (isEmpty() || action == null) {
+        Preconditions.checkArgument(action != null);
+        if (isEmpty()) {
             return;
         }
         rows.forEach(action);
@@ -331,13 +333,16 @@ public class Page<T> implements java.io.Serializable {
      * @param mapper
      * @return
      */
-    public <E> Page<E> transform(Function<T, E> mapper) {
+    public <E> Page<E> transform(Function<T, E> transformer) {
+        Preconditions.checkArgument(transformer != null);
         Page<E> page = new Page<>();
         BeanUtils.copyProperties(this, page);
-        if (isEmpty() || mapper == null) {
+        if (isEmpty()) {
             return page;
         }
-        page.setRows(rows.stream().map(mapper).collect(Collectors.toList()));
+        page.setRows(
+            rows.stream().map(transformer).collect(Collectors.toList())
+        );
         return page;
     }
 
