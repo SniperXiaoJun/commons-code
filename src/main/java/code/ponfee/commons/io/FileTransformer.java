@@ -1,15 +1,5 @@
 package code.ponfee.commons.io;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.channels.FileChannel;
-
-import org.apache.commons.lang3.StringUtils;
-
 import info.monitorenter.cpdetector.io.ASCIIDetector;
 import info.monitorenter.cpdetector.io.ByteOrderMarkDetector;
 import info.monitorenter.cpdetector.io.CodepageDetectorProxy;
@@ -17,6 +7,15 @@ import info.monitorenter.cpdetector.io.ICodepageDetector;
 import info.monitorenter.cpdetector.io.JChardetFacade;
 import info.monitorenter.cpdetector.io.ParsingDetector;
 import info.monitorenter.cpdetector.io.UnicodeDetector;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.channels.FileChannel;
 
 /**
  * 文件编码转换与文本内容替换
@@ -27,7 +26,7 @@ public class FileTransformer {
     private static final int FIX_LENGTH = 85;
 
     private String includeFileExtensions = "(?i)^(.+\\.)(" + StringUtils.join(new String[] { "java", "txt",
-         "properties", "xml", "sql", "html", "htm", "jsp", "css", "js", "log", "bak", "ini" }, "|") + ")$";
+         "properties", "xml", "sql", "html", "htm", "jsp", "css", "js", "log", "bak", "ini", "csv" }, "|") + ")$";
 
     private final File source;
     private final String sourcePath;
@@ -129,12 +128,12 @@ public class FileTransformer {
     }
 
     /**
-     * @param source 源文件路径 
-     * @param target 输出文件路径 
+     * @param source 源文件路径
+     * @param target 输出文件路径
      * @param searchList  the Strings to search for, no-op if null
      * @param replacementList  the Strings to replace them with, no-op if null
      */
-    public static void transform(File source, File target, 
+    public static void transform(File source, File target,
                                  String[] searchList, String[] replacementList) {
         try (WrappedBufferedReader reader = new WrappedBufferedReader(source);
              WrappedBufferedWriter writer = new WrappedBufferedWriter(target)
@@ -146,14 +145,26 @@ public class FileTransformer {
     }
 
     /**
-     * @param source 源文件路径 
-     * @param target 输出文件路径 
-     * @param fromCharset 源文件编码 
-     * @param toCharset 目标文件编码 
+     * Transforms the source file to target file charset
+     *
+     * @param source
+     * @param target
+     * @param fromCharset
+     * @param toCharset
+     */
+    public static void transform(File source, File target, String fromCharset, String toCharset) {
+        transform(source, target, fromCharset, toCharset, null, null);
+    }
+
+    /**
+     * @param source 源文件路径
+     * @param target 输出文件路径
+     * @param fromCharset 源文件编码
+     * @param toCharset 目标文件编码
      * @param searchList  the Strings to search for, no-op if null
      * @param replacementList  the Strings to replace them with, no-op if null
      */
-    public static void transform(File source, File target, String fromCharset, String toCharset, 
+    public static void transform(File source, File target, String fromCharset, String toCharset,
                                  String[] searchList, String[] replacementList) {
         try (WrappedBufferedReader reader = new WrappedBufferedReader(source, fromCharset);
              WrappedBufferedWriter writer = new WrappedBufferedWriter(target, toCharset)
@@ -178,20 +189,14 @@ public class FileTransformer {
 
     /**
      * 探测文件编码类型
-     * @param input
+     * @param inputStream
      * @return
      */
-    public static String guessEncoding(InputStream input) {
-        try {
+    public static String guessEncoding(InputStream inputStream) {
+        try (InputStream input = inputStream) {
             return buildDetector().detectCodepage(input, input.available()).name();
         } catch (IOException e) {
             return null;
-        } finally {
-            if (input != null) try {
-                input.close();
-            } catch (IOException ignored) {
-                ignored.printStackTrace();
-            }
         }
     }
 

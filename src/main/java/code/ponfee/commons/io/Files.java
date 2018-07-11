@@ -1,5 +1,14 @@
 package code.ponfee.commons.io;
 
+import code.ponfee.commons.math.Maths;
+import code.ponfee.commons.math.Numbers;
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.StringBuilderWriter;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,15 +30,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.function.Consumer;
-
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.output.StringBuilderWriter;
-import org.apache.commons.lang3.ArrayUtils;
-
-import com.google.common.collect.ImmutableMap;
-
-import code.ponfee.commons.math.Maths;
-import code.ponfee.commons.math.Numbers;
 
 /**
  * 文件工具类
@@ -158,6 +158,60 @@ public final class Files {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * File to string spec charset
+     *
+     * @param file the file
+     * @return
+     */
+    public static String toStringGuessCharset(File file) {
+        try {
+            return toStringGuessCharset(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * InputStream to string spec charset
+     *
+     * @param inputStream the input stream
+     * @return
+     */
+    public static String toStringGuessCharset(InputStream inputStream) {
+        try (InputStream input = inputStream) {
+            return toStringGuessCharset(IOUtils.toByteArray(input));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        /*Charset charset = Charset.forName(
+            FileTransformer.guessEncoding(Arrays.copyOf(data, 600))
+        );
+
+        inputStream = new ByteArrayInputStream(data);
+        try (WrappedBufferedReader reader = new WrappedBufferedReader(inputStream, charset)) {
+            StringBuilder builder = new StringBuilder(data.length >> 1);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line).append(Files.SYSTEM_LINE_SEPARATOR);
+            }
+            return builder.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }*/
+    }
+
+    public static String toStringGuessCharset(byte[] data) {
+        if (data == null) {
+            return null;
+        } else if (data.length == 0) {
+            return StringUtils.EMPTY;
+        }
+        Charset charset = Charset.forName(FileTransformer.guessEncoding(data));
+        return new String(data, charset);
     }
 
     /**
