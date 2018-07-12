@@ -69,11 +69,11 @@ public class SetOpertions extends JedisOperations {
     }
 
     public <T extends Object> Long sadd(byte[] key, Integer seconds, T[] members) {
-        return this.sadd(key, true, seconds, members);
+        return this.sadd(key, false, seconds, members);
     }
 
     public <T extends Object> Long sadd(byte[] key, T[] members) {
-        return this.sadd(key, true, null, members);
+        return this.sadd(key, false, null, members);
     }
 
     /**
@@ -127,11 +127,11 @@ public class SetOpertions extends JedisOperations {
     }
 
     public <T extends Object> T spop(byte[] key, Class<T> clazz, Integer seconds) {
-        return this.spop(key, clazz, true, seconds);
+        return this.spop(key, clazz, false, seconds);
     }
 
     public <T extends Object> T spop(byte[] key, Class<T> clazz) {
-        return this.spop(key, clazz, true, null);
+        return this.spop(key, clazz, false, null);
     }
 
     /**
@@ -212,11 +212,11 @@ public class SetOpertions extends JedisOperations {
     }
 
     public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz, Integer seconds) {
-        return this.smembers(key, clazz, true, seconds);
+        return this.smembers(key, clazz, false, seconds);
     }
 
     public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz) {
-        return this.smembers(key, clazz, true, null);
+        return this.smembers(key, clazz, false, null);
     }
 
     /**
@@ -318,11 +318,11 @@ public class SetOpertions extends JedisOperations {
     }
 
     public <T extends Object> List<T> srandmember(byte[] key, Class<T> clazz, int count, Integer seconds) {
-        return this.srandmember(key, clazz, true, count, seconds);
+        return this.srandmember(key, clazz, false, count, seconds);
     }
 
     public <T extends Object> List<T> srandmember(byte[] key, Class<T> clazz, int count) {
-        return this.srandmember(key, clazz, true, count, null);
+        return this.srandmember(key, clazz, false, count, null);
     }
 
     /**

@@ -38,7 +38,7 @@ public abstract class Serializer {
             return null;
         }
 
-        return serialize(t, true);
+        return serialize(t, false);
     }
 
     /**
@@ -60,7 +60,7 @@ public abstract class Serializer {
             return null;
         }
 
-        return this.deserialize(data, clazz, true);
+        return this.deserialize(data, clazz, false);
     }
 
     /**

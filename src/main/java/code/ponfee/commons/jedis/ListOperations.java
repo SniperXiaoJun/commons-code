@@ -57,11 +57,11 @@ public class ListOperations extends JedisOperations {
     }
 
     public <T extends Object> Long lpushObject(byte[] key, Integer seconds, T[] objs) {
-        return this.lpushObject(key, true, seconds, objs);
+        return this.lpushObject(key, false, seconds, objs);
     }
 
     public <T extends Object> Long lpushObject(byte[] key, T[] objs) {
-        return this.lpushObject(key, true, null, objs);
+        return this.lpushObject(key, false, null, objs);
     }
 
     /**
@@ -127,11 +127,11 @@ public class ListOperations extends JedisOperations {
     }
 
     public <T extends Object> T lpopObject(byte[] key, Class<T> clazz, Integer seconds) {
-        return this.lpopObject(key, clazz, true, seconds);
+        return this.lpopObject(key, clazz, false, seconds);
     }
 
     public <T extends Object> T lpopObject(byte[] key, Class<T> clazz) {
-        return this.lpopObject(key, clazz, true, null);
+        return this.lpopObject(key, clazz, false, null);
     }
 
     /**
@@ -178,11 +178,11 @@ public class ListOperations extends JedisOperations {
     }
 
     public <T extends Object> T rpopObject(byte[] key, Class<T> clazz, Integer seconds) {
-        return this.rpopObject(key, clazz, true, seconds);
+        return this.rpopObject(key, clazz, false, seconds);
     }
 
     public <T extends Object> T rpopObject(byte[] key, Class<T> clazz) {
-        return this.rpopObject(key, clazz, true, null);
+        return this.rpopObject(key, clazz, false, null);
     }
 
     /**
@@ -335,11 +335,11 @@ public class ListOperations extends JedisOperations {
 
     public <T extends Object> List<T> lrange(byte[] key, Class<T> clazz, long start, 
                                              long end, Integer seconds) {
-        return this.lrange(key, clazz, true, start, end, seconds);
+        return this.lrange(key, clazz, false, start, end, seconds);
     }
 
     public <T extends Object> List<T> lrange(byte[] key, Class<T> clazz, long start, long end) {
-        return this.lrange(key, clazz, true, start, end, null);
+        return this.lrange(key, clazz, false, start, end, null);
     }
 
 }

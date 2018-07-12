@@ -361,7 +361,7 @@ public class JedisClient implements DisposableBean {
     }
 
     final <T> byte[] serialize(T t) {
-        return this.serialize(t, true);
+        return this.serialize(t, false);
     }
 
     final <T> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
@@ -369,7 +369,7 @@ public class JedisClient implements DisposableBean {
     }
 
     final <T> T deserialize(byte[] data, Class<T> clazz) {
-        return this.deserialize(data, clazz, true);
+        return this.deserialize(data, clazz, false);
     }
 
 }

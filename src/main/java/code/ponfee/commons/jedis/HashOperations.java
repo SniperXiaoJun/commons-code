@@ -179,11 +179,11 @@ public class HashOperations extends JedisOperations {
     }
 
     public <T extends Object> boolean hsetObject(byte[] key, byte[] field, T t, Integer seconds) {
-        return this.hsetObject(key, field, t, true, seconds);
+        return this.hsetObject(key, field, t, false, seconds);
     }
 
     public <T extends Object> boolean hsetObject(byte[] key, byte[] field, T t) {
-        return this.hsetObject(key, field, t, true, null);
+        return this.hsetObject(key, field, t, false, null);
     }
 
     /**
@@ -212,11 +212,11 @@ public class HashOperations extends JedisOperations {
     }
 
     public <T extends Object> T hgetObject(byte[] key, byte[] field, Class<T> clazz, Integer seconds) {
-        return this.hgetObject(key, field, clazz, true, seconds);
+        return this.hgetObject(key, field, clazz, false, seconds);
     }
 
     public <T extends Object> T hgetObject(byte[] key, byte[] field, Class<T> clazz) {
-        return this.hgetObject(key, field, clazz, true, null);
+        return this.hgetObject(key, field, clazz, false, null);
     }
 
     /**
@@ -253,11 +253,11 @@ public class HashOperations extends JedisOperations {
     }
 
     public <T extends Object> Map<byte[], T> hgetAllObject(byte[] key, Class<T> clazz, Integer seconds) {
-        return this.hgetAllObject(key, clazz, true, seconds);
+        return this.hgetAllObject(key, clazz, false, seconds);
     }
 
     public <T extends Object> Map<byte[], T> hgetAllObject(byte[] key, Class<T> clazz) {
-        return this.hgetAllObject(key, clazz, true, null);
+        return this.hgetAllObject(key, clazz, false, null);
     }
 
     /**
@@ -288,11 +288,11 @@ public class HashOperations extends JedisOperations {
     }
 
     public <T extends Object> List<T> hvalsObject(byte[] key, Class<T> clazz, Integer seconds) {
-        return this.hvalsObject(key, clazz, true, seconds);
+        return this.hvalsObject(key, clazz, false, seconds);
     }
 
     public <T extends Object> List<T> hvalsObject(byte[] key, Class<T> clazz) {
-        return this.hvalsObject(key, clazz, true, null);
+        return this.hvalsObject(key, clazz, false, null);
 
     }
 
@@ -328,11 +328,11 @@ public class HashOperations extends JedisOperations {
     }
 
     public <T extends Object> boolean hmsetObjects(byte[] key, Map<byte[], T> map, Integer seconds) {
-        return this.hmsetObjects(key, map, true, seconds);
+        return this.hmsetObjects(key, map, false, seconds);
     }
 
     public <T extends Object> boolean hmsetObjects(byte[] key, Map<byte[], T> map) {
-        return this.hmsetObjects(key, map, true, null);
+        return this.hmsetObjects(key, map, false, null);
     }
 
     /**
@@ -376,11 +376,11 @@ public class HashOperations extends JedisOperations {
 
     public <T extends Object> List<T> hmgetObjects(byte[] key, Class<T> clazz, Integer seconds,
         byte[]... fields) {
-        return this.hmgetObjects(key, clazz, true, seconds, fields);
+        return this.hmgetObjects(key, clazz, false, seconds, fields);
     }
 
     public <T extends Object> List<T> hmgetObjects(byte[] key, Class<T> clazz, byte[]... fields) {
-        return this.hmgetObjects(key, clazz, true, null, fields);
+        return this.hmgetObjects(key, clazz, false, null, fields);
     }
 
     /**
