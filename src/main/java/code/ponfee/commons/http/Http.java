@@ -170,7 +170,7 @@ public final class Http {
     }
 
     /**
-     * 发送到服务器的查询字符串：name1=value1&name2=value2
+     * 发送到服务器的查询字符串或json串：name1=value1&name2=value2
      * 最终是以HttpURLConnection.getOutputStream().write(data)的形式发送
      * @param data
      * @return
