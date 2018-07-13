@@ -236,7 +236,8 @@ public final class Files {
         return readLines(new FileInputStream(file), null);
     }
 
-    public static List<String> readLines(File file, String charset) throws FileNotFoundException {
+    public static List<String> readLines(File file, String charset)
+        throws FileNotFoundException {
         return readLines(new FileInputStream(file), charset);
     }
 

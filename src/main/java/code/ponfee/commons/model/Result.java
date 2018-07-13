@@ -120,6 +120,10 @@ public class Result<T> implements java.io.Serializable {
         return code == SUCCESS.getCode();
     }
 
+    public @Transient boolean isFailure() {
+        return !isSuccess();
+    }
+
     @Override
     public String toString() {
         return this.toJson();
