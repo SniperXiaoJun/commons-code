@@ -1,15 +1,13 @@
 package code.ponfee.commons.extract;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
+import code.ponfee.commons.io.Files;
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.io.FilenameUtils;
 
-import com.google.common.collect.ImmutableList;
-
-import code.ponfee.commons.io.Files;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * The fiel data extractor builder
@@ -82,7 +80,7 @@ public class DataExtractorBuilder {
         if (CONTENT_TYPE_TEXT.equalsIgnoreCase(contentType)
             || CSV_EXTENSION.contains(extension)) {
             // csv, txt文本格式数据
-            return new CsvExtractor<>(input, headers, maxFileSize, csvFormat);
+            return new CsvExtractor<>(input, headers, csvFormat);
         } else if (EXCEL_EXTENSION.contains(extension)) {
             // content-type
             // xlsx: application/vnd.openxmlformats-officedocument.wordprocessingml.document
@@ -90,7 +88,7 @@ public class DataExtractorBuilder {
             //
             // xls: application/vnd.ms-excel
             //      application/msword application/x-xls
-            return new ExcelExtractor<>(input, headers, startRow, maxFileSize, 
+            return new ExcelExtractor<>(input, headers, startRow,
                                         ExcelType.from(extension), sheetIndex);
         } else {
             throw new RuntimeException("File content type not supported: " + fileName);

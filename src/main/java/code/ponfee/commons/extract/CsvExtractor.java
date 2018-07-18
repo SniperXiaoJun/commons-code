@@ -22,15 +22,19 @@ import java.io.Reader;
 public class CsvExtractor<T> extends DataExtractor<T> {
 
     private final CSVFormat csvFormat;
+    private final boolean specHeaders;
 
     public CsvExtractor(InputStream input, String[] headers) {
-        this(input, headers, 0, null);
+        this(input, headers, null);
     }
 
-    public CsvExtractor(InputStream input, String[] headers,
-                        long maxFileSize,CSVFormat csvFormat) {
-        super(input, headers, maxFileSize);
-        this.csvFormat = ObjectUtils.orElse(csvFormat, CSVFormat.DEFAULT);
+    public CsvExtractor(InputStream input, String[] headers, CSVFormat csvFormat) {
+        super(input, headers);
+        this.specHeaders = ArrayUtils.isNotEmpty(headers);
+        csvFormat = ObjectUtils.orElse(csvFormat, CSVFormat.DEFAULT);
+        this.csvFormat = this.specHeaders
+                         ? csvFormat.withHeader(headers)
+                         : csvFormat.withFirstRecordAsHeader();
     }
 
     @SuppressWarnings("unchecked")
@@ -40,18 +44,7 @@ public class CsvExtractor<T> extends DataExtractor<T> {
              BOMInputStream bom = new BOMInputStream(stream);
              Reader reader = new InputStreamReader(bom)
         ) {
-            boolean specHeaders;
-            int columnSize;
-            if (ArrayUtils.isNotEmpty(headers)) {
-                csvFormat.withHeader(headers);
-                specHeaders = true;
-                columnSize = this.headers.length;
-            } else {
-                csvFormat.withFirstRecordAsHeader();
-                specHeaders = false;
-                columnSize = 0;
-            }
-
+            int columnSize = specHeaders ? this.headers.length : 0;
             Iterable<CSVRecord> records = csvFormat.parse(reader);
             int i = 0, j, n;
             T data;
@@ -85,7 +78,8 @@ public class CsvExtractor<T> extends DataExtractor<T> {
 
     public static void main(String[] args) throws Exception {
         //String[] headers = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"};
-        String[] headers = {};
+        String[] headers = {"1", "2"};
+        //String[] headers = null;
         String file = "D:\\testExcel1.csv";
         //String file = "D:\\国际组织10-单位模板20180718 - 副本.csv";
         CsvExtractor<String[]> csv = new CsvExtractor<>(new FileInputStream(file), headers);

@@ -1,12 +1,5 @@
 package code.ponfee.commons.extract;
 
-import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Objects;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -17,6 +10,13 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
+
+import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
 
 /**
  * Excel file data extractor
@@ -30,13 +30,13 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
     private final int startRow;
 
     public ExcelExtractor(InputStream inputStream, String[] headers, 
-                          int startRow, long maxFileSize, ExcelType type) {
-        this(inputStream, headers, startRow, maxFileSize, type, 0);
+                          int startRow, ExcelType type) {
+        this(inputStream, headers, startRow, type, 0);
     }
 
     public ExcelExtractor(InputStream input, String[] headers, int startRow, 
-                          long maxFileSize, ExcelType type, int sheetIndex) {
-        super(input, headers, maxFileSize);
+                          ExcelType type, int sheetIndex) {
+        super(input, headers);
         this.startRow = startRow;
         this.type = type;
         this.sheetIndex = sheetIndex;
@@ -145,7 +145,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
         //String[] headers = new String[] {"a"};
         //List<String> list = extractData(new FileInputStream("d:/大屏批量配置-data-2.xlsx"), "xlsx", 0, 1);
         ExcelExtractor<String[]> ex = new ExcelExtractor<>(new FileInputStream("d:/abcd.xlsx"), 
-                                                           headers, 1, 10000, ExcelType.XLSX, 0);
+                                                           headers, 1, ExcelType.XLSX, 0);
         for (String[] s : ex.extract()) {
             System.out.println(StringUtils.join(s, ", "));
         }
