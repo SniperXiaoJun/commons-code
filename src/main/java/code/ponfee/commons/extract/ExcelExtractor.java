@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -26,6 +27,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
 
     private final int sheetIndex;
     private final ExcelType type;
+    private final int startRow;
 
     public ExcelExtractor(InputStream inputStream, String[] headers, 
                           int startRow, long maxFileSize, ExcelType type) {
@@ -34,7 +36,8 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
 
     public ExcelExtractor(InputStream input, String[] headers, int startRow, 
                           long maxFileSize, ExcelType type, int sheetIndex) {
-        super(input, headers, startRow, maxFileSize);
+        super(input, headers, maxFileSize);
+        this.startRow = startRow;
         this.type = type;
         this.sheetIndex = sheetIndex;
     }
@@ -47,22 +50,37 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
         ) {
             T data;
             Sheet sheet = workbook.getSheetAt(sheetIndex);
-            for (int n = sheet.getLastRowNum(), i = startRow, m, j; i <= n; i++) {
+
+            boolean specHeaders;
+            int columnSize;
+            if (ArrayUtils.isNotEmpty(headers)) {
+                specHeaders = true;
+                columnSize = this.headers.length;
+            } else {
+                specHeaders = false;
+                columnSize = 0;
+            }
+
+            for (int n = sheet.getLastRowNum(), i = startRow, k = i, m, j; i <= n; i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) {
                     continue;
                 }
 
-                String[] array = columnNumber > 1 ? new String[columnNumber] : null;
+                if (!specHeaders && k == startRow) {
+                    columnSize = row.getLastCellNum(); // 不指定表头则以开始行为表头
+                }
+
+                String[] array = columnSize > 1 ? new String[columnSize] : null;
                 String str = null;
-                for (m = row.getLastCellNum(), j = 0; j <= m && j < columnNumber; j++) {
+                for (m = row.getLastCellNum(), j = 0; j <= m && j < columnSize; j++) {
                     str = getCellValueAsString(row.getCell(j, CREATE_NULL_AS_BLANK));
-                    if (columnNumber > 1) {
+                    if (columnSize > 1) {
                         array[j] = str;
                     }
                 }
-                if (columnNumber > 1) {
-                    for (; j < columnNumber; j++) {
+                if (columnSize > 1) {
+                    for (; j < columnSize; j++) {
                         array[j] = StringUtils.EMPTY;
                     }
                     data = (T) array;
@@ -70,6 +88,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
                     data = (T) str;
                 }
                 if (isNotEmpty(data)) {
+                    k++;
                     processor.process(i, data);
                 }
             }
@@ -121,7 +140,8 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
     }
 
     public static void main(String[] args) throws Exception {
-        String[] headers = new String[] {"a", "b"};
+        //String[] headers = new String[] {"a", "b"};
+        String[] headers = null;
         //String[] headers = new String[] {"a"};
         //List<String> list = extractData(new FileInputStream("d:/大屏批量配置-data-2.xlsx"), "xlsx", 0, 1);
         ExcelExtractor<String[]> ex = new ExcelExtractor<>(new FileInputStream("d:/abcd.xlsx"), 

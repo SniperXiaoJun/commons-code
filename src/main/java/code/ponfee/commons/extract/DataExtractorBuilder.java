@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.io.FilenameUtils;
 
 import com.google.common.collect.ImmutableList;
@@ -26,9 +27,12 @@ public class DataExtractorBuilder {
     private final String contentType;
     private final String[] headers;
 
-    private int startRow = 0;
     private long maxFileSize = 0;
+
+    private int startRow = 0; // excel start row
     private int sheetIndex = 0; // excel work book sheet index
+
+    private CSVFormat csvFormat; // csv format
 
     private DataExtractorBuilder(InputStream input, String fileName, 
                                  String contentType,String[] headers) {
@@ -39,13 +43,13 @@ public class DataExtractorBuilder {
     }
 
     public static DataExtractorBuilder newBuilder(InputStream input, String fileName, 
-                                                  String contentType,String[] headers) {
-        return new DataExtractorBuilder(input, fileName, contentType, headers);
+                                                  String contentType) {
+        return new DataExtractorBuilder(input, fileName, contentType, null);
     }
 
-    public DataExtractorBuilder startRow(int startRow) {
-        this.startRow = startRow;
-        return this;
+    public static DataExtractorBuilder newBuilder(InputStream input, String fileName,
+                                                  String contentType,String[] headers) {
+        return new DataExtractorBuilder(input, fileName, contentType, headers);
     }
 
     public DataExtractorBuilder maxFileSize(long maxFileSize) {
@@ -53,8 +57,18 @@ public class DataExtractorBuilder {
         return this;
     }
 
+    public DataExtractorBuilder startRow(int startRow) {
+        this.startRow = startRow;
+        return this;
+    }
+
     public DataExtractorBuilder sheetIndex(int sheetIndex) {
         this.sheetIndex = sheetIndex;
+        return this;
+    }
+
+    public DataExtractorBuilder csvFormat(CSVFormat csvFormat) {
+        this.csvFormat = csvFormat;
         return this;
     }
 
@@ -68,7 +82,7 @@ public class DataExtractorBuilder {
         if (CONTENT_TYPE_TEXT.equalsIgnoreCase(contentType)
             || CSV_EXTENSION.contains(extension)) {
             // csv, txt文本格式数据
-            return new CsvExtractor<>(input, headers, startRow, maxFileSize);
+            return new CsvExtractor<>(input, headers, maxFileSize, csvFormat);
         } else if (EXCEL_EXTENSION.contains(extension)) {
             // content-type
             // xlsx: application/vnd.openxmlformats-officedocument.wordprocessingml.document

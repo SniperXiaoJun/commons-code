@@ -1,9 +1,11 @@
 package code.ponfee.commons.extract;
 
 import code.ponfee.commons.json.Jsons;
+import code.ponfee.commons.util.ObjectUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileInputStream;
@@ -19,39 +21,57 @@ import java.io.Reader;
  */
 public class CsvExtractor<T> extends DataExtractor<T> {
 
+    private final CSVFormat csvFormat;
+
     public CsvExtractor(InputStream input, String[] headers) {
-        super(input, headers, 0, 0);
+        this(input, headers, 0, null);
     }
 
-    public CsvExtractor(InputStream input, String[] headers, 
-                        int startRow, long maxFileSize) {
-        super(input, headers, startRow, maxFileSize);
+    public CsvExtractor(InputStream input, String[] headers,
+                        long maxFileSize,CSVFormat csvFormat) {
+        super(input, headers, maxFileSize);
+        this.csvFormat = ObjectUtils.orElse(csvFormat, CSVFormat.DEFAULT);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void extract(RowProcessor<T> processor) throws IOException {
         try (InputStream stream = input;
-             BOMInputStream bom = new BOMInputStream(stream); 
+             BOMInputStream bom = new BOMInputStream(stream);
              Reader reader = new InputStreamReader(bom)
         ) {
-            Iterable<CSVRecord> records = CSVFormat.DEFAULT.withHeader(headers).parse(reader);
+            boolean specHeaders;
+            int columnSize;
+            if (ArrayUtils.isNotEmpty(headers)) {
+                csvFormat.withHeader(headers);
+                specHeaders = true;
+                columnSize = this.headers.length;
+            } else {
+                csvFormat.withFirstRecordAsHeader();
+                specHeaders = false;
+                columnSize = 0;
+            }
+
+            Iterable<CSVRecord> records = csvFormat.parse(reader);
             int i = 0, j, n;
             T data;
-            for (CSVRecord redord : records) {
-                n = redord.size();
-                if (columnNumber == 1) {
+            for (CSVRecord record : records) {
+                if (!specHeaders && i == 0) {
+                    columnSize = record.size(); // 不指定表头，则取第一行数据为表头
+                }
+                n = record.size();
+                if (columnSize == 1) {
                     if (n == 0) {
                         data = (T) StringUtils.EMPTY;
                     } else {
-                        data = (T) redord.get(0);
+                        data = (T) record.get(0);
                     }
                 } else {
-                    String[] array = new String[columnNumber];
-                    for (j = 0; j < n && j < columnNumber; j++) {
-                        array[j] = redord.get(j);
+                    String[] array = new String[columnSize];
+                    for (j = 0; j < n && j < columnSize; j++) {
+                        array[j] = record.get(j);
                     }
-                    for (; j < columnNumber; j++) {
+                    for (; j < columnSize; j++) {
                         array[j] = StringUtils.EMPTY;
                     }
                     data = (T) array;
@@ -64,8 +84,11 @@ public class CsvExtractor<T> extends DataExtractor<T> {
     }
 
     public static void main(String[] args) throws Exception {
-        String[] headers = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"};
-        CsvExtractor<String[]> csv = new CsvExtractor<>(new FileInputStream("D:\\testExcel.csv"), headers);
+        //String[] headers = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"};
+        String[] headers = {};
+        String file = "D:\\testExcel1.csv";
+        //String file = "D:\\国际组织10-单位模板20180718 - 副本.csv";
+        CsvExtractor<String[]> csv = new CsvExtractor<>(new FileInputStream(file), headers);
         System.out.println(Jsons.toJson(csv.extract()));
     }
 }

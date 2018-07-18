@@ -16,16 +16,11 @@ public abstract class DataExtractor<T> {
 
     protected final InputStream input;
     protected final String[] headers;
-    protected final int columnNumber;
-    protected int startRow;
     protected long maxFileSize;
 
-    protected DataExtractor(InputStream input, String[] headers, 
-                            int startRow, long maxFileSize) {
+    protected DataExtractor(InputStream input, String[] headers, long maxFileSize) {
         this.input = input;
         this.headers = headers;
-        this.columnNumber = headers.length;
-        this.startRow = startRow;
         this.maxFileSize = maxFileSize;
     }
 

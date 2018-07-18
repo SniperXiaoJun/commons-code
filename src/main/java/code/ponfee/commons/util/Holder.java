@@ -80,12 +80,10 @@ public final class Holder<T> {
 
     @Override
     public boolean equals(Object obj) {
-        if (null == obj) {
-            return false;
-        }
         if (this == obj) {
             return true;
         }
+
         if (!(obj instanceof Holder)) {
             return false;
         }
