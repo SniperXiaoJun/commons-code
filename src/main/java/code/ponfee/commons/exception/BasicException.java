@@ -8,29 +8,28 @@ public class BasicException extends RuntimeException {
     private static final long serialVersionUID = -5678901285130119481L;
 
     /** 错误编码 */
-    private Integer code;
+    private final Integer code;
 
     public BasicException() {
-        super();
+        this(null, null, null);
     }
 
     public BasicException(Integer code) {
-        super();
-        this.code = code;
+        this(code, null, null);
     }
 
     /**
      * @param message 错误消息
      */
     public BasicException(String message) {
-        super(message);
+        this(null, message, null);
     }
 
     /**
      * @param cause 异常
      */
     public BasicException(Throwable cause) {
-        super(cause);
+        this(null, null, cause);
     }
 
     /**
@@ -38,7 +37,7 @@ public class BasicException extends RuntimeException {
      * @param cause 异常原因
      */
     public BasicException(String message, Throwable cause) {
-        super(message, cause);
+        this(null, message, cause);
     }
 
     /**
@@ -46,8 +45,7 @@ public class BasicException extends RuntimeException {
      * @param message 错误消息
      */
     public BasicException(Integer code, String message) {
-        super(message);
-        this.code = code;
+        this(code, message, null);
     }
 
     /**
@@ -55,8 +53,7 @@ public class BasicException extends RuntimeException {
      * @param cause 异常原因
      */
     public BasicException(Integer code, Throwable cause) {
-        super(cause);
-        this.code = code;
+        this(code, null, cause);
     }
 
     /**
