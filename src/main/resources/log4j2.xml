@@ -24,7 +24,8 @@
 
             <PatternLayout pattern="[%-5p] %d{yyyy-MM-dd HH:mm:ss} %l%n%m%n" />
             <Policies>
-                <OnStartupTriggeringPolicy /><!-- 启动时就重新滚动日志 -->
+                <!-- 启动时就重新滚动日志 -->
+                <!-- <OnStartupTriggeringPolicy /> -->
 
                 <!-- 如果启用此配置，则日志会按文件名生成新压缩文件，即如果filePattern配置的日期格式为 %d{yyyy-MM-dd HH}，
                 `则每小时生成一个压缩文件，如果filePattern配置的日期格式为 %d{yyyy-MM-dd} ，则天生成一个压缩文件 -->
@@ -41,8 +42,11 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="code.ponfee.commons" level="WARN" includeLocation="true" additivity="false">
+        <!-- 当根据日志名字获取不到指定的日志器时就使用Root作为默认的日志器 -->
+        <!-- additivity指定是否同时输出日志到父类的appender，缺省为true -->
+        <Logger name="code.ponfee.commons" level="WARN" additivity="false">
             <AppenderRef ref="Console" />
+            <AppenderRef ref="RollingFile" />
         </Logger>
         <Root level="WARN">
             <AppenderRef ref="Console" />

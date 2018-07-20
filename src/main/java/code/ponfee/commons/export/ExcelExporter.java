@@ -290,9 +290,12 @@ public class ExcelExporter extends AbstractExporter {
      * 输出到输出流
      */
     public void write(OutputStream out) {
-        try (BufferedOutputStream bos = new BufferedOutputStream(out)) {
+        try (BufferedOutputStream bos = new BufferedOutputStream(out);
+             SXSSFWorkbook wb = workbook
+        ) {
             createFreezePane();
-            workbook.write(bos);
+            wb.write(bos);
+            workbook = null;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -321,15 +324,20 @@ public class ExcelExporter extends AbstractExporter {
      */
     @Override
     public void close() {
-        if (workbook != null) try {
-            workbook.close();
+        if (workbook == null) {
+            return;
+        }
+
+        try (SXSSFWorkbook wb = workbook) {
+            // nothing to do
+            workbook = null;
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            sheets.clear();
+            images.clear();
+            freezes.clear();
         }
-        workbook = null;
-        sheets.clear();
-        images.clear();
-        freezes.clear();
     }
 
     //--protected methods------------------------------------------------------------------
