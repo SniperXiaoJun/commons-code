@@ -201,9 +201,11 @@ public class ShardedJedisSentinelPool extends Pool<ShardedJedis> {
                     } catch (JedisConnectionException e) {
                         logger.warn("Cannot connect to sentinel running @ {}. Trying next one.", hap);
                     } finally {
-                        if (jedis != null) {
+                        if (jedis != null) try {
                             jedis.disconnect();
                             jedis.close();
+                        } catch (Exception ignored) {
+                            ignored.printStackTrace();
                         }
                     }
                 }

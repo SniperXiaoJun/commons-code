@@ -41,11 +41,11 @@ public class NodeTreeTest {
 
         list.add(new NamedNode<>("400000", null, 5, true, "nid400000"));
 
-        NodeTree<String> subtree = new NodeTree<>("400010", "400000", 1, true);
+        NodeTree<String> subtree = NodeTree.createRoot("400010", "400000", 1, true);
         List<AbstractNode<String>> list1 = new ArrayList<>();
         list1.add(new NamedNode<>("400011", "400010", 2, true,  "nid400011"));
         list1.add(new NamedNode<>("400012", "400010", 3, false, "nid400012"));
-        subtree.build(list1);
+        subtree.mount(list1);
         list.add(subtree);
 
         
@@ -53,9 +53,9 @@ public class NodeTreeTest {
         list.add(new NamedNode<>("500010", "500000", 3, true, "nid500010"));
         list.add(new NamedNode<>("500011", "500010", 3, true, "nid500011"));
 
-        NodeTree<String> root = new NodeTree<>(NodeTree.DEFAULT_ROOT_NAME);
+        NodeTree<String> root = NodeTree.createRoot(NodeTree.DEFAULT_ROOT_NAME);
         System.out.println(Jsons.toJson(root));
-        root.build(list);
+        root.mount(list);
         System.out.println(Jsons.toJson(root));
         System.out.println(Jsons.toJson(root.flatInherit()));
         System.out.println(Jsons.toJson(root.flatHierarchy()));
@@ -73,8 +73,8 @@ public class NodeTreeTest {
         List<AbstractNode<String>> list = new ArrayList<>();
         list.add(new NamedNode<>("100001", null, 2, true, "nid100010")); // 节点编号不能为空
         list.add(new NamedNode<>(null, "100001", 2, true, "nid100010"));
-        NodeTree<String> root = new NodeTree<>(NodeTree.DEFAULT_ROOT_NAME);
-        root.build(list);
+        NodeTree<String> root = NodeTree.createRoot(NodeTree.DEFAULT_ROOT_NAME);
+        root.mount(list);
         System.out.println(Jsons.toJson(root));
     }
     
@@ -84,6 +84,6 @@ public class NodeTreeTest {
         list.add(new NamedNode<>("100000", "notfound", 1, true, "nid100000")); // 无效的孤儿节点
         list.add(new NamedNode<>("200000", "notfound", 1, true, "nid200000")); // 无效的孤儿节点
 
-        new NodeTree<>(NodeTree.DEFAULT_ROOT_NAME).build(list);
+        NodeTree.createRoot(NodeTree.DEFAULT_ROOT_NAME).mount(list);
     }
 }

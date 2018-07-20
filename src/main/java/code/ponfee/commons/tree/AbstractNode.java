@@ -8,13 +8,11 @@
 
 package code.ponfee.commons.tree;
 
-import java.util.List;
-
+import code.ponfee.commons.serial.JdkSerializer;
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 
-import com.google.common.base.Preconditions;
-
-import code.ponfee.commons.serial.JdkSerializer;
+import java.util.List;
 
 /**
  * 基于树形结构节点的基类
@@ -44,45 +42,38 @@ public abstract class AbstractNode<T extends java.io.Serializable & Comparable<T
     public AbstractNode(T nid, T pid, int orders, 
                         boolean enabled, AbstractNode<T> attach) {
         Preconditions.checkArgument(isNotEmpty(nid), "节点编号不能为空");
-
         this.nid = nid;
         this.pid = pid;
         this.orders = orders;
         this.enabled = enabled;
         this.attach = innermostAttach(attach);
-
         this.available = enabled;
     }
 
-    /*public AbstractNode<T> copy() {
-        AbstractNode<T> node = new AbstractNode<>(
-            this.nid, this.pid, this.orders, this.enabled, 
-            (this.attach != null ? this.attach : this)
-        );
-
-        node.available = this.available;
-        node.level = this.level;
-        node.path = (this.path != null) 
-                    ? Lists.newArrayList(this.path) : null;
-
-        node.treeNodeCount = this.treeNodeCount;
-        node.childLeafCount = this.childLeafCount;
-        node.treeMaxDepth = this.treeMaxDepth;
-        node.leftLeafCount = this.leftLeafCount;
-
-        return node;
-    }*/
-
     @SuppressWarnings("unchecked")
-    public AbstractNode<T> copy() {
-        /*try {
-            return (AbstractNode<T>) this.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("clone object occur exception.", e);
-        }*/
+    public @Override AbstractNode<T> clone() {
         JdkSerializer serializer = new JdkSerializer();
-        byte[] bytes = serializer.serialize(this, false);
-        return serializer.deserialize(bytes, this.getClass(), false);
+        byte[] bytes = serializer.serialize(this);
+        return serializer.deserialize(bytes, this.getClass());
+    }
+
+    public boolean isEmpty(T id) {
+        if (id instanceof CharSequence) {
+            return StringUtils.isBlank((CharSequence) id);
+        }
+        return id == null;
+    }
+
+    public boolean isNotEmpty(T id) {
+        return !isEmpty(id);
+    }
+
+    private AbstractNode<T> innermostAttach(AbstractNode<T> attach) {
+        if (attach == null || attach.attach == null) {
+            return attach; // attach.clone()
+        } else {
+            return innermostAttach(attach.attach);
+        }
     }
 
     // -----------------------------------------------getter/setter
@@ -134,66 +125,16 @@ public abstract class AbstractNode<T extends java.io.Serializable & Comparable<T
         return treeNodeCount;
     }
 
-    public void setTreeNodeCount(int treeNodeCount) {
-        this.treeNodeCount = treeNodeCount;
-    }
-
     public int getChildLeafCount() {
         return childLeafCount;
-    }
-
-    public void setChildLeafCount(int childLeafCount) {
-        this.childLeafCount = childLeafCount;
     }
 
     public int getTreeMaxDepth() {
         return treeMaxDepth;
     }
 
-    public void setTreeMaxDepth(int treeMaxDepth) {
-        this.treeMaxDepth = treeMaxDepth;
-    }
-
     public int getLeftLeafCount() {
         return leftLeafCount;
     }
 
-    public void setLeftLeafCount(int leftLeafCount) {
-        this.leftLeafCount = leftLeafCount;
-    }
-
-    private AbstractNode<T> innermostAttach(AbstractNode<T> attach) {
-        if (attach == null) {
-            return null;
-        }
-        if (attach.attach == null) {
-            /*attach.nid = this.nid;
-            attach.pid = this.pid;
-            attach.orders = this.orders;
-            attach.enabled = this.enabled;
-            
-            attach.available = this.available;
-            attach.level = this.level;
-            attach.path = (this.path != null)
-                          ? Lists.newArrayList(this.path) : null;
-            
-            attach.treeNodeCount = this.treeNodeCount;
-            attach.childLeafCount = this.childLeafCount;
-            attach.treeMaxDepth = this.treeMaxDepth;
-            attach.leftLeafCount = this.leftLeafCount;*/
-            return attach;
-        }
-        return innermostAttach(attach.attach);
-    }
-
-    public boolean isEmpty(T id) {
-        if (id instanceof CharSequence) {
-            return StringUtils.isBlank((CharSequence) id);
-        }
-        return id == null;
-    }
-
-    public boolean isNotEmpty(T id) {
-        return !isEmpty(id);
-    }
 }

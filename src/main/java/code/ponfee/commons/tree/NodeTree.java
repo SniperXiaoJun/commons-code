@@ -41,17 +41,6 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
     private final List<NodeTree<T>> children = Lists.newArrayList();
 
     /**
-     * 构造空结点作为根节点
-     */
-    public NodeTree(T nid) {
-        this(nid, null, 0, true);
-    }
-
-    public NodeTree(T nid, T pid, int orders) {
-        this(nid, pid, orders, true);
-    }
-
-    /**
      * 构造根节点
      * 
      * @param nid
@@ -59,7 +48,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * @param orders
      * @param enabled
      */
-    public NodeTree(T nid, T pid, int orders, boolean enabled) {
+    private NodeTree(T nid, T pid, int orders, boolean enabled) {
         super(nid, pid, orders, enabled, null);
         this.available = enabled;
     }
@@ -69,25 +58,51 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * 
      * @param node  as a tree root node
      */
-    public NodeTree(AbstractNode<T> node) {
+    private NodeTree(AbstractNode<T> node) {
         super(node.getNid(), node.getPid(), 
               node.getOrders(), node.isEnabled(), node);
         super.available = node.isAvailable();
     }
 
-    public <E extends AbstractNode<T>> NodeTree<T> build(List<E> nodes) {
-        build(nodes, false);
+    public static <T extends java.io.Serializable & Comparable<T>> NodeTree<T> 
+        createRoot(T nid) {
+        return new NodeTree<>(nid, null, 0, true);
+    }
+
+    public static <T extends java.io.Serializable & Comparable<T>> NodeTree<T> 
+        createRoot(T nid, T pid, int orders) {
+        return new NodeTree<>(nid, pid, orders, true);
+    }
+
+    public static <T extends java.io.Serializable & Comparable<T>> NodeTree<T> 
+        createRoot(T nid, T pid, int orders, boolean enabled) {
+        return new NodeTree<>(nid, pid, orders, enabled);
+    }
+
+    /**
+     * Returns a tree root node
+     *  
+     * @param node   the node for root
+     * @return
+     */
+    public static <T extends java.io.Serializable & Comparable<T>> NodeTree<T> 
+        createRoot(AbstractNode<T> node) {
+        return new NodeTree<>(node);
+    }
+
+    public <E extends AbstractNode<T>> NodeTree<T> mount(List<E> nodes) {
+        mount(nodes, false);
         return this;
     }
 
     /**
-     * 以此节点为根，传入子节点来构建节点树
+     * Mount a tree
      * 
      * @param nodes        子节点列表
      * @param ignoreOrphan {@code true}忽略孤儿节点
      */
     @SuppressWarnings("unchecked")
-    public <E extends AbstractNode<T>> NodeTree<T> build(@Nonnull List<E> list, 
+    public <E extends AbstractNode<T>> NodeTree<T> mount(@Nonnull List<E> list, 
                                                          boolean ignoreOrphan) {
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(list));
 
@@ -107,12 +122,12 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
         this.level = 1; // reset with 1
         this.path = null; // reset with null
         this.leftLeafCount = 0; // reset with 0
-        this.build0(nodes, ignoreOrphan, this.nid);
+        this.mount0(nodes, ignoreOrphan, this.nid);
 
         // 4、检查是否存在孤儿节点
         if (!ignoreOrphan && CollectionUtils.isNotEmpty(nodes)) {
             List<T> nids = nodes.stream().map(n -> n.getNid())
-                                         .collect(Collectors.toList());
+                                .collect(Collectors.toList());
             throw new RuntimeException("无效的孤儿节点：" + nids);
         }
 
@@ -125,7 +140,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
     /**
      * 按继承方式展开节点：父子节点相邻 
      * 
-     * should be before invoke {@link #build(List)}
+     * should be before invoke {@link #mount(List)}
      * 
      * @return
      */
@@ -149,14 +164,17 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
     // -----------------------------------------------------------private methods
     private <E extends AbstractNode<T>> List<AbstractNode<T>> before(List<E> nodes) {
         List<AbstractNode<T>> list = Lists.newArrayList();
+
+        // nodes list
         for (AbstractNode<T> node : nodes) {
             if (node instanceof NodeTree) {
-                List<NodeFlat<T>> flat = ((NodeTree<T>) node).flatInherit();
-                list.addAll(flat);
+                list.addAll(((NodeTree<T>) node).flatInherit());
             } else {
-                list.add(node.copy());
+                list.add(node); // node.clone()
             }
         }
+
+        // the root node children
         if (CollectionUtils.isNotEmpty(this.children)) {
             List<NodeFlat<T>> flat = this.flatInherit();
             list.addAll(flat.subList(1, flat.size()));
@@ -165,7 +183,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
         return list;
     }
 
-    private <E extends AbstractNode<T>> void build0(
+    private <E extends AbstractNode<T>> void mount0(
         List<E> nodes, boolean ignoreOrphan, T mountPidIfNull) {
         // current "this" is parent: AbstractNode parent = this;
 
@@ -206,9 +224,9 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
             // sort the children list
             this.children.sort(Comparator.comparing(NodeTree::getOrders));
 
-            // recursion to build child tree
+            // recursion to mount child tree
             for (NodeTree<T> nt : this.children) {
-                nt.build0(nodes, ignoreOrphan, mountPidIfNull);
+                nt.mount0(nodes, ignoreOrphan, mountPidIfNull);
             }
         }
 

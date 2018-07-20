@@ -14,7 +14,7 @@ import code.ponfee.commons.tree.NodeTree;
  */
 public class Table implements Serializable {
     private static final long serialVersionUID = 1600567917100486004L;
-    
+
     private static final int ROOT_PID = 0;
 
     private String caption; // 标题
@@ -25,7 +25,8 @@ public class Table implements Serializable {
     private Map<CellStyleOptions, Object> options; // 其它特殊配置项，如：{HIGHLIGHT:{\"cells\":[[2,15],[2,16]],\"color\":\"#f00\"}}
 
     public Table(List<Thead> list) {
-        this.thead = new NodeTree<>(ROOT_PID, null, 0).build(list).flatHierarchy();
+        this.thead = NodeTree.createRoot(ROOT_PID, null, 0)
+                             .mount(list).flatHierarchy();
     }
 
     public Table(String[] names) {
@@ -33,7 +34,8 @@ public class Table implements Serializable {
         for (int i = 0; i < names.length; i++) {
             list.add(new Thead(names[i], i + 1, ROOT_PID));
         }
-        this.thead = new NodeTree<>(ROOT_PID, null, 0).build(list).flatHierarchy();
+        this.thead = NodeTree.createRoot(ROOT_PID, null, 0)
+                             .mount(list).flatHierarchy();
     }
 
     public String getCaption() {
