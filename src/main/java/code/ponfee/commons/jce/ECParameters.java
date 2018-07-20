@@ -172,7 +172,7 @@ public class ECParameters implements java.io.Serializable {
         ECDomainParameters bcSpec = null;
         ECKeyPairGenerator keyPairGenerator = null;
         try {
-            curve = new ECCurve.Fp(this.p, this.a, this.b);
+            curve = new ECCurve.Fp(this.p, this.a, this.b, null, null);
             pointG = curve.createPoint(this.gx, this.gy);
             bcSpec = new ECDomainParameters(curve, pointG, this.n);
             keyPairGenerator = new ECKeyPairGenerator();
