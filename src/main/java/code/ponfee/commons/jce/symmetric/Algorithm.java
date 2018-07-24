@@ -36,5 +36,5 @@ package code.ponfee.commons.jce.symmetric;
 public enum Algorithm {
     AES, DES, DESede, Blowfish, RC2, RC4, RC5, //
     IDEA, TEA, TDEA, Camellia, CAST5, GOST28147, //
-    SEED, Serpent, SHACAL2, Twofish //
+    SEED, Serpent, SHACAL2, Twofish, SM4 //
 }

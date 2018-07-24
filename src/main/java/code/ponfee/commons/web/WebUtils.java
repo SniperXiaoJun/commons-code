@@ -29,6 +29,16 @@ public final class WebUtils {
 
     private final static Pattern PATTERN_SUFFIX = Pattern.compile("\\S*[?]\\S*");
 
+    /*private static final Pattern PATTERN_MOBILE = Pattern.compile(
+        "\\b(ip(hone|od)|android|opera m(ob|in)i|windows (phone|ce)|blackberry|s(ymbian|eries60|amsung)"
+      + "|p(laybook|alm|rofile/midp|laystation portable)|nokia|fennec|htc[-_]|mobile|up.browser"
+      + "|[1-4][0-9]{2}x[1-4][0-9]{2})\\b", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_IPAD = Pattern.compile(
+        "\\b(ipad|tablet|(Nexus 7)|up.browser|[1-4][0-9]{2}x[1-4][0-9]{2})\\b", 
+        Pattern.CASE_INSENSITIVE
+    );*/
+
     /** authorization */
     public static final String AUTH_HEADER = "X-Auth-Token";
     public static final String AUTH_COOKIE = "auth_token";
@@ -107,6 +117,22 @@ public final class WebUtils {
     }
 
     /**
+     * 获取客户端设备类型
+     * @return
+     */
+    public static LiteDevice getClientDevice(HttpServletRequest req) {
+        return new LiteDeviceResolver().resolveDevice(req);
+        /*String userAgent = Objects.toString(userAgent(req), "");
+        if (PATTERN_MOBILE.matcher(userAgent).find()) {
+            return DeviceType.MOBILE;
+        } else if (PATTERN_IPAD.matcher(userAgent).find()) {
+            return DeviceType.TABLET;
+        } else {
+            return DeviceType.NORMAL;
+        }*/
+    }
+
+    /**
      * 判断是否ajax请求
      * @param req
      * @return
@@ -122,7 +148,7 @@ public final class WebUtils {
      * @return web browser user-agent
      */
     public static String userAgent(HttpServletRequest req) {
-        return req.getHeader("USER-AGENT");
+        return req.getHeader("User-Agent");
     }
 
     /**

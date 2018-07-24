@@ -2,8 +2,10 @@ package code.ponfee.commons.jce;
 
 /**
  * RSA加密填充
- * Sun only support：RSA/ECB/PKCS1Padding
+ * Jdk Sun only support：RSA/ECB/PKCS1Padding
+ * 
  * @see org.bouncycastle.jcajce.provider.asymmetric.rsa.CipherSpi
+ * 
  * @author fupf
  */
 public enum RSACipherPaddings {

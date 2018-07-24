@@ -223,9 +223,19 @@ public final class SM2 {
         return c2;
     }
 
+    public static byte[] sign(byte[] data, byte[] publicKey, 
+                              byte[] privateKey) {
+        return sign(data, null, publicKey, privateKey);
+    }
+
     public static byte[] sign(byte[] data, byte[] ida, 
                               byte[] publicKey, byte[] privateKey) {
         return sign(ECParameters.SM2_BEST, data, ida, publicKey, privateKey);
+    }
+
+    public static byte[] sign(ECParameters ecParam, byte[] data, 
+                              byte[] publicKey, byte[] privateKey) {
+        return sign(ecParam, data, null, publicKey, privateKey);
     }
 
     /**
@@ -260,9 +270,18 @@ public final class SM2 {
         return new Signature(r, s, ecParam.n).toByteArray();
     }
 
+    public static boolean verify(byte[] data, byte[] signed, byte[] publicKey) {
+        return verify(data, null, signed, publicKey);
+    }
+
     public static boolean verify(byte[] data, byte[] ida, 
                                  byte[] signed, byte[] publicKey) {
         return verify(ECParameters.SM2_BEST, data, ida, signed, publicKey);
+    }
+
+    public static boolean verify(ECParameters ecParam, byte[] data, 
+                                 byte[] signed, byte[] publicKey) {
+        return verify(ecParam, data, null, signed, publicKey);
     }
 
     /**
@@ -333,6 +352,10 @@ public final class SM2 {
         return y1.equals(x1) && publicKey.multiply(ecParam.n).isInfinity();
     }
 
+    static byte[] calcZ(SM3Digest sm3, ECParameters ecParam, ECPoint pubKey) {
+        return calcZ(sm3, ecParam, null, pubKey);
+    }
+
     /**
      * 取得用户标识字节数组
      * @param ecParam the ec parameter
@@ -341,11 +364,13 @@ public final class SM2 {
      * @return
      */
     static byte[] calcZ(SM3Digest sm3, ECParameters ecParam, byte[] ida, ECPoint pubKey) {
-        int idaBitLen = ida.length << 3; // ida.length*8
         sm3.reset();
-        sm3.update((byte) (idaBitLen & 0xFF00));
-        sm3.update((byte) (idaBitLen & 0x00FF));
-        sm3.update(ida);
+        if (ida != null && ida.length > 0) {
+            int idaBitLen = ida.length << 3; // ida.length*8
+            sm3.update((byte) (idaBitLen & 0xFF00));
+            sm3.update((byte) (idaBitLen & 0x00FF));
+            sm3.update(ida);
+        }
         sm3.update(ecParam.a.toByteArray());
         sm3.update(ecParam.b.toByteArray());
         sm3.update(ecParam.gx.toByteArray());

@@ -8,42 +8,56 @@ import com.google.common.collect.ImmutableBiMap;
  */
 public enum HmacAlgorithms {
 
-    HmacMD5(16), //
+    HmacMD5(128), //
 
-    HmacRipeMD128(16), HmacRipeMD160(20), // 
-    HmacRipeMD256(32), HmacRipeMD320(40), // 
+    HmacRipeMD128(128), HmacRipeMD160(160), // 
+    HmacRipeMD256(256), HmacRipeMD320(320), // 
 
-    HmacSHA1(20), HmacSHA224(28), // 
-    HmacSHA256(32), HmacSHA384(48), // 
-    HmacSHA512(64), // 
+    HmacSHA1(160), HmacSHA224(224), // 
+    HmacSHA256(256), HmacSHA384(384), // 
+    HmacSHA512(512), // 
+
+    //HmacSM3(256), // 
 
     /**
      * @see org.bouncycastle.crypto.digests.KeccakDigest
      * @see org.bouncycastle.jcajce.provider.digest.Keccak
      */
-    HmacKECCAK224(28), HmacKECCAK288(36), // 
-    HmacKECCAK256(32), HmacKECCAK384(48), // 
-    HmacKECCAK512(64), //
+    HmacKECCAK224(224), HmacKECCAK288(288), // 
+    HmacKECCAK256(256), HmacKECCAK384(384), // 
+    HmacKECCAK512(512), //
+
+    HmacSKEIN_256_128("Skein-MAC-256-128", 128), // 
+    HmacSKEIN_256_256("Skein-MAC-256-256", 256), // 
+    HmacSKEIN_512_256("Skein-MAC-512-256", 256), // 
+    HmacSKEIN_512_512("Skein-MAC-512-512", 512), // 
+    HmacSKEIN_1024_512("Skein-MAC-1024-512", 512), // 
+    HmacSKEIN_1024_1024("Skein-MAC-1024-1024", 1024), // 
+
+    /**
+     * @see org.bouncycastle.crypto.digests.SHAKEDigest
+     */
+    //HmacSHAKE128(128), HmacSHAKE256(256), // 
 
     /**
      * @see org.bouncycastle.crypto.digests.SHA3Digest
      * @see org.bouncycastle.jcajce.provider.digest.SHA3
      */
-    HmacSHA3_224("HmacSHA3-224", 28),HmacSHA3_256("HmacSHA3-256", 32), // 
-    HmacSHA3_384("HmacSHA3-384", 48),HmacSHA3_512("HmacSHA3-512", 64), // 
+    HmacSHA3_224("HmacSHA3-224", 224), HmacSHA3_256("HmacSHA3-256", 256), // 
+    HmacSHA3_384("HmacSHA3-384", 384), HmacSHA3_512("HmacSHA3-512", 512), // 
     ;
 
     private final String algorithm;
     private final int byteSize;
 
-    HmacAlgorithms(int byteSize) {
+    HmacAlgorithms(int bitLen) {
         this.algorithm = this.name();
-        this.byteSize = byteSize;
+        this.byteSize = bitLen >>> 3;
     }
 
-    HmacAlgorithms(String algorithm, int byteSize) {
+    HmacAlgorithms(String algorithm, int bitLen) {
         this.algorithm = algorithm;
-        this.byteSize = byteSize;
+        this.byteSize = bitLen >>> 3;
     }
 
     public String algorithm() {

@@ -72,6 +72,8 @@ public final class RSAPublicKeys {
      * MIGJAoGBAKVpbo/Wum3G5ciustuKNGvPX/rgkdZw33QGqBR5UOKUoD5/h/IeQlS7ladX+oa+ciVCXyP854Zq+0RVQ7x87DfAohLmyXlIGOJ7KLJZkUWDYSG0WsPbnTOEmxQcRzqEV5g9pVHIjgPH6N/j6HHKRs5xDEd3pVpoRBZKEncbZ85xAgMBAAE=
      * <p>
      * 
+     * ASN1 Encode
+     * 
      * The RSA Public key PEM file is specific for RSA keys.<p>
      * convert public key to pkcs1 format<p>
      * @param publicKey
@@ -105,6 +107,8 @@ public final class RSAPublicKeys {
     // ----------------------------------PUBLIC KEY X509 PKCS8 FORMAT-----------------------------------
     /**
      * MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQClaW6P1rptxuXIrrLbijRrz1/64JHWcN90BqgUeVDilKA+f4fyHkJUu5WnV/qGvnIlQl8j/OeGavtEVUO8fOw3wKIS5sl5SBjieyiyWZFFg2EhtFrD250zhJsUHEc6hFeYPaVRyI4Dx+jf4+hxykbOcQxHd6VaaEQWShJ3G2fOcQIDAQAB
+     * 
+     * DER Encode
      * 
      * convert public key to x509 pkcs8 fromat
      * @param publicKey

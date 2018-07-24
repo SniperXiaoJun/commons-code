@@ -3,8 +3,6 @@ package code.ponfee.commons.web;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.regex.Pattern;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -101,24 +99,8 @@ public final class WebContext {
      * 获取客户端设备类型
      * @return
      */
-    private static final Pattern PATTERN_MOBILE = Pattern.compile("\\b(ip(hone|od)|android|opera m(ob|in)i|windows (phone|ce)|blackberry|s(ymbian|eries60|amsung)|p(laybook|alm|rofile/midp|laystation portable)|nokia|fennec|htc[-_]|mobile|up.browser|[1-4][0-9]{2}x[1-4][0-9]{2})\\b", Pattern.CASE_INSENSITIVE);
-    private static final Pattern PATTERN_IPAD = Pattern.compile("\\b(ipad|tablet|(Nexus 7)|up.browser|[1-4][0-9]{2}x[1-4][0-9]{2})\\b", Pattern.CASE_INSENSITIVE);
-    public static String getClientDevice() {
-        /*Device device = new LiteDeviceResolver().resolveDevice(getRequest());
-        String type = null;
-        if (device.isNormal()) type = "normal";
-        else if (device.isMobile()) type = "mobile";
-        else if (device.isTablet()) type = "tablet";
-        return type;*/
-
-        String userAgent = Objects.toString(getRequest().getHeader("User-Agent"), "");
-        if (PATTERN_MOBILE.matcher(userAgent).find()) {
-            return "mobile";
-        } else if (PATTERN_IPAD.matcher(userAgent).find()) {
-            return "tablet";
-        } else {
-            return "normal";
-        }
+    public static LiteDevice getClientDevice() {
+        return WebUtils.getClientDevice(getRequest());
     }
 
     // --------------------------setter/remover

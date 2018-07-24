@@ -62,7 +62,6 @@ public class GuavaCurrentLimiter implements CurrentLimiter {
             return true;
         }
 
-        threshold = threshold / 60;
         RateLimiter limiter = LIMITER_MAP.get(key);
         if (limiter == null) {
             synchronized (GuavaCurrentLimiter.class) {
@@ -85,7 +84,7 @@ public class GuavaCurrentLimiter implements CurrentLimiter {
         if (limiter == null) {
             return -1;
         }
-        return ((Double) limiter.getRate()).longValue() * 60;
+        return ((Double) limiter.getRate()).longValue();
     }
 
 }

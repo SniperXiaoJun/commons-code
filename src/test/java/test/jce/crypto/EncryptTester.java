@@ -29,7 +29,7 @@ public class EncryptTester {
         //coder = SymmetricCryptorBuilder.newBuilder(Algorithm.DES).key(nextBytes(8)).provider(bc).build();
         //coder = SymmetricCryptorBuilder.newBuilder(Algorithm.DES).key(nextBytes(8)).mode(Mode.CBC).padding(Padding.PKCS5Padding).ivParameter(nextBytes(8)).provider(bc).build();
         //coder = SymmetricCryptorBuilder.newBuilder(Algorithm.DESede).key(nextBytes(16)).provider(bc).build();
-        coder = SymmetricCryptorBuilder.newBuilder(Algorithm.AES).key(nextBytes(32)).mode(Mode.CBC).padding(Padding.X9_23Padding).ivParameter(nextBytes(16)).provider(bc).build();
+        coder = SymmetricCryptorBuilder.newBuilder(Algorithm.SM4).key(nextBytes(32)).mode(Mode.CBC).padding(Padding.X9_23Padding).ivParameter(nextBytes(16)).provider(bc).build();
         //coder = SymmetricCryptorBuilder.newBuilder(Algorithm.DESede).key(nextBytes(16)).mode(Mode.ECB).padding(Padding.PKCS5Padding).provider(bc).build();
         //coder = SymmetricCryptorBuilder.newBuilder(Algorithm.DESede).key(SecureRandoms.nextBytes(16)).mode(Mode.CBC).padding(Padding.PKCS5Padding).ivParameter(SecureRandoms.nextBytes(8)).provider(bc).build();
 

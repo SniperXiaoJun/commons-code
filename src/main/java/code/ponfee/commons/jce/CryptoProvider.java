@@ -257,8 +257,6 @@ public abstract class CryptoProvider {
     public static CryptoProvider sm2PublicKeyProvider(final ECParameters ecParameter, 
                                                       final byte[] publicKey) {
         return new CryptoProvider() {
-            private final byte[] ida = "ida".getBytes();
-
             @Override
             public byte[] encrypt(byte[] original) {
                 return SM2.encrypt(ecParameter, publicKey, original); // 公钥加密
@@ -271,7 +269,7 @@ public abstract class CryptoProvider {
 
             @Override
             public boolean verify(byte[] data, byte[] signed) {
-                return SM2.verify(ecParameter, data, ida, signed, publicKey);
+                return SM2.verify(ecParameter, data, signed, publicKey);
             }
         };
     }
@@ -285,8 +283,6 @@ public abstract class CryptoProvider {
                                                        final byte[] publicKey, 
                                                        final byte[] privateKey) {
         return new CryptoProvider() {
-            private final byte[] ida = "ida".getBytes();
-
             @Override
             public byte[] encrypt(byte[] original) {
                 return SM2.encrypt(ecParameter, publicKey, original); // 公钥加密
@@ -299,12 +295,12 @@ public abstract class CryptoProvider {
 
             @Override
             public byte[] sign(byte[] data) { // sign data by SM3WithSM2
-                return SM2.sign(ecParameter, data, ida, publicKey, privateKey);
+                return SM2.sign(ecParameter, data, publicKey, privateKey);
             }
 
             @Override
             public boolean verify(byte[] data, byte[] signed) { // verify the SM3WithSM2 signature
-                return SM2.verify(ecParameter, data, ida, signed, publicKey);
+                return SM2.verify(ecParameter, data, signed, publicKey);
             }
         };
     }

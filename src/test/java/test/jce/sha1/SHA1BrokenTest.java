@@ -12,6 +12,7 @@ import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.jce.digest.DigestUtils;
 import code.ponfee.commons.jce.digest.HmacUtils;
 import code.ponfee.commons.jce.implementation.digest.SHA1Digest;
+import code.ponfee.commons.jce.sm.SM3Digest;
 import code.ponfee.commons.util.MavenProjects;
 
 public class SHA1BrokenTest {
@@ -37,6 +38,8 @@ public class SHA1BrokenTest {
 
         System.out.println(Hex.encodeHexString(DigestUtils.digest(DigestAlgorithms.SHA3_512, Providers.BC, pdf2)));
         System.out.println(Hex.encodeHexString(DigestUtils.digest(DigestAlgorithms.KECCAK512, Providers.BC, pdf2)));
+        System.out.println(Hex.encodeHexString(DigestUtils.digest(DigestAlgorithms.SM3, Providers.BC, pdf2)));
+        System.out.println(Hex.encodeHexString(SM3Digest.getInstance().doFinal(pdf2)));
         System.out.println();
 
         System.out.println(Hex.encodeHexString(HmacUtils.crypt("1234".getBytes(), pdf2, HmacAlgorithms.HmacSHA3_256)));

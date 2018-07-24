@@ -34,12 +34,21 @@ public class SM2KeyExchanger implements Serializable {
     private final BigInteger privateKey;
     private final byte[] Z;
 
+    public SM2KeyExchanger(ECPoint publicKey, BigInteger privateKey) {
+        this(null, publicKey, privateKey, ECParameters.SM2_BEST);
+    }
+
     public SM2KeyExchanger(byte[] ida, ECPoint publicKey, BigInteger privateKey) {
         this(ida, publicKey, privateKey, ECParameters.SM2_BEST);
     }
 
+    public SM2KeyExchanger(ECPoint publicKey, BigInteger privateKey, 
+                           ECParameters ecParam) {
+        this(null, publicKey, privateKey, ecParam);
+    }
+
     public SM2KeyExchanger(byte[] ida, ECPoint publicKey, BigInteger privateKey, 
-                          ECParameters ecParam) {
+                           ECParameters ecParam) {
         this.ecParam = ecParam;
         this.w = TWO.pow((int) Math.ceil(ecParam.n.bitLength() * 1.0 / 2) - 1);
         this.publicKey = publicKey;
