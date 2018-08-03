@@ -573,7 +573,7 @@ public final class Bytes {
     /**
      * copy src to dest
      * 从尾部开始拷贝src到dest：
-     *   若src数据不足则在dest前面补0
+     *   若src数据不足则在dest前面补heading
      *   若src数据有多则舍去src前面的数据
      *
      * 若src不够，则dest前面以heading填充

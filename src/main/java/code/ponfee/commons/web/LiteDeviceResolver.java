@@ -38,6 +38,8 @@ import javax.servlet.http.HttpServletRequest;
  * "http://googlewebmastercentral.blogspot.com/2011/03/mo-better-to-also-detect-mobile-user.html"
  * >Google's recommendations</a>.
  * 
+ * @see org.springframework.mobile.device.LiteDeviceResolver
+ * 
  * @author Keith Donald
  * @author Roy Clarkson
  * @author Scott Rossillo

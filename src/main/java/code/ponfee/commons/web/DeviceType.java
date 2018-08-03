@@ -18,6 +18,9 @@ package code.ponfee.commons.web;
 
 /**
  * Enumeration for the type of device that has been resolved
+ * 
+ * @see org.springframework.mobile.device.DeviceType
+ * 
  * @author Roy Clarkson
  */
 public enum DeviceType {

@@ -102,15 +102,15 @@ public final class DigestUtils {
         return Hex.encodeHexString(sha384(data));
     }
 
-    public static byte[] sha512(byte[]... data) {
-        return digest(DigestAlgorithms.SHA512, data);
+    public static byte[] sha512(byte[] input, byte[]... data) {
+        return digest(DigestAlgorithms.SHA512, input, data);
     }
 
     public static String sha512Hex(byte[] data) {
         return Hex.encodeHexString(sha512(data));
     }
 
-    // ---------------------------------------RipeMD---------------------------------------
+    // ---------------------------------------RipeMD
     public static byte[] ripeMD128(byte[] data) {
         return digest(DigestAlgorithms.RipeMD128, Providers.BC, data);
     }
@@ -143,8 +143,29 @@ public final class DigestUtils {
         return Hex.encodeHexString(ripeMD320(data));
     }
 
-    public static byte[] digest(DigestAlgorithms alg, byte[]... data) {
-        return digest(alg, null, data);
+    // ---------------------------------------------digest
+    public static MessageDigest getMessageDigest(DigestAlgorithms alg, Provider provider) {
+        try {
+            return (provider == null)
+                   ? MessageDigest.getInstance(alg.algorithm())
+                   : MessageDigest.getInstance(alg.algorithm(), provider);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e); // cannot happened
+        }
+    }
+
+    public static byte[] digest(DigestAlgorithms alg, byte[] input) {
+        return digest(alg, null, input);
+    }
+
+    public static byte[] digest(DigestAlgorithms alg, Provider provider, byte[] input) {
+        MessageDigest digest = getMessageDigest(alg, provider);
+        digest.update(input);
+        return digest.digest();
+    }
+
+    public static byte[] digest(DigestAlgorithms alg, byte[] input, byte[]... data) {
+        return digest(alg, null, input, data);
     }
 
     /**
@@ -155,19 +176,13 @@ public final class DigestUtils {
      * @return
      */
     public static byte[] digest(DigestAlgorithms alg, Provider provider,
-                                byte[]... data) {
-        MessageDigest md;
-        try {
-            md = (provider == null)
-                 ? MessageDigest.getInstance(alg.algorithm())
-                 : MessageDigest.getInstance(alg.algorithm(), provider);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(e); // cannot happened
+                                byte[] input, byte[]... data) {
+        MessageDigest digest = getMessageDigest(alg, provider);
+        digest.update(input);
+        for (byte[] bytes : data) {
+            digest.update(bytes);
         }
-        for (byte[] input : data) {
-            md.update(input);
-        }
-        return md.digest();
+        return digest.digest();
     }
 
     public static byte[] digest(DigestAlgorithms alg, InputStream input) {
@@ -184,14 +199,7 @@ public final class DigestUtils {
     public static byte[] digest(DigestAlgorithms alg, Provider provider, 
                                 InputStream input) {
         byte[] buff = new byte[BUFF_SIZE];
-        MessageDigest digest;
-        try {
-            digest = (provider == null)
-                     ? MessageDigest.getInstance(alg.algorithm())
-                     : MessageDigest.getInstance(alg.algorithm(), provider);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(e); // cannot happened
-        }
+        MessageDigest digest = getMessageDigest(alg, provider);
 
         try (InputStream in = input) {
             for (int n; (n = in.read(buff, 0, BUFF_SIZE)) != Files.EOF;) {

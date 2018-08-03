@@ -121,7 +121,7 @@ public class SHA1Digest {
     private static final int WORK_SIZE = 80;
 
     /** 填充的边界 */
-    private static final int PADDING_BOUNDS = 448 / 8;
+    private static final int PADDING_BOUNDS = 448 / 8; // 56，long=8byte=64bit
 
     /** 五个链变量A,B,C,D,E */
     private static final int A = 0x67452301,
@@ -140,7 +140,7 @@ public class SHA1Digest {
     private final byte[] block = new byte[BLOCK_SIZE];
 
     private int a, b, c, d, e, blockOffset;
-    private long byteCount;
+    private long dataByteCount;
 
     private SHA1Digest() {
         this.reset();
@@ -155,7 +155,7 @@ public class SHA1Digest {
 
         System.arraycopy(d.block, 0, this.block, 0, BLOCK_SIZE);
         this.blockOffset = d.blockOffset;
-        this.byteCount = d.byteCount;
+        this.dataByteCount = d.dataByteCount;
     }
 
     public static SHA1Digest getInstance() {
@@ -171,7 +171,7 @@ public class SHA1Digest {
         if (this.blockOffset == BLOCK_SIZE) {
             this.digestBlock(this.block);
             this.blockOffset = 0;
-            this.byteCount += BLOCK_SIZE;
+            this.dataByteCount += BLOCK_SIZE;
         }
     }
 
@@ -192,7 +192,7 @@ public class SHA1Digest {
     }
 
     public byte[] doFinal() {
-        this.byteCount += this.blockOffset;
+        this.dataByteCount += this.blockOffset;
         this.block[this.blockOffset++] = -128; // 填充：先补1000 0000
         if (this.blockOffset > PADDING_BOUNDS) {
             Arrays.fill(this.block, this.blockOffset, BLOCK_SIZE, BYTE_ZERO); // 填充0
@@ -204,12 +204,14 @@ public class SHA1Digest {
 
         Arrays.fill(this.block, this.blockOffset, PADDING_BOUNDS, BYTE_ZERO);
 
-        long dataBitLen = this.byteCount << 3; // bit=byte*8
+        long dataLongBitLen = this.dataByteCount << 3; // bit=byte*8
 
-        // dataBitLen value to byte array and padding in block tail
-        for (int i = 0, j = (Long.BYTES - 1) << 3; i < Long.BYTES; i++, j -= 8) {
-            this.block[PADDING_BOUNDS + i] = (byte) (dataBitLen >>> j);
-        }
+        // dataLongBitLen value to byte array and padding in block tail
+        /*for (int i = 0, j = (Long.BYTES - 1) << 3; i < Long.BYTES; i++, j -= 8) {
+            this.block[PADDING_BOUNDS + i] = (byte) (dataLongBitLen >>> j);
+        }*/
+        byte[] dataLongBytes = Bytes.fromLong(dataLongBitLen); // 8 byte
+        System.arraycopy(dataLongBytes, 0, this.block, PADDING_BOUNDS, dataLongBytes.length);
 
         this.digestBlock(this.block);
 
@@ -233,7 +235,7 @@ public class SHA1Digest {
         this.e = E;
 
         this.blockOffset = 0;
-        this.byteCount = 0;
+        this.dataByteCount = 0;
     }
 
     public static int getDigestSize() {

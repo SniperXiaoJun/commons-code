@@ -18,6 +18,9 @@ package code.ponfee.commons.web;
 
 /**
  * Enumeration for the platform of device that has been resolved
+ * 
+ * @see org.springframework.mobile.device.DevicePlatform
+ * 
  * @author Onur Kagan Ozcan
  */
 public enum DevicePlatform {

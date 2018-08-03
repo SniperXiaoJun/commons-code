@@ -275,9 +275,10 @@ public final class WebUtils {
     /**
      * 允许跨站
      * 
-     * @param resp
+     * @param req  the HttpServletRequest
+     * @param resp the HttpServletResponse
      */
-    public static void cors(HttpServletRequest req, HttpServletResponse resp) {
+    public static void cross(HttpServletRequest req, HttpServletResponse resp) {
         String origin = req.getHeader("Origin");
         origin = StringUtils.isEmpty(origin) ? "*" : origin;
         resp.setHeader("Access-Control-Allow-Origin", origin);

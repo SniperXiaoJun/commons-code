@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
+import javax.servlet.annotation.WebInitParam;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,13 +34,13 @@ public final class WebContext {
 
     // -----------------------getter
     public static HttpServletRequest getRequest() {
-        // <listener><listener-class>org.springframework.web.context.request.RequestContextListener</listener-class></listener>
+        //<listener><listener-class>org.springframework.web.context.request.RequestContextListener</listener-class></listener>
         //return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         return REQUEST.get();
     }
 
     public static HttpServletResponse getResponse() {
-        // return ((ServletWebRequest)RequestContextHolder.getRequestAttributes()).getResponse();
+        //return ((ServletWebRequest)RequestContextHolder.getRequestAttributes()).getResponse();
         return RESPONSE.get();
     }
 
@@ -133,17 +134,24 @@ public final class WebContext {
             DispatcherType.ERROR
         }, 
         urlPatterns = { "/*" }, 
+        initParams = { @WebInitParam(name = "cross", value = "true") },
         asyncSupported = true // 支持异步Servlet
     )
     public static class WebContextFilter implements Filter {
+        private boolean cross;
 
-        public @Override void init(FilterConfig cfg) {}
+        public @Override void init(FilterConfig cfg) {
+            cross = Boolean.parseBoolean(cfg.getInitParameter("cross"));
+        }
 
         public @Override void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) 
             throws IOException, ServletException { 
             try {
                 WebContext.setRequest((HttpServletRequest) req);
                 WebContext.setResponse((HttpServletResponse) resp);
+                if (cross) {
+                    WebUtils.cross((HttpServletRequest) req, (HttpServletResponse) resp);
+                }
                 chain.doFilter(req, resp);
             } finally {
                 WebContext.removeRequest();
