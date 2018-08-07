@@ -44,7 +44,7 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 
 import code.ponfee.commons.export.Tmeta.Type;
 import code.ponfee.commons.math.Numbers;
-import code.ponfee.commons.tree.NodeFlat;
+import code.ponfee.commons.tree.FlatNode;
 import code.ponfee.commons.util.Colors;
 import code.ponfee.commons.util.Dates;
 import code.ponfee.commons.util.ImageUtils;
@@ -151,7 +151,7 @@ public class ExcelExporter extends AbstractExporter {
     @Override
     public void build(Table table) {
         // 1、校验表头是否为空
-        List<NodeFlat<Integer>> flats = table.getThead();
+        List<FlatNode<Integer>> flats = table.getThead();
         if (CollectionUtils.isEmpty(flats)) {
             throw new IllegalArgumentException("thead can't be null");
         }
@@ -195,7 +195,7 @@ public class ExcelExporter extends AbstractExporter {
         }
 
         super.nonEmpty();
-        List<NodeFlat<Integer>> thead = flats.subList(1, flats.size());
+        List<FlatNode<Integer>> thead = flats.subList(1, flats.size());
         List<XSSFCellStyle> styles = createStyles(thead);
         SXSSFRow row;
 
@@ -380,10 +380,10 @@ public class ExcelExporter extends AbstractExporter {
 
     // 复合表头
     private void buildComplexThead(Table table, SXSSFSheet sheet, CursorRow cursorRow) {
-        List<NodeFlat<Integer>> flats = table.getThead();
-        NodeFlat<Integer> root = flats.get(0);
+        List<FlatNode<Integer>> flats = table.getThead();
+        FlatNode<Integer> root = flats.get(0);
         int totalLeafCount = root.getChildLeafCount();
-        List<NodeFlat<Integer>> thead = flats.subList(1, flats.size());
+        List<FlatNode<Integer>> thead = flats.subList(1, flats.size());
 
         // create caption
         if (StringUtils.isNotBlank(table.getCaption())) {
@@ -397,7 +397,7 @@ public class ExcelExporter extends AbstractExporter {
         int beginCol, endRow, endCol, lastLevel = 1;
         int cellLevel, treeMaxDepth = root.getTreeMaxDepth() - 1; 
         for (int n = thead.size(), i = 0; i < n; i++) {
-            NodeFlat<?> flat = thead.get(i);
+            FlatNode<?> flat = thead.get(i);
             cellLevel = flat.getLevel() - 1;
             if (cellLevel > lastLevel) {
                 lastLevel = cellLevel;
@@ -447,7 +447,7 @@ public class ExcelExporter extends AbstractExporter {
         cursorRow.increment();
     }
 
-    private Tmeta tmeta(List<NodeFlat<Integer>> thead, int index) {
+    private Tmeta tmeta(List<FlatNode<Integer>> thead, int index) {
         return ((Thead) thead.get(index).getAttach()).getTmeta();
     }
 
@@ -574,9 +574,9 @@ public class ExcelExporter extends AbstractExporter {
      * @param thead
      * @return
      */
-    private List<XSSFCellStyle> createStyles(List<NodeFlat<Integer>> thead) {
+    private List<XSSFCellStyle> createStyles(List<FlatNode<Integer>> thead) {
         List<XSSFCellStyle> styles = new ArrayList<>();
-        for (NodeFlat<?> flat : thead) {
+        for (FlatNode<?> flat : thead) {
             if (!flat.isLeaf()) {
                 continue; // 非叶子节点
             }

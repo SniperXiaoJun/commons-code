@@ -23,8 +23,8 @@ public class DataExtractorBuilder {
     private final InputStream input;
     private final String fileName;
     private final String contentType;
-    private final String[] headers;
 
+    private String[] headers;
     private long maxFileSize = 0;
 
     private int startRow = 0; // excel start row
@@ -33,21 +33,20 @@ public class DataExtractorBuilder {
     private CSVFormat csvFormat; // csv format
 
     private DataExtractorBuilder(InputStream input, String fileName, 
-                                 String contentType,String[] headers) {
+                                 String contentType) {
         this.input = input;
         this.fileName = fileName;
         this.contentType = contentType;
-        this.headers = headers;
     }
 
     public static DataExtractorBuilder newBuilder(InputStream input, String fileName, 
                                                   String contentType) {
-        return new DataExtractorBuilder(input, fileName, contentType, null);
+        return new DataExtractorBuilder(input, fileName, contentType);
     }
 
-    public static DataExtractorBuilder newBuilder(InputStream input, String fileName,
-                                                  String contentType,String[] headers) {
-        return new DataExtractorBuilder(input, fileName, contentType, headers);
+    public DataExtractorBuilder headers(String[] headers) {
+        this.headers = headers;
+        return this;
     }
 
     public DataExtractorBuilder maxFileSize(long maxFileSize) {

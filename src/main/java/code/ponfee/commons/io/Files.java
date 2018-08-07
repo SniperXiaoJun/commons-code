@@ -45,7 +45,7 @@ public final class Files {
     // ------------------------------------------------------------charset encoding
     public static final Charset DEFAULT_CHARSET = Charset.defaultCharset(); // default charset
 
-    public static final String DEFAULT_ENCODING = DEFAULT_CHARSET.name(); // default encoding
+    public static final String DEFAULT_CHARSET_NAME = DEFAULT_CHARSET.name(); // default charset name
 
     public static final String UTF_8 = "UTF-8"; // UTF-8 encoding
 
@@ -146,7 +146,7 @@ public final class Files {
     }
 
     public static String toString(File file) {
-        return toString(file, DEFAULT_ENCODING);
+        return toString(file, DEFAULT_CHARSET_NAME);
     }
 
     public static String toString(File file, String charset) {

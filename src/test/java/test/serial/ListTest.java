@@ -1,7 +1,6 @@
 package test.serial;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -27,13 +26,13 @@ public class ListTest {
         list2.add(5);
 
         System.out.println("====求交集===");
-        System.out.println(Arrays.toString(Collects.intersect(list1, list2)));
+        System.out.println(Collects.intersect(list1, list2));
 
         System.out.println("====求差集===");
         System.out.println(Collects.different(list1, list2));
 
         System.out.println("====求并集===");
-        System.out.println(Arrays.toString(Collects.union(list1, list2)));
+        System.out.println(Collects.union(list1, list2));
 
         System.out.println();
         System.out.println(list1);

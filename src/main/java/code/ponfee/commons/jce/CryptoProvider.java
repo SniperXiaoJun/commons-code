@@ -9,6 +9,7 @@
 package code.ponfee.commons.jce;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
@@ -69,7 +70,7 @@ public abstract class CryptoProvider {
      * @return
      */
     public final String encrypt(String plaintext) {
-        return encrypt(plaintext, Files.DEFAULT_CHARSET);
+        return encrypt(plaintext, StandardCharsets.UTF_8);
     }
 
     /**
@@ -94,7 +95,7 @@ public abstract class CryptoProvider {
      * @return
      */
     public final String decrypt(String ciphertext) {
-        return decrypt(ciphertext, Files.DEFAULT_CHARSET);
+        return decrypt(ciphertext, StandardCharsets.UTF_8);
     }
 
     /**
@@ -120,7 +121,7 @@ public abstract class CryptoProvider {
      * @return
      */
     public final String sign(String data) {
-        return sign(data, Files.DEFAULT_ENCODING);
+        return sign(data, Files.UTF_8);
     }
 
     /**
@@ -145,7 +146,7 @@ public abstract class CryptoProvider {
      * @return
      */
     public final boolean verify(String data, String signed) {
-        return verify(data, Files.DEFAULT_ENCODING, signed);
+        return verify(data, Files.UTF_8, signed);
     }
 
     /**

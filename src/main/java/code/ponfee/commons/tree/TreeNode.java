@@ -31,14 +31,14 @@ import code.ponfee.commons.reflect.Fields;
  * 
  * @author Ponfee
  */
-public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
+public final class TreeNode<T extends java.io.Serializable & Comparable<T>>
     extends AbstractNode<T> {
 
     private static final long serialVersionUID = -9081626363752680404L;
     public static final String DEFAULT_ROOT_NAME = "__ROOT__";
 
     // 子节点列表（空列表则表示为叶子节点）
-    private final List<NodeTree<T>> children = Lists.newArrayList();
+    private final List<TreeNode<T>> children = Lists.newArrayList();
 
     /**
      * 构造根节点
@@ -48,7 +48,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * @param orders
      * @param enabled
      */
-    private NodeTree(T nid, T pid, int orders, boolean enabled) {
+    private TreeNode(T nid, T pid, int orders, boolean enabled) {
         super(nid, pid, orders, enabled, null);
         this.available = enabled;
     }
@@ -58,25 +58,25 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * 
      * @param node  as a tree root node
      */
-    private NodeTree(AbstractNode<T> node) {
+    private TreeNode(AbstractNode<T> node) {
         super(node.getNid(), node.getPid(), 
               node.getOrders(), node.isEnabled(), node);
         super.available = node.isAvailable();
     }
 
-    public static <T extends java.io.Serializable & Comparable<T>> NodeTree<T> 
+    public static <T extends java.io.Serializable & Comparable<T>> TreeNode<T> 
         createRoot(T nid) {
-        return new NodeTree<>(nid, null, 0, true);
+        return new TreeNode<>(nid, null, 0, true);
     }
 
-    public static <T extends java.io.Serializable & Comparable<T>> NodeTree<T> 
+    public static <T extends java.io.Serializable & Comparable<T>> TreeNode<T> 
         createRoot(T nid, T pid, int orders) {
-        return new NodeTree<>(nid, pid, orders, true);
+        return new TreeNode<>(nid, pid, orders, true);
     }
 
-    public static <T extends java.io.Serializable & Comparable<T>> NodeTree<T> 
+    public static <T extends java.io.Serializable & Comparable<T>> TreeNode<T> 
         createRoot(T nid, T pid, int orders, boolean enabled) {
-        return new NodeTree<>(nid, pid, orders, enabled);
+        return new TreeNode<>(nid, pid, orders, enabled);
     }
 
     /**
@@ -85,12 +85,12 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * @param node   the node for root
      * @return
      */
-    public static <T extends java.io.Serializable & Comparable<T>> NodeTree<T> 
+    public static <T extends java.io.Serializable & Comparable<T>> TreeNode<T> 
         createRoot(AbstractNode<T> node) {
-        return new NodeTree<>(node);
+        return new TreeNode<>(node);
     }
 
-    public <E extends AbstractNode<T>> NodeTree<T> mount(List<E> nodes) {
+    public <E extends AbstractNode<T>> TreeNode<T> mount(List<E> nodes) {
         mount(nodes, false);
         return this;
     }
@@ -102,7 +102,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * @param ignoreOrphan {@code true}忽略孤儿节点
      */
     @SuppressWarnings("unchecked")
-    public <E extends AbstractNode<T>> NodeTree<T> mount(@Nonnull List<E> list, 
+    public <E extends AbstractNode<T>> TreeNode<T> mount(@Nonnull List<E> list, 
                                                          boolean ignoreOrphan) {
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(list));
 
@@ -144,8 +144,8 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * 
      * @return
      */
-    public List<NodeFlat<T>> flatInherit() {
-        List<NodeFlat<T>> collect = Lists.newArrayList();
+    public List<FlatNode<T>> flatInherit() {
+        List<FlatNode<T>> collect = Lists.newArrayList();
         inherit(collect);
         return collect;
     }
@@ -155,8 +155,8 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
      * 
      * @return
      */
-    public List<NodeFlat<T>> flatHierarchy() {
-        List<NodeFlat<T>> collect = Lists.newArrayList(new NodeFlat<>(this));
+    public List<FlatNode<T>> flatHierarchy() {
+        List<FlatNode<T>> collect = Lists.newArrayList(new FlatNode<>(this));
         hierarchy(collect);
         return collect;
     }
@@ -167,8 +167,8 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
 
         // nodes list
         for (AbstractNode<T> node : nodes) {
-            if (node instanceof NodeTree) {
-                list.addAll(((NodeTree<T>) node).flatInherit());
+            if (node instanceof TreeNode) {
+                list.addAll(((TreeNode<T>) node).flatInherit());
             } else {
                 list.add(node); // node.clone()
             }
@@ -176,7 +176,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
 
         // the root node children
         if (CollectionUtils.isNotEmpty(this.children)) {
-            List<NodeFlat<T>> flat = this.flatInherit();
+            List<FlatNode<T>> flat = this.flatInherit();
             list.addAll(flat.subList(1, flat.size()));
             this.children.clear();
         }
@@ -208,7 +208,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
                     throw new RuntimeException("兄弟节点次序重复：" + node.getNid());
                 }
 
-                NodeTree<T> child = new NodeTree<>(node);
+                TreeNode<T> child = new TreeNode<>(node);
                 child.setAvailable(this.available && child.isEnabled());
 
                 // 子节点路径=节点路径+自身节点
@@ -222,10 +222,10 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
 
         if (CollectionUtils.isNotEmpty(this.children)) {
             // sort the children list
-            this.children.sort(Comparator.comparing(NodeTree::getOrders));
+            this.children.sort(Comparator.comparing(TreeNode::getOrders));
 
             // recursion to mount child tree
-            for (NodeTree<T> nt : this.children) {
+            for (TreeNode<T> nt : this.children) {
                 nt.mount0(nodes, ignoreOrphan, mountPidIfNull);
             }
         }
@@ -233,21 +233,21 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
         this.setPath(Collects.add(this.path, this.nid)); // 节点路径追加自身的ID
     }
 
-    private void inherit(List<NodeFlat<T>> collect) {
-        collect.add(new NodeFlat<>(this));
+    private void inherit(List<FlatNode<T>> collect) {
+        collect.add(new FlatNode<>(this));
         if (CollectionUtils.isNotEmpty(this.children)) {
-            for (NodeTree<T> nt : this.children) {
+            for (TreeNode<T> nt : this.children) {
                 nt.inherit(collect);
             }
         }
     }
 
-    private void hierarchy(List<NodeFlat<T>> collect) {
+    private void hierarchy(List<FlatNode<T>> collect) {
         if (CollectionUtils.isNotEmpty(this.children)) {
-            for (NodeTree<T> nt : this.children) {
-                collect.add(new NodeFlat<>(nt));
+            for (TreeNode<T> nt : this.children) {
+                collect.add(new FlatNode<>(nt));
             }
-            for (NodeTree<T> nt : this.children) {
+            for (TreeNode<T> nt : this.children) {
                 nt.hierarchy(collect);
             }
         }
@@ -257,7 +257,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
         if (CollectionUtils.isNotEmpty(this.children)) { // 非叶子节点
             int maxChildTreeDepth = 0, sumTreeNodeCount = 0, 
                 sumChildLeafCount = 0;
-            NodeTree<T> child;
+            TreeNode<T> child;
             for (int i = 0; i < this.children.size(); i++) {
                 child = this.children.get(i);
 
@@ -268,7 +268,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
                 } else {
                     // 若不是最左子节点，则其左叶子节点个数=
                     // 相邻左兄弟节点的左叶子节点个数+该兄弟节点的子节点个数
-                    NodeTree<T> prevSibling = this.children.get(i - 1);
+                    TreeNode<T> prevSibling = this.children.get(i - 1);
                     child.leftLeafCount = prevSibling.leftLeafCount 
                                         + prevSibling.childLeafCount;
                 }
@@ -293,7 +293,7 @@ public final class NodeTree<T extends java.io.Serializable & Comparable<T>>
     }
 
     // -----------------------------------------------getter/setter
-    public List<NodeTree<T>> getChildren() {
+    public List<TreeNode<T>> getChildren() {
         return children;
     }
 

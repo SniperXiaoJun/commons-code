@@ -15,14 +15,14 @@ import org.apache.commons.collections4.CollectionUtils;
  * 
  * @author Ponfee
  */
-public final class NodeFlat<T extends java.io.Serializable & Comparable<T>>
+public final class FlatNode<T extends java.io.Serializable & Comparable<T>>
     extends AbstractNode<T> {
 
     private static final long serialVersionUID = 5191371614061952661L;
 
     private final boolean leaf; // 是否叶子节点
 
-    public NodeFlat(NodeTree<T> nt) {
+    public FlatNode(TreeNode<T> nt) {
         super(nt.getNid(), nt.getPid(), nt.getOrders(), 
               nt.isEnabled(), nt.getAttach());
 

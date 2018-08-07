@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.formula.functions.T;
 
 import com.google.common.collect.ImmutableList;
@@ -223,16 +224,16 @@ public final class Collects {
 
     // -----------------------------the collection of intersect, union and different operations
     /**
-     * 求两list的交集
+     * 求两集合的交集
      * intersect([1,2,3], [2,3,4]) = [2,3]
-     * @param list1
-     * @param list2
-     * @return
+     * 
+     * @param coll1 the collection 1
+     * @param coll2 the collection 2
+     * @return a list of the two collection intersect 
      */
-    @SuppressWarnings({ "unchecked", "hiding" })
-    public static <T> T[] intersect(List<T> list1, List<T> list2) {
-        //list1.retainAll(list2);
-        return (T[]) list1.stream().filter(list2::contains).toArray();
+    @SuppressWarnings("hiding")
+    public static <T> List<T> intersect(Collection<T> coll1, Collection<T> coll2) {
+        return coll1.stream().filter(coll2::contains).collect(Collectors.toList());
     }
 
     /**
@@ -242,21 +243,24 @@ public final class Collects {
      * @return
      */
     @SuppressWarnings({ "unchecked", "hiding" })
-    public static <T> T[] intersect(T[] array, List<T> list) {
-        return (T[]) Stream.of(array).filter(list::contains).toArray();
+    public static <T> T[] intersect(T[] array1, T[] array2) {
+        return (T[]) Stream.of(array1).filter(
+            t -> ArrayUtils.contains(array2, t)
+        ).toArray();
     }
 
     /**
      * two list union result
+     * 
      * @param list1
      * @param list2
      * @return
      */
-    @SuppressWarnings({ "unchecked", "hiding" })
-    public static <T> T[] union(List<T> list1, List<T> list2) {
-        list1 = Lists.newArrayList(list1);
-        list1.addAll(list2);
-        return (T[]) list1.stream().distinct().toArray();
+    @SuppressWarnings({ "hiding" })
+    public static <T> List<T> union(List<T> list1, List<T> list2) {
+        Set<T> sets = Sets.newHashSet(list1);
+        sets.addAll(list2);
+        return Lists.newArrayList(sets);
     }
 
     /**

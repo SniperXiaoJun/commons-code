@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.export.Tmeta.Type;
 import code.ponfee.commons.math.Numbers;
-import code.ponfee.commons.tree.NodeFlat;
+import code.ponfee.commons.tree.FlatNode;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
@@ -66,7 +66,7 @@ public class HtmlExporter extends AbstractExporter {
      */
     @Override
     public void build(Table table) {
-        List<NodeFlat<Integer>> flats = table.getThead();
+        List<FlatNode<Integer>> flats = table.getThead();
         if (flats == null || flats.isEmpty()) {
             throw new IllegalArgumentException("thead can't be null");
         }
@@ -94,7 +94,7 @@ public class HtmlExporter extends AbstractExporter {
 
             super.nonEmpty();
 
-            List<NodeFlat<Integer>> thead = flats.subList(1, flats.size());
+            List<FlatNode<Integer>> thead = flats.subList(1, flats.size());
 
             // tbody-----------
             List<Object[]> tbody = table.getTobdy();
@@ -208,10 +208,10 @@ public class HtmlExporter extends AbstractExporter {
     }*/
 
     // 复合表头
-    private void buildComplexThead(List<NodeFlat<Integer>> flats) {
+    private void buildComplexThead(List<FlatNode<Integer>> flats) {
         html.append("<thead><tr>");
         int lastLevel = 1, treeMaxDepth = flats.get(0).getTreeMaxDepth() - 1, cellLevel;
-        for (NodeFlat<Integer> flat : flats.subList(1, flats.size())) {
+        for (FlatNode<Integer> flat : flats.subList(1, flats.size())) {
             cellLevel = flat.getLevel() - 1;
             if (lastLevel < cellLevel) {
                 html.append("</tr><tr>");
@@ -233,7 +233,7 @@ public class HtmlExporter extends AbstractExporter {
         html.append("</tr></thead>");
     }
 
-    private Tmeta tmeta(List<NodeFlat<Integer>> thead, int index) {
+    private Tmeta tmeta(List<FlatNode<Integer>> thead, int index) {
         return ((Thead) thead.get(index).getAttach()).getTmeta();
     }
 

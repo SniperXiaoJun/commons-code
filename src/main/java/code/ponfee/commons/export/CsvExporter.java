@@ -3,7 +3,7 @@ package code.ponfee.commons.export;
 import java.util.List;
 
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.tree.NodeFlat;
+import code.ponfee.commons.tree.FlatNode;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
@@ -30,7 +30,7 @@ public class CsvExporter extends AbstractExporter {
             throw new UnsupportedOperationException("only support signle table");
         }
 
-        List<NodeFlat<Integer>> flats = table.getThead();
+        List<FlatNode<Integer>> flats = table.getThead();
         if (flats == null || flats.isEmpty()) {
             throw new IllegalArgumentException("thead can't be null");
         }
@@ -65,7 +65,7 @@ public class CsvExporter extends AbstractExporter {
         // tfoot---------
         if (table.getTfoot() != null && table.getTfoot().length > 0) {
 
-            NodeFlat<Integer> root = flats.get(0);
+            FlatNode<Integer> root = flats.get(0);
             if (table.getTfoot().length > root.getChildLeafCount()) {
                 throw new IllegalStateException("tfoot data length cannot more than total leaf count.");
             }
@@ -99,8 +99,8 @@ public class CsvExporter extends AbstractExporter {
         csv = null;
     }
 
-    private void buildComplexThead(List<NodeFlat<Integer>> flats) {
-        for (NodeFlat<Integer> cell : flats.subList(1, flats.size())) {
+    private void buildComplexThead(List<FlatNode<Integer>> flats) {
+        for (FlatNode<Integer> cell : flats.subList(1, flats.size())) {
             if (cell.isLeaf()) {
                 csv.append(((Thead) cell.getAttach()).getName()).append(csvSeparator);
             }

@@ -298,9 +298,10 @@ public class MailSender {
                     }
                     if (--retries > 0) {
                         // 发送失败重试
-                        envlop.setTo(Collects.intersect(envlop.getTo(), unsents));
-                        envlop.setBcc(Collects.intersect(envlop.getBcc(), unsents));
-                        envlop.setCc(Collects.intersect(envlop.getCc(), unsents));
+                        String[] unsents0 = unsents.toArray(new String[unsents.size()]);
+                        envlop.setTo(Collects.intersect(envlop.getTo(), unsents0));
+                        envlop.setBcc(Collects.intersect(envlop.getBcc(), unsents0));
+                        envlop.setCc(Collects.intersect(envlop.getCc(), unsents0));
                         return send0(logid, envlop, retries);
                     } else {
                         logger.error("unsend email address [{}] - {}", logid, unsents.toString());
