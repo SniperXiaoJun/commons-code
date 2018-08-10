@@ -6,7 +6,8 @@ import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.util.ObjectUtils;
 
 /**
- * 请求限制器
+ * The request limiter based redis
+ * 
  * @author Ponfee
  */
 public class RedisRequestLimiter extends RequestLimiter{

@@ -1,51 +1,62 @@
 package code.ponfee.commons.limit;
 
 import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.servlet.http.HttpSession;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * The request limiter based http session
+ * The request limiter based ConcurrentHashMap
  * 
  * @author Ponfee
  */
 @SuppressWarnings("unchecked")
-public class HttpSessionRequestLimiter extends RequestLimiter {
+public final class ConcurrentMapRequestLimiter extends RequestLimiter {
 
-    private final HttpSession session;
-
-    private HttpSessionRequestLimiter(HttpSession session) {
-        this.session = session;
+    private static final ConcurrentHashMap<String, CacheValue<?>> CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentMapRequestLimiter INSTANCE = new ConcurrentMapRequestLimiter();
+    private static final ScheduledExecutorService EXECUTOR = new ScheduledThreadPoolExecutor(1, new DiscardPolicy());
+    private static final Lock LOCK = new ReentrantLock(); // 定时清理加锁
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(EXECUTOR::shutdown));
+        EXECUTOR.scheduleAtFixedRate(() -> {
+            if (!LOCK.tryLock()) {
+                return;
+            }
+            try {
+                long now = System.currentTimeMillis();
+                CACHE.entrySet().removeIf(x -> x.getValue().isExpire(now));
+            } finally {
+                LOCK.unlock();
+            }
+        }, 60, 120, TimeUnit.SECONDS);
     }
 
-    public static HttpSessionRequestLimiter create(HttpSession session) {
-        return new HttpSessionRequestLimiter(session);
+    private ConcurrentMapRequestLimiter() {}
+
+    public static ConcurrentMapRequestLimiter singleton() {
+        return INSTANCE;
     }
 
     // ---------------------------------------------------------------------request limit
-    /**
-     * Client user (web browser) can clear session,
-     * so this limit can't really effect
-     * @deprecated
-     */
-    @Deprecated
-    @Override public HttpSessionRequestLimiter limitFrequency(String key, int period, String message)
+    @Override public ConcurrentMapRequestLimiter limitFrequency(String key, int period, String message)
         throws RequestLimitException {
         checkLimit(CHECK_FREQ_KEY + key, period, 1, message);
         return this;
-        //throw new UnsupportedOperationException();
     }
 
-    @Deprecated
-    @Override public HttpSessionRequestLimiter limitThreshold(String key, int period, 
+    @Override public ConcurrentMapRequestLimiter limitThreshold(String key, int period, 
                                                               int limit, String message) 
         throws RequestLimitException {
         checkLimit(CHECK_THRE_KEY + key, period, limit, message);
         return this;
-        //throw new UnsupportedOperationException();
     }
 
     // ---------------------------------------------------------------------cache sms code
@@ -54,7 +65,7 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
         remove(CHECK_CODE_KEY + key);
     }
 
-    @Override public HttpSessionRequestLimiter checkCode(String key, String code, int limit)
+    @Override public ConcurrentMapRequestLimiter checkCode(String key, String code, int limit)
         throws RequestLimitException {
         if (StringUtils.isEmpty(code)) {
             throw new RequestLimitException("验证码不能为空！");
@@ -105,23 +116,15 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
     }
 
     // ---------------------------------------------------------------------action
-    /**
-     * Client user (web browser) can clear session,
-     * so this limit can't really effect
-     * @deprecated
-     */
-    @Deprecated
     @Override public void traceAction(String key, int period) {
         incrementAndGet(INCR_ACTION_KEY + key, expire(period));
     }
 
-    @Deprecated
     @Override public long countAction(String key) {
         CacheValue<Void> cache = get(COUNT_ACTION_KEY + key);
         return cache == null ? 0 : cache.count();
     }
 
-    @Deprecated
     @Override public void resetAction(String key) {
         remove(COUNT_ACTION_KEY + key);
     }
@@ -136,11 +139,11 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
     }
 
     private CacheValue<?> incrementAndGet(String key, long expireTimeMillis) {
-        synchronized (session) {
-            CacheValue<?> cache = (CacheValue<?>) session.getAttribute(key);
+        synchronized (CACHE) {
+            CacheValue<?> cache = (CacheValue<?>) CACHE.get(key);
             if (cache == null || cache.isExpire()) { // 失效则重置
                 cache = new CacheValue<>(null, expireTimeMillis);
-                session.setAttribute(key, cache);
+                CACHE.put(key, cache);
             } else {
                 cache.increment();
             }
@@ -150,30 +153,25 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
 
     private void remove(String... keys) {
         for (String key : keys) {
-            session.removeAttribute(key);
+            CACHE.remove(key);
         }
     }
 
     private <T> CacheValue<T> getAndRemove(String key) {
-        CacheValue<T> cache = (CacheValue<T>) session.getAttribute(key);
-        if (cache == null) {
-            return null;
-        } else {
-            session.removeAttribute(key);
-            return cache.isExpire() ? null : cache;
-        }
+        CacheValue<T> cache = (CacheValue<T>) CACHE.remove(key);
+        return cache == null || cache.isExpire() ? null : cache;
     }
 
     private <T> void add(String key, T value, int ttl) {
-        session.setAttribute(key, new CacheValue<>(value, expire(ttl)));
+        CACHE.put(key, new CacheValue<>(value, expire(ttl)));
     }
 
     private <T> CacheValue<T> get(String key) {
-        CacheValue<T> cache = (CacheValue<T>) session.getAttribute(key);
+        CacheValue<T> cache = (CacheValue<T>) CACHE.get(key);
         if (cache == null) {
             return null;
         } else if (cache.isExpire()) {
-            session.removeAttribute(key);
+            CACHE.remove(key);
             return null;
         } else {
             return cache;
@@ -210,6 +208,10 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
 
         private boolean isExpire() {
             return expireTimeMillis < System.currentTimeMillis();
+        }
+
+        private boolean isExpire(long timeMillis) {
+            return expireTimeMillis < timeMillis;
         }
     }
 }

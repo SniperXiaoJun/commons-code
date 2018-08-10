@@ -465,7 +465,7 @@ public final class Files {
     }
 
     // ------------------------file type---------------------------------
-    private static final int SUB_PREFIX = 16;
+    private static final int SUB_PREFIX = 32;
     public static final Map<String, String> FILE_TYPE_MAGIC = ImmutableMap.<String, String> builder()
         .put("jpg", "FFD8FF") // JPEG (jpg)
         .put("png", "89504E47") // PNG (png)

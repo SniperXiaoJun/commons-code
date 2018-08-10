@@ -110,16 +110,15 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
                     return String.valueOf(cell.getDateCellValue());
                 } else {
                     cell.setCellType(CellType.STRING);
-                    return cell.getStringCellValue().trim();
+                    return cell.getStringCellValue();
                 }
             case STRING: // 字符串
                 return Objects.toString(cell.getStringCellValue(), "");
             case BOOLEAN: // Boolean
                 return Boolean.toString(cell.getBooleanCellValue());
             case FORMULA: // 公式
-                //return Objects.toString(cell.getCellFormula(), "");
                 cell.setCellType(CellType.STRING);
-                return cell.getStringCellValue().trim();
+                return cell.getStringCellValue();
             case BLANK: // 空值
             case ERROR: // 故障
             default:

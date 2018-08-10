@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import code.ponfee.commons.jce.digest.HmacUtils;
 
 /**
- * 请求限制器
+ * The request limiter abstract class
  * 
  * @author Ponfee
  */

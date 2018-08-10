@@ -266,7 +266,7 @@ public abstract class AbstractRSACryptor extends Cryptor {
      * BT：公钥为0x02；私钥为0x00或0x01
      * PS：BT为0则PS全部为0x00；BT为0x01则全部为0xFF；BT为0x02则为随机数，但不能为0
      * 
-     * 对于BT为00的，数据D就不能以00字节开头，因为这时候你PS填充的也是00，
+     * 对于BT为00的，数据D就不能以00字节开头，因为这时候PS填充的也是00，
      * 会分不清哪些是填充数据哪些是明文数据<p>
      * 
      * 如果你使用私钥加密，建议你BT使用01，保证了安全性
