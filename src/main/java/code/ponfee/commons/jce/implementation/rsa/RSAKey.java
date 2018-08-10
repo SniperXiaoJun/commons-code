@@ -3,7 +3,6 @@ package code.ponfee.commons.jce.implementation.rsa;
 import code.ponfee.commons.jce.implementation.Key;
 import code.ponfee.commons.util.SecureRandoms;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
 import org.apache.commons.io.IOUtils;
 import sun.security.util.DerInputStream;
 import sun.security.util.DerOutputStream;
@@ -264,13 +263,4 @@ public class RSAKey implements Key {
         private BigInteger phi;
     }
 
-    public static void main(String[] args) {
-        Stopwatch watch = Stopwatch.createStarted();
-        generateKey(4096, RSA_F4);
-        System.out.println("generateKey1: " + watch.stop());
-
-        watch.reset().start();
-        generateKey2(4096, RSA_F4);
-        System.out.println("generateKey2: " + watch.stop());
-    }
 }

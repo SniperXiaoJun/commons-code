@@ -35,7 +35,7 @@ public final class TreeNode<T extends java.io.Serializable & Comparable<T>>
     extends AbstractNode<T> {
 
     private static final long serialVersionUID = -9081626363752680404L;
-    public static final String DEFAULT_ROOT_NAME = "__ROOT__";
+    public static final String DEFAULT_ROOT_ID = "__ROOT__";
 
     // 子节点列表（空列表则表示为叶子节点）
     private final List<TreeNode<T>> children = Lists.newArrayList();

@@ -1,7 +1,5 @@
 package code.ponfee.commons.jce.implementation.digest;
 
-import org.apache.commons.codec.binary.Hex;
-
 /**
  * The RipeMD160 digest implementation
  * 
@@ -281,18 +279,4 @@ public class RipeMD160Digest {
         return DIGEST_SIZE;
     }
 
-    public static void main(String[] args) {
-        byte[] data = "1234567890".getBytes();
-        RipeMD160Digest md = RipeMD160Digest.getInstance();
-        String actual = Hex.encodeHexString(md.doFinal(data));
-        if(!"9d752daa3fb4df29837088e1e5a1acf74932e074".equals(actual)) {
-            System.err.println("fail");
-        } else {
-            System.out.println("success");
-        }
-        System.out.println(Hex.encodeHexString(md.doFinal(data)));
-        System.out.println(Hex.encodeHexString(md.doFinal(data)));
-        md.update(data);
-        System.out.println(Hex.encodeHexString(md.doFinal()));
-    }
 }

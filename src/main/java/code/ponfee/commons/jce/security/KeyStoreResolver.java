@@ -2,14 +2,12 @@ package code.ponfee.commons.jce.security;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
@@ -61,17 +59,11 @@ public class KeyStoreResolver {
      * @param storePassword  用于解锁密钥库
      */
     public KeyStoreResolver(KeyStoreType type, InputStream input, String storePassword) {
-        try {
+        try (InputStream inputStream = input) {
             this.keyStore = KeyStore.getInstance(type.name());
-            this.keyStore.load(input, toCharArray(storePassword));
+            this.keyStore.load(inputStream, toCharArray(storePassword));
         } catch (Exception e) {
             throw new SecurityException(e);
-        } finally {
-            if (input != null) try {
-                input.close();
-            } catch (IOException ignored) {
-                ignored.printStackTrace();
-            }
         }
     }
 
@@ -108,14 +100,17 @@ public class KeyStoreResolver {
 
     /**
      * set key entry
+     * 
      * @param alias
      * @param pkcs8Key
      * @param chain
+     * @see RSAPrivateKeys#toEncryptedPkcs8(java.security.interfaces.RSAPrivateKey, String)
      */
-    public final void setKeyEntry(String alias, byte[] pkcs8Key, Certificate[] chain) {
+    public final void setKeyEntry(String alias, byte[] encryptedPkcs8Key, 
+                                  Certificate[] chain) {
         try {
             checkAliasNotExists(alias);
-            this.keyStore.setKeyEntry(alias, pkcs8Key, chain);
+            this.keyStore.setKeyEntry(alias, encryptedPkcs8Key, chain);
         } catch (KeyStoreException e) {
             throw new SecurityException(e);
         }
@@ -168,36 +163,37 @@ public class KeyStoreResolver {
         }
     }
 
-    public PublicKey getPublicKey() {
+    public String getFirstAlias() {
         try {
-            return getPublicKey(keyStore.aliases().nextElement());
+            return keyStore.aliases().nextElement();
         } catch (KeyStoreException e) {
             throw new SecurityException(e);
         }
     }
 
+    public Certificate getCertificate() {
+        return getCertificate(getFirstAlias());
+    }
+
     /**
-     * 获取公钥
+     * 获取证书
+     * 
      * @param alias
      * @return
      */
-    public PublicKey getPublicKey(String alias) {
+    public Certificate getCertificate(String alias) {
         try {
             //if (!keyStore.isCertificateEntry(alias)) { // pfx cert isNotCertificateEntry 
-            //    throw new NullPointerException(alias + " is not certificate entry.");
+            //    throw new SecurityException(alias + " is not certificate entry.");
             //}
-            return keyStore.getCertificate(alias).getPublicKey();
+            return keyStore.getCertificate(alias);
         } catch (KeyStoreException e) {
             throw new SecurityException(e);
         }
     }
 
     public PrivateKey getPrivateKey(String keyPassword) {
-        try {
-            return getPrivateKey(keyStore.aliases().nextElement(), keyPassword);
-        } catch (KeyStoreException e) {
-            throw new SecurityException(e);
-        }
+        return getPrivateKey(getFirstAlias(), keyPassword);
     }
 
     /**
@@ -220,11 +216,7 @@ public class KeyStoreResolver {
     }
 
     public X509Certificate[] getX509CertChain() {
-        try {
-            return getX509CertChain(keyStore.aliases().nextElement());
-        } catch (KeyStoreException e) {
-            throw new SecurityException(e);
-        }
+        return getX509CertChain(getFirstAlias());
     }
 
     /**
@@ -234,14 +226,13 @@ public class KeyStoreResolver {
      */
     public X509Certificate[] getX509CertChain(String alias) {
         try {
+            if (!keyStore.isKeyEntry(alias)) {
+                throw new SecurityException("alias[" + alias + "] is not key entry.");
+            }
             Certificate[] certs = keyStore.getCertificateChain(alias);
             X509Certificate[] x509Certchain = new X509Certificate[certs.length];
             for (int i = 0; i < certs.length; i++) {
-                if (!(certs[i] instanceof X509Certificate)) {
-                    throw new SecurityException("cert[" + i + "] in chain '" + alias 
-                                              + "' is not a X509Certificate.");
-                }
-                x509Certchain[i] = (X509Certificate) certs[i];
+                x509Certchain[i] = X509Certificate.class.cast(certs[i]);
             }
             return x509Certchain;
         } catch (KeyStoreException e) {
@@ -284,6 +275,13 @@ public class KeyStoreResolver {
         return keyStore;
     }
 
+    public static KeyStoreResolver loadFromPem(String pem) {
+        KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.JKS);
+        // X509CertUtils.loadFromPem(pem) <==> X509CertUtils.loadX509Cert(pem.getBytes())
+        resolver.setCertificateEntry(DigestUtils.md5Hex(pem), X509CertUtils.loadPemCert(pem));
+        return resolver;
+    }
+
     private void checkAliasNotExists(String alias) throws KeyStoreException {
         if (keyStore.containsAlias(alias)) {
             throw new SecurityException("alias[" + alias + "] is exists.");
@@ -296,13 +294,6 @@ public class KeyStoreResolver {
         } else {
             return str.toCharArray();
         }
-    }
-
-    public static KeyStoreResolver loadFromPem(String pem) {
-        KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.JKS);
-        // X509CertUtils.loadFromPem(pem) <==> X509CertUtils.loadX509Cert(pem.getBytes())
-        resolver.setCertificateEntry(DigestUtils.md5Hex(pem), X509CertUtils.loadFromPem(pem));
-        return resolver;
     }
 
 }

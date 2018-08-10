@@ -536,12 +536,4 @@ public final class Files {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(File.pathSeparator);
-        System.out.println(File.separator);
-        String s = human(1152921504606846976L);
-        System.out.println(s);
-        System.out.println(parseHuman(s));
-        //System.out.println(guessFileType(new File("d:/代码走查问题表.xlsx")));
-    }
 }

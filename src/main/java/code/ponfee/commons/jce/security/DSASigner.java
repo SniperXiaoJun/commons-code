@@ -141,11 +141,4 @@ public final class DSASigner {
         }
     }
 
-    public static void main(String[] args) {
-        Map<String, DSAKey> key = initKey();
-        byte[] data = "123456".getBytes();
-        byte[] signed = sign(data, getPrivateKey(key));
-        boolean flag = verify(data, getPublicKey(key), signed);
-        System.out.println(flag);
-    }
 }

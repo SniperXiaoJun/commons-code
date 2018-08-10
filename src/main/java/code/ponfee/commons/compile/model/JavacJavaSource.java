@@ -19,9 +19,6 @@ import com.sun.tools.javac.parser.ParserFactory;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 import com.sun.tools.javac.util.Context;
 
-import code.ponfee.commons.compile.impl.JdkCompiler;
-import code.ponfee.commons.io.Files;
-
 /**
  * <pre>
  *    <dependency>
@@ -105,11 +102,4 @@ public class JavacJavaSource extends JavaSource {
         }
     }
 
-    public static void main(String[] args) {
-        JavaSource javaSource = new JavacJavaSource(Files.toString("d:/CompilerSource.java"));
-        //JavaSource javaSource = new JavacJavaSource(Files.toString(MavenProjects.getMainJavaFile(HttpRequest.class)));
-        Class<?> clazz = new JdkCompiler().compile(javaSource);
-        System.out.println(clazz);
-        //clazz.getMethod("say").invoke(clazz);
-    }
 }

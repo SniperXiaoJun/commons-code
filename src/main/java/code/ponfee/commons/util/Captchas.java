@@ -9,8 +9,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -199,13 +197,6 @@ public class Captchas {
             g.drawLine(i, d, i, 0);
             g.drawLine(i, d + h, i, h);
             //}
-        }
-    }
-
-    public static void main(String[] args) throws FileNotFoundException {
-        int width = 80;
-        for (int i = 0; i < 100; i++) {
-            generate(width, new FileOutputStream("D:/img/"+i+".jpg"), random(4));
         }
     }
 

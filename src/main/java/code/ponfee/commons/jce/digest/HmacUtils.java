@@ -1,7 +1,5 @@
 package code.ponfee.commons.jce.digest;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
@@ -16,8 +14,6 @@ import org.apache.commons.codec.binary.Hex;
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.Providers;
-import code.ponfee.commons.util.MavenProjects;
-import code.ponfee.commons.util.SecureRandoms;
 
 /**
  * HMAC的一个典型应用是用在“质询/响应”（Challenge/Response）身份认证中
@@ -180,13 +176,4 @@ public final class HmacUtils {
         }
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-        byte[] key = SecureRandoms.nextBytes(16);
-        System.out.println(sha1Hex(key, new FileInputStream(MavenProjects.getMainJavaFile(HmacUtils.class))));
-        System.out.println(sha1Hex(key, new FileInputStream(MavenProjects.getMainJavaFile(HmacUtils.class))));
-        System.out.println(ripeMD128Hex(key, "abc".getBytes()));
-        System.out.println(ripeMD160Hex(key, "abc".getBytes()));
-        System.out.println(ripeMD256Hex(key, "abc".getBytes()));
-        System.out.println(ripeMD320Hex(key, "abc".getBytes()));
-    }
 }

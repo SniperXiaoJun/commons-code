@@ -17,7 +17,6 @@ import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 import code.ponfee.commons.math.Numbers;
@@ -116,8 +115,8 @@ public class ECParameters implements java.io.Serializable {
         try {
             Field field = SECNamedCurves.class.getDeclaredField("objIds");
             field.setAccessible(true);
-            Hashtable<String, ASN1ObjectIdentifier> table;
-            table = (Hashtable<String, ASN1ObjectIdentifier>) field.get(null); // static field
+            Hashtable<String, ASN1ObjectIdentifier> table =
+                (Hashtable<String, ASN1ObjectIdentifier>) field.get(null); // static field
             for (String name : table.keySet()) {
                 X9ECParameters params = SECNamedCurves.getByName(name);
                 nameOids.put(name, table.get(name));
@@ -245,13 +244,4 @@ public class ECParameters implements java.io.Serializable {
         //return EqualsBuilder.reflectionEquals(this, obj, false, null, false, "name");
     }
 
-    public static void main(String[] args) {
-        Preconditions.checkState(EC_PARAMETERS.get("secp112r1").equals(secp112r1));
-        Preconditions.checkState(EC_PARAMETERS.get("secp160r1").equals(secp160r1));
-        Preconditions.checkState(EC_PARAMETERS.get("secp256r1").equals(secp256r1));
-        Preconditions.checkState(SM2_BEST.equals(fromString(SM2_BEST.toString())));
-        for (ECParameters param : EC_PARAMETERS.values()) {
-            System.out.println(param);
-        }
-    }
 }

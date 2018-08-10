@@ -17,7 +17,8 @@ import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
- * the passwd crypt based hmac
+ * The passwd crypt based hmac
+ * 
  * @author Ponfee
  */
 public class Crypt {
@@ -102,23 +103,4 @@ public class Crypt {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
-    public static void main(String[] args) {
-        String passwd = "passwd";
-        String hashed = create(HmacAlgorithms.HmacSHA3_256, passwd, 32, Providers.BC);
-        boolean flag = true;
-        System.out.println(hashed);
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 100000; i++) {
-            if (!check(passwd, hashed)) {
-                flag = false;
-                break;
-            }
-        }
-        System.out.println("cost: " + (System.currentTimeMillis() - start));
-        if (flag) {
-            System.out.println("success!");
-        } else {
-            System.err.println("fail!");
-        }
-    }
 }

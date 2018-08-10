@@ -157,7 +157,4 @@ public final class GenericUtils {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        System.out.println(getActualTypeArgument(ClassUtils.class.getMethod("getField", Class.class, String.class), 0));
-    }
 }

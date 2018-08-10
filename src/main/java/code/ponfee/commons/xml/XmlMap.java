@@ -93,10 +93,4 @@ public final class XmlMap extends LinkedHashMap<String, String> {
         return data;
     }
 
-    public static void main(String[] args) {
-        String s = "<xml><a><![CDATA[<b>12</b><c>34</c>]]></a><d>a</d></xml>";
-        System.out.println(new XmlMap(s).toString()); // {d=a, a=<b>12</b><c>34</c>}
-        System.out.println(new XmlMap(s).get("a")); // <b>12</b><c>34</c>
-    }
-
 }

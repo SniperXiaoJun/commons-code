@@ -5,8 +5,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.util.Arrays;
 import java.util.Base64;
 
-import org.apache.commons.codec.binary.Hex;
-
 import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.util.SecureRandoms;
@@ -561,36 +559,4 @@ public final class BCrypt {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
-    public static void main(String[] args) {
-        byte[] pwd = "123456".getBytes();
-        byte[] salt = "0123456789123456".getBytes();
-        String actual = Hex.encodeHexString(crypt(pwd, salt, 5));
-        if (!"ddc41d0b514ecedb8ae12c42e8c2f4419e71e15c519ecd4b".equals(actual)) {
-            System.err.println("crypt fail!");
-        } else {
-            System.out.println("crypt success!");
-        }
-        System.out.println();
-
-        String password = "passwd";
-        System.out.println(create(password, 11));
-        System.out.println();
-
-        System.out.println("Test begin...");
-        boolean flag = true;
-        String hashed = create(password, 5);
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 100000; i++) { // 45 seconds
-            if (!check(password, hashed)) {
-                flag = false;
-                break;
-            }
-        }
-        System.out.println("cost: " + (System.currentTimeMillis() - start) / 1000);
-        if (flag) {
-            System.out.println("Test success!");
-        } else {
-            System.err.println("Test fail!");
-        }
-    }
 }

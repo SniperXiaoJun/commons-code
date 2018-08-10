@@ -44,7 +44,7 @@
                 </repository>
             </distributionManagement>
             <properties>
-                <publish.version>1.14-SNAPSHOT</publish.version>
+                <publish.version>1.16-SNAPSHOT</publish.version>
                 <separator>;</separator>
             </properties>
         </profile>
@@ -65,7 +65,7 @@
                 </repository>
             </distributionManagement>
             <properties>
-                <publish.version>1.14</publish.version>
+                <publish.version>1.16</publish.version>
                 <separator>;</separator>
                 <!-- <separator>:</separator> -->
             </properties>
@@ -629,6 +629,27 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-shade-plugin</artifactId>
+              <version>3.1.1</version>
+              <executions>
+                <execution>
+                  <phase>package</phase>
+                  <goals>
+                    <goal>shade</goal>
+                  </goals>
+                  <configuration>
+                    <createSourcesJar>true</createSourcesJar>
+                    <artifactSet>
+                      <includes>
+                        <include>${project.groupId}:*:*</include>
+                      </includes>
+                    </artifactSet>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin> -->
         </plugins>
     </build>
 

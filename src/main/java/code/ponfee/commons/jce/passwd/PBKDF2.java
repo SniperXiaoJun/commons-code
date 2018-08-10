@@ -2,7 +2,6 @@ package code.ponfee.commons.jce.passwd;
 
 import static code.ponfee.commons.jce.HmacAlgorithms.ALGORITHM_MAPPING;
 
-import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
@@ -152,40 +151,6 @@ public final class PBKDF2 {
             return skf.generateSecret(spec).getEncoded();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new SecurityException(e);
-        }
-    }
-
-    /**
-     * Tests the basic functionality of the PasswordHash class
-     * @param args ignored
-     * @throws GeneralSecurityException
-     */
-    public static void main(String[] args) {
-        // Print out 10 hashes
-        for (int i = 0; i < 10; i++) {
-            System.out.println(create(HmacAlgorithms.HmacSHA256, "p\r\nassw0Rd!".toCharArray(), 16, 65535, 32));
-        }
-        System.out.println("============================================\n");
-
-        // Test password validation
-        HmacAlgorithms alg = HmacAlgorithms.HmacSHA3_256;
-        System.out.println("Running tests...");
-        String passwd = "password";
-        String hashed = create(alg, passwd);
-        System.out.println(hashed);
-        boolean failure = false;
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 100000; i++) { // 20 seconds
-            if (!check(passwd, hashed)) {
-                failure = true;
-                break;
-            }
-        }
-        System.out.println("cost: " + (System.currentTimeMillis() - start) / 1000);
-        if (failure) {
-            System.err.println("TESTS FAILED!");
-        } else {
-            System.out.println("TESTS PASSED!");
         }
     }
 

@@ -53,7 +53,7 @@ public class NodeTreeTest {
         list.add(new NamedNode<>("500010", "500000", 3, true, "nid500010"));
         list.add(new NamedNode<>("500011", "500010", 3, true, "nid500011"));
 
-        TreeNode<String> root = TreeNode.createRoot(TreeNode.DEFAULT_ROOT_NAME);
+        TreeNode<String> root = TreeNode.createRoot(TreeNode.DEFAULT_ROOT_ID);
         System.out.println(Jsons.toJson(root));
         root.mount(list);
         System.out.println(Jsons.toJson(root));
@@ -73,7 +73,7 @@ public class NodeTreeTest {
         List<AbstractNode<String>> list = new ArrayList<>();
         list.add(new NamedNode<>("100001", null, 2, true, "nid100010")); // 节点编号不能为空
         list.add(new NamedNode<>(null, "100001", 2, true, "nid100010"));
-        TreeNode<String> root = TreeNode.createRoot(TreeNode.DEFAULT_ROOT_NAME);
+        TreeNode<String> root = TreeNode.createRoot(TreeNode.DEFAULT_ROOT_ID);
         root.mount(list);
         System.out.println(Jsons.toJson(root));
     }
@@ -84,6 +84,6 @@ public class NodeTreeTest {
         list.add(new NamedNode<>("100000", "notfound", 1, true, "nid100000")); // 无效的孤儿节点
         list.add(new NamedNode<>("200000", "notfound", 1, true, "nid200000")); // 无效的孤儿节点
 
-        TreeNode.createRoot(TreeNode.DEFAULT_ROOT_NAME).mount(list);
+        TreeNode.createRoot(TreeNode.DEFAULT_ROOT_ID).mount(list);
     }
 }

@@ -1,5 +1,6 @@
 package code.ponfee.commons.limit;
 
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpSession;
@@ -23,21 +24,30 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
         return new HttpSessionRequestLimiter(session);
     }
 
+    // ---------------------------------------------------------------------request limit
+    /**
+     * Client user (web browser) can clear session,
+     * so this limit can't really effect
+     * @deprecated
+     */
+    @Deprecated
     @Override public HttpSessionRequestLimiter limitFrequency(String key, int period, String message)
         throws RequestLimitException {
-        //checkLimit(CHECK_FREQ_KEY + key, period, 1, message);
-        //return this;
-        throw new UnsupportedOperationException();
+        checkLimit(CHECK_FREQ_KEY + key, period, 1, message);
+        return this;
+        //throw new UnsupportedOperationException();
     }
 
+    @Deprecated
     @Override public HttpSessionRequestLimiter limitThreshold(String key, int period, 
                                                               int limit, String message) 
         throws RequestLimitException {
-        //checkLimit(CHECK_THRE_KEY + key, period, limit, message);
-        //return this;
-        throw new UnsupportedOperationException();
+        checkLimit(CHECK_THRE_KEY + key, period, limit, message);
+        return this;
+        //throw new UnsupportedOperationException();
     }
 
+    // ---------------------------------------------------------------------cache sms code
     @Override public void cacheCode(String key, String code, int ttl) {
         add(CACHE_CODE_KEY + key, code, ttl);
         remove(CHECK_CODE_KEY + key);
@@ -76,6 +86,7 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
         return this;
     }
 
+    // ---------------------------------------------------------------------cache captcha
     @Override public void cacheCaptcha(String key, String captcha, int expire) {
         add(CACHE_CAPTCHA_KEY + key, captcha, expire);
     }
@@ -94,6 +105,11 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
         }
     }
 
+    // ---------------------------------------------------------------------action
+    /**
+     * Client user (web browser) can clear session,
+     * so this limit can't really effect
+     */
     @Deprecated
     @Override public void traceAction(String key, int period) {
         incrementAndGet(INCR_ACTION_KEY + key, expire(period));
@@ -111,13 +127,13 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
     }
 
     // ---------------------------------------------------------------------private methods
-    /*private void checkLimit(String key, int ttl, int limit, String message)
+    private void checkLimit(String key, int ttl, int limit, String message)
         throws RequestLimitException {
         CacheValue<?> cache = incrementAndGet(key, expire(ttl));
         if (cache.count() > limit) {
             throw new RequestLimitException(message);
         }
-    }*/
+    }
 
     private CacheValue<?> incrementAndGet(String key, long expireTimeMillis) {
         synchronized (session) {
@@ -168,7 +184,8 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
         return System.currentTimeMillis() + ttl * 1000;
     }
 
-    private static class CacheValue<T> {
+    private static class CacheValue<T> implements Serializable {
+        private static final long serialVersionUID = 8615157453929878610L;
         private final T value;
         private final long expireTimeMillis;
         private final AtomicInteger count;

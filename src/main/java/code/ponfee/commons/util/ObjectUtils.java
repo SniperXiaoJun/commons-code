@@ -305,12 +305,12 @@ public final class ObjectUtils {
     /**
      * Returns if t is null then other, else t
      *
-     * @param t
-     * @param other
-     * @return
+     * @param obj   the obj
+     * @param other the other
+     * @return if obj is not null then obj else other
      */
-    public static <T> T orElse(T t, T other) {
-        return t != null ? t : other;
+    public static <T> T orElse(T obj, T other) {
+        return obj != null ? obj : other;
     }
 
 }

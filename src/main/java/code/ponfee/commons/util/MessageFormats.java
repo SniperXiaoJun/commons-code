@@ -46,8 +46,4 @@ public final class MessageFormats {
         return format(text, Collects.toMap(args));
     }
 
-    public static void main(String[] args) {
-        System.out.println(format("#{     a}|#{ b   }|#{word  }", "#{a}#{b}#{word}", "#{a}#{b}#{word}", "#{word  }"));
-    }
-
 }

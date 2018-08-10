@@ -380,10 +380,4 @@ public class Page<T> implements java.io.Serializable {
         return "List<" + first.getClass().getCanonicalName() + ">(" + rows.size() + ")";
     }
 
-    public static void main(String[] args) {
-        List<String> list = Arrays.asList("1","2","3","4","5","6","7","8","9","0");
-        System.out.println(new Page<>(list).toString());
-        System.out.println(new Page<>().toString());
-        System.out.println(new Page<>(Arrays.asList(null,1)).toString());
-    }
 }

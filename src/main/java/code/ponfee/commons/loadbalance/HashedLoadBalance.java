@@ -27,8 +27,5 @@ public class HashedLoadBalance extends AbstractLoadBalance {
         }
         return servers.get(Math.abs(hash) % servers.size());
     }
-    
-    public static void main(String[] args) {
-        System.out.println(Math.abs(Integer.MIN_VALUE) == Integer.MIN_VALUE); // true
-    }
+
 }

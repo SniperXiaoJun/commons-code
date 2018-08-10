@@ -1,8 +1,5 @@
 package code.ponfee.commons.util;
 
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -464,29 +461,4 @@ public class Dates {
         return random(millis(0), now());
     }
 
-    public static void main(String[] args) {
-        System.out.println(isValidDate("2017-02-29", "yyyy-MM-dd"));
-        System.out.println(format(startOfDay(new Date()), "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(endOfDay(new Date()), "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(startOfWeek(new Date()), "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(endOfWeek(new Date()), "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(startOfMonth(new Date()), "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(endOfMonth(new Date()), "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(startOfYear(new Date()), "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(endOfYear(new Date()), "yyyy-MM-dd HH:mm:ss SSS"));
-
-        System.out.println("============================================");
-        System.out.println(format(currentDayOfWeek(1), "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(currentDayOfMonth(15), "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(currentDayOfYear(155), "yyyy-MM-dd HH:mm:ss SSS"));
-        System.out.println(format(now(), "yyyy-MM-dd'T'HH:mm:ss.SSS"));
-
-        System.out.println(Dates.startOfDay(Dates.toDate("2017-12-07", "yyyy-MM-dd")).getTime()-
-                           Dates.endOfDay(Dates.toDate("2017-12-06", "yyyy-MM-dd")).getTime());
-
-        System.out.println("JDK8 DATE============================================");
-        System.out.println(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-        System.out.println(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        System.out.println(ZonedDateTime.now().format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
-    }
 }

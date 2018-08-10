@@ -3,16 +3,8 @@ package code.ponfee.commons.jce.implementation.digest;
 import static code.ponfee.commons.math.Numbers.BYTE_ZERO;
 
 import java.util.Arrays;
-import java.util.concurrent.ThreadLocalRandom;
-
-import org.apache.commons.codec.binary.Hex;
-
-import code.ponfee.commons.jce.DigestAlgorithms;
-import code.ponfee.commons.jce.digest.DigestUtils;
 import code.ponfee.commons.math.Maths;
 import code.ponfee.commons.util.Bytes;
-import code.ponfee.commons.util.MavenProjects;
-import code.ponfee.commons.util.SecureRandoms;
 
 /**
  * The SHA-1 digest implementation（maximum 2^64 bit length）
@@ -326,28 +318,4 @@ public class SHA1Digest {
         return f1(b, c, d);
     }
 
-    public static void main(String[] args) {
-        System.out.println(Hex.encodeHexString(SHA1Digest.getInstance().doFinal()));
-        System.out.println(DigestUtils.sha1Hex(new byte[] {}));
-
-        byte[] data = MavenProjects.getMainJavaFileAsByteArray(SHA1Digest.class);
-
-        SHA1Digest sha1 = SHA1Digest.getInstance();
-        System.out.println(Hex.encodeHexString(sha1.doFinal(data)));
-        System.out.println(DigestUtils.sha1Hex(data));
-
-        for (int i = 0; i < 1000; i++) {
-            byte[] data1 = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(65537) + 1);
-            byte[] data2 = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(65537) + 1);
-            byte[] data3 = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(65537) + 1);
-            sha1.reset();
-            sha1.update(data1);
-            sha1.update(data2);
-            sha1.update(data3);
-            byte[] expect = DigestUtils.digest(DigestAlgorithms.SHA1, data1, data2, data3);
-            if (!Arrays.equals(expect, sha1.doFinal())) {
-                System.err.println("FAIL" + " --> " + data.length);
-            }
-        }
-    }
 }

@@ -5,8 +5,6 @@ import static code.ponfee.commons.resource.ResourceLoaderFacade.listResources;
 
 import java.awt.Color;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,7 +23,6 @@ import com.aspose.words.MemoryFontSource;
 import com.aspose.words.NodeType;
 import com.aspose.words.PdfSaveOptions;
 import com.aspose.words.Table;
-import com.google.common.io.Files;
 
 import code.ponfee.commons.resource.Resource;
 
@@ -113,8 +110,4 @@ public final class WordUtils {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        ByteArrayInputStream input = new ByteArrayInputStream(Files.toByteArray(new File("d:/test/abc.doc")));
-        toPdf(input, new FileOutputStream("d:/test/abc.pdf"));
-    }
 }

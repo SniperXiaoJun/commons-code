@@ -283,12 +283,12 @@ public class CrossOriginFilter implements Filter {
                 if (anyTimingOriginAllowed || originMatches(allowedTimingOrigins, origin)) {
                     response.setHeader(TIMING_ALLOW_ORIGIN_HEADER, origin);
                 } else {
-                    logger.debug("Cross-origin request to " + request.getRequestURI() + " with origin " 
-                               + origin + " does not match allowed timing origins " + allowedTimingOrigins);
+                    logger.debug("Cross-origin request to {} with origin {} does not match allowed timing origins {}", 
+                                 request.getRequestURI(), origin, allowedTimingOrigins);
                 }
             } else {
-                logger.debug("Cross-origin request to " + request.getRequestURI() + " with origin " 
-                           + origin + " does not match allowed origins " + allowedOrigins);
+                logger.debug("Cross-origin request to {} with origin {} does not match allowed origins {}", 
+                             request.getRequestURI(), origin, allowedOrigins);
             }
         }
 
@@ -422,8 +422,10 @@ public class CrossOriginFilter implements Filter {
         if (accessControlRequestMethod != null) {
             result = allowedMethods.contains(accessControlRequestMethod);
         }
-        logger.debug("Method {} is" + (result ? "" : " not") + " among allowed methods {}", 
-                     accessControlRequestMethod, allowedMethods);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Method {} is" + (result ? "" : " not") + " among allowed methods {}", 
+                         accessControlRequestMethod, allowedMethods);
+        }
         return result;
     }
 
@@ -465,8 +467,10 @@ public class CrossOriginFilter implements Filter {
                 break;
             }
         }
-        logger.debug("Headers [{}] are" + (result ? "" : " not") + " among allowed headers {}", 
-                     requestedHeaders, allowedHeaders);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Headers [{}] are" + (result ? "" : " not") + " among allowed headers {}", 
+                         requestedHeaders, allowedHeaders);
+        }
         return result;
     }
 
@@ -476,8 +480,7 @@ public class CrossOriginFilter implements Filter {
             if (i > 0) {
                 builder.append(",");
             }
-            String string = strings.get(i);
-            builder.append(string);
+            builder.append(strings.get(i));
         }
         return builder.toString();
     }

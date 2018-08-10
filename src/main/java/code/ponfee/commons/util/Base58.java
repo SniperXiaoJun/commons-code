@@ -4,10 +4,8 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.ArrayUtils;
 
-import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jce.digest.DigestUtils;
 
 /**
@@ -225,27 +223,4 @@ public class Base58 {
         return Arrays.copyOfRange(twiceSha256, 0, 4); // take previous 4 bytes
     }
 
-    public static void main(String[] args) {
-        System.out.println(encode(Files.toByteArray(MavenProjects.getMainJavaFile(Base58.class))));
-        String base58 = encodeChecked(Files.toByteArray(MavenProjects.getMainJavaFile(Base58.class)));
-        System.out.println(base58);
-        System.out.println(new String(decodeChecked(base58)));
-
-        byte[] b128 = new byte[16], b0 = new byte[16], b127 = new byte[16];
-        Arrays.fill(b128, (byte) -128);
-        Arrays.fill(b0, (byte) 0);
-        Arrays.fill(b127, (byte) 127);
-
-        System.out.println("==================base58==================");
-        System.out.println("encode(b128)"+encode(b128));
-        System.out.println("encode(b0)"+encode(b0));
-        System.out.println("encode(b127)"+encode(b127));
-
-        // 比特币钱包地址
-        System.out.println(Hex.encodeHexString(decodeChecked("3D2oetdNuZUqQHPJmcMDDHYoqkyNVsFk9r")));
-        System.out.println(Hex.encodeHexString(decodeChecked("16rCmCmbuWDhPjWTrpQGaU3EPdZF7MTdUk")));
-        System.out.println(decodeChecked("1DiHDQMPFu4p84rkLn6Majj2LCZZZRQUaa").length);
-        System.out.println(decodeChecked("3Nxwenay9Z8Lc9JBiywExpnEFiLp6Afp8v").length);
-        System.out.println(decodeChecked("17QY6BzRnsTGKBqGdZHG1bWe1VB6MweiDH").length);
-    }
 }

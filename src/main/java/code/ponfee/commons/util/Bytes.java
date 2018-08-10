@@ -596,24 +596,4 @@ public final class Bytes {
         }
     }
 
-    public static void main(String[] args) {
-        byte[] in = { -2, -2, -2, -2, -2, -2 };
-        byte[] out = { -1, -1, -1, -1, -1, -1, -1, -1, -1 };
-        copy(in, 0, 4, out, 2, 10);
-        System.out.println(ObjectUtils.toString(out));
-
-        System.out.println();
-        System.out.println(toBinary(fromInt(-102)));
-        System.out.println(toBinary(fromInt(-102 >> 3)));
-        System.out.println(toBinary(fromInt(-102 >>> 3)));
-
-        System.out.println();
-        System.out.println(toBinary(fromFloat(0)));
-        System.out.println(toBinary(fromFloat(Float.MIN_VALUE)));
-        System.out.println(toBinary(fromFloat(Float.MAX_VALUE)));
-        System.out.println(toBinary(fromFloat(Float.NaN)));
-        System.out.println(toBinary(fromFloat(Float.MIN_NORMAL)));
-        System.out.println(toBinary(fromFloat(Float.NEGATIVE_INFINITY)));
-        System.out.println(toBinary(fromFloat(Float.POSITIVE_INFINITY)));
-    }
 }

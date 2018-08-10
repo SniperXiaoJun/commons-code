@@ -228,19 +228,4 @@ public class ZipUtils {
         return fileEntries.toArray(new File[fileEntries.size()]);
     }
 
-    public static void main(String[] args) throws Exception {
-        //File f = new File("d:/aaa.zip");
-        //System.out.println(f.getName()); // aaa.zip
-        //System.out.println(FilenameUtils.getBaseName(f.getName())); // aaa
-
-        //zip("D:\\test.txt", "d:\\test.zip");
-
-        //zip("D:\\a", null);
-        //zip("D:\\guiminer", null, true, null, "abc");
-        //unzip("D:\\guiminer.zip");
-        //unzip(new File("d:/aaa.zip"), "d://aaa", "123", "UTF-8");
-
-        zip(MavenProjects.getProjectBaseDir());
-        //unzip("d:/abc.zip");
-    }
 }

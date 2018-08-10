@@ -1,11 +1,6 @@
 package code.ponfee.commons.serial;
 
-import java.util.Map;
-
 import org.nustaq.serialization.FSTConfiguration;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 
 import code.ponfee.commons.io.GzipProcessor;
 import code.ponfee.commons.reflect.ClassUtils;
@@ -49,18 +44,6 @@ public class FstSerializer extends Serializer {
                      + " can't be cast to " + ClassUtils.getClassName(clazz));
         }
         return t;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static void main(String[] args) {
-        Map<String, Object> map = ImmutableMap.of("a", 1, "b", Lists.newArrayList("1", "2"));
-        Serializer serializer = new FstSerializer(); // error
-        //Serializer serializer = new JsonSerializer();
-        //Serializer serializer = new HessianSerializer();
-        byte[] data = serializer.serialize(map);
-        //map = serializer.deserialize(data, HashMap.class);
-        map = serializer.deserialize(data, Map.class);
-        System.out.println(map.getClass());
     }
 
 }

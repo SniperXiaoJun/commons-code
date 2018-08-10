@@ -4,11 +4,6 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import code.ponfee.commons.jce.symmetric.Algorithm;
-import code.ponfee.commons.jce.symmetric.SymmetricCryptor;
-import code.ponfee.commons.jce.symmetric.SymmetricCryptorBuilder;
-import code.ponfee.commons.util.MavenProjects;
-
 /**
  * RC4 implementation
  * 
@@ -99,33 +94,4 @@ public class RC4 {
         }
     }
 
-    public static void main(String[] args) {
-        byte[] key = "0123456789123456".getBytes();
-        byte[] data = MavenProjects.getMainJavaFileAsByteArray(RC4.class);
-        RC4 rc4 = new RC4(key);
-        byte[] encrypted = rc4.encrypt(data);
-        encrypted = rc4.encrypt(data);
-        if (!Arrays.equals(rc4.decrypt(encrypted), data)
-            && !Arrays.equals(rc4.decrypt(encrypted), data)) {
-            System.err.println("rc4 crypt fail!");
-        } else {
-            //System.out.println(new String(rc4.crypt(encrypted)));
-        }
-        SymmetricCryptor rc = SymmetricCryptorBuilder.newBuilder(Algorithm.RC4).key(key).build();
-        if (!Arrays.equals(rc.decrypt(encrypted), data)
-            && !Arrays.equals(rc.decrypt(encrypted), data)) {
-            System.err.println("rc4 crypt fail!");
-        } else {
-            //System.out.println(new String(rc4.crypt(encrypted)));
-        }
-
-        encrypted = rc.encrypt(data);
-        encrypted = rc.encrypt(data);
-        if (!Arrays.equals(rc4.decrypt(encrypted), data)
-            && !Arrays.equals(rc4.decrypt(encrypted), data)) {
-            System.err.println("rc4 crypt fail!");
-        } else {
-            //System.out.println(new String(rc4.decrypt(encrypted)));
-        }
-    }
 }

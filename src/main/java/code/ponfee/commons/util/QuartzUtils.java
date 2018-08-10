@@ -91,15 +91,4 @@ public class QuartzUtils {
         }
     }
 
-    public static void main(String[] args) {
-        List<Date> list = listNextExecTime("0 21 19 * * ?", 2, new Date());
-        for (Date s : list) {
-            System.out.println(Dates.format(s));
-        }
-        System.out.println(verifyCronExp("0 21 19 * * ? 2016"));
-
-        Date date = Dates.toDate("2016-12-14 19:21:00");
-        System.out.println(getNextExecTime("0 21 19 * * ?", date));
-
-    }
 }

@@ -25,22 +25,23 @@ public final class RegexUtils {
     private RegexUtils() {}
 
     private static final LoadingCache<String, org.apache.oro.text.regex.Pattern> PATTERNS =
-        CacheBuilder.newBuilder().softValues()
-                    .build(new CacheLoader<String, org.apache.oro.text.regex.Pattern>() {
-            @Override
-            public org.apache.oro.text.regex.Pattern load(String pattern) {
+    CacheBuilder.newBuilder().softValues().build(
+        new CacheLoader<String, org.apache.oro.text.regex.Pattern>() {
+            public @Override org.apache.oro.text.regex.Pattern load(String pattern) {
                 try {
                     return new Perl5Compiler().compile(pattern, CASE_INSENSITIVE_MASK | READ_ONLY_MASK);
                 } catch (MalformedPatternException e) {
                     throw new RuntimeException("Regex failed!", e);
                 }
             }
-        });
+        }
+    );
 
     /**
-     * find the first match string from originalStr use regex
-     * @param originalStr
-     * @param regex
+     * Finds the first match string from originalStr use regex
+     * 
+     * @param originalStr the origin str
+     * @param regex       the regex
      * @return the first match string
      */
     public static String findFirst(String originalStr, String regex) {
@@ -49,7 +50,6 @@ public final class RegexUtils {
         }
 
         PatternMatcher matcher = new Perl5Matcher();
-
         try {
             return matcher.contains(originalStr, PATTERNS.get(regex))
                    ? StringUtils.trimToEmpty(matcher.getMatch().group(0))
@@ -140,11 +140,4 @@ public final class RegexUtils {
         return text != null && PATTERN_PASSWORD.matcher(text).matches();
     }
 
-    public static void main(String[] args) {
-        System.out.println(isValidPassword(null)); // false
-        System.out.println(isValidPassword("11ABac@#!%&_.?-$^*")); // true
-        System.out.println(isValidPassword("12131111")); // false: 数字
-        System.out.println(isValidPassword("1213Aa_")); // false: 7 length
-        System.out.println(isValidPassword("1213Aa_11213Aa_112111")); // false: 21 length
-    }
 }

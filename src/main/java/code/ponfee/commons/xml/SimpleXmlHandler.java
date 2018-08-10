@@ -1,19 +1,6 @@
 package code.ponfee.commons.xml;
 
-import org.dom4j.Attribute;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.SAXValidator;
-import org.dom4j.util.XMLErrorHandler;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -24,6 +11,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.dom4j.Attribute;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.SAXValidator;
+import org.dom4j.util.XMLErrorHandler;
+import org.xml.sax.SAXException;
 
 /**
  * xml工具类
@@ -201,10 +200,4 @@ public class SimpleXmlHandler {
         static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-        List<Map<String, String>> list = parse(new FileInputStream("d:/test/signers.xml"));
-        System.out.println(list);
-
-        validateByXsd(new FileInputStream("d:/test/signer.xsd"), new FileInputStream("d:/test/signers.xml"));
-    }
 }

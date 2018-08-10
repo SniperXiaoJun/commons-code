@@ -251,10 +251,4 @@ public class Wechats {
         }
     }
 
-    public static void main(String[] args) {
-        //System.out.println(getOAuth("fsda", "fdasf", "fdasf"));
-        //System.out.println(getUserInfo("fsda", "fdasf"));
-        //System.out.println(getJsapiTicket("fsda"));
-        System.out.println(shareUrl("jsapiTicket", "appid", "url"));
-    }
 }

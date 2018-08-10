@@ -52,6 +52,15 @@ public class X509CertUtils {
     private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     /**
+     * pem加载证书
+     * @param pem
+     * @return
+     */
+    public static X509Certificate loadPemCert(String pem) {
+        return loadX509Cert(pem.getBytes());
+    }
+
+    /**
      * load from cert bytes or pem bytes
      * @param bytes
      * @return
@@ -137,19 +146,6 @@ public class X509CertUtils {
             return writer.toString();
         } catch (IOException e) {
             throw new SecurityException(e);
-        }
-    }
-
-    /**
-     * pem加载证书
-     * @param pem
-     * @return
-     */
-    public static X509Certificate loadFromPem(String pem) {
-        try {
-            return loadX509Cert(new ByteArrayInputStream(pem.getBytes()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

@@ -177,12 +177,4 @@ public final class XmlWriter {
         }
     }
 
-    public static void main(String[] args) {
-        XmlWriter writers = XmlWriter.create();
-        writers.element("k", "v");
-        writers.element("book", "price", 98.8, "name", "one book");
-        writers.element("d", newElement("a", 1, "b", "bb", "c", "cc"));
-        String xml = writers.build("root");
-        System.out.println(xml);
-    }
 }

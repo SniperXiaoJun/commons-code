@@ -482,19 +482,4 @@ public final class Numbers {
         return new BigInteger(hex, 16);
     }
 
-    public static void main(String[] args) {
-        System.out.println(lower(441656, 2));
-        System.out.println(percent(0.00241, 1));
-
-        System.out.println(ObjectUtils.toString(average(10, 20)));
-
-        double money = 2020004.7;
-        System.out.println("[" + money + "]   ->   [" + chinesize(new BigDecimal(money)) + "]");
-
-        money = 85050414.776;
-        System.out.println("[" + money + "]   ->   [" + chinesize(new BigDecimal(money)) + "]");
-
-        System.out.println(chinesize(new BigDecimal("9999999999999999.9949")));
-        System.out.println(chinesize(new BigDecimal("9999999999999999.995")));
-    }
 }

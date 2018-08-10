@@ -129,19 +129,4 @@ public final class PageBoundsResolver {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(resolve(11, 10, 101));
-
-        System.out.println("\n==============================");
-        System.out.println(resolve(7, 15, 80, 9, 7, 10));
-
-        System.out.println("\n==============================");
-        System.out.println(resolve(16, 10, 155, 100));
-
-        System.out.println("\n==============================");
-        System.out.println(resolve(20000, 10, 155));
-
-        System.out.println("\n==============================");
-        System.out.println(resolve(6, 55, 155));
-    }
 }

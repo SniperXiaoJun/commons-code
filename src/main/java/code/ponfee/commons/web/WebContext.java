@@ -154,6 +154,7 @@ public final class WebContext {
                 }
                 chain.doFilter(req, resp);
             } finally {
+                CUST_PARAMS.remove();
                 WebContext.removeRequest();
                 WebContext.removeResponse();
             }

@@ -1,10 +1,5 @@
 package code.ponfee.commons.util;
 
-import code.ponfee.commons.concurrent.MultithreadExecutor;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * <pre>
  * 0 | 0000000000 0000000000 0000000000 0000000000 0 | 00000 | 00000 | 0000000000 00
@@ -152,19 +147,5 @@ public final class IdWorker {
         return new IdWorker(workerId, datacenterId, sequenceBits,
                             workerIdBits, datacenterIdBits);
     }).get();
-
-    public static void main(String[] args) {
-        Map<Long, Object> map = new ConcurrentHashMap<>();
-        Object obj = new Object();
-        IdWorker worker = LOCAL_WORKER;
-        MultithreadExecutor.exec(20, () -> {
-            long id = worker.nextId();
-            if (map.put(id, obj) != null) {
-                System.err.println(id);
-            }
-            //Thread.currentThread().interrupt();
-        }, 5);
-        System.out.println(map.size());
-    }
 
 }

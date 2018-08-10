@@ -24,6 +24,8 @@ import code.ponfee.commons.jce.security.KeyStoreResolver;
 import code.ponfee.commons.jce.security.KeyStoreResolver.KeyStoreType;
 import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSACryptor.RSAKeyPair;
+import code.ponfee.commons.jce.security.RSAPrivateKeys;
+import code.ponfee.commons.jce.security.RSAPublicKeys;
 import code.ponfee.commons.resource.ResourceLoaderFacade;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.Dates;
@@ -33,11 +35,11 @@ public class KeyStoreResolverTester {
     public @Test void testLoad() {
         KeyStoreResolver resolver = new KeyStoreResolver(KeyStoreType.PKCS12, ResourceLoaderFacade.getResource("cas_test.pfx").getStream(), "1234");
         String alias = resolver.listAlias().get(0);
-        test0((RSAPrivateKey)resolver.getPrivateKey(alias, "1234"), (RSAPublicKey)resolver.getPublicKey(alias));
+        test0((RSAPrivateKey)resolver.getPrivateKey(alias, "1234"), (RSAPublicKey)resolver.getCertificate(alias).getPublicKey());
 
         String pem = X509CertUtils.exportToPem(resolver.getX509CertChain()[0]);
         resolver = new KeyStoreResolver(KeyStoreType.JKS);
-        resolver.setCertificateEntry("pem", X509CertUtils.loadFromPem(pem));
+        resolver.setCertificateEntry("pem", X509CertUtils.loadPemCert(pem));
         System.out.println(resolver.getKeyStore()); 
     }
 
@@ -53,7 +55,7 @@ public class KeyStoreResolverTester {
         X509Certificate ccert = X509CertGenerator.createRootCert(null, _issuer, alg, p1.getPrivateKey(), p1.getPublicKey(), before, after);
         KeyStoreResolver ca = new KeyStoreResolver(KeyStoreType.PKCS12);
         ca.setKeyEntry(X509CertUtils.getCertInfo(ccert, X509CertInfo.SUBJECT_CN), p1.getPrivateKey(), caPwd, new X509Certificate[] { ccert });
-        test0((RSAPrivateKey)ca.getPrivateKey("1234"), (RSAPublicKey)ca.getPublicKey());
+        test0((RSAPrivateKey)ca.getPrivateKey("1234"), (RSAPublicKey)ca.getCertificate().getPublicKey());
 
         System.out.println("\n\n------------------------------------------------------------\n\n");
 
@@ -62,7 +64,7 @@ public class KeyStoreResolverTester {
         KeyStoreResolver subject = new KeyStoreResolver(KeyStoreType.PKCS12);
         String scn = X509CertUtils.getCertInfo(scert, X509CertInfo.SUBJECT_CN);
         subject.setKeyEntry(scn, p2.getPrivateKey(), subjectPwd, new X509Certificate[] { scert, ccert });
-        test0((RSAPrivateKey)subject.getPrivateKey(subjectPwd), (RSAPublicKey)subject.getPublicKey());
+        test0((RSAPrivateKey)subject.getPrivateKey(subjectPwd), (RSAPublicKey)subject.getCertificate().getPublicKey());
 
         // --------------------------------------------------
         ca.export(new FileOutputStream("d:/test/ca.pfx"), caPwd);
@@ -80,6 +82,53 @@ public class KeyStoreResolverTester {
         // 方法二：通过证书接口验证cert.verify(publicKey);
         CertSignedVerifier.verifyIssuingSign(root, root);
         CertSignedVerifier.verifyIssuingSign(subjectChain[0], subjectChain[1]);
+    }
+
+    public @Test void test1() throws Exception {
+        Date before = Dates.toDate("2017-03-01 00:00:00"), after = Dates.toDate("2027-08-01 00:00:00");
+        RSAKeyPair p1 = RSACryptor.generateKeyPair(2048), p2 = RSACryptor.generateKeyPair(2048);
+        RSASignAlgorithms alg = RSASignAlgorithms.SHA256withRSA;
+        String caPwd = "1234", subjectPwd = "123456";
+        String _issuer = "CN=ca,OU=hackwp,O=wp,L=BJ,S=BJ,C=CN";
+        String _subject = "CN=subject,OU=hackwp,O=wp,L=BJ,S=BJ,C=CN";
+
+        // --------------------------------------------------
+        X509Certificate ccert = X509CertGenerator.createRootCert(null, _issuer, alg, p1.getPrivateKey(), p1.getPublicKey(), before, after);
+        KeyStoreResolver ca = new KeyStoreResolver(KeyStoreType.PKCS12);
+
+        byte[] pkcs8Key = RSAPrivateKeys.toEncryptedPkcs8(p1.getPrivateKey(), caPwd);
+        ca.setKeyEntry(X509CertUtils.getCertInfo(ccert, X509CertInfo.SUBJECT_CN), pkcs8Key, new X509Certificate[] { ccert });
+        //ca.setKeyEntry(X509CertUtils.getCertInfo(ccert, X509CertInfo.SUBJECT_CN), p1.getPrivateKey(), caPwd, new X509Certificate[] { ccert });
+        test0((RSAPrivateKey) ca.getPrivateKey("1234"), (RSAPublicKey) ca.getCertificate().getPublicKey());
+
+        System.out.println("\n\n------------------------------------------------------------\n\n");
+
+        // --------------------------------------------------
+        X509Certificate scert =
+            X509CertGenerator.createSubjectCert(ccert, p1.getPrivateKey(), null, _subject, alg, p2.getPrivateKey(), p2.getPublicKey(), before, after);
+        KeyStoreResolver subject = new KeyStoreResolver(KeyStoreType.PKCS12);
+        String scn = X509CertUtils.getCertInfo(scert, X509CertInfo.SUBJECT_CN);
+        pkcs8Key = RSAPrivateKeys.toEncryptedPkcs8(p2.getPrivateKey(), subjectPwd);
+        subject.setKeyEntry(scn, pkcs8Key, new X509Certificate[] { scert, ccert });
+        //subject.setKeyEntry(scn, p2.getPrivateKey(), subjectPwd, new X509Certificate[] { scert, ccert });
+        test0((RSAPrivateKey) subject.getPrivateKey(subjectPwd), (RSAPublicKey) subject.getCertificate().getPublicKey());
+
+        // --------------------------------------------------
+        ca.export(new FileOutputStream("d:/test/ca.pfx"), caPwd);
+        subject.export(new FileOutputStream("d:/test/subject.pfx"), subjectPwd);
+    }
+
+    public @Test void test2() throws Exception {
+        RSAKeyPair p1 = RSACryptor.generateKeyPair(2048);
+        String caPwd = "1234";
+        System.out.println(RSAPrivateKeys.fromEncryptedPkcs8(RSAPrivateKeys.toEncryptedPkcs8(p1.getPrivateKey(), caPwd), caPwd));
+        System.out.println(RSAPrivateKeys.fromEncryptedPkcs8Pem(RSAPrivateKeys.toEncryptedPkcs8Pem(p1.getPrivateKey(), caPwd), caPwd));
+        System.out.println(RSAPrivateKeys.fromPkcs1(RSAPrivateKeys.toPkcs1(p1.getPrivateKey())));
+        System.out.println(RSAPrivateKeys.fromPkcs8(RSAPrivateKeys.toPkcs8(p1.getPrivateKey())));
+
+        System.out.println(RSAPublicKeys.fromPkcs1(RSAPublicKeys.toPkcs1(p1.getPublicKey())));
+        System.out.println(RSAPublicKeys.fromPkcs8(RSAPublicKeys.toPkcs8(p1.getPublicKey())));
+        System.out.println(RSAPublicKeys.fromPkcs8Pem(RSAPublicKeys.toPkcs8Pem(p1.getPublicKey())));
     }
 
     // -----------------------------------------------------------------------------------

@@ -25,18 +25,18 @@ package code.ponfee.commons.web;
  */
 public enum DevicePlatform {
 
-	/**
-	 * Represents an apple platform
-	 */
-	IOS,
+    /**
+     * Represents an apple platform
+     */
+    IOS,
 
-	/**
-	 * Represents an android platform
-	 */
-	ANDROID,
+    /**
+     * Represents an android platform
+     */
+    ANDROID,
 
-	/**
-	 * Represents unknown platform
-	 */
-	UNKNOWN
+    /**
+     * Represents unknown platform
+     */
+    UNKNOWN
 }

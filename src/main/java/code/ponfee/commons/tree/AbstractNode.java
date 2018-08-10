@@ -19,7 +19,8 @@ import java.util.List;
  * 
  * @author Ponfee
  */
-public abstract class AbstractNode<T extends java.io.Serializable & Comparable<T>>
+public abstract class AbstractNode<T 
+    extends java.io.Serializable & Comparable<T>>
     implements java.io.Serializable {
 
     private static final long serialVersionUID = -4116799955526185765L;

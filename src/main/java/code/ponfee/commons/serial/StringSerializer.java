@@ -1,7 +1,6 @@
 package code.ponfee.commons.serial;
 
 import java.nio.charset.Charset;
-import java.util.HashMap;
 
 import code.ponfee.commons.io.GzipProcessor;
 import code.ponfee.commons.reflect.ClassUtils;
@@ -96,9 +95,4 @@ public class StringSerializer extends Serializer {
         return new String(data, charset);
     }
 
-    public static void main(String[] args) {
-        Serializer serializer = new StringSerializer();
-        byte[] data = serializer.serialize("abcde");
-        serializer.deserialize(data, HashMap.class);
-    }
 }

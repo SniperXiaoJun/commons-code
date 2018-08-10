@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.asm.ClassReader;
@@ -22,7 +21,6 @@ import org.springframework.asm.Opcodes;
 import org.springframework.asm.Type;
 
 import code.ponfee.commons.io.Files;
-import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * 基于asm的字节码工具类
@@ -252,29 +250,6 @@ public final class ClassUtils {
             }
         }
         return true;
-    }
-
-    public static void main(String[] args) throws Exception {
-        System.out.println(getClassName(ClassUtils.class));
-        System.out.println(getPackagePath("code.ponfee.commons.reflect"));
-        System.out.println(getPackagePath(ClassUtils.class));
-        //Method m = ObjectUtils.class.getMethod("shortid", int.class, char[].class);
-        Method m = ObjectUtils.class.getMethod("map2bean", Map.class, Class.class);
-        //Method m = ObjectUtils.class.getMethod("uuid32");
-        System.out.println(getMethodParamNames(m) == null);
-        System.out.println(StringUtils.join(getMethodParamNames(m), ","));
-        System.out.println("getMethodSignature: " + getMethodSignature(m));
-        System.out.println("m.toString: " + m.toString());
-        System.out.println("toGenericString: " + m.toGenericString());
-
-        System.out.println("========================================");
-        System.out.println(getClasspath(ClassUtils.class));
-        System.out.println(getClasspath());
-        System.out.println(getClasspath(StringUtils.class));
-
-        System.out.println("========================================");
-        System.out.println(getClassFilePath(ClassUtils.class));
-        System.out.println(getClassFilePath(StringUtils.class));
     }
 
 }

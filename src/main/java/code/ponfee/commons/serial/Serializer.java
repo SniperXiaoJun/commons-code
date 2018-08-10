@@ -1,14 +1,9 @@
 package code.ponfee.commons.serial;
 
 import java.io.Closeable;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import code.ponfee.commons.io.GzipProcessor;
 
 /**
  * 序例化抽象类
@@ -76,8 +71,4 @@ public abstract class Serializer {
         }
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-        //GzipCompressor.compress(new FileInputStream("d:/test.txt"), new FileOutputStream("d:/test2.txt"));
-        GzipProcessor.decompress(new FileInputStream("d:/test2.txt"), new FileOutputStream("d:/test3.txt"));
-    }
 }

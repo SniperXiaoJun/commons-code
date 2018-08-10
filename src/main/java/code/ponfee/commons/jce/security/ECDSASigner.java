@@ -178,15 +178,4 @@ public final class ECDSASigner {
         }
     }*/
 
-    public static void main(String[] args) {
-        Map<String, ECKey> keyMap = generateKeyPair();
-        byte[] data = "123456".getBytes();
-        byte[] signed = signSha1(data, getPrivateKey(keyMap));
-        System.out.println(signed.length);
-        System.out.println(verifySha1(data, signed, getPublicKey(keyMap)));
-
-        /*byte[] encrypted = encrypt(data, getPublicKey(keyMap));
-        byte[] decrypted = decrypt(encrypted, getPrivateKey(keyMap));
-        System.out.println(new String(decrypted));*/
-    }
 }

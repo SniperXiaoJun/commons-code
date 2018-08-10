@@ -21,7 +21,6 @@ import javax.crypto.interfaces.DHPublicKey;
 import com.google.common.collect.ImmutableMap;
 
 import code.ponfee.commons.jce.symmetric.Algorithm;
-import code.ponfee.commons.util.MavenProjects;
 
 /**
  * Diffie-Hellman Key Exchange
@@ -230,19 +229,4 @@ public final class DHKeyExchanger {
         }
     }
 
-    public static void main(String[] args) {
-        Map<String, DHKey> partA = initPartAKey(1024);
-        Map<String, DHKey> partB = initPartBKey(getPublicKey(partA));
-        byte[] data = MavenProjects.getMainJavaFileAsByteArray(DHKeyExchanger.class);
-
-        // 乙方加密甲方解密
-        byte[] encrypted = encrypt(data, genSecretKey(getPrivateKey(partB), getPublicKey(partA)));
-        byte[] decrypted = decrypt(encrypted, genSecretKey(getPrivateKey(partA), getPublicKey(partB)));
-        System.out.println(new String(decrypted));
-
-        // 甲方加密乙方解密
-        encrypted = encrypt(data, genSecretKey(getPrivateKey(partA), getPublicKey(partB)));
-        decrypted = decrypt(encrypted, genSecretKey(getPrivateKey(partB), getPublicKey(partA)));
-        System.out.println(new String(decrypted));
-    }
 }

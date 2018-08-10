@@ -272,11 +272,4 @@ public final class Networks {
         }
     }*/
 
-    public static void main(String[] args) {
-        System.out.println(getHostAddress().getHostAddress());
-        System.out.println(getHostAddress().getHostName());
-        System.out.println(getHostAddress().getCanonicalHostName());
-        System.out.println(getHostIp());
-        System.out.println(getHostName());
-    }
 }

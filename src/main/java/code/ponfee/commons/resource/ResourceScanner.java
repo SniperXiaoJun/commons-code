@@ -209,10 +209,4 @@ public class ResourceScanner {
         return false;
     }
 
-    public static void main(String[] args) {
-        //System.out.println(new ResourcesScanner("/**/").scan4binary("*.class"));
-        //System.out.println(new ResourcesScanner("/**/*.properties").scan4text());
-        System.out.println(new ResourceScanner("code/ponfee/commons/").scan4class());
-    }
-
 }

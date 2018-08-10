@@ -116,9 +116,4 @@ public class EmailValidator {
         return true;
     }
 
-    public static void main(String[] args) {
-        for (int i = 0; i < 1; i++) {
-            System.out.println(verify("fupengfei163@163.com"));
-        }
-    }
 }

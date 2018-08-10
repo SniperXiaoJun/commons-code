@@ -3959,16 +3959,4 @@ public class IdcardResolver {
         .put("N", 14)
         .build();*/
 
-    public static void main(String[] args) {
-        System.out.println(Integer.valueOf('1'));
-        System.out.println(Character.getNumericValue('1'));
-
-        IdcardResolver resolver = new IdcardResolver("530626201408302303");
-        System.out.println(resolver);
-
-        for (int i = 0; i < 10; i++) {
-            System.out.print(IdcardResolver.generate());
-            System.out.print("\t");
-        }
-    }
 }

@@ -13,10 +13,7 @@ import java.util.Base64;
 import javax.crypto.Mac;
 import javax.crypto.ShortBufferException;
 
-import org.apache.commons.codec.binary.Hex;
-
 import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
 
 import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.Providers;
@@ -344,52 +341,6 @@ public final class SCrypt {
 
     private static String encodeBase64(byte[] data) {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
-    }
-
-    public static void main(String[] args) {
-        byte[] pwd = "123456".getBytes();
-        byte[] salt = "0123456789123456".getBytes();
-        System.out.println("\n=====================PBKDF2=============================");
-        String hashed = create(HmacAlgorithms.HmacSHA256, pwd, salt, 1024, 32);
-        System.out.println(hashed);
-        System.out.println(check(HmacAlgorithms.HmacSHA256, pwd, salt, 1024, hashed));
-
-        System.out.println("\n=====================scrypt cost=============================");
-        Stopwatch watch = Stopwatch.createStarted();
-        scrypt(HmacAlgorithms.HmacSHA256, "123".getBytes(), "123".getBytes(), 16384, 8, 8, 64); // 推荐参数
-        System.out.println("16384, 8, 8, 64 cost: " + watch.stop());
-
-        watch.reset().start();
-        scrypt(HmacAlgorithms.HmacSHA256, "123".getBytes(), "123".getBytes(), 2, 2, 2, 32); // 推荐参数
-        System.out.println("2, 2, 2, 32 cost: " + watch.stop());
-
-        System.out.println("\n=====================scrypt verify=============================");
-        String actual = Hex.encodeHexString(scrypt(HmacAlgorithms.HmacSHA256, pwd, salt, 8, 255, 255, 32));
-        if (!"e488217f72b6c850f82911e78427a78d8a64aa7d313cdc9ee6989915d7548df4".equals(actual)) {
-            System.err.println("scrypt fail!");
-        } else {
-            System.out.println("scrypt success!");
-        }
-
-        System.out.println("\n=====================Scrypt=============================");
-        String password = "passwd";
-        hashed = create(password, 1, 2, 2);
-        System.out.println(hashed);
-        System.out.println("Test begin...");
-        boolean flag = true;
-        watch.reset().start();
-        for (int i = 0; i < 100000; i++) { // 20 seconds
-            if (!check(password, hashed)) {
-                flag = false;
-                break;
-            }
-        }
-        if (flag) {
-            System.out.println("Test success!");
-        } else {
-            System.err.println("Test fail!");
-        }
-        System.out.println("cost: " + watch.stop());
     }
 
 }

@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 import java.util.Base64;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,42 +33,47 @@ import code.ponfee.commons.jce.symmetric.SymmetricCryptor;
 public abstract class CryptoProvider {
 
     /**
-     * 数据加密
-     * @param original  原文
-     * @return
+     * Encrypts data
+     * 
+     * @param original  the origin data
+     * @return encrypted data
      */
     public abstract byte[] encrypt(byte[] original);
 
     /**
-     * 数据解密
-     * @param encrypted  密文
-     * @return
+     * Decrypts data
+     * 
+     * @param encrypted  the encrypted data
+     * @return origin data
      */
     public abstract byte[] decrypt(byte[] encrypted);
 
     /**
-     * sign the data
-     * @param data
-     * @return signature
+     * Signs the data
+     * 
+     * @param data  the data
+     * @return signature data
      */
     public byte[] sign(byte[] data) {
         throw new UnsupportedOperationException("cannot support sign.");
     }
 
     /**
-     * verify the data signature
-     * @param data
-     * @param signed
-     * @return true|false
+     * Verify the data signature
+     * 
+     * @param data   the origin data
+     * @param signed the signed data
+     * @return {@code true} verify success
      */
     public boolean verify(byte[] data, byte[] signed) {
         throw new UnsupportedOperationException("cannot support verify signature.");
     }
 
     /**
-     * 字符串数据加密
-     * @param plaintext  明文
-     * @return
+     * Encrypts the string data
+     * 
+     * @param plaintext  the plain text
+     * @return encrypted data
      */
     public final String encrypt(String plaintext) {
         return encrypt(plaintext, StandardCharsets.UTF_8);
@@ -75,9 +81,10 @@ public abstract class CryptoProvider {
 
     /**
      * 字符串数据加密
+     * 
      * @param plaintext 明文
      * @param charset   字符串编码
-     * @return
+     * @return encrypted data
      */
     public final String encrypt(String plaintext, Charset charset) {
         if (plaintext == null) {
@@ -90,19 +97,21 @@ public abstract class CryptoProvider {
     }
 
     /**
-     * 数据解密
-     * @param ciphertext  密文数据的base64编码
-     * @return
+     * Decrypts data
+     * 
+     * @param ciphertext  the encryted data of base64 string
+     * @return origin data of string
      */
     public final String decrypt(String ciphertext) {
         return decrypt(ciphertext, StandardCharsets.UTF_8);
     }
 
     /**
-     * 数据解密
-     * @param ciphertext  密文数据的base64编码
-     * @param charset     明文字符串编码
-     * @return
+     * Decrypts data
+     * 
+     * @param ciphertext  the encryted data of base64 string
+     * @param charset     the origin data charset
+     * @return origin data of string
      */
     public final String decrypt(String ciphertext, Charset charset) {
         if (ciphertext == null) {
@@ -116,19 +125,21 @@ public abstract class CryptoProvider {
     }
 
     /**
-     * sign of data
-     * @param data
-     * @return
+     * Signs data
+     * 
+     * @param data  the data
+     * @return signed data
      */
     public final String sign(String data) {
         return sign(data, Files.UTF_8);
     }
 
     /**
-     * data
-     * @param data
-     * @param charset
-     * @return
+     * Signs data
+     * 
+     * @param data  the string data
+     * @param charset the charset of string data
+     * @return signed data
      */
     public final String sign(String data, String charset) {
         if (StringUtils.isEmpty(data)) {
@@ -140,21 +151,23 @@ public abstract class CryptoProvider {
     }
 
     /**
-     * verify the data
-     * @param data
-     * @param signed
-     * @return
+     * Verifys the data
+     * 
+     * @param data the origin data
+     * @param signed the signed data
+     * @return {@code true} verify success
      */
     public final boolean verify(String data, String signed) {
         return verify(data, Files.UTF_8, signed);
     }
 
     /**
-     * verify the data
-     * @param data
-     * @param charset
-     * @param signed
-     * @return
+     * Verifys the data
+     * 
+     * @param data  the data
+     * @param charset the charset
+     * @param signed the signed data
+     * @return {@code true} verify success
      */
     public final boolean verify(String data, String charset, String signed) {
         return verify(data.getBytes(Charset.forName(charset)), 
@@ -258,9 +271,11 @@ public abstract class CryptoProvider {
     public static CryptoProvider sm2PublicKeyProvider(final ECParameters ecParameter, 
                                                       final byte[] publicKey) {
         return new CryptoProvider() {
+            private byte[] publicKey0 = Arrays.copyOf(publicKey, publicKey.length);
+
             @Override
             public byte[] encrypt(byte[] original) {
-                return SM2.encrypt(ecParameter, publicKey, original); // 公钥加密
+                return SM2.encrypt(ecParameter, publicKey0, original); // 公钥加密
             }
 
             @Override
@@ -270,7 +285,7 @@ public abstract class CryptoProvider {
 
             @Override
             public boolean verify(byte[] data, byte[] signed) {
-                return SM2.verify(ecParameter, data, signed, publicKey);
+                return SM2.verify(ecParameter, data, signed, publicKey0);
             }
         };
     }
@@ -284,24 +299,27 @@ public abstract class CryptoProvider {
                                                        final byte[] publicKey, 
                                                        final byte[] privateKey) {
         return new CryptoProvider() {
+            private byte[] publicKey0  = Arrays.copyOf(publicKey, publicKey.length);
+            private byte[] privateKey0 = Arrays.copyOf(privateKey, privateKey.length);
+
             @Override
             public byte[] encrypt(byte[] original) {
-                return SM2.encrypt(ecParameter, publicKey, original); // 公钥加密
+                return SM2.encrypt(ecParameter, publicKey0, original); // 公钥加密
             }
 
             @Override
             public byte[] decrypt(byte[] encrypted) { // 私钥解密
-                return SM2.decrypt(ecParameter, privateKey, encrypted);
+                return SM2.decrypt(ecParameter, privateKey0, encrypted);
             }
 
             @Override
             public byte[] sign(byte[] data) { // sign data by SM3WithSM2
-                return SM2.sign(ecParameter, data, publicKey, privateKey);
+                return SM2.sign(ecParameter, data, publicKey0, privateKey0);
             }
 
             @Override
             public boolean verify(byte[] data, byte[] signed) { // verify the SM3WithSM2 signature
-                return SM2.verify(ecParameter, data, signed, publicKey);
+                return SM2.verify(ecParameter, data, signed, publicKey0);
             }
         };
     }

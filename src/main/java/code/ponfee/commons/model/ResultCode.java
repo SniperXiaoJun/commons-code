@@ -2,8 +2,6 @@ package code.ponfee.commons.model;
 
 import java.io.Serializable;
 
-import code.ponfee.commons.json.Jsons;
-
 /**
  * Http response code: {@link java.net.HttpURLConnection#HTTP_OK}
  *  100 => "HTTP/1.1 100 Continue",
@@ -176,10 +174,4 @@ public final class ResultCode implements Serializable {
         return msg;
     }
 
-    public static void main(String[] args) {
-        String json = Jsons.toJson(create(-999, "msg"));
-        System.out.println(json);
-        ResultCode result = Jsons.fromJson(json, ResultCode.class);
-        System.out.println(Jsons.toJson(result));
-    }
 }

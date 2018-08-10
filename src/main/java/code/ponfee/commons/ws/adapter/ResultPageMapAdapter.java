@@ -26,7 +26,8 @@ import code.ponfee.commons.ws.adapter.model.TransitPage;
  * @author fupf
  */
 @SuppressWarnings("unchecked")
-public abstract class ResultPageMapAdapter<K, V> extends XmlAdapter<Result<TransitPage<MapItem>>, Result<Page<Map<K, V>>>> {
+public abstract class ResultPageMapAdapter<K, V> 
+    extends XmlAdapter<Result<TransitPage<MapItem>>, Result<Page<Map<K, V>>>> {
 
     protected final Class<K> ktype;
     protected final Class<V> vtype;

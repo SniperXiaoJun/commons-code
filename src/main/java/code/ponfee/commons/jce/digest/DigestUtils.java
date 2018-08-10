@@ -1,6 +1,5 @@
 package code.ponfee.commons.jce.digest;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -222,12 +221,4 @@ public final class DigestUtils {
         }*/
     }
 
-    public static void main(String[] args) throws Exception {
-        System.out.println(sha224Hex("1".getBytes()));
-        System.out.println(ripeMD160Hex("1234567890".getBytes()));
-        //System.out.println(ObjectUtils.toString(shortText("http://www.manong5.com/102542001/")));
-        long start = System.currentTimeMillis();
-        System.out.println(sha1Hex(new FileInputStream("E:\\tools\\develop\\linux\\CentOS-6.6-x86_64-bin-DVD1.iso")));
-        System.out.println((System.currentTimeMillis() - start) / 1000);
-    }
 }
