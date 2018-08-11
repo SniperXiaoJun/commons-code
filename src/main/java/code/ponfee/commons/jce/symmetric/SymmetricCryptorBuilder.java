@@ -17,31 +17,37 @@ import code.ponfee.commons.util.SecureRandoms;
  */
 public final class SymmetricCryptorBuilder {
 
-    private final Algorithm algorithm; // 加密算法
-    private byte[] key; // 密钥
+    private final SecretKey secretKey; // 密钥
     private Mode mode; // 分组加密模式
     private Padding padding; // 填充
-    private IvParameterSpec iv; // 填充向量
+    private IvParameterSpec parameter; // 填充向量
 
     /**加密服务提供方 {@link code.ponfee.commons.jce.Providers} */
     private Provider provider;
 
-    private SymmetricCryptorBuilder(Algorithm algorithm) {
-        this.algorithm = algorithm;
+    private SymmetricCryptorBuilder(Algorithm alg, byte[] key) {
+        if (key == null) {
+            try {
+                this.secretKey = KeyGenerator.getInstance(alg.name())
+                                             .generateKey();
+            } catch (GeneralSecurityException e) {
+                throw new SecurityException(e);
+            }
+        } else {
+            this.secretKey = new SecretKeySpec(key, alg.name());
+        }
     }
 
     public static SymmetricCryptorBuilder newBuilder(Algorithm algorithm) {
-        return new SymmetricCryptorBuilder(algorithm);
+        return new SymmetricCryptorBuilder(algorithm, null);
     }
 
-    public SymmetricCryptorBuilder key(byte[] key) {
-        this.key = key;
-        return this;
+    public static SymmetricCryptorBuilder newBuilder(Algorithm algorithm, int keySize) {
+        return new SymmetricCryptorBuilder(algorithm, SecureRandoms.nextBytes(keySize));
     }
 
-    public SymmetricCryptorBuilder key(int keySize) {
-        this.key = SecureRandoms.nextBytes(keySize);
-        return this;
+    public static SymmetricCryptorBuilder newBuilder(Algorithm algorithm, byte[] key) {
+        return new SymmetricCryptorBuilder(algorithm, key);
     }
 
     public SymmetricCryptorBuilder mode(Mode mode) {
@@ -54,8 +60,8 @@ public final class SymmetricCryptorBuilder {
         return this;
     }
 
-    public SymmetricCryptorBuilder ivParameter(byte[] ivBytes) {
-        this.iv = new IvParameterSpec(ivBytes);
+    public SymmetricCryptorBuilder parameter(byte[] parameter) {
+        this.parameter = new IvParameterSpec(parameter);
         return this;
     }
 
@@ -73,17 +79,7 @@ public final class SymmetricCryptorBuilder {
             throw new IllegalArgumentException("padding must be null without mode crypto.");
         }
 
-        SecretKey secretKey;
-        if (key == null) {
-            try {
-                secretKey = KeyGenerator.getInstance(algorithm.name()).generateKey();
-            } catch (GeneralSecurityException e) {
-                throw new SecurityException(e);
-            }
-        } else {
-            secretKey = new SecretKeySpec(key, algorithm.name());
-        }
-        return new SymmetricCryptor(secretKey, mode, padding, iv, provider);
+        return new SymmetricCryptor(secretKey, mode, padding, parameter, provider);
     }
 
 }

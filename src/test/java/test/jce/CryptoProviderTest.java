@@ -29,9 +29,8 @@ public class CryptoProviderTest {
         System.out.println("验签："+rsa.verify(str, signed));
 
         System.out.println("\n============================AES crypt==========================");
-        CryptoProvider aes = CryptoProvider.symmetricKeyProvider(SymmetricCryptorBuilder.newBuilder(Algorithm.AES)
-                                                                         .key("z]_5Fi!X$ed4OY8j".getBytes())
-                                                                         .mode(Mode.CBC).ivParameter("SVE<r[)qK`n%zQ'o".getBytes())
+        CryptoProvider aes = CryptoProvider.symmetricKeyProvider(SymmetricCryptorBuilder.newBuilder(Algorithm.AES, "z]_5Fi!X$ed4OY8j".getBytes())
+                                                                         .mode(Mode.CBC).parameter("SVE<r[)qK`n%zQ'o".getBytes())
                                                                          .padding(Padding.PKCS7Padding).provider(Providers.BC)
                                                                          .build());
         data = aes.encrypt(str);

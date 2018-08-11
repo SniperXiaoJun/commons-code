@@ -1,18 +1,32 @@
 package code.ponfee.commons.jce;
 
+import code.ponfee.commons.jce.symmetric.Mode;
 import code.ponfee.commons.jce.symmetric.PBECryptor;
+import code.ponfee.commons.jce.symmetric.PBECryptor.PBEAlgorithm;
+import code.ponfee.commons.jce.symmetric.PBECryptorBuilder;
+import code.ponfee.commons.jce.symmetric.Padding;
 
 public class PBECryptorTest {
 
     public static void main(String[] args) {
-        String ag = PBECryptor.ALG_PBE_SHA1_3DES;
+        PBEAlgorithm alg = PBEAlgorithm.PBEWithMD5AndTripleDES;
+        char[] pass = "87654321".toCharArray();
+        byte[] salt = "12345678".getBytes();
+        int iterations = 100;
 
         // 加密
-        PBECryptor p = new PBECryptor(ag, "fdsafasd".toCharArray(), "12343215678".getBytes(), 1000, Providers.BC);
+        PBECryptor p = PBECryptorBuilder.newBuilder(alg, pass)
+                                        .mode(Mode.CBC).padding(Padding.PKCS5Padding)
+                                        .parameter(salt, iterations)
+                                        .build();
         byte[] encrypted = p.encrypt("abc".getBytes());
 
         // 解密
-        p = new PBECryptor(p.getAlgorithm(), p.getPass(), p.getParameter(), p.getIterations(), p.getProvider());
+        p = PBECryptorBuilder.newBuilder(alg, p.getPass())
+            .mode(p.getMode()).padding(p.getPadding())
+            .parameter(p.getSalt(), p.getIterations())
+            .build();
+        
         byte[] decrypted = p.decrypt(encrypted);
         System.out.println(new String(decrypted));
     }

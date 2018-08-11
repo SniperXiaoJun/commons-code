@@ -46,11 +46,12 @@ public final class Throwables {
     }
 
     /**
-     * print the throwable stack trace to console
-     * @param ignored
+     * Prints the throwable stack trace to console
+     * 
+     * @param t the Throwable
      */
-    public static void console(Throwable ignored) {
-        ignored.printStackTrace();
+    public static void console(Throwable t) {
+        t.printStackTrace();
     }
 
 }

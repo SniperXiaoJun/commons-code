@@ -64,6 +64,9 @@ public class SymmetricCryptor {
     /** 密钥 */
     private final SecretKey secretKey;
 
+    /** the cipher transformation */
+    private final String transformation;
+
     protected SymmetricCryptor(SecretKey secretKey, Mode mode, Padding padding,
                                AlgorithmParameterSpec parameter, Provider provider) {
         this.secretKey = secretKey;
@@ -71,6 +74,14 @@ public class SymmetricCryptor {
         this.padding = padding;
         this.parameter = parameter;
         this.provider = provider;
+        if (mode != null) {
+            this.transformation = new StringBuilder(getAlgorithm())
+                                      .append("/").append(mode.name())
+                                      .append("/").append(padding.padding())
+                                      .toString();
+        } else {
+            this.transformation = getAlgorithm();
+        }
     }
 
     public final byte[] encrypt(byte[] data) {
@@ -88,15 +99,10 @@ public class SymmetricCryptor {
      * @return
      */
     private byte[] docrypt(byte[] bytes, int cryptMode) {
-        StringBuilder transformation = new StringBuilder(getAlgorithm());
-        if (mode != null) {
-            transformation.append("/").append(mode.name())
-                          .append("/").append(padding.padding());
-        }
         try {
             Cipher cipher = (provider == null) 
-                            ? Cipher.getInstance(transformation.toString())
-                            : Cipher.getInstance(transformation.toString(), provider);
+                            ? Cipher.getInstance(transformation)
+                            : Cipher.getInstance(transformation, provider);
             cipher.init(cryptMode, secretKey, parameter);
             return cipher.doFinal(bytes);
         } catch (GeneralSecurityException e) {
@@ -104,18 +110,20 @@ public class SymmetricCryptor {
         }
     }
 
-    // -----------------getter-----------------
+    // ----------------------------------getter
     /**
-     * get encrypt algorithm string
-     * @return
+     * Returns encrypt algorithm string
+     * 
+     * @return algorithm string
      */
     public final String getAlgorithm() {
         return secretKey.getAlgorithm();
     }
 
     /**
-     * get key byte[] data
-     * @return
+     * Returns key byte array data
+     * 
+     * @return key byte array data
      */
     public final byte[] getKey() {
         return secretKey.getEncoded();
@@ -126,15 +134,16 @@ public class SymmetricCryptor {
     }
 
     /**
-     * get iv parameter byte[] data
-     * @return
+     * Returns iv parameter byte array data
+     * 
+     * @return iv parameter byte array data
      */
-    public byte[] getParameter() {
+    public byte[] getParameterAsBytes() {
         return ((IvParameterSpec) parameter).getIV();
     }
 
     public final String getParameterAsBase64() {
-        return Base64UrlSafe.encode(getParameter());
+        return Base64UrlSafe.encode(getParameterAsBytes());
     }
 
     public final Mode getMode() {

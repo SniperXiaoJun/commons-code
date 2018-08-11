@@ -91,7 +91,7 @@ public class DesgitTest {
         } else {
             //System.out.println(new String(rc4.crypt(encrypted)));
         }
-        SymmetricCryptor rc = SymmetricCryptorBuilder.newBuilder(Algorithm.RC4).key(key).build();
+        SymmetricCryptor rc = SymmetricCryptorBuilder.newBuilder(Algorithm.RC4, key).build();
         if (!Arrays.equals(rc.decrypt(encrypted), data)
             && !Arrays.equals(rc.decrypt(encrypted), data)) {
             System.err.println("rc4 crypt fail!");

@@ -43,8 +43,8 @@ public class DigestTest {
         key = nextBytes(16);
         byte[] iv = nextBytes(16);
         SymmetricCryptor coder = null;
-        coder = SymmetricCryptorBuilder.newBuilder(Algorithm.SM4).key(key).mode(Mode.CBC)
-                      .padding(Padding.X9_23Padding).ivParameter(iv).provider(bc).build();
+        coder = SymmetricCryptorBuilder.newBuilder(Algorithm.SM4, key).mode(Mode.CBC)
+                      .padding(Padding.X9_23Padding).parameter(iv).provider(bc).build();
         
         data = "1234".getBytes();
         byte[] encrypted = coder.encrypt(data);
