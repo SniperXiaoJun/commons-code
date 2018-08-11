@@ -15,7 +15,7 @@ import code.ponfee.commons.io.Files;
  * @author Ponfee
  * @param <T>
  */
-public class ProcessResult<T> {
+public class ValidateResult<T> {
 
     private final List<T> data = Lists.newArrayList();
     private final List<String> errors = Lists.newArrayList();

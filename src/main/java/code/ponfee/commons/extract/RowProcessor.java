@@ -10,5 +10,4 @@ package code.ponfee.commons.extract;
 public interface RowProcessor<T> {
 
     void process(int rowNumber, T rowData);
-
 }

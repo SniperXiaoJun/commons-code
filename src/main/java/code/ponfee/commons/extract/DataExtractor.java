@@ -37,8 +37,8 @@ public abstract class DataExtractor<T> {
      * @return
      * @throws IOException
      */
-    public final ProcessResult<T> filter(RowValidator<T> validator) throws IOException {
-        ProcessResult<T> result = new ProcessResult<>();
+    public final ValidateResult<T> filter(RowValidator<T> validator) throws IOException {
+        ValidateResult<T> result = new ValidateResult<>();
         this.extract((rowNumber, data) -> {
             String error = validator.verify(rowNumber, data);
             if (StringUtils.isBlank(error)) {

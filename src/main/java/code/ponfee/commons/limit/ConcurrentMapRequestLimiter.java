@@ -139,16 +139,19 @@ public final class ConcurrentMapRequestLimiter extends RequestLimiter {
     }
 
     private CacheValue<?> incrementAndGet(String key, long expireTimeMillis) {
-        synchronized (CACHE) {
-            CacheValue<?> cache = (CacheValue<?>) CACHE.get(key);
-            if (cache == null || cache.isExpire()) { // 失效则重置
-                cache = new CacheValue<>(null, expireTimeMillis);
-                CACHE.put(key, cache);
-            } else {
-                cache.increment();
+        CacheValue<?> cache = (CacheValue<?>) CACHE.get(key);
+        if (cache == null || cache.isExpire()) {
+            synchronized (ConcurrentMapRequestLimiter.class) {
+                cache = (CacheValue<?>) CACHE.get(key);
+                if (cache == null || cache.isExpire()) { // 失效则重置
+                    cache = new CacheValue<>(null, expireTimeMillis);
+                    CACHE.put(key, cache);
+                    return cache;
+                }
             }
-            return cache;
         }
+        cache.increment();
+        return cache;
     }
 
     private void remove(String... keys) {
@@ -195,7 +198,7 @@ public final class ConcurrentMapRequestLimiter extends RequestLimiter {
         }
 
         private int increment() {
-            return count.getAndIncrement();
+            return count.incrementAndGet();
         }
 
         private int count() {

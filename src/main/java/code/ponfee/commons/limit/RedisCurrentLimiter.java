@@ -124,8 +124,7 @@ public class RedisCurrentLimiter implements CurrentLimiter {
         Long count = countCache.get(key0);
         if (count == null) {
             synchronized (getLock(key0)) {
-                count = countCache.get(key0);
-                if (count == null) {
+                if ((count = countCache.get(key0)) == null) {
                     long now = System.currentTimeMillis();
                     // load the freq from cache, if not hit then calculate by redis zcount
                     count = countByRangeMillis(key, now - millis, now);
@@ -166,8 +165,7 @@ public class RedisCurrentLimiter implements CurrentLimiter {
         Long threshold = confCache.get(key);
         if (threshold == null) {
             synchronized (getLock(key)) {
-                threshold = confCache.get(key);
-                if (threshold == null) {
+                if ((threshold = confCache.get(key)) == null) {
                     threshold = jedisClient.valueOps()
                                            .getLong(THRESHOLD_KEY_PREFIX + key, EXPIRE_SECONDS);
                     if (threshold == null) {

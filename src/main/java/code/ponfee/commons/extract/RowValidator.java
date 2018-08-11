@@ -1,7 +1,7 @@
 package code.ponfee.commons.extract;
 
 /**
- * 行验证
+ * 行数据校验
  * 
  * @author Ponfee
  * @param <T>
