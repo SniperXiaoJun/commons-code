@@ -8,7 +8,6 @@ import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -253,7 +252,7 @@ public final class ObjectUtils {
      * @return
      */
     public static String uuid22() {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(uuid());
+        return Base64UrlSafe.encode(uuid());
     }
 
     /**

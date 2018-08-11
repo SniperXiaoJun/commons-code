@@ -3,10 +3,10 @@ package code.ponfee.commons.jce.passwd;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.util.Arrays;
-import java.util.Base64;
 
 import com.google.common.base.Preconditions;
 
+import code.ponfee.commons.util.Base64UrlSafe;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
@@ -359,10 +359,10 @@ public final class BCrypt {
         builder.append(Integer.toString(logrounds)).append(SEPARATOR);
 
         byte[] salt = SecureRandoms.nextBytes(16);
-        builder.append(encodeBase64(salt)).append(SEPARATOR);
+        builder.append(Base64UrlSafe.encode(salt)).append(SEPARATOR);
 
         byte[] hashed = crypt(passwd, salt, logrounds);
-        return builder.append(encodeBase64(hashed)).toString();
+        return builder.append(Base64UrlSafe.encode(hashed)).toString();
     }
 
     public static boolean check(String passwd, String hashed) {
@@ -382,8 +382,8 @@ public final class BCrypt {
         }
 
         int logrounds = Integer.parseInt(parts[2]);
-        byte[] salt = Base64.getUrlDecoder().decode(parts[3]);
-        byte[] actual = Base64.getUrlDecoder().decode(parts[4]);
+        byte[] salt = Base64UrlSafe.decode(parts[3]);
+        byte[] actual = Base64UrlSafe.decode(parts[4]);
 
         // crypt passwd by salt
         byte[] expect = crypt(passwd, salt, logrounds);
@@ -391,7 +391,7 @@ public final class BCrypt {
         return Arrays.equals(actual, expect);
     }
 
-    private static byte[] crypt(byte[] passwd, byte[] salt, int logrounds) {
+    public static byte[] crypt(byte[] passwd, byte[] salt, int logrounds) {
         int[] ciphertext = Arrays.copyOf(CIPHERTEXT, CIPHERTEXT.length);
         return crypt(passwd, salt, logrounds, ciphertext);
     }
@@ -405,7 +405,7 @@ public final class BCrypt {
      * @param cdata      the plaintext to encrypt
      * @return  an array containing the binary hashed password
      */
-    private static byte[] crypt(byte[] passwd, byte[] salt, int logrounds, int[] cdata) {
+    public static byte[] crypt(byte[] passwd, byte[] salt, int logrounds, int[] cdata) {
         if (logrounds < 2 || logrounds > 20) {
             throw new IllegalArgumentException("logrounds must between 2 and 20.");
         }
@@ -553,10 +553,6 @@ public final class BCrypt {
         }
         lr[off]     = r ^ P[BLOWFISH_NUM_ROUNDS + 1];
         lr[off + 1] = k;
-    }
-
-    private static String encodeBase64(byte[] data) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
 }

@@ -8,7 +8,6 @@ import static java.lang.System.arraycopy;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.util.Arrays;
-import java.util.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.ShortBufferException;
@@ -18,6 +17,7 @@ import com.google.common.base.Preconditions;
 import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.jce.digest.HmacUtils;
+import code.ponfee.commons.util.Base64UrlSafe;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
@@ -40,6 +40,7 @@ public final class SCrypt {
     // -------------------------------------------------------------------pbkdf2
     /**
      * Implementation of PBKDF2 (RFC2898).
+     * 
      * @param alg HMAC algorithm to use.
      * @param P Password.
      * @param S Salt.
@@ -47,13 +48,14 @@ public final class SCrypt {
      * @param dkLen Intended length, in octets, of the derived key (hash byte size).
      * @return The derived key.
      */
-    public static String create(HmacAlgorithms alg, byte[] P, byte[] S, 
-                                int c, int dkLen) {
-        return encodeBase64(pbkdf2(alg, P, S, c, dkLen));
+    public static String createPbkdf2(HmacAlgorithms alg, byte[] P, byte[] S, 
+                                      int c, int dkLen) {
+        return Base64UrlSafe.encode(pbkdf2(alg, P, S, c, dkLen));
     }
 
     /**
-     * check the pbkdf2 hashed value
+     * Checks the pbkdf2 hashed value
+     * 
      * @param alg  HMAC algorithm to use.
      * @param P    Password.
      * @param S    Salt.
@@ -61,9 +63,9 @@ public final class SCrypt {
      * @param hashed  the hashed value to check
      * @return {@code true} is checked success
      */
-    public static boolean check(HmacAlgorithms alg, byte[] P, byte[] S,
-                                int c, String hashed) {
-        byte[] actual = Base64.getUrlDecoder().decode(hashed);
+    public static boolean checkPbkdf2(HmacAlgorithms alg, byte[] P, byte[] S,
+                                      int c, String hashed) {
+        byte[] actual = Base64UrlSafe.decode(hashed);
         byte[] except = pbkdf2(alg, P, S, c, actual.length);
         return Arrays.equals(actual, except);
     }
@@ -99,8 +101,8 @@ public final class SCrypt {
         return new StringBuilder(12 + ((salt.length + derived.length) << 2) / 3 + 4)
                         .append(SEPARATOR).append("s0").append(SEPARATOR)
                         .append(params).append(SEPARATOR)
-                        .append(encodeBase64(salt)).append(SEPARATOR)
-                        .append(encodeBase64(derived)).toString();
+                        .append(Base64UrlSafe.encode(salt)).append(SEPARATOR)
+                        .append(Base64UrlSafe.encode(derived)).toString();
     }
 
     /**
@@ -117,8 +119,8 @@ public final class SCrypt {
         }
 
         int params = Integer.parseInt(parts[2], 16);
-        byte[] salt = Base64.getUrlDecoder().decode(parts[3]);
-        byte[] actual = Base64.getUrlDecoder().decode(parts[4]);
+        byte[] salt = Base64UrlSafe.decode(parts[3]);
+        byte[] actual = Base64UrlSafe.decode(parts[4]);
 
         int algIdx = (params >> 20) & 0xF ,
                  N = (params >> 16) & 0xF ,
@@ -199,8 +201,8 @@ public final class SCrypt {
      * @param dkLen Intended length of the derived key.
      * @return The derived key.
      */
-    private static byte[] scrypt(HmacAlgorithms alg, byte[] P, byte[] S, 
-                                 int N, int r, int p, int dkLen) {
+    public static byte[] scrypt(HmacAlgorithms alg, byte[] P, byte[] S, 
+                                int N, int r, int p, int dkLen) {
         if (r > MAX_VALUE / 128 / p) {
             throw new IllegalArgumentException("Parameter r is too large");
         }
@@ -337,10 +339,6 @@ public final class SCrypt {
              | ((B[Bi + 1] & 0xff) <<  8)
              | ((B[Bi + 2] & 0xff) << 16)
              | ((B[Bi + 3] & 0xff) << 24);
-    }
-
-    private static String encodeBase64(byte[] data) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
 }

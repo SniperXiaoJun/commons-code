@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
-import java.util.Base64;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,6 +24,7 @@ import code.ponfee.commons.jce.security.RSAPrivateKeys;
 import code.ponfee.commons.jce.security.RSAPublicKeys;
 import code.ponfee.commons.jce.sm.SM2;
 import code.ponfee.commons.jce.symmetric.SymmetricCryptor;
+import code.ponfee.commons.util.Base64UrlSafe;
 
 /**
  * 加解密服务提供
@@ -91,7 +91,7 @@ public abstract class CryptoProvider {
             return null;
         }
 
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(
+        return Base64UrlSafe.encode(
             this.encrypt(plaintext.getBytes(charset))
         );
     }
@@ -119,7 +119,7 @@ public abstract class CryptoProvider {
         }
 
         return new String(
-            decrypt(Base64.getUrlDecoder().decode(ciphertext)), 
+            decrypt(Base64UrlSafe.decode(ciphertext)), 
             charset
         );
     }
@@ -145,7 +145,7 @@ public abstract class CryptoProvider {
         if (StringUtils.isEmpty(data)) {
             return null;
         }
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(
+        return Base64UrlSafe.encode(
             sign(data.getBytes(Charset.forName(charset)))
         );
     }
@@ -170,8 +170,9 @@ public abstract class CryptoProvider {
      * @return {@code true} verify success
      */
     public final boolean verify(String data, String charset, String signed) {
-        return verify(data.getBytes(Charset.forName(charset)), 
-            Base64.getUrlDecoder().decode(signed)
+        return verify(
+             data.getBytes(Charset.forName(charset)), 
+             Base64UrlSafe.decode(signed)
         );
     }
 

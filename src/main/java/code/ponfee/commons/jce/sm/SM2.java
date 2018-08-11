@@ -1,20 +1,22 @@
 package code.ponfee.commons.jce.sm;
 
-import code.ponfee.commons.jce.ECParameters;
-import code.ponfee.commons.util.Bytes;
-import code.ponfee.commons.util.SecureRandoms;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Map;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.math.ec.ECPoint;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+
+import code.ponfee.commons.jce.ECParameters;
+import code.ponfee.commons.util.Base64UrlSafe;
+import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.SecureRandoms;
 
 /**
  * new BigInteger("0") // 0为十进制数字符串表示
@@ -425,7 +427,7 @@ public final class SM2 {
         }
 
         public @Override String toString() {
-            return Base64.getUrlEncoder().withoutPadding().encodeToString(toByteArray());
+            return Base64UrlSafe.encode(toByteArray());
         }
     }
 

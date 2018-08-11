@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import com.google.common.base.Stopwatch;
 
+import code.ponfee.commons.jce.passwd.BCrypt;
 import code.ponfee.commons.jce.passwd.Crypt;
 import code.ponfee.commons.jce.passwd.PBKDF2;
 import code.ponfee.commons.jce.passwd.SCrypt;
@@ -15,7 +16,7 @@ public class PasswdTest {
 
     
     @Test
-    public void test0() {
+    public void testCrypt() {
         String passwd = "passwd";
         String hashed = Crypt.create(HmacAlgorithms.HmacSHA3_256, passwd, 32, Providers.BC);
         boolean flag = true;
@@ -41,7 +42,7 @@ public class PasswdTest {
      * @throws GeneralSecurityException
      */
     @Test
-    public void test1() {
+    public void testPBKDF2() {
         // Print out 10 hashes
         for (int i = 0; i < 10; i++) {
             System.out.println(PBKDF2.create(HmacAlgorithms.HmacSHA256, "p\r\nassw0Rd!".toCharArray(), 16, 65535, 32));
@@ -70,14 +71,14 @@ public class PasswdTest {
         }
     }
     
-    /*@Test
-    public void test3() {
+    @Test
+    public void testScrypt() {
         byte[] pwd = "123456".getBytes();
         byte[] salt = "0123456789123456".getBytes();
         System.out.println("\n=====================PBKDF2=============================");
-        String hashed = SCrypt.create(HmacAlgorithms.HmacSHA256, pwd, salt, 1024, 32);
+        String hashed = SCrypt.createPbkdf2(HmacAlgorithms.HmacSHA256, pwd, salt, 1024, 32);
         System.out.println(hashed);
-        System.out.println(SCrypt.check(HmacAlgorithms.HmacSHA256, pwd, salt, 1024, hashed));
+        System.out.println(SCrypt.checkPbkdf2(HmacAlgorithms.HmacSHA256, pwd, salt, 1024, hashed));
 
         System.out.println("\n=====================scrypt cost=============================");
         Stopwatch watch = Stopwatch.createStarted();
@@ -104,7 +105,7 @@ public class PasswdTest {
         boolean flag = true;
         watch.reset().start();
         for (int i = 0; i < 100000; i++) { // 20 seconds
-            if (!check(password, hashed)) {
+            if (!SCrypt.check(password, hashed)) {
                 flag = false;
                 break;
             }
@@ -115,5 +116,39 @@ public class PasswdTest {
             System.err.println("Test fail!");
         }
         System.out.println("cost: " + watch.stop());
-    }*/
+    }
+    
+    @Test
+    public void testBcrypt() {
+        byte[] pwd = "123456".getBytes();
+        byte[] salt = "0123456789123456".getBytes();
+        String actual = Hex.encodeHexString(BCrypt.crypt(pwd, salt, 5));
+        if (!"ddc41d0b514ecedb8ae12c42e8c2f4419e71e15c519ecd4b".equals(actual)) {
+            System.err.println("crypt fail!");
+        } else {
+            System.out.println("crypt success!");
+        }
+        System.out.println();
+
+        String password = "passwd";
+        System.out.println(BCrypt.create(password, 11));
+        System.out.println();
+
+        System.out.println("Test begin...");
+        boolean flag = true;
+        String hashed = BCrypt.create(password, 5);
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 100000; i++) { // 45 seconds
+            if (!BCrypt.check(password, hashed)) {
+                flag = false;
+                break;
+            }
+        }
+        System.out.println("cost: " + (System.currentTimeMillis() - start) / 1000);
+        if (flag) {
+            System.out.println("Test success!");
+        } else {
+            System.err.println("Test fail!");
+        }
+    }
 }

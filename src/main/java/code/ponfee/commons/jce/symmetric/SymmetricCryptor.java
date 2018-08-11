@@ -3,11 +3,12 @@ package code.ponfee.commons.jce.symmetric;
 import java.security.GeneralSecurityException;
 import java.security.Provider;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+
+import code.ponfee.commons.util.Base64UrlSafe;
 
 /**
  * AES
@@ -121,7 +122,7 @@ public class SymmetricCryptor {
     }
 
     public final String getKeyAsBase64() {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(getKey());
+        return Base64UrlSafe.encode(getKey());
     }
 
     /**
@@ -133,7 +134,7 @@ public class SymmetricCryptor {
     }
 
     public final String getParameterAsBase64() {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(getParameter());
+        return Base64UrlSafe.encode(getParameter());
     }
 
     public final Mode getMode() {

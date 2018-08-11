@@ -5,7 +5,6 @@ import static code.ponfee.commons.jce.HmacAlgorithms.ALGORITHM_MAPPING;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
-import java.util.Base64;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -14,6 +13,7 @@ import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.Providers;
+import code.ponfee.commons.util.Base64UrlSafe;
 import code.ponfee.commons.util.SecureRandoms;
 
 /**
@@ -85,13 +85,9 @@ public final class PBKDF2 {
         // format iterations:salt:hash
         return new StringBuilder(8 + ((salt.length + hash.length) << 2) / 3 + 4)
                 .append(SEPARATOR).append(params)
-                .append(SEPARATOR).append(encodeBase64(salt))
-                .append(SEPARATOR).append(encodeBase64(hash))
+                .append(SEPARATOR).append(Base64UrlSafe.encode(salt))
+                .append(SEPARATOR).append(Base64UrlSafe.encode(hash))
                 .toString();
-    }
-
-    private static String encodeBase64(byte[] data) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
     /**
@@ -120,8 +116,8 @@ public final class PBKDF2 {
         int params = Integer.parseInt(parts[1], 16);
         HmacAlgorithms alg = ALGORITHM_MAPPING.get(params >> 16 & 0xf);
         int iterations = params & 0xffff;
-        byte[] salt = Base64.getUrlDecoder().decode(parts[2]);
-        byte[] hash = Base64.getUrlDecoder().decode(parts[3]);
+        byte[] salt = Base64UrlSafe.decode(parts[2]);
+        byte[] hash = Base64UrlSafe.decode(parts[3]);
 
         // Compute the hash of the provided password, using the same salt, 
         // iteration count, and hash length

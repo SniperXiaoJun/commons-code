@@ -4,7 +4,6 @@ import static code.ponfee.commons.jce.HmacAlgorithms.ALGORITHM_MAPPING;
 
 import java.security.Provider;
 import java.util.Arrays;
-import java.util.Base64;
 
 import javax.crypto.Mac;
 
@@ -13,6 +12,7 @@ import com.google.common.base.Preconditions;
 import code.ponfee.commons.jce.HmacAlgorithms;
 import code.ponfee.commons.jce.Providers;
 import code.ponfee.commons.jce.digest.HmacUtils;
+import code.ponfee.commons.util.Base64UrlSafe;
 import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.SecureRandoms;
 
@@ -48,8 +48,8 @@ public class Crypt {
 
         return new StringBuilder(6 + ((salt.length + hashed.length) << 2) / 3 + 4)
                     .append(SEPARATOR).append(Integer.toString((algIdx << 8) | rounds, 16))
-                    .append(SEPARATOR).append(encodeBase64(salt))
-                    .append(SEPARATOR).append(encodeBase64(hashed))
+                    .append(SEPARATOR).append(Base64UrlSafe.encode(salt))
+                    .append(SEPARATOR).append(Base64UrlSafe.encode(hashed))
                     .toString();
     }
 
@@ -72,11 +72,11 @@ public class Crypt {
 
         int params = Integer.parseInt(parts[1], 16);
         HmacAlgorithms alg = ALGORITHM_MAPPING.get(params >> 8 & 0xF);
-        byte[] salt = Base64.getUrlDecoder().decode(parts[2]);
+        byte[] salt = Base64UrlSafe.decode(parts[2]);
         byte[] testHash = crypt(alg, passwd.getBytes(), salt, params & 0xFF, provider);
 
         // compare
-        return Arrays.equals(Base64.getUrlDecoder().decode(parts[3]), testHash);
+        return Arrays.equals(Base64UrlSafe.decode(parts[3]), testHash);
     }
 
     /**
@@ -99,8 +99,5 @@ public class Crypt {
         return password;
     }
 
-    private static String encodeBase64(byte[] data) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
-    }
 
 }
