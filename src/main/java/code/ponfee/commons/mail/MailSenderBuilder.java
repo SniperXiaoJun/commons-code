@@ -6,11 +6,11 @@ package code.ponfee.commons.mail;
  */
 public final class MailSenderBuilder {
 
-    private String user;
-    private String password;
-    private String smtpHost;
-    private String nickname;
+    private final String user;
+    private final String password;
+    private final String smtpHost;
 
+    private String nickname;
     private boolean authRequire = true;
     private Integer connTimeout; // 建立连接超时时间
     private Integer readTimeout; // 邮件发送读写超时时间
@@ -19,18 +19,19 @@ public final class MailSenderBuilder {
     private int retryTimes; // 重试次数
     private MailSentFailedLogger sentFailedLogger;
 
-    private MailSenderBuilder() {}
-
-    public static MailSenderBuilder newBuilder(String user, String password) {
-        return newBuilder(user, password, null);
+    private MailSenderBuilder(String user, String password, String smtpHost) {
+        this.user = user;
+        this.password = password;
+        this.smtpHost = smtpHost;
     }
 
-    public static MailSenderBuilder newBuilder(String user, String password, String smtpHost) {
-        MailSenderBuilder builder = new MailSenderBuilder();
-        builder.user = user;
-        builder.password = password;
-        builder.smtpHost = smtpHost;
-        return builder;
+    public static MailSenderBuilder newBuilder(String user, String password) {
+        return new MailSenderBuilder(user, password, null);
+    }
+
+    public static MailSenderBuilder newBuilder(String user, String password, 
+                                               String smtpHost) {
+        return new MailSenderBuilder(user, password, smtpHost);
     }
 
     public MailSenderBuilder nickname(String nickname) {
@@ -74,7 +75,8 @@ public final class MailSenderBuilder {
     }
 
     public MailSender build() {
-        MailSender sender = new MailSender(user, password, smtpHost, authRequire, connTimeout, readTimeout);
+        MailSender sender = new MailSender(user, password, smtpHost, 
+                                           authRequire, connTimeout, readTimeout);
         sender.setNickname(nickname);
         sender.setCharset(charset);
         sender.setRetryTimes(retryTimes);

@@ -10,6 +10,8 @@ package code.ponfee.commons.jce;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
@@ -19,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Preconditions;
 
 import code.ponfee.commons.io.Files;
+import code.ponfee.commons.jce.security.ECDSASigner;
 import code.ponfee.commons.jce.security.RSACryptor;
 import code.ponfee.commons.jce.security.RSAPrivateKeys;
 import code.ponfee.commons.jce.security.RSAPublicKeys;
@@ -55,7 +58,7 @@ public abstract class CryptoProvider {
      * @return signature data
      */
     public byte[] sign(byte[] data) {
-        throw new UnsupportedOperationException("cannot support sign.");
+        throw new UnsupportedOperationException("cannot support signature.");
     }
 
     /**
@@ -176,6 +179,7 @@ public abstract class CryptoProvider {
         );
     }
 
+    // -----------------------------------------------------------------------SymmetricCryptor
     /**
      * 对称密钥组件
      * @param symmetricKey {@link SymmetricCryptor}
@@ -198,6 +202,7 @@ public abstract class CryptoProvider {
         };
     }
 
+    // -----------------------------------------------------------------------RSA
     /**
      * RSA private key密钥组件
      * forbid use private key encrypt and use public key decrypt
@@ -265,6 +270,7 @@ public abstract class CryptoProvider {
         };
     }
 
+    // -----------------------------------------------------------------------SM2
     public static CryptoProvider sm2PublicKeyProvider(final byte[] publicKey) {
         return sm2PublicKeyProvider(ECParameters.SM2_BEST, publicKey);
     }
@@ -321,6 +327,55 @@ public abstract class CryptoProvider {
             @Override
             public boolean verify(byte[] data, byte[] signed) { // verify the SM3WithSM2 signature
                 return SM2.verify(ecParameter, data, signed, publicKey0);
+            }
+        };
+    }
+
+    // -----------------------------------------------------------------------ECDSASinger
+    public static CryptoProvider ecdsaPublicKeyProvider(byte[] publicKey) {
+        return new CryptoProvider() {
+            private ECPublicKey publicKey0 = ECDSASigner.getPublicKey(publicKey);
+
+            @Override
+            public byte[] encrypt(byte[] original) {
+                throw new UnsupportedOperationException("ECDSA cannot support encrypt.");
+            }
+
+            @Override
+            public byte[] decrypt(byte[] encrypted) {
+                throw new UnsupportedOperationException("ECDSA cannot support decrypt.");
+            }
+
+            @Override
+            public boolean verify(byte[] data, byte[] signed) {
+                return ECDSASigner.verifySha256(data, signed, publicKey0);
+            }
+        };
+    }
+
+    public static CryptoProvider ecdsaPrivateKeyProvider(byte[] publicKey, byte[] privateKey) {
+        return new CryptoProvider() {
+            private ECPublicKey publicKey0 = ECDSASigner.getPublicKey(publicKey);
+            private ECPrivateKey privateKey0 = ECDSASigner.getPrivateKey(privateKey);
+
+            @Override
+            public byte[] encrypt(byte[] original) {
+                throw new UnsupportedOperationException("ECDSA cannot support encrypt.");
+            }
+
+            @Override
+            public byte[] decrypt(byte[] encrypted) {
+                throw new UnsupportedOperationException("ECDSA cannot support decrypt.");
+            }
+
+            @Override
+            public byte[] sign(byte[] data) {
+                return ECDSASigner.signSha256(data, privateKey0);
+            }
+
+            @Override
+            public boolean verify(byte[] data, byte[] signed) {
+                return ECDSASigner.verifySha256(data, signed, publicKey0);
             }
         };
     }

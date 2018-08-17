@@ -34,18 +34,24 @@ public final class ECDHKeyExchanger {
     private static final String PUBLIC_KEY = "ECDHPublicKey";
     private static final String PRIVATE_KEY = "ECDHPrivateKey";
 
+    public static Map<String, byte[]> initPartAKey() {
+        return initPartAKey(256);
+    }
+
     /**
      * 初始化甲方密钥
-     * @return
+     * 
+     * @param keySize the key size: 192/224/256/384/521
+     * @return the key map
      */
-    public static Map<String, byte[]> initPartAKey() {
+    public static Map<String, byte[]> initPartAKey(int keySize) {
         KeyPairGenerator keyPairGenerator;
         try {
             keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM, BC);
         } catch (NoSuchAlgorithmException e) {
             throw new SecurityException(e);
         }
-        keyPairGenerator.initialize(256); // must be 256
+        keyPairGenerator.initialize(keySize); // must be 256
         KeyPair pair = keyPairGenerator.generateKeyPair();
         return ImmutableMap.of(PUBLIC_KEY, pair.getPublic().getEncoded(), // 甲方公钥
                                PRIVATE_KEY, pair.getPrivate().getEncoded()); // 甲方私钥

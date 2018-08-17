@@ -1,12 +1,10 @@
 package code.ponfee.commons.limit;
 
-import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -181,40 +179,4 @@ public final class ConcurrentMapRequestLimiter extends RequestLimiter {
         }
     }
 
-    private static long expire(int ttl) {
-        return System.currentTimeMillis() + ttl * 1000;
-    }
-
-    private static class CacheValue<T> implements Serializable {
-        private static final long serialVersionUID = 8615157453929878610L;
-        private final T value;
-        private final long expireTimeMillis;
-        private final AtomicInteger count;
-
-        public CacheValue(T value, long expireTimeMillis) {
-            this.value = value;
-            this.expireTimeMillis = expireTimeMillis;
-            this.count = new AtomicInteger(1);
-        }
-
-        private int increment() {
-            return count.incrementAndGet();
-        }
-
-        private int count() {
-            return count.get();
-        }
-
-        private T get() {
-            return value;
-        }
-
-        private boolean isExpire() {
-            return expireTimeMillis < System.currentTimeMillis();
-        }
-
-        private boolean isExpire(long timeMillis) {
-            return expireTimeMillis < timeMillis;
-        }
-    }
 }

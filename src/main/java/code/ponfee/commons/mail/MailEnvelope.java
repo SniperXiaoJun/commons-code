@@ -1,182 +1,55 @@
 package code.ponfee.commons.mail;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.mail.util.ByteArrayDataSource;
-
-import org.apache.commons.io.FilenameUtils;
 
 /**
- * 邮件信封实体
+ * The Mail Envelope
+ * 
  * @author fupf
  */
 public class MailEnvelope implements Serializable {
 
     private static final long serialVersionUID = 2375709603692620293L;
-    private static final int MAX_LEN = 200;
+
+    private static final int MAX_LEN = 100;
+
+    public enum MailType { TEXT, MIME }
 
     private final MailType type;
     private final String subject; // 主题
     private final Object content; // 内容
-    private String[] to; // 接收人
-    private String[] cc; // 抄送
-    private String[] bcc; // 密送
-    private String[] reply; // 回复
+    private final String[] to; // 接收人
+    private final String[] cc; // 抄送
+    private final String[] bcc; // 密送
+    private final String[] reply; // 回复
 
     /** 邮件附件：key为邮件附件名 */
-    private final Map<String, DataSource> attachments = new LinkedHashMap<>();
+    private final Map<String, DataSource> attachments;
 
     /** 正文图片：key为content-id，正文应包含：<img src="cid:content-id" /> */
-    private final Map<String, DataSource> contentImages = new HashMap<>();
+    private final Map<String, DataSource> contentImages;
 
-    private MailEnvelope(MailType type, String[] to, String subject, 
-                         Object content, String[] cc, String[] bcc) {
+    public MailEnvelope(MailType type, String subject, Object content, 
+                        String[] to, String[] cc, String[] bcc, String[] reply, 
+                        Map<String, DataSource> attachments,
+                        Map<String, DataSource> contentImages) {
         this.type = type;
-        this.to = to;
         this.subject = subject;
         this.content = content;
-        this.cc = cc;
-        this.bcc = bcc;
-    }
-
-    /** text格式发送 */
-    public static MailEnvelope newTextInstance(String to, String subject) {
-        return newTextInstance(to, subject, null);
-    }
-
-    public static MailEnvelope newTextInstance(String to, String subject, String content) {
-        return newTextInstance(new String[] { to }, subject, content);
-
-    }
-
-    public static MailEnvelope newTextInstance(String[] to, String subject) {
-        return newTextInstance(to, subject, null);
-    }
-
-    public static MailEnvelope newTextInstance(String[] to, String subject, String content) {
-        return newTextInstance(to, subject, content, null, null);
-    }
-
-    public static MailEnvelope newTextInstance(String[] to, String subject, String content,
-                                               String[] cc, String[] bcc) {
-        return new MailEnvelope(MailType.TEXT, to, subject, content, cc, bcc);
-    }
-
-    /** mime格式发送 */
-    public static MailEnvelope newMimeInstance(String to, String subject, Object content) {
-        return newMimeInstance(new String[] { to }, subject, content);
-    }
-
-    public static MailEnvelope newMimeInstance(String[] to, String subject, Object content) {
-        return newMimeInstance(to, subject, content, null, null);
-    }
-
-    public static MailEnvelope newMimeInstance(String[] to, String subject, 
-                                               Object content, String[] cc, String[] bcc) {
-        return new MailEnvelope(MailType.MIME, to, subject, content, cc, bcc);
-    }
-
-    /** setter */
-    public void setTo(String[] to) {
         this.to = to;
-    }
-
-    public void setCc(String[] cc) {
         this.cc = cc;
-    }
-
-    public void setBcc(String[] bcc) {
         this.bcc = bcc;
-    }
-
-    public void setReply(String[] reply) {
         this.reply = reply;
+        this.attachments = attachments;
+        this.contentImages = contentImages;
     }
 
-    /**
-     * 添加附件
-     * @param fileName
-     * @param data
-     */
-    public void addAttachment(String fileName, byte[] data) {
-        checkMimeType();
-        if (this.attachments.containsKey(fileName)) {
-            throw new IllegalArgumentException("repeated attachment filename: " + fileName);
-        }
-        this.attachments.put(fileName, buildDataSource(data));
-    }
-
-    public void addAttachment(String filepath) {
-        addAttachment(new File(filepath));
-    }
-
-    public void addAttachment(String fileName, String filepath) {
-        addAttachment(fileName, new File(filepath));
-    }
-
-    public void addAttachment(File file) {
-        addAttachment(FilenameUtils.getName(file.getAbsolutePath()), file);
-    }
-
-    public void addAttachment(String fileName, File file) {
-        checkMimeType();
-        if (this.attachments.containsKey(fileName)) {
-            throw new IllegalArgumentException("repeated attachment filename: " + fileName);
-        }
-        this.attachments.put(fileName, new FileDataSource(file));
-    }
-
-    /**
-     * 添加正文图片
-     * @param contentId
-     * @param data
-     */
-    public void addContentImage(String contentId, byte[] data) {
-        checkMimeType();
-        if (this.contentImages.containsKey(contentId)) {
-            throw new IllegalArgumentException("repeated image content-id: " + contentId);
-        }
-        this.contentImages.put(contentId, buildDataSource(data));
-    }
-
-    /**
-     * 文件名为content-id
-     * @param filepath
-     */
-    public void addContentImage(String filepath) {
-        addContentImage(FilenameUtils.getName(filepath), filepath);
-    }
-
-    public void addContentImage(String contentId, String filepath) {
-        addContentImage(contentId, new File(filepath));
-    }
-
-    public void addContentImage(File file) {
-        addContentImage(FilenameUtils.getName(file.getAbsolutePath()), file);
-    }
-
-    public void addContentImage(String contentId, File file) {
-        checkMimeType();
-        if (this.contentImages.containsKey(contentId)) {
-            throw new IllegalArgumentException("repeated image content-id: " + contentId);
-        }
-        this.contentImages.put(contentId, new FileDataSource(file));
-    }
-
-    /** getter */
     public MailType getType() {
         return type;
-    }
-
-    public String[] getTo() {
-        return to;
     }
 
     public String getSubject() {
@@ -185,6 +58,10 @@ public class MailEnvelope implements Serializable {
 
     public Object getContent() {
         return content;
+    }
+
+    public String[] getTo() {
+        return to;
     }
 
     public String[] getCc() {
@@ -207,35 +84,27 @@ public class MailEnvelope implements Serializable {
         return contentImages;
     }
 
-    private DataSource buildDataSource(byte[] data) {
-        return new ByteArrayDataSource(data, "application/octet-stream");
-    }
-
-    private void checkMimeType() {
-        if (this.type != MailType.MIME) {
-            throw new IllegalArgumentException("operation must be mime type");
-        }
+    public MailEnvelope copy(String[] to, String[] cc, 
+                             String[] bcc, String[] reply) {
+        return new MailEnvelope(type, subject, content, to, cc, bcc, 
+                                reply, attachments, contentImages);
     }
 
     @Override
     public String toString() {
         return new StringBuilder(256)
                 .append("{type=").append(type)
-                .append(", subject=").append(substr(subject))
-                .append(", content=").append(substr(content))
-                .append(", to=").append(arraystr(to))
-                .append(", cc=").append(arraystr(cc))
-                .append(", bcc=").append(arraystr(bcc))
-                .append(", attachments=").append(substr(attachments))
-                .append(", contentImages=").append(substr(contentImages))
+                .append(", subject=").append(toString(subject))
+                .append(", content=").append(toString(content))
+                .append(", to=").append(Arrays.toString(to))
+                .append(", cc=").append(Arrays.toString(cc))
+                .append(", bcc=").append(Arrays.toString(bcc))
+                .append(", attachments=").append(toString(attachments))
+                .append(", contentImages=").append(toString(contentImages))
                 .append("}").toString();
     }
 
-    private String arraystr(String[] array) {
-        return Arrays.toString(array);
-    }
-
-    private String substr(String str) {
+    private String toString(String str) {
         if (str == null) {
             return null;
         }
@@ -248,18 +117,11 @@ public class MailEnvelope implements Serializable {
         return str;
     }
 
-    private String substr(Object o) {
+    private String toString(Object o) {
         if (o == null) {
             return null;
         }
-        return substr(o.toString());
-    }
-
-    /**
-     * 邮件类型 
-     */
-    enum MailType {
-        TEXT, MIME
+        return toString(o.toString());
     }
 
 }

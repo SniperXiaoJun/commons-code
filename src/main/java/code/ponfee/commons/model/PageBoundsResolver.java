@@ -42,7 +42,7 @@ public final class PageBoundsResolver {
             return bounds;
         }
 
-        // 合理化pageNum、offset的值
+        // normalize pageNum, offset value
         if (pageNum < 1) {
             pageNum = 1;
         }

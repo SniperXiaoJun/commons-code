@@ -30,7 +30,7 @@ import code.ponfee.commons.util.ObjectUtils;
  *        ＠Component
  *        ＠Aspect
  *        public class TestMethodValidator extends MethodValidator {
- *            ＠Around(value = "execution(public * code.ponfee.xxx.service.impl.*Impl.*(..)) 
+ *            ＠Around(value = "execution(public * code.ponfee.xxx.service.impl..*Impl..*(..)) 
  *                    && ＠annotation(cst)", argNames = "pjp,cst")
  *            public ＠Override Object constrain(ProceedingJoinPoint pjp, Constraints cst) 
  *                throws Throwable {
@@ -159,12 +159,6 @@ public abstract class MethodValidator extends FieldValidator {
         } else {
             throw new IllegalArgumentException(errMsg);
         }
-        /*try {
-            return method.getReturnType().getConstructor(ResultCode.class, String.class)
-                         .newInstance(BAD_REQUEST, BAD_REQUEST.getMsg() + ": " + errMsg);
-        } catch (Throwable t) {
-            throw new IllegalArgumentException(errMsg, t);
-        }*/
     }
 
     // -------------------------------------------------------------------------private methods

@@ -1,4 +1,4 @@
-package test;
+package code.ponfee.commons;
 
 import org.junit.After;
 import org.junit.Before;
@@ -44,7 +44,7 @@ public abstract class BaseTest<T> {
         // do no thing
     }
 
-    public static void print(Object obj) {
+    public static void console(Object obj) {
         System.out.println(Jsons.toJson(obj));
     }
 }

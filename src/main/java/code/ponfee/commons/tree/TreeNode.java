@@ -119,9 +119,9 @@ public final class TreeNode<T extends java.io.Serializable & Comparable<T>>
         }
 
         // 3、以此节点为根构建节点树
-        this.level = 1; // reset with 1
+        this.level = 1; // root node level is 1
         this.path = null; // reset with null
-        this.leftLeafCount = 0; // reset with 0
+        this.leftLeafCount = 0; // root node left leaf count is 1
         this.mount0(nodes, ignoreOrphan, this.nid);
 
         // 4、检查是否存在孤儿节点
@@ -163,7 +163,7 @@ public final class TreeNode<T extends java.io.Serializable & Comparable<T>>
 
     // -----------------------------------------------------------private methods
     private <E extends AbstractNode<T>> List<AbstractNode<T>> before(List<E> nodes) {
-        List<AbstractNode<T>> list = Lists.newArrayList();
+        List<AbstractNode<T>> list = Lists.newArrayListWithCapacity(nodes.size());
 
         // nodes list
         for (AbstractNode<T> node : nodes) {

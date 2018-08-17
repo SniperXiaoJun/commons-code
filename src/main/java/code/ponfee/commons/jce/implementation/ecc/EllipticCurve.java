@@ -5,6 +5,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import code.ponfee.commons.jce.ECParameters;
 
 /**
@@ -188,6 +191,27 @@ public class EllipticCurve {
         } else {
             return name;
         }
+    }
+
+    public @Override boolean equals(Object obj) {
+        if (!(obj instanceof EllipticCurve)) {
+            return false;
+        }
+        EllipticCurve o = (EllipticCurve) obj;
+        return new EqualsBuilder().append(this.a, o.a)
+                                  .append(this.b, o.b)
+                                  .append(this.p, o.p)
+                                  .append(this.n, o.n)
+                                  .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(this.a)
+                                    .append(this.b)
+                                    .append(this.p)
+                                    .append(this.n)
+                                    .hashCode();
     }
 
     private static boolean isSingular(BigInteger a, BigInteger b, BigInteger p) {

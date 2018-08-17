@@ -1,5 +1,8 @@
 package code.ponfee.commons.limit;
 
+import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -198,6 +201,44 @@ public abstract class RequestLimiter {
         }
 
         return seconds + "秒"; // 秒
+    }
+
+    static long expire(int ttl) {
+        return System.currentTimeMillis() + ttl * 1000;
+    }
+
+    static class CacheValue<T> implements Serializable {
+        private static final long serialVersionUID = 8615157453929878610L;
+
+        final T value;
+        final long expireTimeMillis;
+        final AtomicInteger count;
+
+        public CacheValue(T value, long expireTimeMillis) {
+            this.value = value;
+            this.expireTimeMillis = expireTimeMillis;
+            this.count = new AtomicInteger(1);
+        }
+
+        int increment() {
+            return count.incrementAndGet();
+        }
+
+        int count() {
+            return count.get();
+        }
+
+        T get() {
+            return value;
+        }
+
+        boolean isExpire() {
+            return expireTimeMillis < System.currentTimeMillis();
+        }
+
+        boolean isExpire(long timeMillis) {
+            return expireTimeMillis < timeMillis;
+        }
     }
 
 }

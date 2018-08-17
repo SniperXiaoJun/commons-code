@@ -107,8 +107,11 @@ public class MailSender {
     MailSender(String user, String password, String smtpHost, 
                boolean authRequire, Integer connTimeout, Integer readTimeout) {
         if (!RegexUtils.isEmail(user)) {
-            throw new IllegalArgumentException("illegal sender email: " + user);
+            throw new IllegalArgumentException("Illegal sender email: " + user);
         }
+        //if (EmailValidator.verify(user)) {
+        //    throw new IllegalArgumentException("Invaild sender email: " + user);
+        //}
 
         if (smtpHost == null || smtpHost.length() == 0) {
             smtpHost = "smtp." + user.split("@")[1];
@@ -299,9 +302,10 @@ public class MailSender {
                     if (--retries > 0) {
                         // 发送失败重试
                         String[] unsents0 = unsents.toArray(new String[unsents.size()]);
-                        envlop.setTo(Collects.intersect(envlop.getTo(), unsents0));
-                        envlop.setBcc(Collects.intersect(envlop.getBcc(), unsents0));
-                        envlop.setCc(Collects.intersect(envlop.getCc(), unsents0));
+                        envlop = envlop.copy(Collects.intersect(envlop.getTo(), unsents0), 
+                                             Collects.intersect(envlop.getCc(), unsents0), 
+                                             Collects.intersect(envlop.getBcc(), unsents0),
+                                             null);
                         return send0(logid, envlop, retries);
                     } else {
                         logger.error("unsend email address [{}] - {}", logid, unsents.toString());

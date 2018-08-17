@@ -1,7 +1,9 @@
-package test.http;
+package code.ponfee.commons;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -16,20 +18,18 @@ import code.ponfee.commons.ws.JAXWS;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:spring/application-config.xml" })
-public abstract class BaseWebserviceTester<T> {
+public abstract class BaseWebserviceTest<T> {
 
-    private static final AtomicBoolean IS_PUBLISHED = new AtomicBoolean(false);
+    private static final Set<String> PUBLISHED = new HashSet<>();
 
     private T client;
-    private final Class<T> clazz;
     private final String addressUrl;
 
-    protected BaseWebserviceTester() {
+    protected BaseWebserviceTest() {
         this("http://localhost:8888/test-ws/" + ObjectUtils.uuid32());
     }
 
-    protected BaseWebserviceTester(String url) {
-        clazz = GenericUtils.getActualTypeArgument(this.getClass());
+    protected BaseWebserviceTest(String url) {
         addressUrl = url;
     }
 
@@ -39,9 +39,19 @@ public abstract class BaseWebserviceTester<T> {
 
     @Before
     public final void setUp() {
-        if (!IS_PUBLISHED.get()) {
-            JAXWS.publish(addressUrl, SpringContextHolder.getBean(clazz)); // 发布web service
-            IS_PUBLISHED.set(true);
+        Class<T> clazz = GenericUtils.getActualTypeArgument(this.getClass());
+        synchronized (BaseWebserviceTest.class) {
+            int pos = StringUtils.ordinalIndexOf(addressUrl, "/", 3);
+            if (pos == -1) {
+                pos = addressUrl.length();
+            }
+            String prefixUrl = addressUrl.substring(0, pos); // http://domain:port
+            if (!PUBLISHED.contains(prefixUrl)) {
+                JAXWS.publish(addressUrl, SpringContextHolder.getBean(clazz)); // 发布web service
+                PUBLISHED.add(addressUrl);
+            } else {
+                System.out.println("The web service: " + prefixUrl + " are already published.");
+            }
         }
 
         /*JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
@@ -65,7 +75,8 @@ public abstract class BaseWebserviceTester<T> {
         // do no thing
     }
 
-    public static void print(Object obj) {
-        System.out.println("=======================================" + Jsons.NORMAL.stringify(obj));
+    public static void consloe(Object obj) {
+        System.out.println(Jsons.toJson(obj));
     }
+
 }

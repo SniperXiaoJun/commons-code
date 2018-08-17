@@ -4,6 +4,7 @@ import java.math.BigInteger;
 
 /**
  * The EC point of lie on the curve
+ * 
  * @author Ponfee
  */
 public class ECPoint {
@@ -107,8 +108,8 @@ public class ECPoint {
      */
     public ECPoint add(ECPoint q) {
         if (!isSameCurve(q)) {
-            throw new IllegalArgumentException("the q point don't lie on "
-                                             + "the same elliptic curve.");
+            throw new IllegalArgumentException(
+                "the q point don't lie on the same elliptic curve.");
         }
 
         if (this.isZero()) {

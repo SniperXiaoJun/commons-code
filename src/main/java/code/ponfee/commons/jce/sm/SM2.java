@@ -182,7 +182,8 @@ public final class SM2 {
 
         byte[] c3 = sm2.doFinal(); // 摘要
 
-        // return the C1(65) + C2(data.length) + C3(32)
+        // return: C1(65) + C2(data.length) + C3(32)
+        // C1 = {0x04, X byte array, Y byte array}
         return Bytes.concat(c1, c2, c3);
     }
 

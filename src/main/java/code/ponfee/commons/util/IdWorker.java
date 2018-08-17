@@ -37,11 +37,13 @@ public final class IdWorker {
     private long sequence = 0L; // 0，并发控制
 
     public IdWorker(int workerId, int datacenterId,
-                    int sequenceBits, int workerIdBits, int datacenterIdBits) {
+                    int sequenceBits, int workerIdBits, 
+                    int datacenterIdBits) {
         long maxWorkerId = (1L << workerIdBits) - 1;
         if (workerId > maxWorkerId || workerId < 0) {
             throw new IllegalArgumentException(
-                String.format("worker Id can't be greater than %d or less than 0", maxWorkerId)
+                String.format("worker Id can't be greater than %d "
+                            + "or less than 0", maxWorkerId)
             );
         }
 
@@ -65,8 +67,8 @@ public final class IdWorker {
 
     /**
      * sequenceBits: 12 bit, value range of 0 ~ 4095(111111111111)
-     * workerIdBits: 5 bit, value range of 0 ~ 31
-     * datacenterIdBits: 5 bit, value range of 0 ~ 31
+     * workerIdBits: 5 bit, value range of 0 ~ 31(11111)
+     * datacenterIdBits: 5 bit, value range of 0 ~ 31(11111)
      * 
      * workerIdShift: sequenceBits，左移12位(seq12位)
      * datacenterIdShift: sequenceBits+workerIdBits，即左移17位(wid5位+seq12位)
@@ -131,11 +133,11 @@ public final class IdWorker {
      * 43 ~ 53：11位workerId（机器ip），
      * 54 ~ 63：10位该毫秒内的当前毫秒内的计数
      * </pre>
-     * 根据IP地址作为workerId
-     * @return
+     * 
+     * Builds a IdWorker based local ip address
      */
-    private @FunctionalInterface interface LocalIPWorker { IdWorker get(); }
-    public static final IdWorker LOCAL_WORKER = ((LocalIPWorker) () -> {
+    public static final IdWorker LOCAL_WORKER;
+    static {
         int sequenceBits = 10; // specified 10 bit length
         int workerIdBits = 11; // specified 11 bit length
         int datacenterIdBits = 0; // specified 0 bit length
@@ -144,8 +146,8 @@ public final class IdWorker {
         int workerId = (int) Networks.toLong(Networks.HOST_IP) & maxWorkerId;
         int datacenterId = (int) (1L << datacenterIdBits) - 1;
 
-        return new IdWorker(workerId, datacenterId, sequenceBits,
-                            workerIdBits, datacenterIdBits);
-    }).get();
+        LOCAL_WORKER = new IdWorker(workerId, datacenterId, sequenceBits,
+                                    workerIdBits, datacenterIdBits);
+    }
 
 }

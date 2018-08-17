@@ -25,13 +25,15 @@ import com.google.common.collect.ImmutableMap;
  */
 public final class ECDSASigner {
 
+    public static enum ECDSASignAlgorithms {
+        SHA1withECDSA, SHA256withECDSA, // 
+        SHA384withECDSA, SHA512withECDSA
+    }
+
     private static final String ALGORITHM = "EC";
 
     public static final String PRIVATE_KEY = "ECPrivateKey";
     public static final String PUBLIC_KEY = "ECPublicKey";
-
-    private static final String SHA256withECDSA = "SHA256withECDSA";
-    private static final String SHA1withECDSA = "SHA1withECDSA";
 
     public static Map<String, ECKey> generateKeyPair() {
         return generateKeyPair(256);
@@ -39,8 +41,8 @@ public final class ECDSASigner {
 
     /**
      * 密钥生成
-     * @param keySize  only support 256 key size
-     * @return
+     * @param keySize  the key size: 192/224/256/384/521/571
+     * @return ec key map
      */
     public static Map<String, ECKey> generateKeyPair(int keySize) {
         KeyPairGenerator keyPairGen;
@@ -122,24 +124,33 @@ public final class ECDSASigner {
     }
 
     public static byte[] signSha1(byte[] data, ECPrivateKey privateKey) {
-        return sign(data, privateKey, SHA1withECDSA);
+        return sign(data, privateKey, ECDSASignAlgorithms.SHA1withECDSA);
     }
 
     public static boolean verifySha1(byte[] data, byte[] signed, ECPublicKey publicKey) {
-        return verify(data, signed, publicKey, SHA1withECDSA);
+        return verify(data, signed, publicKey, ECDSASignAlgorithms.SHA1withECDSA);
     }
 
     public static byte[] signSha256(byte[] data, ECPrivateKey privateKey) {
-        return sign(data, privateKey, SHA256withECDSA);
+        return sign(data, privateKey, ECDSASignAlgorithms.SHA256withECDSA);
     }
 
     public static boolean verifySha256(byte[] data, byte[] signed, ECPublicKey publicKey) {
-        return verify(data, signed, publicKey, SHA256withECDSA);
+        return verify(data, signed, publicKey, ECDSASignAlgorithms.SHA256withECDSA);
     }
 
-    private static byte[] sign(byte[] data, ECPrivateKey privateKey, String algorithm) {
+    public static byte[] signSha512(byte[] data, ECPrivateKey privateKey) {
+        return sign(data, privateKey, ECDSASignAlgorithms.SHA512withECDSA);
+    }
+
+    public static boolean verifySha512(byte[] data, byte[] signed, ECPublicKey publicKey) {
+        return verify(data, signed, publicKey, ECDSASignAlgorithms.SHA512withECDSA);
+    }
+
+    private static byte[] sign(byte[] data, ECPrivateKey privateKey, 
+                               ECDSASignAlgorithms algorithm) {
         try {
-            Signature signature = Signature.getInstance(algorithm);
+            Signature signature = Signature.getInstance(algorithm.name());
             signature.initSign(privateKey);
             signature.update(data);
             return signature.sign();
@@ -148,10 +159,10 @@ public final class ECDSASigner {
         }
     }
 
-    private static boolean verify(byte[] data, byte[] signed, 
-                                  ECPublicKey publicKey, String algorithm) {
+    private static boolean verify(byte[] data, byte[] signed, ECPublicKey publicKey, 
+                                  ECDSASignAlgorithms algorithm) {
         try {
-            Signature signature = Signature.getInstance(algorithm);
+            Signature signature = Signature.getInstance(algorithm.name());
             signature.initVerify(publicKey);
             signature.update(data);
             return signature.verify(signed);

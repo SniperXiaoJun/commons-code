@@ -20,7 +20,8 @@ import code.ponfee.commons.util.ObjectUtils;
  *     `@Component
  *     `@Aspect
  *     public class TestLogger extends LogRecorder {
- *         `@Around(value = "execution(public * cn.xxx.service.impl.*Impl.*(..)) && @annotation(log)", argNames = "pjp,log")
+ *         `@Around(value = "execution(public * cn.xxx.service.impl..*Impl..*(..)) 
+ *                  && @annotation(log)", argNames = "pjp,log")
  *         `@Override
  *         public Object around(ProceedingJoinPoint pjp, LogAnnotation log) throws Throwable {
  *             return super.around(pjp, log);

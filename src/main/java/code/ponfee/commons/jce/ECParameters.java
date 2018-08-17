@@ -107,6 +107,17 @@ public class ECParameters implements java.io.Serializable {
         "0"
     );
 
+    public static final ECParameters secp521r1 = new ECParameters(
+        "secp521r1",
+        "01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 
+        "01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC", 
+        "0051953EB9618E1C9A1F929A21A0B68540EEA2DA725B99B315F3B8B489918EF109E156193951EC7E937B1652C0BD3BB1BF073573DF883D2C34F1EF451FD46B503F00", 
+        "C6858E06B70404E9CD9E3ECB662395B4429C648139053FB521F828AF606B4D3DBAA14B5E77EFE75928FE1DC127A2FFA8DE3348B3C1856A429BF97E7E31C2E5BD66", 
+        "11839296A789A3BC0045C8A5FB42C7D1BD998F54449579B446817AFBD17273E662C97EE72995EF42640C550B9013FAD0761353C7086A272C24088BE94769FD16650", 
+        "01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA51868783BF2F966B7FCC0148F709A5D03BB5C9B8899C47AEBB6FB71E91386409", 
+        "D09E8800291CB85396CC6717393284AAA0DA64BA"
+    );
+
     public static final ImmutableMap<String, ASN1ObjectIdentifier> NAME_OID_MAPPING;
     public static final ImmutableMap<String, ECParameters> EC_PARAMETERS;
     static {
@@ -121,13 +132,13 @@ public class ECParameters implements java.io.Serializable {
                 X9ECParameters params = SECNamedCurves.getByName(name);
                 nameOids.put(name, table.get(name));
                 nameParams.put(name, new ECParameters(
-                      name, 
-                      Numbers.toHex(params.getCurve().getField().getCharacteristic()), 
-                      Numbers.toHex(params.getCurve().getA().toBigInteger()), 
-                      Numbers.toHex(params.getCurve().getB().toBigInteger()), 
-                      Numbers.toHex(params.getG().getXCoord().toBigInteger()), 
-                      Numbers.toHex(params.getG().getYCoord().toBigInteger()), 
-                      Numbers.toHex(params.getN()), encodeHex(params.getSeed())
+                    name, 
+                    Numbers.toHex(params.getCurve().getField().getCharacteristic()), 
+                    Numbers.toHex(params.getCurve().getA().toBigInteger()), 
+                    Numbers.toHex(params.getCurve().getB().toBigInteger()), 
+                    Numbers.toHex(params.getG().getXCoord().toBigInteger()), 
+                    Numbers.toHex(params.getG().getYCoord().toBigInteger()), 
+                    Numbers.toHex(params.getN()), encodeHex(params.getSeed())
                 ));
             }
         } catch (Exception ignored) {

@@ -5,7 +5,7 @@ import java.util.Map;
 public class ECDHKeyExchangerTest {
 
     public static void main(String[] args) {
-        Map<String, byte[]> partA = ECDHKeyExchanger.initPartAKey();
+        Map<String, byte[]> partA = ECDHKeyExchanger.initPartAKey(192);
         Map<String, byte[]> partB = ECDHKeyExchanger.initPartBKey(ECDHKeyExchanger.getPublicKey(partA));
         byte[] data = "123456".getBytes();
 

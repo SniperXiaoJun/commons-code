@@ -21,7 +21,7 @@ public abstract class JedisOperations {
     //static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
     static final int BATCH_MULTIPLE = 3; // the multiple jedis server number to use batch
 
-    static final ExecutorService EXECUTOR = ThreadPoolExecutors.create(1, 30, 300, 0, "jedis-ops-furture");
+    static final ExecutorService EXECUTOR = ThreadPoolExecutors.create(1, 32, 120, 0, "jedis-ops-furture");
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(EXECUTOR::shutdown));
     }
@@ -67,6 +67,7 @@ public abstract class JedisOperations {
         return shardedJedis.getShard(key);
     }
 
+    // --------------------------------------------------------------expire
     /**
      * 设置过期时间，若seconds为null则不做处理
      * @param shardedJedis
@@ -86,25 +87,6 @@ public abstract class JedisOperations {
     public static boolean expire(ShardedJedis shardedJedis, byte[] key, Integer seconds) {
         return seconds != null
             && Numbers.equals(shardedJedis.expire(key, getActualExpire(seconds)), 1);
-
-    }
-
-    /**
-     * 设置过期时间，若milliseconds为null则不做处理
-     * @param shardedJedis
-     * @param key
-     * @param milliseconds
-     * @return
-     */
-    public static boolean pexpire(ShardedJedis shardedJedis, String key, Integer milliseconds) {
-        return milliseconds != null
-            && expire(shardedJedis, key, (int) TimeUnit.MILLISECONDS.toSeconds(milliseconds));
-
-    }
-
-    public static boolean pexpire(ShardedJedis shardedJedis, byte[] key, Integer milliseconds) {
-        return milliseconds != null
-            && expire(shardedJedis, key, (int) TimeUnit.MILLISECONDS.toSeconds(milliseconds));
 
     }
 
@@ -132,6 +114,49 @@ public abstract class JedisOperations {
     }
 
     /**
+     * 防止内存泄露：如果无失效期，则设置默认失效时间
+     * @param shardedJedis
+     * @param key
+     */
+    public static boolean expireDefaultIfInfinite(ShardedJedis shardedJedis, String key) {
+        return shardedJedis.ttl(key) == -1
+            && Numbers.equals(shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS), 1);
+    }
+
+    public static boolean expireDefaultIfInfinite(ShardedJedis shardedJedis, byte[] key) {
+        return shardedJedis.ttl(key) == -1
+            && Numbers.equals(shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS), 1);
+    }
+
+    public static int getActualExpire(int seconds) {
+        return (seconds > MAX_EXPIRE_SECONDS)
+               ? MAX_EXPIRE_SECONDS
+               : (seconds < MIN_EXPIRE_SECONDS)
+               ? MIN_EXPIRE_SECONDS 
+               : seconds;
+    }
+
+    // ------------------------------------------------------------------pexpire
+    /**
+     * 设置过期时间，若milliseconds为null则不做处理
+     * @param shardedJedis
+     * @param key
+     * @param milliseconds
+     * @return
+     */
+    public static boolean pexpire(ShardedJedis shardedJedis, String key, Integer milliseconds) {
+        return milliseconds != null
+            && expire(shardedJedis, key, (int) TimeUnit.MILLISECONDS.toSeconds(milliseconds));
+
+    }
+
+    public static boolean pexpire(ShardedJedis shardedJedis, byte[] key, Integer milliseconds) {
+        return milliseconds != null
+            && expire(shardedJedis, key, (int) TimeUnit.MILLISECONDS.toSeconds(milliseconds));
+
+    }
+
+    /**
      * 设置过期时间，若milliseconds为null且无失效期限则设置默认失效时间
      * @param shardedJedis
      * @param key
@@ -154,29 +179,6 @@ public abstract class JedisOperations {
         } else {
             return expireDefaultIfInfinite(shardedJedis, key);
         }
-    }
-
-    /**
-     * 防止内存泄露：如果无失效期，则设置默认失效时间
-     * @param shardedJedis
-     * @param key
-     */
-    public static boolean expireDefaultIfInfinite(ShardedJedis shardedJedis, String key) {
-        return shardedJedis.ttl(key) == -1
-            && Numbers.equals(shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS), 1);
-    }
-
-    public static boolean expireDefaultIfInfinite(ShardedJedis shardedJedis, byte[] key) {
-        return shardedJedis.ttl(key) == -1
-            && Numbers.equals(shardedJedis.expire(key, DEFAULT_EXPIRE_SECONDS), 1);
-    }
-
-    public static int getActualExpire(int seconds) {
-        return (seconds > MAX_EXPIRE_SECONDS)
-               ? MAX_EXPIRE_SECONDS
-               : (seconds < MIN_EXPIRE_SECONDS)
-               ? MIN_EXPIRE_SECONDS 
-               : seconds;
     }
 
 }

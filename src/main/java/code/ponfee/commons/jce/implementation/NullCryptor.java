@@ -2,19 +2,16 @@ package code.ponfee.commons.jce.implementation;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 
 /**
  * Null Cryptor is the do nothing
+ * 
  * @author Ponfee
  */
 public class NullCryptor extends Cryptor {
 
     public @Override byte[] encrypt(byte[] input, int length, Key ek) {
-        if (input.length == length) {
-            return input;
-        }
-        return Arrays.copyOfRange(input, 0, length);
+        return input;
     }
 
     public @Override byte[] decrypt(byte[] cipher, Key dk) {

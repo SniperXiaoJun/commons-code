@@ -20,6 +20,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.reflect.Fields;
 
 /**
  * 公用对象工具类
@@ -90,14 +91,15 @@ public final class ObjectUtils {
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
             for (PropertyDescriptor prop : beanInfo.getPropertyDescriptors()) {
-                if ("class".equals(name = prop.getName())) {
+                if ("class".equals(name = prop.getName())) { // getClass()
                     continue;
                 }
 
                 String name0 = name;
-                if (!map.containsKey(name)
+                if (   !map.containsKey(name)
+                    && !map.containsKey(name = LOWER_UNDERSCORE.to(LOWER_CAMEL, name0))
                     && !map.containsKey(name = LOWER_CAMEL.to(LOWER_UNDERSCORE, name0))
-                    && !map.containsKey(name = LOWER_UNDERSCORE.to(LOWER_CAMEL, name0))) {
+                ) {
                     continue;
                 }
 
@@ -205,8 +207,7 @@ public final class ObjectUtils {
             BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
             String name;
             for (PropertyDescriptor prop : beanInfo.getPropertyDescriptors()) {
-                name = prop.getName();
-                if (!"class".equals(name)) {
+                if (!"class".equals((name = prop.getName()))) { // getClass()
                     map.put(name, prop.getReadMethod().invoke(bean));
                 }
             }
@@ -312,4 +313,21 @@ public final class ObjectUtils {
         return obj != null ? obj : other;
     }
 
+    public static <T> void copy(T source, T target, String... fields) {
+        for (String field : fields) {
+            Fields.put(target, field, Fields.get(source, field));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T copy(T source, String... fields) {
+        T target;
+        try {
+            target = (T) source.getClass().newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        copy(source, target, fields);
+        return target;
+    }
 }

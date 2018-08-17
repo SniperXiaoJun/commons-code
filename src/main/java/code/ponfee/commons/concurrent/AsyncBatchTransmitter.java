@@ -129,14 +129,14 @@ public final class AsyncBatchTransmitter<T> {
             this.thresholdChunk = thresholdChunk;
             if (executor == null) {
                 this.requireDestroyWhenEnd = true;
-                this.executor = ThreadPoolExecutors.create(1, 10, 300, 0, "async-batch-transmitter");
+                this.executor = ThreadPoolExecutors.create(1, 16, 120, 0, "async-batch-transmitter");
             } else {
                 this.requireDestroyWhenEnd = false;
                 this.executor = executor;
             }
             super.setName("async-batch-transmitter-thread-" + Integer.toHexString(hashCode()));
             super.setDaemon(true);
-            super.start();
+            super.start(); // 启动线程
         }
 
         /**

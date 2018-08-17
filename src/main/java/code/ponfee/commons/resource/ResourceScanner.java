@@ -29,12 +29,13 @@ import org.springframework.core.type.filter.TypeFilter;
 /**
  * <pre>
  *   用法：
- *   new ResourcesScanner("\/**\/").scan4text("*.properties")
- *   new ResourcesScanner("\/**\/").scan4text("*.class");
- *   new ResourcesScanner("/").scan4text("*.xml");
+ *   new ResourceScanner("∕**∕").scan4text("*.properties")
+ *   new ResourceScanner("∕**∕").scan4text("*.class");
+ *   new ResourceScanner("∕").scan4text("*.xml");
+ *   new ResourceScanner("∕**∕").scan4text("*.xml")
  *   
- *   new ResourcesScanner("code.ponfee").scan4class();
- *   new ResourcesScanner("code.ponfee").scan4class(new Class[] { Service.class });
+ *   new ResourceScanner("code.ponfee").scan4class();
+ *   new ResourceScanner("code.ponfee").scan4class(new Class[] { Service.class });
  * </pre>
  * 
  * 资源扫描

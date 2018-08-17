@@ -108,7 +108,7 @@ public final class Bytes {
         String binary;
         for (byte b : array) {
             // b & 0xFF：byte转int保留bit位
-            // | 0x100：100000000，对于正数保留八位
+            // | 0x100：100000000，对于正数保留八位（不|0x100的话前面的0会被舍去）
             // 也可以 + 0x100或leftPad(str, 8, '0')
             binary = Integer.toBinaryString((b & 0xFF) | 0x100);
             builder.append(binary, 1, binary.length());
@@ -359,7 +359,7 @@ public final class Bytes {
               (bytes[  fromIdx]       ) << 8 
             | (bytes[++fromIdx] & 0xFF) 
         );
-        //return ByteBuffer.wrap(bytes, fromIdx, Short.BYTES).getLong();
+        //return ByteBuffer.wrap(bytes, fromIdx, Short.BYTES).getShort();
         //ByteBuffer buffer = ByteBuffer.allocate(Short.BYTES);
         //buffer.put(bytes, fromIdx, Short.BYTES).flip();
         //return buffer.getShort();

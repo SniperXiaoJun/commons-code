@@ -97,7 +97,7 @@ public final class ResourceLoaderFacade {
     }
 
     public static List<Resource> listResources(String dir, String extensions[], boolean recursive) {
-        return listResources(dir, extensions, recursive, null, null);
+        return listResources(dir, extensions, recursive, null, Files.UTF_8);
     }
 
     public static List<Resource> listResources(String dir, String extensions[],

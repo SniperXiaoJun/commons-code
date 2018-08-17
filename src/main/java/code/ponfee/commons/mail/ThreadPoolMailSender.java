@@ -19,7 +19,8 @@ import java.util.concurrent.ExecutorService;
 public class ThreadPoolMailSender {
 
     private static Logger logger = LoggerFactory.getLogger(ThreadPoolMailSender.class);
-    private static final ExecutorService EXECUTOR = ThreadPoolExecutors.create(5, 20, 300, 50, "mail-sender");
+    private static final ExecutorService EXECUTOR = 
+        ThreadPoolExecutors.create(4, 32, 120, 100, "mail-sender");
 
     public static boolean send(MailSender mailSender, MailEnvelope envlop) {
         return send(mailSender, envlop, true);

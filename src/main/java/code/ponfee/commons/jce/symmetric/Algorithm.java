@@ -31,11 +31,13 @@ package code.ponfee.commons.jce.symmetric;
  * https://downloads.bouncycastle.org/fips-java/BC-FJA-UserGuide-1.0.0.pdf
  * https://downloads.bouncycastle.org/fips-java/BC-FJA-(D)TLSUserGuide-1.0.3.pdf
  * 
+ * @see org.bouncycastle.jcajce.provider.symmetric.ARC4
+ * 
  * @author fupf
  */
 public enum Algorithm {
     AES, DES, DESede, Blowfish, RC2, RC4, RC5, // RC4: ARC4, ARCFOUR
-    IDEA, TEA, TDEA, Camellia, CAST5, GOST28147, //
+    IDEA, TEA, TDEA, Camellia, CAST5, 
+    GOST, GOST3411, GOST28147, //
     SEED, Serpent, SHACAL2, Twofish, SM4, //
-    GOST, GOST3411, 
 }

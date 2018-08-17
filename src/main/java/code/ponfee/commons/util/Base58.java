@@ -185,7 +185,7 @@ public class Base58 {
         return origin;
     }
 
-    // -------------------------------private methods-------------------------------
+    // --------------------------------------------------------------private methods
     // number -> number / LENGTH, returns number % LENGTH
     private static int divmod58(byte[] number, int startAt) {
         int remainder = 0;

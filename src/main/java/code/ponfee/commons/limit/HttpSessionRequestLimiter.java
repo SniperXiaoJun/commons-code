@@ -1,8 +1,5 @@
 package code.ponfee.commons.limit;
 
-import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,8 +24,9 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
 
     // ---------------------------------------------------------------------request limit
     /**
-     * Client user (web browser) can clear session,
+     * Client user (web browser) can clear session(cookie),
      * so this limit can't really effect
+     * 
      * @deprecated
      */
     @Deprecated
@@ -106,8 +104,9 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
 
     // ---------------------------------------------------------------------action
     /**
-     * Client user (web browser) can clear session,
+     * Client user (web browser) can clear session(cookie),
      * so this limit can't really effect
+     * 
      * @deprecated
      */
     @Deprecated
@@ -180,36 +179,4 @@ public class HttpSessionRequestLimiter extends RequestLimiter {
         }
     }
 
-    private static long expire(int ttl) {
-        return System.currentTimeMillis() + ttl * 1000;
-    }
-
-    private static class CacheValue<T> implements Serializable {
-        private static final long serialVersionUID = 8615157453929878610L;
-        private final T value;
-        private final long expireTimeMillis;
-        private final AtomicInteger count;
-
-        public CacheValue(T value, long expireTimeMillis) {
-            this.value = value;
-            this.expireTimeMillis = expireTimeMillis;
-            this.count = new AtomicInteger(1);
-        }
-
-        private int increment() {
-            return count.getAndIncrement();
-        }
-
-        private int count() {
-            return count.get();
-        }
-
-        private T get() {
-            return value;
-        }
-
-        private boolean isExpire() {
-            return expireTimeMillis < System.currentTimeMillis();
-        }
-    }
 }
