@@ -244,9 +244,12 @@ public final class Collects {
      */
     @SuppressWarnings({ "unchecked", "hiding" })
     public static <T> T[] intersect(T[] array1, T[] array2) {
-        return (T[]) Stream.of(array1).filter(
+        List<T> list = Stream.of(array1).filter(
             t -> ArrayUtils.contains(array2, t)
-        ).toArray();
+        ).collect(Collectors.toList());
+
+        Class<?> type = array1.getClass().getComponentType();
+        return list.toArray((T[]) Array.newInstance(type, list.size()));
     }
 
     /**
