@@ -125,7 +125,8 @@ public final class PageBoundsResolver {
 
         @Override
         public String toString() {
-            return "PageBounds [index=" + index + ", total=" + total + ", offset=" + offset + ", limit=" + limit + "]";
+            return "PageBounds [index=" + index + ", total=" + total 
+                 + ", offset=" + offset + ", limit=" + limit + "]";
         }
     }
 
