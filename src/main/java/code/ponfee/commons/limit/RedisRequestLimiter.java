@@ -96,7 +96,7 @@ public class RedisRequestLimiter extends RequestLimiter{
     }
 
     @Override public void traceAction(String key, int period) {
-        key = INCR_ACTION_KEY + key;
+        key = TRACE_ACTION_KEY + key;
         long times = client.valueOps().incrBy(key);
         if (times == 1) {
             client.keysOps().expire(key, period); // 第一次缓存，设置失效时间
@@ -104,11 +104,11 @@ public class RedisRequestLimiter extends RequestLimiter{
     }
 
     @Override public long countAction(String key) {
-        return ObjectUtils.orElse(client.valueOps().getLong(COUNT_ACTION_KEY + key), 0L);
+        return ObjectUtils.orElse(client.valueOps().getLong(TRACE_ACTION_KEY + key), 0L);
     }
 
     @Override public void resetAction(String key) {
-        client.keysOps().del(COUNT_ACTION_KEY + key);
+        client.keysOps().del(TRACE_ACTION_KEY + key);
     }
 
     // -----------------------------------------------------------------------private methods

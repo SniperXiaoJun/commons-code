@@ -115,16 +115,16 @@ public final class ConcurrentMapRequestLimiter extends RequestLimiter {
 
     // ---------------------------------------------------------------------action
     @Override public void traceAction(String key, int period) {
-        incrementAndGet(INCR_ACTION_KEY + key, expire(period));
+        incrementAndGet(TRACE_ACTION_KEY + key, expire(period));
     }
 
     @Override public long countAction(String key) {
-        CacheValue<Void> cache = get(COUNT_ACTION_KEY + key);
+        CacheValue<Void> cache = get(TRACE_ACTION_KEY + key);
         return cache == null ? 0 : cache.count();
     }
 
     @Override public void resetAction(String key) {
-        remove(COUNT_ACTION_KEY + key);
+        remove(TRACE_ACTION_KEY + key);
     }
 
     // ---------------------------------------------------------------------private methods

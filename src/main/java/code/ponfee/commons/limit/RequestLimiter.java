@@ -29,8 +29,7 @@ public abstract class RequestLimiter {
     public static final String CACHE_CAPTCHA_KEY = "req:cah:cap:";
 
     /** count operation action key */
-    public static final String INCR_ACTION_KEY = "req:inc:act:";
-    public static final String COUNT_ACTION_KEY = "req:cnt:act:";
+    public static final String TRACE_ACTION_KEY = "req:cnt:act:";
 
     // ----------------------------------------------------------------用于请求限制
     public final RequestLimiter limitFrequency(String key, int period) 
@@ -42,9 +41,13 @@ public abstract class RequestLimiter {
      * 访问频率限制：一个周期内最多允许访问1次<p>
      * 比如短信60秒内只能发送一次
      * 
-     * @param key
-     * @param period
-     * @throws RequestLimitException 
+     * @param key the key
+     * @param period the period
+     * @param message the message
+     * 
+     * @return the caller, chain program
+     * 
+     * @throws RequestLimitException if over limit occurs 
      */
     public abstract RequestLimiter limitFrequency(String key, int period, String message) 
         throws RequestLimitException;
@@ -59,10 +62,14 @@ public abstract class RequestLimiter {
      * 访问次数限制：一个周期内最多允许访问limit次
      * 比如一个手机号一天只能发10次
      * 
-     * @param key
-     * @param period
-     * @param limit
-     * @throws RequestLimitException 
+     * @param key    the key
+     * @param period the period
+     * @param limit  the limit
+     * @param message  the message
+     * 
+     * @return the caller, chain program
+     * 
+     * @throws RequestLimitException if over limit occurs 
      */
     public abstract RequestLimiter limitThreshold(String key, int period, 
                                                   int limit, String message) 
@@ -75,7 +82,6 @@ public abstract class RequestLimiter {
      * @param key   the cache key
      * @param code  the validation code of server generate
      * @param ttl   the expire time
-     * @return
      */
     public abstract void cacheCode(String key, String code, int ttl);
 
@@ -85,8 +91,10 @@ public abstract class RequestLimiter {
      * @param key   the cache key
      * @param code  the validation code of user input
      * @param limit the maximum fail input times
-     * @return chain program
-     * @throws RequestLimitException
+     * 
+     * @return the caller, chain program
+     * 
+     * @throws RequestLimitException if over limit occurs
      */
     public abstract RequestLimiter checkCode(String key, String code, int limit) 
         throws RequestLimitException;
@@ -98,7 +106,6 @@ public abstract class RequestLimiter {
      * @param key
      * @param captcha the image captcha code of server generate
      * @param expire  缓存有效时间
-     * @return
      */
     public abstract void cacheCaptcha(String key, String captcha, int expire);
 
@@ -112,6 +119,7 @@ public abstract class RequestLimiter {
      * @param key  the cache key
      * @param captcha  the captcha
      * @param caseSensitive  is case sensitive
+     * 
      * @return true|false
      */
     public abstract boolean checkCaptcha(String key, String captcha, 
@@ -130,14 +138,16 @@ public abstract class RequestLimiter {
     /**
      * 统计周期内的行为量<p>
      * 用于登录失败达到一定次数后锁定账户等场景<p>
-     * @param key
-     * @return
+     * 
+     * @param key the key
+     * @return action count number
      */
     public abstract long countAction(String key);
 
     /**
      * 重置行为
-     * @param key
+     * 
+     * @param key the key
      */
     public abstract void resetAction(String key);
 
@@ -147,6 +157,7 @@ public abstract class RequestLimiter {
      *
      * @param code a string like as captcha code
      * @param salt a string like as mobile phone
+     * 
      * @return a check code
      */
     public static String buildNonce(String code, String salt) {
@@ -159,10 +170,11 @@ public abstract class RequestLimiter {
     /**
      * 校验nonce
      * 
-     * @param nonce
-     * @param code
-     * @param salt
-     * @return
+     * @param nonce the nonce
+     * @param code  the code
+     * @param salt  the salt
+     * 
+     * @return {@code true} is verify success
      */
     public static boolean verifyNonce(String nonce, String code, String salt) {
         return StringUtils.isNotEmpty(nonce) && nonce.equals(buildNonce(code, salt));
