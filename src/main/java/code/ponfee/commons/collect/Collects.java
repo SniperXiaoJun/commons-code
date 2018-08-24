@@ -142,7 +142,7 @@ public final class Collects {
     }
 
     /**
-     * 指定对象字段fieldA的值作为key，字段fieldB的值作为value
+     * 指定对象字段keyField的值作为key，字段valueField的值作为value
      * 
      * @param bean
      * @param keyField
@@ -360,15 +360,15 @@ public final class Collects {
     public static List<Object> toList(Object obj) {
         if (obj == null) {
             return null;
-        } else if (!obj.getClass().isArray()) {
-            return Collections.singletonList(obj);
-        } else {
+        } else if (obj.getClass().isArray()) {
             int length = Array.getLength(obj);
             List<Object> result = new ArrayList<>(length);
             for (int i = 0; i < length; i++) {
                 result.add(Array.get(obj, i));
             }
             return result;
+        } else {
+            return Collections.singletonList(obj);
         }
     }
 

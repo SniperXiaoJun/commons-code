@@ -105,22 +105,22 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
             return StringUtils.EMPTY;
         }
         switch (cell.getCellTypeEnum()) {
-            case NUMERIC: // 数字
+            case NUMERIC:
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return String.valueOf(cell.getDateCellValue());
                 } else {
                     cell.setCellType(CellType.STRING);
                     return cell.getStringCellValue();
                 }
-            case STRING: // 字符串
+            case STRING:
                 return Objects.toString(cell.getStringCellValue(), "");
-            case BOOLEAN: // Boolean
+            case BOOLEAN:
                 return Boolean.toString(cell.getBooleanCellValue());
-            case FORMULA: // 公式
+            case FORMULA:
                 cell.setCellType(CellType.STRING);
                 return cell.getStringCellValue();
             case BLANK: // 空值
-            case ERROR: // 故障
+            case ERROR: // 错误
             default:
                 return StringUtils.EMPTY;
         }

@@ -35,6 +35,9 @@ public class DigestTest {
         System.out.println(Hex.encodeHexString(DigestUtils.digest(DigestAlgorithms.SKEIN_512_256, Providers.BC, data)));
         System.out.println(Hex.encodeHexString(HmacUtils.crypt(key, data, HmacAlgorithms.HmacSKEIN_512_256)));
 
+        System.out.println(Hex.encodeHexString(DigestUtils.digest(DigestAlgorithms.SHA512, Providers.BC, data)));
+        System.out.println(Hex.encodeHexString(DigestUtils.digest(DigestAlgorithms.SKEIN_512_512, Providers.BC, data)));
+        System.out.println(Hex.encodeHexString(DigestUtils.digest(DigestAlgorithms.SKEIN_1024_512, Providers.BC, data)));
         System.out.println(Hex.encodeHexString(DigestUtils.digest(DigestAlgorithms.SKEIN_1024_1024, Providers.BC, data)));
         System.out.println(Hex.encodeHexString(HmacUtils.crypt(key, data, HmacAlgorithms.HmacSKEIN_1024_1024)));
         
