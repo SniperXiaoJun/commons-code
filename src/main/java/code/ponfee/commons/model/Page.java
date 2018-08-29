@@ -330,7 +330,7 @@ public class Page<T> implements java.io.Serializable {
 
     /**
      * 转换
-     * @param mapper
+     * @param transformer
      * @return
      */
     public <E> Page<E> transform(Function<T, E> transformer) {

@@ -24,7 +24,7 @@ public class HessianSerializer extends Serializer {
     private static Logger logger = LoggerFactory.getLogger(HessianSerializer.class);
 
     @Override
-    public <T extends Object> byte[] serialize(T t, boolean isCompress) {
+    public byte[] serialize(Object t, boolean isCompress) {
         if (t == null) {
             return null;
         }
@@ -61,7 +61,7 @@ public class HessianSerializer extends Serializer {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends Object> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
+    public <T> T deserialize(byte[] data, Class<T> clazz, boolean isCompress) {
         if (data == null) {
             return null;
         }

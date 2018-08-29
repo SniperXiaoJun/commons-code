@@ -34,9 +34,7 @@ public enum HmacAlgorithms {
     HmacSKEIN_1024_512("Skein-MAC-1024-512", 512), // 
     HmacSKEIN_1024_1024("Skein-MAC-1024-1024", 1024), // 
 
-    /**
-     * @see org.bouncycastle.crypto.digests.SHAKEDigest
-     */
+    /* @see org.bouncycastle.crypto.digests.SHAKEDigest */
     //HmacSHAKE128(128), HmacSHAKE256(256), // 
 
     /**

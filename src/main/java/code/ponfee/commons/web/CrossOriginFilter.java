@@ -154,17 +154,17 @@ public class CrossOriginFilter implements Filter {
     private boolean anyOriginAllowed;
     private boolean anyTimingOriginAllowed;
     private boolean anyHeadersAllowed;
-    private List<String> allowedOrigins = new ArrayList<String>();
-    private List<String> allowedTimingOrigins = new ArrayList<String>();
-    private List<String> allowedMethods = new ArrayList<String>();
-    private List<String> allowedHeaders = new ArrayList<String>();
-    private List<String> exposedHeaders = new ArrayList<String>();
+    private List<String> allowedOrigins = new ArrayList<>();
+    private List<String> allowedTimingOrigins = new ArrayList<>();
+    private List<String> allowedMethods = new ArrayList<>();
+    private List<String> allowedHeaders = new ArrayList<>();
+    private List<String> exposedHeaders = new ArrayList<>();
     private int preflightMaxAge;
     private boolean allowCredentials;
     private boolean chainPreflight;
 
     @Override
-    public void init(FilterConfig config) throws ServletException {
+    public void init(FilterConfig config) {
         String allowedOriginsConfig = config.getInitParameter(ALLOWED_ORIGINS_PARAM);
         String allowedTimingOriginsConfig = config.getInitParameter(ALLOWED_TIMING_ORIGINS_PARAM);
 
@@ -299,10 +299,10 @@ public class CrossOriginFilter implements Filter {
         // WebSocket clients such as Chrome 5 implement a version of the WebSocket
         // protocol that does not accept extra response headers on the upgrade response
         for (Enumeration<String> elm = request.getHeaders("Connection"); elm.hasMoreElements();) {
-            String connection = (String) elm.nextElement();
+            String connection = elm.nextElement();
             if ("Upgrade".equalsIgnoreCase(connection)) {
                 for (Enumeration<String> upg = request.getHeaders("Upgrade"); upg.hasMoreElements();) {
-                    String upgrade = (String) upg.nextElement();
+                    String upgrade = upg.nextElement();
                     if ("WebSocket".equalsIgnoreCase(upgrade)) {
                         return false;
                     }
@@ -365,10 +365,7 @@ public class CrossOriginFilter implements Filter {
         if (!"OPTIONS".equalsIgnoreCase(method)) {
             return false;
         }
-        if (request.getHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER) == null) {
-            return false;
-        }
-        return true;
+        return request.getHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER) != null;
     }
 
     private void handleSimpleResponse(HttpServletRequest request, HttpServletResponse response, String origin) {
@@ -436,7 +433,7 @@ public class CrossOriginFilter implements Filter {
             return Collections.emptyList();
         }
 
-        List<String> requestedHeaders = new ArrayList<String>();
+        List<String> requestedHeaders = new ArrayList<>();
         String[] headers = Strings.csvSplit(accessControlRequestHeaders);
         for (String header : headers) {
             String h = header.trim();

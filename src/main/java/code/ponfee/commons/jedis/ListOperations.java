@@ -40,7 +40,7 @@ public class ListOperations extends JedisOperations {
      * @param objs
      * @return 执行 LPUSH 命令后，列表的长度。
      */
-    public <T extends Object> Long lpushObject(byte[] key, boolean isCompress, Integer seconds, T[] objs) {
+    public <T> Long lpushObject(byte[] key, boolean isCompress, Integer seconds, T[] objs) {
         return call(shardedJedis -> {
             byte[][] data = new byte[objs.length][];
             for (int i = 0; i < objs.length; i++) {
@@ -52,15 +52,15 @@ public class ListOperations extends JedisOperations {
         }, null, key, isCompress, seconds, objs);
     }
 
-    public <T extends Object> Long lpushObject(byte[] key, boolean isCompress, T[] objs) {
+    public <T> Long lpushObject(byte[] key, boolean isCompress, T[] objs) {
         return this.lpushObject(key, isCompress, null, objs);
     }
 
-    public <T extends Object> Long lpushObject(byte[] key, Integer seconds, T[] objs) {
+    public <T> Long lpushObject(byte[] key, Integer seconds, T[] objs) {
         return this.lpushObject(key, false, seconds, objs);
     }
 
-    public <T extends Object> Long lpushObject(byte[] key, T[] objs) {
+    public <T> Long lpushObject(byte[] key, T[] objs) {
         return this.lpushObject(key, false, null, objs);
     }
 
@@ -110,8 +110,8 @@ public class ListOperations extends JedisOperations {
      * @param seconds
      * @return 列表的尾元素。当 key 不存在时，返回 nil 。
      */
-    public <T extends Object> T lpopObject(byte[] key, Class<T> clazz,
-                                           boolean isCompress, Integer seconds) {
+    public <T> T lpopObject(byte[] key, Class<T> clazz,
+                            boolean isCompress, Integer seconds) {
         return call(shardedJedis -> {
             T result = jedisClient.deserialize(shardedJedis.lpop(key), clazz, isCompress);
             if (result != null) {
@@ -122,15 +122,15 @@ public class ListOperations extends JedisOperations {
         }, null, key, clazz, isCompress, seconds);
     }
 
-    public <T extends Object> T lpopObject(byte[] key, Class<T> clazz, boolean isCompress) {
+    public <T> T lpopObject(byte[] key, Class<T> clazz, boolean isCompress) {
         return this.lpopObject(key, clazz, isCompress, null);
     }
 
-    public <T extends Object> T lpopObject(byte[] key, Class<T> clazz, Integer seconds) {
+    public <T> T lpopObject(byte[] key, Class<T> clazz, Integer seconds) {
         return this.lpopObject(key, clazz, false, seconds);
     }
 
-    public <T extends Object> T lpopObject(byte[] key, Class<T> clazz) {
+    public <T> T lpopObject(byte[] key, Class<T> clazz) {
         return this.lpopObject(key, clazz, false, null);
     }
 
@@ -161,8 +161,8 @@ public class ListOperations extends JedisOperations {
      * @param seconds
      * @return 列表的尾元素。当 key 不存在时，返回 nil 。
      */
-    public <T extends Object> T rpopObject(byte[] key, Class<T> clazz,
-                                           boolean isCompress, Integer seconds) {
+    public <T> T rpopObject(byte[] key, Class<T> clazz,
+                            boolean isCompress, Integer seconds) {
         return call(shardedJedis -> {
             T result = jedisClient.deserialize(shardedJedis.rpop(key), clazz, isCompress);
             if (result != null) {
@@ -173,15 +173,15 @@ public class ListOperations extends JedisOperations {
         }, null, key, clazz, isCompress, seconds);
     }
 
-    public <T extends Object> T rpopObject(byte[] key, Class<T> clazz, boolean isCompress) {
+    public <T> T rpopObject(byte[] key, Class<T> clazz, boolean isCompress) {
         return this.rpopObject(key, clazz, isCompress, null);
     }
 
-    public <T extends Object> T rpopObject(byte[] key, Class<T> clazz, Integer seconds) {
+    public <T> T rpopObject(byte[] key, Class<T> clazz, Integer seconds) {
         return this.rpopObject(key, clazz, false, seconds);
     }
 
-    public <T extends Object> T rpopObject(byte[] key, Class<T> clazz) {
+    public <T> T rpopObject(byte[] key, Class<T> clazz) {
         return this.rpopObject(key, clazz, false, null);
     }
 
@@ -310,8 +310,8 @@ public class ListOperations extends JedisOperations {
      * @param seconds
      * @return 一个列表，包含指定区间内的元素。
      */
-    public <T extends Object> List<T> lrange(byte[] key, Class<T> clazz, boolean isCompress, 
-                                             long start, long end, Integer seconds) {
+    public <T> List<T> lrange(byte[] key, Class<T> clazz, boolean isCompress, 
+                              long start, long end, Integer seconds) {
         return call(shardedJedis -> {
             List<T> result = new ArrayList<>();
             List<byte[]> datas = shardedJedis.lrange(key, start, end);
@@ -328,17 +328,17 @@ public class ListOperations extends JedisOperations {
         }, null, key, clazz, isCompress, start, end, seconds);
     }
 
-    public <T extends Object> List<T> lrange(byte[] key, Class<T> clazz, boolean isCompress,
+    public <T> List<T> lrange(byte[] key, Class<T> clazz, boolean isCompress,
                                              long start, long end) {
         return this.lrange(key, clazz, isCompress, start, end, null);
     }
 
-    public <T extends Object> List<T> lrange(byte[] key, Class<T> clazz, long start, 
+    public <T> List<T> lrange(byte[] key, Class<T> clazz, long start, 
                                              long end, Integer seconds) {
         return this.lrange(key, clazz, false, start, end, seconds);
     }
 
-    public <T extends Object> List<T> lrange(byte[] key, Class<T> clazz, long start, long end) {
+    public <T> List<T> lrange(byte[] key, Class<T> clazz, long start, long end) {
         return this.lrange(key, clazz, false, start, end, null);
     }
 

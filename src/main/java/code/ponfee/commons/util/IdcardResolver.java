@@ -3944,7 +3944,7 @@ public class IdcardResolver {
         AREA_CODE_LIST = new ArrayList<>(DISTRICT_CODE_MAPPING.keySet());
     }
 
-    /** 香港身份首字母对应数字 */
+    /* 香港身份首字母对应数字 */
     /*private static final Map<String, Integer> HK_FIRST_CODE = 
         new ImmutableMap.Builder<String, Integer>()
         .put("A", 1)

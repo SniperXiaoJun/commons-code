@@ -98,7 +98,7 @@ public final class TreeNode<T extends java.io.Serializable & Comparable<T>>
     /**
      * Mount a tree
      * 
-     * @param nodes        子节点列表
+     * @param list         子节点列表
      * @param ignoreOrphan {@code true}忽略孤儿节点
      */
     @SuppressWarnings("unchecked")
@@ -126,7 +126,7 @@ public final class TreeNode<T extends java.io.Serializable & Comparable<T>>
 
         // 4、检查是否存在孤儿节点
         if (!ignoreOrphan && CollectionUtils.isNotEmpty(nodes)) {
-            List<T> nids = nodes.stream().map(n -> n.getNid())
+            List<T> nids = nodes.stream().map(AbstractNode::getNid)
                                 .collect(Collectors.toList());
             throw new RuntimeException("无效的孤儿节点：" + nids);
         }

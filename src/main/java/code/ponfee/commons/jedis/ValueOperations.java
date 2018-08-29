@@ -279,8 +279,8 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public <T extends Object> boolean setObject(byte[] key, T t,
-                                                boolean isCompress, int seconds) {
+    public boolean setObject(byte[] key, Object t,
+                             boolean isCompress, int seconds) {
         if (t == null) {
             return false;
         }
@@ -292,15 +292,15 @@ public class ValueOperations extends JedisOperations {
         }, false, key, t, isCompress, seconds);
     }
 
-    public <T extends Object> boolean setObject(byte[] key, T t, boolean isCompress) {
+    public boolean setObject(byte[] key, Object t, boolean isCompress) {
         return setObject(key, t, isCompress, DEFAULT_EXPIRE_SECONDS);
     }
 
-    public <T extends Object> boolean setObject(byte[] key, T t, int seconds) {
+    public boolean setObject(byte[] key, Object t, int seconds) {
         return setObject(key, t, false, seconds);
     }
 
-    public <T extends Object> boolean setObject(byte[] key, T t) {
+    public boolean setObject(byte[] key, Object t) {
         return setObject(key, t, false, DEFAULT_EXPIRE_SECONDS);
     }
 
@@ -312,20 +312,20 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public <T extends Object> boolean setObject(String key, T t,
-                                                boolean isCompress, int seconds) {
+    public boolean setObject(String key, Object t,
+                             boolean isCompress, int seconds) {
         return setObject(key.getBytes(StandardCharsets.UTF_8), t, isCompress, seconds);
     }
 
-    public <T extends Object> boolean setObject(String key, T t, boolean isCompress) {
+    public boolean setObject(String key, Object t, boolean isCompress) {
         return setObject(key, t, isCompress, DEFAULT_EXPIRE_SECONDS);
     }
 
-    public <T extends Object> boolean setObject(String key, T t, int seconds) {
+    public boolean setObject(String key, Object t, int seconds) {
         return setObject(key, t, false, seconds);
     }
 
-    public <T extends Object> boolean setObject(String key, T t) {
+    public boolean setObject(String key, Object t) {
         return setObject(key, t, false, DEFAULT_EXPIRE_SECONDS);
     }
 
@@ -337,8 +337,8 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public <T extends Object> T getObject(byte[] key, Class<T> clazz, 
-                                          boolean isCompress, Integer seconds) {
+    public <T> T getObject(byte[] key, Class<T> clazz, 
+                           boolean isCompress, Integer seconds) {
         return call(shardedJedis -> {
             T t = jedisClient.deserialize(shardedJedis.get(key), clazz, isCompress);
             if (t != null) {
@@ -349,15 +349,15 @@ public class ValueOperations extends JedisOperations {
         }, null, key, clazz, isCompress, seconds);
     }
 
-    public <T extends Object> T getObject(byte[] key, Class<T> clazz, boolean isCompress) {
+    public <T> T getObject(byte[] key, Class<T> clazz, boolean isCompress) {
         return getObject(key, clazz, isCompress, null);
     }
 
-    public <T extends Object> T getObject(byte[] key, Class<T> clazz, Integer seconds) {
+    public <T> T getObject(byte[] key, Class<T> clazz, Integer seconds) {
         return getObject(key, clazz, false, seconds);
     }
 
-    public <T extends Object> T getObject(byte[] key, Class<T> clazz) {
+    public <T> T getObject(byte[] key, Class<T> clazz) {
         return getObject(key, clazz, false, null);
     }
 
@@ -370,20 +370,20 @@ public class ValueOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public <T extends Object> T getObject(String key, Class<T> clazz, 
-                                          boolean isCompress, Integer seconds) {
+    public <T> T getObject(String key, Class<T> clazz, 
+                           boolean isCompress, Integer seconds) {
         return getObject(key.getBytes(StandardCharsets.UTF_8), clazz, isCompress, seconds);
     }
 
-    public <T extends Object> T getObject(String key, Class<T> clazz, boolean isCompress) {
+    public <T> T getObject(String key, Class<T> clazz, boolean isCompress) {
         return getObject(key, clazz, isCompress, null);
     }
 
-    public <T extends Object> T getObject(String key, Class<T> clazz, Integer seconds) {
+    public <T> T getObject(String key, Class<T> clazz, Integer seconds) {
         return getObject(key, clazz, false, seconds);
     }
 
-    public <T extends Object> T getObject(String key, Class<T> clazz) {
+    public <T> T getObject(String key, Class<T> clazz) {
         return getObject(key, clazz, false, null);
     }
 
@@ -583,7 +583,7 @@ public class ValueOperations extends JedisOperations {
      * @param keys
      * @return
      */
-    public <T extends Object> Map<byte[], T> mgetObject(Class<T> clazz, boolean isCompress, byte[]... keys) {
+    public <T> Map<byte[], T> mgetObject(Class<T> clazz, boolean isCompress, byte[]... keys) {
         Map<byte[], byte[]> datas = this.mget(false, keys);
         if (datas == null || datas.isEmpty()) {
             return null;
@@ -599,7 +599,7 @@ public class ValueOperations extends JedisOperations {
         return result;
     }
 
-    public <T extends Object> Map<byte[], T> mgetObject(Class<T> clazz, byte[]... keys) {
+    public <T> Map<byte[], T> mgetObject(Class<T> clazz, byte[]... keys) {
         return this.mgetObject(clazz, false, keys);
     }
 }

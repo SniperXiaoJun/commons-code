@@ -137,7 +137,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
         }
     }
 
-    public static enum ExcelType {
+    public enum ExcelType {
         XLS, XLSX;
         public static ExcelType from(String type) {
             for (ExcelType et : ExcelType.values()) {

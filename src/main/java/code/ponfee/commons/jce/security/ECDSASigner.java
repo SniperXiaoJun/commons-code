@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableMap;
  */
 public final class ECDSASigner {
 
-    public static enum ECDSASignAlgorithms {
+    public enum ECDSASignAlgorithms {
         SHA1withECDSA, SHA256withECDSA, // 
         SHA384withECDSA, SHA512withECDSA
     }

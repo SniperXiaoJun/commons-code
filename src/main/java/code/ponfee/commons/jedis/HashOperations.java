@@ -160,8 +160,8 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 返回值：true设置一个新域；false覆盖一个旧域；
      */
-    public <T extends Object> boolean hsetObject(byte[] key, byte[] field, T t, 
-                                                 boolean isCompress, Integer seconds) {
+    public boolean hsetObject(byte[] key, byte[] field, Object t,
+                              boolean isCompress, Integer seconds) {
         if (t == null) {
             return false;
         }
@@ -174,15 +174,15 @@ public class HashOperations extends JedisOperations {
         }, false, key, field, t, isCompress, seconds);
     }
 
-    public <T extends Object> boolean hsetObject(byte[] key, byte[] field, T t, boolean isCompress) {
+    public boolean hsetObject(byte[] key, byte[] field, Object t, boolean isCompress) {
         return this.hsetObject(key, field, t, isCompress, null);
     }
 
-    public <T extends Object> boolean hsetObject(byte[] key, byte[] field, T t, Integer seconds) {
+    public boolean hsetObject(byte[] key, byte[] field, Object t, Integer seconds) {
         return this.hsetObject(key, field, t, false, seconds);
     }
 
-    public <T extends Object> boolean hsetObject(byte[] key, byte[] field, T t) {
+    public boolean hsetObject(byte[] key, byte[] field, Object t) {
         return this.hsetObject(key, field, t, false, null);
     }
 
@@ -195,8 +195,8 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return
      */
-    public <T extends Object> T hgetObject(byte[] key, byte[] field, Class<T> clazz, 
-                                           boolean isCompress, Integer seconds) {
+    public <T> T hgetObject(byte[] key, byte[] field, Class<T> clazz, 
+                            boolean isCompress, Integer seconds) {
         return call(shardedJedis -> {
             byte[] data = shardedJedis.hget(key, field);
             T t = jedisClient.deserialize(data, clazz, isCompress);
@@ -207,15 +207,15 @@ public class HashOperations extends JedisOperations {
         }, null, key, field, clazz, isCompress, seconds);
     }
 
-    public <T extends Object> T hgetObject(byte[] key, byte[] field, Class<T> clazz, boolean isCompress) {
+    public <T> T hgetObject(byte[] key, byte[] field, Class<T> clazz, boolean isCompress) {
         return this.hgetObject(key, field, clazz, isCompress, null);
     }
 
-    public <T extends Object> T hgetObject(byte[] key, byte[] field, Class<T> clazz, Integer seconds) {
+    public <T> T hgetObject(byte[] key, byte[] field, Class<T> clazz, Integer seconds) {
         return this.hgetObject(key, field, clazz, false, seconds);
     }
 
-    public <T extends Object> T hgetObject(byte[] key, byte[] field, Class<T> clazz) {
+    public <T> T hgetObject(byte[] key, byte[] field, Class<T> clazz) {
         return this.hgetObject(key, field, clazz, false, null);
     }
 
@@ -231,8 +231,8 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 以map形式返回哈希表的域和域的值
      */
-    public <T extends Object> Map<byte[], T> hgetAllObject(byte[] key, Class<T> clazz, 
-                                                           boolean isCompress, Integer seconds) {
+    public <T> Map<byte[], T> hgetAllObject(byte[] key, Class<T> clazz, 
+                                            boolean isCompress, Integer seconds) {
         return call(shardedJedis -> {
             Map<byte[], byte[]> datas = shardedJedis.hgetAll(key);
             Map<byte[], T> result = new HashMap<>();
@@ -247,16 +247,16 @@ public class HashOperations extends JedisOperations {
         }, null, key, clazz, isCompress, seconds);
     }
 
-    public <T extends Object> Map<byte[], T> hgetAllObject(byte[] key, Class<T> clazz,
-        boolean isCompress) {
+    public <T> Map<byte[], T> hgetAllObject(byte[] key, Class<T> clazz,
+                                            boolean isCompress) {
         return this.hgetAllObject(key, clazz, isCompress, null);
     }
 
-    public <T extends Object> Map<byte[], T> hgetAllObject(byte[] key, Class<T> clazz, Integer seconds) {
+    public <T> Map<byte[], T> hgetAllObject(byte[] key, Class<T> clazz, Integer seconds) {
         return this.hgetAllObject(key, clazz, false, seconds);
     }
 
-    public <T extends Object> Map<byte[], T> hgetAllObject(byte[] key, Class<T> clazz) {
+    public <T> Map<byte[], T> hgetAllObject(byte[] key, Class<T> clazz) {
         return this.hgetAllObject(key, clazz, false, null);
     }
 
@@ -268,8 +268,8 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 一个包含哈希表中所有值的表
      */
-    public <T extends Object> List<T> hvalsObject(byte[] key, Class<T> clazz, 
-                                                  boolean isCompress, Integer seconds) {
+    public <T> List<T> hvalsObject(byte[] key, Class<T> clazz, 
+                                   boolean isCompress, Integer seconds) {
         return call(shardedJedis -> {
             List<T> list = new ArrayList<>();
             for (byte[] data : shardedJedis.hvals(key)) {
@@ -283,15 +283,15 @@ public class HashOperations extends JedisOperations {
         }, null, key, clazz, isCompress, seconds);
     }
 
-    public <T extends Object> List<T> hvalsObject(byte[] key, Class<T> clazz, boolean isCompress) {
+    public <T> List<T> hvalsObject(byte[] key, Class<T> clazz, boolean isCompress) {
         return this.hvalsObject(key, clazz, isCompress, null);
     }
 
-    public <T extends Object> List<T> hvalsObject(byte[] key, Class<T> clazz, Integer seconds) {
+    public <T> List<T> hvalsObject(byte[] key, Class<T> clazz, Integer seconds) {
         return this.hvalsObject(key, clazz, false, seconds);
     }
 
-    public <T extends Object> List<T> hvalsObject(byte[] key, Class<T> clazz) {
+    public <T> List<T> hvalsObject(byte[] key, Class<T> clazz) {
         return this.hvalsObject(key, clazz, false, null);
 
     }
@@ -309,11 +309,11 @@ public class HashOperations extends JedisOperations {
      * @param seconds
      * @return 返回值：true成功；false失败；
      */
-    public <T extends Object> boolean hmsetObjects(byte[] key, Map<byte[], T> map,
-                                                   boolean isCompress, Integer seconds) {
+    public boolean hmsetObjects(byte[] key, Map<byte[], ?> map,
+                                boolean isCompress, Integer seconds) {
         return call(shardedJedis -> {
             Map<byte[], byte[]> data = new HashMap<>();
-            for (Entry<byte[], T> entry : map.entrySet()) {
+            for (Entry<byte[], ?> entry : map.entrySet()) {
                 data.put(entry.getKey(), jedisClient.serialize(entry.getValue(), isCompress));
             }
 
@@ -323,15 +323,15 @@ public class HashOperations extends JedisOperations {
         }, false, key, map, isCompress, seconds);
     }
 
-    public <T extends Object> boolean hmsetObjects(byte[] key, Map<byte[], T> map, boolean isCompress) {
+    public boolean hmsetObjects(byte[] key, Map<byte[], ?> map, boolean isCompress) {
         return this.hmsetObjects(key, map, isCompress, null);
     }
 
-    public <T extends Object> boolean hmsetObjects(byte[] key, Map<byte[], T> map, Integer seconds) {
+    public boolean hmsetObjects(byte[] key, Map<byte[], ?> map, Integer seconds) {
         return this.hmsetObjects(key, map, false, seconds);
     }
 
-    public <T extends Object> boolean hmsetObjects(byte[] key, Map<byte[], T> map) {
+    public boolean hmsetObjects(byte[] key, Map<byte[], ?> map) {
         return this.hmsetObjects(key, map, false, null);
     }
 
@@ -349,8 +349,8 @@ public class HashOperations extends JedisOperations {
      * @param fields
      * @return 一个包含多个给定域的关联值的表，表值的排列顺序和给定域参数的请求顺序一样。
      */
-    public <T extends Object> List<T> hmgetObjects(byte[] key, Class<T> clazz, boolean isCompress, 
-                                                   Integer seconds, byte[]... fields) {
+    public <T> List<T> hmgetObjects(byte[] key, Class<T> clazz, boolean isCompress, 
+                                    Integer seconds, byte[]... fields) {
         return call(shardedJedis -> {
             List<byte[]> datas = shardedJedis.hmget(key, fields);
             if (datas == null || datas.isEmpty()) {
@@ -369,17 +369,17 @@ public class HashOperations extends JedisOperations {
         }, null, key, clazz, isCompress, seconds, fields);
     }
 
-    public <T extends Object> List<T> hmgetObjects(byte[] key, Class<T> clazz, boolean isCompress,
-        byte[]... fields) {
+    public <T> List<T> hmgetObjects(byte[] key, Class<T> clazz, boolean isCompress,
+                                    byte[]... fields) {
         return this.hmgetObjects(key, clazz, isCompress, null, fields);
     }
 
-    public <T extends Object> List<T> hmgetObjects(byte[] key, Class<T> clazz, Integer seconds,
-        byte[]... fields) {
+    public <T> List<T> hmgetObjects(byte[] key, Class<T> clazz, Integer seconds,
+                                    byte[]... fields) {
         return this.hmgetObjects(key, clazz, false, seconds, fields);
     }
 
-    public <T extends Object> List<T> hmgetObjects(byte[] key, Class<T> clazz, byte[]... fields) {
+    public <T> List<T> hmgetObjects(byte[] key, Class<T> clazz, byte[]... fields) {
         return this.hmgetObjects(key, clazz, false, null, fields);
     }
 

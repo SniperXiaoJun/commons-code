@@ -79,6 +79,20 @@ public final class ObjectUtils {
     }
 
     /**
+     * Returns {@code true} if the provided reference 
+     * is not {@code null} otherwise {@code false}
+     * 
+     * user in method reference
+     * {@link java.util.Objects#isNull(Object)}
+     * 
+     * @param o the object
+     * @return {@code true} the object is not null
+     */
+    public static boolean isNotNull(Object o) {
+        return o != null;
+    }
+
+    /**
      * map to javabean
      * @param map
      * @param bean

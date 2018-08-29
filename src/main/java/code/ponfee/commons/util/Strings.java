@@ -528,7 +528,7 @@ public class Strings {
 
     enum CsvSplitState {
         PRE_DATA, QUOTE, SLOSH, DATA, WHITE, POST_DATA
-    };
+    }
 
     /** Split a quoted comma separated string to a list
      * <p>Handle <a href="https://www.ietf.org/rfc/rfc4180.txt">rfc4180</a>-like 

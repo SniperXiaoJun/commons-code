@@ -51,8 +51,8 @@ public class SetOpertions extends JedisOperations {
      * @param members
      * @return 被添加到集合中的新元素的数量，不包括被忽略的元素。
      */
-    public <T extends Object> Long sadd(byte[] key, boolean isCompress,
-                                        Integer seconds, T[] members) {
+    public <T> Long sadd(byte[] key, boolean isCompress,
+                         Integer seconds, T[] members) {
         return call(shardedJedis -> {
             byte[][] data = new byte[members.length][];
             for (int i = 0; i < members.length; i++) {
@@ -64,15 +64,15 @@ public class SetOpertions extends JedisOperations {
         }, null, key, isCompress, seconds, members);
     }
 
-    public <T extends Object> Long sadd(byte[] key, boolean isCompress, T[] members) {
+    public <T> Long sadd(byte[] key, boolean isCompress, T[] members) {
         return this.sadd(key, isCompress, null, members);
     }
 
-    public <T extends Object> Long sadd(byte[] key, Integer seconds, T[] members) {
+    public <T> Long sadd(byte[] key, Integer seconds, T[] members) {
         return this.sadd(key, false, seconds, members);
     }
 
-    public <T extends Object> Long sadd(byte[] key, T[] members) {
+    public <T> Long sadd(byte[] key, T[] members) {
         return this.sadd(key, false, null, members);
     }
 
@@ -110,8 +110,8 @@ public class SetOpertions extends JedisOperations {
      * @param seconds
      * @return 被移除的随机元素。当 key 不存在或 key 是空集时，返回 nil 。
      */
-    public <T extends Object> T spop(byte[] key, Class<T> clazz,
-                                     boolean isCompress, Integer seconds) {
+    public <T> T spop(byte[] key, Class<T> clazz,
+                      boolean isCompress, Integer seconds) {
         return call(shardedJedis -> {
             byte[] data = shardedJedis.spop(key);
             T t = jedisClient.deserialize(data, clazz, isCompress);
@@ -122,15 +122,15 @@ public class SetOpertions extends JedisOperations {
         }, null, key, clazz, isCompress, seconds);
     }
 
-    public <T extends Object> T spop(byte[] key, Class<T> clazz, boolean isCompress) {
+    public <T> T spop(byte[] key, Class<T> clazz, boolean isCompress) {
         return this.spop(key, clazz, isCompress, null);
     }
 
-    public <T extends Object> T spop(byte[] key, Class<T> clazz, Integer seconds) {
+    public <T> T spop(byte[] key, Class<T> clazz, Integer seconds) {
         return this.spop(key, clazz, false, seconds);
     }
 
-    public <T extends Object> T spop(byte[] key, Class<T> clazz) {
+    public <T> T spop(byte[] key, Class<T> clazz) {
         return this.spop(key, clazz, false, null);
     }
 
@@ -187,8 +187,8 @@ public class SetOpertions extends JedisOperations {
      * @param seconds
      * @return 集合中的所有成员。
      */
-    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz,
-                                              boolean isCompress, Integer seconds) {
+    public <T> Set<T> smembers(byte[] key, Class<T> clazz,
+                               boolean isCompress, Integer seconds) {
         return call(shardedJedis -> {
             Set<byte[]> datas = shardedJedis.smembers(key);
             Set<T> result = new HashSet<>();
@@ -207,15 +207,15 @@ public class SetOpertions extends JedisOperations {
         }, null, key, clazz, isCompress, seconds);
     }
 
-    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz, boolean isCompress) {
+    public <T> Set<T> smembers(byte[] key, Class<T> clazz, boolean isCompress) {
         return this.smembers(key, clazz, isCompress, null);
     }
 
-    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz, Integer seconds) {
+    public <T> Set<T> smembers(byte[] key, Class<T> clazz, Integer seconds) {
         return this.smembers(key, clazz, false, seconds);
     }
 
-    public <T extends Object> Set<T> smembers(byte[] key, Class<T> clazz) {
+    public <T> Set<T> smembers(byte[] key, Class<T> clazz) {
         return this.smembers(key, clazz, false, null);
     }
 
@@ -293,8 +293,8 @@ public class SetOpertions extends JedisOperations {
      * @return 只提供 key 参数时，返回一个元素；如果集合为空，返回 nil；如果提供了 count 参数，那么返回一个数组；如果集合为空，返回空数组。
      */
     @SuppressWarnings("unchecked")
-    public <T extends Object> List<T> srandmember(byte[] key, Class<T> clazz,
-                                                  boolean isCompress, int count, Integer seconds) {
+    public <T> List<T> srandmember(byte[] key, Class<T> clazz,
+                                   boolean isCompress, int count, Integer seconds) {
         return call(shardedJedis -> {
             List<byte[]> datas = shardedJedis.srandmember(key, count);
             List<T> result = new ArrayList<>();
@@ -313,15 +313,15 @@ public class SetOpertions extends JedisOperations {
         }, null, key, clazz, isCompress, count, seconds);
     }
 
-    public <T extends Object> List<T> srandmember(byte[] key, Class<T> clazz, boolean isCompress, int count) {
+    public <T> List<T> srandmember(byte[] key, Class<T> clazz, boolean isCompress, int count) {
         return this.srandmember(key, clazz, isCompress, count, null);
     }
 
-    public <T extends Object> List<T> srandmember(byte[] key, Class<T> clazz, int count, Integer seconds) {
+    public <T> List<T> srandmember(byte[] key, Class<T> clazz, int count, Integer seconds) {
         return this.srandmember(key, clazz, false, count, seconds);
     }
 
-    public <T extends Object> List<T> srandmember(byte[] key, Class<T> clazz, int count) {
+    public <T> List<T> srandmember(byte[] key, Class<T> clazz, int count) {
         return this.srandmember(key, clazz, false, count, null);
     }
 

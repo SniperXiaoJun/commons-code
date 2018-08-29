@@ -238,8 +238,8 @@ public final class Collects {
 
     /**
      * 数组与list交集
-     * @param array
-     * @param list
+     * @param array1
+     * @param array2
      * @return
      */
     @SuppressWarnings({ "unchecked", "hiding" })

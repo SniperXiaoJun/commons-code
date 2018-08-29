@@ -29,7 +29,7 @@ public class StringSerializer extends Serializer {
     }
 
     @Override
-    public <T> byte[] serialize(T t, boolean isCompress) {
+    public byte[] serialize(Object t, boolean isCompress) {
         if (t == null) {
             return null;
         } else if (t instanceof String) {

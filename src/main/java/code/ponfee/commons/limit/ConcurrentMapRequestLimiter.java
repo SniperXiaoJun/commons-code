@@ -137,10 +137,10 @@ public final class ConcurrentMapRequestLimiter extends RequestLimiter {
     }
 
     private CacheValue<?> incrementAndGet(String key, long expireTimeMillis) {
-        CacheValue<?> cache = (CacheValue<?>) CACHE.get(key);
+        CacheValue<?> cache = CACHE.get(key);
         if (cache == null || cache.isExpire()) {
             synchronized (ConcurrentMapRequestLimiter.class) {
-                cache = (CacheValue<?>) CACHE.get(key);
+                cache = CACHE.get(key);
                 if (cache == null || cache.isExpire()) { // 失效则重置
                     cache = new CacheValue<>(null, expireTimeMillis);
                     CACHE.put(key, cache);

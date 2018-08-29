@@ -21,14 +21,14 @@ public abstract class Serializer {
      * @param isCompress 是否要压缩：true是；false否；
      * @return 序例化后的流数据
      */
-    public abstract <T extends Object> byte[] serialize(T t, boolean isCompress);
+    public abstract byte[] serialize(Object t, boolean isCompress);
 
     /**
      * 对象序例化为流数据
      * @param t 对象
      * @return 序例化后的流数据
      */
-    public final <T extends Object> byte[] serialize(T t) {
+    public final byte[] serialize(Object t) {
         if (t == null) {
             return null;
         }
@@ -42,15 +42,15 @@ public abstract class Serializer {
      * @param isCompress 是否被压缩：true是；false否；
      * @return 反序例化后的对象
      */
-    public abstract <T extends Object> T deserialize(byte[] data, 
-                             Class<T> clazz, boolean isCompress);
+    public abstract <T> T deserialize(byte[] data, Class<T> clazz, 
+                                      boolean isCompress);
 
     /**
      * 流数据反序例化为对象
      * @param data 流数据
      * @return 反序例化后的对象
      */
-    public final <T extends Object> T deserialize(byte[] data, Class<T> clazz) {
+    public final <T> T deserialize(byte[] data, Class<T> clazz) {
         if (data == null) {
             return null;
         }

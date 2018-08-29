@@ -307,8 +307,8 @@ public final class Files {
     private static final long TB = GB * UNIT;
     private static final long PB = TB * UNIT;
     private static final long EB = PB * UNIT;
-    private static final long ZB = EB * UNIT;
-    private static final long YB = ZB * UNIT;
+    //private static final long ZB = EB * UNIT;
+    //private static final long YB = ZB * UNIT;
     public static long parseHuman(String humanSize) {
         long factor = 1L;
         switch (humanSize.charAt(0)) {
@@ -350,12 +350,12 @@ public final class Files {
                 case 'E':
                     factor *= EB;
                     break;
-                case 'Z':
-                    factor *= ZB;
-                    break;
-                case 'Y':
-                    factor *= YB;
-                    break;
+                //case 'Z':
+                //    factor *= ZB;
+                //    break;
+                //case 'Y':
+                //    factor *= YB;
+                //    break;
                 default:
                     throw new RuntimeException("Invalid unit " + c); // cannot happened
             }

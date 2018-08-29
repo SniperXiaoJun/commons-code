@@ -50,10 +50,10 @@ import org.apache.commons.collections4.CollectionUtils;
  */
 public class LiteDeviceResolver {
 
-    private final List<String> mobileUserAgentPrefixes = new ArrayList<String>();
-    private final List<String> mobileUserAgentKeywords = new ArrayList<String>();
-    private final List<String> tabletUserAgentKeywords = new ArrayList<String>();
-    private final List<String> normalUserAgentKeywords = new ArrayList<String>();
+    private final List<String> mobileUserAgentPrefixes = new ArrayList<>();
+    private final List<String> mobileUserAgentKeywords = new ArrayList<>();
+    private final List<String> tabletUserAgentKeywords = new ArrayList<>();
+    private final List<String> normalUserAgentKeywords = new ArrayList<>();
 
     public LiteDeviceResolver() {
         this(null);

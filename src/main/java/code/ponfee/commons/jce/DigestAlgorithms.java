@@ -31,9 +31,7 @@ public enum DigestAlgorithms {
     SKEIN_1024_512("Skein-1024-512", 512), // 
     SKEIN_1024_1024("Skein-1024-1024", 1024), // 
 
-    /**
-     * @see org.bouncycastle.crypto.digests.SHAKEDigest
-     */
+    /* @see org.bouncycastle.crypto.digests.SHAKEDigest */
     //SHAKE128(128), SHAKE256(256), // 
 
     /**

@@ -10,7 +10,6 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Hex;
@@ -155,8 +154,7 @@ public final class CryptoMessageSyntax {
         try {
             RecipientInformationStore ris = new CMSEnvelopedData(enveloped).getRecipientInfos();
 
-            for (Iterator<RecipientInformation> i = ris.getRecipients().iterator(); i.hasNext();) {
-                RecipientInformation rin = i.next();
+            for (RecipientInformation rin : ris.getRecipients()) {
                 KeyTransRecipientId rid = (KeyTransRecipientId) rin.getRID();
                 // 匹配
                 if (cert.getSerialNumber().equals(rid.getSerialNumber())) {

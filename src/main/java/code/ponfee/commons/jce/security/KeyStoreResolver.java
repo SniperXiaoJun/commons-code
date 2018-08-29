@@ -102,7 +102,7 @@ public class KeyStoreResolver {
      * set key entry
      * 
      * @param alias
-     * @param pkcs8Key
+     * @param encryptedPkcs8Key
      * @param chain
      * @see RSAPrivateKeys#toEncryptedPkcs8(java.security.interfaces.RSAPrivateKey, String)
      */
