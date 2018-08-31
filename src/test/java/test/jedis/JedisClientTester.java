@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Resource;
@@ -143,7 +144,7 @@ public class JedisClientTester {
 
     @Test
     public void testGets() {
-        List<String> list = jedisClient.valueOps().gets("test_mget_*");
+        Set<String> list = jedisClient.valueOps().gets("test_mget_*");
         System.out.println(list.size());
     }
 

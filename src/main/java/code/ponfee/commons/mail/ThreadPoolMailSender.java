@@ -1,16 +1,12 @@
 package code.ponfee.commons.mail;
 
-import code.ponfee.commons.concurrent.ThreadPoolExecutors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
+
+import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 
 /**
  * 邮件通过走线程池发送
@@ -18,7 +14,6 @@ import java.util.concurrent.ExecutorService;
  */
 public class ThreadPoolMailSender {
 
-    private static Logger logger = LoggerFactory.getLogger(ThreadPoolMailSender.class);
     private static final ExecutorService EXECUTOR = 
         ThreadPoolExecutors.create(4, 32, 120, 100, "mail-sender");
 
@@ -42,46 +37,18 @@ public class ThreadPoolMailSender {
      * @return
      */
     public static boolean send(MailSender mailSender, List<MailEnvelope> envlops, boolean async) {
-        boolean flag = true;
         if (async) { // 异步发送
-            for (MailEnvelope envlop : envlops) {
-                EXECUTOR.submit(new Sender(mailSender, envlop));
-            }
+            envlops.stream().forEach(e -> EXECUTOR.submit(() -> mailSender.send(e)));
+            return true;
         } else { // 同步发送
-            CompletionService<Boolean> service = new ExecutorCompletionService<>(EXECUTOR);
-            for (MailEnvelope envlop : envlops) {
-                service.submit(new Sender(mailSender, envlop));
-            }
-            for (int number = envlops.size(); number > 0; number--) {
-                try {
-                    if (!service.take().get()) {
-                        flag = false;
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.error("thread pool send mail occur error", e);
-                    flag = false;
-                }
-            }
-        }
+            List<CompletableFuture<Boolean>> list = envlops.stream().map(
+                e -> CompletableFuture.supplyAsync(() -> mailSender.send(e), EXECUTOR)
+            ).collect(Collectors.toList());
 
-        return flag;
-    }
-
-    /**
-     * 异步发送
-     */
-    private static final class Sender implements Callable<Boolean> {
-        final MailSender mailSender;
-        final MailEnvelope envlop;
-
-        Sender(MailSender mailSender, MailEnvelope envlop) {
-            this.mailSender = mailSender;
-            this.envlop = envlop;
-        }
-
-        @Override
-        public Boolean call() {
-            return mailSender.send(envlop);
+            return list.stream()
+                       .map(CompletableFuture::join)
+                       .reduce(Boolean::logicalAnd)
+                       .orElse(false);
         }
     }
 

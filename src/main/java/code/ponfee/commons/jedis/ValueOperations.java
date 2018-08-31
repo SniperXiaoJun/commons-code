@@ -1,20 +1,16 @@
 package code.ponfee.commons.jedis;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CompletionService;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Collectors;
 
 import code.ponfee.commons.io.GzipProcessor;
 import code.ponfee.commons.math.Numbers;
@@ -25,7 +21,6 @@ import redis.clients.jedis.Jedis;
  * @author fupf
  */
 public class ValueOperations extends JedisOperations {
-    private static Logger logger = LoggerFactory.getLogger(ValueOperations.class);
 
     ValueOperations(JedisClient jedisClient) {
         super(jedisClient);
@@ -98,9 +93,17 @@ public class ValueOperations extends JedisOperations {
      * @param keyWildcard
      * @return
      */
-    public List<String> gets(String keyWildcard) {
+    public Set<String> gets(String keyWildcard) {
         return call(shardedJedis -> {
-            CompletionService<List<String>> service = new ExecutorCompletionService<>(EXECUTOR);
+            List<CompletableFuture<Set<String>>> list = shardedJedis.getAllShards().stream().map(
+                 jedis -> CompletableFuture.supplyAsync(() -> jedis.keys(keyWildcard), EXECUTOR)
+             ).collect(Collectors.toList());
+    
+            return list.stream()
+                       .map(CompletableFuture::join)
+                       .collect(HashSet::new, HashSet::addAll, HashSet::addAll);
+
+            /*CompletionService<List<String>> service = new ExecutorCompletionService<>(EXECUTOR);
             int number = 0;
             for (final Jedis jedis : shardedJedis.getAllShards()) {
                 Set<String> keys = jedis.keys(keyWildcard);
@@ -122,7 +125,7 @@ public class ValueOperations extends JedisOperations {
                     logger.error("Jedis mget occur error", e);
                 }
             }
-            return result;
+            return result;*/
         }, null, keyWildcard);
     }
 
@@ -470,11 +473,20 @@ public class ValueOperations extends JedisOperations {
                 return null;
             }
 
-            Map<String, String> resultMap;
             int number = jedisList.size();
             if (number < keys.length / BATCH_MULTIPLE) { // key数量大于分片数量倍数，则采用mget方式
-                resultMap = new ConcurrentHashMap<>();
-                CompletionService<List<String>> service = new ExecutorCompletionService<>(EXECUTOR);
+                Map<String, String> resultMap = new ConcurrentHashMap<>();
+                List<CompletableFuture<Void>> list = jedisList.stream().map(
+                  jedis -> CompletableFuture.supplyAsync(() -> jedis.mget(keys), EXECUTOR)
+                ).map(future -> future.thenAccept(values -> {
+                    for (int i = 0; i < keys.length; i++) {
+                        resultMap.putIfAbsent(keys[i], values.get(i));
+                    }
+                })).collect(Collectors.toList());
+                list.stream().forEach(CompletableFuture::join);
+                return resultMap;
+
+                /*CompletionService<List<String>> service = new ExecutorCompletionService<>(EXECUTOR);
                 for (Jedis jedis : jedisList) {
                     service.submit(() -> jedis.mget(keys));
                 }
@@ -495,17 +507,17 @@ public class ValueOperations extends JedisOperations {
                     } catch (InterruptedException | ExecutionException e) {
                         logger.error("Jedis mget occur error", e);
                     }
-                }
+                }*/
             } else { // 直接获取，不用mget方式
-                resultMap = new HashMap<>();
+                Map<String, String> resultMap = new HashMap<>();
                 for (String k : keys) {
                     String v = shardedJedis.get(k);
                     if (v != null) {
                         resultMap.put(k, v);
                     }
                 }
+                return resultMap;
             }
-            return resultMap;
         }, null, String.valueOf(keys));
     }
 
@@ -526,11 +538,21 @@ public class ValueOperations extends JedisOperations {
                 return null;
             }
 
-            Map<byte[], byte[]> resultMap;
             int number = jedisList.size();
             if (number < keys.length / BATCH_MULTIPLE) { // key数量大于分片数量倍数，则采用mget方式
-                resultMap = new ConcurrentHashMap<>();
-                CompletionService<List<byte[]>> service = new ExecutorCompletionService<>(EXECUTOR);
+                Map<byte[], byte[]> resultMap = new ConcurrentHashMap<>();
+                List<CompletableFuture<Void>> list = jedisList.stream().map(
+                  jedis -> CompletableFuture.supplyAsync(() -> jedis.mget((byte[][])keys), EXECUTOR)
+                ).map(future -> future.thenAccept(values -> {
+                    for (int i = 0; i < keys.length; i++) {
+                        resultMap.putIfAbsent(keys[i], values.get(i));
+                    }
+                })).collect(Collectors.toList());
+                //CompletableFuture.allOf(list.toArray(new CompletableFuture[list.size()]));
+                list.stream().forEach(CompletableFuture::join);
+                return resultMap;
+
+                /*CompletionService<List<byte[]>> service = new ExecutorCompletionService<>(EXECUTOR);
                 for (Jedis jedis : jedisList) {
                     service.submit(() -> jedis.mget((byte[][]) keys));
                 }
@@ -554,9 +576,9 @@ public class ValueOperations extends JedisOperations {
                     } catch (Exception e) {
                         logger.error("Jedis mget occur error", e);
                     }
-                }
+                }*/
             } else { // 直接获取，不用mget方式
-                resultMap = new HashMap<>();
+                Map<byte[], byte[]> resultMap = new HashMap<>();
                 byte[] v;
                 for (byte[] k : (byte[][]) keys) {
                     v = shardedJedis.get(k);
@@ -568,8 +590,8 @@ public class ValueOperations extends JedisOperations {
                     }
                     resultMap.put(k, v);
                 }
+                return resultMap;
             }
-            return resultMap;
         }, null, isCompress, keys);
     }
 
