@@ -9,6 +9,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.time.DateUtils;
 
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.math.Numbers;
@@ -29,6 +31,7 @@ import code.ponfee.commons.reflect.Fields;
 public final class ObjectUtils {
 
     private static final char[] URL_SAFE_BASE64_CODES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
+    private static final String[] DATE_PATTERN = { "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyyMMdd", "yyyyMMddHHmmss" };
 
     /**
      * Returns object toString
@@ -140,7 +143,7 @@ public final class ObjectUtils {
                     } else if (double.class == type) {
                         value = Numbers.toDouble(value);
                     } else {
-                        // cannot to run in this place
+                        // cannot happened
                     }
                 } else if (value != null && !type.isInstance(value)) { // 类型不一致时
                     if (org.apache.commons.lang3.ClassUtils.isPrimitiveWrapper(type)
@@ -173,6 +176,19 @@ public final class ObjectUtils {
                                     break;
                                 }
                             }*/
+                        }
+                    } else if (Date.class == type) {
+                        if (value instanceof Number) {
+                            value = new Date(((Number) value).longValue());
+                        } else if (CharSequence.class.isAssignableFrom(type)) {
+                            if (StringUtils.isNumeric((CharSequence) value) 
+                                && !RegexUtils.isDatePattern(value.toString())) {
+                                value = new Date(Numbers.toLong(value));
+                            } else {
+                                value = DateUtils.parseDate(value.toString(), DATE_PATTERN);
+                            }
+                        } else {
+                            throw new IllegalArgumentException("Illegal date time: " + value);
                         }
                     } else if (CharSequence.class.isAssignableFrom(type)) {
                         // Construct a CharSequence

@@ -15,7 +15,7 @@ import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 public class ThreadPoolMailSender {
 
     private static final ExecutorService EXECUTOR = 
-        ThreadPoolExecutors.create(4, 32, 120, 100, "mail-sender");
+        ThreadPoolExecutors.create(4, 15, 120, 100, "mail-sender");
 
     public static boolean send(MailSender mailSender, MailEnvelope envlop) {
         return send(mailSender, envlop, true);

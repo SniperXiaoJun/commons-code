@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import code.ponfee.commons.util.ObjectUtils;
 import redis.clients.jedis.Jedis;
@@ -47,11 +50,16 @@ public class KeysOperations extends JedisOperations {
      */
     public Set<String> keys(String keyWildcard) {
         return call(shardedJedis -> {
-            Set<String> keys = new HashSet<>();
-            for (Jedis jedis : shardedJedis.getAllShards()) {
-                keys.addAll(jedis.keys(keyWildcard));
-            }
-            return keys;
+            List<CompletableFuture<Set<String>>> list = 
+            shardedJedis.getAllShards().stream().map(
+                jedis -> CompletableFuture.supplyAsync(
+                    () -> jedis.keys(keyWildcard), EXECUTOR
+                )
+            ).collect(Collectors.toList());
+            return list.stream()
+                       .map(CompletableFuture::join)
+                       .filter(CollectionUtils::isNotEmpty)
+                       .collect(HashSet::new, HashSet::addAll, HashSet::addAll);
         }, null, keyWildcard);
     }
 
@@ -124,17 +132,19 @@ public class KeysOperations extends JedisOperations {
             }
 
             Collection<Jedis> jedisList = shardedJedis.getAllShards();
-            if (jedisList == null || jedisList.isEmpty()) {
+            if (CollectionUtils.isEmpty(jedisList)) {
                 return 0L;
             }
 
-            Long delCounts = 0L;
-            int number = jedisList.size();
-            if (number < keys.length / BATCH_MULTIPLE) { // key数量大于分片数量的BATCH_MULTIPLE倍
+            if (jedisList.size() < keys.length / BATCH_MULTIPLE) { // key数量大于分片数量的BATCH_MULTIPLE倍
                 List<CompletableFuture<Long>> list = jedisList.stream().map(
                      jedis -> CompletableFuture.supplyAsync(() -> jedis.del(keys), EXECUTOR)
                  ).collect(Collectors.toList());
-                return list.stream().map(CompletableFuture::join).reduce(0L, Long::sum);
+
+                //return list.stream().mapToLong(c -> ObjectUtils.orElse(c.join(), 0L)).sum()
+                return list.stream().map(CompletableFuture::join)
+                           .filter(ObjectUtils::isNotNull)
+                           .reduce(0L, Long::sum);
 
                 /*CompletionService<Long> service = new ExecutorCompletionService<>(EXECUTOR);
                 for (Jedis jedis : jedisList) {
@@ -150,11 +160,13 @@ public class KeysOperations extends JedisOperations {
                     }
                 }*/
             } else {
-                for (String key : keys) {
-                    delCounts += ObjectUtils.orElse(shardedJedis.del(key), 0L);
-                }
+                return Stream.of(keys).map(
+                    k -> CompletableFuture.supplyAsync(() -> shardedJedis.del(k), EXECUTOR)
+                ).collect(Collectors.toList())
+                 .stream().map(CompletableFuture::join)
+                 .filter(ObjectUtils::isNotNull)
+                 .reduce(0L, Long::sum);
             }
-            return delCounts;
         }, null, (Object[]) keys);
     }
 
@@ -167,11 +179,11 @@ public class KeysOperations extends JedisOperations {
         return call(shardedJedis -> {
             long delCounts = 0L;
             Collection<Jedis> jedisList = shardedJedis.getAllShards();
-            if (jedisList == null || jedisList.isEmpty()) {
+            if (CollectionUtils.isEmpty(jedisList)) {
                 return delCounts;
             }
 
-            List<CompletableFuture<Long>> list = shardedJedis.getAllShards().stream().map(
+            List<CompletableFuture<Long>> list = jedisList.stream().map(
                 jedis -> CompletableFuture.supplyAsync(
                     () -> jedis.keys(keyWildcard), EXECUTOR
                 ).thenCompose(
@@ -182,28 +194,10 @@ public class KeysOperations extends JedisOperations {
                     keys -> jedis.del(keys.toArray(new String[keys.size()]))
                 )*/
             ).collect(Collectors.toList());
-            return list.stream().map(CompletableFuture::join).reduce(0L, Long::sum);
-
-            /*int number = jedisList.size();
-            CompletionService<Long> service = new ExecutorCompletionService<>(EXECUTOR);
-            for (Jedis jedis : jedisList) {
-                service.submit(() -> {
-                    Set<String> keys = jedis.keys(keyWildcard);
-                    if (keys == null || keys.isEmpty()) {
-                        return 0L;
-                    } else {
-                        return jedis.del(keys.toArray(new String[keys.size()]));
-                    }
-                });
-            }
-            for (; number > 0; number--) {
-                try {
-                    delCounts += ObjectUtils.orElse(service.take().get(), 0L);
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.error("Jedis del by wildcard occur error", e);
-                }
-            }
-            return delCounts;*/
+            return list.stream()
+                       .map(CompletableFuture::join)
+                       .filter(ObjectUtils::isNotNull)
+                       .reduce(0L, Long::sum);
         }, 0L, keyWildcard);
     }
 

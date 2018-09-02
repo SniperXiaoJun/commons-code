@@ -140,4 +140,20 @@ public final class RegexUtils {
         return text != null && PATTERN_PASSWORD.matcher(text).matches();
     }
 
+    // ----------------------------------------------------------yyyyMMdd(HHmmss)
+    public static final String REGEXP_DATE = 
+        "^([2-9]\\d{3}((0[1-9]|1[012])(0[1-9]|1\\d|2[0-8])|(0[13456789]|1[012])(29|30)|(0[13578]|1[02])31)|(([2-9]\\d)(0[48]|[2468][048]|[13579][26])|(([2468][048]|[3579][26])00))0229)"
+      + "(([0-1]{1}\\d{1}|[2]{1}[0-3]{1})(?::)?([0-5]{1}\\d{1})(?::)?([0-5]{1}\\d{1}))?$";
+    public static final Pattern PATTERN_DATE = Pattern.compile(REGEXP_DATE);
+    /**
+     * Validates the text whether date pattern
+     * 
+     * @param text the string
+     * @return if returns {@code true} then is a valid date pattern
+     */
+    public static boolean isDatePattern(String text) {
+        return text != null
+            && PATTERN_DATE.matcher(text).matches(); 
+    }
+
 }

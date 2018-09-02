@@ -6,7 +6,10 @@ import static org.apache.commons.net.smtp.SMTPReply.SERVICE_READY;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.net.smtp.SMTPClient;
 import org.apache.commons.net.smtp.SMTPReply;
@@ -16,6 +19,7 @@ import org.xbill.DNS.Type;
 
 /**
  * 电子邮箱地址验证
+ * 
  * @author fupf
  */
 public class EmailValidator {
@@ -108,12 +112,17 @@ public class EmailValidator {
     }
 
     public static boolean verify(String email, int validateTimes) {
-        for (int i = 0; i < validateTimes; i++) {
-            if (!verify(email)) {
-                return false;
-            }
+        if (validateTimes > 1) {
+            return IntStream.range(0, validateTimes).mapToObj(
+                i -> CompletableFuture.supplyAsync(() -> verify(email))
+            ).collect(Collectors.toList())
+             .stream()
+             .map(CompletableFuture::join)
+             .reduce(Boolean::logicalAnd)
+             .orElse(false);
+        } else {
+            return verify(email);
         }
-        return true;
     }
 
 }

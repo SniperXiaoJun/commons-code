@@ -10,7 +10,6 @@ import com.google.common.collect.Maps;
 
 import code.ponfee.commons.model.Page;
 import code.ponfee.commons.model.Result;
-import code.ponfee.commons.reflect.Fields;
 import code.ponfee.commons.reflect.GenericUtils;
 import code.ponfee.commons.ws.adapter.model.MapEntry;
 import code.ponfee.commons.ws.adapter.model.MapItem;
@@ -41,27 +40,21 @@ public abstract class ResultPageMapAdapter<K, V>
     public Result<Page<Map<K, V>>> unmarshal(Result<TransitPage<MapItem>> v) {
         if (v.getData() == null) {
             return v.copy();
-        } else if (v.getData().getRows() == null || v.getData().getRows().getItem() == null) {
+        } else if (v.getData().getRows() == null 
+                || v.getData().getRows().getItem() == null) {
             return v.copy(new Page<>());
         }
 
-        List<Map<K, V>> list = Lists.newArrayList();
-        Page<MapItem> page = TransitPage.recover(v.getData());
-        for (MapItem items : page.getRows()) {
+        return v.copy(TransitPage.recover(v.getData()).transform(items -> {
             if (items == null) {
-                continue;
+                return null;
             }
             Map<K, V> map = Maps.newLinkedHashMap();
             for (MapEntry<K, V> item : items.getItem()) {
                 map.put(item.getKey(), item.getValue());
             }
-            list.add(map);
-        }
-
-        Fields.put(page, "rows", list);
-        Result<Page<Map<K, V>>> result = v.copy(null);
-        Fields.put(result, "data", page);
-        return result;
+            return map;
+        }));
     }
 
     @Override

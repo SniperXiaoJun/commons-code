@@ -5,12 +5,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,7 +19,6 @@ import org.apache.poi.ss.formula.functions.T;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import code.ponfee.commons.model.Page;
@@ -42,11 +40,9 @@ public final class Collects {
      * @return
      */
     public static Object[] map2array(Map<String, Object> map, String... fields) {
-        Object[] array = new Object[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            array[i] = ObjectUtils.orElse(map.get(fields[i]), "");
-        }
-        return array;
+        return Stream.of(fields).map(
+            field -> ObjectUtils.orElse(map.get(field), "")
+        ).toArray();
     }
 
     /**
@@ -59,14 +55,9 @@ public final class Collects {
         if (data == null) {
             return null;
         }
-
-        List<Object[]> result = new ArrayList<>(data.size());
-        for (Map<String, Object> row : data) {
-            if (row != null && !row.isEmpty()) {
-                result.add(map2array(row, fields));
-            }
-        }
-        return result;
+        return data.stream().map(
+            map -> Collects.map2array(map, fields)
+        ).collect(Collectors.toList());
     }
 
     /**
@@ -79,12 +70,9 @@ public final class Collects {
             return null;
         }
 
-        Object[] result = new Object[data.size()];
-        int i = 0;
-        for (Entry<String, Object> entry : data.entrySet()) {
-            result[i++] = ObjectUtils.orElse(entry.getValue(), "");
-        }
-        return result;
+        return data.entrySet().stream().map(
+            e -> ObjectUtils.orElse(e.getValue(), "")
+        ).toArray();
     }
 
     /**
@@ -97,13 +85,7 @@ public final class Collects {
             return null;
         }
 
-        List<Object[]> result = new ArrayList<>(data.size());
-        for (LinkedHashMap<String, Object> row : data) {
-            if (row != null && !row.isEmpty()) {
-                result.add(map2array(row));
-            }
-        }
-        return result;
+        return data.stream().map(Collects::map2array).collect(Collectors.toList());
     }
 
     /**
@@ -111,14 +93,11 @@ public final class Collects {
      * @param s
      * @return
      */
-    public static Result<Page<Object[]>> map2array(Result<Page<LinkedHashMap<String, Object>>> s) {
-        Page<LinkedHashMap<String, Object>> page = s.getData();
-        List<Object[]> list = map2array(page.getRows());
-
-        Fields.put(page, "rows", list);
-        Result<Page<Object[]>> target = s.copy(null);
-        Fields.put(target, "data", page);
-        return target;
+    public static Result<Page<Object[]>> map2array(
+        Result<Page<LinkedHashMap<String, Object>>> source) {
+        return source.copy(source.getData().transform(
+            linkedMap -> map2array(linkedMap)
+        ));
     }
 
     /**
@@ -129,16 +108,7 @@ public final class Collects {
      */
     public static Result<Page<Object[]>> map2array(Result<Page<Map<String, Object>>> source, 
                                                    String... fields) {
-        Page<Map<String, Object>> page = source.getData();
-        List<Object[]> list = Lists.newArrayListWithCapacity(page.getRows().size());
-        for (Map<String, Object> map : page.getRows()) {
-            list.add(map2array(map, fields));
-        }
-
-        Fields.put(page, "rows", list);
-        Result<Page<Object[]>> target = source.copy(null);
-        Fields.put(target, "data", page);
-        return target;
+        return source.copy(source.getData().transform(map -> map2array(map, fields)));
     }
 
     /**
@@ -162,11 +132,10 @@ public final class Collects {
         if (beans == null) {
             return null;
         }
-        Map<K, V> map = new HashMap<>();
-        for (E bean : beans) {
-            map.put((K) Fields.get(bean, keyField), (V) Fields.get(bean, valueField));
-        }
-        return map;
+        return beans.stream().collect(Collectors.toMap(
+            bean -> (K) Fields.get(bean, keyField), 
+            bean -> (V) Fields.get(bean, valueField)
+        ));
     }
 
     /**
@@ -181,11 +150,9 @@ public final class Collects {
         if (beans == null) {
             return null;
         }
-        List<T> list = new ArrayList<>(beans.size());
-        for (E bean : beans) {
-            list.add((T) Fields.get(bean, field));
-        }
-        return list;
+        return beans.stream().map(
+            bean -> (T) Fields.get(bean, field)
+        ).collect(Collectors.toList());
     }
 
     public static <E> List<Object[]> flatList(List<E> beans, String... fields) {
@@ -193,15 +160,9 @@ public final class Collects {
             return null;
         }
 
-        List<Object[]> list = new ArrayList<>(beans.size());
-        for (E bean : beans) {
-            Object[] array = new Object[fields.length];
-            for (int i = 0; i < fields.length; i++) {
-                array[i] = Fields.get(bean, fields[i]);
-            }
-            list.add(array);
-        }
-        return list;
+        return beans.stream().map(
+            b -> Stream.of(fields).map(f -> Fields.get(b, f)).toArray()
+        ).collect(Collectors.toList());
     }
 
     /**
@@ -215,11 +176,10 @@ public final class Collects {
         if (bean == null || fields == null) {
             return null;
         }
-        Map<String, Object> result = new HashMap<>(fields.length);
-        for (String field : fields) {
-            result.put(field, Fields.get(bean, field));
-        }
-        return result;
+        return Stream.of(fields).collect(Collectors.toMap(
+            Function.identity(), 
+            field -> Fields.get(bean, field)
+        ));
     }
 
     // -----------------------------the collection of intersect, union and different operations
@@ -310,15 +270,10 @@ public final class Collects {
         Set<K> set2 = map2.keySet();
         Set<K> diffSet = Sets.newHashSet(Sets.difference(set1, set2));
         diffSet.addAll(Sets.difference(set2, set1));
-        Map<K, V> result = Maps.newHashMapWithExpectedSize(diffSet.size());
-        for (K key : diffSet) {
-            if (map1.containsKey(key)) {
-                result.put(key, map1.get(key));
-            } else {
-                result.put(key, map2.get(key));
-            }
-        }
-        return result;
+        return diffSet.stream().collect(Collectors.toMap(
+            Function.identity(), 
+            key -> map1.containsKey(key) ? map1.get(key) : map2.get(key)
+        ));
     }
 
     /**
