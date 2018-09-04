@@ -2,6 +2,7 @@ package code.ponfee.commons.jedis;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -9,9 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -97,12 +96,23 @@ public class ValueOperations extends JedisOperations {
      * @param keyWildcard
      * @return
      */
-    public Set<String> gets(String keyWildcard) {
+    public Set<String> getWithWildcard(String keyWildcard) {
         return call(shardedJedis -> {
-            List<CompletableFuture<Set<String>>> list = shardedJedis.getAllShards().stream().map(
-                 jedis -> CompletableFuture.supplyAsync(() -> jedis.keys(keyWildcard), EXECUTOR)
-             ).collect(Collectors.toList());
-    
+            Collection<Jedis> jedisList = shardedJedis.getAllShards();
+            if (CollectionUtils.isEmpty(jedisList)) {
+                return null;
+            }
+            List<CompletableFuture<List<String>>> list = jedisList.stream().map(
+                jedis -> CompletableFuture.supplyAsync(
+                    () -> jedis.keys(keyWildcard), EXECUTOR
+                ).thenCompose(
+                    keys -> CompletableFuture.supplyAsync(
+                        () -> CollectionUtils.isEmpty(keys) ? null : 
+                            jedis.mget(keys.toArray(new String[keys.size()])), 
+                        EXECUTOR
+                    )
+                )
+            ).collect(Collectors.toList());
             return list.stream()
                        .map(CompletableFuture::join)
                        .filter(CollectionUtils::isNotEmpty)
@@ -459,19 +469,24 @@ public class ValueOperations extends JedisOperations {
                 List<CompletableFuture<Void>> list = jedisList.stream().map(
                   jedis -> CompletableFuture.supplyAsync(() -> jedis.mget(keys), EXECUTOR)
                 ).map(future -> future.thenAccept(values -> { // 同步
+                    String value;
                     for (int i = 0; i < keys.length; i++) {
-                        resultMap.putIfAbsent(keys[i], values.get(i));
+                        if ((value = values.get(i)) != null) {
+                            resultMap.putIfAbsent(keys[i], value);
+                        }
                     }
                 })).collect(Collectors.toList());
                 list.stream().forEach(CompletableFuture::join);
                 return resultMap;
             } else { // 直接获取，不用mget方式
-                return Stream.of(keys).collect(Collectors.toMap(
-                    Function.identity(), 
-                    k -> CompletableFuture.supplyAsync(() -> shardedJedis.get(k), EXECUTOR)
-                )).entrySet().stream().collect(
-                    Collectors.toMap(Entry::getKey, e -> e.getValue().join())
-                );
+                Map<String, String> result = new HashMap<>();
+                for (String key : keys) {
+                    String value = shardedJedis.get(key);
+                    if (value != null) {
+                        result.putIfAbsent(key, value);
+                    }
+                }
+                return result;
             }
         }, null, String.valueOf(keys));
     }
@@ -499,7 +514,10 @@ public class ValueOperations extends JedisOperations {
                   jedis -> CompletableFuture.supplyAsync(() -> jedis.mget(keys), EXECUTOR)
                 ).map(future -> future.thenAccept(values -> { // 同步
                     for (int i = 0; i < keys.length; i++) {
-                        resultMap.putIfAbsent(keys[i], values.get(i));
+                        byte[] value;
+                        if ((value = values.get(i)) != null) {
+                            resultMap.putIfAbsent(keys[i], value);
+                        }
                     }
                 })).collect(Collectors.toList());
 
@@ -507,13 +525,20 @@ public class ValueOperations extends JedisOperations {
                 list.stream().forEach(CompletableFuture::join);
                 return resultMap;
             } else { // 直接获取，不用mget方式
-                return Stream.of(keys).collect(Collectors.toMap(
+                /*return Stream.of(keys).collect(Collectors.toMap(
                      Function.identity(), 
                      k -> CompletableFuture.supplyAsync(() -> shardedJedis.get(k), EXECUTOR)
-                     //,(o, n) -> o
                  )).entrySet().stream().collect(
                      Collectors.toMap(Entry::getKey, e -> e.getValue().join())
-                 );
+                 );*/
+                Map<byte[], byte[]> result = new HashMap<>();
+                for (byte[] key : keys) {
+                    byte[] value = shardedJedis.get(key);
+                    if (value != null) {
+                        result.putIfAbsent(key, value);
+                    }
+                }
+                return result;
             }
         }, null, isCompress, keys);
     }

@@ -307,18 +307,6 @@ public final class Numbers {
     }
 
     /**
-     * 两数相加
-     *
-     * @param num1
-     * @param num2
-     * @return
-     */
-    public static double add(Double num1, Double num2) {
-        return ObjectUtils.orElse(num1, 0D)
-             + ObjectUtils.orElse(num2, 0D);
-    }
-
-    /**
      * 区间取值
      *
      * @param value
@@ -334,6 +322,22 @@ public final class Numbers {
         } else {
             return value;
         }
+    }
+
+    public static BigInteger toBigInteger(String hex) {
+        return new BigInteger(hex, 16);
+    }
+
+    public static int sum(Integer a, Integer b) {
+        return ObjectUtils.orElse(a, 0) + ObjectUtils.orElse(b, 0);
+    }
+
+    public static long sum(Long a, Long b) {
+        return ObjectUtils.orElse(a, 0L) + ObjectUtils.orElse(b, 0L);
+    }
+
+    public static double sum(Double a, Double b) {
+        return ObjectUtils.orElse(a, 0.0) + ObjectUtils.orElse(b, 0.0);
     }
 
     /**
@@ -476,10 +480,6 @@ public final class Numbers {
             return "0";
         }
         return hex.replaceFirst("^0*", "");
-    }
-
-    public static BigInteger toBigInteger(String hex) {
-        return new BigInteger(hex, 16);
     }
 
 }

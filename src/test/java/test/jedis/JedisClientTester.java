@@ -26,6 +26,7 @@ import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.ScriptOperations;
 import code.ponfee.commons.util.MavenProjects;
+import code.ponfee.commons.util.ObjectUtils;
 import redis.clients.jedis.JedisPubSub;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -77,9 +78,38 @@ public class JedisClientTester {
         System.out.println(System.currentTimeMillis() - start);
     }
 
+    // ----------------------------------------------------------------------------batch start
     @Test
-    public void testMget() {
-        int n = 1;
+    public void testMget1() {
+        int n = 2000;
+        String[] keys =new String[n];
+        for (int i = 0; i < n; i++) {
+            String key = "test_mget_str_" + i;
+            jedisClient.valueOps().setObject(key, key);
+            keys[i] = key;
+        }
+        long start = System.currentTimeMillis();
+        System.out.println(jedisClient.valueOps().mget(keys).size());
+        System.out.println(System.currentTimeMillis() - start);
+    }
+    
+    @Test
+    public void testMget2() {
+        int n = 2;
+        byte[][] keys =new byte[n][];
+        for (int i = 0; i < n; i++) {
+            byte[] key = ("test_mget_str_" + i).getBytes();
+            jedisClient.valueOps().setObject(key, key);
+            keys[i] = key;
+        }
+        long start = System.currentTimeMillis();
+        System.out.println(jedisClient.valueOps().mget(keys).size());
+        System.out.println(System.currentTimeMillis() - start);
+    }
+ 
+    @Test
+    public void testMget3() {
+        int n = 2;
         List<byte[]> keys = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             byte[] key = ("test_mget_" + i).getBytes();
@@ -93,7 +123,7 @@ public class JedisClientTester {
 
     @Test
     public void testMgetByte() {
-        int n = 1;
+        int n = 2000;
         byte[][] keys = new byte[n][];
         for (int i = 0; i < n; i++) {
             byte[] key = ("test_mget_" + i).getBytes();
@@ -105,22 +135,22 @@ public class JedisClientTester {
             jedisClient.valueOps().set(key, bytes, true, 1000);
         }
         long start = System.currentTimeMillis();
-        jedisClient.valueOps().mget(true, keys);
-        System.out.println("mget cost: " + (System.currentTimeMillis() - start));
+        Map<byte[], byte[]> map = jedisClient.valueOps().mget(true, keys);
+        System.out.println(map.size() + " mget cost: " + (System.currentTimeMillis() - start));
 
         start = System.currentTimeMillis();
-        Map<byte[], byte[]> map = new HashMap<>();
+        map = new HashMap<>();
         byte[] v;
         for (byte[] key : keys) {
             v = jedisClient.valueOps().get(key, true);
             if (v != null) map.put(key, v);
         }
-        System.out.println("get cost: " + (System.currentTimeMillis() - start));
+        System.out.println(map.size() + " get cost: " + (System.currentTimeMillis() - start));
     }
 
     @Test
     public void testMgetObj() {
-        int n = 1;
+        int n = 2000;
         byte[][] keys = new byte[n][];
         for (int i = 0; i < n; i++) {
             byte[] key = ("test_mget_" + i).getBytes();
@@ -143,10 +173,37 @@ public class JedisClientTester {
     }
 
     @Test
-    public void testGets() {
-        Set<String> list = jedisClient.valueOps().gets("test_mget_*");
+    public void testGetWithWildcard() {
+        Set<String> list = jedisClient.valueOps().getWithWildcard("test_mget_str_*");
         System.out.println(list.size());
     }
+
+    @Test
+    public void testKeys() {
+        Set<String> list = jedisClient.keysOps().keys("test_mget_*");
+        System.out.println(list.size());
+    }
+
+    @Test
+    public void testDels() {
+        int n = 3;
+        String[] keys = new String[n];
+        for (int i = 0; i < n; i++) {
+            keys[i] = ObjectUtils.uuid32();
+            jedisClient.valueOps().set(keys[i], keys[i]);
+        }
+        System.out.println("mget: "+jedisClient.valueOps().mget(keys).size());
+        System.out.println("dels: "+jedisClient.keysOps().mdel(keys));
+        System.out.println("mget: "+jedisClient.valueOps().mget(keys).size());
+    }
+
+    @Test
+    public void testDelWithWildcard() {
+        System.out.println(jedisClient.keysOps().keys("test_mget_*").size());
+        jedisClient.keysOps().delWithWildcard("test_mget_*");
+        System.out.println(jedisClient.keysOps().keys("test_mget_*").size());
+    }
+    // ----------------------------------------------------------------------------batch end
 
     @Test
     public void testString() {

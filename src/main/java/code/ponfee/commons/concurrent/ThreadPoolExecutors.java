@@ -9,6 +9,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
 
+import code.ponfee.commons.math.Numbers;
+
 /**
  * 线程池执行器创建
  * @author Ponfee
@@ -16,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 public final class ThreadPoolExecutors {
     private ThreadPoolExecutors() {}
 
+    public static final int MAX_CAP = 0x7fff; // max #workers - 1
     public static final RejectedExecutionHandler CALLER_RUN_HANDLER = new CallerRunsPolicy();
 
     public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime) {
@@ -65,6 +68,13 @@ public final class ThreadPoolExecutors {
         if (rejectedHandler == null) {
             rejectedHandler = CALLER_RUN_HANDLER;
         }
+
+        if (corePoolSize < 0) {
+            
+        }
+
+        maximumPoolSize = Numbers.bounds(maximumPoolSize, 1, MAX_CAP);
+        corePoolSize = Numbers.bounds(corePoolSize, 1, maximumPoolSize);
 
         // create ThreadPoolExecutor instance
         ThreadPoolExecutor executor = new ThreadPoolExecutor(

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -125,7 +124,7 @@ public class KeysOperations extends JedisOperations {
      * @param keys
      * @return
      */
-    public Long dels(String... keys) {
+    public Long mdel(String... keys) {
         return call(shardedJedis -> {
             if (keys == null || keys.length == 0) {
                 return 0L;
@@ -160,12 +159,19 @@ public class KeysOperations extends JedisOperations {
                     }
                 }*/
             } else {
-                return Stream.of(keys).map(
+                /*return Stream.of(keys).map(
                     k -> CompletableFuture.supplyAsync(() -> shardedJedis.del(k), EXECUTOR)
                 ).collect(Collectors.toList())
                  .stream().map(CompletableFuture::join)
                  .filter(ObjectUtils::isNotNull)
-                 .reduce(0L, Long::sum);
+                 .reduce(0L, Long::sum);*/
+                long result = 0; Long count;
+                for (String key : keys) {
+                    if ((count = shardedJedis.del(key)) != null) {
+                        result += count;
+                    }
+                }
+                return result;
             }
         }, null, (Object[]) keys);
     }
@@ -184,11 +190,13 @@ public class KeysOperations extends JedisOperations {
             }
 
             List<CompletableFuture<Long>> list = jedisList.stream().map(
-                jedis -> CompletableFuture.supplyAsync(
+                jedis -> CompletableFuture.supplyAsync( // 获取key list
                     () -> jedis.keys(keyWildcard), EXECUTOR
-                ).thenCompose(
+                ).thenCompose( // 根据key list删除
                     keys -> CompletableFuture.supplyAsync(
-                        () -> jedis.del(keys.toArray(new String[keys.size()])), EXECUTOR
+                        () -> CollectionUtils.isEmpty(keys) ? null : 
+                            jedis.del(keys.toArray(new String[keys.size()])), 
+                        EXECUTOR
                     )
                 )/*.thenApply(
                     keys -> jedis.del(keys.toArray(new String[keys.size()]))
