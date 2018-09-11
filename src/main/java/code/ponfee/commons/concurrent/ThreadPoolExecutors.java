@@ -69,10 +69,6 @@ public final class ThreadPoolExecutors {
             rejectedHandler = CALLER_RUN_HANDLER;
         }
 
-        if (corePoolSize < 0) {
-            
-        }
-
         maximumPoolSize = Numbers.bounds(maximumPoolSize, 1, MAX_CAP);
         corePoolSize = Numbers.bounds(corePoolSize, 1, maximumPoolSize);
 

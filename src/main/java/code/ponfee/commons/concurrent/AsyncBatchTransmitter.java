@@ -129,7 +129,10 @@ public final class AsyncBatchTransmitter<T> {
             this.thresholdChunk = thresholdChunk;
             if (executor == null) {
                 this.requireDestroyWhenEnd = true;
-                this.executor = ThreadPoolExecutors.create(1, 15, 120, 0, "async-batch-transmitter");
+                this.executor = ThreadPoolExecutors.create(
+                    1, Runtime.getRuntime().availableProcessors() - 1, 
+                    120, 0, "async-batch-transmitter"
+                );
             } else {
                 this.requireDestroyWhenEnd = false;
                 this.executor = executor;

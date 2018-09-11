@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 
+import code.ponfee.commons.http.ContentType;
 import code.ponfee.commons.http.Http;
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.util.ObjectUtils;
@@ -29,9 +30,9 @@ public class TestOpenApi {
                                                               "password", passowrd));
 
         String resp = Http.post(host+"/open/api/auth")
-                                       .contentType("application/json", "UTF-8") 
+                                       .contentType(ContentType.APPLICATION_JSON, "UTF-8") 
                                        .data(Jsons.NORMAL.stringify(data))
-                                       .accept("application/json") 
+                                       .accept(ContentType.APPLICATION_JSON) 
                                        .request();
         System.out.println(resp);
     }
@@ -42,9 +43,9 @@ public class TestOpenApi {
                                       "body", ImmutableMap.of("username", "rnT2s9YMKGHkannrr-kNFSZYk-XOLBRKIIjnY62szVR0E31j8SQx50cym_KVXT5m1yjzcHUHh-M8g24q-oHnPa-MgaNaKR8IK-TUa9I9S9Vo8Xseg25EjgrvONK2X4ahKbSBHqrJfyIrPmE7rO70XHnhhma5HtLLXVukhY7eVJk"));
 
         Map<String, Object> resp = Http.post(host+"/open/api/userinfo")
-                                       .contentType("application/json", "UTF-8") 
+                                       .contentType(ContentType.APPLICATION_JSON, "UTF-8") 
                                        .data(Jsons.NORMAL.stringify(data))
-                                       .accept("application/json") 
+                                       .accept(ContentType.APPLICATION_JSON) 
                                        .request(Map.class);
         System.out.println(resp);
     }

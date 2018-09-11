@@ -12,6 +12,7 @@ import javax.net.ssl.SSLSocketFactory;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
+import code.ponfee.commons.http.ContentType;
 import code.ponfee.commons.http.Http;
 import code.ponfee.commons.jce.security.KeyStoreResolver;
 import code.ponfee.commons.jce.security.KeyStoreResolver.KeyStoreType;
@@ -69,7 +70,7 @@ public class HttpTester {
         Resource resource = ResourceLoaderFacade.getResource("qq.coupon/createConfig.json", "UTF-8");
         String json = IOUtils.toString(resource.getStream(), Charset.forName("UTF-8"));
         Http http = Http.post("http://3bc98c2a.ngrok.io/pay-center-testdemo/test/json");
-        String s = http.contentType("application/json", "utf-8").data(json).request();
+        String s = http.contentType(ContentType.APPLICATION_JSON, "utf-8").data(json).request();
         System.out.println("======================================================\n" + s);
 
         http = Http.post("http://3bc98c2a.ngrok.io/pay-center-testdemo/test/post");

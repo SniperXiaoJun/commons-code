@@ -225,13 +225,13 @@ public final class Http {
      * @param contentCharset
      * @return
      */
-    public Http contentType(String contentType, String contentCharset) {
-        this.contentType = contentType;
+    public Http contentType(ContentType contentType, String contentCharset) {
+        this.contentType = contentType.value();
         this.contentCharset = contentCharset;
         return this;
     }
 
-    public Http contentType(String contentType) {
+    public Http contentType(ContentType contentType) {
         return this.contentType(contentType, Files.UTF_8);
     }
 
@@ -242,8 +242,8 @@ public final class Http {
      * @param accept  application/json
      * @return
      */
-    public Http accept(String accept) {
-        this.accept = accept;
+    public Http accept(ContentType contentType) {
+        this.accept = contentType.value();
         return this;
     }
 

@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import code.ponfee.commons.http.ContentType;
 import code.ponfee.commons.http.Http;
 import code.ponfee.commons.io.Files;
 
@@ -23,7 +24,7 @@ public class TestDDTWarehouse {
     @Test
     public void test0() {
         List<Object> resp = Http.post("http://10.118.58.74:8080/battleRoom/shouSkuInfo2")
-                                .accept("application/json") // @ResponseBody
+                                .accept(ContentType.APPLICATION_JSON) // @ResponseBody
                                 .request(List.class);
         System.out.println(resp);
     }
@@ -32,8 +33,8 @@ public class TestDDTWarehouse {
     public void test1() {
         Map<String, Object> resp = Http.post("http://10.118.58.74:8080/battleRoom/importsku")
                                        .addPart("skuFile", "importsku.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", new File("d:/大屏批量配置-data-2.xlsx"))
-                                       .contentType("multipart/form-data", "UTF-8") // <input type="file" name="upload" />
-                                       .accept("application/json") // @ResponseBody
+                                       .contentType(ContentType.MULTIPART_FORM_DATA, "UTF-8") // <input type="file" name="upload" />
+                                       .accept(ContentType.APPLICATION_JSON) // @ResponseBody
                                        .request(Map.class);
         System.out.println(resp);
     }

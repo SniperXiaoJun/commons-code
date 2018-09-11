@@ -114,16 +114,6 @@ import code.ponfee.commons.util.ObjectUtils;
 public class HttpRequest {
 
     /**
-     * 'application/x-www-form-urlencoded' content type header value
-     */
-    public static final String CONTENT_TYPE_FORM = "application/x-www-form-urlencoded";
-
-    /**
-     * 'application/json' content type header value
-     */
-    public static final String CONTENT_TYPE_JSON = "application/json";
-
-    /**
      * 'gzip' encoding header value
      */
     public static final String ENCODING_GZIP = "gzip";
@@ -2271,7 +2261,7 @@ public class HttpRequest {
      * @return this request
      */
     public HttpRequest acceptJson() {
-        return accept(CONTENT_TYPE_JSON);
+        return accept(ContentType.APPLICATION_JSON.value());
     }
 
     /**
@@ -2812,7 +2802,7 @@ public class HttpRequest {
         throws HttpException {
         boolean first = !form;
         if (first) {
-            contentType(CONTENT_TYPE_FORM, charset);
+            contentType(ContentType.APPLICATION_FORM_URLENCODED.value(), charset);
             form = true;
         }
         charset = getValidCharset(charset);

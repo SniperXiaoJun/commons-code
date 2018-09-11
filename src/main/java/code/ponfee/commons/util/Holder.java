@@ -4,6 +4,8 @@ import java.util.Objects;
 
 /**
  * 变量持有，用于lambda方法体内
+ * non-thread-safe
+ * 
  * @author Ponfee
  * @param <T>
  */
@@ -23,6 +25,11 @@ public final class Holder<T> {
         return new Holder<>(t);
     }
 
+    /**
+     * Returns the holder value whether null
+     * 
+     * @return a boolean, if {@code true} then the value is null
+     */
     public boolean isEmpty() {
         return value == null;
     }

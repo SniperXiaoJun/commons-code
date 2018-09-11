@@ -34,7 +34,7 @@ public class RedisTemplateCache implements Cache {
     }
 
     @Override
-    public Object getNativeCache() {
+    public RedisTemplate<String, Object> getNativeCache() {
         return this.redisTemplate;
     }
 
