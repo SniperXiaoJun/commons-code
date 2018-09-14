@@ -20,12 +20,13 @@ package code.ponfee.commons.web;
  * A lightweight Device implementation suitable for use as support code.
  * Typically used to hold the output of a device resolution invocation.
  * 
- * @see org.springframework.mobile.device.LiteDevice
- * 
  * @author Keith Donald
  * @author Roy Clarkson
  * @author Scott Rossillo
  * @author Onur Kagan Ozcan
+ * 
+ * Modify from org.springframework.mobile.device.LiteDevice
+ * @see org.springframework.mobile.device.LiteDevice
  */
 public class LiteDevice {
 

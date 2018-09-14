@@ -441,13 +441,15 @@ public class ElasticSearchClient implements DisposableBean {
      * @param list
      * @return result
      */
-    public Result<Void> addDocsSpecId(String index, String type, List<Map<String, Object>> list) {
+    public Result<Void> addDocsWithId(String index, String type, List<Map<String, Object>> list) {
         try {
             BulkRequestBuilder bulkRequest = client.prepareBulk();
             for (Map<String, Object> map : list) {
                 XContentBuilder xcb = XContentFactory.jsonBuilder().startObject();
                 for (Entry<String, Object> entry : map.entrySet()) {
-                    xcb.field(entry.getKey(), entry.getValue());
+                    if (!"id".equalsIgnoreCase(entry.getKey())) {
+                        xcb.field(entry.getKey(), entry.getValue());
+                    }
                 }
                 xcb.endObject();
                 bulkRequest.add(client.prepareIndex(index, type, (String) map.get("id")).setSource(xcb)); // id尽量为物理表的主键

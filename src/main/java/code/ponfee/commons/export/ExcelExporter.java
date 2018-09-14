@@ -161,7 +161,7 @@ public class ExcelExporter extends AbstractExporter {
         SXSSFSheet sheet = getSheet(name);
 
         // 3、判断工作簿是否已创建过行数据
-        CursorRow cursorRow = new CursorRow(sheet.getLastRowNum());
+        CursorRowNumber cursorRow = new CursorRowNumber(sheet.getLastRowNum());
         if (cursorRow.get() > 0) {
             // 创建两行空白行
             cursorRow.increment();
@@ -340,7 +340,7 @@ public class ExcelExporter extends AbstractExporter {
         }
     }
 
-    //--protected methods------------------------------------------------------------------
+    //------------------------------------------------------------protected methods
     protected SXSSFSheet getSheet(String name) {
         SXSSFSheet sheet = sheets.get(name);
         if (sheet == null) {
@@ -379,7 +379,7 @@ public class ExcelExporter extends AbstractExporter {
     }*/
 
     // 复合表头
-    private void buildComplexThead(Table table, SXSSFSheet sheet, CursorRow cursorRow) {
+    private void buildComplexThead(Table table, SXSSFSheet sheet, CursorRowNumber cursorRow) {
         List<FlatNode<Integer>> flats = table.getThead();
         FlatNode<Integer> root = flats.get(0);
         int totalLeafCount = root.getChildLeafCount();
@@ -460,7 +460,7 @@ public class ExcelExporter extends AbstractExporter {
      * @param columnLen
      */
     private void createBlankRow(String text, SXSSFSheet sheet, XSSFCellStyle style, 
-                                CursorRow cursorRow, int columnLen) {
+                                CursorRowNumber cursorRow, int columnLen) {
         SXSSFRow row = sheet.createRow(cursorRow.get());
         row.setHeight(DEFAULT_HEIGHT);
         createCell(row, 0, style, text);
@@ -632,14 +632,14 @@ public class ExcelExporter extends AbstractExporter {
      * 游标行
      */
     @SuppressWarnings("unused")
-    private static final class CursorRow {
+    private static final class CursorRowNumber {
         int current;
 
-        CursorRow() {
+        CursorRowNumber() {
             this(0);
         }
 
-        CursorRow(int initValue) {
+        CursorRowNumber(int initValue) {
             this.current = initValue;
         }
 

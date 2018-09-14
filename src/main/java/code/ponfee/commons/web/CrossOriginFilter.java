@@ -116,6 +116,7 @@ import code.ponfee.commons.util.Strings;
  *  〈/filter-mapping>
  * </pre>
  * 
+ * Modify from org.eclipse.jetty.servlets.CrossOriginFilter
  * @see org.eclipse.jetty.servlets.CrossOriginFilter
  * 
  */

@@ -40,4 +40,14 @@ public enum Algorithm {
     IDEA, TEA, TDEA, Camellia, CAST5, 
     GOST, GOST3411, GOST28147, //
     SEED, Serpent, SHACAL2, Twofish, SM4, //
+    ;
+
+    public static Algorithm from(String name) {
+        for (Algorithm alg : Algorithm.values()) {
+            if (name.equalsIgnoreCase(alg.name())) {
+                return alg;
+            }
+        }
+        return null;
+    }
 }

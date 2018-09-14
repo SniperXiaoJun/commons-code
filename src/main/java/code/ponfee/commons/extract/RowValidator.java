@@ -1,7 +1,7 @@
 package code.ponfee.commons.extract;
 
 /**
- * 行数据校验
+ * Verify row data
  * 
  * @author Ponfee
  * @param <T>
@@ -9,5 +9,13 @@ package code.ponfee.commons.extract;
 @FunctionalInterface
 public interface RowValidator<T> {
 
+    /**
+     * If Returns null or blank string then verify success
+     * else verify fail
+     * 
+     * @param rowNumber the row number
+     * @param rowData the row data
+     * @return a string, if null or blank string then verify success
+     */
     String verify(int rowNumber, T rowData);
 }

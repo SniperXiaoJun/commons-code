@@ -144,6 +144,7 @@ public final class ObjectUtils {
                         value = Numbers.toDouble(value);
                     } else {
                         // cannot happened
+                        throw new UnsupportedOperationException("unknow primitive class: " + type.toString());
                     }
                 } else if (value != null && !type.isInstance(value)) { // 类型不一致时
                     if (org.apache.commons.lang3.ClassUtils.isPrimitiveWrapper(type)
@@ -171,7 +172,7 @@ public final class ObjectUtils {
                             value = Enum.valueOf((Class<E>) type, value.toString());
                             /*String str = value.toString();
                             for (Object e : type.getEnumConstants()) {
-                                if (((Enum<?>) e).name().equals(str)) {
+                                if (((Enum<?>) e).name().equalsIgnoreCase(str)) {
                                     value = e;
                                     break;
                                 }
@@ -198,9 +199,7 @@ public final class ObjectUtils {
                         throw new ClassCastException(ClassUtils.getClassName(value.getClass())
                                       + " cannot be cast to " + ClassUtils.getClassName(type));
                     }
-                } else {
-                    // nothing to do: value is null or type.isInstance(value)
-                }
+                } //else { /*nothing to do: value is null or type.isInstance(value)*/ }
 
                 // set value into bean field
                 prop.getWriteMethod().invoke(bean, value);

@@ -9,7 +9,10 @@ import code.ponfee.commons.jce.symmetric.Padding;
 public class PBECryptorTest {
 
     public static void main(String[] args) {
-        PBEAlgorithm alg = PBEAlgorithm.PBEWithMD5AndTripleDES;
+        //PBEAlgorithm alg = PBEAlgorithm.PBEWithMD5AndTripleDES;
+        //PBEAlgorithm alg = PBEAlgorithm.PBEWithMD5AndDES;
+        //PBEAlgorithm alg = PBEAlgorithm.PBEWithSHA1AndRC2_40;
+        PBEAlgorithm alg = PBEAlgorithm.PBEWithSHA1AndDESede;
         char[] pass = "87654321".toCharArray();
         byte[] salt = "12345678".getBytes();
         int iterations = 100;

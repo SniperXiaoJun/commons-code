@@ -130,7 +130,7 @@ public final class AsyncBatchTransmitter<T> {
             if (executor == null) {
                 this.requireDestroyWhenEnd = true;
                 this.executor = ThreadPoolExecutors.create(
-                    1, Runtime.getRuntime().availableProcessors() - 1, 
+                    1, Runtime.getRuntime().availableProcessors(), 
                     120, 0, "async-batch-transmitter"
                 );
             } else {

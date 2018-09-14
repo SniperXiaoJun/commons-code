@@ -37,7 +37,7 @@ public abstract class DataExtractor<T> {
      * @return
      * @throws IOException
      */
-    public final ValidateResult<T> filter(RowValidator<T> validator) throws IOException {
+    public final ValidateResult<T> verify(RowValidator<T> validator) throws IOException {
         ValidateResult<T> result = new ValidateResult<>();
         this.extract((rowNumber, data) -> {
             String error = validator.verify(rowNumber, data);

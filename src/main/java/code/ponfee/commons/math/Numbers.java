@@ -356,35 +356,47 @@ public final class Numbers {
     }
 
     /**
-     * 数字比较
-     *
-     * @param a
-     * @param b
-     * @return
+     * Returns the two Long object is equals
+     * 
+     * @param a the Long a
+     * @param b the Long b
+     * @return if return {@code true}, then is equals
      */
     public static boolean equals(Long a, Long b) {
         return (a == b) || (a != null && a.equals(b));
     }
 
     /**
-     * 数字比较
-     *
-     * @param a
-     * @param b
-     * @return
+     * Returns the Long object is equals the Integer object
+     * 
+     * @param a the Long a
+     * @param b the Integer b
+     * @return if return {@code true}, then is equals
      */
     public static boolean equals(Long a, Integer b) {
-        return a != null && b != null && a.intValue() == b;
+        return a != null && b != null 
+            && a.longValue() == b.intValue();
     }
 
     /**
-     * 数字比较
-     *
-     * @param a
-     * @param b
-     * @return
+     * Returns the two Integer object is equals
+     * 
+     * @param a the Integer a
+     * @param b the Integer b
+     * @return if return {@code true}, then is equals
      */
     public static boolean equals(Integer a, Integer b) {
+        return (a == b) || (a != null && a.equals(b));
+    }
+
+    /**
+     * Returns the two Double object is equals
+     * 
+     * @param a the Double a
+     * @param b the Double b
+     * @return if return {@code true}, then is equals
+     */
+    public static boolean equals(Double a, Double b) {
         return (a == b) || (a != null && a.equals(b));
     }
 

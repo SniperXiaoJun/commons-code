@@ -16,8 +16,9 @@
 
 package code.ponfee.commons.web;
 
+import static com.google.common.collect.ImmutableList.of;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -40,19 +41,17 @@ import org.apache.commons.collections4.CollectionUtils;
  * "http://googlewebmastercentral.blogspot.com/2011/03/mo-better-to-also-detect-mobile-user.html"
  * >Google's recommendations</a>.
  * 
- * @see org.springframework.mobile.device.LiteDeviceResolver
- * 
  * @author Keith Donald
  * @author Roy Clarkson
  * @author Scott Rossillo
  * @author Yuri Mednikov
  * @author Onur Kagan Ozcan
+ * 
+ * Modify from org.springframework.mobile.device.LiteDeviceResolver
+ * @see org.springframework.mobile.device.LiteDeviceResolver
  */
 public class LiteDeviceResolver {
 
-    private final List<String> mobileUserAgentPrefixes = new ArrayList<>();
-    private final List<String> mobileUserAgentKeywords = new ArrayList<>();
-    private final List<String> tabletUserAgentKeywords = new ArrayList<>();
     private final List<String> normalUserAgentKeywords = new ArrayList<>();
 
     public LiteDeviceResolver() {
@@ -60,10 +59,6 @@ public class LiteDeviceResolver {
     }
 
     public LiteDeviceResolver(List<String> normalUserAgentKeywords) {
-        getMobileUserAgentPrefixes().addAll(Arrays.asList(KNOWN_MOBILE_USER_AGENT_PREFIXES));
-        getMobileUserAgentKeywords().addAll(Arrays.asList(KNOWN_MOBILE_USER_AGENT_KEYWORDS));
-        getTabletUserAgentKeywords().addAll(Arrays.asList(KNOWN_TABLET_USER_AGENT_KEYWORDS));
-
         if (CollectionUtils.isNotEmpty(normalUserAgentKeywords)) {
             this.normalUserAgentKeywords.addAll(normalUserAgentKeywords);
         }
@@ -95,7 +90,7 @@ public class LiteDeviceResolver {
             if (userAgent.contains("silk") && !userAgent.contains("mobile")) {
                 return resolveWithPlatform(DeviceType.TABLET, DevicePlatform.UNKNOWN);
             }
-            for (String keyword : tabletUserAgentKeywords) {
+            for (String keyword : KNOWN_TABLET_USER_AGENT_KEYWORDS) {
                 if (userAgent.contains(keyword)) {
                     return resolveWithPlatform(DeviceType.TABLET, DevicePlatform.UNKNOWN);
                 }
@@ -118,7 +113,7 @@ public class LiteDeviceResolver {
         // User-Agent prefix detection
         if (userAgent != null && userAgent.length() >= 4) {
             String prefix = userAgent.substring(0, 4).toLowerCase();
-            if (mobileUserAgentPrefixes.contains(prefix)) {
+            if (KNOWN_MOBILE_USER_AGENT_PREFIXES.contains(prefix)) {
                 return resolveWithPlatform(DeviceType.MOBILE, DevicePlatform.UNKNOWN);
             }
         }
@@ -137,7 +132,7 @@ public class LiteDeviceResolver {
             if (userAgent.contains("iphone") || userAgent.contains("ipod") || userAgent.contains("ipad")) {
                 return resolveWithPlatform(DeviceType.MOBILE, DevicePlatform.IOS);
             }
-            for (String keyword : mobileUserAgentKeywords) {
+            for (String keyword : KNOWN_MOBILE_USER_AGENT_KEYWORDS) {
                 if (userAgent.contains(keyword)) {
                     return resolveWithPlatform(DeviceType.MOBILE, DevicePlatform.UNKNOWN);
                 }
@@ -165,39 +160,6 @@ public class LiteDeviceResolver {
     }
 
     /**
-     * List of user agent prefixes that identify mobile devices. Used primarily to match
-     * by operator or handset manufacturer.
-     */
-    protected List<String> getMobileUserAgentPrefixes() {
-        return mobileUserAgentPrefixes;
-    }
-
-    /**
-     * List of user agent keywords that identify mobile devices. Used primarily to match
-     * by mobile platform or operating system.
-     */
-    protected List<String> getMobileUserAgentKeywords() {
-        return mobileUserAgentKeywords;
-    }
-
-    /**
-     * List of user agent keywords that identify tablet devices. Used primarily to match
-     * by tablet platform or operating system.
-     */
-    protected List<String> getTabletUserAgentKeywords() {
-        return tabletUserAgentKeywords;
-    }
-
-    /**
-     * List of user agent keywords that identify normal devices. Any items in this list
-     * take precedence over the mobile and tablet user agent keywords, effectively
-     * overriding those.
-     */
-    protected List<String> getNormalUserAgentKeywords() {
-        return normalUserAgentKeywords;
-    }
-
-    /**
      * Fallback called if no mobile device is matched by this resolver. The default
      * implementation of this method returns a "normal" {@link Device} that is neither
      * mobile or a tablet. Subclasses may override to try additional mobile or tablet
@@ -208,7 +170,7 @@ public class LiteDeviceResolver {
     }
 
     // internal helpers
-    private static final String[] KNOWN_MOBILE_USER_AGENT_PREFIXES = {
+    private static final List<String> KNOWN_MOBILE_USER_AGENT_PREFIXES = of(
         "w3c ", "w3c-", "acs-", "alav", "alca", "amoi", "audi", "avan", "benq",
         "bird", "blac", "blaz", "brew", "cell", "cldc", "cmd-", "dang", "doco",
         "eric", "hipt", "htc_", "inno", "ipaq", "ipod", "jigs", "kddi", "keji",
@@ -219,17 +181,17 @@ public class LiteDeviceResolver {
         "siem", "smal", "smar", "sony", "sph-", "symb", "t-mo", "teli", "tim-",
         "tosh", "tsm-", "upg1", "upsi", "vk-v", "voda", "wap-", "wapa", "wapi",
         "wapp", "wapr", "webc", "winw", "winw", "xda ", "xda-" 
-    };
+    );
 
-    private static final String[] KNOWN_MOBILE_USER_AGENT_KEYWORDS = {
+    private static final List<String> KNOWN_MOBILE_USER_AGENT_KEYWORDS = of(
         "blackberry", "webos", "ipod", "lge vx", "midp", "maemo", "mmp", "mobile",
         "netfront", "hiptop", "nintendo DS", "novarra", "openweb", "opera mobi",
         "opera mini", "palm", "psp", "phone", "smartphone", "symbian", "up.browser",
         "up.link", "wap", "windows ce" 
-    };
+    );
 
-    private static final String[] KNOWN_TABLET_USER_AGENT_KEYWORDS = {
+    private static final List<String> KNOWN_TABLET_USER_AGENT_KEYWORDS = of(
         "ipad", "playbook", "hp-tablet", "kindle" 
-    };
+    );
 
 }
