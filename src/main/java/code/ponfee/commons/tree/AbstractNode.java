@@ -102,24 +102,12 @@ public abstract class AbstractNode<T
         return level;
     }
 
-    public void setLevel(int level) {
-        this.level = level;
-    }
-
     public boolean isAvailable() {
         return available;
     }
 
-    public void setAvailable(boolean available) {
-        this.available = available;
-    }
-
     public List<T> getPath() {
         return path;
-    }
-
-    public void setPath(List<T> path) {
-        this.path = path;
     }
 
     public int getTreeNodeCount() {

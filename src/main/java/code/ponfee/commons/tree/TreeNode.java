@@ -209,11 +209,11 @@ public final class TreeNode<T extends java.io.Serializable & Comparable<T>>
                 }
 
                 TreeNode<T> child = new TreeNode<>(node);
-                child.setAvailable(this.available && child.isEnabled());
+                child.available = this.available && child.isEnabled();
 
                 // 子节点路径=节点路径+自身节点
-                child.setPath(Collects.add(this.path, this.nid));
-                child.setLevel(this.level + 1);
+                child.path = Collects.add(this.path, this.nid);
+                child.level = this.level + 1;
                 this.children.add(child); // 挂载子节点
 
                 iter.remove(); // remove the found child node
@@ -230,7 +230,7 @@ public final class TreeNode<T extends java.io.Serializable & Comparable<T>>
             }
         }
 
-        this.setPath(Collects.add(this.path, this.nid)); // 节点路径追加自身的ID
+        this.path = Collects.add(this.path, this.nid); // 节点路径追加自身的ID
     }
 
     private void inherit(List<FlatNode<T>> collect) {
