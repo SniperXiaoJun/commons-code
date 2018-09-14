@@ -12,11 +12,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
@@ -33,7 +35,6 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
@@ -88,7 +89,7 @@ public class ElasticSearchClient implements DisposableBean {
         client = new PreBuiltTransportClient(settings);
 
         logger.info("Init ElasticSearch Client Start: {}, {}", clusterName, clusterNodes);
-        for (String clusterNode : split(clusterNodes, ",")) {
+        Stream.of(split(clusterNodes, ",")).forEach(clusterNode -> {
             try {
                 InetAddress hostName = InetAddress.getByName(substringBeforeLast(clusterNode, ":"));
                 int port = Integer.parseInt(substringAfterLast(clusterNode, ":"));
@@ -96,11 +97,11 @@ public class ElasticSearchClient implements DisposableBean {
             } catch (UnknownHostException e) {
                 logger.error("Cannot Connect ElasticSearch Node: {}, {}", clusterName, clusterNode, e);
             }
-        }
+        });
 
-        for (DiscoveryNode node : client.connectedNodes()) {
-            logger.info("Connected ElasticSearch Node: {}", node.getHostAddress());
-        }
+        client.connectedNodes().stream().forEach(
+            node -> logger.info("Connected ElasticSearch Node: {}", node.getHostAddress())
+        );
         logger.info("Init ElasticSearch Client End: {}, {}", clusterName, clusterNodes);
     }
 
@@ -211,9 +212,12 @@ public class ElasticSearchClient implements DisposableBean {
         return putMapping(index, type, mapping, contentType);
     }
 
-    public boolean putMapping(String index, String type, String mapping, XContentType contentType) {
-        return indicesAdminClient().preparePutMapping(index).setType(type)
-                                   .setSource(mapping, contentType).get().isAcknowledged();
+    public boolean putMapping(String index, String type, String mapping, 
+                              XContentType contentType) {
+        return indicesAdminClient().preparePutMapping(index)
+                                   .setType(type)
+                                   .setSource(mapping, contentType)
+                                   .get().isAcknowledged();
     }
 
     /**
@@ -224,9 +228,9 @@ public class ElasticSearchClient implements DisposableBean {
      */
     public boolean putMapping(String indexName, IElasticSearchMapping esMapping) {
         XContentBuilder contentType = esMapping.getMapping();
-        PutMappingRequest putMappingRequest = new PutMappingRequest(indexName).type(esMapping.getIndexType())
-                                                  .source(contentType, contentType.contentType());
-        return indicesAdminClient().putMapping(putMappingRequest).actionGet().isAcknowledged();
+        PutMappingRequest req = new PutMappingRequest(indexName).type(esMapping.getIndexType())
+                                               .source(contentType, contentType.contentType());
+        return indicesAdminClient().putMapping(req).actionGet().isAcknowledged();
     }
 
     /**
@@ -402,13 +406,13 @@ public class ElasticSearchClient implements DisposableBean {
      */
     public Result<Void> addDocs(String index, String type, List<Object> list) {
         BulkRequestBuilder bulkRequest = client.prepareBulk();
-        for (Object map : list) {
-            bulkRequest.add(client.prepareIndex(index, type).setSource(map));
-        }
+        list.stream().forEach(
+            map -> bulkRequest.add(client.prepareIndex(index, type).setSource(map))
+        );
         BulkResponse resp = bulkRequest.get();
 
         if (resp.hasFailures()) {
-            return Result.failure(ResultCode.SERVER_ERROR.getCode(), resp.buildFailureMessage());
+            return Result.failure(ResultCode.SERVER_ERROR, resp.buildFailureMessage());
         } else {
             return Result.success();
         }
@@ -424,11 +428,14 @@ public class ElasticSearchClient implements DisposableBean {
     public Result<Void> addDocs(String index, String type, Map<String, Object> map) {
         BulkRequestBuilder bulkRequest = client.prepareBulk();
         for (Entry<String, Object> entry : map.entrySet()) {
-            bulkRequest.add(client.prepareIndex(index, type, entry.getKey()).setSource(entry.getValue()));
+            bulkRequest.add(
+                client.prepareIndex(index, type, entry.getKey())
+                      .setSource(entry.getValue())
+            );
         }
         BulkResponse resp = bulkRequest.get();
         if (resp.hasFailures()) {
-            return Result.failure(ResultCode.SERVER_ERROR.getCode(), resp.buildFailureMessage());
+            return Result.failure(ResultCode.SERVER_ERROR, resp.buildFailureMessage());
         } else {
             return Result.success();
         }
@@ -452,11 +459,14 @@ public class ElasticSearchClient implements DisposableBean {
                     }
                 }
                 xcb.endObject();
-                bulkRequest.add(client.prepareIndex(index, type, (String) map.get("id")).setSource(xcb)); // id尽量为物理表的主键
+                bulkRequest.add(
+                    client.prepareIndex(index, type, Objects.toString(map.get("id")))
+                          .setSource(xcb) // id尽量为物理表的主键
+                );
             }
             BulkResponse resp = bulkRequest.get();
             if (resp.hasFailures()) {
-                return Result.failure(ResultCode.SERVER_ERROR.getCode(), resp.buildFailureMessage());
+                return Result.failure(ResultCode.SERVER_ERROR, resp.buildFailureMessage());
             } else {
                 return Result.success();
             }
@@ -513,7 +523,7 @@ public class ElasticSearchClient implements DisposableBean {
         }
         BulkResponse resp = bulkReq.get();
         if (resp.hasFailures()) {
-            return Result.failure(ResultCode.SERVER_ERROR.getCode(), resp.buildFailureMessage());
+            return Result.failure(ResultCode.SERVER_ERROR, resp.buildFailureMessage());
         } else {
             return Result.success();
         }
@@ -659,22 +669,22 @@ public class ElasticSearchClient implements DisposableBean {
     // -----------------------------------------------顶部搜索---------------------------------------
     public Map<String, Object> topSearch(SearchRequestBuilder query) {
         List<Map<String, Object>> list = rankingSearch(query, 1);
-        return (list == null || list.isEmpty()) ? null : list.get(0);
+        return CollectionUtils.isEmpty(list) ? null : list.get(0);
     }
 
     public <T> T topSearch(SearchRequestBuilder query, Class<T> clazz) {
         List<T> list = rankingSearch(query, 1, clazz);
-        return (list == null || list.isEmpty()) ? null : list.get(0);
+        return CollectionUtils.isEmpty(list) ? null : list.get(0);
     }
 
     public Map<String, Object> topSearch(ESQueryBuilder query) {
         List<Map<String, Object>> list = rankingSearch(query, 1);
-        return (list == null || list.isEmpty()) ? null : list.get(0);
+        return CollectionUtils.isEmpty(list) ? null : list.get(0);
     }
 
     public <T> T topSearch(ESQueryBuilder query, Class<T> clazz) {
         List<T> list = rankingSearch(query, 1, clazz);
-        return (list == null || list.isEmpty()) ? null : list.get(0);
+        return CollectionUtils.isEmpty(list) ? null : list.get(0);
     }
 
     // -----------------------------------------------滚动搜索---------------------------------------
@@ -688,8 +698,7 @@ public class ElasticSearchClient implements DisposableBean {
      */
     public void scrollSearch(ESQueryBuilder query, int scrollSize, 
                              ScrollSearchCallback callback) {
-        SearchResponse scrollResp = query.scroll(client, scrollSize);
-        this.scrollSearch(scrollResp, scrollSize, callback);
+        this.scrollSearch(query.scroll(client, scrollSize), scrollSize, callback);
     }
 
     /**
@@ -708,7 +717,11 @@ public class ElasticSearchClient implements DisposableBean {
     // ---------------------------------------------全部搜索-------------------------------------------
     @SuppressWarnings("rawtypes")
     public List<Map> fullSearch(ESQueryBuilder query) {
-        return fullSearch(query, Map.class);
+        return fullSearch(query, Map.class, SCROLL_SIZE);
+    }
+
+    public <T> List<T> fullSearch(ESQueryBuilder query, Class<T> clazz) {
+        return fullSearch(query, clazz, SCROLL_SIZE);
     }
 
     /**
@@ -717,10 +730,10 @@ public class ElasticSearchClient implements DisposableBean {
      * @param clazz
      * @return
      */
-    public <T> List<T> fullSearch(ESQueryBuilder query, Class<T> clazz) {
-        SearchResponse scrollResp = query.scroll(client, SCROLL_SIZE);
+    public <T> List<T> fullSearch(ESQueryBuilder query, Class<T> clazz, int eachScrollSize) {
+        SearchResponse scrollResp = query.scroll(client, eachScrollSize);
         List<T> result = new ArrayList<>((int) scrollResp.getHits().getTotalHits());
-        this.scrollSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecords, totalPages, pageNo) -> {
+        this.scrollSearch(scrollResp, eachScrollSize, (searchHits, totalRecords, totalPages, pageNo) -> {
             for (SearchHit hit : searchHits.getHits()) {
                 result.add(convertFromMap(hit.getSourceAsMap(), clazz));
             }
@@ -733,16 +746,20 @@ public class ElasticSearchClient implements DisposableBean {
         return fullSearch(search, Map.class);
     }
 
+    public <T> List<T> fullSearch(SearchRequestBuilder search, Class<T> clazz) {
+        return fullSearch(search, clazz, SCROLL_SIZE);
+    }
+
     /**
      * 查询全部数据
      * @param search
      * @param clazz
      * @return
      */
-    public <T> List<T> fullSearch(SearchRequestBuilder search, Class<T> clazz) {
-        SearchResponse scrollResp = search.setSize(SCROLL_SIZE).setScroll(SCROLL_TIMEOUT).get();
+    public <T> List<T> fullSearch(SearchRequestBuilder search, Class<T> clazz, int eachScrollSize) {
+        SearchResponse scrollResp = search.setSize(eachScrollSize).setScroll(SCROLL_TIMEOUT).get();
         List<T> result = new ArrayList<>((int) scrollResp.getHits().getTotalHits());
-        this.scrollSearch(scrollResp, SCROLL_SIZE, (searchHits, totalRecords, totalPages, pageNo) -> {
+        this.scrollSearch(scrollResp, eachScrollSize, (searchHits, totalRecords, totalPages, pageNo) -> {
             for (SearchHit hit : searchHits.getHits()) {
                 result.add(convertFromMap(hit.getSourceAsMap(), clazz));
             }
