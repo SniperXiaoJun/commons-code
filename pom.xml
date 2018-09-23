@@ -20,6 +20,7 @@
         <!-- <log4j2.version>2.8.2</log4j2.version> -->
         <log4j2.version>2.11.0</log4j2.version>
         <slf4j.version>1.7.25</slf4j.version>
+        <java.version>1.8</java.version>
         <bouncycastle.version>1.60</bouncycastle.version>
     </properties>
 
@@ -234,6 +235,7 @@
             <version>5.6.11</version>
         </dependency>
 
+        <!-- 正则 Perl5Matcher -->
         <dependency>
             <groupId>oro</groupId>
             <artifactId>oro</artifactId>
@@ -529,12 +531,18 @@
 
         <!-- jdk源码动态编译 -->
         <dependency>
-            <groupId>jdk-lib</groupId>
+            <groupId>jdk.tools</groupId>
+            <artifactId>jdk.tools</artifactId>
+            <version>${java.version}</version>
+            <scope>system</scope>
+            <systemPath>${JAVA_HOME}/lib/tools.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.sun</groupId>
             <artifactId>tools</artifactId>
-            <version>1.8.0_121</version>
-            <scope>compile</scope>
-            <!-- <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/jdk-tools-1.8.0_121.jar</systemPath> -->
+            <version>${java.version}</version>
+            <scope>system</scope>
+            <systemPath>${JAVA_HOME}/lib/tools.jar</systemPath>
         </dependency>
 
         <!-- zip压缩 -->
@@ -597,8 +605,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                     <encoding>${project.encoding}</encoding>
                     <optimize>true</optimize>
                     <!-- <debug>true</debug>

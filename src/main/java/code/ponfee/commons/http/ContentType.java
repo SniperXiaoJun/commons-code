@@ -26,7 +26,7 @@ public enum ContentType {
 
     private final String value;
 
-    private ContentType(String value) {
+    ContentType(String value) {
         this.value = value;
     }
 

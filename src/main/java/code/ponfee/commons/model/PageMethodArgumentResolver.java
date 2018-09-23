@@ -1,9 +1,5 @@
 //package code.ponfee.commons.model;
 //
-//import java.util.Iterator;
-//import java.util.Map;
-//import java.util.Map.Entry;
-//
 //import org.apache.commons.lang3.StringUtils;
 //import org.springframework.core.MethodParameter;
 //import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -12,7 +8,6 @@
 //import org.springframework.web.method.support.ModelAndViewContainer;
 //
 //import code.ponfee.commons.math.Numbers;
-//import code.ponfee.commons.model.PageRequestParams;
 //import code.ponfee.commons.reflect.Fields;
 //
 ///**
@@ -32,7 +27,7 @@
 //    @Override
 //    public boolean supportsParameter(MethodParameter parameter) {
 //        //return parameter.hasParameterAnnotation(PageRequestParam.class);
-//        return PageRequestParams.class.equals(parameter.getParameterType());
+//        return PageRequestParams.class == parameter.getParameterType();
 //    }
 //
 //    @Override
@@ -41,9 +36,7 @@
 //        NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
 //
 //        PageRequestParams page = new PageRequestParams();
-//        Map<String, String[]> map = webRequest.getParameterMap();
-//        for (Iterator<Entry<String, String[]>> i = map.entrySet().iterator(); i.hasNext();) {
-//            Entry<String, String[]> entry = i.next();
+//        webRequest.getParameterMap().entrySet().stream().forEach(entry -> {
 //            if (PageRequestParams.PAGE_PARAMS.contains(entry.getKey())) {
 //                int value = Numbers.toInt(entry.getValue()[0], 0);
 //                Fields.put(page, entry.getKey(), value);
@@ -57,17 +50,13 @@
 //                String[] value = entry.getValue();
 //                page.put(entry.getKey(), value.length == 1 ? value[0] : value);
 //            }
-//        }
+//        });
 //        return page;
 //    }
 //
-//    /**
-//     * 分页查询参数注解
-//     */
-//    /*@Target(ElementType.PARAMETER)
-//    @Retention(RetentionPolicy.RUNTIME)
-//    @Documented
-//    public static @interface PageRequestParam {
-//    }*/
+//    //@Target(ElementType.PARAMETER)
+//    //@Retention(RetentionPolicy.RUNTIME)
+//    //@Documented
+//    //public static @interface PageRequestParam {}
 //
 //}
