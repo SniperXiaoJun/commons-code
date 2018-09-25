@@ -14,6 +14,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -30,8 +31,11 @@ import code.ponfee.commons.reflect.Fields;
  */
 public final class ObjectUtils {
 
-    private static final char[] URL_SAFE_BASE64_CODES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
-    private static final String[] DATE_PATTERN = { "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyyMMdd", "yyyyMMddHHmmss" };
+    private static final char[] URL_SAFE_BASE64_CODES = 
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
+    private static final String[] DATE_PATTERN = { 
+        "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyyMMdd", "yyyyMMddHHmmss", "yyyyMMddHHmmssSSS" 
+    };
 
     /**
      * Returns object toString
@@ -96,12 +100,12 @@ public final class ObjectUtils {
     }
 
     /**
-     * map to javabean
-     * @param map
-     * @param bean
+     * Map object converts to java bean object
+     * 
+     * @param map the map object
+     * @param bean the java bean object
      */
-    @SuppressWarnings("unchecked")
-    public static <T, E extends Enum<E>> void map2bean(Map<String, ?> map, T bean) {
+    public static <T> void map2bean(Map<String, ?> map, T bean) {
         String name;
         Object value;
         Class<?> type;
@@ -121,99 +125,108 @@ public final class ObjectUtils {
                 }
 
                 value = map.get(name);
-                type = prop.getPropertyType();
-                if (type.isPrimitive()) {
-                    // 原始类型
-                    //type = org.apache.commons.lang3.ClassUtils.primitiveToWrapper(type);
-                    //org.apache.commons.lang3.ClassUtils.isPrimitiveOrWrapper(type)
-                    if (Strings.isEmpty(value)) {
-                        continue; // value为null或为空字符串时跳过
-                    } else if (byte.class == type) {
-                        value = Numbers.toByte(value);
-                    } else if (short.class == type) {
-                        value = Numbers.toShort(value);
-                    } else if (char.class == type) {
-                        value = Numbers.toChar(value);
-                    } else if (int.class == type) {
-                        value = Numbers.toInt(value);
-                    } else if (long.class == type) {
-                        value = Numbers.toLong(value);
-                    } else if (float.class == type) {
-                        value = Numbers.toFloat(value);
-                    } else if (double.class == type) {
-                        value = Numbers.toDouble(value);
-                    } else {
-                        // cannot happened
-                        throw new UnsupportedOperationException("unknow primitive class: " + type.toString());
-                    }
-                } else if (value != null && !type.isInstance(value)) { // 类型不一致时
-                    if (org.apache.commons.lang3.ClassUtils.isPrimitiveWrapper(type)
-                        && Strings.isEmpty(value)) {
-                        value = null; // 原始包装类型且value为空或为空字符串则设置为null
-                    } else if (Byte.class == type) {
-                        value = Numbers.toWrapByte(value);
-                    } else if (Short.class == type) {
-                        value = Numbers.toWrapShort(value);
-                    } else if (Character.class == type) {
-                        value = Numbers.toWrapChar(value);
-                    } else if (Integer.class == type) {
-                        value = Numbers.toWrapInt(value);
-                    } else if (Long.class == type) {
-                        value = Numbers.toWrapLong(value);
-                    } else if (Float.class == type) {
-                        value = Numbers.toWrapFloat(value);
-                    } else if (Double.class == type) {
-                        value = Numbers.toWrapDouble(value);
-                    } else if (type.isEnum()) {
-                        // enum class
-                        if (value instanceof Number) {
-                            value = type.getEnumConstants()[((Number) value).intValue()];
-                        } else {
-                            value = Enum.valueOf((Class<E>) type, value.toString());
-                            /*String str = value.toString();
-                            for (Object e : type.getEnumConstants()) {
-                                if (((Enum<?>) e).name().equalsIgnoreCase(str)) {
-                                    value = e;
-                                    break;
-                                }
-                            }*/
-                        }
-                    } else if (Date.class == type) {
-                        if (value instanceof Number) {
-                            value = new Date(((Number) value).longValue());
-                        } else if (CharSequence.class.isAssignableFrom(type)) {
-                            if (StringUtils.isNumeric((CharSequence) value) 
-                                && !RegexUtils.isDatePattern(value.toString())) {
-                                value = new Date(Numbers.toLong(value));
-                            } else {
-                                value = DateUtils.parseDate(value.toString(), DATE_PATTERN);
-                            }
-                        } else {
-                            throw new IllegalArgumentException("Illegal date time: " + value);
-                        }
-                    } else if (CharSequence.class.isAssignableFrom(type)) {
-                        // Construct a CharSequence
-                        // e.g. new String(value.toString()) and new StringBuilder(value.toString())
-                        value = type.getConstructor(String.class).newInstance(value.toString());
-                    } else {
-                        throw new ClassCastException(ClassUtils.getClassName(value.getClass())
-                                      + " cannot be cast to " + ClassUtils.getClassName(type));
-                    }
-                } //else { /*nothing to do: value is null or type.isInstance(value)*/ }
+                if ((type = prop.getPropertyType()).isPrimitive() && Strings.isEmpty(value)) {
+                    continue; // 原始类型时：value为null或为空字符串时跳过
+                }
 
                 // set value into bean field
-                prop.getWriteMethod().invoke(bean, value);
+                prop.getWriteMethod().invoke(bean, convert(value, type));
             }
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T, E extends Enum<E>> Object convert(Object value, Class<?> type) 
+        throws Exception {
+        if (type.isPrimitive()) {
+            // 原始类型
+            //type = org.apache.commons.lang3.ClassUtils.primitiveToWrapper(type);
+            //org.apache.commons.lang3.ClassUtils.isPrimitiveOrWrapper(type)
+            if (byte.class == type) {
+                value = Numbers.toByte(value);
+            } else if (short.class == type) {
+                value = Numbers.toShort(value);
+            } else if (char.class == type) {
+                value = Numbers.toChar(value);
+            } else if (int.class == type) {
+                value = Numbers.toInt(value);
+            } else if (long.class == type) {
+                value = Numbers.toLong(value);
+            } else if (float.class == type) {
+                value = Numbers.toFloat(value);
+            } else if (double.class == type) {
+                value = Numbers.toDouble(value);
+            } else {
+                // cannot happened
+                throw new UnsupportedOperationException("unknow primitive class: " + type.toString());
+            }
+        } else if (value != null && !type.isInstance(value)) { // 类型不一致时
+            if (   org.apache.commons.lang3.ClassUtils.isPrimitiveWrapper(type)
+                && Strings.isEmpty(value)
+            ) {
+                value = null; // 原始包装类型且value为空或为空字符串则设置为null
+            } else if (Byte.class == type) {
+                value = Numbers.toWrapByte(value);
+            } else if (Short.class == type) {
+                value = Numbers.toWrapShort(value);
+            } else if (Character.class == type) {
+                value = Numbers.toWrapChar(value);
+            } else if (Integer.class == type) {
+                value = Numbers.toWrapInt(value);
+            } else if (Long.class == type) {
+                value = Numbers.toWrapLong(value);
+            } else if (Float.class == type) {
+                value = Numbers.toWrapFloat(value);
+            } else if (Double.class == type) {
+                value = Numbers.toWrapDouble(value);
+            } else if (type.isEnum()) {
+                // enum class
+                if (value instanceof Number) {
+                    value = type.getEnumConstants()[((Number) value).intValue()];
+                } else {
+                    value = Enum.valueOf((Class<E>) type, value.toString());
+                    /*String str = value.toString();
+                    for (Object e : type.getEnumConstants()) {
+                        if (((Enum<?>) e).name().equalsIgnoreCase(str)) {
+                            value = e;
+                            break;
+                        }
+                    }*/
+                }
+            } else if (Date.class == type) {
+                if (value instanceof Number) {
+                    value = new Date(((Number) value).longValue());
+                } else if (value instanceof CharSequence) {
+                    String str = value.toString();
+                    if (StringUtils.isNumeric(str) && !RegexUtils.isDatePattern(str)) {
+                        value = new Date(Numbers.toLong(str));
+                    } else {
+                        value = DateUtils.parseDate(str, DATE_PATTERN);
+                    }
+                } else {
+                    throw new IllegalArgumentException("Illegal date time: " + value);
+                }
+            } else if (CharSequence.class.isAssignableFrom(type)) {
+                // Construct a CharSequence
+                // e.g. new String(value.toString()) and new StringBuilder(value.toString())
+                value = type.getConstructor(String.class).newInstance(value.toString());
+            } else {
+                throw new ClassCastException(ClassUtils.getClassName(value.getClass())
+                              + " cannot be cast to " + ClassUtils.getClassName(type));
+            }
+        } //else { /*nothing to do: value is null or type.isInstance(value)*/ }
+        return value;
+    }
+
+
     /**
-     * map value set to bean property
-     * @param map
-     * @param type   bean type, must be has default constructor
-     * @return
+     * Returns a map object which is copy of java bean
+     * 
+     * @param map   the map object
+     * @param type  the java bean type, must has a default constructor
+     * @return a java bean object
      */
     public static <T> T map2bean(Map<String, ?> map, Class<T> type) {
         try {
@@ -226,9 +239,10 @@ public final class ObjectUtils {
     }
 
     /**
-     * javabean to map
-     * @param bean
-     * @return
+     * Returns a map object which is copy of java bean
+     * 
+     * @param bean the java bean object
+     * @return a HashMap object
      */
     public static Map<String, Object> bean2map(Object bean) {
         try {
@@ -338,8 +352,12 @@ public final class ObjectUtils {
      * @param other the other
      * @return if obj is not null then obj else other
      */
-    public static <T> T orElse(T obj, T other) {
-        return obj != null ? obj : other;
+    public static <T> T orElse(T obj, T defaultValue) {
+        return orElse(obj, defaultValue, ObjectUtils::isNotNull);
+    }
+
+    public static <T> T orElse(T obj, T defaultValue, Predicate<T> predicate) {
+        return predicate.test(obj) ? obj : defaultValue;
     }
 
     public static <T> void copy(T source, T target, String... fields) {

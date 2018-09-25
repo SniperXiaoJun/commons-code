@@ -107,11 +107,11 @@ public final class ClassUtils {
     }
 
     /**
-     * 获取反射字段对象
-     * @param clazz
-     * @param field
-     * @return Filed object
-     * @throws Exception
+     * Returns a sepc field include super class
+     * 
+     * @param clazz the class
+     * @param field the field name
+     * @return Filed a field for spec name 
      */
     public static Field getField(Class<?> clazz, String field) {
         if (clazz.isInterface() || clazz == Object.class) {
@@ -129,6 +129,35 @@ public final class ClassUtils {
         } while (clazz != null && clazz != Object.class);
 
         throw new RuntimeException(ex);
+    }
+
+    /**
+     * Returns field list include super class
+     * 
+     * @param clazz the class
+     * @return a list filled fields
+     */
+    public static List<Field> listFields(Class<?> clazz) {
+        if (clazz.isInterface() || clazz == Object.class) {
+            return null; // error class args
+        }
+
+        List<Field> list = new ArrayList<>();
+        do {
+            try {
+                for (Field field : clazz.getDeclaredFields()) {
+                    if (   !Modifier.isStatic(field.getModifiers())
+                        && !Modifier.isTransient(field.getModifiers())
+                    ) {
+                        list.add(field);
+                    }
+                }
+            } catch (SecurityException ignored) {
+            }
+            clazz = clazz.getSuperclass();
+        } while (clazz != null && clazz != Object.class);
+
+        return list;
     }
 
     /**

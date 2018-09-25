@@ -1,8 +1,6 @@
 package code.ponfee.commons.elasticsearch;
 
 import static org.apache.commons.lang3.StringUtils.split;
-import static org.apache.commons.lang3.StringUtils.substringAfterLast;
-import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -91,8 +89,9 @@ public class ElasticSearchClient implements DisposableBean {
         logger.info("Init ElasticSearch Client Start: {}, {}", clusterName, clusterNodes);
         Stream.of(split(clusterNodes, ",")).forEach(clusterNode -> {
             try {
-                InetAddress hostName = InetAddress.getByName(substringBeforeLast(clusterNode, ":"));
-                int port = Integer.parseInt(substringAfterLast(clusterNode, ":"));
+                String[] nodeInfos = clusterNode.split(":", 2);
+                InetAddress hostName = InetAddress.getByName(nodeInfos[0]);
+                int port = Integer.parseInt(nodeInfos[1]);
                 client.addTransportAddress(new InetSocketTransportAddress(hostName, port));
             } catch (UnknownHostException e) {
                 logger.error("Cannot Connect ElasticSearch Node: {}, {}", clusterName, clusterNode, e);
