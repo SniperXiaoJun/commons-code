@@ -84,7 +84,7 @@ public final class RSAPrivateKeys {
     public static RSAPrivateKey toRSAPrivateKey(BigInteger modulus, BigInteger privateExponent) {
         try {
             return (RSAPrivateKey) KeyFactory.getInstance(RSACryptor.ALG_RSA).generatePrivate(
-                new RSAPrivateKeySpec(modulus, privateExponent)
+                new RSAPrivateKeySpec(modulus, privateExponent) // RSAPrivateCrtKeySpec
             );
         } catch (Exception ex) {
             throw new SecurityException(ex);
@@ -109,6 +109,10 @@ public final class RSAPrivateKeys {
      * @return
      */
     public static RSAPublicKey extractPublicKey(RSAPrivateKey privateKey) {
+        if (!(privateKey instanceof RSAPrivateCrtKey)) {
+            throw new ClassCastException("The key expect a java.security.interfaces.RSAPrivateCrtKey, "
+                                       + "but is " + privateKey.getClass().getCanonicalName());
+        }
         RSAPrivateCrtKey key = (RSAPrivateCrtKey) privateKey;
         return RSAPublicKeys.toRSAPublicKey(key.getModulus(), 
                                             key.getPublicExponent());

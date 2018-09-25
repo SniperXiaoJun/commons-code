@@ -218,7 +218,8 @@ public final class Numbers {
             return val;
         }
 
-        return new BigDecimal(val).setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return new BigDecimal(val)
+                   .setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     /**
@@ -230,7 +231,7 @@ public final class Numbers {
      */
     public static double lower(double value, int scale) {
         return new BigDecimal(value / Math.pow(10, scale))
-                .setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+                   .setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     /**
@@ -360,7 +361,7 @@ public final class Numbers {
      * 
      * @param a the Long a
      * @param b the Long b
-     * @return if return {@code true}, then is equals
+     * @return if is equals then return {@code true}
      */
     public static boolean equals(Long a, Long b) {
         return (a == b) || (a != null && a.equals(b));
@@ -371,7 +372,7 @@ public final class Numbers {
      * 
      * @param a the Long a
      * @param b the Integer b
-     * @return if return {@code true}, then is equals
+     * @return if is equals then return {@code true}
      */
     public static boolean equals(Long a, Integer b) {
         return a != null && b != null 
@@ -383,7 +384,7 @@ public final class Numbers {
      * 
      * @param a the Integer a
      * @param b the Integer b
-     * @return if return {@code true}, then is equals
+     * @return if is equals then return {@code true}
      */
     public static boolean equals(Integer a, Integer b) {
         return (a == b) || (a != null && a.equals(b));
@@ -394,7 +395,7 @@ public final class Numbers {
      * 
      * @param a the Double a
      * @param b the Double b
-     * @return if return {@code true}, then is equals
+     * @return if is equals then return {@code true}
      */
     public static boolean equals(Double a, Double b) {
         return (a == b) || (a != null && a.equals(b));
@@ -414,7 +415,7 @@ public final class Numbers {
      * 金额汉化（单位元）
      *
      * @param amount
-     * @return
+     * @return a string of chineseize amount
      */
     public static String chinesize(BigDecimal amount) {
         if (amount.compareTo(MAX_VALUE) >= 0) {
@@ -481,7 +482,7 @@ public final class Numbers {
     }
 
     /**
-     * to upper hex string and remove prefix 0
+     * To upper hex string and remove prefix 0
      *
      * @param num the BigInteger
      * @return upper hex string
