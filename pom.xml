@@ -120,11 +120,7 @@
             <artifactId>log4j-jcl</artifactId>
             <version>${log4j2.version}</version>
         </dependency>
-<<<<<<< HEAD
         <dependency> <!-- 桥接：告诉log4j jul使用Log4j2 -->
-=======
-        <dependency> <!-- 桥接：告诉og4j jul使用Log4j2 -->
->>>>>>> branch 'master' of git@github.com:china-fupengfei/commons-code.git
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jul</artifactId>
             <version>${log4j2.version}</version>
