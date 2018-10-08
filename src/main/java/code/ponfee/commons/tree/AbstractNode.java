@@ -8,11 +8,12 @@
 
 package code.ponfee.commons.tree;
 
-import code.ponfee.commons.serial.JdkSerializer;
-import com.google.common.base.Preconditions;
+import java.util.List;
+
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
+import com.google.common.base.Preconditions;
 
 /**
  * 基于树形结构节点的基类
@@ -51,11 +52,8 @@ public abstract class AbstractNode<T
         this.available = enabled;
     }
 
-    @SuppressWarnings("unchecked")
     public @Override AbstractNode<T> clone() {
-        JdkSerializer serializer = new JdkSerializer();
-        byte[] bytes = serializer.serialize(this);
-        return serializer.deserialize(bytes, this.getClass());
+        return SerializationUtils.clone(this);
     }
 
     public boolean isEmpty(T id) {

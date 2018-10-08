@@ -192,7 +192,9 @@ public final class ObjectUtils {
             // 原始类型
             //type = org.apache.commons.lang3.ClassUtils.primitiveToWrapper(type);
             //org.apache.commons.lang3.ClassUtils.isPrimitiveOrWrapper(type)
-            if (byte.class == type) {
+            if (boolean.class == type) {
+                value = Numbers.toBoolean(value);
+            } else if (byte.class == type) {
                 value = Numbers.toByte(value);
             } else if (short.class == type) {
                 value = Numbers.toShort(value);
@@ -215,6 +217,8 @@ public final class ObjectUtils {
                 && Strings.isEmpty(value)
             ) {
                 value = null; // 原始包装类型且value为空或为空字符串则设置为null
+            } else if (Boolean.class == type) {
+                value = Numbers.toWrapBoolean(value);
             } else if (Byte.class == type) {
                 value = Numbers.toWrapByte(value);
             } else if (Short.class == type) {
@@ -275,7 +279,7 @@ public final class ObjectUtils {
      * @param type  the type of value
      * @return a byte array
      */
-    public static byte[] serialize(Object value, Class<?> type) {
+    public static byte[] serialize(Object value) {
         if (value == null) {
             return null;
         } else if (value instanceof byte[]) {
@@ -288,23 +292,27 @@ public final class ObjectUtils {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        } else if (byte.class == type || Byte.class == type) {
+        } else if (value instanceof Boolean) {
+            return new byte[] { (Boolean) value ? (byte) 0x01 : (byte) 0x00 };
+        } else if (value instanceof Byte) {
             return new byte[] { Numbers.toByte(value) };
-        } else if (short.class == type || Short.class == type) {
+        } else if (value instanceof Short) {
             return Bytes.fromShort(Numbers.toShort(value));
-        } else if (char.class == type || Character.class == type) {
+        } else if (value instanceof Character) {
             return Bytes.fromChar(Numbers.toChar(value));
-        } else if (int.class == type || Integer.class == type) {
+        } else if (value instanceof Integer) {
             return Bytes.fromInt(Numbers.toInt(value));
-        } else if (long.class == type || Long.class == type) {
+        } else if (value instanceof Long) {
             return Bytes.fromLong(Numbers.toLong(value));
-        } else if (float.class == type || Float.class == type) {
+        } else if (value instanceof Float) {
             return Bytes.fromFloat(Numbers.toFloat(value));
-        } else if (double.class == type || Double.class == type) {
+        } else if (value instanceof Double) {
             return Bytes.fromDouble(Numbers.toDouble(value));
-        } else if (String.class == type) {
+        } else if (value instanceof String) {
             return ((String) value).getBytes(StandardCharsets.UTF_8);
-        } else if (type.isEnum()) {
+        } else if (value instanceof Date) {
+            return Bytes.fromLong(((Date) value).getTime());
+        } else if (value instanceof Enum) {
             return Bytes.fromInt(((Enum<?>) value).ordinal());
         } else if (value instanceof Serializable) {
             return SerializationUtils.serialize((Serializable) value);
@@ -327,7 +335,9 @@ public final class ObjectUtils {
     public static <T> T deserialize(byte[] value, Class<T> type) {
         if (value == null || value.length == 0) {
             // type.isPrimitive()
-            if (byte.class == type) {
+            if (boolean.class == type) {
+                return (T) Boolean.FALSE;
+            } else if (byte.class == type) {
                 //return (T) new Byte((byte) 0);
                 return (T) (Byte) (byte) 0;
             } else if (short.class == type) {
@@ -351,6 +361,8 @@ public final class ObjectUtils {
             return (T) ArrayUtils.toObject(value);
         } else if (type == InputStream.class) {
             return (T) new ByteArrayInStream(value);
+        }  else if (boolean.class == type || Boolean.class == type) {
+            return (T) (value[0] == 0x00 ? Boolean.FALSE : Boolean.TRUE);
         } else if (byte.class == type || Byte.class == type) {
             return (T) (Byte) value[0];
         } else if (short.class == type || Short.class == type) {
@@ -367,6 +379,8 @@ public final class ObjectUtils {
             return (T) (Double) Bytes.toDouble(value);
         } else if (String.class == type) {
             return (T) new String(value, StandardCharsets.UTF_8);
+        } else if (Date.class == type) {
+            return (T) new Date(Bytes.toLong(value));
         } else if (type.isEnum()) {
             return type.getEnumConstants()[Bytes.toInt(value)];
         } else if (Serializable.class.isAssignableFrom(type)) {

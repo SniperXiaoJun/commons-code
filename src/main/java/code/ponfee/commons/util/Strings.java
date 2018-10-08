@@ -361,23 +361,6 @@ public class Strings {
         return toStringArray(Collections.list(enumeration));
     }
 
-    /**
-     * 判断是否为空字符串
-     * @param value
-     * @return
-     */
-    public static boolean isEmpty(Object value) {
-        return value == null
-            || (CharSequence.class.isInstance(value) && StringUtils.isEmpty((CharSequence) value));
-
-    }
-
-    public static boolean isBlank(Object value) {
-        return value == null
-            || (CharSequence.class.isInstance(value) && StringUtils.isBlank((CharSequence) value));
-
-    }
-
     /** 
      * 驼峰转换为下划线 
      * CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, camelCaseName);
@@ -459,6 +442,23 @@ public class Strings {
     }
 
     /**
+     * 判断是否为空字符串
+     * @param value
+     * @return
+     */
+    public static boolean isEmpty(Object value) {
+        return value == null
+            || (CharSequence.class.isInstance(value) && StringUtils.isEmpty((CharSequence) value));
+
+    }
+
+    public static boolean isBlank(Object value) {
+        return value == null
+            || (CharSequence.class.isInstance(value) && StringUtils.isBlank((CharSequence) value));
+
+    }
+
+    /**
      * 如果为空则设置默认
      * 
      * @param str
@@ -500,6 +500,7 @@ public class Strings {
 
     /**
     * Parse a CSV string using {@link #csvSplit(List,String, int, int)}
+    * use in {@link code.ponfee.commons.web.CrossOriginFilter)
     * 
     * @param s The string to parse
     * @return An array of parsed values.

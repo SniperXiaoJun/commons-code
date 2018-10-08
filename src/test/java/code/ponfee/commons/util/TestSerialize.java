@@ -9,10 +9,10 @@
 package code.ponfee.commons.util;
 
 import java.lang.reflect.Field;
+import java.util.Date;
 
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.reflect.Fields;
-import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * 
@@ -24,7 +24,7 @@ public class TestSerialize {
         A, B
     }
 
-    public TestSerialize(byte a, Byte b, int c, Integer d, float f, Float g, E h) {
+    public TestSerialize(byte a, Byte b, int c, Integer d, float f, Float g, E h, Date i) {
         super();
         this.a = a;
         this.b = b;
@@ -33,6 +33,7 @@ public class TestSerialize {
         this.f = f;
         this.g = g;
         this.h = h;
+        this.i = i;
     }
 
     private byte a;
@@ -42,6 +43,7 @@ public class TestSerialize {
     private float f;
     private Float g;
     private E h;
+    private Date i;
 
     public byte getA() {
         return a;
@@ -99,19 +101,27 @@ public class TestSerialize {
         this.h = h;
     }
 
+    public Date getI() {
+        return i;
+    }
+
+    public void setI(Date i) {
+        this.i = i;
+    }
+
     @Override
     public String toString() {
-        return "TestSerialize [a=" + a + ", b=" + b + ", c=" + c + ", d=" + d + ", f=" + f + ", g=" + g + ", h=" + h + "]";
+        return "TestSerialize [a=" + a + ", b=" + b + ", c=" + c + ", d=" + d + ", f=" + f + ", g=" + g + ", h=" + h + ", i=" + i + "]";
     }
 
     public static void main(String[] args) {
-        TestSerialize source = new TestSerialize((byte) 12, (Byte) (byte) 23, 34, 45, 56f, 67f, E.A);
+        TestSerialize source = new TestSerialize((byte) 12, (Byte) (byte) 23, 34, 45, 56f, 67f, E.A, new Date());
         System.out.println(source);
-        TestSerialize target = new TestSerialize((byte) 0, null, 1, 2, 3, null, E.B);
+        TestSerialize target = new TestSerialize((byte) 0, null, 1, 2, 3, null, E.B, null);
         System.out.println(target);
 
         for (Field field : ClassUtils.listFields(TestSerialize.class)) {
-            byte[] value = ObjectUtils.serialize(Fields.get(source, field), field.getType());
+            byte[] value = ObjectUtils.serialize(Fields.get(source, field));
             Fields.put(target, field, ObjectUtils.deserialize(value, field.getType()));
         }
         System.out.println(target);

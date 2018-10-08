@@ -53,6 +53,26 @@ public final class Numbers {
     }
 
     // -----------------------------------------------------------------to primary number
+    public static boolean toBoolean(Object obj) {
+        return toWrapBoolean(obj, false);
+    }
+
+    public static Boolean toWrapBoolean(Object obj) {
+        return toWrapBoolean(obj, null);
+    }
+
+    public static Boolean toWrapBoolean(Object obj, Boolean defaultVal) {
+        if (obj == null) {
+            return defaultVal;
+        } else if (obj instanceof Boolean) {
+            return (Boolean) obj;
+        } else if (obj instanceof Number) {
+            return ((Number) obj).byteValue() == 0x00;
+        } else {
+            return Boolean.parseBoolean(obj.toString());
+        }
+    }
+
     public static byte toByte(Object obj) {
         return toByte(obj, (byte) 0);
     }
