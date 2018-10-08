@@ -7,7 +7,11 @@ import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToStrin
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Dictionary;
@@ -16,9 +20,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.time.DateUtils;
+
+import com.vividsolutions.jts.io.ByteArrayInStream;
 
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.math.Numbers;
@@ -137,6 +146,45 @@ public final class ObjectUtils {
         }
     }
 
+    /**
+     * Returns a map object which is copy of java bean
+     * 
+     * @param map   the map object
+     * @param type  the java bean type, must has a default constructor
+     * @return a java bean object
+     */
+    public static <T> T map2bean(Map<String, ?> map, Class<T> type) {
+        try {
+            T bean = type.getConstructor().newInstance();
+            map2bean(map, bean);
+            return bean;
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Returns a map object which is copy of java bean
+     * 
+     * @param bean the java bean object
+     * @return a HashMap object
+     */
+    public static Map<String, Object> bean2map(Object bean) {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
+            String name;
+            for (PropertyDescriptor prop : beanInfo.getPropertyDescriptors()) {
+                if (!"class".equals((name = prop.getName()))) { // getClass()
+                    map.put(name, prop.getReadMethod().invoke(bean));
+                }
+            }
+            return map;
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public static <T, E extends Enum<E>> Object convert(Object value, Class<?> type) 
         throws Exception {
@@ -220,43 +268,113 @@ public final class ObjectUtils {
         return value;
     }
 
-
     /**
-     * Returns a map object which is copy of java bean
+     * Returns the serialize byte array data for value
      * 
-     * @param map   the map object
-     * @param type  the java bean type, must has a default constructor
-     * @return a java bean object
+     * @param value the value
+     * @param type  the type of value
+     * @return a byte array
      */
-    public static <T> T map2bean(Map<String, ?> map, Class<T> type) {
-        try {
-            T bean = type.getConstructor().newInstance();
-            map2bean(map, bean);
-            return bean;
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
+    public static byte[] serialize(Object value, Class<?> type) {
+        if (value == null) {
+            return null;
+        } else if (value instanceof byte[]) {
+            return (byte[]) value;
+        } else if (value instanceof Byte[]) {
+            return ArrayUtils.toPrimitive((Byte[]) value);
+        } else if (value instanceof InputStream) {
+            try (InputStream input = (InputStream) value) {
+                return IOUtils.toByteArray(input);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (byte.class == type || Byte.class == type) {
+            return new byte[] { Numbers.toByte(value) };
+        } else if (short.class == type || Short.class == type) {
+            return Bytes.fromShort(Numbers.toShort(value));
+        } else if (char.class == type || Character.class == type) {
+            return Bytes.fromChar(Numbers.toChar(value));
+        } else if (int.class == type || Integer.class == type) {
+            return Bytes.fromInt(Numbers.toInt(value));
+        } else if (long.class == type || Long.class == type) {
+            return Bytes.fromLong(Numbers.toLong(value));
+        } else if (float.class == type || Float.class == type) {
+            return Bytes.fromFloat(Numbers.toFloat(value));
+        } else if (double.class == type || Double.class == type) {
+            return Bytes.fromDouble(Numbers.toDouble(value));
+        } else if (String.class == type) {
+            return ((String) value).getBytes(StandardCharsets.UTF_8);
+        } else if (type.isEnum()) {
+            return Bytes.fromInt(((Enum<?>) value).ordinal());
+        } else if (value instanceof Serializable) {
+            return SerializationUtils.serialize((Serializable) value);
+        } else {
+            throw new UnsupportedOperationException(
+                ClassUtils.getClassName(value.getClass()) + " is not Serializable."
+            );
         }
     }
 
     /**
-     * Returns a map object which is copy of java bean
+     * Returns a object or primitive value from 
+     * deserialize the byte array
      * 
-     * @param bean the java bean object
-     * @return a HashMap object
+     * @param value the byte array
+     * @param type the obj type
+     * @return a object
      */
-    public static Map<String, Object> bean2map(Object bean) {
-        try {
-            Map<String, Object> map = new HashMap<>();
-            BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
-            String name;
-            for (PropertyDescriptor prop : beanInfo.getPropertyDescriptors()) {
-                if (!"class".equals((name = prop.getName()))) { // getClass()
-                    map.put(name, prop.getReadMethod().invoke(bean));
-                }
+    @SuppressWarnings("unchecked")
+    public static <T> T deserialize(byte[] value, Class<T> type) {
+        if (value == null || value.length == 0) {
+            // type.isPrimitive()
+            if (byte.class == type) {
+                //return (T) new Byte((byte) 0);
+                return (T) (Byte) (byte) 0;
+            } else if (short.class == type) {
+                return (T) (Short) (short) 0;
+            } else if (char.class == type) {
+                return (T) (Character) Numbers.CHAR_ZERO;
+            } else if (int.class == type) {
+                return (T) (Integer) 0;
+            } else if (long.class == type) {
+                return (T) (Long) 0L;
+            } else if (float.class == type) {
+                return (T) (Float) 0F;
+            } else if (double.class == type) {
+                return (T) (Double) 0D;
+            } else {
+                return null;
             }
-            return map;
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
+        } else if (type == byte[].class) {
+            return (T) value;
+        } else if (type == Byte[].class) {
+            return (T) ArrayUtils.toObject(value);
+        } else if (type == InputStream.class) {
+            return (T) new ByteArrayInStream(value);
+        } else if (byte.class == type || Byte.class == type) {
+            return (T) (Byte) value[0];
+        } else if (short.class == type || Short.class == type) {
+            return (T) (Short) Bytes.toShort(value);
+        } else if (char.class == type || Character.class == type) {
+            return (T) (Character) Bytes.toChar(value);
+        } else if (int.class == type || Integer.class == type) {
+            return (T) (Integer) Bytes.toInt(value);
+        } else if (long.class == type || Long.class == type) {
+            return (T) (Long) Bytes.toLong(value);
+        } else if (float.class == type || Float.class == type) {
+            return (T) (Float) Bytes.toFloat(value);
+        } else if (double.class == type || Double.class == type) {
+            return (T) (Double) Bytes.toDouble(value);
+        } else if (String.class == type) {
+            return (T) new String(value, StandardCharsets.UTF_8);
+        } else if (type.isEnum()) {
+            return type.getEnumConstants()[Bytes.toInt(value)];
+        } else if (Serializable.class.isAssignableFrom(type)) {
+            return SerializationUtils.deserialize(value);
+        } else {
+            throw new UnsupportedOperationException(
+                ClassUtils.getClassName(value.getClass()) + " is not Serializable."
+            );
         }
     }
 

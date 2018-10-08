@@ -22,6 +22,7 @@ public final class Numbers {
     public static final Integer INTEGER_ZERO = 0;
     public static final int     INT_ZERO     = 0;
     public static final byte    BYTE_ZERO    = 0x00;
+    public static final char    CHAR_ZERO    = '\u0000';
 
     // --------------------------------------------------------------character convert
     public static char toChar(Object obj, char defaultVal) {
@@ -29,7 +30,7 @@ public final class Numbers {
     }
 
     public static char toChar(Object obj) {
-        return toWrapChar(obj, '\u0000');
+        return toWrapChar(obj, CHAR_ZERO);
     }
 
     public static Character toWrapChar(Object obj) {
