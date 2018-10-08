@@ -8,7 +8,7 @@ import java.io.Closeable;
  * 数据导出
  * @author fupf
  */
-public interface DataExporter extends AutoCloseable {
+public interface DataExporter extends Closeable {
 
     /** 提示无结果 */
     String NO_RESULT_TIP = "data not found";

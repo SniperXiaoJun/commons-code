@@ -40,7 +40,7 @@ public class Cache<T> {
     private volatile boolean isDestroy = false; // 是否被销毁
     private final Lock lock = new ReentrantLock(); // 定时清理加锁
     private ScheduledExecutorService executor;
-    private DateProvider dateProvider = DateProvider.SYSTEM;
+    private DateProvider dateProvider = DateProvider.CURRENT;
 
     Cache(boolean caseSensitiveKey, boolean compressKey, long keepAliveInMillis, 
           int autoReleaseInSeconds, ScheduledExecutorService scheduleExecutor) {

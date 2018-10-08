@@ -6,9 +6,10 @@ package code.ponfee.commons.cache;
  * @author fupf
  */
 @FunctionalInterface
-interface DateProvider {
+public interface DateProvider {
 
-    DateProvider SYSTEM = System::currentTimeMillis;
+    DateProvider CURRENT = System::currentTimeMillis;
+    DateProvider LATEST = () -> Long.MAX_VALUE;
 
     long now();
 

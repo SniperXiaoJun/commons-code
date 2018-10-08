@@ -1,5 +1,6 @@
 package code.ponfee.commons.resource;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -7,7 +8,7 @@ import java.io.InputStream;
  * 资源类
  * @author fupf
  */
-public class Resource implements AutoCloseable {
+public class Resource implements Closeable {
 
     private final String filePath;
     private final String fileName;
