@@ -26,6 +26,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.get.MultiGetItemResponse;
 import org.elasticsearch.action.get.MultiGetResponse;
+import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -381,8 +382,11 @@ public class ElasticSearchClient implements DisposableBean {
      * @param type
      * @param object
      */
-    public void addDoc(String index, String type, Object object) {
-        client.prepareIndex(index, type).setSource(object).get();
+    public String addDoc(String index, String type, Object object) {
+        //return client.prepareIndex(index, type).setSource(object).get().getId();
+        return client.prepareIndex(index, type).
+                     setSource(object, XContentType.JSON)
+                     .get().getId();
     }
 
     /**
@@ -392,8 +396,11 @@ public class ElasticSearchClient implements DisposableBean {
      * @param id     指定id
      * @param object 要增加的source
      */
-    public void addDoc(String index, String type, String id, Object object) {
-        client.prepareIndex(index, type, id).setSource(object).get();
+    public String addDoc(String index, String type, String id, Object object) {
+        //return client.prepareIndex(index, type, id).setSource(object).get().getId();
+        return client.prepareIndex(index, type, id)
+                     .setSource(object, XContentType.JSON)
+                     .get().getId();
     }
 
     /**
@@ -581,6 +588,10 @@ public class ElasticSearchClient implements DisposableBean {
 
     public SearchRequestBuilder prepareSearch(String[] indexNames, String[] typeNames) {
         return client.prepareSearch(indexNames).setTypes(typeNames);
+    }
+
+    public MultiSearchRequestBuilder prepareMultiSearch() {
+        return this.client.prepareMultiSearch();
     }
 
     // ------------------------------------------------分页搜索---------------------------------------

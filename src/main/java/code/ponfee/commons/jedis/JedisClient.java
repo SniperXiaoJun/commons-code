@@ -214,10 +214,6 @@ public class JedisClient implements DisposableBean {
         }
     }
 
-    ShardedJedis getShardedJedis() throws JedisException {
-        return this.shardedJedisPool.getResource();
-    }
-
     /**
      * 回调函数：有返回值
      * @param call              回调对象
@@ -336,6 +332,10 @@ public class JedisClient implements DisposableBean {
             }
         }
         return list;
+    }
+
+    ShardedJedis getShardedJedis() throws JedisException {
+        return this.shardedJedisPool.getResource();
     }
 
     /*void closeShardedJedis(ShardedJedis shardedJedis) {

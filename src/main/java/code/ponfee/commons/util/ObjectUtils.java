@@ -7,6 +7,7 @@ import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToStrin
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -27,8 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.time.DateUtils;
 
-import com.vividsolutions.jts.io.ByteArrayInStream;
-
 import code.ponfee.commons.json.Jsons;
 import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.reflect.ClassUtils;
@@ -43,7 +42,8 @@ public final class ObjectUtils {
     private static final char[] URL_SAFE_BASE64_CODES = 
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
     private static final String[] DATE_PATTERN = { 
-        "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyyMMdd", "yyyyMMddHHmmss", "yyyyMMddHHmmssSSS" 
+        "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyyMMdd", "yyyyMMddHHmmss", 
+        "yyyyMMddHHmmssSSS", "yyyy-MM-dd HH:mm:ss.SSS" 
     };
 
     /**
@@ -185,6 +185,14 @@ public final class ObjectUtils {
         }
     }
 
+    /**
+     * Returns a object that convert spec value to type
+     * 
+     * @param value source object
+     * @param type  target object type
+     * @return a object of type 
+     * @throws Exception if occur error
+     */
     @SuppressWarnings("unchecked")
     public static <T, E extends Enum<E>> Object convert(Object value, Class<?> type) 
         throws Exception {
@@ -360,7 +368,7 @@ public final class ObjectUtils {
         } else if (type == Byte[].class) {
             return (T) ArrayUtils.toObject(value);
         } else if (type == InputStream.class) {
-            return (T) new ByteArrayInStream(value);
+            return (T) new ByteArrayInputStream(value);
         }  else if (boolean.class == type || Boolean.class == type) {
             return (T) (value[0] == 0x00 ? Boolean.FALSE : Boolean.TRUE);
         } else if (byte.class == type || Byte.class == type) {

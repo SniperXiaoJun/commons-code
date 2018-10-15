@@ -67,9 +67,13 @@ public abstract class AbstractDataConverter<F, T> implements Function<F, T> {
     }
 
     // -----------------------------------------------static methods
+    @SuppressWarnings("unchecked")
     public static <T, F> T convert(F from, Class<T> clazz) {
         if (from == null) {
             return null;
+        }
+        if (clazz.isInstance(from)) {
+            return (T) from;
         }
 
         try {

@@ -2,7 +2,7 @@ package code.ponfee.commons.collect;
 
 import java.util.Arrays;
 
-import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * The class use in byte array as hash map key
@@ -23,6 +23,20 @@ public class ByteArrayWrapper implements
         this.array = array;
     }
 
+    public ByteArrayWrapper(Byte[] array) {
+        if (array == null) {
+            throw new NullPointerException();
+        }
+        this.array = ArrayUtils.toPrimitive(array);
+    }
+
+    public static ByteArrayWrapper create(byte[] array) {
+        if (array == null || array.length == 0) {
+            return null;
+        }
+        return new ByteArrayWrapper(array);
+    }
+
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof ByteArrayWrapper)) {
@@ -41,10 +55,10 @@ public class ByteArrayWrapper implements
         if (o == null) {
             return 1;
         }
-        return new CompareToBuilder().append(array, o.array)
+        return ByteArrayComparator.compareTo(array, o.array);
+        /*return new CompareToBuilder().append(array, o.array)
                                      .toComparison();
-
-        /*return Bytes.toBigInteger(array).compareTo(
+        return Bytes.toBigInteger(array).compareTo(
             Bytes.toBigInteger(o.array)
         );*/
     }
@@ -56,6 +70,13 @@ public class ByteArrayWrapper implements
      */
     public byte[] getArray() {
         return array;
+    }
+
+    @Override
+    public String toString() {
+        return "ByteArrayWrapper [" + 
+                (array == null ? "null" : "array.length=" + array.length)
+             + "]";
     }
 
 }
