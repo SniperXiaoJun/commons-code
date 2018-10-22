@@ -186,11 +186,11 @@ public class SM3Digest {
         }
 
         static int[] convert(byte[] arr) {
-            int[] out = new int[arr.length / 4];
+            int[] out = new int[arr.length >>> 2];
             byte[] tmp = new byte[4];
             for (int i = 0; i < arr.length; i += 4) {
                 System.arraycopy(arr, i, tmp, 0, 4);
-                out[i / 4] = bigEndianByteToInt(tmp);
+                out[i >>> 2] = bigEndianByteToInt(tmp);
             }
             return out;
         }

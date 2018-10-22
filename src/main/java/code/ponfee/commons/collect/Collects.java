@@ -291,7 +291,7 @@ public final class Collects {
             throw new IllegalArgumentException("args must be pair.");
         }
 
-        Map<String, Object> map = new LinkedHashMap<>(length / 2);
+        Map<String, Object> map = new LinkedHashMap<>(length);
         for (int i = 0; i < length; i += 2) {
             map.put((String) kv[i], kv[i + 1]);
         }

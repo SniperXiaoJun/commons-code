@@ -1,5 +1,11 @@
 //package code.ponfee.commons.model;
 //
+//import static code.ponfee.commons.model.PageHandler.DEFAULT_LIMIT;
+//import static code.ponfee.commons.model.PageHandler.DEFAULT_PAGE_SIZE;
+//
+//import java.util.Arrays;
+//import java.util.List;
+//
 //import org.apache.commons.lang3.StringUtils;
 //import org.springframework.core.MethodParameter;
 //import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -24,6 +30,11 @@
 // */
 //public class PageMethodArgumentResolver implements HandlerMethodArgumentResolver {
 //
+//    private static final int MIN_SIZE = 50;
+//    private static final List<String> SIZE_PARAMS = Arrays.asList(
+//        DEFAULT_PAGE_SIZE, DEFAULT_LIMIT
+//    );
+//
 //    @Override
 //    public boolean supportsParameter(MethodParameter parameter) {
 //        //return parameter.hasParameterAnnotation(PageRequestParam.class);
@@ -39,6 +50,9 @@
 //        webRequest.getParameterMap().entrySet().stream().forEach(entry -> {
 //            if (PageRequestParams.PAGE_PARAMS.contains(entry.getKey())) {
 //                int value = Numbers.toInt(entry.getValue()[0], 0);
+//                if (value < 1 && SIZE_PARAMS.contaions(entry.getKey())) {
+//                    value = MIN_PAGE_SIZE;
+//                }
 //                Fields.put(page, entry.getKey(), value);
 //                page.put(entry.getKey(), value);
 //            } else if (PageRequestParams.SORT_PARAM.equalsIgnoreCase(entry.getKey())) {

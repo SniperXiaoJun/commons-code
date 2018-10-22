@@ -64,6 +64,7 @@ public final class TreeNode<T extends java.io.Serializable & Comparable<T>>
         super.available = node.isAvailable();
     }
 
+    // ---------------------------------------------------create root node
     public static <T extends java.io.Serializable & Comparable<T>> TreeNode<T> 
         createRoot(T nid) {
         return new TreeNode<>(nid, null, 0, true);
@@ -90,6 +91,7 @@ public final class TreeNode<T extends java.io.Serializable & Comparable<T>>
         return new TreeNode<>(node);
     }
 
+    // ------------------------------------------------------mount children nodes
     public <E extends AbstractNode<T>> TreeNode<T> mount(List<E> nodes) {
         mount(nodes, false);
         return this;

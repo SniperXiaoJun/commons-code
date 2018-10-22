@@ -124,7 +124,7 @@ public final class AsyncBatchTransmitter<T> {
             Preconditions.checkArgument(thresholdChunk > 0);
 
             this.factory = factory;
-            this.sleepTimeMillis = NumberUtils.max(9, thresholdPeriod / 2);
+            this.sleepTimeMillis = NumberUtils.max(9, thresholdPeriod >>> 1);
             this.thresholdPeriod = thresholdPeriod;
             this.thresholdChunk = thresholdChunk;
             if (executor == null) {

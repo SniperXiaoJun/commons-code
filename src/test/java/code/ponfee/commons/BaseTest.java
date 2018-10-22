@@ -27,7 +27,10 @@ public abstract class BaseTest<T> {
 
     @Before
     public final void setUp() {
-        bean = SpringContextHolder.getBean(GenericUtils.getActualTypeArgument(this.getClass()));
+        Class<T> type = GenericUtils.getActualTypeArgument(this.getClass());
+        if (Object.class != type) {
+            bean = SpringContextHolder.getBean(type);
+        }
         initialize();
     }
 
@@ -44,7 +47,11 @@ public abstract class BaseTest<T> {
         // do no thing
     }
 
-    public static void console(Object obj) {
+    public static void consoleJson(Object obj) {
         System.out.println(Jsons.toJson(obj));
+    }
+
+    public static void console(Object obj) {
+        System.out.println(obj);
     }
 }

@@ -54,7 +54,7 @@ public class RedisCurrentLimiter implements CurrentLimiter {
         this.clearBeforeMillis = (int) TimeUnit.MINUTES.toMillis(clearBeforeMinutes);
 
         // 定时清除记录(zrem range by score)，jedis:lock:cir:bre:clear
-        this.lock = new JedisLock(jedisClient, TRACE_KEY_PREFIX + "clear", autoClearInSeconds / 2);
+        this.lock = new JedisLock(jedisClient, TRACE_KEY_PREFIX + "clear", autoClearInSeconds >>> 1);
         this.executor.scheduleAtFixedRate(() -> {
             try {
                 if (this.lock.tryLock()) { // 不用释放锁，让其自动超时

@@ -113,7 +113,7 @@ public class SHA1Digest {
     private static final int WORK_SIZE = 80;
 
     /** 填充的边界 */
-    private static final int PADDING_BOUNDS = 448 / 8; // 56，long=8byte=64bit
+    private static final int PADDING_BOUNDS = 448 >>> 3; // 56，long=8byte=64bit
 
     /** 五个链变量A,B,C,D,E */
     private static final int A = 0x67452301,

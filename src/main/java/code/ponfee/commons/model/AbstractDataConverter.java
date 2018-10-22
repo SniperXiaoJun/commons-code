@@ -1,8 +1,11 @@
 package code.ponfee.commons.model;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import code.ponfee.commons.util.ObjectUtils;
 
 import static code.ponfee.commons.reflect.GenericUtils.getActualTypeArgument;
 
@@ -67,25 +70,31 @@ public abstract class AbstractDataConverter<F, T> implements Function<F, T> {
     }
 
     // -----------------------------------------------static methods
-    @SuppressWarnings("unchecked")
-    public static <T, F> T convert(F from, Class<T> clazz) {
-        if (from == null) {
-            return null;
-        }
-        if (clazz.isInstance(from)) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <T, F> T convert(F from, Class<T> type) {
+        if (from == null || type.isInstance(from)) {
             return (T) from;
         }
 
+        T to;
         try {
-            T to = clazz.getConstructor().newInstance();
+            to = type.getConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (Map.class.isAssignableFrom(type) && Map.class.isInstance(from)) {
+            ((Map) to).putAll((Map<?, ?>) from);
+        } else if (Map.class.isAssignableFrom(type)) {
+            ((Map) to).putAll(ObjectUtils.bean2map(from));
+        } else if (Map.class.isInstance(from)) {
+            ObjectUtils.map2bean((Map) from, to);
+        } else {
             org.springframework.beans.BeanUtils.copyProperties(from, to);
             //org.apache.commons.beanutils.BeanUtils.copyProperties(to, from);
             //org.apache.commons.beanutils.PropertyUtils.copyProperties(to, from);
             //org.springframework.cglib.beans.BeanCopier.create(source, target, false);
-            return to;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
+        return to;
     }
 
     public static <F, T> T convert(F from, Function<F, T> converter) {

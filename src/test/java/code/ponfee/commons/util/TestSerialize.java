@@ -13,6 +13,7 @@ import java.util.Date;
 
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.reflect.Fields;
+import code.ponfee.commons.serial.Serializations;
 
 /**
  * 
@@ -121,13 +122,13 @@ public class TestSerialize {
         System.out.println(target);
 
         for (Field field : ClassUtils.listFields(TestSerialize.class)) {
-            byte[] value = ObjectUtils.serialize(Fields.get(source, field));
-            Fields.put(target, field, ObjectUtils.deserialize(value, field.getType()));
+            byte[] value = Serializations.serialize(Fields.get(source, field));
+            Fields.put(target, field, Serializations.deserialize(value, field.getType()));
         }
         System.out.println(target);
 
         for (Field field : ClassUtils.listFields(TestSerialize.class)) {
-            Fields.put(target, field, ObjectUtils.deserialize(null, field.getType()));
+            Fields.put(target, field, Serializations.deserialize(null, field.getType()));
         }
         System.out.println(target);
     }
