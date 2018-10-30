@@ -2,7 +2,6 @@ package code.ponfee.commons.export;
 
 import java.util.List;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 import code.ponfee.commons.io.Files;
@@ -41,11 +40,14 @@ public class CsvExporter extends AbstractExporter {
         buildComplexThead(flats);
 
         // tbody---------------
-        List<Object[]> tbody = table.getTobdy();
-        if (CollectionUtils.isNotEmpty(tbody)) {
+        try {
             Object[] data;
-            for (int n = tbody.size(), i = 0, j, m; i < n; i++) {
-                data = tbody.get(i);
+            for (int m, j; table.isNotEnd();) {
+                data = table.poll();
+                if (data == null) {
+                    Thread.sleep(AWAIT_TIME_MILLIS);
+                    continue;
+                }
                 for (m = data.length - 1, j = 0; j <= m; j++) {
                     csv.append(data[j]);
                     if (j < m) {
@@ -54,9 +56,14 @@ public class CsvExporter extends AbstractExporter {
                 }
                 csv.append(Files.SYSTEM_LINE_SEPARATOR); // 换行
             }
-            super.nonEmpty();
-        } else {
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (table.isEmptyTbody()) {
             csv.append(NO_RESULT_TIP);
+        } else {
+            super.nonEmpty();
         }
 
         // tfoot---------
@@ -104,8 +111,8 @@ public class CsvExporter extends AbstractExporter {
         csv.append(Files.SYSTEM_LINE_SEPARATOR);
     }
 
-    /*// 创建简单表头
-    private void buildSimpleThead(String[] theadName) {
+    // 创建简单表头
+    /*private void buildSimpleThead(String[] theadName) {
         for (String th : theadName) {
             csv.append(th).append(csvSeparator);
         }

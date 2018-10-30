@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -72,7 +71,10 @@ public class HtmlExporter extends AbstractExporter {
             throw new IllegalArgumentException("thead can't be null");
         }
 
+        // horizon-------
         horizon();
+
+        // table start-------
         html.append("<div class=\"grid\"><table cellpadding=\"0\" cellspacing=\"0\">");
         if (StringUtils.isNotBlank(table.getCaption())) {
             html.append("<caption>")
@@ -80,39 +82,45 @@ public class HtmlExporter extends AbstractExporter {
                 .append("</caption>");
         }
 
-        // thead
+        // thead-------
         buildComplexThead(flats);
 
-        // tbody-----------
+        // tbody-------
         List<FlatNode<Integer>> thead = flats.subList(1, flats.size());
-        int totalLeafCount = flats.get(0).getChildLeafCount();
-        List<Object[]> tbody = table.getTobdy();
         html.append("<tbody>");
-        if (CollectionUtils.isNotEmpty(tbody)) {
+        try {
             Object[] data;
-            for (int n = tbody.size(), i = 0, m, j; i < n; i++) {
-                data = tbody.get(i);
+            for (int i = 0, m, j; table.isNotEnd(); i++) {
+                data = table.poll();
+                if (data == null) {
+                    Thread.sleep(AWAIT_TIME_MILLIS);
+                    continue;
+                }
                 html.append("<tr>");
                 for (m = data.length, j = 0; j < m; j++) {
                     html.append("<td");
-
                     processMeta(data[j], tmeta(thead, j), i, j, table.getOptions()); // 样式
-
                     html.append(">").append(formatData(data[j], tmeta(thead, j))).append("</td>");
                 }
                 html.append("</tr>");
             }
-            super.nonEmpty();
-        } else {
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        int totalLeafCount = flats.get(0).getChildLeafCount();
+        if (table.isEmptyTbody()) {
             html.append("<tr><td colspan=\"")
                 .append(totalLeafCount)
                 .append("\" style=\"color:red;padding:3px;font-size:14px;\">")
                 .append(NO_RESULT_TIP)
                 .append("</td></tr>");
+        } else {
+            super.nonEmpty();
         }
         html.append("</tbody>");
 
-        // tfoot---------
+        // tfoot-------
         boolean hasTfoot = false;
         if (ArrayUtils.isNotEmpty(table.getTfoot())) {
             hasTfoot = true;
@@ -131,9 +139,7 @@ public class HtmlExporter extends AbstractExporter {
 
             for (int i = 0; i < table.getTfoot().length; i++) {
                 html.append("<th");
-
                 processMeta(table.getTfoot()[i], tmeta(thead, merge + i));
-
                 html.append(">")
                     .append(formatData(table.getTfoot()[i], tmeta(thead, merge + i)))
                     .append("</th>");
@@ -143,13 +149,15 @@ public class HtmlExporter extends AbstractExporter {
 
         // comment------
         if (StringUtils.isNotBlank(table.getComment())) {
-            StringBuilder builder = new StringBuilder();
             String[] comments = table.getComment().split(";");
-            builder.append("<tr><td colspan=\"").append(totalLeafCount);
-            builder.append("\" style=\"color:red; padding:3px;font-size:14px;\">");
-            builder.append("<div style=\"font-weight:bold;\">备注：</div>");
+            StringBuilder builder = new StringBuilder("<tr><td colspan=\"")
+                .append(totalLeafCount)
+                .append("\" style=\"color:red; padding:3px;font-size:14px;\">")
+                .append("<div style=\"font-weight:bold;\">备注：</div>");
             for (String comment : comments) {
-                builder.append("<div style=\"text-indent:2em;\">").append(comment).append("</div>");
+                builder.append("<div style=\"text-indent:2em;\">")
+                       .append(comment)
+                       .append("</div>");
             }
             builder.append("</td></tr>");
 
@@ -160,7 +168,7 @@ public class HtmlExporter extends AbstractExporter {
             }
         }
 
-        // end-----
+        // table end-----
         html.append("</table></div>");
     }
 

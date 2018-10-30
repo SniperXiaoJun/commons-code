@@ -3,7 +3,7 @@ package code.ponfee.commons.concurrent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.BiFunction;
 
@@ -18,7 +18,8 @@ import com.google.common.base.Preconditions;
  */
 public final class AsyncBatchTransmitter<T> {
 
-    private final Queue<T> queue = new ConcurrentLinkedQueue<>();
+    // 单消费者用LinkedBlockingQueue，多消费者用ConcurrentLinkedQueue
+    private final Queue<T> queue = new LinkedBlockingQueue<>();
     private final AsyncBatchThread batch;
     private volatile boolean isEnd = false;
 

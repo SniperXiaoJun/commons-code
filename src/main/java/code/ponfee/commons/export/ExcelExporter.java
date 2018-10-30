@@ -189,28 +189,37 @@ public class ExcelExporter extends AbstractExporter {
         }
 
         // 6、处理tbody数据
-        int totalLeafCount = flats.get(0).getChildLeafCount();
+        Map<CellStyleOptions, Object> options = table.getOptions();
         List<FlatNode<Integer>> thead = flats.subList(1, flats.size());
         List<XSSFCellStyle> styles = createStyles(thead);
         SXSSFRow row;
-        List<Object[]> tbody = table.getTobdy();
-        if (CollectionUtils.isNotEmpty(tbody)) {
-            Map<CellStyleOptions, Object> options = table.getOptions();
+        try {
             Object[] data;
-            for (int i = 0, n = tbody.size(), j, m; i < n; i++) {
+            for (int i = 0, m, j; table.isNotEnd(); i++) {
+                data = table.poll();
+                if (data == null) {
+                    Thread.sleep(AWAIT_TIME_MILLIS);
+                    continue;
+                }
                 row = sheet.createRow(cursorRow.getAndIncrement());
                 row.setHeight(DEFAULT_HEIGHT);
-                data = tbody.get(i);
                 for (m = data.length, j = 0; j < m; j++) {
                     createCell(row, j, styles.get(j), tmeta(thead, j), data[j], i, j, options);
                 }
             }
-            super.nonEmpty();
-        } else {
-            createBlankRow(NO_RESULT_TIP, sheet, tipStyle, cursorRow, totalLeafCount);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
-        // 7、处理tfoot数据
+        // 7、判断是否有数据
+        int totalLeafCount = flats.get(0).getChildLeafCount();
+        if (table.isEmptyTbody()) {
+            createBlankRow(NO_RESULT_TIP, sheet, tipStyle, cursorRow, totalLeafCount);
+        } else {
+            super.nonEmpty();
+        }
+
+        // 8、处理tfoot数据
         Object[] tfoots = table.getTfoot();
         if (ArrayUtils.isNotEmpty(tfoots)) {
             int rowNum = cursorRow.getAndIncrement();
@@ -237,7 +246,7 @@ public class ExcelExporter extends AbstractExporter {
             }
         }
 
-        // 8、文字注释
+        // 9、文字注释
         if (StringUtils.isNotBlank(table.getComment())) {
             createBlankRow(table.getComment(), sheet, tipStyle, cursorRow, totalLeafCount);
         }

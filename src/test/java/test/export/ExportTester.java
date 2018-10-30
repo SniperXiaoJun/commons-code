@@ -80,7 +80,7 @@ public class ExportTester {
         Table table = new Table(list);
         System.out.println(Jsons.toJson(table.getThead()));
         table.setCaption("abc");
-        table.setTobdy(Lists.newArrayList(new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+        table.addRowsAndEnd(Lists.newArrayList(new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
                                           new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
                                           new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
                                           new Object[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -115,9 +115,11 @@ public class ExportTester {
 
         table = new Table(list);
         table.setCaption("123");
+        table.end();
         html.build(table);
         
         table = new Table(list);
+        table.end();
         table.setCaption("bnm");
         html.build(table);
 
@@ -133,7 +135,7 @@ public class ExportTester {
     @Test
     public void testHtml2() throws FileNotFoundException, IOException {
         AbstractExporter html = new HtmlExporter();
-        html.build(new Table("a,b,c,d,e".split(",")));
+        html.build(new Table("a,b,c,d,e".split(",")).end());
         IOUtils.write((String) html.export(), new FileOutputStream("d://testHtml2.html"), "UTF-8");
         Files.addBOM("d:/testHtml2.html");
         html.close();
@@ -208,7 +210,7 @@ public class ExportTester {
 
         Table table1 = new Table(list);
         table1.setCaption("test1");
-        table1.setTobdy(data1);
+        table1.addRowsAndEnd(data1);
         table1.setTfoot(tfoot);
         table1.setOptions(options);
         excel.setName("报表1").build(table1);
@@ -216,7 +218,7 @@ public class ExportTester {
         // ------------------------------------------
         Table table2 = new Table(list);
         table2.setCaption("test2");
-        table2.setTobdy(data2);
+        table2.addRowsAndEnd(data2);
         table2.setTfoot(tfoot);
         table2.setOptions(options);
         excel.setName("报表2").build(table2);
@@ -224,7 +226,7 @@ public class ExportTester {
         // ------------------------------------------
         Table table3 = new Table(list);
         table3.setCaption("test3");
-        table3.setTobdy(data3);
+        table3.addRowsAndEnd(data3);
         table3.setTfoot(tfoot);
         table3.setOptions(options);
         excel.setName("报表1").build(table3);
@@ -271,7 +273,7 @@ public class ExportTester {
         table.setCaption("title");
         List<Object[]> data = new ArrayList<>();
         data.add(new Object[] { "1", "2", "3", "4", "5" });
-        table.setTobdy(data);
+        table.addRowsAndEnd(data);
         excel.setName("21321");
         excel.build(table);
         IOUtils.write((byte[]) excel.export(), new FileOutputStream("d:/testExcel2.xlsx"));

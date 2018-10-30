@@ -6,6 +6,8 @@ package code.ponfee.commons.export;
  */
 public abstract class AbstractExporter implements DataExporter {
 
+    static final int AWAIT_TIME_MILLIS = 31;
+
     private boolean empty = true;
     private String name; // non thread safe
 
