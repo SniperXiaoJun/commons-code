@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -21,24 +22,25 @@ public final class AsyncBatchTransmitter<T> {
     private final AsyncBatchThread batch;
     private volatile boolean isEnd = false;
 
-    public AsyncBatchTransmitter(RunnableFactory<T> factory) {
-        this(factory, 1000, 200);
+    public AsyncBatchTransmitter(BiFunction<List<T>, Boolean, Runnable> processor) {
+        this(processor, 1000, 200);
     }
 
-    public AsyncBatchTransmitter(RunnableFactory<T> factory, 
+    public AsyncBatchTransmitter(BiFunction<List<T>, Boolean, Runnable> processor, 
                                  int thresholdPeriod, int thresholdChunk) {
-        this(factory, thresholdPeriod, thresholdChunk, null);
+        this(processor, thresholdPeriod, thresholdChunk, null);
     }
 
     /**
-     * @param factory         消费线程工厂
+     * @param processor       处理器
      * @param thresholdPeriod 消费周期阀值
      * @param thresholdChunk  消费数量阀值
      * @param executor        线程执行器
      */
-    public AsyncBatchTransmitter(RunnableFactory<T> factory, int thresholdPeriod, 
-                                 int thresholdChunk, ThreadPoolExecutor executor) {
-        this.batch = new AsyncBatchThread(factory, thresholdPeriod, 
+    public AsyncBatchTransmitter(BiFunction<List<T>, Boolean, Runnable> processor, 
+                                 int thresholdPeriod, int thresholdChunk, 
+                                 ThreadPoolExecutor executor) {
+        this.batch = new AsyncBatchThread(processor, thresholdPeriod, 
                                           thresholdChunk, executor);
     }
 
@@ -102,7 +104,7 @@ public final class AsyncBatchTransmitter<T> {
      * asnyc batch consume into this alone thread
      */
     private final class AsyncBatchThread extends Thread {
-        final RunnableFactory<T> factory; // 线程工厂
+        final BiFunction<List<T>, Boolean, Runnable> processor; // 处理器
         final int sleepTimeMillis; // 休眠时间
         final int thresholdPeriod; // 消费周期阀值
         final int thresholdChunk; // 消费数量阀值
@@ -112,17 +114,18 @@ public final class AsyncBatchTransmitter<T> {
         long lastConsumeTimeMillis = System.currentTimeMillis(); // 最近刷新时间
 
         /**
-         * @param factory          消费线程工厂
+         * @param processor        处理器
          * @param executor         线程执行器
          * @param thresholdPeriod  消费周期阀值
          * @param thresholdChunk   消费数量阀值
          */
-        AsyncBatchThread(RunnableFactory<T> factory,int thresholdPeriod, 
-                         int thresholdChunk, ThreadPoolExecutor executor) {
+        AsyncBatchThread(BiFunction<List<T>, Boolean, Runnable> processor, 
+                         int thresholdPeriod, int thresholdChunk, 
+                         ThreadPoolExecutor executor) {
             Preconditions.checkArgument(thresholdPeriod > 0);
             Preconditions.checkArgument(thresholdChunk > 0);
 
-            this.factory = factory;
+            this.processor = processor;
             this.sleepTimeMillis = NumberUtils.max(9, thresholdPeriod >>> 1);
             this.thresholdPeriod = thresholdPeriod;
             this.thresholdChunk = thresholdChunk;
@@ -175,9 +178,9 @@ public final class AsyncBatchTransmitter<T> {
                 if (list.size() == thresholdChunk 
                     || ( !list.isEmpty() && (isEnd || cumulate() > thresholdPeriod) )
                 ) {
-                    // task抛异常后：execute会输出错误信息，线程结束，后续任务会创建新线程执行
-                    //               submit不会输出错误信息，线程继续分配执行其它任务
-                    executor.submit(factory.create(list, isEnd && queue.isEmpty())); // 提交到异步批量处理
+                    // task抛异常后：execute会输出错误信息，线程结束，后续任务会创建新线程执行（会抛出异常）
+                    //            submit不会输出错误信息，线程继续分配执行其它任务，（不会抛出异常，除非你调用Future.get()）
+                    executor.submit(processor.apply(list, isEnd && queue.isEmpty())); // 提交到异步批量处理
                     list = new ArrayList<>(thresholdChunk);
                     refresh();
                 } else {
