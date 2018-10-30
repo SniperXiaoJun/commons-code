@@ -9,7 +9,6 @@ import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.SerializationUtils;
 
 import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.reflect.ClassUtils;
@@ -21,6 +20,8 @@ import code.ponfee.commons.util.Bytes;
  * @author Ponfee
  */
 public final class Serializations {
+
+    private static final Serializer SERIALIZER = new KryoSerializer();
 
     public static byte[] serialize(boolean value) {
         return new byte[] { value ? (byte) 0x01 : (byte) 0x00 };
@@ -117,7 +118,8 @@ public final class Serializations {
         } else if (value instanceof Enum) {
             return Bytes.fromInt(((Enum<?>) value).ordinal());
         } else if (value instanceof Serializable) {
-            return SerializationUtils.serialize((Serializable) value);
+            //return SerializationUtils.serialize((Serializable) value);
+            return SERIALIZER.serialize(value);
         } else {
             throw new UnsupportedOperationException(
                 ClassUtils.getClassName(value.getClass()) + " is not Serializable."
@@ -165,7 +167,7 @@ public final class Serializations {
             return (T) ArrayUtils.toObject(value);
         } else if (InputStream.class == type) {
             return (T) new ByteArrayInputStream(value);
-        }  else if (boolean.class == type || Boolean.class == type) {
+        } else if (boolean.class == type || Boolean.class == type) {
             return (T) (value[0] == 0x00 ? Boolean.FALSE : Boolean.TRUE);
         } else if (byte.class == type || Byte.class == type) {
             return (T) (Byte) value[0];
@@ -188,7 +190,8 @@ public final class Serializations {
         } else if (type.isEnum()) {
             return type.getEnumConstants()[Bytes.toInt(value)];
         } else {
-            return (T)SerializationUtils.deserialize(value);
+            return SERIALIZER.deserialize(value, type);
+            //return (T) SerializationUtils.deserialize(value);
         }
     }
 
