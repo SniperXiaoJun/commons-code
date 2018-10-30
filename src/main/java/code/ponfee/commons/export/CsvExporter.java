@@ -3,6 +3,7 @@ package code.ponfee.commons.export;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.tree.FlatNode;
@@ -59,7 +60,7 @@ public class CsvExporter extends AbstractExporter {
         }
 
         // tfoot---------
-        if (table.getTfoot() != null && table.getTfoot().length > 0) {
+        if (ArrayUtils.isNotEmpty(table.getTfoot())) {
             FlatNode<Integer> root = flats.get(0);
             if (table.getTfoot().length > root.getChildLeafCount()) {
                 throw new IllegalStateException("tfoot data length cannot more than total leaf count.");
@@ -81,7 +82,6 @@ public class CsvExporter extends AbstractExporter {
 
             csv.append(Files.SYSTEM_LINE_SEPARATOR);
         }
-
     }
 
     @Override

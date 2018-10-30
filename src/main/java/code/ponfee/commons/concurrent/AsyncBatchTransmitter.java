@@ -89,7 +89,7 @@ public final class AsyncBatchTransmitter<T> {
     /**
      * 结束
      */
-    public void end() {
+    public synchronized void end() {
         if (isEnd) {
             return;
         }
@@ -102,7 +102,6 @@ public final class AsyncBatchTransmitter<T> {
      * asnyc batch consume into this alone thread
      */
     private final class AsyncBatchThread extends Thread {
-
         final RunnableFactory<T> factory; // 线程工厂
         final int sleepTimeMillis; // 休眠时间
         final int thresholdPeriod; // 消费周期阀值

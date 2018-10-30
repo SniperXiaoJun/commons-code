@@ -15,16 +15,17 @@ import com.google.common.base.Stopwatch;
  * @author Ponfee
  */
 public class MultithreadExecutor {
+
     private static Logger logger = LoggerFactory.getLogger(MultithreadExecutor.class);
 
-    public static void exec(int threadCount, Executable executable, int sleepSeconds) {
+    public static void exec(int threadCount, Runnable runnable, int sleepSeconds) {
         Stopwatch watch = Stopwatch.createStarted();
         AtomicBoolean flag = new AtomicBoolean(true);
         Thread[] threads = new Thread[threadCount];
         for (int i = 0; i < threadCount; i++) {
             threads[i] = new Thread(() -> {
                 while (flag.get() && !Thread.interrupted()) {
-                    executable.exec();
+                    runnable.run();
                 }
             });
         }

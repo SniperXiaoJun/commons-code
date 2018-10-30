@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -211,7 +212,7 @@ public class ExcelExporter extends AbstractExporter {
 
         // 7、处理tfoot数据
         Object[] tfoots = table.getTfoot();
-        if (tfoots != null && tfoots.length > 0) {
+        if (ArrayUtils.isNotEmpty(tfoots)) {
             int rowNum = cursorRow.getAndIncrement();
             row = sheet.createRow(rowNum);
             row.setHeight(DEFAULT_HEIGHT);

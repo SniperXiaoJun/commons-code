@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.export.Tmeta.Type;
@@ -113,7 +114,7 @@ public class HtmlExporter extends AbstractExporter {
 
         // tfoot---------
         boolean hasTfoot = false;
-        if (table.getTfoot() != null && table.getTfoot().length > 0) {
+        if (ArrayUtils.isNotEmpty(table.getTfoot())) {
             hasTfoot = true;
             html.append("<tfoot><tr>");
 
