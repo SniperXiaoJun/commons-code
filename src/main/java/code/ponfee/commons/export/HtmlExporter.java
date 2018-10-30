@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import code.ponfee.commons.export.Tmeta.Type;
 import code.ponfee.commons.math.Numbers;
 import code.ponfee.commons.tree.FlatNode;
-import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * html导出
@@ -82,88 +82,81 @@ public class HtmlExporter extends AbstractExporter {
         // thead
         buildComplexThead(flats);
 
+        // tbody-----------
+        List<FlatNode<Integer>> thead = flats.subList(1, flats.size());
         int totalLeafCount = flats.get(0).getChildLeafCount();
-        if (ObjectUtils.isEmpty(table.getTobdy()) 
-            && ObjectUtils.isEmpty(table.getTfoot())) {
-            html.append("<tfoot><tr><td colspan=\"")
+        List<Object[]> tbody = table.getTobdy();
+        html.append("<tbody>");
+        if (CollectionUtils.isNotEmpty(tbody)) {
+            Object[] data;
+            for (int n = tbody.size(), i = 0, m, j; i < n; i++) {
+                data = tbody.get(i);
+                html.append("<tr>");
+                for (m = data.length, j = 0; j < m; j++) {
+                    html.append("<td");
+
+                    processMeta(data[j], tmeta(thead, j), i, j, table.getOptions()); // 样式
+
+                    html.append(">").append(formatData(data[j], tmeta(thead, j))).append("</td>");
+                }
+                html.append("</tr>");
+            }
+            super.nonEmpty();
+        } else {
+            html.append("<tr><td colspan=\"")
                 .append(totalLeafCount)
                 .append("\" style=\"color:red;padding:3px;font-size:14px;\">")
                 .append(NO_RESULT_TIP)
-                .append("</td></tr></tfoot>");
-        } else {
+                .append("</td></tr>");
+        }
+        html.append("</tbody>");
 
-            super.nonEmpty();
+        // tfoot---------
+        boolean hasTfoot = false;
+        if (table.getTfoot() != null && table.getTfoot().length > 0) {
+            hasTfoot = true;
+            html.append("<tfoot><tr>");
 
-            List<FlatNode<Integer>> thead = flats.subList(1, flats.size());
-
-            // tbody-----------
-            List<Object[]> tbody = table.getTobdy();
-            if (tbody != null && !tbody.isEmpty()) {
-                html.append("<tbody>");
-                Object[] datas;
-                for (int n = tbody.size(), i = 0, m, j; i < n; i++) {
-                    datas = tbody.get(i);
-                    html.append("<tr>");
-                    for (m = datas.length, j = 0; j < m; j++) {
-                        html.append("<td");
-
-                        processMeta(datas[j], tmeta(thead, j), i, j, table.getOptions()); // 样式
-
-                        html.append(">").append(formatData(datas[j], tmeta(thead, j))).append("</td>");
-                    }
-                    html.append("</tr>");
-                }
-                html.append("</tbody>");
+            if (table.getTfoot().length > totalLeafCount) {
+                throw new IllegalStateException("tfoot data length cannot more than total leaf count.");
             }
 
-            // tfoot---------
-            boolean hasTfoot = false;
-            if (table.getTfoot() != null && table.getTfoot().length > 0) {
-                hasTfoot = true;
-                html.append("<tfoot><tr>");
-
-                if (table.getTfoot().length > totalLeafCount) {
-                    throw new IllegalStateException("tfoot data length cannot more than total leaf count.");
-                }
-
-                int merge = totalLeafCount - table.getTfoot().length;
-                if (merge > 0) {
-                    html.append("<th colspan=\"")
-                        .append(merge)
-                        .append("\" style=\"text-align:right;\">合计</th>");
-                }
-
-                for (int i = 0; i < table.getTfoot().length; i++) {
-                    html.append("<th");
-
-                    processMeta(table.getTfoot()[i], tmeta(thead, merge + i));
-
-                    html.append(">")
-                        .append(formatData(table.getTfoot()[i], tmeta(thead, merge + i)))
-                        .append("</th>");
-                }
-                html.append("</tr></tfoot>");
+            int merge = totalLeafCount - table.getTfoot().length;
+            if (merge > 0) {
+                html.append("<th colspan=\"")
+                    .append(merge)
+                    .append("\" style=\"text-align:right;\">合计</th>");
             }
 
-            // comment------
-            if (StringUtils.isNotBlank(table.getComment())) {
-                StringBuilder builder = new StringBuilder();
-                String[] comments = table.getComment().split(";");
-                builder.append("<tr><td colspan=\"").append(totalLeafCount);
-                builder.append("\" style=\"color:red; padding:3px;font-size:14px;\">");
-                builder.append("<div style=\"font-weight:bold;\">备注：</div>");
-                for (String comment : comments) {
-                    builder.append("<div style=\"text-indent:2em;\">").append(comment).append("</div>");
-                }
-                builder.append("</td></tr>");
+            for (int i = 0; i < table.getTfoot().length; i++) {
+                html.append("<th");
 
-                if (hasTfoot) {
-                    html.insert(html.length() - "</tfoot>".length(), builder);
-                } else {
-                    html.append("<tfoot>").append(builder).append("</tfoot>");
-                }
+                processMeta(table.getTfoot()[i], tmeta(thead, merge + i));
+
+                html.append(">")
+                    .append(formatData(table.getTfoot()[i], tmeta(thead, merge + i)))
+                    .append("</th>");
             }
+            html.append("</tr></tfoot>");
+        }
 
+        // comment------
+        if (StringUtils.isNotBlank(table.getComment())) {
+            StringBuilder builder = new StringBuilder();
+            String[] comments = table.getComment().split(";");
+            builder.append("<tr><td colspan=\"").append(totalLeafCount);
+            builder.append("\" style=\"color:red; padding:3px;font-size:14px;\">");
+            builder.append("<div style=\"font-weight:bold;\">备注：</div>");
+            for (String comment : comments) {
+                builder.append("<div style=\"text-indent:2em;\">").append(comment).append("</div>");
+            }
+            builder.append("</td></tr>");
+
+            if (hasTfoot) {
+                html.insert(html.length() - "</tfoot>".length(), builder);
+            } else {
+                html.append("<tfoot>").append(builder).append("</tfoot>");
+            }
         }
 
         // end-----

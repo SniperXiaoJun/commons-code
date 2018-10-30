@@ -25,6 +25,7 @@ import bean.TestBean;
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.ScriptOperations;
+import code.ponfee.commons.util.Bytes;
 import code.ponfee.commons.util.MavenProjects;
 import code.ponfee.commons.util.ObjectUtils;
 import redis.clients.jedis.JedisPubSub;
@@ -62,6 +63,20 @@ public class JedisClientTester {
         TestBean bean = new TestBean(123, 4324L, "5435fds");
         System.out.println(jedisClient.valueOps().setObject("abcdefg".getBytes(), bean));
         System.out.println(jedisClient.valueOps().getObject("abcdefg".getBytes(), TestBean.class));
+    }
+    
+    @Test
+    public void test2() {
+        System.out.println(jedisClient.valueOps().set("123456".getBytes(), "11".getBytes(), 99999));
+        System.out.println(jedisClient.valueOps().incrBy("123456"));
+        
+        
+        System.out.println(jedisClient.valueOps().set("654321".getBytes(), Bytes.fromInt(789), 99999));
+        System.out.println(jedisClient.valueOps().incrBy("654321"));
+        
+        
+        System.out.println(jedisClient.valueOps().set("1111111".getBytes(), Bytes.fromInt(52), 99999));
+        System.out.println(jedisClient.valueOps().incrBy("1111111"));
     }
 
     @Test

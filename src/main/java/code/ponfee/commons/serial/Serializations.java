@@ -4,7 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
@@ -16,7 +16,8 @@ import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.util.Bytes;
 
 /**
- * 公用对象工具类
+ * 序列化工具类
+ * 
  * @author Ponfee
  */
 public final class Serializations {
@@ -53,8 +54,8 @@ public final class Serializations {
         return Bytes.fromDouble(value);
     }
 
-    public static byte[] serialize(String value) {
-        return ((String) value).getBytes(StandardCharsets.UTF_8);
+    public static byte[] serialize(CharSequence value) {
+        return ((CharSequence) value).toString().getBytes(UTF_8);
     }
 
     public static byte[] serialize(Date value) {
@@ -96,21 +97,21 @@ public final class Serializations {
         } else if (value instanceof Boolean) {
             return new byte[] { (Boolean) value ? (byte) 0x01 : (byte) 0x00 };
         } else if (value instanceof Byte) {
-            return new byte[] { Numbers.toByte(value) };
+            return new byte[] { ((Byte) value).byteValue() };
         } else if (value instanceof Short) {
-            return Bytes.fromShort(Numbers.toShort(value));
+            return Bytes.fromShort(((Short) value).shortValue());
         } else if (value instanceof Character) {
-            return Bytes.fromChar(Numbers.toChar(value));
+            return Bytes.fromChar(((Character) value).charValue());
         } else if (value instanceof Integer) {
-            return Bytes.fromInt(Numbers.toInt(value));
+            return Bytes.fromInt(((Integer) value).intValue());
         } else if (value instanceof Long) {
-            return Bytes.fromLong(Numbers.toLong(value));
+            return Bytes.fromLong(((Long) value).longValue());
         } else if (value instanceof Float) {
-            return Bytes.fromFloat(Numbers.toFloat(value));
+            return Bytes.fromFloat(((Float) value).floatValue());
         } else if (value instanceof Double) {
-            return Bytes.fromDouble(Numbers.toDouble(value));
-        } else if (value instanceof String) {
-            return ((String) value).getBytes(StandardCharsets.UTF_8);
+            return Bytes.fromDouble(((Double) value).doubleValue());
+        } else if (value instanceof CharSequence) {
+            return ((CharSequence) value).toString().getBytes(UTF_8);
         } else if (value instanceof Date) {
             return Bytes.fromLong(((Date) value).getTime());
         } else if (value instanceof Enum) {
@@ -181,7 +182,7 @@ public final class Serializations {
         } else if (double.class == type || Double.class == type) {
             return (T) (Double) Bytes.toDouble(value);
         } else if (String.class == type) {
-            return (T) new String(value, StandardCharsets.UTF_8);
+            return (T) new String(value, UTF_8);
         } else if (Date.class == type) {
             return (T) new Date(Bytes.toLong(value));
         } else if (type.isEnum()) {

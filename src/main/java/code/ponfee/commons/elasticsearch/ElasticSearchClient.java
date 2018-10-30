@@ -78,6 +78,20 @@ public class ElasticSearchClient implements DisposableBean {
      * @param clusterNodes 集群节点列表：ip1:port1,ip2:port2
      */
     public ElasticSearchClient(String clusterName, String clusterNodes) {
+        client = connectClient(clusterName, clusterNodes);
+    }
+
+    /**
+     * <code>
+     *  try (Client client = connectClient(clusterName, clusterNodes)) {
+     *    // do something...
+     *  }
+     * </code>
+     * @param clusterName
+     * @param clusterNodes
+     * @return
+     */
+    private static TransportClient connectClient(String clusterName, String clusterNodes) {
         Settings settings = Settings.builder()
                                     .put("cluster.name", clusterName)
                                     .put("client.transport.sniff", true)
@@ -85,8 +99,7 @@ public class ElasticSearchClient implements DisposableBean {
                                     //.put("client.transport.ping_timeout", "15s")
                                     //.put("client.transport.nodes_sampler_interval", "5s")
                                     .build();
-        client = new PreBuiltTransportClient(settings);
-
+        TransportClient client = new PreBuiltTransportClient(settings);
         logger.info("Init ElasticSearch Client Start: {}, {}", clusterName, clusterNodes);
         Stream.of(split(clusterNodes, ",")).forEach(clusterNode -> {
             try {
@@ -103,6 +116,7 @@ public class ElasticSearchClient implements DisposableBean {
             node -> logger.info("Connected ElasticSearch Node: {}", node.getHostAddress())
         );
         logger.info("Init ElasticSearch Client End: {}, {}", clusterName, clusterNodes);
+        return client;
     }
 
     /**

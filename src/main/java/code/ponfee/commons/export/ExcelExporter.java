@@ -187,19 +187,11 @@ public class ExcelExporter extends AbstractExporter {
             freezes.put(name, new Freeze(1, cursorRow.get())); // 叶子节点只占一列，故colSplit=1
         }
 
+        // 6、处理tbody数据
         int totalLeafCount = flats.get(0).getChildLeafCount();
-        // 6、判断是否有数据
-        if (CollectionUtils.isEmpty(table.getTobdy()) && ObjectUtils.isEmpty(table.getTfoot())) {
-            createBlankRow(NO_RESULT_TIP, sheet, tipStyle, cursorRow, totalLeafCount);
-            return;
-        }
-
-        super.nonEmpty();
         List<FlatNode<Integer>> thead = flats.subList(1, flats.size());
         List<XSSFCellStyle> styles = createStyles(thead);
         SXSSFRow row;
-
-        // 7、处理tbody数据
         List<Object[]> tbody = table.getTobdy();
         if (CollectionUtils.isNotEmpty(tbody)) {
             Map<CellStyleOptions, Object> options = table.getOptions();
@@ -212,9 +204,12 @@ public class ExcelExporter extends AbstractExporter {
                     createCell(row, j, styles.get(j), tmeta(thead, j), data[j], i, j, options);
                 }
             }
+            super.nonEmpty();
+        } else {
+            createBlankRow(NO_RESULT_TIP, sheet, tipStyle, cursorRow, totalLeafCount);
         }
 
-        // 8、处理tfoot数据
+        // 7、处理tfoot数据
         Object[] tfoots = table.getTfoot();
         if (tfoots != null && tfoots.length > 0) {
             int rowNum = cursorRow.getAndIncrement();
@@ -241,7 +236,7 @@ public class ExcelExporter extends AbstractExporter {
             }
         }
 
-        // 9、文字注释
+        // 8、文字注释
         if (StringUtils.isNotBlank(table.getComment())) {
             createBlankRow(table.getComment(), sheet, tipStyle, cursorRow, totalLeafCount);
         }

@@ -2,9 +2,10 @@ package code.ponfee.commons.export;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.tree.FlatNode;
-import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * csv导出
@@ -38,33 +39,27 @@ public class CsvExporter extends AbstractExporter {
         // build table thead
         buildComplexThead(flats);
 
-        if (ObjectUtils.isEmpty(table.getTobdy()) 
-            && ObjectUtils.isEmpty(table.getTfoot())) {
-            csv.append(NO_RESULT_TIP);
-            return;
-        } 
-
-        super.nonEmpty();
-
         // tbody---------------
         List<Object[]> tbody = table.getTobdy();
-        if (tbody != null && !tbody.isEmpty()) {
-            Object[] datas;
+        if (CollectionUtils.isNotEmpty(tbody)) {
+            Object[] data;
             for (int n = tbody.size(), i = 0, j, m; i < n; i++) {
-                datas = tbody.get(i);
-                for (m = datas.length - 1, j = 0; j <= m; j++) {
-                    csv.append(datas[j]);
+                data = tbody.get(i);
+                for (m = data.length - 1, j = 0; j <= m; j++) {
+                    csv.append(data[j]);
                     if (j < m) {
                         csv.append(csvSeparator);
                     }
                 }
                 csv.append(Files.SYSTEM_LINE_SEPARATOR); // 换行
             }
+            super.nonEmpty();
+        } else {
+            csv.append(NO_RESULT_TIP);
         }
 
         // tfoot---------
         if (table.getTfoot() != null && table.getTfoot().length > 0) {
-
             FlatNode<Integer> root = flats.get(0);
             if (table.getTfoot().length > root.getChildLeafCount()) {
                 throw new IllegalStateException("tfoot data length cannot more than total leaf count.");

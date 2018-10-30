@@ -31,3 +31,6 @@ out/
 build/
 bin/
 logs/
+
+# rebel.xml
+/**/rebel.xml
