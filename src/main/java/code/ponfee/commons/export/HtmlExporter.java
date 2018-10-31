@@ -35,10 +35,10 @@ public class HtmlExporter extends AbstractExporter {
        .append("      .grid table tr td, div.grid table tr th '{border: 1px solid #6d6d6d;}'                                       \n")
        .append("      .grid table caption '{font-size:14px;padding:5px;background:#e6e6fa;font-weight:bolder;border-bottom:none;}' \n")
        .append("      .grid table thead th '{padding: 5px;background: #ccc;}'                                                      \n")
-       .append("      .grid table tbody td '{text-align: center;padding: 3px;}'                                                    \n")
-       .append("      .grid table tbody td.text-left '{text-align:left;}'                                                          \n")
-       .append("      .grid table tbody td.text-right '{text-align:right;}'                                                        \n")
-       .append("      .grid table tbody td.text-center '{text-align:center;}'                                                      \n")
+       .append("      .grid table td '{text-align: center;padding: 3px;}'                                                          \n")
+       .append("      .grid table td.text-left, .grid table th.text-left '{text-align:left;}'                                      \n")
+       .append("      .grid table td.text-right, .grid table th.text-right '{text-align:right;}'                                   \n")
+       .append("      .grid table td.text-center, .grid table th.text-center '{text-align:center;}'                                \n")
        .append("      .grid table tfoot th '{padding: 5px;}'                                                                       \n")
        .append("      .grid table tr:nth-child(odd) td'{background:#fff;}'                                                         \n")
        .append("      .grid table tr:nth-child(even) td'{background: #e8e8e8}'                                                     \n")
@@ -48,7 +48,7 @@ public class HtmlExporter extends AbstractExporter {
        .append("  </head>                                                                                                          \n")
        .append("  <body>{1}</body>                                                                                                 \n")
        .append("</html>                                                                                                            \n")
-       .toString();
+       .toString().replaceAll(" +\n", "\n");
 
     private StringBuilder html; // StringBuilder扩容：(value.length << 1) + 2
                                 // 容量如果不够，直接扩充到需要的容量大小
