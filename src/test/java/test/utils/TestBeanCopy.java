@@ -16,7 +16,7 @@ public class TestBeanCopy {
         System.out.println(System.identityHashCode(obj));
     }
     
-    static int round = 999999999;
+    static int round = 99999999;
     @Test @Ignore
     public void test1() {
         Result<Void> result1 = Result.failure(-1,  "error");

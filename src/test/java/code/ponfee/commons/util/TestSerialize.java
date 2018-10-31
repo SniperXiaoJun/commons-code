@@ -116,6 +116,11 @@ public class TestSerialize {
     }
 
     public static void main(String[] args) {
+        byte[] data = Serializations.serialize(1);
+        System.out.println(Serializations.deserialize(data, int.class));
+        
+        
+        
         TestSerialize source = new TestSerialize((byte) 12, (Byte) (byte) 23, 34, 45, 56f, 67f, E.A, new Date());
         System.out.println(source);
         TestSerialize target = new TestSerialize((byte) 0, null, 1, 2, 3, null, E.B, null);

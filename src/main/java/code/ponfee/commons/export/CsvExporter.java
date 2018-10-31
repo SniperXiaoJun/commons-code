@@ -40,25 +40,15 @@ public class CsvExporter extends AbstractExporter {
         buildComplexThead(flats);
 
         // tbody---------------
-        try {
-            Object[] data;
-            for (int m, j; table.isNotEnd();) {
-                data = table.poll();
-                if (data == null) {
-                    Thread.sleep(AWAIT_TIME_MILLIS);
-                    continue;
+        rollingTbody(table, (data, i) -> {
+            for (int m = data.length - 1, j = 0; j <= m; j++) {
+                csv.append(data[j]);
+                if (j < m) {
+                    csv.append(csvSeparator);
                 }
-                for (m = data.length - 1, j = 0; j <= m; j++) {
-                    csv.append(data[j]);
-                    if (j < m) {
-                        csv.append(csvSeparator);
-                    }
-                }
-                csv.append(Files.SYSTEM_LINE_SEPARATOR); // 换行
             }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+            csv.append(Files.SYSTEM_LINE_SEPARATOR); // 换行
+        });
 
         if (table.isEmptyTbody()) {
             csv.append(NO_RESULT_TIP);

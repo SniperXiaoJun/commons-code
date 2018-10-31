@@ -192,26 +192,16 @@ public class ExcelExporter extends AbstractExporter {
         Map<CellStyleOptions, Object> options = table.getOptions();
         List<FlatNode<Integer>> thead = flats.subList(1, flats.size());
         List<XSSFCellStyle> styles = createStyles(thead);
-        SXSSFRow row;
-        try {
-            Object[] data;
-            for (int i = 0, m, j; table.isNotEnd(); i++) {
-                data = table.poll();
-                if (data == null) {
-                    Thread.sleep(AWAIT_TIME_MILLIS);
-                    continue;
-                }
-                row = sheet.createRow(cursorRow.getAndIncrement());
-                row.setHeight(DEFAULT_HEIGHT);
-                for (m = data.length, j = 0; j < m; j++) {
-                    createCell(row, j, styles.get(j), tmeta(thead, j), data[j], i, j, options);
-                }
+        rollingTbody(table, (data, i) -> {
+            SXSSFRow row = sheet.createRow(cursorRow.getAndIncrement());
+            //row.setHeight(DEFAULT_HEIGHT);
+            for (int m = data.length, j = 0; j < m; j++) {
+                createCell(row, j, styles.get(j), tmeta(thead, j), data[j], i, j, options);
             }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        });
 
         // 7、判断是否有数据
+        SXSSFRow row;
         int totalLeafCount = flats.get(0).getChildLeafCount();
         if (table.isEmptyTbody()) {
             createBlankRow(NO_RESULT_TIP, sheet, tipStyle, cursorRow, totalLeafCount);

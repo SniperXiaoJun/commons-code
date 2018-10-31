@@ -88,25 +88,15 @@ public class HtmlExporter extends AbstractExporter {
         // tbody-------
         List<FlatNode<Integer>> thead = flats.subList(1, flats.size());
         html.append("<tbody>");
-        try {
-            Object[] data;
-            for (int i = 0, m, j; table.isNotEnd(); i++) {
-                data = table.poll();
-                if (data == null) {
-                    Thread.sleep(AWAIT_TIME_MILLIS);
-                    continue;
-                }
-                html.append("<tr>");
-                for (m = data.length, j = 0; j < m; j++) {
-                    html.append("<td");
-                    processMeta(data[j], tmeta(thead, j), i, j, table.getOptions()); // 样式
-                    html.append(">").append(formatData(data[j], tmeta(thead, j))).append("</td>");
-                }
-                html.append("</tr>");
+        rollingTbody(table, (data, i) -> {
+            html.append("<tr>");
+            for (int m = data.length, j = 0; j < m; j++) {
+                html.append("<td");
+                processMeta(data[j], tmeta(thead, j), i, j, table.getOptions()); // 样式
+                html.append(">").append(formatData(data[j], tmeta(thead, j))).append("</td>");
             }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+            html.append("</tr>");
+        });
 
         int totalLeafCount = flats.get(0).getChildLeafCount();
         if (table.isEmptyTbody()) {

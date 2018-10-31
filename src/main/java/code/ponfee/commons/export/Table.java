@@ -2,11 +2,12 @@ package code.ponfee.commons.export;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.springframework.util.CollectionUtils;
 
 import code.ponfee.commons.tree.FlatNode;
 import code.ponfee.commons.tree.TreeNode;
@@ -87,10 +88,14 @@ public class Table implements Serializable {
     }
 
     public void addRows(List<Object[]> rows) {
-        for (Iterator<Object[]> iter = rows.iterator(); iter.hasNext();) {
-            addRow(iter.next());
-            iter.remove();
+        if (CollectionUtils.isEmpty(rows)) {
+            return;
         }
+        for (Object[] row : rows) {
+            tbody.offer(row);
+        }
+        empty = false;
+        rows.clear();
     }
 
     public void addRowAndEnd(Object[] row) {
@@ -99,17 +104,20 @@ public class Table implements Serializable {
     }
 
     public void addRow(Object[] row) {
+        if (row == null) {
+            return;
+        }
         tbody.offer(row);
         empty = false;
     }
 
-    // -----------------------------------------------end ops
+    // -----------------------------------------------to end operation
     public synchronized Table end() {
         this.end = true;
         return this;
     }
 
-    // -----------------------------------------------Data Exporter use
+    // -----------------------------------------------data exporter use
     boolean isEnd() {
         return end && tbody.isEmpty();
     }
