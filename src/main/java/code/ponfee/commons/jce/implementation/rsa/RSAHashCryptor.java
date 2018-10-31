@@ -48,7 +48,7 @@ public class RSAHashCryptor extends AbstractRSACryptor {
 
         byte[] result = new byte[keyByteLen + length];
         // mod pow之后可能被去0或加0
-        Bytes.copy(encryptedKey, 0, encryptedKey.length, result, 0, keyByteLen);
+        Bytes.tailCopy(encryptedKey, 0, encryptedKey.length, result, 0, keyByteLen);
 
         // 对密钥进行HASH
         byte[] keyArray = key.toByteArray();
@@ -100,7 +100,7 @@ public class RSAHashCryptor extends AbstractRSACryptor {
         byte[] encryptedKey = key.modPow(exponent, rsaKey.n).toByteArray();
 
         byte[] encryptedKey0 = new byte[keyByteLen]; // mod pow之后可能被去0或加0
-        Bytes.copy(encryptedKey, 0, encryptedKey.length, encryptedKey0, 0, keyByteLen);
+        Bytes.tailCopy(encryptedKey, 0, encryptedKey.length, encryptedKey0, 0, keyByteLen);
 
         byte[] keyArray = key.toByteArray();
         byte[] hashedKey = crypt(keyArray, Bytes.fromInt(count), HMAC_ALG, BC);

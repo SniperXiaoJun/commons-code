@@ -56,8 +56,8 @@ public final class SM2 {
 
         this.x = new byte[byteCount];
         this.y = new byte[byteCount];
-        Bytes.copy(x1, 0, x1.length, this.x, 0, this.x.length);
-        Bytes.copy(y1, 0, y1.length, this.y, 0, this.y.length);
+        Bytes.tailCopy(x1, 0, x1.length, this.x, 0, this.x.length);
+        Bytes.tailCopy(y1, 0, y1.length, this.y, 0, this.y.length);
 
         this.reset();
     }
@@ -422,8 +422,8 @@ public final class SM2 {
             byte[] out = new byte[byteCount << 1];
             byte[] r1 = this.r.toByteArray();
             byte[] s1 = this.s.toByteArray();
-            Bytes.copy(r1, 0, r1.length, out, 0, byteCount);
-            Bytes.copy(s1, 0, s1.length, out, byteCount, byteCount);
+            Bytes.tailCopy(r1, 0, r1.length, out, 0, byteCount);
+            Bytes.tailCopy(s1, 0, s1.length, out, byteCount, byteCount);
             return out;
         }
 

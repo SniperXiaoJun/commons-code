@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Calendar;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.codec.binary.Hex;
@@ -20,6 +21,7 @@ import code.ponfee.commons.reflect.Fields;
 import code.ponfee.commons.reflect.GenericUtils;
 import code.ponfee.commons.resource.ResourceScanner;
 import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.ObjectUtils;
 import code.ponfee.commons.util.SecureRandoms;
 
 public class TempTest {
@@ -171,6 +173,43 @@ public class TempTest {
         System.out.println("toLong: " + watch.stop());
     }
 
+    @org.junit.Test
+    public void test100() {
+        System.out.println(ObjectUtils.uuid32());
+        UUID uuid = UUID.randomUUID();
+        long most = uuid.getMostSignificantBits();
+        long least = uuid.getLeastSignificantBits();
+        long round = 99999999L;
+        String s;
+        Stopwatch watch = Stopwatch.createStarted();
+        for (long i = 0; i < round; i++) {
+            s = Long.toHexString(most) + Long.toHexString(least);
+        }
+        System.out.println("Long.toHexString: " + watch.stop());
+
+        watch.reset().start();
+        for (long i = 0; i < round; i++) {
+            s = Bytes.hexEncode(Bytes.fromLong(most))+Bytes.hexEncode(Bytes.fromLong(least));
+        }
+        System.out.println("Bytes.hexEncode: " + watch.stop());
+
+        watch.reset().start();
+        for (long i = 0; i < round; i++) {
+            s = Bytes.hexEncode(new byte[] {
+               (byte) (most  >>> 56), (byte) (most  >>> 48),
+               (byte) (most  >>> 40), (byte) (most  >>> 32),
+               (byte) (most  >>> 24), (byte) (most  >>> 16),
+               (byte) (most  >>>  8), (byte) (most        ),
+    
+               (byte) (least >>> 56), (byte) (least >>> 48),
+               (byte) (least >>> 40), (byte) (least >>> 32),
+               (byte) (least >>> 24), (byte) (least >>> 16),
+               (byte) (least >>>  8), (byte) (least       )
+            });
+        }
+        System.out.println("uuid32: " + watch.stop());
+    }
+    
     @org.junit.Test
     public void test11() {
         int value = tableSizeFor(ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE));

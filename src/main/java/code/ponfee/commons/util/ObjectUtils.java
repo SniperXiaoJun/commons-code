@@ -33,6 +33,7 @@ public final class ObjectUtils {
 
     private static final char[] URL_SAFE_BASE64_CODES = 
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
+
     private static final String[] DATE_PATTERN = { 
         "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyyMMdd", "yyyyMMddHHmmss", 
         "yyyyMMddHHmmssSSS", "yyyy-MM-dd HH:mm:ss.SSS" 
@@ -185,9 +186,8 @@ public final class ObjectUtils {
      * @return a object of type 
      * @throws Exception if occur error
      */
-    @SuppressWarnings("unchecked")
-    public static <T, E extends Enum<E>> Object convert(Object value, Class<?> type) 
-        throws Exception {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <T> T convert(Object value, Class<T> type) throws Exception {
         if (type.isPrimitive()) {
             // 原始类型
             //type = org.apache.commons.lang3.ClassUtils.primitiveToWrapper(type);
@@ -238,7 +238,7 @@ public final class ObjectUtils {
                 if (value instanceof Number) {
                     value = type.getEnumConstants()[((Number) value).intValue()];
                 } else {
-                    value = Enum.valueOf((Class<E>) type, value.toString());
+                    value = Enum.valueOf((Class<Enum>) type, value.toString());
                     /*String str = value.toString();
                     for (Object e : type.getEnumConstants()) {
                         if (((Enum<?>) e).name().equalsIgnoreCase(str)) {
@@ -269,7 +269,7 @@ public final class ObjectUtils {
                               + " cannot be cast to " + ClassUtils.getClassName(type));
             }
         } //else { /*nothing to do: value is null or type.isInstance(value)*/ }
-        return value;
+        return (T) value;
     }
 
     /**
@@ -298,9 +298,7 @@ public final class ObjectUtils {
      * @return
      */
     public static String uuid32() {
-        UUID uuid = UUID.randomUUID();
-        return Long.toHexString(uuid.getMostSignificantBits())
-             + Long.toHexString(uuid.getLeastSignificantBits());
+        return Bytes.hexEncode(uuid());
     }
 
     /**

@@ -17,26 +17,9 @@ public class BytesTest {
 
     @Test
     public void test1() {
-        for (int i = 0; i < 100; i++) {
-            byte[] data = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(100));
-            String b64 = Bytes.base64Encode(data);
-            if (!b64.equals(Base64.getEncoder().encodeToString(data))) {
-                System.err.println("encode fail!");
-            }
-            if (!Arrays.equals(data, Bytes.base64Decode(b64))) {
-                System.err.println("decode fail!");
-            }
-        }
-
         int n = 999999;
         byte[] data = SecureRandoms.nextBytes(ThreadLocalRandom.current().nextInt(9999));
         Stopwatch watch = Stopwatch.createStarted();
-        for (int i = 0; i < n; i++) {
-            Bytes.base64Encode(data);
-        }
-        System.out.println("base64Encode " + watch.stop());
-
-        watch.reset().start();
         for (int i = 0; i < n; i++) {
             Base64.getEncoder().encodeToString(data);
         }

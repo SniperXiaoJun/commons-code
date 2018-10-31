@@ -1,8 +1,5 @@
 package code.ponfee.commons.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkPositionIndexes;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -116,6 +113,7 @@ public final class Bytes {
         return builder.toString();
     }
 
+    // -----------------------------------------------------------------hexEncode/hexDecode
     public static String hexEncode(byte b, boolean lowercase) {
         char[] codes = lowercase ? HEX_LOWER_CODES : HEX_UPPER_CODES;
         return new String(new char[] {
@@ -170,132 +168,7 @@ public final class Bytes {
         return out;
     }
 
-    // -----------------------------------------------------------------base64 encode/decode
-    private static final char[] BASE64_ENCODES =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
-    private static final int[] BASE64_DECODES = new int[256];
-    static {
-        Arrays.fill(BASE64_DECODES, -1);
-        for (int i = 0, len = BASE64_ENCODES.length; i < len; i++) {
-            BASE64_DECODES[BASE64_ENCODES[i]] = i;
-        }
-        BASE64_DECODES['='] = 0;
-    }
-
-    /**
-     * base64 encode
-     * @param data
-     * @return 
-     * @deprecated {@code Base64.getEncoder().encodeToString(data)}
-     */
-    @Deprecated
-    public static String base64Encode(byte[] data) {
-        StringBuilder builder = new StringBuilder((data.length << 2) / 3 + 2);
-        for (int i = 0, len = data.length, b1, b2, b3; i < len;) {
-            b1 = data[i++] & 0xFF;
-            if (i == len) {
-                builder.append(BASE64_ENCODES[b1 >>> 2]);
-                builder.append(BASE64_ENCODES[(b1 & 0x3) << 4]);
-                builder.append("==");
-                break;
-            }
-            b2 = data[i++] & 0xFF;
-            if (i == len) {
-                builder.append(BASE64_ENCODES[b1 >>> 2]);
-                builder.append(BASE64_ENCODES[((b1 & 0x03) << 4) | ((b2 & 0xf0) >>> 4)]);
-                builder.append(BASE64_ENCODES[(b2 & 0x0f) << 2]);
-                builder.append("=");
-                break;
-            }
-            b3 = data[i++] & 0xFF;
-            builder.append(BASE64_ENCODES[b1 >>> 2]);
-            builder.append(BASE64_ENCODES[((b1 & 0x03) << 4) | ((b2 & 0xf0) >>> 4)]);
-            builder.append(BASE64_ENCODES[((b2 & 0x0f) << 2) | ((b3 & 0xc0) >>> 6)]);
-            builder.append(BASE64_ENCODES[b3 & 0x3f]);
-        }
-        return builder.toString();
-    }
-
-    /**
-     * base64转byte[]
-     * @param b64
-     * @return
-     * @deprecated {@code Base64.getDecoder().decode(data)}
-     */
-    @Deprecated
-    public static byte[] base64Decode(String b64) {
-        byte[] data = b64.getBytes(StandardCharsets.US_ASCII);
-        StringBuilder builder = new StringBuilder(data.length * 3 / 4 + 1);
-        for (int i = 0, len = data.length, b1, b2, b3, b4; i < len;) {
-            /* b1 */
-            do {
-                b1 = BASE64_DECODES[data[i++]];
-            } while (i < len && b1 == -1);
-            if (b1 == -1) {
-                break;
-            }
-            /* b2 */
-            do {
-                b2 = BASE64_DECODES[data[i++]];
-            } while (i < len && b2 == -1);
-            if (b2 == -1) {
-                break;
-            }
-            builder.append((char) ((b1 << 2) | ((b2 & 0x30) >>> 4)));
-            /* b3 */
-            do {
-                b3 = data[i++];
-                if (b3 == 61) {
-                    return builder.toString().getBytes(StandardCharsets.ISO_8859_1);
-                }
-                b3 = BASE64_DECODES[b3];
-            } while (i < len && b3 == -1);
-
-            if (b3 == -1) {
-                break;
-            }
-            builder.append((char) (((b2 & 0x0f) << 4) | ((b3 & 0x3c) >>> 2)));
-            /* b4 */
-            do {
-                b4 = data[i++];
-                if (b4 == 61) {
-                    return builder.toString().getBytes(StandardCharsets.ISO_8859_1);
-                }
-                b4 = BASE64_DECODES[b4];
-            } while (i < len && b4 == -1);
-
-            if (b4 == -1) {
-                break;
-            }
-            builder.append((char) (((b3 & 0x03) << 6) | b4));
-        }
-        return builder.toString().getBytes(StandardCharsets.ISO_8859_1);
-    }
-
-    /**
-     * @param data
-     * @return
-     * @Deprecated {@code Base64.getUrlEncoder()[.withoutPadding()].encodeToString(data)}
-     */
-    @Deprecated
-    public static String base64EncodeUrlSafe(byte[] data) {
-        String str = base64Encode(data);
-        return StringUtils.replaceEach(str, new String[] { "+", "/", "=" }, new String[] { "-", "_", "" });
-    }
-
-    /**
-     * @param b64
-     * @return
-     * @Deprecated {@code Base64.getUrlDecoder().decode(data)}
-     */
-    @Deprecated
-    public static byte[] base64DecodeUrlSafe(String b64) {
-        b64 = StringUtils.replaceEach(b64, new String[] { "-", "_" }, new String[] { "+", "/" });
-        // (4 - b64.length() % 4) % 4
-        b64 += StringUtils.leftPad("", (4 - b64.length() & 0x03) & 0x03, '=');
-        return base64Decode(b64);
-    }
-
+    // -----------------------------------------------------------------toCharArray/fromCharArray
     /**
      * convert byte array to char array
      * @param bytes the byte array
@@ -531,26 +404,12 @@ public final class Bytes {
         return baos.toByteArray();*/
     }
 
-    public static void reverse(byte[] array) {
-        checkNotNull(array);
-        reverse(array, 0, array.length);
+    public static void tailCopy(byte[] src, int destLen) {
+        tailCopy(src, new byte[destLen]);
     }
 
-    /**
-     * reverse the byte array between fromIndexInclusive and toIndexExclusive
-     * @param array
-     * @param fromIndexInclusive
-     * @param toIndexExclusive
-     */
-    public static void reverse(byte[] array, int fromIndexInclusive, int toIndexExclusive) {
-        checkNotNull(array);
-        checkPositionIndexes(fromIndexInclusive, toIndexExclusive, array.length);
-        byte tmp;
-        for (int i = fromIndexInclusive, j = toIndexExclusive - 1; i < j; i++, j--) {
-            tmp = array[i];
-            array[i] = array[j];
-            array[j] = tmp;
-        }
+    public static void tailCopy(byte[] src, byte[] dest) {
+        tailCopy(src, 0, src.length, dest, 0, dest.length);
     }
 
     /**
@@ -558,6 +417,7 @@ public final class Bytes {
      * 从尾部开始拷贝src到dest：
      *   若src数据不足则在dest前面补0
      *   若src数据有多则舍去src前面的数据
+     *   
      * @param src
      * @param srcFrom
      * @param srcLen
@@ -565,9 +425,9 @@ public final class Bytes {
      * @param destFrom
      * @param destLen
      */
-    public static void copy(byte[] src, int srcFrom, int srcLen,
-                            byte[] dest, int destFrom, int destLen) {
-        copy(src, srcFrom, srcLen, dest, destFrom, destLen, Numbers.BYTE_ZERO);
+    public static void tailCopy(byte[] src, int srcFrom, int srcLen,
+                                byte[] dest, int destFrom, int destLen) {
+        tailCopy(src, srcFrom, srcLen, dest, destFrom, destLen, Numbers.BYTE_ZERO);
     }
 
     /**
@@ -575,9 +435,6 @@ public final class Bytes {
      * 从尾部开始拷贝src到dest：
      *   若src数据不足则在dest前面补heading
      *   若src数据有多则舍去src前面的数据
-     *
-     * 若src不够，则dest前面以heading填充
-     * 若dest不够，则src前面数据舍弃
      *
      * @param src
      * @param srcFrom
@@ -587,12 +444,36 @@ public final class Bytes {
      * @param destLen
      * @param heading
      */
-    public static void copy(byte[] src, int srcFrom, int srcLen, byte[] dest, 
-                            int destFrom, int destLen, byte heading) {
+    public static void tailCopy(byte[] src, int srcFrom, int srcLen, 
+                                byte[] dest, int destFrom, int destLen, 
+                                byte heading) {
         int srcTo = Math.min(src.length, srcFrom + srcLen),
            destTo = Math.min(dest.length, destFrom + destLen);
         for (int i = destTo - 1, j = srcTo - 1; i >= destFrom; i--, j--) {
             dest[i] = (j < srcFrom) ? heading : src[j];
+        }
+    }
+
+    /**
+     * copy src to dest
+     * 从首部开始拷贝src到dest：
+     *   若src数据不足则在dest后面补tailing
+     *   若src数据有多则舍去src后面的数据
+     *   
+     * @param src
+     * @param dest
+     */
+    public static void headCopy(byte[] src, byte[] dest) {
+        headCopy(src, 0, src.length, dest, 0, dest.length, Numbers.BYTE_ZERO);
+    }
+
+    public static void headCopy(byte[] src, int srcFrom, int srcLen,
+                                byte[] dest, int destFrom, int destLen,
+                                byte tailing) {
+        int srcTo = Math.min(src.length, srcFrom + srcLen),
+            destTo = Math.min(dest.length, destFrom + destLen);
+        for (int i = destFrom, j = srcFrom; i < destTo; i++, j++) {
+            dest[i] = (j < srcTo) ? src[j] : tailing;
         }
     }
 

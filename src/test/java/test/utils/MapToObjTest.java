@@ -1,12 +1,10 @@
 package test.utils;
 
-import java.util.Map;
-import java.util.Objects;
-
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
 import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.EnumMemberMode;
 
+import code.ponfee.commons.jce.DigestAlgorithms;
 import code.ponfee.commons.util.ObjectUtils;
 
 public class MapToObjTest {
@@ -14,7 +12,7 @@ public class MapToObjTest {
     public static class A {
         private int a_b;
         private String str;
-        private EnumMemberMode mode;
+        private DigestAlgorithms mode;
 
         public A() {}
 
@@ -40,11 +38,11 @@ public class MapToObjTest {
             this.str = str;
         }
 
-        public EnumMemberMode getMode() {
+        public DigestAlgorithms getMode() {
             return mode;
         }
 
-        public void setMode(EnumMemberMode mode) {
+        public void setMode(DigestAlgorithms mode) {
             this.mode = mode;
         }
 
@@ -72,8 +70,9 @@ public class MapToObjTest {
         //a = ObjectUtils.map2bean(map, A.class);
         //System.out.println(a);
 
-        a = ObjectUtils.map2bean(ImmutableMap.of("aB", 123, "str", "abc", "mode", "SKIP"), A.class);
+        a = ObjectUtils.map2bean(ImmutableMap.of("aB", 123, "str", "abc", "mode", "RipeMD128"), A.class);
         System.out.println(a);
+        System.out.println(ObjectUtils.bean2map(a));
     }
 
 }

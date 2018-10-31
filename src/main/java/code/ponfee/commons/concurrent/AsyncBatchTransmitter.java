@@ -7,8 +7,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.BiFunction;
 
-import org.apache.commons.lang3.math.NumberUtils;
-
 import com.google.common.base.Preconditions;
 
 /**
@@ -127,7 +125,7 @@ public final class AsyncBatchTransmitter<T> {
             Preconditions.checkArgument(thresholdChunk > 0);
 
             this.processor = processor;
-            this.sleepTimeMillis = NumberUtils.max(9, thresholdPeriod >>> 1);
+            this.sleepTimeMillis = Math.max(9, thresholdPeriod >>> 1);
             this.thresholdPeriod = thresholdPeriod;
             this.thresholdChunk = thresholdChunk;
             if (executor == null) {

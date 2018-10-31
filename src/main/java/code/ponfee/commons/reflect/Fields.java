@@ -24,6 +24,26 @@ public final class Fields {
     }
 
     /**
+     * Returns the object reference pointer address of jvm
+     * 
+     * @param obj the obj
+     * @return reference pointer addresss
+     */
+    public static long addressOf(Object obj) {
+        Object[] array = { obj };
+        long baseOffset = UNSAFE.arrayBaseOffset(Object[].class);
+        int addressSize = UNSAFE.addressSize();
+        switch (addressSize) {
+            case 4:
+                return UNSAFE.getInt(array, baseOffset);
+            case 8:
+                return UNSAFE.getLong(array, baseOffset);
+            default:
+                throw new Error("unsupported address size: " + addressSize);
+        }
+    }
+
+    /**
      * put field to target object
      * @param target 目标对象
      * @param name 字段名
