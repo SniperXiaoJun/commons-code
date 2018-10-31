@@ -190,13 +190,13 @@ public class ExcelExporter extends AbstractExporter {
 
         // 6、处理tbody数据
         Map<CellStyleOptions, Object> options = table.getOptions();
-        List<FlatNode<Integer>> thead = flats.subList(1, flats.size());
-        List<XSSFCellStyle> styles = createStyles(thead);
+        List<FlatNode<Integer>> thead = getLeafThead(flats);
+        List<XSSFCellStyle> styles = createStyles(flats);
         rollingTbody(table, (data, i) -> {
             SXSSFRow row = sheet.createRow(cursorRow.getAndIncrement());
             //row.setHeight(DEFAULT_HEIGHT);
             for (int m = data.length, j = 0; j < m; j++) {
-                createCell(row, j, styles.get(j), tmeta(thead, j), data[j], i, j, options);
+                createCell(row, j, styles.get(j), getTmeta(thead, j), data[j], i, j, options);
             }
         });
 
@@ -232,7 +232,7 @@ public class ExcelExporter extends AbstractExporter {
             // 合计数据
             for (int i = 0; i < tfoots.length; i++) {
                 createCell(row, i + mergeNum, styles.get(mergeNum + i),
-                           tmeta(thead, mergeNum + i), tfoots[i]);
+                           getTmeta(thead, mergeNum + i), tfoots[i]);
             }
         }
 
@@ -442,7 +442,7 @@ public class ExcelExporter extends AbstractExporter {
         cursorRow.increment();
     }
 
-    private Tmeta tmeta(List<FlatNode<Integer>> thead, int index) {
+    private Tmeta getTmeta(List<FlatNode<Integer>> thead, int index) {
         return ((Thead) thead.get(index).getAttach()).getTmeta();
     }
 

@@ -86,14 +86,14 @@ public class HtmlExporter extends AbstractExporter {
         buildComplexThead(flats);
 
         // tbody-------
-        List<FlatNode<Integer>> thead = flats.subList(1, flats.size());
+        List<FlatNode<Integer>> thead = getLeafThead(flats);
         html.append("<tbody>");
         rollingTbody(table, (data, i) -> {
             html.append("<tr>");
             for (int m = data.length, j = 0; j < m; j++) {
                 html.append("<td");
-                processMeta(data[j], tmeta(thead, j), i, j, table.getOptions()); // 样式
-                html.append(">").append(formatData(data[j], tmeta(thead, j))).append("</td>");
+                processMeta(data[j], getTmeta(thead, j), i, j, table.getOptions()); // 样式
+                html.append(">").append(formatData(data[j], getTmeta(thead, j))).append("</td>");
             }
             html.append("</tr>");
         });
@@ -120,18 +120,18 @@ public class HtmlExporter extends AbstractExporter {
                 throw new IllegalStateException("tfoot data length cannot more than total leaf count.");
             }
 
-            int merge = totalLeafCount - table.getTfoot().length;
-            if (merge > 0) {
+            int mergeNum = totalLeafCount - table.getTfoot().length;
+            if (mergeNum > 0) {
                 html.append("<th colspan=\"")
-                    .append(merge)
+                    .append(mergeNum)
                     .append("\" style=\"text-align:right;\">合计</th>");
             }
 
             for (int i = 0; i < table.getTfoot().length; i++) {
                 html.append("<th");
-                processMeta(table.getTfoot()[i], tmeta(thead, merge + i));
+                processMeta(table.getTfoot()[i], getTmeta(thead, mergeNum + i));
                 html.append(">")
-                    .append(formatData(table.getTfoot()[i], tmeta(thead, merge + i)))
+                    .append(formatData(table.getTfoot()[i], getTmeta(thead, mergeNum + i)))
                     .append("</th>");
             }
             html.append("</tr></tfoot>");
@@ -225,7 +225,7 @@ public class HtmlExporter extends AbstractExporter {
         html.append("</tr></thead>");
     }
 
-    private Tmeta tmeta(List<FlatNode<Integer>> thead, int index) {
+    private Tmeta getTmeta(List<FlatNode<Integer>> thead, int index) {
         return ((Thead) thead.get(index).getAttach()).getTmeta();
     }
 

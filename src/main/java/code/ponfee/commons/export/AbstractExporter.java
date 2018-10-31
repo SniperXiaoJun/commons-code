@@ -1,6 +1,10 @@
 package code.ponfee.commons.export;
 
+import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+
+import code.ponfee.commons.tree.FlatNode;
 
 /**
  * 导出
@@ -45,6 +49,10 @@ public abstract class AbstractExporter implements DataExporter {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected final List<FlatNode<Integer>> getLeafThead(List<FlatNode<Integer>> thead) {
+        return thead.stream().filter(FlatNode::isLeaf).collect(Collectors.toList());
     }
 
 }

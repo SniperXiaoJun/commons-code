@@ -202,7 +202,7 @@ public class ExportTester {
                 "abd", "abd",
                 "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" });
         }
-        Object[] tfoot = new Object[] {"abd111111", "abd111111", "ab1111111d", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd","abd", "abd",
+        Object[] tfoot = new Object[] {"1", "2", "3", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd","abd", "abd",
             "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd", "abd" };
         Map<CellStyleOptions, Object> options = ImmutableMap.of(CellStyleOptions.HIGHLIGHT, ImmutableMap.of("cells", Lists.newArrayList(Lists.newArrayList(1,1),Lists.newArrayList(2,2)), "color", "#FF3030"));
         long start = System.currentTimeMillis();
@@ -249,6 +249,11 @@ public class ExportTester {
         start = System.currentTimeMillis();
         // -------------------------csv
         CsvExporter csv = new CsvExporter();
+        table1 = new Table(list);
+        table1.setCaption("test1");
+        table1.addRowsAndEnd(data1);
+        table1.setTfoot(tfoot);
+        table1.setOptions(options);
         csv.build(table1);
         IOUtils.write(csv.export().toString(), new FileOutputStream("d://testExcel.csv"), "UTF-8");
         Files.addBOM(new File("d://testExcel.csv"));
@@ -257,6 +262,11 @@ public class ExportTester {
         
         start = System.currentTimeMillis();
         HtmlExporter html = new HtmlExporter();
+        table1 = new Table(list);
+        table1.setCaption("test1");
+        table1.addRowsAndEnd(data1);
+        table1.setTfoot(tfoot);
+        table1.setOptions(options);
         html.build(table1);
         html.setName("test");
         IOUtils.write((String) html.export(), new FileOutputStream("d://testExcel.html"), "UTF-8");
