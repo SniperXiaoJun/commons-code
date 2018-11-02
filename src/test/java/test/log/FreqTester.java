@@ -35,7 +35,7 @@ public class FreqTester {
         RedisCurrentLimiter f = new RedisCurrentLimiter(jedisClient, 1, 5);
         f.setRequestThreshold("abc", 7000000);
 
-        MultithreadExecutor.momentAsync(20, ()->{
+        MultithreadExecutor.execAsync(20, ()->{
             if (!f.checkpoint("abc")) {
                 System.err.println("reject req " + Thread.currentThread());
             }

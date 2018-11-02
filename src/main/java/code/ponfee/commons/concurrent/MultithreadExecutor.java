@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -29,13 +30,13 @@ public class MultithreadExecutor {
     private static Logger logger = LoggerFactory.getLogger(MultithreadExecutor.class);
 
     /**
-     * Moment async
+     * Exec async
      * 
      * @param times the exec times
      * @param command the command
-     * @param momentSeconds the momentSeconds
+     * @param execSeconds the execSeconds
      */
-    public static void momentAsync(int times, Runnable command, int momentSeconds) {
+    public static void execAsync(int times, Runnable command, int execSeconds) {
         Stopwatch watch = Stopwatch.createStarted();
         AtomicBoolean flag = new AtomicBoolean(true);
         Thread[] threads = new Thread[times];
@@ -51,7 +52,7 @@ public class MultithreadExecutor {
         }
 
         try {
-            Thread.sleep(momentSeconds * 1000); // main thread sleep
+            Thread.sleep(execSeconds * 1000); // main thread sleep
             flag.set(false);
 
             for (Thread thread : threads) {
@@ -66,10 +67,10 @@ public class MultithreadExecutor {
     }
 
     // -----------------------------------------------------------------execAsync
-    public static void execAsync(Runnable command, int times) {
+    public static void runAsync(Runnable command, int times) {
         ExecutorService executor = Executors.newFixedThreadPool(times);
         try {
-            execAsync(command, times, executor);
+            runAsync(command, times, executor);
         } finally {
             executor.shutdown();
         }
@@ -82,8 +83,8 @@ public class MultithreadExecutor {
      * @param times  the times to exec command
      * @param executor  thread executor service
      */
-    public static void execAsync(Runnable command, int times, 
-                                 Executor executor) {
+    public static void runAsync(Runnable command, int times, 
+                                Executor executor) {
         Stopwatch watch = Stopwatch.createStarted();
         IntStream.range(0, times).mapToObj(
             x -> CompletableFuture.runAsync(command, executor)
@@ -95,27 +96,56 @@ public class MultithreadExecutor {
         logger.info("multi thread execute duration: {}", watch.stop());
     }
 
+    // -----------------------------------------------------------------callAsync
+    public static <U> List<U> callAsync(Supplier<U> supplier, int times) {
+        ExecutorService executor = Executors.newFixedThreadPool(times);
+        try {
+            return callAsync(supplier, times, executor);
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    public static <U> List<U> callAsync(Supplier<U> supplier, 
+                                        int times, 
+                                        Executor executor) {
+        Stopwatch watch = Stopwatch.createStarted();
+        List<U> result = IntStream.range(0, times).mapToObj(
+            x -> CompletableFuture.supplyAsync(supplier)
+        ).collect(
+            Collectors.toList()
+        ).stream().map(
+            CompletableFuture::join
+        ).collect(
+            Collectors.toList()
+        );
+        logger.info("multi thread execute duration: {}", watch.stop());
+        return result;
+    }
+
     // -----------------------------------------------------------------runAsync
-    public static <T> void runAsync(Collection<T> coll, Consumer<T> command) {
+    public static <T> void runAsync(Collection<T> coll, Consumer<T> action) {
         ExecutorService executor = Executors.newFixedThreadPool(coll.size());
         try {
-            runAsync(coll, command, executor);
+            runAsync(coll, action, executor);
         } finally {
             executor.shutdown();
         }
     }
 
     /**
-     * Run async, consume the T collection
+     * Run async, action the T collection
+     * 
      * @param coll the T collection
-     * @param command the T consumer
+     * @param action the T action
      * @param executor  thread executor service
      */
-    public static <T> void runAsync(Collection<T> coll, Consumer<T> command, 
+    public static <T> void runAsync(Collection<T> coll, 
+                                    Consumer<T> action, 
                                     Executor executor) {
         Stopwatch watch = Stopwatch.createStarted();
         coll.stream().map(
-            x -> CompletableFuture.runAsync(() -> command.accept(x), executor)
+            x -> CompletableFuture.runAsync(() -> action.accept(x), executor)
         ).collect(
             Collectors.toList()
         ).stream().forEach(
@@ -125,11 +155,11 @@ public class MultithreadExecutor {
     }
 
     // -----------------------------------------------------------------callAsync
-    public static <T, U> List<U> callAsync(
-        Collection<T> coll, Function<T, U> command) {
+    public static <T, U> List<U> callAsync(Collection<T> coll, 
+                                           Function<T, U> mapper) {
         ExecutorService executor = Executors.newFixedThreadPool(coll.size());
         try {
-            return callAsync(coll, command, executor);
+            return callAsync(coll, mapper, executor);
         } finally {
             executor.shutdown();
         }
@@ -139,15 +169,16 @@ public class MultithreadExecutor {
      * Call async, mapped T to U
      * 
      * @param coll the T collection
-     * @param command  the mapper of T to U
+     * @param mapper  the mapper of T to U
      * @param executor thread executor service
      * @return the U collection
      */
-    public static <T, U> List<U> callAsync(Collection<T> coll, Function<T, U> command, 
+    public static <T, U> List<U> callAsync(Collection<T> coll, 
+                                           Function<T, U> mapper, 
                                            Executor executor) {
         Stopwatch watch = Stopwatch.createStarted();
         List<U> result = coll.stream().map(
-            x -> CompletableFuture.supplyAsync(() -> command.apply(x), executor)
+            x -> CompletableFuture.supplyAsync(() -> mapper.apply(x), executor)
         ).collect(
             Collectors.toList()
         ).stream().map(
