@@ -95,7 +95,6 @@ public class Table implements Serializable {
             tbody.offer(row);
         }
         empty = false;
-        rows.clear();
     }
 
     public void addRowAndEnd(Object[] row) {

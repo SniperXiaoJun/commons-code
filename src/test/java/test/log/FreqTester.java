@@ -8,10 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import redis.clients.jedis.JedisPoolConfig;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class FreqTester {
 
     private JedisClient jedisClient;
@@ -39,7 +35,7 @@ public class FreqTester {
         RedisCurrentLimiter f = new RedisCurrentLimiter(jedisClient, 1, 5);
         f.setRequestThreshold("abc", 7000000);
 
-        MultithreadExecutor.exec(20, ()->{
+        MultithreadExecutor.momentAsync(20, ()->{
             if (!f.checkpoint("abc")) {
                 System.err.println("reject req " + Thread.currentThread());
             }

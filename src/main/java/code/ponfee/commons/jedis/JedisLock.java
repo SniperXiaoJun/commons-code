@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -147,9 +148,11 @@ public class JedisLock implements Lock, java.io.Serializable {
             Jedis jedis = shardedJedis.getShard(lockKey);
 
             // 仅当lockKey不存在才能设置成功并返回1，否则setnx不做任何动作返回0
-            Long result = jedis.setnx(lockKey, generateValue());
+            byte[] lockValue = generateValue();
+            Long result = jedis.setnx(lockKey, lockValue);
             if (result != null && result.intValue() == 1) {
                 // 成功获取锁后需要设置失效期
+                LOCK_VALUE.set(lockValue);
                 jedis.expire(lockKey, JedisOperations.getActualExpire(timeoutSeconds));
                 return true;
             }
@@ -165,11 +168,17 @@ public class JedisLock implements Lock, java.io.Serializable {
             } else {
                 // 锁已超时，争抢锁（事务控制）
                 Transaction tx = jedis.multi();
-                tx.getSet(lockKey, generateValue());
+                lockValue = generateValue();
+                tx.getSet(lockKey, lockValue);
                 tx.expire(lockKey, JedisOperations.getActualExpire(timeoutSeconds));
                 List<Object> exec = tx.exec(); // exec执行完后被监控的key会自动unwatch
-                return exec != null && !exec.isEmpty() 
-                    && Arrays.equals(value, (byte[]) exec.get(0));
+                boolean status = 
+                                  exec != null && !exec.isEmpty() 
+                               && Arrays.equals(value, (byte[]) exec.get(0));
+                if (status) {
+                    LOCK_VALUE.set(lockValue);
+                }
+                return status;
             }
         }, false);
     }
@@ -201,23 +210,7 @@ public class JedisLock implements Lock, java.io.Serializable {
      * 释放锁
      */
     public @Override void unlock() {
-        jedisClient.hook(shardedJedis -> {
-            // 根据分片获取jedis
-            Jedis jedis = shardedJedis.getShard(lockKey);
-            jedis.watch(lockKey);
-            byte[] value = LOCK_VALUE.get(); // 获取当前线程保存的锁值
-            if (value == null || !Arrays.equals(value, jedis.get(lockKey))) {
-                // 当前线程未获取过锁或锁已被其它线程获取
-                jedis.unwatch();
-            } else {
-                // 当前线程持有锁，需要释放锁
-                Transaction tx = jedis.multi();
-                tx.del(lockKey);
-                tx.exec(); // 自动unwatch
-            }
-
-            LOCK_VALUE.remove(); // 删除
-        });
+        doIfHoldLock(tx -> tx.del(lockKey));
     }
 
     public @Override Condition newCondition() {
@@ -255,7 +248,42 @@ public class JedisLock implements Lock, java.io.Serializable {
      * @return
      */
     public boolean isLocked() {
-        return jedisClient.valueOps().get(lockKey) != null;
+        byte[] value = jedisClient.valueOps().get(lockKey);
+        return value != null 
+            && System.currentTimeMillis() <= parseValue(value);
+    }
+
+    /**
+     * 让锁失效
+     * @param seconds
+     */
+    public void expireLock(int seconds) {
+        doIfHoldLock(tx -> tx.expire(lockKey, seconds));
+    }
+
+    public void forceUnlock(int seconds) {
+        jedisClient.keysOps().del(lockKey);
+    }
+
+    // ---------------------------------------------------------------------private methods
+    private void doIfHoldLock(Consumer<Transaction> action) {
+        jedisClient.hook(shardedJedis -> {
+            // 根据分片获取jedis
+            Jedis jedis = shardedJedis.getShard(lockKey);
+            jedis.watch(lockKey);
+            byte[] value = LOCK_VALUE.get(); // 获取当前线程保存的锁值
+            if (value == null || !Arrays.equals(value, jedis.get(lockKey))) {
+                // 当前线程未获取过锁或锁已被其它线程获取
+                jedis.unwatch();
+            } else {
+                // 当前线程持有锁，需要释放锁
+                Transaction tx = jedis.multi();
+                action.accept(tx);
+                tx.exec(); // 自动unwatch
+            }
+
+            LOCK_VALUE.remove(); // 删除
+        });
     }
 
     /**
@@ -300,7 +328,6 @@ public class JedisLock implements Lock, java.io.Serializable {
             (byte) (time  >>> 24), (byte) (time  >>> 16),
             (byte) (time  >>>  8), (byte) (time        )
         };
-        LOCK_VALUE.set(value);
         return value;
     }
 

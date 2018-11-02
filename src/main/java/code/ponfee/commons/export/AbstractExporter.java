@@ -39,9 +39,9 @@ public abstract class AbstractExporter implements DataExporter {
         BiConsumer<Object[], Integer> action) {
         try {
             Object[] data;
-            for (int i = 0; table.isNotEnd(); i++) {
+            for (int i = 0; table.isNotEnd();) {
                 if ((data = table.poll()) != null) {
-                    action.accept(data, i);
+                    action.accept(data, i++);
                 } else {
                     Thread.sleep(AWAIT_TIME_MILLIS);
                 }
@@ -51,8 +51,10 @@ public abstract class AbstractExporter implements DataExporter {
         }
     }
 
-    protected final List<FlatNode<Integer>> getLeafThead(List<FlatNode<Integer>> thead) {
-        return thead.stream().filter(FlatNode::isLeaf).collect(Collectors.toList());
+    protected final List<FlatNode<Integer>> getLeafThead(
+                        List<FlatNode<Integer>> thead) {
+        return thead.stream().filter(FlatNode::isLeaf)
+                    .collect(Collectors.toList());
     }
 
 }

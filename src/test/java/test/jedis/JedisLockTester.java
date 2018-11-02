@@ -1,10 +1,14 @@
 package test.jedis;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -15,6 +19,10 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Files;
+
+import code.ponfee.commons.concurrent.MultithreadExecutor;
 import code.ponfee.commons.io.WrappedBufferedReader;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.jedis.JedisLock;
@@ -118,6 +126,35 @@ public class JedisLockTester {
             thread.join();
         }
         System.out.println("=========================END========================\n");
+    }
+
+    @Test
+    public void test4() throws IOException, InterruptedException {
+        Printer printer = new Printer(new JedisLock(jedisClient, "testLock4", 5));
+        AtomicInteger num = new AtomicInteger(0);
+        System.out.println("\n=========================START========================");
+        List<Map<Integer, String>> lines = Files.readLines(
+            MavenProjects.getTestJavaFile(this.getClass()), StandardCharsets.UTF_8
+        ).stream().map(
+           line -> ImmutableMap.of((Integer) num.getAndIncrement(), line)
+       ).collect(Collectors.toList());
+
+       MultithreadExecutor.runAsync(lines, map -> {
+           Entry<Integer, String> line = map.entrySet().iterator().next();
+           printer.output(NAME + "-" + line.getKey() + "\t" + line.getValue() + "\n");
+       });
+        System.out.println("=========================END========================\n");
+    }
+
+    @Test
+    public void test5() throws IOException, InterruptedException {
+        JedisLock lock = new JedisLock(jedisClient, "testLock5", 30);
+        System.out.println(lock.tryLock());
+        System.out.println(lock.isLocked());
+        System.out.println(lock.tryLock());
+        System.out.println(lock.isLocked());
+        lock.unlock();
+        System.out.println(lock.isLocked());
     }
 
     private static class Printer {

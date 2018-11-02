@@ -1,11 +1,15 @@
 package code.ponfee.commons.extract;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import code.ponfee.commons.util.Holder;
 
 /**
  * The file data extractor
@@ -28,6 +32,21 @@ public abstract class DataExtractor<T> {
         List<T> list = new ArrayList<>();
         this.extract((rowNumber, data) -> list.add(data));
         return list;
+    }
+
+    public final void extract(int batchSize, Consumer<List<T>> action) throws IOException {
+        Holder<List<T>> holder = Holder.of(new ArrayList<>(batchSize));
+        this.extract((rowNumber, data) -> {
+            List<T> list = holder.get();
+            list.add(data);
+            if (list.size() == batchSize) {
+                action.accept(list);
+                holder.set(new ArrayList<>(batchSize));
+            }
+        });
+        if (CollectionUtils.isNotEmpty(holder.get())) {
+            action.accept(holder.get());
+        }
     }
 
     /**

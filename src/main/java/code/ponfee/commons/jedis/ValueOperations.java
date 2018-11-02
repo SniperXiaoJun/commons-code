@@ -558,12 +558,12 @@ public class ValueOperations extends JedisOperations {
         if (datas == null || datas.isEmpty()) {
             return null;
         }
-        return datas.entrySet().stream()
-                    .filter(e -> ObjectUtils.isNotNull(e.getValue()))
-                    .collect(Collectors.toMap(
-                         Entry::getKey, 
-                         e -> jedisClient.deserialize(e.getValue(), clazz, isCompress)
-                     ));
+        return datas.entrySet().stream().filter(
+            e -> ObjectUtils.isNotNull(e.getValue())
+        ).collect(Collectors.toMap(
+            Entry::getKey, 
+            e -> jedisClient.deserialize(e.getValue(), clazz, isCompress)
+        ));
     }
 
     public <T> Map<byte[], T> mgetObject(Class<T> clazz, byte[]... keys) {

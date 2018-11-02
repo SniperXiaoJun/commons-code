@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.springframework.cglib.beans.BeanCopier;
 
 import code.ponfee.commons.reflect.CglibUtils;
-import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * Converts model to the data transfer object
@@ -36,6 +35,10 @@ public abstract class AbstractDataConverter<F, T> implements Function<F, T> {
             return null;
         }
         return convert(from, toType, this::getCopier);
+    }
+
+    public void copyProperties(F from, T to) {
+        copy(from, to, this::getCopier);
     }
 
     public final List<T> convert(List<F> list) {
@@ -93,24 +96,47 @@ public abstract class AbstractDataConverter<F, T> implements Function<F, T> {
     }
 
     // -----------------------------------------------static methods
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <T, F> T convert(F from, Class<T> type, Supplier<BeanCopier> supplier) {
-        if (from == null || type.isInstance(from)) {
+    public static <T, F> T convert(F from, Class<T> toType) {
+        return convert(from, toType, null);
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    public static <T, F> T convert(F from, Class<T> toType, Supplier<BeanCopier> supplier) {
+        if (from == null || toType.isInstance(from)) {
             return (T) from;
         }
 
+        // new instance
         T to;
         try {
-            to = type.getConstructor().newInstance();
+            to = toType.getConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        if (Map.class.isAssignableFrom(type) && Map.class.isInstance(from)) {
+
+        copy(from, to, supplier);
+        return to;
+    }
+
+    public static <T, F> void copy(F from, T to) {
+        copy(from, to, null);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <T, F> void copy(F from, T to, Supplier<BeanCopier> supplier) {
+        if (from == null || to == null) {
+            return;
+        }
+
+        // convert
+        if (to instanceof Map && from instanceof Map) {
             ((Map) to).putAll((Map<?, ?>) from);
-        } else if (Map.class.isAssignableFrom(type)) {
-            ((Map) to).putAll(ObjectUtils.bean2map(from));
-        } else if (Map.class.isInstance(from)) {
-            ObjectUtils.map2bean((Map) from, to);
+        } else if (to instanceof Map) {
+            //((Map) to).putAll(ObjectUtils.bean2map(from));
+            ((Map) to).putAll(CglibUtils.bean2map(from));
+        } else if (from instanceof Map) {
+            //ObjectUtils.map2bean((Map) from, to);
+            CglibUtils.map2bean((Map) from, to);
         } else {
             BeanCopier copier = (supplier != null) ? supplier.get() : null;
             if (copier != null) {
@@ -123,7 +149,6 @@ public abstract class AbstractDataConverter<F, T> implements Function<F, T> {
             //org.springframework.beans.BeanUtils.copyProperties(from, to);
             //org.springframework.cglib.beans.BeanCopier.create(source, target, false);
         }
-        return to;
     }
 
     public static <F, T> T convert(F from, Function<F, T> converter) {
