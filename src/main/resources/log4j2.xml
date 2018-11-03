@@ -42,12 +42,18 @@
     </Appenders>
 
     <Loggers>
-        <!-- 当根据日志名字获取不到指定的日志器时就使用Root作为默认的日志器 -->
+        <!-- 数据库操作日志 -->
+        <Logger name="dao" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+
         <!-- additivity指定是否同时输出日志到父类的appender，缺省为true -->
         <Logger name="code.ponfee.commons" level="WARN" additivity="false">
             <AppenderRef ref="Console" />
             <AppenderRef ref="RollingFile" />
         </Logger>
+
+        <!-- 当根据日志名字获取不到指定的日志器时就使用Root作为默认的日志器 -->
         <Root level="WARN">
             <AppenderRef ref="Console" />
             <AppenderRef ref="RollingFile" />

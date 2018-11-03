@@ -56,8 +56,8 @@ public class PageRequestParams implements java.io.Serializable {
     }
 
     public void setPageNum(int pageNum) {
-        this.put(DEFAULT_PAGE_NUM, pageNum);
         this.pageNum = pageNum;
+        this.put(DEFAULT_PAGE_NUM, pageNum);
     }
 
     public int getPageSize() {
@@ -65,8 +65,8 @@ public class PageRequestParams implements java.io.Serializable {
     }
 
     public void setPageSize(int pageSize) {
-        this.put(DEFAULT_PAGE_SIZE, pageSize);
         this.pageSize = pageSize;
+        this.put(DEFAULT_PAGE_SIZE, pageSize);
     }
 
     public int getOffset() {
@@ -74,8 +74,8 @@ public class PageRequestParams implements java.io.Serializable {
     }
 
     public void setOffset(int offset) {
-        this.put(DEFAULT_OFFSET, offset);
         this.offset = offset;
+        this.put(DEFAULT_OFFSET, offset);
     }
 
     public int getLimit() {
@@ -83,8 +83,8 @@ public class PageRequestParams implements java.io.Serializable {
     }
 
     public void setLimit(int limit) {
-        this.put(DEFAULT_LIMIT, limit);
         this.limit = limit;
+        this.put(DEFAULT_LIMIT, limit);
     }
 
     public String getSort() {
@@ -92,8 +92,8 @@ public class PageRequestParams implements java.io.Serializable {
     }
 
     public void setSort(String sort) {
-        this.put(SORT_PARAM, sort);
         this.sort = sort;
+        this.put(SORT_PARAM, sort);
     }
 
     public Map<String, Object> getParams() {

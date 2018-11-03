@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 import code.ponfee.commons.cache.Cache;
 import code.ponfee.commons.cache.CacheBuilder;
@@ -280,7 +280,8 @@ public class FieldValidator {
         Date date = null;
         if (isNotBlank(c.datePattern()) && !(!c.notNull() && v == null)) {
             try {
-                date = DateUtils.parseDate((String) v, c.datePattern());
+                //date = DateUtils.parseDate((String) v, c.datePattern());
+                date = FastDateFormat.getInstance(c.datePattern()).parse((String) v);
             } catch (ParseException e) {
                 return n + "{" + v + "}：日期格式不匹配" + c.datePattern() + ";";
             }

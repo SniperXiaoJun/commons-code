@@ -23,7 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
@@ -515,7 +515,8 @@ public class ExcelExporter extends AbstractExporter {
                 String str = value.toString();
                 String format = ObjectUtils.orElse(tmeta.getFormat(), Dates.DEFAULT_DATE_FORMAT);
                 try {
-                    cell.setCellValue(DateUtils.parseDate(str, format));
+                    //cell.setCellValue(DateUtils.parseDate(str, format));
+                    cell.setCellValue(FastDateFormat.getInstance(format).parse(str));
                 } catch (ParseException e) {
                     throw new IllegalArgumentException("invalid date str: " + str + ", format: " + format, e);
                 }
