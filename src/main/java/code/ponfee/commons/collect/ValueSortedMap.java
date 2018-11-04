@@ -15,7 +15,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * Extends TreeMap sort by value 
+ * Extends TreeMap sort by value
+ * 
+ * new TreeMap<>(Comparator.comparing(k -> map.get(k)));
  * 
  * @author Ponfee
  */
@@ -64,12 +66,12 @@ public class ValueSortedMap<K, V> extends TreeMap<K, V> {
 
         @Override
         public int compare(K k1, K k2) {
-            int i = comparator.compare(data.get(k1), data.get(k2));
-            return i == 0 ? 1 : i;
+            int n = comparator.compare(data.get(k1), data.get(k2));
+            return n != 0 ? n : k1.toString().compareTo(k2.toString());
         }
     }
 
-    // ------------------------------------------------------------Unsupported Operation Methods
+    // ------------------------------------------------------------Deprecated Methods
     @Deprecated @Override
     public final V put(K k, V v) {
       if (initialized) {

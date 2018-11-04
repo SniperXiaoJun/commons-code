@@ -6,6 +6,8 @@ import java.util.Map;
 import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.cglib.beans.BeanMap;
 
+import code.ponfee.commons.collect.ObjectArrayWrapper;
+
 /**
  * The utility class based cglib
  * 
@@ -13,7 +15,9 @@ import org.springframework.cglib.beans.BeanMap;
  */
 public class CglibUtils {
 
-    private static final Map<Long, BeanCopier> COPIER_CACHE = new HashMap<>();
+    //private static final Map<Long, BeanCopier> COPIER_CACHE = new HashMap<>();
+    //private static final Map<String, BeanCopier> COPIER_CACHE = new HashMap<>();
+    private static final Map<ObjectArrayWrapper<Class<?>>, BeanCopier> COPIER_CACHE = new HashMap<>();
 
     /**
      * 1、名称相同而类型不同的属性不会被拷贝
@@ -27,8 +31,11 @@ public class CglibUtils {
      * @param target target object
      */
     public static void copyProperties(Object source, Object target) {
-        Long beanKey = ((long) System.identityHashCode(source) << 32) 
-                       | System.identityHashCode(target);
+        /*Long beanKey = ((long) System.identityHashCode(source) << 32) 
+                       | System.identityHashCode(target);*/
+        /*String beanKey = new StringBuilder(source.getClass().getName()).append(':')
+                               .append(target.getClass().getName()).toString();*/
+        ObjectArrayWrapper<Class<?>> beanKey = ObjectArrayWrapper.create(new Class[] {source.getClass(), target.getClass()});
         BeanCopier copier = COPIER_CACHE.get(beanKey);
         if (copier == null) {
             synchronized (COPIER_CACHE) {
