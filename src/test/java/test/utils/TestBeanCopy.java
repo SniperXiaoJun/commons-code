@@ -22,7 +22,7 @@ public class TestBeanCopy {
     
     static int round = 999999999;
     @Test @Ignore
-    public void test1() {
+    public void test0() {
         Result<Void> result1 = Result.failure(-1,  "error");
         Result<Void> result2 = new Result<>();
         for (int i = 0; i < round; i++) {
@@ -31,11 +31,20 @@ public class TestBeanCopy {
     }
     
     @Test
-    public void test2() {
+    public void test1() {
         Result<Void> result1 = Result.failure(-1,  "error");
         Result<Void> result2 = new Result<>();
         for (int i = 0; i < round; i++) {
             CglibUtils.copyProperties(result1, result2);
+        }
+    }
+    
+    @Test
+    public void test2() {
+        Result<Void> result1 = Result.failure(-1,  "error");
+        Result<Void> result2 = new Result<>();
+        for (int i = 0; i < round; i++) {
+            BeanCopier.create(Result.class, Result.class, false).copy(result1, result2, null);
         }
     }
 

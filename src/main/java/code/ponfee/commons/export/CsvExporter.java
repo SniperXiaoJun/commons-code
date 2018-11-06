@@ -31,13 +31,13 @@ public class CsvExporter extends AbstractExporter {
             throw new UnsupportedOperationException("only support signle table");
         }
 
-        List<FlatNode<Integer>> flats = table.getThead();
-        if (flats == null || flats.isEmpty()) {
+        List<FlatNode<Integer>> thead = table.getThead();
+        if (thead == null || thead.isEmpty()) {
             throw new IllegalArgumentException("thead can't be null");
         }
 
         // build table thead
-        buildComplexThead(flats);
+        buildComplexThead(thead);
 
         // tbody---------------
         rollingTbody(table, (data, i) -> {
@@ -58,7 +58,7 @@ public class CsvExporter extends AbstractExporter {
 
         // tfoot---------
         if (ArrayUtils.isNotEmpty(table.getTfoot())) {
-            FlatNode<Integer> root = flats.get(0);
+            FlatNode<Integer> root = thead.get(0);
             if (table.getTfoot().length > root.getChildLeafCount()) {
                 throw new IllegalStateException("tfoot data length cannot more than total leaf count.");
             }
@@ -82,7 +82,7 @@ public class CsvExporter extends AbstractExporter {
     }
 
     @Override
-    public Object export() {
+    public String export() {
         return csv.toString();
     }
 
@@ -91,13 +91,15 @@ public class CsvExporter extends AbstractExporter {
         csv = null;
     }
 
-    private void buildComplexThead(List<FlatNode<Integer>> flats) {
-        for (FlatNode<Integer> cell : flats.subList(1, flats.size())) {
-            if (cell.isLeaf()) {
-                csv.append(((Thead) cell.getAttach()).getName()).append(csvSeparator);
+    private void buildComplexThead(List<FlatNode<Integer>> thead) {
+        List<FlatNode<Integer>> leafs = super.getLeafThead(thead);
+        for (int i = 0, n = leafs.size(); i < n; i++) {
+            FlatNode<Integer> th = leafs.get(i);
+            csv.append(((Thead) th.getAttach()).getName());
+            if (i != n - 1) {
+                csv.append(csvSeparator);
             }
         }
-        csv.deleteCharAt(csv.length() - 1);
         csv.append(Files.SYSTEM_LINE_SEPARATOR);
     }
 

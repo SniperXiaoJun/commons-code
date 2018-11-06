@@ -15,6 +15,8 @@ import com.google.common.base.Stopwatch;
 import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 import code.ponfee.commons.export.AbstractExporter;
 import code.ponfee.commons.export.ExcelExporter;
+import code.ponfee.commons.export.SplitCsvFileExporter;
+import code.ponfee.commons.export.SplitExcelExporter;
 import code.ponfee.commons.export.Table;
 
 public class ExportTester2 {
@@ -80,4 +82,58 @@ public class ExportTester2 {
         excel.close();
         System.out.println(watch.stop());
     }
+
+    @Test
+    public void test3() throws IOException {
+        Table table = new Table("a,b,c,d,e".split(","));
+        table.setCaption("title");
+        int n = 11;
+        AtomicInteger count = new AtomicInteger(0);
+        Stopwatch watch = Stopwatch.createStarted();
+        for (int j = 0; j < n; j++) {
+            EXECUTOR.submit(()-> {
+                for (int i = 0; i < 100000; i++) {
+                    table.addRow(new Object[] { "1", "2", "3", "4", "5" });
+                }
+                if (count.incrementAndGet() == n) {
+                    table.end();
+                }
+            });
+        }
+        
+        SplitExcelExporter excel = new SplitExcelExporter(65537,"d:/test/test_excel_", EXECUTOR);
+        excel.setName("21321");
+        System.out.println("================"+watch.stop());
+        watch.reset().start();
+        excel.build(table);
+        excel.close();
+        System.out.println(watch.stop());
+    }
+    
+    @Test
+    public void test4() throws IOException {
+        Table table = new Table("中国,人,c,d,e".split(","));
+        table.setCaption("title");
+        int n = 11;
+        AtomicInteger count = new AtomicInteger(0);
+        Stopwatch watch = Stopwatch.createStarted();
+        for (int j = 0; j < n; j++) {
+            EXECUTOR.submit(()-> {
+                for (int i = 0; i < 100000; i++) {
+                    table.addRow(new Object[] { "1", "2", "3", "4", "5" });
+                }
+                if (count.incrementAndGet() == n) {
+                    table.end();
+                }
+            });
+        }
+        
+        SplitCsvFileExporter csv = new SplitCsvFileExporter(65537,"d:/test/test_excel_", false, EXECUTOR);
+        System.out.println("================"+watch.stop());
+        watch.reset().start();
+        csv.build(table);
+        csv.close();
+        System.out.println(watch.stop());
+    }
 }
+

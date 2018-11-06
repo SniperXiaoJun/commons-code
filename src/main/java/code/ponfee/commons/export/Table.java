@@ -31,6 +31,16 @@ public class Table implements Serializable {
     private volatile boolean empty = true;
     private volatile boolean end = false;
 
+    public Table(List<FlatNode<Integer>> thead, String caption, 
+                 Object[] tfoot, String comment, 
+                 Map<CellStyleOptions, Object> options) {
+        this.thead = thead;
+        this.caption = caption;
+        this.tfoot = tfoot;
+        this.comment = comment;
+        this.options = options;
+    }
+
     public Table(List<Thead> list) {
         this.thead = TreeNode.createRoot(ROOT_PID, null, 0)
                              .mount(list).flatHierarchy();
@@ -43,6 +53,11 @@ public class Table implements Serializable {
         }
         this.thead = TreeNode.createRoot(ROOT_PID, null, 0)
                              .mount(list).flatHierarchy();
+    }
+
+    public Table copyOfWithoutTbody() {
+        return new Table(this.thead, this.caption, this.tfoot, 
+                         this.comment, this.options);
     }
 
     public String getCaption() {

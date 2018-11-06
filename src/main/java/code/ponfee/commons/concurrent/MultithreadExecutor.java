@@ -1,11 +1,15 @@
 package code.ponfee.commons.concurrent;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -86,13 +90,11 @@ public class MultithreadExecutor {
     public static void runAsync(Runnable command, int times, 
                                 Executor executor) {
         Stopwatch watch = Stopwatch.createStarted();
-        IntStream.range(0, times).mapToObj(
-            x -> CompletableFuture.runAsync(command, executor)
-        ).collect(
-            Collectors.toList()
-        ).stream().forEach(
-            CompletableFuture::join
-        );
+        CompletableFuture.allOf(
+            IntStream.range(0, times).mapToObj(
+                x -> CompletableFuture.runAsync(command, executor)
+            ).toArray(CompletableFuture[]::new)
+        ).join();
         logger.info("multi thread execute duration: {}", watch.stop());
     }
 
@@ -144,13 +146,17 @@ public class MultithreadExecutor {
                                     Consumer<T> action, 
                                     Executor executor) {
         Stopwatch watch = Stopwatch.createStarted();
-        coll.stream().map(
+        /*coll.stream().map(
             x -> CompletableFuture.runAsync(() -> action.accept(x), executor)
         ).collect(
             Collectors.toList()
         ).stream().forEach(
             CompletableFuture::join
-        );
+        );*/
+        CompletableFuture<?>[] array = coll.stream().map(
+          x -> CompletableFuture.runAsync(() -> action.accept(x), executor)
+        ).toArray(CompletableFuture[]::new);
+        CompletableFuture.allOf(array).join();
         logger.info("multi thread execute duration: {}", watch.stop());
     }
 
@@ -189,4 +195,30 @@ public class MultithreadExecutor {
         logger.info("multi thread execute duration: {}", watch.stop());
         return result;
     }
+
+    // -----------------------------------------------------------------Join
+    public static <T> List<T> join(CompletionService<T> service, 
+                                   int count, int sleepTimeMillis) {
+        List<T> result = new ArrayList<>(count);
+        join(service, count, result::add, sleepTimeMillis);
+        return result;
+    }
+
+    public static <T> void join(CompletionService<T> service, int count, 
+                                Consumer<T> accept, int sleepTimeMillis) {
+        try {
+            for (; count > 0;) {
+                Future<T> future = service.poll();
+                if (future != null) {
+                    accept.accept(future.get());
+                    count--;
+                } else {
+                    Thread.sleep(sleepTimeMillis);
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

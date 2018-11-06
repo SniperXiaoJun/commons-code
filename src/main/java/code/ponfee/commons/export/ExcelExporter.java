@@ -61,6 +61,8 @@ import code.ponfee.commons.util.Strings;
  */
 public class ExcelExporter extends AbstractExporter {
 
+    public static final int DEFAULT_WINDOW_SIZE = 200;
+
     /** row and cell config，默认的列宽和行高大小 */
     private static final int DEFAULT_WIDTH = 3200;
     private static final short DEFAULT_HEIGHT = 350;
@@ -86,7 +88,7 @@ public class ExcelExporter extends AbstractExporter {
     private final Map<String, Freeze>    freezes = new HashMap<>();
 
     public ExcelExporter() {
-        workbook = new SXSSFWorkbook(200);
+        workbook = new SXSSFWorkbook(DEFAULT_WINDOW_SIZE);
         dataFormat = (XSSFDataFormat) workbook.createDataFormat();
 
         XSSFFont titleFont = (XSSFFont) workbook.createFont();

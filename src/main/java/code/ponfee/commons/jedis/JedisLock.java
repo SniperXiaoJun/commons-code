@@ -8,6 +8,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,10 +172,9 @@ public class JedisLock implements Lock, java.io.Serializable {
                 lockValue = generateValue();
                 tx.getSet(lockKey, lockValue);
                 tx.expire(lockKey, JedisOperations.getActualExpire(timeoutSeconds));
-                List<Object> exec = tx.exec(); // exec执行完后被监控的key会自动unwatch
-                boolean status = 
-                                  exec != null && !exec.isEmpty() 
-                               && Arrays.equals(value, (byte[]) exec.get(0));
+                List<Object> res = tx.exec(); // exec执行完后被监控的key会自动unwatch
+                boolean status = CollectionUtils.isNotEmpty(res)
+                              && Arrays.equals(value, (byte[]) res.get(0));
                 if (status) {
                     LOCK_VALUE.set(lockValue);
                 }

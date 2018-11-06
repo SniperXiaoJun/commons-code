@@ -39,6 +39,10 @@ public class WrappedBufferedWriter extends Writer {
         this.buffer = new BufferedWriter(writer, Files.BUFF_SIZE);
     }
 
+    public void write(byte[] bytes) throws IOException {
+        output.write(bytes);
+    }
+
     @Override
     public void write(String str) throws IOException {
         buffer.write(str);
