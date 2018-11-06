@@ -86,14 +86,14 @@ public class HtmlExporter extends AbstractExporter {
         buildComplexThead(flats);
 
         // tbody-------
-        List<FlatNode<Integer>> thead = getLeafThead(flats);
+        List<FlatNode<Integer>> leafs = getLeafThead(flats);
         html.append("<tbody>");
         rollingTbody(table, (data, i) -> {
             html.append("<tr>");
             for (int m = data.length, j = 0; j < m; j++) {
                 html.append("<td");
-                processMeta(data[j], getTmeta(thead, j), i, j, table.getOptions()); // 样式
-                html.append(">").append(formatData(data[j], getTmeta(thead, j))).append("</td>");
+                processMeta(data[j], getTmeta(leafs, j), i, j, table.getOptions()); // 样式
+                html.append(">").append(formatData(data[j], getTmeta(leafs, j))).append("</td>");
             }
             html.append("</tr>");
         });
@@ -129,9 +129,9 @@ public class HtmlExporter extends AbstractExporter {
 
             for (int i = 0; i < table.getTfoot().length; i++) {
                 html.append("<th");
-                processMeta(table.getTfoot()[i], getTmeta(thead, mergeNum + i));
+                processMeta(table.getTfoot()[i], getTmeta(leafs, mergeNum + i));
                 html.append(">")
-                    .append(formatData(table.getTfoot()[i], getTmeta(thead, mergeNum + i)))
+                    .append(formatData(table.getTfoot()[i], getTmeta(leafs, mergeNum + i)))
                     .append("</th>");
             }
             html.append("</tr></tfoot>");

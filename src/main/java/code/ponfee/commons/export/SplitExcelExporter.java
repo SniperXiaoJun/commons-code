@@ -72,7 +72,7 @@ public class SplitExcelExporter extends AbstractExporter {
     @Override
     public void close() {}
 
-    private class AsnycExcelExporter implements Callable<Void> {
+    private static class AsnycExcelExporter implements Callable<Void> {
         private final String sheetName;
         private final Table table;
         private final String savingFilePath;

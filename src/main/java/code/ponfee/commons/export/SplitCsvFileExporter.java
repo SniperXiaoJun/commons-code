@@ -45,14 +45,15 @@ public class SplitCsvFileExporter extends AbstractExporter {
                 Table sub = subTable.set(table.copyOfWithoutTbody());
                 count.set(0); // reset count and sub table
                 service.submit(new AsnycCsvFileExporter(
-                    sub, this.savingFilePathPrefix + split.incrementAndGet()
+                    sub, withBom, 
+                    this.savingFilePathPrefix + split.incrementAndGet()
                 ));
             }
         });
         if (!subTable.get().isEmptyTbody()) {
             super.nonEmpty();
             service.submit(new AsnycCsvFileExporter(
-                subTable.get(), 
+                subTable.get(), withBom,
                 this.savingFilePathPrefix + split.incrementAndGet()
             ));
         }
@@ -74,12 +75,15 @@ public class SplitCsvFileExporter extends AbstractExporter {
     @Override
     public void close() {}
 
-    private class AsnycCsvFileExporter implements Callable<Void> {
+    private static class AsnycCsvFileExporter implements Callable<Void> {
         private final Table table;
+        private final boolean withBom;
         private final String savingFilePath;
 
-        private AsnycCsvFileExporter(Table table, String savingFilePath) {
+        private AsnycCsvFileExporter(Table table, boolean withBom, 
+                                     String savingFilePath) {
             this.table = table;
+            this.withBom = withBom;
             this.savingFilePath = savingFilePath + ".csv";
         }
 

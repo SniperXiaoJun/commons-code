@@ -192,13 +192,13 @@ public class ExcelExporter extends AbstractExporter {
 
         // 6、处理tbody数据
         Map<CellStyleOptions, Object> options = table.getOptions();
-        List<FlatNode<Integer>> thead = getLeafThead(flats);
+        List<FlatNode<Integer>> leafs = getLeafThead(flats);
         List<XSSFCellStyle> styles = createStyles(flats);
         rollingTbody(table, (data, i) -> {
             SXSSFRow row = sheet.createRow(cursorRow.getAndIncrement());
             //row.setHeight(DEFAULT_HEIGHT);
             for (int m = data.length, j = 0; j < m; j++) {
-                createCell(row, j, styles.get(j), getTmeta(thead, j), data[j], i, j, options);
+                createCell(row, j, styles.get(j), getTmeta(leafs, j), data[j], i, j, options);
             }
         });
 
@@ -234,7 +234,7 @@ public class ExcelExporter extends AbstractExporter {
             // 合计数据
             for (int i = 0; i < tfoots.length; i++) {
                 createCell(row, i + mergeNum, styles.get(mergeNum + i),
-                           getTmeta(thead, mergeNum + i), tfoots[i]);
+                           getTmeta(leafs, mergeNum + i), tfoots[i]);
             }
         }
 
