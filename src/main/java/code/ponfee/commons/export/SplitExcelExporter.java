@@ -43,8 +43,7 @@ public class SplitExcelExporter extends AbstractExporter {
                 Table sub = subTable.set(table.copyOfWithoutTbody());
                 count.set(0); // reset count and sub table
                 service.submit(new AsnycExcelExporter(
-                    this.getName(), sub, 
-                    this.savingFilePathPrefix + split.incrementAndGet() + ".xlsx"
+                    this.getName(), sub, this.savingFilePathPrefix + split.incrementAndGet()
                 ));
             }
         });
@@ -52,11 +51,11 @@ public class SplitExcelExporter extends AbstractExporter {
             super.nonEmpty();
             service.submit(new AsnycExcelExporter(
                 this.getName(), subTable.get(), 
-                this.savingFilePathPrefix + split.incrementAndGet() + ".xlsx"
+                this.savingFilePathPrefix + split.incrementAndGet()
             ));
         }
 
-        MultithreadExecutor.join(service, split.get(), AWAIT_TIME_MILLIS);
+        MultithreadExecutor.joinDiscard(service, split.get(), AWAIT_TIME_MILLIS);
     }
 
     /**
@@ -82,7 +81,7 @@ public class SplitExcelExporter extends AbstractExporter {
                                    String savingFilePath) {
             this.sheetName = sheetName;
             this.table = table;
-            this.savingFilePath = savingFilePath;
+            this.savingFilePath = savingFilePath + ".xlsx";
         }
 
         @Override

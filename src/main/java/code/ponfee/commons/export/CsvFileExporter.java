@@ -18,7 +18,9 @@ import code.ponfee.commons.tree.FlatNode;
  */
 public class CsvFileExporter extends AbstractExporter {
 
-    private static final byte[] WINDOWS_BOM = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
+    private static final byte[] WINDOWS_BOM = { 
+        (byte) 0xEF, (byte) 0xBB, (byte) 0xBF 
+    };
     private final WrappedBufferedWriter writer;
     private final char csvSeparator;
 

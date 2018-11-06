@@ -55,6 +55,9 @@ public final class ObjectUtils {
                : reflectionToString(obj, ToStringStyle.JSON_STYLE);
     }
 
+    public static void discard(Object obj) {
+    }
+
     /**
      * 对象转json
      * @param obj

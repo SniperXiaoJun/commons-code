@@ -45,8 +45,7 @@ public class SplitCsvFileExporter extends AbstractExporter {
                 Table sub = subTable.set(table.copyOfWithoutTbody());
                 count.set(0); // reset count and sub table
                 service.submit(new AsnycCsvFileExporter(
-                    sub, 
-                    this.savingFilePathPrefix + split.incrementAndGet() + ".csv"
+                    sub, this.savingFilePathPrefix + split.incrementAndGet()
                 ));
             }
         });
@@ -54,11 +53,11 @@ public class SplitCsvFileExporter extends AbstractExporter {
             super.nonEmpty();
             service.submit(new AsnycCsvFileExporter(
                 subTable.get(), 
-                this.savingFilePathPrefix + split.incrementAndGet() + ".csv"
+                this.savingFilePathPrefix + split.incrementAndGet()
             ));
         }
 
-        MultithreadExecutor.join(service, split.get(), AWAIT_TIME_MILLIS);
+        MultithreadExecutor.joinDiscard(service, split.get(), AWAIT_TIME_MILLIS);
     }
 
     /**
@@ -81,7 +80,7 @@ public class SplitCsvFileExporter extends AbstractExporter {
 
         private AsnycCsvFileExporter(Table table, String savingFilePath) {
             this.table = table;
-            this.savingFilePath = savingFilePath;
+            this.savingFilePath = savingFilePath + ".csv";
         }
 
         @Override

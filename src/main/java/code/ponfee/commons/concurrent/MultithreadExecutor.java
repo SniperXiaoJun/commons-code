@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 
+import code.ponfee.commons.util.ObjectUtils;
+
 /**
  * Multi Thread executor
  * 
@@ -202,6 +204,11 @@ public class MultithreadExecutor {
         List<T> result = new ArrayList<>(count);
         join(service, count, result::add, sleepTimeMillis);
         return result;
+    }
+
+    public static <T> void joinDiscard(CompletionService<T> service, 
+                                       int count, int sleepTimeMillis) {
+        join(service, count, ObjectUtils::discard, sleepTimeMillis);
     }
 
     public static <T> void join(CompletionService<T> service, int count, 

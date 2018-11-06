@@ -115,7 +115,7 @@ public class StreamForker<T> {
         @Override
         public boolean tryAdvance(Consumer<? super T> action) {
             T t;
-            while (true) {
+            while (true) { // if occur exception, then keep take
                 try {
                     t = q.take();
                     break;
