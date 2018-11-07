@@ -1,15 +1,7 @@
 package code.ponfee.commons.limit;
 
-import code.ponfee.commons.cache.Cache;
-import code.ponfee.commons.cache.CacheBuilder;
-import code.ponfee.commons.concurrent.AsyncBatchTransmitter;
-import code.ponfee.commons.jedis.JedisClient;
-import code.ponfee.commons.jedis.JedisLock;
-import code.ponfee.commons.util.Bytes;
-import code.ponfee.commons.util.IdWorker;
-import com.google.common.base.Preconditions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_HANDLER;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -19,8 +11,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_HANDLER;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+
+import code.ponfee.commons.cache.Cache;
+import code.ponfee.commons.cache.CacheBuilder;
+import code.ponfee.commons.concurrent.AsyncBatchTransmitter;
+import code.ponfee.commons.jedis.JedisClient;
+import code.ponfee.commons.jedis.JedisLock;
+import code.ponfee.commons.util.Bytes;
+import code.ponfee.commons.util.IdWorker;
+import redis.clients.jedis.ShardedJedisPipeline;
 
 /**
  * Redis限流器
@@ -79,18 +82,34 @@ public class RedisCurrentLimiter implements CurrentLimiter {
                     // Long.toString(IdWorker.LOCAL_WORKER.nextId(), Character.MAX_RADIX)
                     batch.put(Bytes.fromLong(IdWorker.LOCAL_WORKER.nextId()), trace.timeMillis);
                 }
-                for (Entry<String, Map<byte[], Double>> entry : groups.entrySet()) {
+                //Stopwatch watch = Stopwatch.createStarted();
+
+                /*for (Entry<String, Map<byte[], Double>> entry : groups.entrySet()) {
                     if (entry.getValue().isEmpty()) {
                         continue;
                     }
-
                     // TRACE_KEY_PREFIX + trace.key
                     jedisClient.zsetOps().zadd(
                         concat(TRACE_KEY_BYTES, entry.getKey().getBytes(UTF_8)),
                         entry.getValue(), EXPIRE_SECONDS
                     );
                     entry.getValue().clear();
-                }
+                }*/
+                jedisClient.hook(shardedJedis -> {
+                    ShardedJedisPipeline pipeline = shardedJedis.pipelined();
+                    for (Entry<String, Map<byte[], Double>> entry : groups.entrySet()) {
+                        if (entry.getValue().isEmpty()) {
+                            continue;
+                        }
+                        byte[] key = concat(TRACE_KEY_BYTES, entry.getKey().getBytes(UTF_8));
+                        pipeline.zadd(key, entry.getValue());
+                        pipeline.expire(key, EXPIRE_SECONDS);
+                        entry.getValue().clear();
+                    }
+                    pipeline.sync();
+                });
+
+                //System.out.println("count:"+traces.size()+", cost:"+watch.stop());
                 groups.clear();
                 traces.clear();
             };

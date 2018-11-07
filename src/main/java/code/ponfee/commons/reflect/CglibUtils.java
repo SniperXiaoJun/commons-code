@@ -34,8 +34,10 @@ public class CglibUtils {
         /*Long beanKey = ((long) System.identityHashCode(source) << 32) 
                        | System.identityHashCode(target);*/
         /*String beanKey = new StringBuilder(source.getClass().getName()).append(':')
-                               .append(target.getClass().getName()).toString();*/
-        ObjectArrayWrapper<Class<?>> beanKey = ObjectArrayWrapper.create(new Class[] {source.getClass(), target.getClass()});
+                                     .append(target.getClass().getName()).toString();*/
+        ObjectArrayWrapper<Class<?>> beanKey = ObjectArrayWrapper.create(
+            new Class[] { source.getClass(), target.getClass() }
+        );
         BeanCopier copier = COPIER_CACHE.get(beanKey);
         if (copier == null) {
             synchronized (COPIER_CACHE) {

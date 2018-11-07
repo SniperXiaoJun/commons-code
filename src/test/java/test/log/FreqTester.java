@@ -4,6 +4,9 @@ import code.ponfee.commons.concurrent.MultithreadExecutor;
 import code.ponfee.commons.limit.RedisCurrentLimiter;
 import code.ponfee.commons.jedis.JedisClient;
 import code.ponfee.commons.serial.JdkSerializer;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Before;
 import org.junit.Test;
 import redis.clients.jedis.JedisPoolConfig;
@@ -33,10 +36,15 @@ public class FreqTester {
     @Test
     public void test1() throws InterruptedException {
         RedisCurrentLimiter f = new RedisCurrentLimiter(jedisClient, 1, 5);
-        f.setRequestThreshold("abc", 7000000);
 
-        MultithreadExecutor.execAsync(20, ()->{
-            if (!f.checkpoint("abc")) {
+        String[] s = {"a","b","c","d","e","f","g","h"};
+        for (String a : s) {
+            f.setRequestThreshold(a, 7000000);
+        }
+        int len = s.length;
+        AtomicInteger count = new AtomicInteger(0);
+        MultithreadExecutor.execAsync(100, ()->{
+            if (!f.checkpoint(s[count.getAndIncrement()%len])) {
                 System.err.println("reject req " + Thread.currentThread());
             }
 

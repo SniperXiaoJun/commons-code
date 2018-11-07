@@ -26,13 +26,13 @@ public class PageRequestParams implements java.io.Serializable {
 
     public static final String SORT_PARAM = "sort";
 
-    private int pageNum;
-    private int pageSize;
+    private int pageNum = -1;
+    private int pageSize = -1;
 
-    private int offset;
-    private int limit;
+    private int offset = -1;
+    private int limit = -1;
 
-    private String sort;
+    private String sort = null;
 
     // 包含pageNum、pageSize、offset、limit、sort
     private final Map<String, Object> params = new LinkedHashMap<>();
@@ -102,6 +102,10 @@ public class PageRequestParams implements java.io.Serializable {
 
     public void put(String key, Object value) {
         this.params.put(key, value);
+    }
+
+    public Object get(String key) {
+        return params.get(key);
     }
 
 }

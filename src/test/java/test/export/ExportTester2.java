@@ -84,7 +84,7 @@ public class ExportTester2 {
     }
 
     @Test
-    public void test3() throws IOException {
+    public void testSplitExcel() throws IOException {
         Table table = new Table("a,b,c,d,e".split(","));
         table.setCaption("title");
         int n = 10;
@@ -111,7 +111,7 @@ public class ExportTester2 {
     }
     
     @Test
-    public void test4() throws IOException {
+    public void testSplitCsv() throws IOException {
         Table table = new Table("中国,人,c,d,e".split(","));
         table.setCaption("title");
         int n = 10;
@@ -128,7 +128,7 @@ public class ExportTester2 {
             });
         }
         
-        SplitCsvFileExporter csv = new SplitCsvFileExporter(65537,"d:/test/test_excel_", true, EXECUTOR);
+        SplitCsvFileExporter csv = new SplitCsvFileExporter(65537,"d:/test/test_csv_", true, EXECUTOR);
         System.out.println("================"+watch.stop());
         watch.reset().start();
         csv.build(table);

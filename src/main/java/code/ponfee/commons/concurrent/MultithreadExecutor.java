@@ -214,7 +214,7 @@ public class MultithreadExecutor {
     public static <T> void join(CompletionService<T> service, int count, 
                                 Consumer<T> accept, int sleepTimeMillis) {
         try {
-            for (; count > 0;) {
+            while (count > 0) {
                 Future<T> future = service.poll();
                 if (future != null) {
                     accept.accept(future.get());

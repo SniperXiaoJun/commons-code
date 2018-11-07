@@ -375,4 +375,27 @@ public final class Collects {
         return builder.build();
     }
 
+    /**
+     * Splinter the collection to batch
+     * 
+     * @param coll the collection
+     * @param batchSize the batch size
+     * @return batch collection
+     */
+    public static List<List<T>> splinter(Collection<T> coll, int batchSize) {
+        List<List<T>> result = new ArrayList<>((coll.size() + batchSize - 1) / batchSize);
+        List<T> batch = new ArrayList<>(batchSize);
+        for (T item : coll) {
+            batch.add(item);
+            if (batch.size() == batchSize) {
+                result.add(batch);
+                batch = new ArrayList<>(batchSize);
+            }
+        }
+        if (!batch.isEmpty()) {
+            result.add(batch);
+        }
+        return result;
+    }
+
 }

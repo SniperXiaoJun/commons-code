@@ -20,7 +20,7 @@ public class HtmlExporter extends AbstractExporter {
 
     //private static final Pattern PATTERN_NEGATIVE = Pattern.compile("^(-(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*)))(%)?$");
 
-    private static final String HORIZON = "<hr style=\"border:3 double #b0c4de;with:95%;margin:20px 0;\" />";
+    public static final String HORIZON = "<hr style=\"border:3 double #b0c4de;with:95%;margin:20px 0;\" />";
     private static final String TEMPLATE = new StringBuilder(4096) 
        .append("<!DOCTYPE html>                                                                                                    \n")
        .append("<html>                                                                                                             \n")

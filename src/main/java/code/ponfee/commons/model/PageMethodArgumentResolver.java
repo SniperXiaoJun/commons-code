@@ -65,14 +65,17 @@
 //                page.put(entry.getKey(), value.length == 1 ? value[0] : value);
 //            }
 //        });
-//        if (page.getPageSize() < 1 && page.getLimit() < 1) {
-//            page.setPageSize(MIN_PAGE_SIZE);
-//        }
-//        if (page.getPageNum() < 1) {
-//            page.setPageNum(1);
-//        }
-//        if (page.getOffset() < 0) {
-//            page.setOffset(0);
+//        if (page.getLimit() > 0) {
+//            if (page.getOffset() < 0) {
+//                page.setOffset(0);
+//            }
+//        } else {
+//            if (page.getPageSize() < 1) {
+//                page.setPageSize(MIN_PAGE_SIZE);
+//            }
+//            if (page.getPageNum() < 1) {
+//                page.setPageNum(1);
+//            }
 //        }
 //        return page;
 //    }

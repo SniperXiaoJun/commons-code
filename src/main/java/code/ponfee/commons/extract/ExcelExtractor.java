@@ -9,12 +9,15 @@ import java.util.Objects;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
@@ -33,8 +36,8 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
         this(inputStream, headers, startRow, type, 0);
     }
 
-    public ExcelExtractor(InputStream input, String[] headers, int startRow, 
-                          ExcelType type, int sheetIndex) {
+    public ExcelExtractor(InputStream input, String[] headers, 
+                          int startRow, ExcelType type, int sheetIndex) {
         super(input, headers);
         this.startRow = startRow;
         this.type = type;
@@ -91,6 +94,8 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
                     processor.process(i, data);
                 }
             }
+        } catch (InvalidFormatException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -126,12 +131,14 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
         }
     }
 
-    private Workbook readWorkbook(InputStream input) throws IOException {
+    private Workbook readWorkbook(InputStream input) throws IOException, InvalidFormatException {
         switch (type) {
             case XLS:
                 return new HSSFWorkbook(input);
             case XLSX:
-                return new XSSFWorkbook(input);
+                //return new SXSSFWorkbook(new XSSFWorkbook(input), 200);
+                //return new SXSSFWorkbook(new XSSFWorkbook(OPCPackage.open("filePath")), 200);
+                return new SXSSFWorkbook(new XSSFWorkbook(OPCPackage.open(input)), 200);
             default:
                 throw new RuntimeException("Unknown excel type: " + type);
         }
