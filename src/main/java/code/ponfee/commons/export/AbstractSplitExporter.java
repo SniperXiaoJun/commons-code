@@ -14,16 +14,18 @@ import code.ponfee.commons.util.Holder;
  *
  * @author fupf
  */
-public abstract class AbstractSplitExporter extends AbstractExporter {
+public abstract class AbstractSplitExporter extends AbstractExporter<Void> {
 
     private final int batchSize;
-    protected final String savingFilePathPrefix;
+    private final String savingFilePathPrefix;
+    private final String fileSuffix;
     private final ExecutorService executor;
 
     public AbstractSplitExporter(int batchSize, String savingFilePathPrefix, 
-                                 ExecutorService executor) {
+                                 String fileSuffix, ExecutorService executor) {
         this.batchSize = batchSize;
         this.savingFilePathPrefix = savingFilePathPrefix;
+        this.fileSuffix = fileSuffix;
         this.executor = executor;
     }
 
@@ -38,43 +40,51 @@ public abstract class AbstractSplitExporter extends AbstractExporter {
                 super.nonEmpty();
                 Table st = subTable.set(table.copyOfWithoutTbody());
                 count.set(0); // reset count and sub table
-                service.submit(splitExporter(st, split.incrementAndGet()));
+                service.submit(splitExporter(st, buildFilePath(split.incrementAndGet())));
             }
         });
         if (!subTable.get().isEmptyTbody()) {
             super.nonEmpty();
-            service.submit(splitExporter(subTable.get(), split.incrementAndGet()));
+            service.submit(splitExporter(subTable.get(), buildFilePath(split.incrementAndGet())));
         }
 
         MultithreadExecutor.joinDiscard(service, split.get(), AWAIT_TIME_MILLIS);
     }
 
-    protected abstract AsnycSplitExporter splitExporter(Table subTable, int number);
+    protected abstract AsnycSplitExporter splitExporter(Table subTable, String savingFilePath);
 
-    public @Override final Object export() {
+    public @Override final Void export() {
         throw new UnsupportedOperationException();
     }
 
     public @Override final void close() {}
 
+    private String buildFilePath(int fileNo) {
+        return savingFilePathPrefix + fileNo + fileSuffix;
+    }
+
     public static abstract class AsnycSplitExporter implements Callable<Void> {
-        protected final Table subTable;
+        private final Table subTable;
         protected final String savingFilePath;
 
-        public AsnycSplitExporter(Table subTable, String savingFilePathPrefix, 
-                                  String suffix) {
+        public AsnycSplitExporter(Table subTable, String savingFilePath) {
             this.subTable = subTable;
-            this.savingFilePath = savingFilePathPrefix + suffix;
+            this.savingFilePath = savingFilePath;
         }
 
         @Override
         public final Void call() throws Exception {
             subTable.end();
-            build();
+            try (AbstractExporter<?> exporter = createExporter()) {
+                exporter.build(subTable);
+                doOthers(exporter);
+            }
             return null;
         }
 
-        protected abstract void build();
+        protected abstract AbstractExporter<?> createExporter();
+
+        protected void doOthers(AbstractExporter<?> exporter) {}
     }
 
 }

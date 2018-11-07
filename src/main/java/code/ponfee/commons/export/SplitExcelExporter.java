@@ -11,32 +11,33 @@ public class SplitExcelExporter extends AbstractSplitExporter {
 
     public SplitExcelExporter(int batchSize, String savingFilePathPrefix,
                               ExecutorService executor) {
-        super(batchSize, savingFilePathPrefix, executor);
+        super(batchSize, savingFilePathPrefix, ".xlsx", executor);
     }
 
     @Override
-    protected AsnycSplitExporter splitExporter(Table subTable, int number) {
-        return new AsnycExcelExporter(
-            subTable, super.savingFilePathPrefix + number, super.getName()
-        );
+    protected AsnycSplitExporter splitExporter(Table subTable, String savingFilePath) {
+        return new AsnycExcelExporter(subTable, savingFilePath, super.getName());
     }
 
     private static class AsnycExcelExporter extends AsnycSplitExporter {
         private final String sheetName;
 
-        private AsnycExcelExporter(Table subTable, String savingFilePath, 
+        private AsnycExcelExporter(Table subTable, String savingFilePath,
                                    String sheetName) {
-            super(subTable, savingFilePath, ".xlsx");
+            super(subTable, savingFilePath);
             this.sheetName = sheetName;
         }
 
         @Override
-        protected void build() {
-            try (ExcelExporter excel = new ExcelExporter()) {
-                excel.setName(sheetName);
-                excel.build(subTable);
-                excel.write(savingFilePath);
-            }
+        protected AbstractExporter<?> createExporter() {
+            AbstractExporter<?> excel = new ExcelExporter();
+            excel.setName(sheetName);
+            return excel;
+        }
+
+        @Override
+        protected void doOthers(AbstractExporter<?> exporter) {
+            ((ExcelExporter) exporter).write(savingFilePath);
         }
     }
 

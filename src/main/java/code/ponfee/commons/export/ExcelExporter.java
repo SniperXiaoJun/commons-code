@@ -59,7 +59,7 @@ import code.ponfee.commons.util.Strings;
  *
  * @author fupf
  */
-public class ExcelExporter extends AbstractExporter {
+public class ExcelExporter extends AbstractExporter<byte[]> {
 
     public static final int DEFAULT_WINDOW_SIZE = 200;
 

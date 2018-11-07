@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
@@ -373,7 +372,7 @@ public final class Files {
      * add file bom head
      * @param filepath
      */
-    private static final byte[] WINDOWS_BOM = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
+    public static final byte[] WINDOWS_BOM = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
     public static void addBOM(String filepath) {
         addBOM(new File(filepath));
     }
@@ -387,7 +386,7 @@ public final class Files {
             if (length >= 3) {
                 bytes1 = new byte[3];
                 input.read(bytes1);
-                if (Objects.deepEquals(WINDOWS_BOM, bytes1)) {
+                if (Arrays.equals(WINDOWS_BOM, bytes1)) {
                     return;
                 }
                 bytes2 = new byte[length - 3];

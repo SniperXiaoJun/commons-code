@@ -8,7 +8,7 @@ import java.io.Closeable;
  * 数据导出
  * @author fupf
  */
-public interface DataExporter extends Closeable {
+public interface DataExporter<T> extends Closeable {
 
     /** 提示无结果 */
     String NO_RESULT_TIP = "data not found";
@@ -21,7 +21,7 @@ public interface DataExporter extends Closeable {
     /**
      * 获取表格
      */
-    Object export();
+    T export();
 
     /**
      * 判断是否为空

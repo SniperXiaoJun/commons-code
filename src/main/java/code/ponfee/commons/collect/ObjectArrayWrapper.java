@@ -46,7 +46,7 @@ public class ObjectArrayWrapper<T> implements
 
         //return new HashCodeBuilder().append(array).toHashCode();
         /*int result = array[0].hashCode();
-        for (int i = 0; i < array.length; i++) {
+        for (int i = 1, n = array.length; i < n; i++) {
             result ^= array[i].hashCode();
         }
         return result;*/

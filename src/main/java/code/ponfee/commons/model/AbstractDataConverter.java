@@ -84,12 +84,14 @@ public abstract class AbstractDataConverter<F, T> implements Function<F, T> {
     }
 
     private BeanCopier getCopier() {
-        if (copier != null) {
-            return copier;
-        }
-        synchronized (this) {
-            if (copier == null) {
-                BeanCopier.create(getActualTypeArgument(this.getClass(), 0), toType, false);
+        if (copier == null) {
+            synchronized (this) {
+                if (copier == null) {
+                    copier = BeanCopier.create(
+                        getActualTypeArgument(this.getClass(), 0), 
+                        toType, false
+                    );
+                }
             }
         }
         return copier;

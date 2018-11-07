@@ -117,8 +117,11 @@ public class StreamForker<T> {
             T t;
             while (true) { // if occur exception, then keep take
                 try {
-                    t = q.take();
-                    break;
+                    if ((t = q.poll()) != null) {
+                        break;
+                    } else {
+                        Thread.sleep(31);
+                    }
                 } catch (InterruptedException e) {
                 }
             }

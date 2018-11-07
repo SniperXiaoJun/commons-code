@@ -16,7 +16,7 @@ import code.ponfee.commons.tree.FlatNode;
  * html导出
  * @author fupf
  */
-public class HtmlExporter extends AbstractExporter {
+public class HtmlExporter extends AbstractExporter<String> {
 
     //private static final Pattern PATTERN_NEGATIVE = Pattern.compile("^(-(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*)))(%)?$");
 

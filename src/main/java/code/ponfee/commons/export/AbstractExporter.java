@@ -10,12 +10,12 @@ import code.ponfee.commons.tree.FlatNode;
  * 导出
  * @author fupf
  */
-public abstract class AbstractExporter implements DataExporter {
+public abstract class AbstractExporter<T> implements DataExporter<T> {
 
     public static final int AWAIT_TIME_MILLIS = 31;
 
     private boolean empty = true;
-    private String name; // non thread safe
+    private String name; // report name: non thread safe
 
     @Override
     public boolean isEmpty() {
@@ -26,7 +26,7 @@ public abstract class AbstractExporter implements DataExporter {
         this.empty = false;
     }
 
-    public final AbstractExporter setName(String name) {
+    public final AbstractExporter<T> setName(String name) {
         this.name = name;
         return this;
     }
