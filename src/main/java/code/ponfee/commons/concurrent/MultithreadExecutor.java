@@ -22,8 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 
-import code.ponfee.commons.util.ObjectUtils;
-
 /**
  * Multi Thread executor
  * 
@@ -208,7 +206,7 @@ public class MultithreadExecutor {
 
     public static <T> void joinDiscard(CompletionService<T> service, 
                                        int count, int sleepTimeMillis) {
-        join(service, count, ObjectUtils::discard, sleepTimeMillis);
+        join(service, count, t -> {}, sleepTimeMillis);
     }
 
     public static <T> void join(CompletionService<T> service, int count, 
@@ -217,8 +215,8 @@ public class MultithreadExecutor {
             while (count > 0) {
                 Future<T> future = service.poll();
                 if (future != null) {
-                    accept.accept(future.get());
                     count--;
+                    accept.accept(future.get());
                 } else {
                     Thread.sleep(sleepTimeMillis);
                 }

@@ -1,7 +1,6 @@
 package code.ponfee.commons.extract;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
@@ -10,7 +9,6 @@ import org.apache.commons.io.FilenameUtils;
 import com.google.common.collect.ImmutableList;
 
 import code.ponfee.commons.extract.ExcelExtractor.ExcelType;
-import code.ponfee.commons.io.Files;
 
 /**
  * The fiel data extractor builder
@@ -23,37 +21,31 @@ public class DataExtractorBuilder {
     private static final List<String> CSV_EXTENSION = ImmutableList.of("csv", "txt");
     private static final String CONTENT_TYPE_TEXT = "text/plain";
 
-    private final InputStream input;
+    private final Object dataSource;
     private final String fileName;
     private final String contentType;
 
     private String[] headers;
-    private long maxFileSize = 0;
 
     private int startRow = 0; // excel start row
     private int sheetIndex = 0; // excel work book sheet index
 
     private CSVFormat csvFormat; // csv format
 
-    private DataExtractorBuilder(InputStream input, String fileName, 
+    private DataExtractorBuilder(Object dataSource, String fileName, 
                                  String contentType) {
-        this.input = input;
+        this.dataSource = dataSource;
         this.fileName = fileName;
         this.contentType = contentType;
     }
 
-    public static DataExtractorBuilder newBuilder(InputStream input, String fileName, 
+    public static DataExtractorBuilder newBuilder(Object dataSource, String fileName, 
                                                   String contentType) {
-        return new DataExtractorBuilder(input, fileName, contentType);
+        return new DataExtractorBuilder(dataSource, fileName, contentType);
     }
 
     public DataExtractorBuilder headers(String[] headers) {
         this.headers = headers;
-        return this;
-    }
-
-    public DataExtractorBuilder maxFileSize(long maxFileSize) {
-        this.maxFileSize = maxFileSize;
         return this;
     }
 
@@ -72,17 +64,12 @@ public class DataExtractorBuilder {
         return this;
     }
 
-    public <T> DataExtractor<T> build() throws FileTooBigException, IOException {
+    public <T> DataExtractor<T> build() throws IOException {
         String extension = FilenameUtils.getExtension(fileName).toLowerCase();
-        long fileSize = input.available();
-        if (maxFileSize > 0 && fileSize > maxFileSize) {
-            throw new FileTooBigException("文件大小：" + Files.human(fileSize) 
-                                        + "，已经超过：" + Files.human(maxFileSize));
-        }
         if (CONTENT_TYPE_TEXT.equalsIgnoreCase(contentType)
             || CSV_EXTENSION.contains(extension)) {
             // csv, txt文本格式数据
-            return new CsvExtractor<>(input, headers, csvFormat);
+            return new CsvExtractor<>(dataSource, headers, csvFormat);
         } else if (EXCEL_EXTENSION.contains(extension)) {
             // content-type
             // xlsx: application/vnd.openxmlformats-officedocument.wordprocessingml.document
@@ -90,7 +77,7 @@ public class DataExtractorBuilder {
             //
             // xls: application/vnd.ms-excel
             //      application/msword application/x-xls
-            return new ExcelExtractor<>(input, headers, startRow,
+            return new ExcelExtractor<>(dataSource, headers, startRow,
                                         ExcelType.from(extension), sheetIndex);
         } else {
             throw new RuntimeException("File content type not supported: " + fileName);

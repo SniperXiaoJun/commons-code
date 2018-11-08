@@ -23,12 +23,12 @@ public class CsvExtractor<T> extends DataExtractor<T> {
     private final CSVFormat csvFormat;
     private final boolean specHeaders;
 
-    public CsvExtractor(InputStream input, String[] headers) {
-        this(input, headers, null);
+    public CsvExtractor(Object dataSource, String[] headers) {
+        this(dataSource, headers, null);
     }
 
-    public CsvExtractor(InputStream input, String[] headers, CSVFormat csvFormat) {
-        super(input, headers);
+    public CsvExtractor(Object dataSource, String[] headers, CSVFormat csvFormat) {
+        super(dataSource, headers);
         this.specHeaders = ArrayUtils.isNotEmpty(headers);
         csvFormat = ObjectUtils.orElse(csvFormat, CSVFormat.DEFAULT);
         this.csvFormat = this.specHeaders
@@ -39,7 +39,7 @@ public class CsvExtractor<T> extends DataExtractor<T> {
     @SuppressWarnings("unchecked")
     @Override
     public void extract(RowProcessor<T> processor) throws IOException {
-        try (InputStream stream = input;
+        try (InputStream stream = asInputStream();
              BOMInputStream bom = new BOMInputStream(stream);
              Reader reader = new InputStreamReader(bom)
         ) {

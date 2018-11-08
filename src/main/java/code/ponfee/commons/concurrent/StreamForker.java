@@ -1,4 +1,4 @@
-package code.ponfee.commons.util;
+package code.ponfee.commons.concurrent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,7 +49,7 @@ public class StreamForker<T> {
         List<BlockingQueue<T>> queues = new ArrayList<>();
 
         Map<Object, Future<?>> actions = forks.entrySet().stream().reduce(
-            new HashMap<Object, Future<?>>(),
+            new HashMap<>(),
             (map, e) -> {
                 map.put(e.getKey(), getOperationResult(queues, e.getValue()));
                 return map;

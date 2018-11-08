@@ -2,6 +2,7 @@ package code.ponfee.commons.extract;
 
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
@@ -17,7 +18,6 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
@@ -36,9 +36,9 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
         this(inputStream, headers, startRow, type, 0);
     }
 
-    public ExcelExtractor(InputStream input, String[] headers, 
+    public ExcelExtractor(Object dataSource, String[] headers, 
                           int startRow, ExcelType type, int sheetIndex) {
-        super(input, headers);
+        super(dataSource, headers);
         this.startRow = startRow;
         this.type = type;
         this.sheetIndex = sheetIndex;
@@ -47,12 +47,31 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
     @SuppressWarnings("unchecked")
     @Override
     public void extract(RowProcessor<T> processor) throws IOException {
-        try (InputStream stream = input;
-             Workbook workbook = readWorkbook(stream)
-        ) {
+        InputStream input = null;
+        Workbook workbook = null;
+        try {
+            switch (type) {
+                case XLS:
+                    workbook = new HSSFWorkbook(input = super.asInputStream());
+                    break;
+                case XLSX:
+                    OPCPackage opcPkg;
+                    if (dataSource instanceof CharSequence) {
+                        opcPkg = OPCPackage.open(dataSource.toString());
+                    } else if (dataSource instanceof File) {
+                        opcPkg = OPCPackage.open((File) dataSource);
+                    } else {
+                        opcPkg = OPCPackage.open(input = (InputStream) dataSource);
+                    }
+                    workbook = new XSSFWorkbook(opcPkg);
+                    //return new SXSSFWorkbook(new XSSFWorkbook(OPCPackage.open(input)), 200);
+                    break;
+                default:
+                    throw new RuntimeException("Unknown excel type: " + type);
+            }
+
             T data;
             Sheet sheet = workbook.getSheetAt(sheetIndex);
-
             boolean specHeaders;
             int columnSize;
             if (ArrayUtils.isNotEmpty(headers)) {
@@ -96,6 +115,17 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
             }
         } catch (InvalidFormatException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (workbook != null) try {
+                workbook.close();
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
+            }
+            if (input != null) try {
+                input.close();
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
+            }
         }
     }
 
@@ -128,19 +158,6 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
             case ERROR: // 错误
             default:
                 return StringUtils.EMPTY;
-        }
-    }
-
-    private Workbook readWorkbook(InputStream input) throws IOException, InvalidFormatException {
-        switch (type) {
-            case XLS:
-                return new HSSFWorkbook(input);
-            case XLSX:
-                //return new SXSSFWorkbook(new XSSFWorkbook(input), 200);
-                //return new SXSSFWorkbook(new XSSFWorkbook(OPCPackage.open("filePath")), 200);
-                return new SXSSFWorkbook(new XSSFWorkbook(OPCPackage.open(input)), 200);
-            default:
-                throw new RuntimeException("Unknown excel type: " + type);
         }
     }
 

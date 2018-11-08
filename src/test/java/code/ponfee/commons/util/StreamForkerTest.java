@@ -2,6 +2,8 @@ package code.ponfee.commons.util;
 
 import java.util.stream.Stream;
 
+import code.ponfee.commons.concurrent.StreamForker;
+
 public class StreamForkerTest {
 
     public static void main(String[] args) throws Exception {

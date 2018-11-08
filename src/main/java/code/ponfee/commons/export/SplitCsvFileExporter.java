@@ -23,10 +23,10 @@ public class SplitCsvFileExporter extends AbstractSplitExporter {
     }
 
     private static class AsnycCsvFileExporter extends AsnycSplitExporter {
-        private final boolean withBom;
+        final boolean withBom;
 
-        private AsnycCsvFileExporter(Table subTable, String savingFilePath,
-                                     boolean withBom) {
+        AsnycCsvFileExporter(Table subTable, String savingFilePath,
+                             boolean withBom) {
             super(subTable, savingFilePath);
             this.withBom = withBom;
         }

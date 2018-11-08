@@ -184,8 +184,9 @@ public class ExcelExporter extends AbstractExporter<byte[]> {
         buildComplexThead(table, sheet, cursorRow);
 
         // 5、冻结窗口配置
-        if (freezes.get(name) != null) {
-            freezes.get(name).disable();
+        Freeze freeze;
+        if ((freeze = freezes.get(name)) != null) {
+            freeze.disable();
         } else {
             freezes.put(name, new Freeze(1, cursorRow.get())); // 叶子节点只占一列，故colSplit=1
         }

@@ -94,7 +94,7 @@ public @interface Constraint {
     /**
      * 时态（只针对CharSequence[datePattern]，Date）
      */
-    Tense tense() default Tense.NON;
+    Tense tense() default Tense.ANY;
 
     /**
      * 数列
@@ -117,7 +117,7 @@ public @interface Constraint {
      * 时态（过去或将来）
      */
     enum Tense {
-        PAST("过去"), FUTURE("将来"), ANY("任意"), NON(null);
+        PAST("过去"), FUTURE("将来"), ANY("任意");
 
         private final String desc;
 

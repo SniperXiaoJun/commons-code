@@ -22,6 +22,7 @@ import code.ponfee.commons.cache.CacheBuilder;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.reflect.Fields;
 import code.ponfee.commons.util.ObjectUtils;
+import code.ponfee.commons.util.Strings;
 
 /**
  * <pre>
@@ -172,7 +173,7 @@ public class FieldValidator {
         }
 
         // 时间类型验证
-        if (   (c.tense() != Constraint.Tense.NON && isBlank(c.datePattern()))
+        if (   (c.tense() != Constraint.Tense.ANY && isBlank(c.datePattern()))
             && !Date.class.isAssignableFrom(type)
         ) {
             throw new UnsupportedOperationException(CFG_ERR + name + "]：非日期类型不支持时态验证");
@@ -278,7 +279,7 @@ public class FieldValidator {
 
         // 时间格式 
         Date date = null;
-        if (isNotBlank(c.datePattern()) && !(!c.notNull() && v == null)) {
+        if (isNotBlank(c.datePattern()) && !(!c.notNull() && (v == null||Strings.isEmpty(v)))) {
             try {
                 //date = DateUtils.parseDate((String) v, c.datePattern());
                 date = FastDateFormat.getInstance(c.datePattern()).parse((String) v);
@@ -288,7 +289,7 @@ public class FieldValidator {
         }
 
         // 时态校验
-        if (c.tense() != Constraint.Tense.NON) {
+        if (c.tense() != Constraint.Tense.ANY) {
             if (date == null) {
                 date = (Date) v;
             }

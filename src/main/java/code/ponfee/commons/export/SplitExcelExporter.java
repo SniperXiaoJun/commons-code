@@ -20,10 +20,10 @@ public class SplitExcelExporter extends AbstractSplitExporter {
     }
 
     private static class AsnycExcelExporter extends AsnycSplitExporter {
-        private final String sheetName;
+        final String sheetName;
 
-        private AsnycExcelExporter(Table subTable, String savingFilePath,
-                                   String sheetName) {
+        AsnycExcelExporter(Table subTable, String savingFilePath,
+                           String sheetName) {
             super(subTable, savingFilePath);
             this.sheetName = sheetName;
         }

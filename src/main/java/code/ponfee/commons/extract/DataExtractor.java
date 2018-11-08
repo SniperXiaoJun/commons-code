@@ -1,5 +1,8 @@
 package code.ponfee.commons.extract;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -18,11 +21,19 @@ import code.ponfee.commons.util.Holder;
  */
 public abstract class DataExtractor<T> {
 
-    protected final InputStream input;
+    protected final Object dataSource;
     protected final String[] headers;
 
-    protected DataExtractor(InputStream input, String[] headers) {
-        this.input = input;
+    protected DataExtractor(Object dataSource, String[] headers) {
+        if (   !(dataSource instanceof CharSequence)
+            && !(dataSource instanceof File)
+            && !(dataSource instanceof InputStream)
+        ) {
+            throw new IllegalArgumentException(
+                "Datasouce only support such type as CharSequence, File, InputStream"
+            );
+        }
+        this.dataSource = dataSource;
         this.headers = headers;
     }
 
@@ -83,4 +94,19 @@ public abstract class DataExtractor<T> {
             return data != null;
         }
     }
+
+    protected final InputStream asInputStream() {
+        try {
+            if (dataSource instanceof CharSequence) {
+                return new FileInputStream(dataSource.toString());
+            } else if (dataSource instanceof File) {
+                return new FileInputStream((File) dataSource);
+            } else {
+                return (InputStream) dataSource;
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException();
+        }
+    }
+
 }
