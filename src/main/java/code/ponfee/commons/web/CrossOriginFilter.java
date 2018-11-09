@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -23,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import code.ponfee.commons.util.RegexUtils;
 import code.ponfee.commons.util.Strings;
 
 /**
@@ -326,8 +325,9 @@ public class CrossOriginFilter implements Filter {
 
             for (String allowedOrigin : allowedOrigins) {
                 if (allowedOrigin.contains("*")) {
-                    Matcher matcher = createMatcher(origin, allowedOrigin);
-                    if (matcher.matches()) {
+                    // we want to be greedy here to match multiple subdomains, thus we use .*
+                    String regex = allowedOrigin.replace(".", "\\.").replace("*", ".*");
+                    if (RegexUtils.matches(origin, regex)) {
                         return true;
                     }
                 } else if (allowedOrigin.equals(origin)) {
@@ -336,17 +336,6 @@ public class CrossOriginFilter implements Filter {
             }
         }
         return false;
-    }
-
-    private Matcher createMatcher(String origin, String allowedOrigin) {
-        String regex = parseAllowedWildcardOriginToRegex(allowedOrigin);
-        Pattern pattern = Pattern.compile(regex);
-        return pattern.matcher(origin);
-    }
-
-    private String parseAllowedWildcardOriginToRegex(String allowedOrigin) {
-        String regex = allowedOrigin.replace(".", "\\.");
-        return regex.replace("*", ".*"); // we want to be greedy here to match multiple subdomains, thus we use .*
     }
 
     private boolean isSimpleRequest(HttpServletRequest request) {

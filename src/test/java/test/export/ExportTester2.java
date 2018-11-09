@@ -93,7 +93,7 @@ public class ExportTester2 {
         for (int j = 0; j < n; j++) {
             EXECUTOR.submit(()-> {
                 for (int i = 0; i < 100000; i++) {
-                    table.addRow(new Object[] { "1", "2", "3", "4", "5" });
+                    table.addRow(new Object[] { "1111111111111111111111111111", "2", "3", "4", "5" });
                 }
                 if (count.incrementAndGet() == n) {
                     table.end();

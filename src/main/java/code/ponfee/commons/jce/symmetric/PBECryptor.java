@@ -38,15 +38,6 @@ public class PBECryptor extends SymmetricCryptor {
         PBEWithSHA1AndRC2_40, //
         PBEWithMD5AndTripleDES, //
         ;
-
-        public static PBEAlgorithm from(String name) {
-            for (PBEAlgorithm alg : PBEAlgorithm.values()) {
-                if (name.equalsIgnoreCase(alg.name())) {
-                    return alg;
-                }
-            }
-            return null;
-        }
     }
 
     public PBECryptor(SecretKey secretKey, Mode mode, Padding padding, 

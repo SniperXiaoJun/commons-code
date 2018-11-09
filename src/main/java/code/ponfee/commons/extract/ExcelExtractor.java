@@ -5,20 +5,20 @@ import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_B
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.Objects;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import com.monitorjbl.xlsx.StreamingReader;
 
 /**
  * Excel file data extractor
@@ -44,8 +44,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
         this.sheetIndex = sheetIndex;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
+    @Override @SuppressWarnings("unchecked")
     public void extract(RowProcessor<T> processor) throws IOException {
         InputStream input = null;
         Workbook workbook = null;
@@ -54,7 +53,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
                 case XLS:
                     workbook = new HSSFWorkbook(input = super.asInputStream());
                     break;
-                case XLSX:
+                /*case XLSX:
                     OPCPackage opcPkg;
                     if (dataSource instanceof CharSequence) {
                         opcPkg = OPCPackage.open(dataSource.toString());
@@ -64,7 +63,20 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
                         opcPkg = OPCPackage.open(input = (InputStream) dataSource);
                     }
                     workbook = new XSSFWorkbook(opcPkg);
-                    //return new SXSSFWorkbook(new XSSFWorkbook(OPCPackage.open(input)), 200);
+                    //new SXSSFWorkbook(new XSSFWorkbook(OPCPackage.open(input)), 200);
+                    break;*/
+                case XLSX:
+                    StreamingReader.Builder builder = StreamingReader.builder()
+                            .rowCacheSize(10) // 缓存到内存中的行数，默认是10
+                            .bufferSize(8192); // 读取资源时，缓存到内存的字节大小，默认是1024
+                    // 可以是InputStream或者是File，注意：只能打开XLSX格式的文件
+                    if (dataSource instanceof CharSequence) {
+                        workbook = builder.open(new File(dataSource.toString()));
+                    } else if (dataSource instanceof File) {
+                        workbook = builder.open((File) dataSource);
+                    } else {
+                        workbook = builder.open(input = (InputStream) dataSource);
+                    }
                     break;
                 default:
                     throw new RuntimeException("Unknown excel type: " + type);
@@ -82,9 +94,11 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
                 columnSize = 0;
             }
 
-            for (int n = sheet.getLastRowNum(), i = startRow, k = i, m, j; i <= n; i++) {
-                Row row = sheet.getRow(i);
-                if (row == null) {
+            Iterator<Row> iter = sheet.iterator();
+            Row row;
+            for (int i = startRow, k = i, m, j; iter.hasNext(); i++) {
+                row = iter.next(); // row = sheet.getRow(i);
+                if (row == null && i < startRow) {
                     continue;
                 }
 
@@ -113,8 +127,6 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
                     processor.process(i, data);
                 }
             }
-        } catch (InvalidFormatException e) {
-            throw new RuntimeException(e);
         } finally {
             if (workbook != null) try {
                 workbook.close();
@@ -139,7 +151,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
         if (cell == null) {
             return StringUtils.EMPTY;
         }
-        switch (cell.getCellTypeEnum()) {
+        switch (cell.getCellType()) {
             case NUMERIC:
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return String.valueOf(cell.getDateCellValue());
@@ -163,13 +175,5 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
 
     public enum ExcelType {
         XLS, XLSX;
-        public static ExcelType from(String type) {
-            for (ExcelType et : ExcelType.values()) {
-                if (et.name().equalsIgnoreCase(type)) {
-                    return et;
-                }
-            }
-            return null;
-        }
     }
 }

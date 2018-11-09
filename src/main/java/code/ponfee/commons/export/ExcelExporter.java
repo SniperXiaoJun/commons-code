@@ -36,6 +36,8 @@ import org.apache.poi.xssf.streaming.SXSSFDrawing;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
+import org.apache.poi.xssf.usermodel.IndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -74,6 +76,8 @@ public class ExcelExporter extends AbstractExporter<byte[]> {
     /** 作为分隔符（类似html的<hr />）的合并列数目 */
     private static final int MARGIN_ROW_CELL_SIZE = 26;
 
+    private static final IndexedColorMap DEFAULT_COLOR_MAP = new DefaultIndexedColorMap();
+
     private SXSSFWorkbook workbook; // excel
     private final XSSFCellStyle titleStyle; // 标题样式
     private final XSSFCellStyle headStyle; // 表头样式
@@ -100,7 +104,7 @@ public class ExcelExporter extends AbstractExporter<byte[]> {
         headFont.setFontName("宋体");
 
         XSSFFont redFont = (XSSFFont) workbook.createFont();
-        redFont.setColor(new XSSFColor(new Color(255, 0, 0)));
+        redFont.setColor(new XSSFColor(new Color(255, 0, 0), DEFAULT_COLOR_MAP));
         redFont.setFontName("宋体");
 
         XSSFCellStyle baseStyle = (XSSFCellStyle) workbook.createCellStyle();
@@ -117,18 +121,19 @@ public class ExcelExporter extends AbstractExporter<byte[]> {
         titleStyle.setAlignment(HorizontalAlignment.CENTER);
         titleStyle.setFont(titleFont);
         titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND); // 填充样式
-        titleStyle.setFillForegroundColor(new XSSFColor(new Color(255, 255, 224))); // 填充颜色
+        titleStyle.setFillForegroundColor(new XSSFColor(new Color(255, 255, 224), DEFAULT_COLOR_MAP)); // 填充颜色
 
         headStyle = (XSSFCellStyle) workbook.createCellStyle();
         headStyle.cloneStyleFrom(baseStyle);
         headStyle.setAlignment(HorizontalAlignment.CENTER);
         headStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        headStyle.setFillForegroundColor(new XSSFColor(new Color(192, 192, 192)));
+        headStyle.setFillForegroundColor(new XSSFColor(new Color(192, 192, 192), DEFAULT_COLOR_MAP));
         headStyle.setFont(headFont);
         headStyle.setWrapText(false);
 
         dataStyle = (XSSFCellStyle) workbook.createCellStyle();
         dataStyle.cloneStyleFrom(baseStyle);
+        dataStyle.setWrapText(false);
 
         tfootMergeStyle = (XSSFCellStyle) workbook.createCellStyle();
         tfootMergeStyle.cloneStyleFrom(dataStyle);
@@ -552,7 +557,7 @@ public class ExcelExporter extends AbstractExporter<byte[]> {
             for (List<Integer> c : (List<List<Integer>>) highlight.get("cells")) {
                 if (c.get(0) == tbodyRowIdx && c.get(1) == tbodyColIdx) {
                     XSSFFont font = (XSSFFont) workbook.createFont();
-                    font.setColor(new XSSFColor(Colors.hex2color((String) highlight.get("color"))));
+                    font.setColor(new XSSFColor(Colors.hex2color((String) highlight.get("color")), DEFAULT_COLOR_MAP));
                     XSSFCellStyle style = (XSSFCellStyle) workbook.createCellStyle();
                     style.cloneStyleFrom(cell.getCellStyle());
                     style.setFont(font);
@@ -609,7 +614,7 @@ public class ExcelExporter extends AbstractExporter<byte[]> {
                 // 设置颜色
                 if (tmeta.getColor() != null) {
                     XSSFFont font = (XSSFFont) workbook.createFont();
-                    font.setColor(new XSSFColor(tmeta.getColor()));
+                    font.setColor(new XSSFColor(tmeta.getColor(), DEFAULT_COLOR_MAP));
                     style.setFont(font);
                 }
             } // end of tmeta

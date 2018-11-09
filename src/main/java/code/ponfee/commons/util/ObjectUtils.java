@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.time.DateUtils;
@@ -238,14 +239,8 @@ public final class ObjectUtils {
                 if (value instanceof Number) {
                     value = type.getEnumConstants()[((Number) value).intValue()];
                 } else {
-                    value = Enum.valueOf((Class<Enum>) type, value.toString());
-                    /*String str = value.toString();
-                    for (Object e : type.getEnumConstants()) {
-                        if (((Enum<?>) e).name().equalsIgnoreCase(str)) {
-                            value = e;
-                            break;
-                        }
-                    }*/
+                    //value = EnumUtils.getEnum((Class<Enum>) type, value.toString());
+                    value = EnumUtils.getEnumIgnoreCase((Class<Enum>) type, value.toString());
                 }
             } else if (Date.class == type) {
                 if (value instanceof Number) {

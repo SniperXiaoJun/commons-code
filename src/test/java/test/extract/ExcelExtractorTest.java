@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -21,7 +22,7 @@ public class ExcelExtractorTest {
         DataExtractor<?> et = DataExtractorBuilder.newBuilder("D:\\test\\test_excel_14.xlsx", "test_excel_16.xlsx", null)
             .headers(new String[] { "a", "b", "c", "d", "e" }).build();
         et.extract((n, d) -> {
-            //System.out.println(Arrays.toString((String[])d));
+            System.out.println(Arrays.toString((String[])d));
         });
     }
     
@@ -30,7 +31,7 @@ public class ExcelExtractorTest {
         DataExtractor<?> et = DataExtractorBuilder.newBuilder(new File("D:\\test\\test_excel_14.xlsx"), "test_excel_16.xlsx", null)
             .headers(new String[] { "a", "b", "c", "d", "e" }).build();
         et.extract((n, d) -> {
-            //System.out.println(Arrays.toString((String[])d));
+            System.out.println(Arrays.toString((String[])d));
         });
     }
     
@@ -39,7 +40,13 @@ public class ExcelExtractorTest {
         DataExtractor<?> et = DataExtractorBuilder.newBuilder(new FileInputStream("D:\\test\\test_excel_14.xlsx"), "test_excel_16.xlsx", null)
             .headers(new String[] { "a", "b", "c", "d", "e" }).build();
         et.extract((n, d) -> {
-            //System.out.println(Arrays.toString((String[])d));
+            if (n == 0) {
+                System.out.println(Arrays.toString((String[])d));
+            }
+            if (n == 1) {
+                System.out.println(Arrays.toString((String[])d));
+            }
+            System.out.println(Arrays.toString((String[])d));
         });
     }
 }

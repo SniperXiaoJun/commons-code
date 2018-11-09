@@ -1,16 +1,10 @@
 package code.ponfee.commons.util;
 
-import static org.apache.oro.text.regex.Perl5Compiler.CASE_INSENSITIVE_MASK;
-import static org.apache.oro.text.regex.Perl5Compiler.READ_ONLY_MASK;
-
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.oro.text.regex.MalformedPatternException;
-import org.apache.oro.text.regex.PatternMatcher;
-import org.apache.oro.text.regex.Perl5Compiler;
-import org.apache.oro.text.regex.Perl5Matcher;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -24,15 +18,11 @@ import com.google.common.cache.LoadingCache;
 public final class RegexUtils {
     private RegexUtils() {}
 
-    private static final LoadingCache<String, org.apache.oro.text.regex.Pattern> PATTERNS =
+    private static final LoadingCache<String, Pattern> PATTERNS =
     CacheBuilder.newBuilder().softValues().build(
-        new CacheLoader<String, org.apache.oro.text.regex.Pattern>() {
-            public @Override org.apache.oro.text.regex.Pattern load(String pattern) {
-                try {
-                    return new Perl5Compiler().compile(pattern, CASE_INSENSITIVE_MASK | READ_ONLY_MASK);
-                } catch (MalformedPatternException e) {
-                    throw new RuntimeException("Regex failed!", e);
-                }
+        new CacheLoader<String, Pattern>() {
+            public @Override Pattern load(String pattern) {
+                return Pattern.compile(pattern/*, Pattern.CASE_INSENSITIVE*/);
             }
         }
     );
@@ -45,15 +35,29 @@ public final class RegexUtils {
      * @return the first match string
      */
     public static String findFirst(String originalStr, String regex) {
+        return findGroup(originalStr, regex, 0);
+    }
+
+    public static String findGroup(String originalStr, String regex, int group) {
         if (StringUtils.isBlank(originalStr) || StringUtils.isBlank(regex)) {
             return StringUtils.EMPTY;
         }
 
-        PatternMatcher matcher = new Perl5Matcher();
         try {
-            return matcher.contains(originalStr, PATTERNS.get(regex))
-                   ? StringUtils.trimToEmpty(matcher.getMatch().group(0))
-                   : StringUtils.EMPTY;
+            Matcher matcher = PATTERNS.get(regex).matcher(originalStr);
+            return matcher.find() ? matcher.group(group) : StringUtils.EMPTY;
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean matches(String originalStr, String regex) {
+        if (StringUtils.isBlank(originalStr) || StringUtils.isBlank(regex)) {
+            return false;
+        }
+
+        try {
+            return PATTERNS.get(regex).matcher(originalStr).matches();
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }

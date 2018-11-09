@@ -282,7 +282,7 @@ public class ExportTester {
         Table table = new Table("a,b,c,d,e".split(","));
         table.setCaption("title");
         List<Object[]> data = new ArrayList<>();
-        data.add(new Object[] { "1", "2", "3", "4", "5" });
+        data.add(new Object[] { "11111111111111111111111111111111111111111", "2", "3", "4", "5" });
         table.addRowsAndEnd(data);
         excel.setName("21321");
         excel.build(table);

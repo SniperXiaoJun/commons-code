@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.EnumUtils;
 
 import com.google.common.collect.ImmutableList;
 
@@ -27,8 +28,8 @@ public class DataExtractorBuilder {
 
     private String[] headers;
 
-    private int startRow = 0; // excel start row
-    private int sheetIndex = 0; // excel work book sheet index
+    private int startRow = 0; // excel start row: start with 0
+    private int sheetIndex = 0; // excel work book sheet index: start with 0
 
     private CSVFormat csvFormat; // csv format
 
@@ -78,7 +79,7 @@ public class DataExtractorBuilder {
             // xls: application/vnd.ms-excel
             //      application/msword application/x-xls
             return new ExcelExtractor<>(dataSource, headers, startRow,
-                                        ExcelType.from(extension), sheetIndex);
+                                        EnumUtils.getEnumIgnoreCase(ExcelType.class, extension), sheetIndex);
         } else {
             throw new RuntimeException("File content type not supported: " + fileName);
         }

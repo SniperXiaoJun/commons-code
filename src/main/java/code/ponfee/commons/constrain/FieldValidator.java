@@ -22,6 +22,7 @@ import code.ponfee.commons.cache.CacheBuilder;
 import code.ponfee.commons.reflect.ClassUtils;
 import code.ponfee.commons.reflect.Fields;
 import code.ponfee.commons.util.ObjectUtils;
+import code.ponfee.commons.util.RegexUtils;
 import code.ponfee.commons.util.Strings;
 
 /**
@@ -238,7 +239,7 @@ public class FieldValidator {
 
         // 正则校验
         if (!(!c.notNull() && v == null) && isNotBlank(c.regExp())
-            && (v == null || !v.toString().matches(c.regExp()))) {
+            && (v == null || !RegexUtils.matches(v.toString(), c.regExp()))) {
             return n + "{" + v + "}：格式不匹配" + c.regExp() + ";";
         }
 
