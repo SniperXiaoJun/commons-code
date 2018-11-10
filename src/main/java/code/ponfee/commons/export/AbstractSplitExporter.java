@@ -10,7 +10,7 @@ import code.ponfee.commons.concurrent.MultithreadExecutor;
 import code.ponfee.commons.util.Holder;
 
 /**
- * Export multiple excel file
+ * Export multiple file
  *
  * @author fupf
  */

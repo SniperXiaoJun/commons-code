@@ -23,7 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.FastDateFormat;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
@@ -58,12 +58,26 @@ import code.ponfee.commons.util.Strings;
  * excel导出
  *
  * SXSSFWorkbook（size>65536），XSSFWorkbook（.xlsx），HSSFWorkbook（.xls）
- *
+ * 
+ * {@linkplain https://blog.csdn.net/zl_momomo/article/details/80703533}
+ * 
+ *  |--------------|----------------------------------------------------------|---------|
+ *  |      模式           |                         说明                                                                              | 读写性       |
+ *  |--------------|----------------------------------------------------------|---------|
+ *  | SXSSF        | 内存中保留一定行数数据，超过行数，将索引最低的数据刷入硬盘       |  只写         |
+ *  |--------------|----------------------------------------------------------|---------|
+ *  | eventmodel   | 基于事件驱动,SAX的方式解析excel，cup和内存消耗低                              |  只读         |
+ *  |--------------|----------------------------------------------------------|---------|
+ *  | usermodel    | 传统方式，cpu和内存消耗大                                                                                         | 可读可写  |
+ *  |--------------|----------------------------------------------------------|---------|
+ * 
  * @author fupf
  */
 public class ExcelExporter extends AbstractExporter<byte[]> {
 
-    public static final int DEFAULT_WINDOW_SIZE = 200;
+    // 内存最大存放100行数据 超过100自动刷新到硬盘中
+    // SXSSFSheet.flushRows(100); retain 100 last rows and flush all others
+    public static final int DEFAULT_WINDOW_SIZE = 50;
 
     /** row and cell config，默认的列宽和行高大小 */
     private static final int DEFAULT_WIDTH = 3200;
@@ -93,11 +107,13 @@ public class ExcelExporter extends AbstractExporter<byte[]> {
 
     public ExcelExporter() {
         workbook = new SXSSFWorkbook(DEFAULT_WINDOW_SIZE);
+        //workbook.setCompressTempFiles(true); // temp files will be gzipped
         dataFormat = (XSSFDataFormat) workbook.createDataFormat();
 
         XSSFFont titleFont = (XSSFFont) workbook.createFont();
         titleFont.setBold(true);
         titleFont.setFontName("黑体");
+        //titleFont.setFontHeightInPoints((short) 12); // set font 1 to 12 point type
 
         XSSFFont headFont = (XSSFFont) workbook.createFont();
         headFont.setBold(true);
@@ -298,6 +314,7 @@ public class ExcelExporter extends AbstractExporter<byte[]> {
         ) {
             createFreezePane();
             wb.write(bos);
+            wb.dispose();
             workbook = null;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -333,6 +350,7 @@ public class ExcelExporter extends AbstractExporter<byte[]> {
 
         try (SXSSFWorkbook wb = workbook) {
             // nothing to do
+            wb.dispose();
             workbook = null;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -523,8 +541,8 @@ public class ExcelExporter extends AbstractExporter<byte[]> {
                 String str = value.toString();
                 String format = ObjectUtils.orElse(tmeta.getFormat(), Dates.DEFAULT_DATE_FORMAT);
                 try {
-                    //cell.setCellValue(DateUtils.parseDate(str, format));
-                    cell.setCellValue(FastDateFormat.getInstance(format).parse(str));
+                    cell.setCellValue(DateUtils.parseDateStrictly(str, format));
+                    //cell.setCellValue(FastDateFormat.getInstance(format).parse(str));
                 } catch (ParseException e) {
                     throw new IllegalArgumentException("invalid date str: " + str + ", format: " + format, e);
                 }

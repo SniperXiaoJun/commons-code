@@ -126,7 +126,8 @@ public enum DatePeriods {
     }
 
     public static final class Interval {
-        //private static final FastDateFormat FORMAT = FastDateFormat.getInstance(PATTERN);
+        //private static final FastDateFormat FORMAT = 
+        //      FastDateFormat.getInstance(PATTERN);
 
         private final String begin;
         private final String end;

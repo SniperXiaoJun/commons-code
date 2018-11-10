@@ -45,8 +45,7 @@ public class CsvExtractor<T> extends DataExtractor<T> {
         ) {
             int columnSize = specHeaders ? this.headers.length : 0;
             Iterable<CSVRecord> records = csvFormat.parse(reader);
-            int i = 0, j, n;
-            T data;
+            int i = 0, j, n; T data;
             for (CSVRecord record : records) {
                 if (!specHeaders && i == 0) {
                     columnSize = record.size(); // 不指定表头，则取第一行数据为表头

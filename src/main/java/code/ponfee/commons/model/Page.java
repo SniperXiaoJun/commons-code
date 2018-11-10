@@ -12,7 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
+import org.springframework.cglib.beans.BeanCopier;
 
 /**
  * 参考guthub开源的mybatis分页工具
@@ -23,6 +23,8 @@ import org.springframework.beans.BeanUtils;
  */
 public class Page<T> implements java.io.Serializable {
     private static final long serialVersionUID = 1313118491812094979L;
+
+    private static final BeanCopier COPIER = BeanCopier.create(Page.class, Page.class, false);
 
     private int pageNum; // 当前页（start 1）
     private int pageSize; // 每页的数量
@@ -347,8 +349,7 @@ public class Page<T> implements java.io.Serializable {
      */
     public <E> Page<E> transform(Function<T, E> transformer) {
         Preconditions.checkArgument(transformer != null);
-        Page<E> page = new Page<>();
-        BeanUtils.copyProperties(this, page);
+        Page<E> page = this.copy();
         if (isEmpty()) {
             return page;
         }
@@ -392,4 +393,9 @@ public class Page<T> implements java.io.Serializable {
         return "List<" + first.getClass().getCanonicalName() + ">(" + rows.size() + ")";
     }
 
+    public <E> Page<E> copy() {
+        Page<E> page = new Page<>();
+        COPIER.copy(this, page, null);
+        return page;
+    }
 }

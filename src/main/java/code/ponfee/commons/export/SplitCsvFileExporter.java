@@ -3,7 +3,7 @@ package code.ponfee.commons.export;
 import java.util.concurrent.ExecutorService;
 
 /**
- * Export multiple excel file
+ * Export multiple csv file
  *
  * @author fupf
  */

@@ -1,6 +1,10 @@
 package code.ponfee.commons.extract;
 
+import static org.apache.commons.io.FilenameUtils.getExtension;
+
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
@@ -22,7 +26,7 @@ public class DataExtractorBuilder {
     private static final List<String> CSV_EXTENSION = ImmutableList.of("csv", "txt");
     private static final String CONTENT_TYPE_TEXT = "text/plain";
 
-    private final Object dataSource;
+    private final Object dataSource; // only support such type as File, InputStream
     private final String fileName;
     private final String contentType;
 
@@ -40,9 +44,20 @@ public class DataExtractorBuilder {
         this.contentType = contentType;
     }
 
-    public static DataExtractorBuilder newBuilder(Object dataSource, String fileName, 
+    public static DataExtractorBuilder newBuilder(InputStream dataSource, 
+                                                  String fileName, 
                                                   String contentType) {
         return new DataExtractorBuilder(dataSource, fileName, contentType);
+    }
+
+    public static DataExtractorBuilder newBuilder(CharSequence dataSource) {
+        return newBuilder(new File(dataSource.toString()));
+    }
+
+    public static DataExtractorBuilder newBuilder(File dataSource) {
+        String fileName = dataSource.getName();
+        return new DataExtractorBuilder(dataSource, fileName,
+                                        getExtension(fileName));
     }
 
     public DataExtractorBuilder headers(String[] headers) {

@@ -19,7 +19,7 @@ public class ExcelExtractorTest {
 
     @Test
     public void testPath() throws FileNotFoundException, IOException {
-        DataExtractor<?> et = DataExtractorBuilder.newBuilder("D:\\test\\test_excel_14.xlsx", "test_excel_16.xlsx", null)
+        DataExtractor<?> et = DataExtractorBuilder.newBuilder("D:\\test\\test_excel_14.xls")
             .headers(new String[] { "a", "b", "c", "d", "e" }).build();
         et.extract((n, d) -> {
             System.out.println(Arrays.toString((String[])d));
@@ -28,8 +28,8 @@ public class ExcelExtractorTest {
     
     @Test
     public void testFile() throws FileNotFoundException, IOException {
-        DataExtractor<?> et = DataExtractorBuilder.newBuilder(new File("D:\\test\\test_excel_14.xlsx"), "test_excel_16.xlsx", null)
-            .headers(new String[] { "a", "b", "c", "d", "e" }).build();
+        DataExtractor<?> et = DataExtractorBuilder.newBuilder(new File("D:\\test\\test_excel_14.xlsx"))
+            /*.headers(new String[] { "a", "b", "c", "d", "e" })*/.build();
         et.extract((n, d) -> {
             System.out.println(Arrays.toString((String[])d));
         });
@@ -46,6 +46,15 @@ public class ExcelExtractorTest {
             if (n == 1) {
                 System.out.println(Arrays.toString((String[])d));
             }
+            System.out.println(Arrays.toString((String[])d));
+        });
+    }
+    
+    @Test
+    public void testPath2() throws FileNotFoundException, IOException {
+        DataExtractor<?> et = DataExtractorBuilder.newBuilder("e:\\data_expert_temp.xls")
+            .headers(new String[] { "a", "b", "c", "d", "e" }).build();
+        et.extract((n, d) -> {
             System.out.println(Arrays.toString((String[])d));
         });
     }

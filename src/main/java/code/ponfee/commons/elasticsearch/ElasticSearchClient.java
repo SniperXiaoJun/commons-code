@@ -48,7 +48,6 @@ import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 
 import code.ponfee.commons.elasticsearch.bulk.configuration.BulkProcessorConfiguration;
@@ -617,9 +616,7 @@ public class ElasticSearchClient implements DisposableBean {
      * @return  page result and map of row record
      */
     public Page<Map<String, Object>> paginationSearch(ESQueryBuilder query, int pageNo, int pageSize) {
-        Page<Map<String, Object>> page = new Page<>();
-        BeanUtils.copyProperties(this.paginationSearch(query, pageNo, pageSize, Map.class), page);
-        return page;
+        return this.paginationSearch(query, pageNo, pageSize, Map.class).copy();
     }
 
     /**
@@ -646,9 +643,7 @@ public class ElasticSearchClient implements DisposableBean {
      */
     public Page<Map<String, Object>> paginationSearch(SearchRequestBuilder search, 
                                                       int pageNo, int pageSize) {
-        Page<Map<String, Object>> page = new Page<>();
-        BeanUtils.copyProperties(this.paginationSearch(search, pageNo, pageSize, Map.class), page);
-        return page;
+        return this.paginationSearch(search, pageNo, pageSize, Map.class).copy();
     }
 
     /**

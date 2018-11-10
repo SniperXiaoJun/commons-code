@@ -25,12 +25,11 @@ public abstract class DataExtractor<T> {
     protected final String[] headers;
 
     protected DataExtractor(Object dataSource, String[] headers) {
-        if (   !(dataSource instanceof CharSequence)
-            && !(dataSource instanceof File)
+        if (   !(dataSource instanceof File)
             && !(dataSource instanceof InputStream)
         ) {
             throw new IllegalArgumentException(
-                "Datasouce only support such type as CharSequence, File, InputStream"
+                "Datasouce only support such type as File, InputStream"
             );
         }
         this.dataSource = dataSource;
@@ -96,16 +95,14 @@ public abstract class DataExtractor<T> {
     }
 
     protected final InputStream asInputStream() {
-        try {
-            if (dataSource instanceof CharSequence) {
-                return new FileInputStream(dataSource.toString());
-            } else if (dataSource instanceof File) {
+        if (dataSource instanceof File) {
+            try {
                 return new FileInputStream((File) dataSource);
-            } else {
-                return (InputStream) dataSource;
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
             }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException();
+        } else {
+            return (InputStream) dataSource;
         }
     }
 

@@ -49,7 +49,8 @@ public class X509CertUtils {
 
     private static final String X509 = "X.509";
     private static final char[] ENDBOUNDARY = "-----END".toCharArray();
-    private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private static final FastDateFormat DATE_FORMAT =
+        FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     /**
      * pem加载证书
