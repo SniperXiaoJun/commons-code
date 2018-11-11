@@ -1,6 +1,6 @@
 package code.ponfee.commons.extract;
 
-import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
+import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.RETURN_NULL_AND_BLANK;
 
 import java.io.File;
 import java.io.IOException;
@@ -136,7 +136,8 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
                 array = columnSize > 1 ? new String[columnSize] : null;
                 str = null;
                 for (m = row.getLastCellNum(), j = 0; j <= m && j < columnSize; j++) {
-                    str = getCellValueAsString(row.getCell(j, CREATE_NULL_AS_BLANK));
+                    // Missing cells are returned as null, Blank cells are returned as normal
+                    str = getCellValueAsString(row.getCell(j, RETURN_NULL_AND_BLANK));
                     if (columnSize > 1) {
                         array[j] = str;
                     }

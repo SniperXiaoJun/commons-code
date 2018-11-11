@@ -30,10 +30,10 @@ public class CsvExtractor<T> extends DataExtractor<T> {
     public CsvExtractor(Object dataSource, String[] headers, CSVFormat csvFormat) {
         super(dataSource, headers);
         this.specHeaders = ArrayUtils.isNotEmpty(headers);
-        csvFormat = ObjectUtils.orElse(csvFormat, CSVFormat.DEFAULT);
-        this.csvFormat = this.specHeaders
-                         ? csvFormat.withHeader(headers)
-                         : csvFormat.withFirstRecordAsHeader();
+        this.csvFormat = ObjectUtils.orElse(csvFormat, CSVFormat.DEFAULT);
+        if (this.specHeaders) {
+            this.csvFormat.withHeader(headers);
+        }
     }
 
     @SuppressWarnings("unchecked")

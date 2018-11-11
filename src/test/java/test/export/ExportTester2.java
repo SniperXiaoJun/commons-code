@@ -88,7 +88,7 @@ public class ExportTester2 {
     public void testCsv1() throws IOException {
         CsvFileExporter excel = new CsvFileExporter("E:/test.csv", true);
 
-        Table table = new Table("a,b,c,d,e".split(","));
+        Table table = new Table("中,文,b,o,m".split(","));
         table.setCaption("title");
         int n = 100;
         AtomicInteger count = new AtomicInteger(0);

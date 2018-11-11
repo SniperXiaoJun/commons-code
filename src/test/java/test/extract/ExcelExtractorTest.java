@@ -51,7 +51,7 @@ public class ExcelExtractorTest {
     }
     
     @Test
-    public void testPath2() throws FileNotFoundException, IOException {
+    public void test1() throws FileNotFoundException, IOException {
         DataExtractor<?> et = DataExtractorBuilder.newBuilder("e:\\data_expert_temp.xls")
             .headers(new String[] { "a", "b", "c", "d", "e" }).build();
         et.extract((n, d) -> {
@@ -60,10 +60,20 @@ public class ExcelExtractorTest {
     }
     
     @Test
+    public void test2() throws FileNotFoundException, IOException {
+        DataExtractor<?> et = DataExtractorBuilder.newBuilder("E:\\test.xlsx")
+            .headers(new String[] { "a", "b", "c", "d", "e" }).build();
+        et.extract((n, d) -> {
+            System.out.println(String.join("|",(String[])d));
+        });
+    }
+    
+    @Test
     public void testCsvPath() throws FileNotFoundException, IOException {
         DataExtractor<?> et = DataExtractorBuilder.newBuilder("E:\\test.csv")
             .headers(new String[] { "a", "b", "c", "d", "e" }).build();
         et.extract((n, d) -> {
+            if (n < 10)
             System.out.println(Arrays.toString((String[])d));
         });
     }
