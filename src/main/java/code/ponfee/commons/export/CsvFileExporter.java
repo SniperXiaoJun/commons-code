@@ -49,4 +49,13 @@ public class CsvFileExporter extends AbstractCsvExporter<Void> {
         ((WrappedBufferedWriter) super.csv).close();
     }
 
+    @Override
+    protected void flush() {
+        try {
+            ((WrappedBufferedWriter) super.csv).flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

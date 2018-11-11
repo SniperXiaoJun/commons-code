@@ -58,4 +58,13 @@ public class ExcelExtractorTest {
             System.out.println(Arrays.toString((String[])d));
         });
     }
+    
+    @Test
+    public void testCsvPath() throws FileNotFoundException, IOException {
+        DataExtractor<?> et = DataExtractorBuilder.newBuilder("E:\\test.csv")
+            .headers(new String[] { "a", "b", "c", "d", "e" }).build();
+        et.extract((n, d) -> {
+            System.out.println(Arrays.toString((String[])d));
+        });
+    }
 }

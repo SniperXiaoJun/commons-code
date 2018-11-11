@@ -39,6 +39,7 @@ public class XLSEventTest
      * This method listens for incoming records and handles them as required.
      * @param record    The record that was found while reading.
      */
+    @Override
     public void processRecord(Record record) {
         switch (record.getSid()) {
             // the BOFRecord can represent either the beginning of a sheet or the workbook

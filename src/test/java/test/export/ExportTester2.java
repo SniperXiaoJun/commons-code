@@ -14,6 +14,7 @@ import com.google.common.base.Stopwatch;
 
 import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 import code.ponfee.commons.export.AbstractExporter;
+import code.ponfee.commons.export.CsvFileExporter;
 import code.ponfee.commons.export.ExcelExporter;
 import code.ponfee.commons.export.SplitCsvFileExporter;
 import code.ponfee.commons.export.SplitExcelExporter;
@@ -25,7 +26,7 @@ public class ExportTester2 {
     );
 
     @Test
-    public void test1() throws IOException {
+    public void testExcel1() throws IOException {
         AbstractExporter excel = new ExcelExporter();
 
         Table table = new Table("a,b,c,d,e".split(","));
@@ -56,7 +57,7 @@ public class ExportTester2 {
 
     
     @Test
-    public void test2() throws IOException {
+    public void testExcel2() throws IOException {
         AbstractExporter excel = new ExcelExporter();
 
         Table table = new Table("a,b,c,d,e".split(","));
@@ -84,10 +85,37 @@ public class ExportTester2 {
     }
 
     @Test
+    public void testCsv1() throws IOException {
+        CsvFileExporter excel = new CsvFileExporter("E:/test.csv", true);
+
+        Table table = new Table("a,b,c,d,e".split(","));
+        table.setCaption("title");
+        int n = 100;
+        AtomicInteger count = new AtomicInteger(0);
+        Stopwatch watch = Stopwatch.createStarted();
+        for (int j = 0; j < n; j++) {
+            EXECUTOR.submit(()-> {
+                for (int i = 0; i < 100000; i++) {
+                    table.addRow(new Object[] { "1", "2", "3", "4", "5" });
+                }
+                if (count.incrementAndGet() == n) {
+                    table.end();
+                }
+            });
+        }
+        System.out.println("================"+watch.stop());
+        watch.reset().start();
+        excel.setName("21321");
+        excel.build(table);
+        excel.close();
+        System.out.println(watch.stop());
+    }
+    
+    @Test
     public void testSplitExcel() throws IOException {
         Table table = new Table("a,b,c,d,e".split(","));
         table.setCaption("title");
-        int n = 10;
+        int n = 100;
         AtomicInteger count = new AtomicInteger(0);
         Stopwatch watch = Stopwatch.createStarted();
         for (int j = 0; j < n; j++) {

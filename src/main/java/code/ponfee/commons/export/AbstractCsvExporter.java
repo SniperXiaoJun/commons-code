@@ -33,7 +33,7 @@ public abstract class AbstractCsvExporter<T> extends AbstractExporter<T> {
     }
 
     @Override
-    public void build(Table table) {
+    public final void build(Table table) {
         if (hasBuild) {
             throw new UnsupportedOperationException("Only support signle table.");
         }
@@ -57,6 +57,9 @@ public abstract class AbstractCsvExporter<T> extends AbstractExporter<T> {
                     }
                 }
                 csv.append(Files.SYSTEM_LINE_SEPARATOR); // 换行
+                if ((i & 0xFF) == 0) {
+                    this.flush();
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -96,6 +99,8 @@ public abstract class AbstractCsvExporter<T> extends AbstractExporter<T> {
             throw new RuntimeException(e);
         }
     }
+
+    protected void flush() {}
 
     private void buildComplexThead(List<FlatNode<Integer>> thead) {
         List<FlatNode<Integer>> leafs = super.getLeafThead(thead);
