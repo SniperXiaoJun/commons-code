@@ -73,7 +73,11 @@ public abstract class DataExtractor<T> {
             if (StringUtils.isBlank(error)) {
                 result.addData(data);
             } else {
-                result.addError("第" + rowNumber + "行错误：" + error);
+                result.addError(
+                    new StringBuilder(error.length() + 12)
+                        .append("第").append(rowNumber)
+                        .append("行错误：").append(error).toString()
+                );
             }
         });
         return result;

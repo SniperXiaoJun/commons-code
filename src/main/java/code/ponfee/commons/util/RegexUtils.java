@@ -40,7 +40,7 @@ public final class RegexUtils {
     }
 
     public static String findGroup(String originalStr, String regex, int group) {
-        if (StringUtils.isBlank(originalStr) || StringUtils.isBlank(regex)) {
+        if (originalStr == null || regex == null) {
             return StringUtils.EMPTY;
         }
 
@@ -53,7 +53,7 @@ public final class RegexUtils {
     }
 
     public static boolean matches(String originalStr, String regex) {
-        if (StringUtils.isBlank(originalStr) || StringUtils.isBlank(regex)) {
+        if (originalStr == null || regex == null) {
             return false;
         }
 

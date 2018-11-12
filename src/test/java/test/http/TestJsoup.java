@@ -26,7 +26,7 @@ import code.ponfee.commons.http.Http;
 public class TestJsoup {
 
     private static final String COOKIE =
-        "preLG_45769077=2018-08-28+20%3A38%3A33; sid=FCCHLBeiXXYY7ebc24JQ; popFlag520#45769077=1; isFirstLoadPage=1; JSESSIONID=abck6fPzeeZYt-r-9WbCw; Hm_lvt_2c8ad67df9e787ad29dbd54ee608f5d2=1541922829; zxr_index_45769077=1; validate_45769077=yes; smail_45769077=yes; hasShowTip=1; dialogSec=10; isSafeId=%2C45769077; isShowSafeDialog=-1; _pc_login_sec=1; login_health=58786d1c9338cc82d46e03c51c7363e8cb0d95c8b7c5360fce6a0da1928f1b8abaf9d9ea8e6ca0082e59ed6c77e6649a72ed3289875eb4a505d244a77f287171; token=1382287360.1541929686159.d38fdc1fc4758fd4fbf0a15d0f0d494f; p=%5E%7Eworkcity%3D10101206%5E%7Esex%3D0%5E%7Emt%3D1%5E%7Enickname%3D%E9%9A%8F%E7%BC%98%5E%7Edby%3D8d14b74c8de0aa52%5E%7Elh%3D1382287360%5E%7Eage%3D30%5E%7E; isSignOut=%5E%7ElastLoginActionTime%3D1541929686159%5E%7E; mid=%5E%7Emid%3D1382287360%5E%7E; loginactiontime=%5E%7Eloginactiontime%3D1541929686159%5E%7E; logininfo=%5E%7Elogininfo%3D1382287360%5E%7E; live800=%5E%7EinfoValue%3DuserId%253D1382287360%2526name%253D1382287360%2526memo%253D%5E%7E; preLG_1382287360=2018-11-11+15%3A50%3A47; dgpw=1; _pc_login_isWeakPwd=1; Hm_lpvt_2c8ad67df9e787ad29dbd54ee608f5d2=1541929675; clientp=4223";
+        "";
 
     // ========================================================see
     @Test(timeout = 999999999)
