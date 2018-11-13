@@ -15,6 +15,7 @@ import org.apache.commons.lang3.EnumUtils;
 import com.google.common.collect.ImmutableList;
 
 import code.ponfee.commons.extract.ExcelExtractor.ExcelType;
+import code.ponfee.commons.http.ContentType;
 
 /**
  * The fiel data extractor builder
@@ -25,7 +26,6 @@ public class DataExtractorBuilder {
 
     private static final List<String> EXCEL_EXTENSION = ImmutableList.of("xlsx", "xls");
     private static final List<String> CSV_EXTENSION = ImmutableList.of("csv", "txt");
-    private static final String CONTENT_TYPE_TEXT = "text/plain";
 
     private final Object dataSource; // only support such type as File, InputStream
     private final String fileName;
@@ -88,7 +88,7 @@ public class DataExtractorBuilder {
 
     public <T> DataExtractor<T> build() throws IOException {
         String extension = FilenameUtils.getExtension(fileName).toLowerCase();
-        if (CONTENT_TYPE_TEXT.equalsIgnoreCase(contentType)
+        if (ContentType.TEXT_PLAIN.value().equalsIgnoreCase(contentType)
             || CSV_EXTENSION.contains(extension)) {
             // csv, txt文本格式数据
             return new CsvExtractor<>(dataSource, headers, charset, csvFormat);
@@ -100,7 +100,8 @@ public class DataExtractorBuilder {
             // xls: application/vnd.ms-excel
             //      application/msword application/x-xls
             return new ExcelExtractor<>(dataSource, headers, startRow,
-                                        EnumUtils.getEnumIgnoreCase(ExcelType.class, extension), sheetIndex);
+                                        EnumUtils.getEnumIgnoreCase(ExcelType.class, extension), 
+                                        sheetIndex);
         } else {
             throw new RuntimeException("File content type not supported: " + fileName);
         }

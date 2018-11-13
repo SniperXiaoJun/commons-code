@@ -24,7 +24,7 @@ public enum ContentType {
     WILDCARD("*/*"), //
     ;
 
-    private final String value;
+    final String value;
 
     ContentType(String value) {
         this.value = value;

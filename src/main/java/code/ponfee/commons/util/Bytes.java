@@ -26,7 +26,7 @@ import code.ponfee.commons.math.Numbers;
  */
 public final class Bytes {
 
-    public static final byte[] EMPTY_BYTES = new byte[0];
+    public static final byte[] EMPTY_BYTES = {}; // new byte[0]
 
     private static final char SPACE_CHAR = ' ';
     private static final char[] HEX_LOWER_CODES = "0123456789abcdef".toCharArray();
