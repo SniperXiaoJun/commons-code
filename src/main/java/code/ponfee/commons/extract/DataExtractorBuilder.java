@@ -5,6 +5,7 @@ import static org.apache.commons.io.FilenameUtils.getExtension;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
@@ -29,13 +30,13 @@ public class DataExtractorBuilder {
     private final Object dataSource; // only support such type as File, InputStream
     private final String fileName;
     private final String contentType;
-
     private String[] headers;
 
     private int startRow = 0; // excel start row: start with 0
     private int sheetIndex = 0; // excel work book sheet index: start with 0
 
     private CSVFormat csvFormat; // csv format
+    private Charset charset; // csv data source charset
 
     private DataExtractorBuilder(Object dataSource, String fileName, 
                                  String contentType) {
@@ -80,12 +81,17 @@ public class DataExtractorBuilder {
         return this;
     }
 
+    public DataExtractorBuilder charset(Charset charset) {
+        this.charset = charset;
+        return this;
+    }
+
     public <T> DataExtractor<T> build() throws IOException {
         String extension = FilenameUtils.getExtension(fileName).toLowerCase();
         if (CONTENT_TYPE_TEXT.equalsIgnoreCase(contentType)
             || CSV_EXTENSION.contains(extension)) {
             // csv, txt文本格式数据
-            return new CsvExtractor<>(dataSource, headers, csvFormat);
+            return new CsvExtractor<>(dataSource, headers, charset, csvFormat);
         } else if (EXCEL_EXTENSION.contains(extension)) {
             // content-type
             // xlsx: application/vnd.openxmlformats-officedocument.wordprocessingml.document

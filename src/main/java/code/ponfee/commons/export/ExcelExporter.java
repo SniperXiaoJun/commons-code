@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -61,15 +62,15 @@ import code.ponfee.commons.util.Strings;
  * 
  * {@linkplain https://blog.csdn.net/zl_momomo/article/details/80703533}
  * 
- *  |--------------|----------------------------------------------------------|---------|
- *  |      模式           |                         说明                                                                              | 读写性       |
- *  |--------------|----------------------------------------------------------|---------|
- *  | SXSSF        | 内存中保留一定行数数据，超过行数，将索引最低的数据刷入硬盘       |  只写         |
- *  |--------------|----------------------------------------------------------|---------|
- *  | eventmodel   | 基于事件驱动,SAX的方式解析excel，cup和内存消耗低                              |  只读         |
- *  |--------------|----------------------------------------------------------|---------|
- *  | usermodel    | 传统方式，cpu和内存消耗大                                                                                         | 可读可写  |
- *  |--------------|----------------------------------------------------------|---------|
+ *  |--------------|----------------------------------------------------------|--------------|
+ *  |   model      |                         description                      | Read & Write |
+ *  |--------------|----------------------------------------------------------|--------------|
+ *  | SXSSF        | 内存中保留一定行数数据，超过行数，将索引最低的数据刷入硬盘。~                |      R       |
+ *  |--------------|----------------------------------------------------------|--------------|
+ *  | eventmodel   | 基于事件驱动,SAX的方式解析excel，cup和内存消耗低 ，。~                 |      R       |
+ *  |--------------|----------------------------------------------------------|--------------|
+ *  | usermodel    | 传统方式，cpu和内存消耗大。~                                     |     R & W    |
+ *  |--------------|----------------------------------------------------------|--------------|
  * 
  * @author fupf
  */
@@ -322,7 +323,11 @@ public class ExcelExporter extends AbstractExporter<byte[]> {
     }
 
     public void write(String filepath) {
-        try (OutputStream out = new FileOutputStream(filepath)) {
+        write(new File(filepath));
+    }
+
+    public void write(File file) {
+        try (OutputStream out = new FileOutputStream(file)) {
             write(out);
         } catch (IOException e) {
             throw new RuntimeException(e);

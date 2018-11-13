@@ -3,8 +3,6 @@ package code.ponfee.commons.util;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,8 +20,6 @@ import code.ponfee.commons.math.Numbers;
  * @author fupf
  */
 public class Strings {
-
-    public static final char SPACE_SEPARATOR = '\u0000';
 
     private static final String FOLDER_SEPARATOR = "/";
     private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
@@ -161,7 +157,7 @@ public class Strings {
                 result.add(deleteAny(str.substring(pos), charsToDelete));
             }
         }
-        return toStringArray(result);
+        return result.toArray(new String[result.size()]);
     }
 
     /**
@@ -337,29 +333,6 @@ public class Strings {
         return sb.toString();
     }
 
-    /**
-     * Collection转String[]
-     * @param collection 集合
-     * @return
-     */
-    public static String[] toStringArray(Collection<String> collection) {
-        if (collection == null) {
-            return null;
-        }
-        return collection.toArray(new String[collection.size()]);
-    }
-
-    /**
-     * Enumeration转String[]
-     * @param enumeration 枚举
-     * @return
-     */
-    public static String[] toStringArray(Enumeration<String> enumeration) {
-        if (enumeration == null) {
-            return null;
-        }
-        return toStringArray(Collections.list(enumeration));
-    }
 
     /** 
      * 驼峰转换为下划线 
@@ -511,7 +484,7 @@ public class Strings {
     }
 
     /**
-     * Parse a CSV string using {@link #csvSplit(List,String, int, int)}
+     * Parse a CSV string using {@link #csvSplit(List, String, int, int)}
      * 
      * @param s The string to parse
      * @param off The offset into the string to start parsing
@@ -654,4 +627,5 @@ public class Strings {
 
         return list;
     }
+
 }

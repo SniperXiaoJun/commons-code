@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -288,6 +289,16 @@ public class ExportTester {
         excel.build(table);
         IOUtils.write((byte[]) excel.export(), new FileOutputStream("d:/testExcel2.xlsx"));
         excel.close();
+    }
+    
+    @Test
+    public void testExcel3() throws IOException {
+        XSSFWorkbook wb = new XSSFWorkbook();
+        FileOutputStream out = new FileOutputStream("d:/test_empty.xlsx");
+        wb.createSheet();
+        wb.write(out);
+        wb.close();
+        out.close();
     }
 
     public static void main(String[] args) {
