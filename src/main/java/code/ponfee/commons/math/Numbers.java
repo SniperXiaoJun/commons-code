@@ -67,7 +67,7 @@ public final class Numbers {
         } else if (obj instanceof Boolean) {
             return (Boolean) obj;
         } else if (obj instanceof Number) {
-            return ((Number) obj).byteValue() == 0x00;
+            return ((Number) obj).byteValue() == BYTE_ZERO ? false : true;
         } else {
             return Boolean.parseBoolean(obj.toString());
         }

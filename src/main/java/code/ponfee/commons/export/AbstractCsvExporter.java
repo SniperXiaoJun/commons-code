@@ -21,7 +21,7 @@ public abstract class AbstractCsvExporter<T> extends AbstractExporter<T> {
 
     protected final Appendable csv;
     private final char csvSeparator;
-    private volatile boolean hasBuild = false;
+    private boolean hasBuild = false;
 
     public AbstractCsvExporter(Appendable csv) {
         this(csv, ',');
@@ -34,11 +34,15 @@ public abstract class AbstractCsvExporter<T> extends AbstractExporter<T> {
 
     @Override
     public final void build(Table table) {
-        if (hasBuild) {
-            throw new UnsupportedOperationException("Only support signle table.");
+        if (!hasBuild) {
+            synchronized (this) {
+                if (hasBuild) {
+                    throw new UnsupportedOperationException("Only support signle table.");
+                }
+                hasBuild = true;
+            }
         }
 
-        hasBuild = true;
         List<FlatNode<Integer>> thead = table.getThead();
         if (CollectionUtils.isEmpty(thead)) {
             throw new IllegalArgumentException("Thead cannot be null.");
@@ -57,9 +61,9 @@ public abstract class AbstractCsvExporter<T> extends AbstractExporter<T> {
                     }
                 }
                 csv.append(Files.SYSTEM_LINE_SEPARATOR); // 换行
-                if ((i & 0xFF) == 0) {
-                    this.flush();
-                }
+                //if ((i & 0xFF) == 0) {
+                //    this.flush();
+                //}
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
