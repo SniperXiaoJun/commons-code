@@ -8,6 +8,7 @@ import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Dictionary;
@@ -188,7 +189,7 @@ public final class ObjectUtils {
      * @throws Exception if occur error
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <T> T convert(Object value, Class<T> type) throws Exception {
+    public static <T> T convert(Object value, Class<T> type) {
         if (type.isPrimitive()) {
             // 原始类型
             //type = org.apache.commons.lang3.ClassUtils.primitiveToWrapper(type);
@@ -250,7 +251,11 @@ public final class ObjectUtils {
                     if (StringUtils.isNumeric(str) && !RegexUtils.isDatePattern(str)) {
                         value = new Date(Numbers.toLong(str));
                     } else {
-                        value = DateUtils.parseDate(str, DATE_PATTERN);
+                        try {
+                            value = DateUtils.parseDate(str, DATE_PATTERN);
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 } else {
                     throw new IllegalArgumentException("Illegal date time: " + value);
@@ -258,7 +263,11 @@ public final class ObjectUtils {
             } else if (CharSequence.class.isAssignableFrom(type)) {
                 // Construct a CharSequence
                 // e.g. new String(value.toString()) and new StringBuilder(value.toString())
-                value = type.getConstructor(String.class).newInstance(value.toString());
+                try {
+                    value = type.getConstructor(String.class).newInstance(value.toString());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 throw new ClassCastException(ClassUtils.getClassName(value.getClass())
                               + " cannot be cast to " + ClassUtils.getClassName(type));
