@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -328,35 +329,31 @@ public final class Collects {
     }
 
     /**
-     * 合并数组
+     * Returns a new array for merged the generic array generator
+     * 
      * @see org.apache.commons.lang3.ArrayUtils#addAll(T[] array1, T... array2)
-     * @param arrays
-     * @return The new array of merged
+     * @param generator the generic array generator
+     * @param arrays the multiple generic object array
+     * @return a new array of merged
      */
     @SuppressWarnings({ "unchecked", "hiding" })
-    public static <T> T[] concat(T[]... arrays) {
-        if (arrays == null) {
-            return null;
-        }
-
-        List<T> list = new ArrayList<>();
-        Class<?> type = null;
-        for (T[] array : arrays) {
-            if (array == null) continue;
-
-            if (type == null) {
-                type = array.getClass().getComponentType();
-            }
-            list.addAll(Arrays.asList(array));
-        }
-        if (type == null) {
-            return null;
-        }
-
-        return list.toArray((T[]) Array.newInstance(type, list.size()));
+    public static <T> T[] concat(IntFunction<T[]> generator, T[]... arrays) {
+        //Class<?> type = arrays[0][0].getClass();
+        //Class<?> type = arrays[0].getClass().getComponentType();
+        //return list.toArray((T[]) Array.newInstance(type, list.size()));
 
         // [Ljava.lang.Object; cannot be cast to [Ljava.lang.String;
         //return list.toArray((T[]) new Object[list.size()]);
+
+        if (ArrayUtils.isEmpty(arrays)) {
+            return null;
+        }
+
+        return Arrays.stream(arrays)
+                     .filter(ObjectUtils::isNotNull)
+                     .map(Arrays::stream)
+                     .flatMap(Function.identity())
+                     .toArray(generator);
     }
 
     /**

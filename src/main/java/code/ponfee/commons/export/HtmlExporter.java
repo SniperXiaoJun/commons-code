@@ -190,6 +190,13 @@ public class HtmlExporter extends AbstractExporter<String> {
         return this;
     }
 
+    // <img src="data:image/jpg;base64,/9j/4QMZR..." />
+    public HtmlExporter insertImage(String imageB64) {
+        super.nonEmpty();
+        html.append("<img src=\"").append(imageB64).append("\" />");
+        return this;
+    }
+
     // 创建简单表头
     /*private void buildSimpleThead(String[] theadName) {
         html.append("<thead><tr>");
