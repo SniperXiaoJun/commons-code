@@ -96,7 +96,7 @@ public final class Serializations {
                 throw new RuntimeException(e);
             }
         } else if (value instanceof Boolean) {
-            return new byte[] { (Boolean) value ? (byte) 0x01 : (byte) 0x00 };
+            return new byte[] { (Boolean) value ? (byte) 0xFF : (byte) 0x00 };
         } else if (value instanceof Byte) {
             return new byte[] { ((Byte) value).byteValue() };
         } else if (value instanceof Short) {
@@ -168,7 +168,7 @@ public final class Serializations {
         } else if (InputStream.class == type) {
             return (T) new ByteArrayInputStream(value);
         } else if (boolean.class == type || Boolean.class == type) {
-            return (T) (value[0] == 0x00 ? Boolean.FALSE : Boolean.TRUE);
+            return (T) (Boolean) (value[0] != 0x00);
         } else if (byte.class == type || Byte.class == type) {
             return (T) (Byte) value[0];
         } else if (short.class == type || Short.class == type) {

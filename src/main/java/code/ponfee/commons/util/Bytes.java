@@ -1,5 +1,6 @@
 package code.ponfee.commons.util;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -341,23 +342,65 @@ public final class Bytes {
       );
     }
 
+    // ---------------------------------------------------------BigDecimal
     /**
-     * int转byte
-     * @param n
-     * @param out
-     * @param offset
+     * Convert a BigDecimal value to a byte array
+     *
+     * @param val
+     * @return the byte array
      */
-    public static void toByteArray(int n, byte[] out, int offset) {
+    public static byte[] fromBigDecimal(BigDecimal val) {
+        byte[] valueBytes = val.unscaledValue().toByteArray();
+        byte[] result = new byte[valueBytes.length + Integer.BYTES];
+        int offset = putInt(val.scale(), result, 0);
+        System.arraycopy(valueBytes, 0, result, offset, valueBytes.length);
+        return result;
+    }
+
+    public static int putInt(int n, byte[] out, int offset) {
         out[  offset] = (byte) (n >>> 24);
         out[++offset] = (byte) (n >>> 16);
         out[++offset] = (byte) (n >>>  8);
         out[++offset] = (byte) (n       );
+        return ++offset;
     }
 
     /**
-     * 转BigInteger
+     * Converts a byte array to a BigDecimal
+     *
      * @param bytes
-     * @return
+     * @return the char value
+     */
+    public static BigDecimal toBigDecimal(byte[] bytes) {
+        return toBigDecimal(bytes, 0, bytes.length);
+    }
+
+    /**
+     * Converts a byte array to a BigDecimal value
+     *
+     * @param bytes
+     * @param offset
+     * @param length
+     * @return the char value
+     */
+    public static BigDecimal toBigDecimal(byte[] bytes, int offset, final int length) {
+        if (bytes == null || length < Integer.BYTES + 1 ||
+            (offset + length > bytes.length)) {
+            return null;
+        }
+
+        int scale = toInt(bytes, offset);
+        byte[] tcBytes = new byte[length - Integer.BYTES];
+        System.arraycopy(bytes, offset + Integer.BYTES, tcBytes, 0, length - Integer.BYTES);
+        return new BigDecimal(new BigInteger(tcBytes), scale);
+    }
+
+    // ---------------------------------------------------------BigInteger
+    /**
+     * Converts byte array to positive BigInteger
+     * 
+     * @param bytes the byte array
+     * @return a positive BigInteger number
      */
     public static BigInteger toBigInteger(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
@@ -366,6 +409,7 @@ public final class Bytes {
         return new BigInteger(1, bytes);
     }
 
+    // ----------------------------------------------------------others
     /**
      * merge byte arrays
      * @param first  first byte array of args

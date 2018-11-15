@@ -46,13 +46,15 @@ public final class Numbers {
             return (char) ((Number) obj).intValue();
         } else if (obj instanceof byte[]) {
             return Chars.fromByteArray((byte[]) obj);
+        } else if (obj instanceof Boolean) {
+            return (char) (((boolean) obj) ? 0xFF : 0x00);
         } else {
             String str = obj.toString();
             return str.length() == 1 ? str.charAt(0) : defaultVal;
         }
     }
 
-    // -----------------------------------------------------------------to primary number
+    // -----------------------------------------------------------------boolean convert
     public static boolean toBoolean(Object obj) {
         return toWrapBoolean(obj, false);
     }
@@ -67,12 +69,13 @@ public final class Numbers {
         } else if (obj instanceof Boolean) {
             return (Boolean) obj;
         } else if (obj instanceof Number) {
-            return ((Number) obj).byteValue() == BYTE_ZERO ? false : true;
+            return ((Number) obj).byteValue() != BYTE_ZERO;
         } else {
             return Boolean.parseBoolean(obj.toString());
         }
     }
 
+    // -----------------------------------------------------------------primary number convert
     public static byte toByte(Object obj) {
         return toByte(obj, (byte) 0);
     }
