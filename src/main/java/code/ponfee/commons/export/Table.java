@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Function;
 
 import org.springframework.util.CollectionUtils;
 
@@ -21,8 +22,9 @@ public class Table implements Serializable {
 
     private static final int ROOT_PID = 0;
 
-    private String caption; // 标题
     private final List<FlatNode<Integer>> thead; // 表头
+    private final Function<Object[], Object[]> convert; // 数据转换
+    private String caption; // 标题
     private Object[] tfoot; // 表尾
     private String comment; // 注释说明
     private Map<CellStyleOptions, Object> options; // 其它特殊配置项，如：{HIGHLIGHT:{\"cells\":[[2,15],[2,16]],\"color\":\"#f00\"}}
@@ -31,10 +33,12 @@ public class Table implements Serializable {
     private volatile boolean empty = true;
     private volatile boolean end = false;
 
-    public Table(List<FlatNode<Integer>> thead, String caption, 
-                 Object[] tfoot, String comment, 
+    public Table(List<FlatNode<Integer>> thead, 
+                 Function<Object[], Object[]> convert,
+                 String caption, Object[] tfoot, String comment, 
                  Map<CellStyleOptions, Object> options) {
         this.thead = thead;
+        this.convert = convert;
         this.caption = caption;
         this.tfoot = tfoot;
         this.comment = comment;
@@ -42,22 +46,41 @@ public class Table implements Serializable {
     }
 
     public Table(List<Thead> list) {
+        this(list, null);
+    }
+
+    public Table(List<Thead> list, Function<Object[], Object[]> convert) {
         this.thead = TreeNode.createRoot(ROOT_PID, null, 0)
                              .mount(list).flatHierarchy();
+        this.convert = convert;
     }
 
     public Table(String[] names) {
+        this(names, null);
+    }
+
+    public Table(String[] names, Function<Object[], Object[]> convert) {
         List<Thead> list = new ArrayList<>(names.length);
         for (int i = 0; i < names.length; i++) {
             list.add(new Thead(names[i], i + 1, ROOT_PID));
         }
         this.thead = TreeNode.createRoot(ROOT_PID, null, 0)
                              .mount(list).flatHierarchy();
+        this.convert = convert;
     }
 
     public Table copyOfWithoutTbody() {
-        return new Table(this.thead, this.caption, this.tfoot, 
+        return new Table(this.thead, this.convert, 
+                         this.caption, this.tfoot, 
                          this.comment, this.options);
+    }
+
+    public List<FlatNode<Integer>> getThead() {
+        return thead;
+    }
+
+    public Function<Object[], Object[]> getConvert() {
+        return convert;
     }
 
     public String getCaption() {
@@ -66,10 +89,6 @@ public class Table implements Serializable {
 
     public void setCaption(String caption) {
         this.caption = caption;
-    }
-
-    public List<FlatNode<Integer>> getThead() {
-        return thead;
     }
 
     public Object[] getTfoot() {

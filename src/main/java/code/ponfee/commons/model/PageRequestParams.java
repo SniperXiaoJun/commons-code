@@ -108,4 +108,8 @@ public class PageRequestParams implements java.io.Serializable {
         return params.get(key);
     }
 
+    public String getString(String key) {
+        return (String) get(key);
+    }
+
 }

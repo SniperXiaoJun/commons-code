@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE xml>
 <!--日志级别以及优先级排序： OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
-<!-- Log4j 2.x 配置文件：每30秒自动检查和应用配置文件的更新； -->
-<Configuration status="WARN" monitorInterval="30" strict="true" schema="Log4J-V2.10.xsd">
+<!-- Log4j 2.x 配置文件：每30秒自动检查和应用配置文件的更新；log4j-core-2.11.0.jar!/Log4j-config.xsd -->
+<Configuration status="WARN" monitorInterval="30" 
+               strict="true" name="commons-log">
 
     <properties>
         <property name="LOG_HOME">../logs</property>

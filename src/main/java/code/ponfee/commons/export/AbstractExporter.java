@@ -2,6 +2,7 @@ package code.ponfee.commons.export;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import code.ponfee.commons.tree.FlatNode;
@@ -38,12 +39,22 @@ public abstract class AbstractExporter<T> implements DataExporter<T> {
     protected final void rollingTbody(Table table,
         BiConsumer<Object[], Integer> action) {
         try {
-            Object[] data;
-            for (int i = 0; table.isNotEnd();) {
-                if ((data = table.poll()) != null) {
-                    action.accept(data, i++);
-                } else {
-                    Thread.sleep(AWAIT_TIME_MILLIS);
+            Object[] data; Function<Object[], Object[]> convert;
+            if ((convert = table.getConvert()) != null) {
+                for (int i = 0; table.isNotEnd();) {
+                    if ((data = table.poll()) != null) {
+                        action.accept(convert.apply(data), i++);
+                    } else {
+                        Thread.sleep(AWAIT_TIME_MILLIS);
+                    }
+                }
+            } else {
+                for (int i = 0; table.isNotEnd();) {
+                    if ((data = table.poll()) != null) {
+                        action.accept(data, i++);
+                    } else {
+                        Thread.sleep(AWAIT_TIME_MILLIS);
+                    }
                 }
             }
         } catch (InterruptedException e) {

@@ -30,7 +30,9 @@
 // */
 //public class PageMethodArgumentResolver implements HandlerMethodArgumentResolver {
 //
-//    private static final int MIN_PAGE_SIZE = 50;
+//    private static final int DEF_SIZE = 20;
+//    private static final int MAX_SIZE = 500;
+//
 //    private static final List<String> SIZE_PARAMS = Arrays.asList(
 //        DEFAULT_PAGE_SIZE, DEFAULT_LIMIT
 //    );
@@ -51,7 +53,7 @@
 //            if (PageRequestParams.PAGE_PARAMS.contains(entry.getKey())) {
 //                int value = Numbers.toInt(entry.getValue()[0], 0);
 //                if (value < 1 && SIZE_PARAMS.contaions(entry.getKey())) {
-//                    value = MIN_PAGE_SIZE;
+//                    value = DEF_SIZE;
 //                }
 //                Fields.put(page, entry.getKey(), value);
 //                page.put(entry.getKey(), value);
@@ -66,12 +68,17 @@
 //            }
 //        });
 //        if (page.getLimit() > 0) {
+//            if (page.getLimit() > MAX_SIZE) {
+//                page.setLimit(MAX_SIZE);
+//            }
 //            if (page.getOffset() < 0) {
 //                page.setOffset(0);
 //            }
 //        } else {
 //            if (page.getPageSize() < 1) {
-//                page.setPageSize(MIN_PAGE_SIZE);
+//                page.setPageSize(DEF_SIZE);
+//            } else if (page.getPageSize() > MAX_SIZE) {
+//                page.setPageSize(MAX_SIZE);
 //            }
 //            if (page.getPageNum() < 1) {
 //                page.setPageNum(1);
