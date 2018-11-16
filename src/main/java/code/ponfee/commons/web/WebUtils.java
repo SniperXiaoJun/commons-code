@@ -273,12 +273,12 @@ public final class WebUtils {
     }
 
     /**
-     * 允许跨站
+     * ross-Origin Resource Sharing
      * 
      * @param req  the HttpServletRequest
      * @param resp the HttpServletResponse
      */
-    public static void cross(HttpServletRequest req, HttpServletResponse resp) {
+    public static void cors(HttpServletRequest req, HttpServletResponse resp) {
         String origin = req.getHeader("Origin");
         origin = StringUtils.isEmpty(origin) ? "*" : origin;
         resp.setHeader("Access-Control-Allow-Origin", origin);
@@ -290,7 +290,7 @@ public final class WebUtils {
                   : headers;
         resp.setHeader("Access-Control-Allow-Headers", headers);
 
-        resp.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+        resp.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,HEAD,OPTIONS");
         resp.setHeader("Access-Control-Max-Age", "0");
         resp.setHeader("Access-Control-Allow-Credentials", "true");
         resp.setHeader("XDomainRequestAllowed", "1");

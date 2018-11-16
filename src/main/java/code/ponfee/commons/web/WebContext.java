@@ -134,14 +134,14 @@ public final class WebContext {
             DispatcherType.ERROR
         }, 
         urlPatterns = { "/*" }, 
-        initParams = { @WebInitParam(name = "cross", value = "true") },
+        initParams = { @WebInitParam(name = "cors", value = "true") },
         asyncSupported = true // 支持异步Servlet
     )
     public static class WebContextFilter implements Filter {
-        private boolean cross;
+        private boolean cors;
 
         public @Override void init(FilterConfig cfg) {
-            cross = Boolean.parseBoolean(cfg.getInitParameter("cross"));
+            cors = Boolean.parseBoolean(cfg.getInitParameter("cors"));
         }
 
         public @Override void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) 
@@ -149,8 +149,8 @@ public final class WebContext {
             try {
                 WebContext.setRequest((HttpServletRequest) req);
                 WebContext.setResponse((HttpServletResponse) resp);
-                if (cross) {
-                    WebUtils.cross((HttpServletRequest) req, (HttpServletResponse) resp);
+                if (cors) {
+                    WebUtils.cors((HttpServletRequest) req, (HttpServletResponse) resp);
                 }
                 chain.doFilter(req, resp);
             } finally {

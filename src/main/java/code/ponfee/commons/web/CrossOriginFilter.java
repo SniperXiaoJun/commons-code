@@ -92,6 +92,7 @@ import code.ponfee.commons.util.Strings;
  * </dl>
  * A typical configuration could be:
  * 
+ * Plan one:
  * <pre>
  *  〈filter>
  *    〈filter-name>cross-origin</filter-name>
@@ -117,6 +118,17 @@ import code.ponfee.commons.util.Strings;
  * 
  * Modify from org.eclipse.jetty.servlets.CrossOriginFilter
  * @see org.eclipse.jetty.servlets.CrossOriginFilter
+ * 
+ * 
+ * Plan two: Spring mvc xml config
+ *  <mvc:cors>
+ *    <mvc:mapping path="/**" 
+ *      allowed-origins="${allowed_origins}" 
+ *      allowed-methods="GET,POST,PUT,DELETE,HEAD,OPTIONS" 
+ *      allowed-headers="X-Requested-With,Content-Type,Accept,Origin,LastModified,Authorization" 
+ *      exposed-headers="SetCookie" allow-credentials="true" />
+ *    <mvc:mapping path="/api/**" allowed-origins="http://domain1.com" />
+ *  </mvc:cors>
  * 
  */
 public class CrossOriginFilter implements Filter {
