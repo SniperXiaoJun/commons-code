@@ -6,6 +6,8 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.base.Preconditions;
+
 import code.ponfee.commons.concurrent.MultithreadExecutor;
 import code.ponfee.commons.util.Holder;
 
@@ -23,6 +25,7 @@ public abstract class AbstractSplitExporter extends AbstractExporter<Void> {
 
     public AbstractSplitExporter(int batchSize, String savingFilePathPrefix, 
                                  String fileSuffix, ExecutorService executor) {
+        Preconditions.checkArgument(batchSize > 0);
         this.batchSize = batchSize;
         this.savingFilePathPrefix = savingFilePathPrefix;
         this.fileSuffix = fileSuffix;

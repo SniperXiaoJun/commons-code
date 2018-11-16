@@ -23,7 +23,7 @@ public class Table implements Serializable {
     private static final int ROOT_PID = 0;
 
     private final List<FlatNode<Integer>> thead; // 表头
-    private final Function<Object[], Object[]> convert; // 数据转换
+    private final Function<Object[], Object[]> converter; // 数据转换
     private String caption; // 标题
     private Object[] tfoot; // 表尾
     private String comment; // 注释说明
@@ -34,11 +34,11 @@ public class Table implements Serializable {
     private volatile boolean end = false;
 
     public Table(List<FlatNode<Integer>> thead, 
-                 Function<Object[], Object[]> convert,
+                 Function<Object[], Object[]> converter,
                  String caption, Object[] tfoot, String comment, 
                  Map<CellStyleOptions, Object> options) {
         this.thead = thead;
-        this.convert = convert;
+        this.converter = converter;
         this.caption = caption;
         this.tfoot = tfoot;
         this.comment = comment;
@@ -49,28 +49,28 @@ public class Table implements Serializable {
         this(list, null);
     }
 
-    public Table(List<Thead> list, Function<Object[], Object[]> convert) {
+    public Table(List<Thead> list, Function<Object[], Object[]> converter) {
         this.thead = TreeNode.createRoot(ROOT_PID, null, 0)
                              .mount(list).flatHierarchy();
-        this.convert = convert;
+        this.converter = converter;
     }
 
     public Table(String[] names) {
         this(names, null);
     }
 
-    public Table(String[] names, Function<Object[], Object[]> convert) {
+    public Table(String[] names, Function<Object[], Object[]> converter) {
         List<Thead> list = new ArrayList<>(names.length);
         for (int i = 0; i < names.length; i++) {
             list.add(new Thead(names[i], i + 1, ROOT_PID));
         }
         this.thead = TreeNode.createRoot(ROOT_PID, null, 0)
                              .mount(list).flatHierarchy();
-        this.convert = convert;
+        this.converter = converter;
     }
 
     public Table copyOfWithoutTbody() {
-        return new Table(this.thead, this.convert, 
+        return new Table(this.thead, this.converter, 
                          this.caption, this.tfoot, 
                          this.comment, this.options);
     }
@@ -79,8 +79,8 @@ public class Table implements Serializable {
         return thead;
     }
 
-    public Function<Object[], Object[]> getConvert() {
-        return convert;
+    public Function<Object[], Object[]> getConverter() {
+        return converter;
     }
 
     public String getCaption() {

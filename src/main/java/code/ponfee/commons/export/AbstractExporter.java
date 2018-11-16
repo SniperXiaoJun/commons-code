@@ -39,11 +39,11 @@ public abstract class AbstractExporter<T> implements DataExporter<T> {
     protected final void rollingTbody(Table table,
         BiConsumer<Object[], Integer> action) {
         try {
-            Object[] data; Function<Object[], Object[]> convert;
-            if ((convert = table.getConvert()) != null) {
+            Object[] data; Function<Object[], Object[]> converter;
+            if ((converter = table.getConverter()) != null) {
                 for (int i = 0; table.isNotEnd();) {
                     if ((data = table.poll()) != null) {
-                        action.accept(convert.apply(data), i++);
+                        action.accept(converter.apply(data), i++);
                     } else {
                         Thread.sleep(AWAIT_TIME_MILLIS);
                     }

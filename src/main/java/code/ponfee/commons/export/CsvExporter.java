@@ -44,7 +44,7 @@ public class CsvExporter extends AbstractCsvExporter<String> {
 
     @Override
     public void close() {
-        ((StringBuilder) super.csv).setLength(0);
+        //((StringBuilder) super.csv).setLength(0);
     }
 
 }
