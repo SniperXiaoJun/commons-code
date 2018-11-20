@@ -174,7 +174,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
      * @param cell
      * @return
      */
-    private static String getCellValueAsString(Cell cell) {
+    private String getCellValueAsString(Cell cell) {
         if (cell == null) {
             return StringUtils.EMPTY;
         }
@@ -183,7 +183,9 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return String.valueOf(cell.getDateCellValue());
                 } else {
-                    cell.setCellType(CellType.STRING);
+                    if (this.type == ExcelType.XLS) {
+                        cell.setCellType(CellType.STRING);
+                    }
                     return cell.getStringCellValue();
                 }
             case STRING:
@@ -191,7 +193,9 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
             case BOOLEAN:
                 return Boolean.toString(cell.getBooleanCellValue());
             case FORMULA:
-                cell.setCellType(CellType.STRING);
+                if (this.type == ExcelType.XLS) {
+                    cell.setCellType(CellType.STRING);
+                }
                 return cell.getStringCellValue();
             case BLANK: // 空值
             case ERROR: // 错误

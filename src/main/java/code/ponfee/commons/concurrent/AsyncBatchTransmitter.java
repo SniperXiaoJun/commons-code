@@ -144,7 +144,7 @@ public final class AsyncBatchTransmitter<T> {
         }
 
         /**
-         * thread run, don't to direct call into the code
+         * thread inner run, don't to direct call this method
          * it is a thread and the alone thread
          */
         public @Override void run() {
