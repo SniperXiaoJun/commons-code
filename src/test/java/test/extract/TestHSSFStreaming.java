@@ -22,28 +22,21 @@ public class TestHSSFStreaming {
 
     @Test
     public void test1() throws InterruptedException {
-        String file = "e:/data_expert.xls";
-        //String file = "e:/writeTest2.xls";
+        //String file = "e:/data_expert.xls";
+        String file = "e:/writeTest2.xls";
         HSSFStreamingWorkbook wb = HSSFStreamingReader.create(/*40, 0*/).open(file, exec);
         HSSFStreamingSheet sheet = (HSSFStreamingSheet) wb.getSheetAt(0);
-        int count = 0;
         for (Row row : sheet) {
             System.out.print(row.getRowNum() + ", " + ((HSSFStreamingRow) row).getRowOrder() + ":  ");
             for (Cell cell : row) {
-                System.out.print(cell == null ? "null," : cell.getStringCellValue() + ", ");
+                System.out.print(cell == null ? "null, " : cell.getStringCellValue() + ", ");
             }
             System.out.println();
-            count++;
         }
-        System.out.println(count); 
-        
-        System.out.println("=============================");
+        System.out.println();
         for (Iterator<Sheet> iter = wb.iterator(); iter.hasNext();) {
             HSSFStreamingSheet sst = (HSSFStreamingSheet) iter.next();
-            System.out.println(sheet.getCacheRowCount());
-            System.out.println(sst.getSheetIndex());
-            System.out.println(sst.getSheetName());
-            System.out.println("***");
+            System.out.println("SheetIndex: "+sst.getSheetIndex()+"，SheetName: "+sst.getSheetName()+"，"+"acheRowCount: "+sheet.getCacheRowCount());
         }
     }
 

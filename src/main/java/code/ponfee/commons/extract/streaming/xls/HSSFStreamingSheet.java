@@ -101,11 +101,10 @@ public class HSSFStreamingSheet implements Sheet {
         public boolean hasNext() {
             try {
                 while (!sheet.isEnd()) {
-                    if (currentRow == null) {
-                        currentRow = sheet.rows.poll();
-                        if (currentRow != null) {
-                            return true;
-                        }
+                    if (   (currentRow == null)
+                        && ((currentRow = sheet.rows.poll()) != null)
+                    ) {
+                        return true;
                     }
                     Thread.sleep(HSSFStreamingWorkbook.AWAIT_MILLIS);
                 }
@@ -450,7 +449,8 @@ public class HSSFStreamingSheet implements Sheet {
     }
 
     @Override
-    public void shiftRows(int startRow, int endRow, int n, boolean copyRowHeight, boolean resetOriginalRowHeight) {
+    public void shiftRows(int startRow, int endRow, int n,
+        boolean copyRowHeight, boolean resetOriginalRowHeight) {
         throw new UnsupportedOperationException();
     }
 
@@ -460,7 +460,8 @@ public class HSSFStreamingSheet implements Sheet {
     }
 
     @Override
-    public void createFreezePane(int colSplit, int rowSplit, int leftmostColumn, int topRow) {
+    public void createFreezePane(int colSplit, int rowSplit,
+        int leftmostColumn, int topRow) {
         throw new UnsupportedOperationException();
     }
 
@@ -470,7 +471,8 @@ public class HSSFStreamingSheet implements Sheet {
     }
 
     @Override
-    public void createSplitPane(int xSplitPos, int ySplitPos, int leftmostColumn, int topRow, int activePane) {
+    public void createSplitPane(int xSplitPos, int ySplitPos,
+        int leftmostColumn, int topRow, int activePane) {
         throw new UnsupportedOperationException();
     }
 
@@ -620,7 +622,8 @@ public class HSSFStreamingSheet implements Sheet {
     }
 
     @Override
-    public CellRange<? extends Cell> setArrayFormula(String formula, CellRangeAddress range) {
+    public CellRange<? extends Cell> setArrayFormula(String formula,
+        CellRangeAddress range) {
         throw new UnsupportedOperationException();
     }
 
