@@ -58,7 +58,7 @@ public class HSSFStreamingSheet implements Sheet {
         end = true;
     }
 
-    boolean isEnd() {
+    private boolean isEnd() {
         return end && rows.isEmpty();
     }
 
@@ -101,9 +101,11 @@ public class HSSFStreamingSheet implements Sheet {
         public boolean hasNext() {
             try {
                 while (!sheet.isEnd()) {
-                    currentRow = sheet.rows.poll();
-                    if (currentRow != null) {
-                        return true;
+                    if (currentRow == null) {
+                        currentRow = sheet.rows.poll();
+                        if (currentRow != null) {
+                            return true;
+                        }
                     }
                     Thread.sleep(HSSFStreamingWorkbook.AWAIT_MILLIS);
                 }

@@ -1,4 +1,4 @@
-package code.ponfee.commons.extract;
+package code.ponfee.commons.extract.streaming;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import com.monitorjbl.xlsx.StreamingReader;
 
 import code.ponfee.commons.concurrent.ThreadPoolExecutors;
+import code.ponfee.commons.extract.ExcelExtractor;
 import code.ponfee.commons.extract.streaming.xls.HSSFStreamingReader;
 
 /**

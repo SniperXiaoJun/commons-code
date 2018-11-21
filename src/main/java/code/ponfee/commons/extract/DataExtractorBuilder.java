@@ -15,6 +15,7 @@ import org.apache.commons.lang3.EnumUtils;
 import com.google.common.collect.ImmutableList;
 
 import code.ponfee.commons.extract.ExcelExtractor.ExcelType;
+import code.ponfee.commons.extract.streaming.StreamingExcelExtractor;
 import code.ponfee.commons.http.ContentType;
 
 /**
