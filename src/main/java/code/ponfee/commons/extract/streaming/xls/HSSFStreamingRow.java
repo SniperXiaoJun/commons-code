@@ -1,7 +1,7 @@
-package code.ponfee.commons.extract.xls;
+package code.ponfee.commons.extract.streaming.xls;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -10,9 +10,17 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
+/**
+ * The version for 2003 or early XSL excel file 
+ * streaming reader
+ * 
+ * excel row
+ * 
+ * @author Ponfee
+ */
 public class HSSFStreamingRow implements Row {
 
-    private final List<Cell> cells = new LinkedList<>();
+    private final List<Cell> cells = new ArrayList<>();
     private final Sheet sheet;
     private final int rowNum;
 
@@ -42,6 +50,16 @@ public class HSSFStreamingRow implements Row {
     }
 
     @Override
+    public Cell getCell(int cellnum, MissingCellPolicy policy) {
+        return getCell(cellnum);
+    }
+
+    @Override
+    public short getLastCellNum() {
+        return (short) (cells.size() - 1);
+    }
+
+    @Override
     public int getPhysicalNumberOfCells() {
         return this.cells.size();
     }
@@ -56,8 +74,18 @@ public class HSSFStreamingRow implements Row {
         return this.sheet;
     }
 
-    public void addCell(Cell cell) {
-        this.cells.add(cell);
+    public void addCell(int index, Cell cell) {
+        int size;
+        if (index == (size = this.cells.size())) {
+            this.cells.add(cell);
+        } else if (index < size) {
+            this.cells.set(index, cell);
+        } else {
+            for (int i = size; i < index; i++) {
+                this.cells.add(null);
+            }
+            this.cells.add(cell);
+        }
     }
 
     // ----------------------------------------------unsupported operation
@@ -77,17 +105,7 @@ public class HSSFStreamingRow implements Row {
     }
 
     @Override
-    public Cell getCell(int cellnum, MissingCellPolicy policy) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public short getFirstCellNum() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public short getLastCellNum() {
         throw new UnsupportedOperationException();
     }
 

@@ -1,9 +1,10 @@
-package code.ponfee.commons.extract.xls;
+package code.ponfee.commons.extract.streaming.xls;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.poi.ss.usermodel.AutoFilter;
@@ -26,57 +27,39 @@ import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.PaneInformation;
 
+/**
+ * The version for 2003 or early XSL excel file 
+ * streaming reader
+ * 
+ * excel sheet
+ * 
+ * @author Ponfee
+ */
 public class HSSFStreamingSheet implements Sheet {
-
-    private static class HSSFStreamingSheetIterator implements Iterator<Row> {
-
-        final HSSFStreamingSheet sheet;
-        Row currentRow;
-
-        HSSFStreamingSheetIterator(HSSFStreamingSheet sheet) {
-            this.sheet = sheet;
-        }
-
-        @Override
-        public boolean hasNext() {
-            try {
-                while (!sheet.isEnd()) {
-                    currentRow = sheet.queue.poll();
-                    if (currentRow != null) {
-                        return true;
-                    }
-                    Thread.sleep(31);
-                }
-                return false;
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public Row next() {
-            return currentRow;
-        }
-    }
 
     private final int index;
     private final String name;
-    private final LinkedBlockingQueue<Row> queue = new LinkedBlockingQueue<>();
-    private final HSSFStreamingSheetIterator iterator;
+    private final BlockingQueue<Row> rows;
+    private final RowsIterator iterator;
     private volatile boolean end = false;
 
-    public HSSFStreamingSheet(int index, String name) {
+    public HSSFStreamingSheet(int index, int rowCacheSize, String name) {
         this.index = index;
         this.name = name;
-        this.iterator = new HSSFStreamingSheetIterator(this);
-    }
-
-    public boolean isEnd() {
-        return end && queue.isEmpty();
+        this.iterator = new RowsIterator(this);
+        if (rowCacheSize > 0) {
+            this.rows = new LinkedBlockingQueue<>(rowCacheSize);
+        } else {
+            this.rows = new LinkedBlockingQueue<>();
+        }
     }
 
     void end() {
         end = true;
+    }
+
+    boolean isEnd() {
+        return end && rows.isEmpty();
     }
 
     @Override
@@ -98,8 +81,44 @@ public class HSSFStreamingSheet implements Sheet {
         return this.index;
     }
 
+    public int getCacheRowCount() {
+        return this.rows.size();
+    }
+
     boolean putRow(Row row) {
-        return this.queue.offer(row);
+        return this.rows.offer(row);
+    }
+
+    private static class RowsIterator implements Iterator<Row> {
+        final HSSFStreamingSheet sheet;
+        Row currentRow;
+
+        RowsIterator(HSSFStreamingSheet sheet) {
+            this.sheet = sheet;
+        }
+
+        @Override
+        public boolean hasNext() {
+            try {
+                while (!sheet.isEnd()) {
+                    currentRow = sheet.rows.poll();
+                    if (currentRow != null) {
+                        return true;
+                    }
+                    Thread.sleep(HSSFStreamingWorkbook.AWAIT_MILLIS);
+                }
+                return false;
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public Row next() {
+            Row res = currentRow;
+            currentRow = null;
+            return res;
+        }
     }
 
     // ----------------------------------------------unsupported operation

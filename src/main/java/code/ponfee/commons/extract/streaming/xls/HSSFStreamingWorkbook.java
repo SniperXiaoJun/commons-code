@@ -1,4 +1,4 @@
-package code.ponfee.commons.extract.xls;
+package code.ponfee.commons.extract.streaming.xls;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFRequest;
@@ -34,93 +35,49 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.usermodel.Workbook;
 
-public class HSSFStreamingWorkbook implements Workbook, HSSFListener, AutoCloseable {
+/**
+ * The version for 2003 or early XSL excel file 
+ * streaming reader
+ * 
+ * excel workbook
+ * 
+ * @author Ponfee
+ */
+public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
 
-    private volatile boolean readAllSheet = false;
+    public static final int AWAIT_MILLIS = 7;
 
-    private int currentSheetIndex = -1; // start with 0
-    private HSSFStreamingSheet currentSheet;
-
-    private volatile int currentRowIndex = -1; // start with 0
-    private volatile HSSFStreamingRow currentRow;
-
+    private volatile boolean allSheetReadied = false;
     private final List<Sheet> sheets = new ArrayList<>();
-    private SSTRecord sstrec;
 
-    /**
-     * This method listens for incoming records and handles them as required.
-     * 
-     * @param record the record that was found while reading.
-     */
-    @Override
-    public void processRecord(Record record) {
-        if (record instanceof BOFRecord) { // beginning of a sheet or the workbook
-            BOFRecord bof = (BOFRecord) record;
-            if (bof.getType() == BOFRecord.TYPE_WORKBOOK) {
-                // beginning the workbook
-            } else if (bof.getType() == BOFRecord.TYPE_WORKSHEET) {
-                readAllSheet = true;
-                // beginning a sheet
-                if (currentSheet != null) {
-                    if (currentRow != null) {
-                        currentSheet.putRow(currentRow);
-                    }
-                    currentSheet.end();
-                }
-                currentRow = null;
-                currentSheet = (HSSFStreamingSheet) sheets.get(++currentSheetIndex);
-            } else {
-                // others uncapture
-                System.err.println("Others uncapture BOFRecord " + bof);
-            }
-        } else if (record instanceof BoundSheetRecord) { // the workbook all of sheet
-            BoundSheetRecord bsr = (BoundSheetRecord) record;
-            sheets.add(new HSSFStreamingSheet(sheets.size(), bsr.getSheetname()));
-        } else if (record instanceof RowRecord) {// batch row loading
-            // nothing todo
-        } else if (record instanceof SSTRecord) {// store a array of unique strings used in Excel.
-            sstrec = (SSTRecord) record;
-        } else if (record instanceof CellRecord) {
-            CellRecord cellrec = (CellRecord) record;
-            if (currentRowIndex != cellrec.getRow()) { // new row
-                if (currentRow != null) {
-                    currentSheet.putRow(currentRow);
-                }
-                currentRowIndex = cellrec.getRow();
-                currentRow = new HSSFStreamingRow(currentSheet, currentRowIndex);
-            }
-            currentRow.addCell(new HSSFStreamingCell((int) cellrec.getColumn(), getCellAsString(cellrec)));
-        } else {
-            //System.err.println("Others uncapture Record " + record);
-        }
-    }
-
-    public HSSFStreamingWorkbook(InputStream input, ThreadPoolExecutor executor) {
-        //new Thread(new Async(this, input)).start();
-        executor.submit(new Async(this, input));
+    public HSSFStreamingWorkbook(InputStream input, int rowCacheSize, 
+                                 int[] sheetIndexs, String[] sheetNames, 
+                                 ThreadPoolExecutor executor) {
+        executor.submit(new AsyncHSSFReader(rowCacheSize, sheetIndexs, 
+                                            sheetNames, input));
     }
 
     @Override
     public Iterator<Sheet> iterator() {
-        whileReadAllSheet();
+        awaitReadAllSheet();
         return sheets.iterator();
     }
 
     @Override
     public Iterator<Sheet> sheetIterator() {
-        whileReadAllSheet();
+        awaitReadAllSheet();
         return iterator();
     }
 
     @Override
     public String getSheetName(int sheet) {
-        whileReadAllSheet();
+        awaitReadAllSheet();
         return sheets.get(sheet).getSheetName();
     }
 
     @Override
     public int getSheetIndex(String name) {
-        whileReadAllSheet();
+        awaitReadAllSheet();
         for (int i = 0; i < sheets.size(); i++) {
             if (sheets.get(i).getSheetName().equals(name)) {
                 return i;
@@ -131,7 +88,7 @@ public class HSSFStreamingWorkbook implements Workbook, HSSFListener, AutoClosea
 
     @Override
     public int getSheetIndex(Sheet sheet) {
-        whileReadAllSheet();
+        awaitReadAllSheet();
         for (int i = 0; i < sheets.size(); i++) {
             if (sheets.get(i) == sheet) {
                 return i;
@@ -142,19 +99,19 @@ public class HSSFStreamingWorkbook implements Workbook, HSSFListener, AutoClosea
 
     @Override
     public int getNumberOfSheets() {
-        whileReadAllSheet();
+        awaitReadAllSheet();
         return sheets.size();
     }
 
     @Override
     public Sheet getSheetAt(int index) {
-        whileReadAllSheet();
+        awaitReadAllSheet();
         return sheets.size() > index ? sheets.get(index) : null;
     }
 
     @Override
     public Sheet getSheet(String name) {
-        whileReadAllSheet();
+        awaitReadAllSheet();
         for (Sheet sheet : sheets) {
             if (sheet.getSheetName().equals(name)) {
                 return sheet;
@@ -163,40 +120,44 @@ public class HSSFStreamingWorkbook implements Workbook, HSSFListener, AutoClosea
         return null;
     }
 
-    private void readEnd() {
-        if (currentSheet != null && currentRow != null) {
-            currentSheet.putRow(currentRow);
-        }
-        sheets.stream().forEach(s -> ((HSSFStreamingSheet) s).end());
-        readAllSheet = true;
+    @Override
+    public void close() throws IOException {
+        // nothing todo
     }
 
-    private String getCellAsString(CellRecord cell) {
-        if (cell instanceof NumberRecord) {
-            return String.valueOf(((NumberRecord) cell).getValue());
-        } else if (cell instanceof LabelSSTRecord) {
-            return sstrec.getString(((LabelSSTRecord) cell).getSSTIndex()).getString();
-        } else {
-            return null;
-        }
-    }
-
-    private void whileReadAllSheet() {
+    private void awaitReadAllSheet() {
         try {
-            while (!readAllSheet) {
-                Thread.sleep(31);
+            while (!allSheetReadied) {
+                Thread.sleep(AWAIT_MILLIS);
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private class Async implements Runnable {
-        final HSSFStreamingWorkbook streamming;
+    /**
+     * Runs in alone thread
+     */
+    private class AsyncHSSFReader implements HSSFListener, Runnable {
         final InputStream input;
+        final int rowCacheSize;
+        final int[] sheetIndexs;
+        final String[] sheetNames;
 
-        Async(HSSFStreamingWorkbook streamming, InputStream input) {
-            this.streamming = streamming;
+        int currentSheetIndex = -1; // start with 0
+        HSSFStreamingSheet currentSheet;
+        boolean discardCurrentSheet;
+
+        int currentRowIndex = -1; // start with 0
+        HSSFStreamingRow currentRow;
+
+
+        SSTRecord sstrec;
+
+        AsyncHSSFReader(int rowCacheSize, int[] sheetIndexs, String[] sheetNames, InputStream input) {
+            this.rowCacheSize = rowCacheSize;
+            this.sheetIndexs = sheetIndexs;
+            this.sheetNames = sheetNames;
             this.input = input;
         }
 
@@ -207,12 +168,101 @@ public class HSSFStreamingWorkbook implements Workbook, HSSFListener, AutoClosea
                  DocumentInputStream doc = poifs.createDocumentInputStream("Workbook")
             ) {
                 HSSFRequest request = new HSSFRequest();
-                request.addListenerForAllRecords(streamming);
+                request.addListenerForAllRecords(this);
                 new HSSFEventFactory().processEvents(request, doc);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } finally {
-                streamming.readEnd();
+                this.endRead();
+            }
+        }
+
+        /**
+         * This method listens for incoming records and handles them as required.
+         * 
+         * @param record the record that was found while reading.
+         */
+        @Override
+        public void processRecord(Record record) {
+            if (record instanceof BOFRecord) { // beginning of a sheet or the workbook
+                BOFRecord bof = (BOFRecord) record;
+                if (bof.getType() == BOFRecord.TYPE_WORKBOOK) {
+                    // beginning the workbook
+                } else if (bof.getType() == BOFRecord.TYPE_WORKSHEET) {
+                    allSheetReadied = true;
+                    // beginning a sheet
+                    if (currentSheet != null) {
+                        if (currentRow != null) {
+                            rowRead();
+                        }
+                        currentSheet.end();
+                    }
+                    currentRow = null;
+                    currentSheet = (HSSFStreamingSheet) sheets.get(++currentSheetIndex);
+                    discardCurrentSheet = isDiscard(currentSheet.getSheetIndex(), currentSheet.getSheetName());
+                } else {
+                    // others uncapture
+                    System.err.println("Others uncapture BOFRecord " + bof);
+                }
+            } else if (record instanceof BoundSheetRecord) { // the workbook all of sheet
+                BoundSheetRecord bsr = (BoundSheetRecord) record;
+                sheets.add(new HSSFStreamingSheet(sheets.size(), rowCacheSize, bsr.getSheetname()));
+            } else if (record instanceof RowRecord) {// batch row loading
+                // nothing todo
+            } else if (record instanceof SSTRecord) {// store a array of unique strings used in Excel.
+                sstrec = (SSTRecord) record;
+            } else if (record instanceof CellRecord) {
+                CellRecord cell = (CellRecord) record;
+                if (currentRowIndex != cell.getRow()) { // new row
+                    if (currentRow != null) {
+                        rowRead();
+                    }
+                    currentRowIndex = cell.getRow();
+                    currentRow = new HSSFStreamingRow(currentSheet, currentRowIndex);
+                }
+                currentRow.addCell((int) cell.getColumn(), new HSSFStreamingCell(getStringCellValue(cell)));
+            } else {
+                //System.err.println("Others uncapture Record " + record);
+            }
+        }
+
+        void endRead() {
+            if (currentSheet != null && currentRow != null) {
+                rowRead(); // last row
+            }
+            sheets.stream().forEach(s -> ((HSSFStreamingSheet) s).end());
+            allSheetReadied = true;
+        }
+
+        void rowRead() {
+            if (discardCurrentSheet) {
+                return;
+            }
+            try {
+                while (!this.currentSheet.putRow(currentRow)) {
+                    Thread.sleep(AWAIT_MILLIS);
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        boolean isDiscard(int sheetIndex, String sheetName) {
+            if (   ArrayUtils.isEmpty(sheetIndexs)
+                && ArrayUtils.isEmpty(sheetNames)) {
+                return false;
+            }
+            return !ArrayUtils.contains(sheetIndexs, sheetIndex)
+                && !ArrayUtils.contains(sheetNames, sheetName);
+        }
+
+        String getStringCellValue(CellRecord cell) {
+            if (cell instanceof NumberRecord) {
+                return String.valueOf(((NumberRecord) cell).getValue());
+            } else if (cell instanceof LabelSSTRecord) {
+                return sstrec.getString(((LabelSSTRecord) cell).getSSTIndex()).getString();
+            } else {
+                return null;
             }
         }
     }
@@ -225,11 +275,6 @@ public class HSSFStreamingWorkbook implements Workbook, HSSFListener, AutoClosea
 
     @Override
     public boolean isSheetVeryHidden(int sheetIx) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void close() throws IOException {
         throw new UnsupportedOperationException();
     }
 

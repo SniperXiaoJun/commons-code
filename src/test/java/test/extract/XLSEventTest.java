@@ -17,6 +17,7 @@ import org.apache.poi.hssf.eventusermodel.HSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFRequest;
 import org.apache.poi.hssf.record.BOFRecord;
 import org.apache.poi.hssf.record.BoundSheetRecord;
+import org.apache.poi.hssf.record.ExtSSTRecord;
 import org.apache.poi.hssf.record.LabelSSTRecord;
 import org.apache.poi.hssf.record.NumberRecord;
 import org.apache.poi.hssf.record.Record;
@@ -50,6 +51,8 @@ public class XLSEventTest
                     // assigned to the class level member
                 } else if (bof.getType() == BOFRecord.TYPE_WORKSHEET) {
                     System.out.println("Encountered sheet reference");
+                } else {
+                    System.out.println("others "+bof);
                 }
                 break;
             case BoundSheetRecord.sid:
@@ -58,13 +61,7 @@ public class XLSEventTest
                 break;
             case RowRecord.sid:
                 RowRecord rowrec = (RowRecord) record;
-                System.out.println("Row found, first column at "
-                    + rowrec.getFirstCol() + " last column at " + rowrec.getLastCol());
-                break;
-            case NumberRecord.sid:
-                NumberRecord numrec = (NumberRecord) record;
-                System.out.println("Cell found with value " + numrec.getValue()
-                    + " at row " + numrec.getRow() + " and column " + numrec.getColumn());
+                System.out.println("Row found "+rowrec.getRowNumber()+", first column at " + rowrec.getFirstCol() + " last column at " + rowrec.getLastCol());
                 break;
             // SSTRecords store a array of unique strings used in Excel.
             case SSTRecord.sid:
@@ -73,11 +70,21 @@ public class XLSEventTest
                     System.out.println("String table value " + k + " = " + sstrec.getString(k));
                 }
                 break;
+            case NumberRecord.sid:
+                NumberRecord numrec = (NumberRecord) record;
+                System.out.println("Cell found with value " + numrec.getValue() + " at row " + numrec.getRow() + " and column " + numrec.getColumn());
+                break;
             case LabelSSTRecord.sid:
                 LabelSSTRecord lrec = (LabelSSTRecord) record;
-                System.out.println("String cell found with value "
-                    + sstrec.getString(lrec.getSSTIndex()));
+                System.out.println("String cell found with value " + sstrec.getString(lrec.getSSTIndex())+ " at row " + lrec.getRow() + " and column " + lrec.getColumn());
                 break;
+            case ExtSSTRecord.sid:
+                ExtSSTRecord extsstrec =  (ExtSSTRecord) record;
+                for (int k = 0; k < extsstrec.getRecordSize(); k++) {
+                }
+            default:
+                //System.out.println("==others"+record.getClass()+"---"+record.getSid());
+                // discard;
         }
     }
 
@@ -90,7 +97,7 @@ public class XLSEventTest
     public static void main(String[] args) throws IOException {
         // create a new file input stream with the input file specified
         // at the command line
-        FileInputStream fin = new FileInputStream("e:/data_expert.xls");
+        FileInputStream fin = new FileInputStream("e:/advices_export.xls");
         // create a new org.apache.poi.poifs.filesystem.Filesystem
         POIFSFileSystem poifs = new POIFSFileSystem(fin);
         // get the Workbook (excel part) stream in a InputStream

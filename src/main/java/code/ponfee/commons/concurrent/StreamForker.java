@@ -120,7 +120,7 @@ public class StreamForker<T> {
                     if ((t = q.poll()) != null) {
                         break;
                     } else {
-                        Thread.sleep(31);
+                        Thread.sleep(7);
                     }
                 } catch (InterruptedException e) {
                 }

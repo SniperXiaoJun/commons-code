@@ -1,4 +1,4 @@
-package code.ponfee.commons.extract.xls;
+package code.ponfee.commons.extract.streaming.xls;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -15,13 +15,19 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+/**
+ * The version for 2003 or early XSL excel file 
+ * streaming reader
+ * 
+ * excel cell
+ * 
+ * @author Ponfee
+ */
 public class HSSFStreamingCell implements Cell {
 
-    private final int index;
     private final String value;
 
-    public HSSFStreamingCell(int index, String value) {
-        this.index = index;
+    public HSSFStreamingCell(String value) {
         this.value = value;
     }
 
@@ -31,16 +37,16 @@ public class HSSFStreamingCell implements Cell {
     }
 
     @Override
-    public int getColumnIndex() {
-        return this.index;
-    }
-
-    @Override
     public CellType getCellType() {
         return CellType.STRING;
     }
 
     // ----------------------------------------------unsupported operation
+    @Override
+    public int getColumnIndex() {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public int getRowIndex() {
         throw new UnsupportedOperationException();

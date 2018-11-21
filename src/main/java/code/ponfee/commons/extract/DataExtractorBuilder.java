@@ -34,6 +34,7 @@ public class DataExtractorBuilder {
 
     private int startRow = 0; // excel start row: start with 0
     private int sheetIndex = 0; // excel work book sheet index: start with 0
+    private boolean streaming = true; // excel streaming read
 
     private CSVFormat csvFormat; // csv format
     private Charset charset; // csv data source charset
@@ -76,6 +77,11 @@ public class DataExtractorBuilder {
         return this;
     }
 
+    public DataExtractorBuilder streaming(boolean streaming) {
+        this.streaming = streaming;
+        return this;
+    }
+
     public DataExtractorBuilder csvFormat(CSVFormat csvFormat) {
         this.csvFormat = csvFormat;
         return this;
@@ -99,9 +105,10 @@ public class DataExtractorBuilder {
             //
             // xls: application/vnd.ms-excel
             //      application/msword application/x-xls
-            return new ExcelExtractor<>(dataSource, headers, startRow,
-                                        EnumUtils.getEnumIgnoreCase(ExcelType.class, extension), 
-                                        sheetIndex);
+            ExcelType type = EnumUtils.getEnumIgnoreCase(ExcelType.class, extension);
+            return streaming 
+                   ? new StreamingExcelExtractor<>(dataSource, headers, startRow, type, sheetIndex)
+                   : new ExcelExtractor<>(dataSource, headers, startRow, type, sheetIndex);
         } else {
             throw new RuntimeException("File content type not supported: " + fileName);
         }

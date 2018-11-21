@@ -17,58 +17,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
-import com.monitorjbl.xlsx.StreamingReader;
-
 /**
  * Excel file data extractor
- * 
- * 在打开一本工作簿时，不管是一个.xls HSSFWorkbook，还是一个.xlsx XSSFWorkbook，
- * 工作簿都可以从文件或InputStream中加载。使用File对象可以降低内存消耗，
- * 而InputStream则需要更多的内存，因为它必须缓冲整个文件。
- * 
- *  // Use a file
- *  Workbook wb = WorkbookFactory.create(new File("MyExcel.xls"));
- *  
- *  // Use an InputStream, needs more memory
- *  Workbook wb = WorkbookFactory.create(new FileInputStream("MyExcel.xlsx"));
- *  
- *  
- *  =======================================================================
- *  // HSSFWorkbook, File
- *  NPOIFSFileSystem fs = new NPOIFSFileSystem(new File("file.xls"));
- *  HSSFWorkbook wb = new HSSFWorkbook(fs.getRoot(), true);
- *  ....
- *  fs.close();
- *  
- *  // HSSFWorkbook, InputStream, needs more memory
- *  NPOIFSFileSystem fs = new NPOIFSFileSystem(myInputStream);
- *  HSSFWorkbook wb = new HSSFWorkbook(fs.getRoot(), true);
- *  
- *  
- *  =======================================================================
- *  // XSSFWorkbook, File
- *  OPCPackage pkg = OPCPackage.open(new File("file.xlsx"));
- *  XSSFWorkbook wb = new XSSFWorkbook(pkg);
- *  ....
- *  pkg.close();
- *  
- *  // XSSFWorkbook, InputStream, needs more memory
- *  OPCPackage pkg = OPCPackage.open(myInputStream);
- *  XSSFWorkbook wb = new XSSFWorkbook(pkg);
- *  ....
- *  pkg.close();
- * 
- * 
- * {@linkplain https://blog.csdn.net/zl_momomo/article/details/80703533}
- * {@linkplain http://poi.apache.org/components/spreadsheet/how-to.html}
- * {@linkplain https://github.com/monitorjbl/excel-streaming-reader}
  * 
  * @author Ponfee
  */
 public class ExcelExtractor<T> extends DataExtractor<T> {
 
-    private final ExcelType type;
-    private final int sheetIndex; // start with 0
+    protected final ExcelType type;
+    protected final int sheetIndex; // start with 0
     private final int startRow; // start with 0
 
     public ExcelExtractor(InputStream inputStream, String[] headers, 
@@ -84,86 +41,78 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
         this.sheetIndex = sheetIndex;
     }
 
-    @Override @SuppressWarnings("unchecked")
-    public void extract(RowProcessor<T> processor) throws IOException {
-        InputStream input = null;
+    @Override
+    public final void extract(RowProcessor<T> processor) throws IOException {
         Workbook workbook = null;
         try {
-            switch (type) {
-                case XLS: // sheet.getPhysicalNumberOfRows()
-                    if (dataSource instanceof File) {
-                        workbook = WorkbookFactory.create((File) dataSource);
-                    } else {
-                        workbook = WorkbookFactory.create(input = (InputStream) dataSource);
-                    }
-                    break;
-                case XLSX:
-                    // only support xlsx
-                    StreamingReader.Builder builder = StreamingReader.builder()
-                        .rowCacheSize(100) // 缓存到内存中的行数，默认是10
-                        .bufferSize(4096); // 读取资源时，缓存到内存的字节大小，默认是1024
-                    if (dataSource instanceof File) {
-                        workbook = builder.open((File) dataSource);
-                    } else {
-                        workbook = builder.open(input = (InputStream) dataSource);
-                    }
-                    break;
-                default:
-                    throw new RuntimeException("Unknown excel type: " + type);
-            }
-
-            boolean specHeaders; int columnSize;
-            if (ArrayUtils.isNotEmpty(headers)) {
-                specHeaders = true;
-                columnSize = this.headers.length;
-            } else {
-                specHeaders = false;
-                columnSize = 0;
-            }
-
-            Row row; T data; String[] array; String str;
-            Iterator<Row> iter = workbook.getSheetAt(sheetIndex).iterator();
-            for (int i = 0, k = 0, m, j; iter.hasNext(); i++) {
-                row = iter.next(); // row = sheet.getRow(i);
-                if (row == null || i < startRow) {
-                    continue;
-                }
-
-                if (!specHeaders && i == startRow) {
-                    columnSize = row.getLastCellNum(); // 不指定表头则以开始行为表头
-                }
-
-                array = columnSize > 1 ? new String[columnSize] : null;
-                str = null;
-                for (m = row.getLastCellNum(), j = 0; j <= m && j < columnSize; j++) {
-                    // Missing cells are returned as null, Blank cells are returned as normal
-                    str = getCellValueAsString(row.getCell(j, RETURN_NULL_AND_BLANK));
-                    if (columnSize > 1) {
-                        array[j] = str;
-                    }
-                }
-                if (columnSize > 1) {
-                    for (; j < columnSize; j++) {
-                        array[j] = StringUtils.EMPTY;
-                    }
-                    data = (T) array;
-                } else {
-                    data = (T) str;
-                }
-                if (isNotEmpty(data)) {
-                    processor.process(k++, data);
-                }
-            }
+            readRow(workbook = createWorkbook(), processor);
         } finally {
             if (workbook != null) try {
                 workbook.close();
             } catch (Exception ignored) {
                 ignored.printStackTrace();
             }
-            if (input != null) try {
-                input.close();
+            try {
+                if (dataSource instanceof InputStream) {
+                    ((InputStream) dataSource).close();
+                }
             } catch (Exception ignored) {
                 ignored.printStackTrace();
+            }
+        }
+    }
+
+    protected Workbook createWorkbook() throws IOException {
+        // sheet.getPhysicalNumberOfRows()
+        if (dataSource instanceof File) {
+            return WorkbookFactory.create((File) dataSource);
+        } else {
+            return WorkbookFactory.create((InputStream) dataSource);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void readRow(Workbook workbook, RowProcessor<T> processor) {
+        boolean specHeaders; int columnSize;
+        if (ArrayUtils.isNotEmpty(headers)) {
+            specHeaders = true;
+            columnSize = this.headers.length;
+        } else {
+            specHeaders = false;
+            columnSize = 0;
+        }
+
+        Row row; T data; String[] array; String str;
+        Iterator<Row> iter = workbook.getSheetAt(sheetIndex).iterator();
+        for (int i = 0, k = 0, m, j; iter.hasNext(); i++) {
+            row = iter.next(); // row = sheet.getRow(i);
+            if (row == null || i < startRow) {
+                continue;
+            }
+
+            if (!specHeaders && i == startRow) {
+                columnSize = row.getLastCellNum(); // 不指定表头则以开始行为表头
+            }
+
+            array = columnSize > 1 ? new String[columnSize] : null;
+            str = null;
+            for (m = row.getLastCellNum(), j = 0; j <= m && j < columnSize; j++) {
+                // Missing cells are returned as null, Blank cells are returned as normal
+                str = getStringCellValue(row.getCell(j, RETURN_NULL_AND_BLANK));
+                if (columnSize > 1) {
+                    array[j] = str;
+                }
+            }
+            if (columnSize > 1) {
+                for (; j < columnSize; j++) {
+                    array[j] = StringUtils.EMPTY;
+                }
+                data = (T) array;
+            } else {
+                data = (T) str;
+            }
+            if (isNotEmpty(data)) {
+                processor.process(k++, data);
             }
         }
     }
@@ -174,7 +123,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
      * @param cell
      * @return
      */
-    private String getCellValueAsString(Cell cell) {
+    protected String getStringCellValue(Cell cell) {
         if (cell == null) {
             return StringUtils.EMPTY;
         }
@@ -183,9 +132,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return String.valueOf(cell.getDateCellValue());
                 } else {
-                    if (this.type == ExcelType.XLS) {
-                        cell.setCellType(CellType.STRING);
-                    }
+                    cell.setCellType(CellType.STRING);
                     return cell.getStringCellValue();
                 }
             case STRING:
@@ -193,9 +140,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
             case BOOLEAN:
                 return Boolean.toString(cell.getBooleanCellValue());
             case FORMULA:
-                if (this.type == ExcelType.XLS) {
-                    cell.setCellType(CellType.STRING);
-                }
+                cell.setCellType(CellType.STRING);
                 return cell.getStringCellValue();
             case BLANK: // 空值
             case ERROR: // 错误

@@ -13,7 +13,7 @@ import code.ponfee.commons.tree.FlatNode;
  */
 public abstract class AbstractExporter<T> implements DataExporter<T> {
 
-    public static final int AWAIT_TIME_MILLIS = 31;
+    public static final int AWAIT_TIME_MILLIS = 17;
 
     private boolean empty = true;
     private String name; // report name: non thread safe

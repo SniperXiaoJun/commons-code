@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
@@ -85,5 +86,29 @@ public class ExcelExtractorTest {
             if (n < 10)
             System.out.println(Arrays.toString((String[])d));
         });
+    }
+    
+    
+    // ------------------------------------------------------
+    @Test
+    public void test6() throws FileNotFoundException, IOException {
+        test("E:\\test11.xlsx", false); // 9.1 s
+        //test("E:\\test11.xlsx", true); // 7.8
+        //test("E:\\writeTest.xls", false); // 2.6
+        //test("E:\\writeTest.xls", true); // 2.0
+    }
+
+    private void test(String filename, boolean streaming) throws FileNotFoundException, IOException {
+        DataExtractor<?> et = DataExtractorBuilder.newBuilder(filename)
+            .streaming(streaming).headers(new String[] { "a", "b", "c", "d", "e" }).build();
+        
+        AtomicInteger count = new AtomicInteger();
+        et.extract((n, d) -> {
+            if (n < 10) {
+                System.out.println(Arrays.toString((String[])d));
+            }
+            count.incrementAndGet();
+        });
+        System.out.println(count.get());
     }
 }
