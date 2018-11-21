@@ -232,11 +232,11 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
         }
 
         void endRead() {
+            allSheetReadied = true;
             if (currentSheet != null) {
                 putRow(currentRow); // last row
             }
             sheets.stream().forEach(s -> ((HSSFStreamingSheet) s).end());
-            allSheetReadied = true;
         }
 
         void putRow(HSSFStreamingRow row) {
