@@ -9,16 +9,21 @@ import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFRequest;
+import org.apache.poi.hssf.eventusermodel.MissingRecordAwareHSSFListener;
 import org.apache.poi.hssf.record.BOFRecord;
+import org.apache.poi.hssf.record.BlankRecord;
+import org.apache.poi.hssf.record.BoolErrRecord;
 import org.apache.poi.hssf.record.BoundSheetRecord;
 import org.apache.poi.hssf.record.CellRecord;
+import org.apache.poi.hssf.record.FormulaRecord;
 import org.apache.poi.hssf.record.LabelSSTRecord;
 import org.apache.poi.hssf.record.NumberRecord;
 import org.apache.poi.hssf.record.Record;
-import org.apache.poi.hssf.record.RowRecord;
 import org.apache.poi.hssf.record.SSTRecord;
 import org.apache.poi.poifs.filesystem.DocumentInputStream;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
@@ -53,8 +58,9 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
     public HSSFStreamingWorkbook(InputStream input, int rowCacheSize, 
                                  int[] sheetIndexs, String[] sheetNames, 
                                  ThreadPoolExecutor executor) {
-        executor.submit(new AsyncHSSFReader(rowCacheSize, sheetIndexs, 
-                                            sheetNames, input));
+        executor.submit(new AsyncHSSFReader(
+            rowCacheSize, sheetIndexs, sheetNames, input
+        ));
     }
 
     @Override
@@ -148,13 +154,16 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
         HSSFStreamingSheet currentSheet;
         boolean discardCurrentSheet;
 
-        int currentRowIndex = -1; // start with 0
+        int currentRowNumber = -1; // start with 0
+        int currentRowOrder = -1; // start with 0
         HSSFStreamingRow currentRow;
 
 
         SSTRecord sstrec;
+        FormatTrackingHSSFListener formatListener;
 
-        AsyncHSSFReader(int rowCacheSize, int[] sheetIndexs, String[] sheetNames, InputStream input) {
+        AsyncHSSFReader(int rowCacheSize, int[] sheetIndexs, 
+                        String[] sheetNames, InputStream input) {
             this.rowCacheSize = rowCacheSize;
             this.sheetIndexs = sheetIndexs;
             this.sheetNames = sheetNames;
@@ -164,11 +173,14 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
         @Override
         public void run() {
             try (InputStream steam = input; 
-                 POIFSFileSystem poifs = new POIFSFileSystem(steam); 
-                 DocumentInputStream doc = poifs.createDocumentInputStream("Workbook")
+                 POIFSFileSystem poi = new POIFSFileSystem(steam); 
+                 DocumentInputStream doc = poi.createDocumentInputStream("Workbook")
             ) {
                 HSSFRequest request = new HSSFRequest();
-                request.addListenerForAllRecords(this);
+                formatListener = new FormatTrackingHSSFListener(
+                    new MissingRecordAwareHSSFListener(this)
+                );
+                request.addListenerForAllRecords(formatListener);
                 new HSSFEventFactory().processEvents(request, doc);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -185,61 +197,54 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
         @Override
         public void processRecord(Record record) {
             if (record instanceof BOFRecord) { // beginning of a sheet or the workbook
-                BOFRecord bof = (BOFRecord) record;
-                if (bof.getType() == BOFRecord.TYPE_WORKBOOK) {
-                    // beginning the workbook
-                } else if (bof.getType() == BOFRecord.TYPE_WORKSHEET) {
+                if (((BOFRecord) record).getType() == BOFRecord.TYPE_WORKSHEET) { // beginning a sheet
                     allSheetReadied = true;
-                    // beginning a sheet
                     if (currentSheet != null) {
-                        if (currentRow != null) {
-                            rowRead();
-                        }
+                        putRow(currentRow);
                         currentSheet.end();
                     }
                     currentRow = null;
                     currentSheet = (HSSFStreamingSheet) sheets.get(++currentSheetIndex);
-                    discardCurrentSheet = isDiscard(currentSheet.getSheetIndex(), currentSheet.getSheetName());
+                    discardCurrentSheet = isDiscard(currentSheet);
                 } else {
-                    // others uncapture
-                    System.err.println("Others uncapture BOFRecord " + bof);
+                    // BOFRecord.TYPE_WORKBOOK: beginning the workbook
+                    // others uncapture ...
                 }
             } else if (record instanceof BoundSheetRecord) { // the workbook all of sheet
                 BoundSheetRecord bsr = (BoundSheetRecord) record;
                 sheets.add(new HSSFStreamingSheet(sheets.size(), rowCacheSize, bsr.getSheetname()));
-            } else if (record instanceof RowRecord) {// batch row loading
-                // nothing todo
-            } else if (record instanceof SSTRecord) {// store a array of unique strings used in Excel.
+            } else if (record instanceof SSTRecord) { // store a array of unique strings used in Excel.
                 sstrec = (SSTRecord) record;
-            } else if (record instanceof CellRecord) {
+            } else if (record instanceof CellRecord) { // excel cell
                 CellRecord cell = (CellRecord) record;
-                if (currentRowIndex != cell.getRow()) { // new row
-                    if (currentRow != null) {
-                        rowRead();
-                    }
-                    currentRowIndex = cell.getRow();
-                    currentRow = new HSSFStreamingRow(currentSheet, currentRowIndex);
+                if (currentRowNumber != cell.getRow()) { // new row
+                    putRow(currentRow);
+                    currentRowNumber = cell.getRow();
+                    currentRow = new HSSFStreamingRow(currentSheet, currentRowNumber, ++currentRowOrder);
                 }
-                currentRow.addCell((int) cell.getColumn(), new HSSFStreamingCell(getStringCellValue(cell)));
+                currentRow.addCell(cell.getColumn(), new HSSFStreamingCell(getStringCellValue(cell)));
             } else {
-                //System.err.println("Others uncapture Record " + record);
+                // RowRecord: batch row loading
+                // MissingCellDummyRecord: missing cell
+                // LastCellOfRowDummyRecord: last cell
+                // others ...
             }
         }
 
         void endRead() {
-            if (currentSheet != null && currentRow != null) {
-                rowRead(); // last row
+            if (currentSheet != null) {
+                putRow(currentRow); // last row
             }
             sheets.stream().forEach(s -> ((HSSFStreamingSheet) s).end());
             allSheetReadied = true;
         }
 
-        void rowRead() {
-            if (discardCurrentSheet) {
+        void putRow(HSSFStreamingRow row) {
+            if (discardCurrentSheet || row == null || row.isEmpty()) {
                 return;
             }
             try {
-                while (!this.currentSheet.putRow(currentRow)) {
+                while (!this.currentSheet.putRow(row)) {
                     Thread.sleep(AWAIT_MILLIS);
                 }
             } catch (InterruptedException e) {
@@ -247,22 +252,40 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
             }
         }
 
-        boolean isDiscard(int sheetIndex, String sheetName) {
+        boolean isDiscard(HSSFStreamingSheet sheet) {
             if (   ArrayUtils.isEmpty(sheetIndexs)
                 && ArrayUtils.isEmpty(sheetNames)) {
                 return false;
             }
-            return !ArrayUtils.contains(sheetIndexs, sheetIndex)
-                && !ArrayUtils.contains(sheetNames, sheetName);
+            return !ArrayUtils.contains(sheetIndexs, sheet.getSheetIndex())
+                && !ArrayUtils.contains(sheetNames, sheet.getSheetName());
         }
 
-        String getStringCellValue(CellRecord cell) {
-            if (cell instanceof NumberRecord) {
-                return String.valueOf(((NumberRecord) cell).getValue());
-            } else if (cell instanceof LabelSSTRecord) {
-                return sstrec.getString(((LabelSSTRecord) cell).getSSTIndex()).getString();
-            } else {
-                return null;
+        String getStringCellValue(CellRecord record) {
+            switch (record.getSid()) {
+                case BlankRecord.sid: 
+                    return null;
+                case BoolErrRecord.sid: 
+                    return Boolean.toString(((BoolErrRecord) record).getBooleanValue());
+                case FormulaRecord.sid:
+                    FormulaRecord frec = (FormulaRecord) record;
+                    if (Double.isNaN(frec.getValue())) {
+                        return null; // Formula result is a string, This is stored in the next record
+                    } else {
+                        return formatListener.formatNumberDateCell(frec);
+                    }
+                    // return '"' + HSSFFormulaParser.toFormulaString(stubWorkbook, frec.getParsedExpression()) + '"';
+                case LabelSSTRecord.sid: 
+                    return sstrec == null ? null : sstrec.getString(((LabelSSTRecord) record).getSSTIndex()).getString();
+                case NumberRecord.sid:
+                    NumberRecord number = (NumberRecord) record;
+                    if (StringUtils.containsAny(formatListener.getFormatString(number), '/', ':')) {
+                        return formatListener.formatNumberDateCell(number);
+                    } else {
+                        return String.valueOf(number.getValue());
+                    }
+                default:
+                    return null;
             }
         }
     }

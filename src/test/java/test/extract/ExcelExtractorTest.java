@@ -92,10 +92,10 @@ public class ExcelExtractorTest {
     // ------------------------------------------------------
     @Test
     public void test6() throws FileNotFoundException, IOException {
-        test("E:\\test11.xlsx", false); // 9.1 s
-        //test("E:\\test11.xlsx", true); // 7.8
+        //test("E:\\test20.xlsx", false); // 9.1 s
+        //test("E:\\test100.xlsx", true); // 7.8
         //test("E:\\writeTest.xls", false); // 2.6
-        //test("E:\\writeTest.xls", true); // 2.0
+        test("E:\\writeTest.xls", true); // 2.0
     }
 
     private void test(String filename, boolean streaming) throws FileNotFoundException, IOException {

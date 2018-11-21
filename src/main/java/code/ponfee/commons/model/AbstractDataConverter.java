@@ -23,7 +23,7 @@ import code.ponfee.commons.reflect.CglibUtils;
 public abstract class AbstractDataConverter<F, T> implements Function<F, T> {
 
     private Class<T> toType;
-    private BeanCopier copier;
+    private volatile BeanCopier copier;
 
     @SuppressWarnings("unchecked")
     public AbstractDataConverter() {

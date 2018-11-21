@@ -22,11 +22,13 @@ public class HSSFStreamingRow implements Row {
 
     private final List<Cell> cells = new ArrayList<>();
     private final Sheet sheet;
-    private final int rowNum;
+    private final int rowNum; // excel row number
+    private final int rowOrder; // excel row order
 
-    public HSSFStreamingRow(Sheet sheet, int rowNum) {
+    public HSSFStreamingRow(Sheet sheet, int rowNum, int rowOrder) {
         this.sheet = sheet;
         this.rowNum = rowNum;
+        this.rowOrder = rowOrder;
     }
 
     @Override
@@ -42,6 +44,10 @@ public class HSSFStreamingRow implements Row {
     @Override
     public int getRowNum() {
         return this.rowNum;
+    }
+
+    public int getRowOrder() {
+        return this.rowOrder;
     }
 
     @Override
@@ -86,6 +92,10 @@ public class HSSFStreamingRow implements Row {
             }
             this.cells.add(cell);
         }
+    }
+
+    public boolean isEmpty() {
+        return this.cells.isEmpty();
     }
 
     // ----------------------------------------------unsupported operation

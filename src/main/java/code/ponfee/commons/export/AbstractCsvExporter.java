@@ -21,7 +21,7 @@ public abstract class AbstractCsvExporter<T> extends AbstractExporter<T> {
 
     protected final Appendable csv;
     private final char csvSeparator;
-    private boolean hasBuild = false;
+    private volatile boolean hasBuild = false;
 
     public AbstractCsvExporter(Appendable csv) {
         this(csv, ',');
