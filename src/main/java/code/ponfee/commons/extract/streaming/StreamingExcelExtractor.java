@@ -63,7 +63,7 @@ import code.ponfee.commons.extract.streaming.xls.HSSFStreamingReader;
  */
 public class StreamingExcelExtractor<T> extends ExcelExtractor<T> {
 
-    private static final ThreadPoolExecutor EXECUTOR = ThreadPoolExecutors.create(0, 16, 60);
+    private static volatile ThreadPoolExecutor EXECUTOR;
 
     public StreamingExcelExtractor(InputStream inputStream, String[] headers, 
                                    int startRow, ExcelType type) {
@@ -80,6 +80,13 @@ public class StreamingExcelExtractor<T> extends ExcelExtractor<T> {
         switch (type) {
             case XLS:
                 HSSFStreamingReader reader = HSSFStreamingReader.create(200, sheetIndex);
+                if (EXECUTOR == null) {
+                    synchronized (StreamingExcelExtractor.class) {
+                        if (EXECUTOR == null) {
+                            EXECUTOR = ThreadPoolExecutors.create(0, 16, 60);
+                        }
+                    }
+                }
                 if (dataSource instanceof File) {
                     return reader.open((File) dataSource, EXECUTOR);
                 } else {

@@ -36,7 +36,7 @@ public class SplitExcelExporter extends AbstractSplitExporter {
         }
 
         @Override
-        protected void doOthers(AbstractExporter<?> exporter) {
+        protected void complete(AbstractExporter<?> exporter) {
             ((ExcelExporter) exporter).write(savingFilePath);
         }
     }

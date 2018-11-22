@@ -45,17 +45,15 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
     public final void extract(RowProcessor<T> processor) throws IOException {
         Workbook workbook = null;
         try {
-            readRow(workbook = createWorkbook(), processor);
+            extract(workbook = createWorkbook(), processor);
         } finally {
             if (workbook != null) try {
                 workbook.close();
             } catch (Exception ignored) {
                 ignored.printStackTrace();
             }
-            try {
-                if (dataSource instanceof InputStream) {
-                    ((InputStream) dataSource).close();
-                }
+            if (dataSource instanceof InputStream) try {
+                ((InputStream) dataSource).close();
             } catch (Exception ignored) {
                 ignored.printStackTrace();
             }
@@ -72,7 +70,7 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private void readRow(Workbook workbook, RowProcessor<T> processor) {
+    private void extract(Workbook workbook, RowProcessor<T> processor) {
         boolean specHeaders; int columnSize;
         if (ArrayUtils.isNotEmpty(headers)) {
             specHeaders = true;

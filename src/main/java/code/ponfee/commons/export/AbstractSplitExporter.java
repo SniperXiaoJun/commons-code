@@ -1,6 +1,5 @@
 package code.ponfee.commons.export;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -43,18 +42,23 @@ public abstract class AbstractSplitExporter extends AbstractExporter<Void> {
                 super.nonEmpty();
                 Table st = subTable.set(table.copyOfWithoutTbody());
                 count.set(0); // reset count and sub table
-                service.submit(splitExporter(st, buildFilePath(split.incrementAndGet())));
+                service.submit(splitExporter(
+                    st, buildFilePath(split.incrementAndGet())
+                ), null);
             }
         });
         if (!subTable.get().isEmptyTbody()) {
             super.nonEmpty();
-            service.submit(splitExporter(subTable.get(), buildFilePath(split.incrementAndGet())));
+            service.submit(splitExporter(
+                subTable.get(), buildFilePath(split.incrementAndGet())
+            ), null);
         }
 
         MultithreadExecutor.joinDiscard(service, split.get(), AWAIT_TIME_MILLIS);
     }
 
-    protected abstract AsnycSplitExporter splitExporter(Table subTable, String savingFilePath);
+    protected abstract AsnycSplitExporter splitExporter(
+        Table subTable, String savingFilePath);
 
     public @Override final Void export() {
         throw new UnsupportedOperationException();
@@ -66,7 +70,7 @@ public abstract class AbstractSplitExporter extends AbstractExporter<Void> {
         return savingFilePathPrefix + fileNo + fileSuffix;
     }
 
-    public static abstract class AsnycSplitExporter implements Callable<Void> {
+    public static abstract class AsnycSplitExporter implements Runnable {
         private final Table subTable;
         protected final String savingFilePath;
 
@@ -76,18 +80,17 @@ public abstract class AbstractSplitExporter extends AbstractExporter<Void> {
         }
 
         @Override
-        public final Void call() throws Exception {
+        public final void run()  {
             subTable.end();
             try (AbstractExporter<?> exporter = createExporter()) {
                 exporter.build(subTable);
-                doOthers(exporter);
+                complete(exporter);
             }
-            return null;
         }
 
         protected abstract AbstractExporter<?> createExporter();
 
-        protected void doOthers(AbstractExporter<?> exporter) {}
+        protected void complete(AbstractExporter<?> exporter) {}
     }
 
 }
