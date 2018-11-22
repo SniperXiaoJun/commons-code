@@ -53,13 +53,15 @@ public final class PageHandler {
         Integer limit = getInt(params, paramLimit);
 
         // 默认通过pageSize查询
-        if (pageSize == null && limit == null) {
+        if (   (pageSize == null || pageSize < 0) 
+            && (limit == null    || limit < 0)
+        ) {
             pageSize = 0;
         }
 
         // 分页处理，pageSizeZero：默认值为false，当该参数设置为true时，如果pageSize=0或者
         // RowBounds.limit=0就会查询出全部的结果（相当于没有执行分页查询，但是返回结果仍然是Page类型）
-        if (pageSize != null) {
+        if (pageSize != null && pageSize > -1) { // first use page size
             startPage(getInt(params, paramPageNum), 
                       Numbers.bounds(pageSize, MIN_SIZE, MAX_SIZE));
         } else {

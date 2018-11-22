@@ -59,16 +59,18 @@
 //                page.put(entry.getKey(), value);
 //            } else if (PageRequestParams.SORT_PARAM.equalsIgnoreCase(entry.getKey())) {
 //                // value：“name ASC, age DESC”
-//                String value = StringUtils.join(entry.getValue(), ',');
+//                String value = StringUtils.join(entry.getValue(), ',').trim();
 //                Fields.put(page, PageRequestParams.SORT_PARAM, value);
 //                page.put(PageRequestParams.SORT_PARAM, value);
 //            } else {
 //                String[] value = entry.getValue();
-//                page.put(entry.getKey(), value.length == 1 ? value[0] : value);
+//                page.put(entry.getKey(), value.length == 1 ? value[0].trim() : value);
 //            }
 //        });
 //        if (page.getLimit() > 0) {
-//            if (page.getLimit() > MAX_SIZE) {
+//            if (page.getLimit() < 1) {
+//                page.setLimit(DEF_SIZE);
+//            } else if (page.getLimit() > MAX_SIZE) {
 //                page.setLimit(MAX_SIZE);
 //            }
 //            if (page.getOffset() < 0) {
