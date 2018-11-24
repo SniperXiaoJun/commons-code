@@ -238,8 +238,8 @@ public final class Http {
     // ----------------------------response accept--------------------------
     /**
      * 内容类型发送请求头，告诉服务器什么样的响应会接受返回
-     * header("Accept", accept)
-     * @param accept  application/json
+     * header("Accept", contentType)
+     * @param contentType  application/json
      * @return
      */
     public Http accept(ContentType contentType) {

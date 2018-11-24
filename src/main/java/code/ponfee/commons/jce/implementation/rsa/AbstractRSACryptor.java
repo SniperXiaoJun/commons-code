@@ -220,7 +220,7 @@ public abstract class AbstractRSACryptor extends Cryptor {
      * @param out         the output stream
      * @throws IOException
      * @see code.ponfee.commons.util.Bytes#toBinary(byte...)
-     * @see code.ponfee.commons.util.Bytes#copy(byte[], int, int, byte[], int, int)
+     * @see code.ponfee.commons.util.Bytes#tailCopy(byte[], int, int, byte[], int, int)
      */
     private static void fixedByteArray(byte[] data, int fixedSize, OutputStream out)
         throws IOException {

@@ -312,7 +312,7 @@ public class JedisLock implements Lock, java.io.Serializable {
              least = uuid.getLeastSignificantBits(),
              time  = System.currentTimeMillis() + timeoutMillis;
 
-        byte[] value = {
+        return new byte[] {
             (byte) (most  >>> 56), (byte) (most  >>> 48),
             (byte) (most  >>> 40), (byte) (most  >>> 32),
             (byte) (most  >>> 24), (byte) (most  >>> 16),
@@ -328,7 +328,6 @@ public class JedisLock implements Lock, java.io.Serializable {
             (byte) (time  >>> 24), (byte) (time  >>> 16),
             (byte) (time  >>>  8), (byte) (time        )
         };
-        return value;
     }
 
 }

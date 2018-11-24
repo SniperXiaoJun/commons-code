@@ -1,12 +1,12 @@
 package code.ponfee.commons.mail;
 
+import code.ponfee.commons.concurrent.ThreadPoolExecutors;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
-
-import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 
 /**
  * Sends emial by thread pool
@@ -40,7 +40,7 @@ public class ThreadPoolMailSender {
      */
     public static boolean send(MailSender mailSender, List<MailEnvelope> envlops, boolean async) {
         if (async) { // 异步发送
-            envlops.stream().forEach(e -> EXECUTOR.submit(() -> mailSender.send(e)));
+            envlops.forEach(e -> EXECUTOR.submit(() -> mailSender.send(e)));
             return true;
         } else { // 同步发送
             List<CompletableFuture<Boolean>> list = envlops.stream().map(

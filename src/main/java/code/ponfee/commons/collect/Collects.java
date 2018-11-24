@@ -1,5 +1,16 @@
 package code.ponfee.commons.collect;
 
+import code.ponfee.commons.model.Page;
+import code.ponfee.commons.model.Result;
+import code.ponfee.commons.reflect.Fields;
+import code.ponfee.commons.util.ObjectUtils;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.poi.ss.formula.functions.T;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,19 +24,6 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.poi.ss.formula.functions.T;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import code.ponfee.commons.model.Page;
-import code.ponfee.commons.model.Result;
-import code.ponfee.commons.reflect.Fields;
-import code.ponfee.commons.util.ObjectUtils;
 
 /**
  * 集合工具类
@@ -91,13 +89,13 @@ public final class Collects {
 
     /**
      * Result<Page<LinkedHashMap<String, Object>>>转Result<Page<Object[]>>
-     * @param s
+     * @param source
      * @return
      */
     public static Result<Page<Object[]>> map2array(
         Result<Page<LinkedHashMap<String, Object>>> source) {
         return source.copy(source.getData().transform(
-            linkedMap -> map2array(linkedMap)
+            Collects::map2array
         ));
     }
 

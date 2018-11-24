@@ -1,14 +1,13 @@
 package code.ponfee.commons.extract.streaming.xls;
 
+import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.concurrent.ThreadPoolExecutor;
-
-import org.apache.commons.lang3.ArrayUtils;
-
-import com.google.common.base.Preconditions;
 
 /**
  * The version for 2003 or early XSL excel file 
@@ -55,7 +54,6 @@ public class HSSFStreamingReader {
      * Reads spec sheet that is in sheet name at string array
      * 
      * @param rowCacheableSize  the size of read row count in memory
-     * @param sheetIndexs sheet name at string array
      * @return HSSFStreamingReader instance
      */
     public static HSSFStreamingReader create(int rowCacheableSize, String... sheetNames) {

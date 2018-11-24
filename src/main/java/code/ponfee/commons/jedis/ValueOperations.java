@@ -476,7 +476,7 @@ public class ValueOperations extends JedisOperations {
                         }
                     }
                 })).collect(Collectors.toList());
-                list.stream().forEach(CompletableFuture::join);
+                list.forEach(CompletableFuture::join);
                 return resultMap;
             } else { // 直接获取，不用mget方式
                 Map<String, String> result = new HashMap<>();

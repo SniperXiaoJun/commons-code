@@ -6,5 +6,5 @@ package code.ponfee.commons.model;
  * @author Ponfee
  */
 public enum PageSortOrder {
-    ASC, DESC;
+    ASC, DESC
 }

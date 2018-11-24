@@ -70,8 +70,8 @@ public class StreamForker<T> {
         return CompletableFuture.supplyAsync(() -> f.apply(source));
     }
 
-    public static interface Results {
-        public <R> R get(Object key);
+    public interface Results {
+        <R> R get(Object key);
     }
 
     @SuppressWarnings("unchecked")

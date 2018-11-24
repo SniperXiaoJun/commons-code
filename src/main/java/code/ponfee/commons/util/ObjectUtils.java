@@ -363,7 +363,7 @@ public final class ObjectUtils {
      * Returns if t is null then other, else t
      *
      * @param obj   the obj
-     * @param other the other
+     * @param defaultValue the default value
      * @return if obj is not null then obj else other
      */
     public static <T> T orElse(T obj, T defaultValue) {

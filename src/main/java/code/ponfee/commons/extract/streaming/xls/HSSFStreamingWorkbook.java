@@ -1,13 +1,5 @@
 package code.ponfee.commons.extract.streaming.xls;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener;
@@ -39,6 +31,14 @@ import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.usermodel.Workbook;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * The version for 2003 or early XSL excel file 
@@ -127,7 +127,7 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         // nothing todo
     }
 
@@ -237,7 +237,7 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
             if (currentSheet != null) {
                 putRow(currentRow); // last row
             }
-            sheets.stream().forEach(s -> ((HSSFStreamingSheet) s).end());
+            sheets.forEach(s -> ((HSSFStreamingSheet) s).end());
         }
 
         void putRow(HSSFStreamingRow row) {
@@ -406,7 +406,7 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
     }
 
     @Override
-    public void write(OutputStream stream) throws IOException {
+    public void write(OutputStream stream) {
         throw new UnsupportedOperationException();
     }
 
@@ -562,8 +562,8 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
     }
 
     @Override
-    public int addOlePackage(byte[] oleData, String label, String fileName, String command)
-        throws IOException {
+    public int addOlePackage(byte[] oleData, String label, 
+                             String fileName, String command) {
         throw new UnsupportedOperationException();
     }
 

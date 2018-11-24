@@ -1,15 +1,14 @@
 package code.ponfee.commons.util;
 
-import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 正则工具类
@@ -148,7 +147,7 @@ public final class RegexUtils {
     // ----------------------------------------------------------yyyyMMdd(HHmmss(SSS))
     public static final String REGEXP_DATE = 
         "^([1-9]\\d{3}((0[1-9]|1[012])(0[1-9]|1\\d|2[0-8])|(0[13456789]|1[012])(29|30)|(0[13578]|1[02])31)|(([2-9]\\d)(0[48]|[2468][048]|[13579][26])|(([2468][048]|[3579][26])00))0229)"
-      + "(([0-1]\\d{1}|2[0-3])([0-5]\\d{1})([0-5]\\d{1})(\\d{3})?)?$";
+      + "(([0-1][0-9]|2[0-3])([0-5][0-9])([0-5][0-9])(\\d{3})?)?$";
     public static final Pattern PATTERN_DATE = Pattern.compile(REGEXP_DATE);
     /**
      * Validates the text whether date pattern

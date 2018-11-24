@@ -1,7 +1,6 @@
 package code.ponfee.commons.extract.streaming;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -76,7 +75,7 @@ public class StreamingExcelExtractor<T> extends ExcelExtractor<T> {
     }
 
     @Override
-    protected Workbook createWorkbook() throws IOException {
+    protected Workbook createWorkbook() {
         switch (type) {
             case XLS:
                 HSSFStreamingReader reader = HSSFStreamingReader.create(200, sheetIndex);

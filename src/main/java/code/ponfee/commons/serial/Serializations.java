@@ -1,18 +1,18 @@
 package code.ponfee.commons.serial;
 
+import code.ponfee.commons.math.Numbers;
+import code.ponfee.commons.reflect.ClassUtils;
+import code.ponfee.commons.util.Bytes;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import java.util.Date;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
-
-import code.ponfee.commons.math.Numbers;
-import code.ponfee.commons.reflect.ClassUtils;
-import code.ponfee.commons.util.Bytes;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * 序列化工具类
@@ -56,19 +56,19 @@ public final class Serializations {
     }
 
     public static byte[] serialize(CharSequence value) {
-        return ((CharSequence) value).toString().getBytes(UTF_8);
+        return value.toString().getBytes(UTF_8);
     }
 
     public static byte[] serialize(Date value) {
-        return Bytes.fromLong(((Date) value).getTime());
+        return Bytes.fromLong(value.getTime());
     }
 
     public static byte[] serialize(Enum<?> value) {
-        return Bytes.fromInt(((Enum<?>) value).ordinal());
+        return Bytes.fromInt(value.ordinal());
     }
 
     public static byte[] serialize(InputStream value) {
-        try (InputStream input = (InputStream) value) {
+        try (InputStream input = value) {
             return IOUtils.toByteArray(input);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -79,7 +79,6 @@ public final class Serializations {
      * Returns the serialize byte array data for value
      * 
      * @param value the value
-     * @param type  the type of value
      * @return a byte array
      */
     public static byte[] serialize(Object value) {
@@ -98,7 +97,7 @@ public final class Serializations {
         } else if (value instanceof Boolean) {
             return new byte[] { (Boolean) value ? (byte) 0xFF : (byte) 0x00 };
         } else if (value instanceof Byte) {
-            return new byte[] { ((Byte) value).byteValue() };
+            return new byte[] {(Byte) value};
         } else if (value instanceof Short) {
             return Bytes.fromShort(((Short) value).shortValue());
         } else if (value instanceof Character) {

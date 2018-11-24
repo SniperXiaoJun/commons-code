@@ -8,18 +8,6 @@
 
 package code.ponfee.commons.jce;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.base.Preconditions;
-
 import code.ponfee.commons.io.Files;
 import code.ponfee.commons.jce.security.ECDSASigner;
 import code.ponfee.commons.jce.security.RSACryptor;
@@ -28,6 +16,16 @@ import code.ponfee.commons.jce.security.RSAPublicKeys;
 import code.ponfee.commons.jce.sm.SM2;
 import code.ponfee.commons.jce.symmetric.SymmetricCryptor;
 import code.ponfee.commons.util.Base64UrlSafe;
+import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 
 /**
  * 加解密服务提供
@@ -212,8 +210,8 @@ public abstract class CryptoProvider {
      */
     public static CryptoProvider rsaPrivateKeyProvider(final String pkcs8PrivateKey) {
         return new CryptoProvider() {
-            private final RSAPrivateKey priKey = RSAPrivateKeys.fromPkcs8(pkcs8PrivateKey); // thread-safe
-            private final RSAPublicKey  pubKey = RSAPrivateKeys.extractPublicKey(priKey); // thread-safe
+            final RSAPrivateKey priKey = RSAPrivateKeys.fromPkcs8(pkcs8PrivateKey); // thread-safe
+            final RSAPublicKey  pubKey = RSAPrivateKeys.extractPublicKey(priKey); // thread-safe
 
             @Override
             public byte[] encrypt(byte[] original) {
@@ -249,7 +247,7 @@ public abstract class CryptoProvider {
      */
     public static CryptoProvider rsaPublicKeyProvider(final String pkcs8PublicKey) {
         return new CryptoProvider() {
-            private final RSAPublicKey pubKey = RSAPublicKeys.fromPkcs8(pkcs8PublicKey); // thread-safe
+            final RSAPublicKey pubKey = RSAPublicKeys.fromPkcs8(pkcs8PublicKey); // thread-safe
 
             @Override
             public byte[] encrypt(byte[] original) {
@@ -278,7 +276,7 @@ public abstract class CryptoProvider {
     public static CryptoProvider sm2PublicKeyProvider(final ECParameters ecParameter, 
                                                       final byte[] publicKey) {
         return new CryptoProvider() {
-            private byte[] publicKey0 = Arrays.copyOf(publicKey, publicKey.length);
+            final byte[] publicKey0 = Arrays.copyOf(publicKey, publicKey.length);
 
             @Override
             public byte[] encrypt(byte[] original) {
@@ -306,8 +304,8 @@ public abstract class CryptoProvider {
                                                        final byte[] publicKey, 
                                                        final byte[] privateKey) {
         return new CryptoProvider() {
-            private byte[] publicKey0  = Arrays.copyOf(publicKey, publicKey.length);
-            private byte[] privateKey0 = Arrays.copyOf(privateKey, privateKey.length);
+            final byte[] publicKey0  = Arrays.copyOf(publicKey, publicKey.length);
+            final byte[] privateKey0 = Arrays.copyOf(privateKey, privateKey.length);
 
             @Override
             public byte[] encrypt(byte[] original) {
@@ -334,7 +332,7 @@ public abstract class CryptoProvider {
     // -----------------------------------------------------------------------ECDSASinger
     public static CryptoProvider ecdsaPublicKeyProvider(byte[] publicKey) {
         return new CryptoProvider() {
-            private ECPublicKey publicKey0 = ECDSASigner.getPublicKey(publicKey);
+            final ECPublicKey publicKey0 = ECDSASigner.getPublicKey(publicKey);
 
             @Override
             public byte[] encrypt(byte[] original) {
@@ -355,8 +353,8 @@ public abstract class CryptoProvider {
 
     public static CryptoProvider ecdsaPrivateKeyProvider(byte[] publicKey, byte[] privateKey) {
         return new CryptoProvider() {
-            private ECPublicKey publicKey0 = ECDSASigner.getPublicKey(publicKey);
-            private ECPrivateKey privateKey0 = ECDSASigner.getPrivateKey(privateKey);
+            final ECPublicKey publicKey0 = ECDSASigner.getPublicKey(publicKey);
+            final ECPrivateKey privateKey0 = ECDSASigner.getPrivateKey(privateKey);
 
             @Override
             public byte[] encrypt(byte[] original) {

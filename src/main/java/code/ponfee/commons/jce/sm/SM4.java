@@ -242,7 +242,8 @@ public final class SM4 {
      * @return
      */
     private static long rotateLeft(long x, int n) {
-        return ((x & 0xFFFFFFFF) << n) | (x >>> (32 - n));
+        // ((x & 0xFFFFFFFF) << n) | (x >>> (32 - n));
+        return (x << n) | (x >>> (32 - n));
     }
 
     private static void swap(long[] sk, int i) {

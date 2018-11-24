@@ -148,6 +148,6 @@ public class ExcelExtractor<T> extends DataExtractor<T> {
     }
 
     public enum ExcelType {
-        XLS, XLSX;
+        XLS, XLSX
     }
 }

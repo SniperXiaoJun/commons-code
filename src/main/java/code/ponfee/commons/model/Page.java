@@ -46,15 +46,15 @@ public class Page<T> implements java.io.Serializable {
     private int navigateLastPage; // 导航条上的最后一页
 
     public static <T> Page<T> empty() {
-        return new Page<T>();
+        return new Page<>();
     }
 
     public static <T> Page<T> of(List<T> list) {
-        return new Page<T>(list);
+        return new Page<>(list);
     }
 
     public static <T> Page<T> of(List<T> list, int navigatePages) {
-        return new Page<T>(list, navigatePages);
+        return new Page<>(list, navigatePages);
     }
 
     public Page() {

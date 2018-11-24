@@ -3,7 +3,6 @@ package code.ponfee.commons.extract;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -93,7 +92,7 @@ public class DataExtractorBuilder {
         return this;
     }
 
-    public <T> DataExtractor<T> build() throws IOException {
+    public <T> DataExtractor<T> build() {
         String extension = FilenameUtils.getExtension(fileName).toLowerCase();
         if (ContentType.TEXT_PLAIN.value().equalsIgnoreCase(contentType)
             || CSV_EXTENSION.contains(extension)) {
