@@ -395,4 +395,26 @@ public final class Collects {
         return result;
     }
 
+    /**
+     * Puts the element to list specified index
+     * 
+     * @param list a list
+     * @param index spec index
+     * @param obj the element
+     */
+    @SuppressWarnings("hiding")
+    public static <T> void set(List<T> list, int index, T obj) {
+        int size;
+        if (index == (size = list.size())) {
+            list.add(obj);
+        } else if (index < size) {
+            list.set(index, obj);
+        } else {
+            for (int i = size; i < index; i++) {
+                list.add(null);
+            }
+            list.add(obj);
+        }
+    }
+
 }

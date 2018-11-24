@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author Ponfee
  */
-public class Assert extends org.springframework.util.Assert {
+public class Asserts extends org.springframework.util.Assert {
 
     public static void notEmpty(String text, String msg) {
         if (StringUtils.isEmpty(text)) {

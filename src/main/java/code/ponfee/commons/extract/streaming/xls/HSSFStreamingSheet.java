@@ -39,27 +39,26 @@ public class HSSFStreamingSheet implements Sheet {
 
     private final int index;
     private final String name;
+    private final boolean discard;
     private final BlockingQueue<Row> rows;
     private final RowsIterator iterator;
     private volatile boolean end = false;
 
-    public HSSFStreamingSheet(int index, int rowCacheSize, String name) {
+    public HSSFStreamingSheet(int index, String name, 
+                              boolean discard, int rowCacheSize) {
         this.index = index;
         this.name = name;
-        this.iterator = new RowsIterator(this);
-        if (rowCacheSize > 0) {
-            this.rows = new LinkedBlockingQueue<>(rowCacheSize);
+        this.discard = discard;
+        if (discard) {
+            this.iterator = null;
+            this.rows = null;
+            end();
         } else {
-            this.rows = new LinkedBlockingQueue<>();
+            this.iterator = new RowsIterator(this);
+            this.rows = rowCacheSize > 0
+                        ? new LinkedBlockingQueue<>(rowCacheSize)
+                        : new LinkedBlockingQueue<>();
         }
-    }
-
-    void end() {
-        end = true;
-    }
-
-    private boolean isEnd() {
-        return end && rows.isEmpty();
     }
 
     @Override
@@ -81,8 +80,20 @@ public class HSSFStreamingSheet implements Sheet {
         return this.index;
     }
 
+    public boolean isDiscard() {
+        return discard;
+    }
+
     public int getCacheRowCount() {
-        return this.rows.size();
+        return rows == null ? 0 : rows.size();
+    }
+
+    void end() {
+        end = true;
+    }
+
+    private boolean isEnd() {
+        return end && rows.isEmpty();
     }
 
     boolean putRow(Row row) {

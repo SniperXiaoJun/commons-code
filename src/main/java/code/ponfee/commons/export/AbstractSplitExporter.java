@@ -40,10 +40,11 @@ public abstract class AbstractSplitExporter extends AbstractExporter<Void> {
             subTable.get().addRow(data);
             if (count.incrementAndGet() == batchSize) {
                 super.nonEmpty();
-                Table st = subTable.set(table.copyOfWithoutTbody());
+                // sets a new table and return the last
+                Table last = subTable.set(table.copyOfWithoutTbody());
                 count.set(0); // reset count and sub table
                 service.submit(splitExporter(
-                    st, buildFilePath(split.incrementAndGet())
+                    last, buildFilePath(split.incrementAndGet())
                 ), null);
             }
         });

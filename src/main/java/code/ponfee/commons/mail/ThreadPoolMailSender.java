@@ -9,7 +9,8 @@ import java.util.stream.Collectors;
 import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 
 /**
- * 邮件通过走线程池发送
+ * Sends emial by thread pool
+ * 
  * @author fupf
  */
 public class ThreadPoolMailSender {

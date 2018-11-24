@@ -36,7 +36,7 @@ public class TestHSSFStreaming {
         System.out.println();
         for (Iterator<Sheet> iter = wb.iterator(); iter.hasNext();) {
             HSSFStreamingSheet sst = (HSSFStreamingSheet) iter.next();
-            System.out.println("SheetIndex: "+sst.getSheetIndex()+"，SheetName: "+sst.getSheetName()+"，"+"acheRowCount: "+sheet.getCacheRowCount());
+            System.out.println("SheetIndex: "+sst.getSheetIndex()+"，SheetName: "+sst.getSheetName()+"，cheRowCount: "+sheet.getCacheRowCount());
         }
     }
 

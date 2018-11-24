@@ -10,6 +10,8 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
+import code.ponfee.commons.collect.Collects;
+
 /**
  * The version for 2003 or early XSL excel file 
  * streaming reader
@@ -21,12 +23,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 public class HSSFStreamingRow implements Row {
 
     private final List<Cell> cells = new ArrayList<>();
-    private final Sheet sheet;
     private final int rowNum; // excel row number
     private final int rowOrder; // excel row order
 
-    public HSSFStreamingRow(Sheet sheet, int rowNum, int rowOrder) {
-        this.sheet = sheet;
+    public HSSFStreamingRow(int rowNum, int rowOrder) {
         this.rowNum = rowNum;
         this.rowOrder = rowOrder;
     }
@@ -75,23 +75,8 @@ public class HSSFStreamingRow implements Row {
         return iterator();
     }
 
-    @Override
-    public Sheet getSheet() {
-        return this.sheet;
-    }
-
-    public void addCell(int index, Cell cell) {
-        int size;
-        if (index == (size = this.cells.size())) {
-            this.cells.add(cell);
-        } else if (index < size) {
-            this.cells.set(index, cell);
-        } else {
-            for (int i = size; i < index; i++) {
-                this.cells.add(null);
-            }
-            this.cells.add(cell);
-        }
+    public void putCell(int index, Cell cell) {
+        Collects.set(this.cells, index, cell);
     }
 
     public boolean isEmpty() {
@@ -99,6 +84,11 @@ public class HSSFStreamingRow implements Row {
     }
 
     // ----------------------------------------------unsupported operation
+    @Override
+    public Sheet getSheet() {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public Cell createCell(int column) {
         throw new UnsupportedOperationException();

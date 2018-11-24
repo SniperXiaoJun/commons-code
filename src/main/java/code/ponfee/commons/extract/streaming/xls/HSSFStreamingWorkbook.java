@@ -152,7 +152,6 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
 
         int currentSheetIndex = -1; // start with 0
         HSSFStreamingSheet currentSheet;
-        boolean discardCurrentSheet;
 
         int currentRowNumber = -1; // start with 0
         int currentRowOrder = -1; // start with 0
@@ -203,16 +202,18 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
                         putRow(currentRow);
                         currentSheet.end();
                     }
-                    currentRow = null;
+                    currentRow = null; currentRowNumber = -1; currentRowOrder = -1; // reset current row
                     currentSheet = (HSSFStreamingSheet) sheets.get(++currentSheetIndex);
-                    discardCurrentSheet = isDiscard(currentSheet);
                 } else {
                     // BOFRecord.TYPE_WORKBOOK: beginning the workbook
                     // others uncapture ...
                 }
             } else if (record instanceof BoundSheetRecord) { // the workbook all of sheet
                 BoundSheetRecord bsr = (BoundSheetRecord) record;
-                sheets.add(new HSSFStreamingSheet(sheets.size(), rowCacheSize, bsr.getSheetname()));
+                boolean discard = isDiscard(sheets.size(),  bsr.getSheetname());
+                sheets.add(new HSSFStreamingSheet(
+                    sheets.size(), bsr.getSheetname(), discard, rowCacheSize
+                ));
             } else if (record instanceof SSTRecord) { // store a array of unique strings used in Excel.
                 sstrec = (SSTRecord) record;
             } else if (record instanceof CellRecord) { // excel cell
@@ -220,9 +221,9 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
                 if (currentRowNumber != cell.getRow()) { // new row
                     putRow(currentRow);
                     currentRowNumber = cell.getRow();
-                    currentRow = new HSSFStreamingRow(currentSheet, currentRowNumber, ++currentRowOrder);
+                    currentRow = new HSSFStreamingRow(currentRowNumber, ++currentRowOrder);
                 }
-                currentRow.addCell(cell.getColumn(), new HSSFStreamingCell(getStringCellValue(cell)));
+                currentRow.putCell(cell.getColumn(), new HSSFStreamingCell(getString(cell)));
             } else {
                 // RowRecord: batch row loading
                 // MissingCellDummyRecord: missing cell
@@ -240,7 +241,9 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
         }
 
         void putRow(HSSFStreamingRow row) {
-            if (discardCurrentSheet || row == null || row.isEmpty()) {
+            if (   this.currentSheet.isDiscard() 
+                || row == null || row.isEmpty()
+            ) {
                 return;
             }
             try {
@@ -252,16 +255,16 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
             }
         }
 
-        boolean isDiscard(HSSFStreamingSheet sheet) {
+        boolean isDiscard(int sstIdx, String sstName) {
             if (   ArrayUtils.isEmpty(sheetIndexs)
                 && ArrayUtils.isEmpty(sheetNames)) {
                 return false;
             }
-            return !ArrayUtils.contains(sheetIndexs, sheet.getSheetIndex())
-                && !ArrayUtils.contains(sheetNames, sheet.getSheetName());
+            return !ArrayUtils.contains(sheetIndexs, sstIdx)
+                && !ArrayUtils.contains(sheetNames, sstName);
         }
 
-        String getStringCellValue(CellRecord record) {
+        String getString(CellRecord record) {
             switch (record.getSid()) {
                 case BlankRecord.sid: 
                     return null;
