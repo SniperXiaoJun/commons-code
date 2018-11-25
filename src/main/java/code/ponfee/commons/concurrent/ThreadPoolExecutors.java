@@ -1,8 +1,15 @@
 package code.ponfee.commons.concurrent;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
@@ -10,6 +17,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import code.ponfee.commons.math.Numbers;
 
@@ -21,31 +29,17 @@ import code.ponfee.commons.math.Numbers;
 public final class ThreadPoolExecutors {
     private ThreadPoolExecutors() {}
 
-    public static final int MAX_CAP = 0x7fff; // max #workers - 1
+    public static final int MAX_CAP = 0x7FFF; // max #workers - 1
 
-    public static final RejectedExecutionHandler CALLER_RUN_HANDLER = new CallerRunsPolicy();
+    public static final RejectedExecutionHandler CALLER_RUN = new CallerRunsPolicy();
 
-    public static final ScheduledThreadPoolExecutor CALLER_RUN_SCHEDULER = 
-        new ScheduledThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors(), 
-        new NamedThreadFactory("caller-run-scheduler"), 
-        CALLER_RUN_HANDLER
-    );
+    public static final RejectedExecutionHandler DISCARD_POLICY = new DiscardPolicy();
 
-    public static final ScheduledThreadPoolExecutor DISCARD_POLICY_SCHEDULER = 
-        new ScheduledThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors(), 
-        new NamedThreadFactory("discard-policy-scheduler"), 
-        new DiscardPolicy()
-    );
+    public static final ScheduledExecutorService CALLER_RUN_SCHEDULER =
+        new DelegatedScheduledExecutorService("caller-run-sched", CALLER_RUN);
 
-    static {
-        CALLER_RUN_SCHEDULER.allowCoreThreadTimeOut(true);
-        Runtime.getRuntime().addShutdownHook(new Thread(CALLER_RUN_SCHEDULER::shutdown));
-
-        DISCARD_POLICY_SCHEDULER.allowCoreThreadTimeOut(true);
-        Runtime.getRuntime().addShutdownHook(new Thread(DISCARD_POLICY_SCHEDULER::shutdown));
-    }
+    public static final ScheduledExecutorService DISCARD_POLICY_SCHEDULER =
+        new DelegatedScheduledExecutorService("discard-policy-sched", DISCARD_POLICY);
 
     public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime) {
         return create(corePoolSize, maximumPoolSize, keepAliveTime, 0, null, null);
@@ -92,7 +86,7 @@ public final class ThreadPoolExecutors {
 
         // rejected Handler Strategy 
         if (rejectedHandler == null) {
-            rejectedHandler = CALLER_RUN_HANDLER;
+            rejectedHandler = CALLER_RUN;
         }
 
         maximumPoolSize = Numbers.bounds(maximumPoolSize, 1, MAX_CAP);
@@ -106,6 +100,118 @@ public final class ThreadPoolExecutors {
         executor.allowCoreThreadTimeOut(true); // 设置允许核心线程超时关闭
 
         return executor;
+    }
+
+    private static class DelegatedScheduledExecutorService
+        implements ScheduledExecutorService {
+
+        private final ScheduledThreadPoolExecutor delegate;
+
+        DelegatedScheduledExecutorService(String threadName,
+                                          RejectedExecutionHandler handler) {
+            this.delegate = new ScheduledThreadPoolExecutor(
+                1, new NamedThreadFactory(threadName), handler
+            );
+            this.delegate.allowCoreThreadTimeOut(true);
+            Runtime.getRuntime().addShutdownHook(
+                new Thread(this.delegate::shutdownNow)
+            );
+        }
+
+        @Override
+        public void shutdown() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<Runnable> shutdownNow() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean awaitTermination(long timeout, TimeUnit unit)
+            throws InterruptedException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isShutdown() {
+            return this.delegate.isShutdown();
+        }
+
+        @Override
+        public boolean isTerminated() {
+            return this.delegate.isTerminated();
+        }
+
+        @Override
+        public <T> Future<T> submit(Callable<T> task) {
+            return delegate.submit(task);
+        }
+
+        @Override
+        public <T> Future<T> submit(Runnable task, T result) {
+            return delegate.submit(task, result);
+        }
+
+        @Override
+        public Future<?> submit(Runnable task) {
+            return delegate.submit(task);
+        }
+
+        @Override
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) 
+            throws InterruptedException {
+            return delegate.invokeAll(tasks);
+        }
+
+        @Override
+        public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, 
+                                             long timeout, TimeUnit unit) 
+            throws InterruptedException {
+            return delegate.invokeAll(tasks, timeout, unit);
+        }
+
+        @Override
+        public <T> T invokeAny(Collection<? extends Callable<T>> tasks) 
+            throws InterruptedException, ExecutionException {
+            return delegate.invokeAny(tasks);
+        }
+
+        @Override
+        public <T> T invokeAny(Collection<? extends Callable<T>> tasks, 
+                               long timeout, TimeUnit unit) 
+            throws InterruptedException, ExecutionException, TimeoutException {
+            return delegate.invokeAny(tasks, timeout, unit);
+        }
+
+        @Override
+        public void execute(Runnable command) {
+            delegate.execute(command);
+        }
+
+        @Override
+        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+            return delegate.schedule(command, delay, unit);
+        }
+
+        @Override
+        public <V> ScheduledFuture<V> schedule(Callable<V> callable, 
+                                               long delay, TimeUnit unit) {
+            return delegate.schedule(callable, delay, unit);
+        }
+
+        @Override
+        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, 
+                                                      long period, TimeUnit unit) {
+            return delegate.scheduleAtFixedRate(command, initialDelay, period, unit);
+        }
+
+        @Override
+        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, 
+                                                         long delay, TimeUnit unit) {
+            return delegate.scheduleWithFixedDelay(command, initialDelay, delay, unit);
+        }
     }
 
 }
