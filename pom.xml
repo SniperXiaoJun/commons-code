@@ -12,7 +12,7 @@
     <properties>
         <project.encoding>UTF-8</project.encoding>
         <project.build.sourceEncoding>${project.encoding}</project.build.sourceEncoding>
-        <spring.version>4.3.18.RELEASE</spring.version>
+        <spring.version>4.3.20.RELEASE</spring.version>
         <poi.version>4.0.0</poi.version>
         <!-- log4j2用2.11.0版本jetty报错（用2.8.2版本解决此问题）：Error scanning entry 
              META-INF/versions/9/org/apache/logging/log4j/util/ProcessIdUtil.class from jar 

@@ -71,7 +71,7 @@ public class JedisLock implements Lock, java.io.Serializable {
 
     private static final int MAX_TOMEOUT_SECONDS = 86400; // 最大超 时为1天
     private static final int MIN_TOMEOUT_SECONDS = 1; // 最小超 时为1秒
-    private static final int MIN_SLEEP_MILLIS = 9; // 最小休眠时间为9毫秒
+    private static final int MIN_SLEEP_MILLIS = 7; // 最小休眠时间为7毫秒
     private static final byte[] KEY_PREFIX = "jedis:lock:".getBytes();
     private static final transient ThreadLocal<byte[]> LOCK_VALUE = new ThreadLocal<>();
 

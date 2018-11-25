@@ -1,6 +1,8 @@
 package code.ponfee.commons.util;
 
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * 变量持有，用于lambda方法体内
@@ -77,12 +79,31 @@ public final class Holder<T> {
         return t;
     }
 
+    public void ifPresent(Consumer<? super T> consumer) {
+        if (value != null) {
+            consumer.accept(value);
+        }
+    }
+
     public T get() {
         return this.value;
     }
 
     public T orElse(T other) {
         return value != null ? value : other;
+    }
+
+    public T orElseGet(Supplier<T> other) {
+        return value != null ? value : other.get();
+    }
+
+    public <E extends Throwable> T orElseThrow(
+        Supplier<? extends E> exceptionSupplier) throws E {
+        if (value != null) {
+            return value;
+        } else {
+            throw exceptionSupplier.get();
+        }
     }
 
     @Override
@@ -106,6 +127,8 @@ public final class Holder<T> {
 
     @Override
     public String toString() {
-        return String.format("Holder[%s]", Objects.toString(value, "null"));
+        return value != null
+            ? String.format("Holder[%s]", value)
+            : "Holder.empty";
     }
 }
