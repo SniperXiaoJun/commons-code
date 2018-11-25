@@ -1,12 +1,10 @@
 package code.ponfee.commons.wechat;
 
-import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_HANDLER;
+import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_SCHEDULER;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -63,15 +61,12 @@ public class WechatTokenManager implements DisposableBean {
     private static Logger logger = LoggerFactory.getLogger(WechatTokenManager.class);
 
     private final JedisClient jedisClient;
-    private ScheduledExecutorService scheduled;
 
     public WechatTokenManager(JedisClient jedisClient) {
         this.jedisClient = jedisClient;
-        //this.scheduled = Executors.newSingleThreadScheduledExecutor();
-        this.scheduled = new ScheduledThreadPoolExecutor(1, CALLER_RUN_HANDLER);
 
         // refresh token from wechat schedule
-        this.scheduled.scheduleAtFixedRate(() -> {
+        CALLER_RUN_SCHEDULER.scheduleAtFixedRate(() -> {
             for (Wechat wechat : WECHAT_CONFIGS.values()) {
                 try {
                     refreshToken(wechat);
@@ -84,7 +79,7 @@ public class WechatTokenManager implements DisposableBean {
         }, 0, TOKEN_EXPIRE / 2 - 1, TimeUnit.SECONDS);
 
         // load token and ticket from redis cache schedule
-        this.scheduled.scheduleAtFixedRate(() -> {
+        CALLER_RUN_SCHEDULER.scheduleAtFixedRate(() -> {
             try {
                 for (Wechat wx : WECHAT_CONFIGS.values()) {
                     String accessToken = jedisClient.valueOps().get(wx.accessTokenKey);
@@ -168,12 +163,7 @@ public class WechatTokenManager implements DisposableBean {
     }
 
     public @Override void destroy() {
-        try {
-            this.scheduled.shutdown();
-        } catch (Exception ignored) {
-            ignored.printStackTrace();
-        }
-        this.scheduled = null;
+        // do nothing
     }
 
     // -----------------------------------private methods--------------------------------- //

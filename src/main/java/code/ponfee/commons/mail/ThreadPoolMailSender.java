@@ -1,11 +1,9 @@
 package code.ponfee.commons.mail;
 
-import code.ponfee.commons.concurrent.ThreadPoolExecutors;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 /**
@@ -14,10 +12,6 @@ import java.util.stream.Collectors;
  * @author fupf
  */
 public class ThreadPoolMailSender {
-
-    private static final ExecutorService EXECUTOR = ThreadPoolExecutors.create(
-        3, Runtime.getRuntime().availableProcessors(), 120, 99, "mail-sender"
-    );
 
     public static boolean send(MailSender mailSender, MailEnvelope envlop) {
         return send(mailSender, envlop, true);
@@ -40,11 +34,13 @@ public class ThreadPoolMailSender {
      */
     public static boolean send(MailSender mailSender, List<MailEnvelope> envlops, boolean async) {
         if (async) { // 异步发送
-            envlops.forEach(e -> EXECUTOR.submit(() -> mailSender.send(e)));
+            envlops.forEach(e -> ForkJoinPool.commonPool().submit(() -> mailSender.send(e)));
             return true;
         } else { // 同步发送
             List<CompletableFuture<Boolean>> list = envlops.stream().map(
-                e -> CompletableFuture.supplyAsync(() -> mailSender.send(e), EXECUTOR)
+                e -> CompletableFuture.supplyAsync(
+                   () -> mailSender.send(e), ForkJoinPool.commonPool()
+               )
             ).collect(Collectors.toList());
 
             return list.stream()

@@ -1,14 +1,12 @@
 package code.ponfee.commons.limit;
 
-import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_HANDLER;
+import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_SCHEDULER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -39,10 +37,8 @@ public class RedisCurrentLimiter implements CurrentLimiter {
     private static final byte[] TRACE_KEY_BYTES = TRACE_KEY_PREFIX.getBytes(); // 频率缓存key前缀
     private static final String THRESHOLD_KEY_PREFIX = "freq:thrd:"; // 限制次数缓存key前缀
     private static final Map<String, Object> LOCK_MAP = new HashMap<>(); // the map for store lock object
-
     private final JedisClient jedisClient;
     private final JedisLock lock;
-    private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1, CALLER_RUN_HANDLER);
     private final AsyncBatchTransmitter<Trace> transmitter;
     private final int clearBeforeMillis;
 
@@ -58,7 +54,7 @@ public class RedisCurrentLimiter implements CurrentLimiter {
 
         // 定时清除记录(zrem range by score)，jedis:lock:cir:bre:clear
         this.lock = new JedisLock(jedisClient, TRACE_KEY_PREFIX + "clear", autoClearInSeconds >>> 1);
-        this.executor.scheduleAtFixedRate(() -> {
+        CALLER_RUN_SCHEDULER.scheduleAtFixedRate(() -> {
             try {
                 if (this.lock.tryLock()) { // 不用释放锁，让其自动超时
                     long beforeTimeMillis = System.currentTimeMillis() - clearBeforeMillis;
@@ -204,7 +200,6 @@ public class RedisCurrentLimiter implements CurrentLimiter {
         confCache.destroy();
         countCache.destroy();
         transmitter.end();
-        executor.shutdown();
         synchronized (RedisCurrentLimiter.class) {
             LOCK_MAP.clear();
         }

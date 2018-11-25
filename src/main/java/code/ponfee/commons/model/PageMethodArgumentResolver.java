@@ -49,7 +49,7 @@
 //        NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
 //
 //        PageRequestParams page = new PageRequestParams();
-//        webRequest.getParameterMap().entrySet().stream().forEach(entry -> {
+//        webRequest.getParameterMap().forEach(entry -> {
 //            if (PageRequestParams.PAGE_PARAMS.contains(entry.getKey())) {
 //                int value = Numbers.toInt(entry.getValue()[0], 0);
 //                if (value < 1 && SIZE_PARAMS.contaions(entry.getKey())) {

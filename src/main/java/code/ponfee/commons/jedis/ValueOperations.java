@@ -1,5 +1,11 @@
 package code.ponfee.commons.jedis;
 
+import code.ponfee.commons.io.GzipProcessor;
+import code.ponfee.commons.math.Numbers;
+import code.ponfee.commons.util.ObjectUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import redis.clients.jedis.Jedis;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,13 +17,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-
-import code.ponfee.commons.io.GzipProcessor;
-import code.ponfee.commons.math.Numbers;
-import code.ponfee.commons.util.ObjectUtils;
-import redis.clients.jedis.Jedis;
 
 /**
  * redis string（字符串）操作类
@@ -522,7 +521,7 @@ public class ValueOperations extends JedisOperations {
                 })).collect(Collectors.toList());
 
                 //CompletableFuture.allOf(list.toArray(new CompletableFuture[list.size()])).join();
-                list.stream().forEach(CompletableFuture::join);
+                list.forEach(CompletableFuture::join);
                 return resultMap;
             } else { // 直接获取，不用mget方式
                 /*return Stream.of(keys).collect(Collectors.toMap(

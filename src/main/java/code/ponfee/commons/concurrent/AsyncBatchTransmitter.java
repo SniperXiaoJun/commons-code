@@ -3,8 +3,8 @@ package code.ponfee.commons.concurrent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.BiFunction;
 
 import com.google.common.base.Preconditions;
@@ -38,7 +38,7 @@ public final class AsyncBatchTransmitter<T> {
      */
     public AsyncBatchTransmitter(BiFunction<List<T>, Boolean, Runnable> processor, 
                                  int thresholdPeriod, int thresholdChunk, 
-                                 ThreadPoolExecutor executor) {
+                                 ExecutorService executor) {
         this.batch = new AsyncBatchThread(processor, thresholdPeriod, 
                                           thresholdChunk, executor);
     }
@@ -108,7 +108,7 @@ public final class AsyncBatchTransmitter<T> {
         final int thresholdPeriod; // 消费周期阀值
         final int thresholdChunk; // 消费数量阀值
         final boolean requireDestroyWhenEnd;
-        final ThreadPoolExecutor executor;
+        final ExecutorService executor;
 
         long lastConsumeTimeMillis = System.currentTimeMillis(); // 最近刷新时间
 
@@ -120,7 +120,7 @@ public final class AsyncBatchTransmitter<T> {
          */
         AsyncBatchThread(BiFunction<List<T>, Boolean, Runnable> processor, 
                          int thresholdPeriod, int thresholdChunk, 
-                         ThreadPoolExecutor executor) {
+                         ExecutorService executor) {
             Preconditions.checkArgument(thresholdPeriod > 0);
             Preconditions.checkArgument(thresholdChunk > 0);
 
@@ -133,6 +133,9 @@ public final class AsyncBatchTransmitter<T> {
                 this.executor = ThreadPoolExecutors.create(
                     1, Runtime.getRuntime().availableProcessors(), 
                     120, 0, "async-batch-transmitter"
+                );
+                Runtime.getRuntime().addShutdownHook(
+                    new Thread(this.executor::shutdown)
                 );
             } else {
                 this.requireDestroyWhenEnd = false;

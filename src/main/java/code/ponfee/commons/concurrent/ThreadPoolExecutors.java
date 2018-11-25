@@ -3,23 +3,49 @@ package code.ponfee.commons.concurrent;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
+import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import java.util.concurrent.TimeUnit;
 
 import code.ponfee.commons.math.Numbers;
 
 /**
- * 线程池执行器创建
+ * Thread pool executor utility
+ * 
  * @author Ponfee
  */
 public final class ThreadPoolExecutors {
     private ThreadPoolExecutors() {}
 
     public static final int MAX_CAP = 0x7fff; // max #workers - 1
+
     public static final RejectedExecutionHandler CALLER_RUN_HANDLER = new CallerRunsPolicy();
+
+    public static final ScheduledThreadPoolExecutor CALLER_RUN_SCHEDULER = 
+        new ScheduledThreadPoolExecutor(
+        Runtime.getRuntime().availableProcessors(), 
+        new NamedThreadFactory("caller-run-scheduler"), 
+        CALLER_RUN_HANDLER
+    );
+
+    public static final ScheduledThreadPoolExecutor DISCARD_POLICY_SCHEDULER = 
+        new ScheduledThreadPoolExecutor(
+        Runtime.getRuntime().availableProcessors(), 
+        new NamedThreadFactory("discard-policy-scheduler"), 
+        new DiscardPolicy()
+    );
+
+    static {
+        CALLER_RUN_SCHEDULER.allowCoreThreadTimeOut(true);
+        Runtime.getRuntime().addShutdownHook(new Thread(CALLER_RUN_SCHEDULER::shutdown));
+
+        DISCARD_POLICY_SCHEDULER.allowCoreThreadTimeOut(true);
+        Runtime.getRuntime().addShutdownHook(new Thread(DISCARD_POLICY_SCHEDULER::shutdown));
+    }
 
     public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime) {
         return create(corePoolSize, maximumPoolSize, keepAliveTime, 0, null, null);

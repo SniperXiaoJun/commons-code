@@ -1,9 +1,8 @@
 package code.ponfee.commons.limit;
 
+import static code.ponfee.commons.concurrent.ThreadPoolExecutors.DISCARD_POLICY_SCHEDULER;
+
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -20,11 +19,10 @@ public final class ConcurrentMapRequestLimiter extends RequestLimiter {
 
     private static final ConcurrentHashMap<String, CacheValue<?>> CACHE = new ConcurrentHashMap<>();
     private static final ConcurrentMapRequestLimiter INSTANCE = new ConcurrentMapRequestLimiter();
-    private static final ScheduledExecutorService EXECUTOR = new ScheduledThreadPoolExecutor(1, new DiscardPolicy());
+
     private static final Lock LOCK = new ReentrantLock(); // 定时清理加锁
     static {
-        Runtime.getRuntime().addShutdownHook(new Thread(EXECUTOR::shutdown));
-        EXECUTOR.scheduleAtFixedRate(() -> {
+        DISCARD_POLICY_SCHEDULER.scheduleAtFixedRate(() -> {
             if (!LOCK.tryLock()) {
                 return;
             }

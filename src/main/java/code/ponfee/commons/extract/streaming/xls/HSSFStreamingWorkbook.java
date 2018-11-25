@@ -1,5 +1,13 @@
 package code.ponfee.commons.extract.streaming.xls;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener;
@@ -32,14 +40,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
-
 /**
  * The version for 2003 or early XSL excel file 
  * streaming reader
@@ -57,7 +57,7 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
 
     public HSSFStreamingWorkbook(InputStream input, int rowCacheSize, 
                                  int[] sheetIndexs, String[] sheetNames, 
-                                 ThreadPoolExecutor executor) {
+                                 ExecutorService executor) {
         executor.submit(new AsyncHSSFReader(
             rowCacheSize, sheetIndexs, sheetNames, input
         ));

@@ -1,6 +1,7 @@
 package code.ponfee.commons.cache;
 
-import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_HANDLER;
+
+import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_SCHEDULER;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,7 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -29,9 +29,6 @@ public class Cache<T> {
 
     public static final long KEEPALIVE_FOREVER = 0; // 为0表示不失效
 
-    /** The default scheduled executor shared of class level */
-    private static volatile ScheduledExecutorService defaultExecutor;
-
     private final boolean caseSensitiveKey; // 是否忽略大小写（只针对String）
     private final boolean compressKey; // 是否压缩key（只针对String）
     private final long keepAliveInMillis; // 默认的数据保存的时间
@@ -39,11 +36,11 @@ public class Cache<T> {
 
     private volatile boolean isDestroy = false; // 是否被销毁
     private final Lock lock = new ReentrantLock(); // 定时清理加锁
-    private ScheduledExecutorService executor;
+    private ScheduledExecutorService scheduler;
     private DateProvider dateProvider = DateProvider.CURRENT;
 
     Cache(boolean caseSensitiveKey, boolean compressKey, long keepAliveInMillis, 
-          int autoReleaseInSeconds, ScheduledExecutorService scheduleExecutor) {
+          int autoReleaseInSeconds, ScheduledExecutorService scheduler) {
         Preconditions.checkArgument(keepAliveInMillis >= 0);
         Preconditions.checkArgument(autoReleaseInSeconds >= 0);
 
@@ -52,23 +49,14 @@ public class Cache<T> {
         this.keepAliveInMillis = keepAliveInMillis;
 
         if (autoReleaseInSeconds > 0) {
-            ScheduledExecutorService executor0;
-            if (scheduleExecutor != null) {
-                this.executor = executor0 = scheduleExecutor;
+            if (scheduler != null) {
+                this.scheduler = scheduler;
             } else {
-                if (defaultExecutor == null) {
-                    synchronized (Cache.class) {
-                        if (defaultExecutor == null) { // double check lock
-                            defaultExecutor = new ScheduledThreadPoolExecutor(1, CALLER_RUN_HANDLER);
-                            Runtime.getRuntime().addShutdownHook(new Thread(defaultExecutor::shutdown));
-                        }
-                    }
-                }
-                executor0 = defaultExecutor;
+                scheduler = CALLER_RUN_SCHEDULER;
             }
 
             // 定时清理
-            executor0.scheduleAtFixedRate(() -> {
+            scheduler.scheduleAtFixedRate(() -> {
                 // none exception to throw, so can not wrap try catch
                 if (!lock.tryLock()) {
                     return;
@@ -281,8 +269,8 @@ public class Cache<T> {
      */
     public void destroy() {
         isDestroy = true;
-        if (executor != null) try {
-            executor.shutdown();
+        if (scheduler != null) try {
+            scheduler.shutdown();
         } catch (Exception ignored) {
             ignored.printStackTrace();
         }
