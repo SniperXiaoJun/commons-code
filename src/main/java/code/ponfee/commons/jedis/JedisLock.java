@@ -73,6 +73,7 @@ public class JedisLock implements Lock, java.io.Serializable {
     private static final int MIN_TOMEOUT_SECONDS = 1; // 最小超 时为1秒
     private static final int MIN_SLEEP_MILLIS = 7; // 最小休眠时间为7毫秒
     private static final byte[] KEY_PREFIX = "jedis:lock:".getBytes();
+    // https://github.com/alibaba/transmittable-thread-local
     private static final transient ThreadLocal<byte[]> LOCK_VALUE = new ThreadLocal<>();
 
     private final transient JedisClient jedisClient;

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -40,6 +41,9 @@ public final class ThreadPoolExecutors {
 
     public static final ScheduledExecutorService DISCARD_POLICY_SCHEDULER =
         new DelegatedScheduledExecutorService("discard-policy-sched", DISCARD_POLICY);
+
+    public static final ExecutorService CALLER_RUN_EXECUTOR =
+        new DelegatedExecutorService("caller-run-exec", CALLER_RUN);
 
     public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime) {
         return create(corePoolSize, maximumPoolSize, keepAliveTime, 0, null, null);
@@ -103,19 +107,81 @@ public final class ThreadPoolExecutors {
     }
 
     private static class DelegatedScheduledExecutorService
-        implements ScheduledExecutorService {
-
-        private final ScheduledThreadPoolExecutor delegate;
+        extends AbstractDelegatedExecutorService implements ScheduledExecutorService {
 
         DelegatedScheduledExecutorService(String threadName,
                                           RejectedExecutionHandler handler) {
-            this.delegate = new ScheduledThreadPoolExecutor(
+            super(newScheduledExecutorService(threadName, handler));
+        }
+
+        private static ScheduledExecutorService newScheduledExecutorService(
+                      String threadName, RejectedExecutionHandler handler) {
+            ScheduledThreadPoolExecutor delegate = new ScheduledThreadPoolExecutor(
                 1, new NamedThreadFactory(threadName), handler
             );
-            this.delegate.allowCoreThreadTimeOut(true);
-            Runtime.getRuntime().addShutdownHook(
-                new Thread(this.delegate::shutdownNow)
+            Runtime.getRuntime().addShutdownHook(new Thread(delegate::shutdownNow));
+            return delegate;
+        }
+
+        @Override
+        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+            return ((ScheduledExecutorService) delegate).schedule(command, delay, unit);
+        }
+
+        @Override
+        public <V> ScheduledFuture<V> schedule(Callable<V> callable, 
+                                               long delay, TimeUnit unit) {
+            return ((ScheduledExecutorService) delegate).schedule(callable, delay, unit);
+        }
+
+        @Override
+        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, 
+                                                      long period, TimeUnit unit) {
+            return ((ScheduledExecutorService) delegate).scheduleAtFixedRate(
+                command, initialDelay, period, unit
             );
+        }
+
+        @Override
+        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, 
+                                                         long delay, TimeUnit unit) {
+            return ((ScheduledExecutorService) delegate).scheduleWithFixedDelay(
+                command, initialDelay, delay, unit
+            );
+        }
+    }
+
+    private static class DelegatedExecutorService extends AbstractDelegatedExecutorService {
+
+        DelegatedExecutorService(String threadName, RejectedExecutionHandler handler) {
+            super(newExecutorService(threadName, handler));
+        }
+
+        static ExecutorService newExecutorService(String threadName, 
+                                                  RejectedExecutionHandler handler) {
+            int corePoolSize = Runtime.getRuntime().availableProcessors();
+            if (corePoolSize < 0) {
+                corePoolSize = 1;
+            }
+            int maximumPoolSize = corePoolSize << 2;
+
+            // create ThreadPoolExecutor instance
+            ThreadPoolExecutor delegate = new ThreadPoolExecutor(
+                corePoolSize, maximumPoolSize, 120, TimeUnit.SECONDS, 
+                new SynchronousQueue<>(), new NamedThreadFactory(threadName), handler
+            );
+            delegate.allowCoreThreadTimeOut(true); // 设置允许核心线程超时关闭
+            Runtime.getRuntime().addShutdownHook(new Thread(delegate::shutdownNow));
+            return delegate;
+        }
+    }
+
+    private static class AbstractDelegatedExecutorService implements ExecutorService {
+
+        final ExecutorService delegate;
+
+        AbstractDelegatedExecutorService(ExecutorService delegate) {
+            this.delegate = delegate;
         }
 
         @Override
@@ -188,29 +254,6 @@ public final class ThreadPoolExecutors {
         @Override
         public void execute(Runnable command) {
             delegate.execute(command);
-        }
-
-        @Override
-        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-            return delegate.schedule(command, delay, unit);
-        }
-
-        @Override
-        public <V> ScheduledFuture<V> schedule(Callable<V> callable, 
-                                               long delay, TimeUnit unit) {
-            return delegate.schedule(callable, delay, unit);
-        }
-
-        @Override
-        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, 
-                                                      long period, TimeUnit unit) {
-            return delegate.scheduleAtFixedRate(command, initialDelay, period, unit);
-        }
-
-        @Override
-        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, 
-                                                         long delay, TimeUnit unit) {
-            return delegate.scheduleWithFixedDelay(command, initialDelay, delay, unit);
         }
     }
 

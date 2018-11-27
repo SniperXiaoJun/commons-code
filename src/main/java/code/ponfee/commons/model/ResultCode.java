@@ -137,6 +137,8 @@ public final class ResultCode implements Serializable {
         this.msg = msg;
     }
 
+    private static final String SYS_ERROR = "The sys code must between "
+                           + SYS_CODE_MIN + " and " + SYS_CODE_MAX + ".";
     /**
      * inner create, only call in this class
      * use in assign the commons code 
@@ -146,12 +148,13 @@ public final class ResultCode implements Serializable {
      */
     private static ResultCode create0(int code, String msg) {
         if (code < SYS_CODE_MIN || code > SYS_CODE_MAX) {
-            throw new IllegalArgumentException("the sys code must between " 
-                              + SYS_CODE_MIN + " and " + SYS_CODE_MAX + ".");
+            throw new IllegalArgumentException(SYS_ERROR);
         }
         return new ResultCode(code, msg);
     }
 
+    private static final String BIZ_ERROR = "The biz code cannot between "
+                             + SYS_CODE_MIN + " and " + SYS_CODE_MAX + ".";
     /**
      * others place cannot set the code in commons code range[000 ~ 999]
      * @param code
@@ -160,8 +163,7 @@ public final class ResultCode implements Serializable {
      */
     public static ResultCode create(int code, String msg) {
         if (code >= SYS_CODE_MIN && code <= SYS_CODE_MAX) {
-            throw new IllegalArgumentException("the biz code cannot between " 
-                                + SYS_CODE_MIN + " and " + SYS_CODE_MAX + ".");
+            throw new IllegalArgumentException(BIZ_ERROR);
         }
         return new ResultCode(code, msg);
     }

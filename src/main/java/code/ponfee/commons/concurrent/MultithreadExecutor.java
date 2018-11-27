@@ -1,5 +1,6 @@
 package code.ponfee.commons.concurrent;
 
+import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_EXECUTOR;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -7,8 +8,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -43,6 +42,15 @@ public class MultithreadExecutor {
     public static void execAsync(int times, Runnable command, int execSeconds) {
         Stopwatch watch = Stopwatch.createStarted();
         AtomicBoolean flag = new AtomicBoolean(true);
+
+        /*CompletionService<Void> service = new ExecutorCompletionService<>(CALLER_RUN_EXECUTOR);
+        IntStream.range(0, times).mapToObj(
+            x -> service.submit(() -> {
+                while (flag.get() && !Thread.interrupted()) {
+                    command.run();
+                }
+            }, null)
+        );*/
         Thread[] threads = new Thread[times];
         for (int i = 0; i < times; i++) {
             threads[i] = new Thread(() -> {
@@ -54,14 +62,13 @@ public class MultithreadExecutor {
         for (Thread thread : threads) {
             thread.start();
         }
-
         try {
             Thread.sleep(execSeconds * 1000); // main thread sleep
             flag.set(false);
-
             for (Thread thread : threads) {
                 thread.join();
             }
+            //joinDiscard(service, times, 7);
         } catch (InterruptedException e) {
             flag.set(false);
             throw new RuntimeException(e);
@@ -72,12 +79,7 @@ public class MultithreadExecutor {
 
     // -----------------------------------------------------------------execAsync
     public static void runAsync(Runnable command, int times) {
-        ExecutorService executor = Executors.newFixedThreadPool(times);
-        try {
-            runAsync(command, times, executor);
-        } finally {
-            executor.shutdown();
-        }
+        runAsync(command, times, CALLER_RUN_EXECUTOR);
     }
 
     /**
@@ -100,12 +102,7 @@ public class MultithreadExecutor {
 
     // -----------------------------------------------------------------callAsync
     public static <U> List<U> callAsync(Supplier<U> supplier, int times) {
-        ExecutorService executor = Executors.newFixedThreadPool(times);
-        try {
-            return callAsync(supplier, times, executor);
-        } finally {
-            executor.shutdown();
-        }
+        return callAsync(supplier, times, CALLER_RUN_EXECUTOR);
     }
 
     public static <U> List<U> callAsync(Supplier<U> supplier, 
@@ -127,12 +124,7 @@ public class MultithreadExecutor {
 
     // -----------------------------------------------------------------runAsync
     public static <T> void runAsync(Collection<T> coll, Consumer<T> action) {
-        ExecutorService executor = Executors.newFixedThreadPool(coll.size());
-        try {
-            runAsync(coll, action, executor);
-        } finally {
-            executor.shutdown();
-        }
+        runAsync(coll, action, CALLER_RUN_EXECUTOR);
     }
 
     /**
@@ -163,12 +155,7 @@ public class MultithreadExecutor {
     // -----------------------------------------------------------------callAsync
     public static <T, U> List<U> callAsync(Collection<T> coll, 
                                            Function<T, U> mapper) {
-        ExecutorService executor = Executors.newFixedThreadPool(coll.size());
-        try {
-            return callAsync(coll, mapper, executor);
-        } finally {
-            executor.shutdown();
-        }
+        return callAsync(coll, mapper, CALLER_RUN_EXECUTOR);
     }
 
     /**

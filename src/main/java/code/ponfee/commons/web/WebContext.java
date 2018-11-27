@@ -20,6 +20,9 @@ import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * 本地线程级的web上下文持有类
+ * 
+ * https://github.com/alibaba/transmittable-thread-local
+ * 
  * @author fupf
  */
 public final class WebContext {
