@@ -39,6 +39,16 @@ public final class ThreadPoolExecutors {
 
     public static final RejectedExecutionHandler DISCARD_POLICY = new DiscardPolicy();
 
+    public static final RejectedExecutionHandler BLOCK_PRODUCER = (r, executor) -> {
+        if (!executor.isShutdown()) {
+            try {
+                executor.getQueue().put(r);
+            } catch (InterruptedException ignored) {
+                ignored.printStackTrace();
+            }
+        }
+    };
+
     public static final ScheduledExecutorService CALLER_RUN_SCHEDULER =
         new DelegatedScheduledExecutorService("caller-run-sched", CALLER_RUN);
 
