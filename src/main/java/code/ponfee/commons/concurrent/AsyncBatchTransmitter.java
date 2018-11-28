@@ -17,7 +17,7 @@ import com.google.common.base.Preconditions;
 public final class AsyncBatchTransmitter<T> {
 
     // 单消费者用LinkedBlockingQueue，多消费者用ConcurrentLinkedQueue
-    private final Queue<T> queue = new LinkedBlockingQueue<>();
+    private final Queue<T> queue = new LinkedBlockingQueue<>(); // capacity: Integer.MAX_VALUE
     private final AsyncBatchThread batch;
     private volatile boolean isEnd = false;
 

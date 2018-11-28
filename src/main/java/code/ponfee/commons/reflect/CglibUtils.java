@@ -31,8 +31,8 @@ public class CglibUtils {
      * @param target target object
      */
     public static void copyProperties(Object source, Object target) {
-        /*Long beanKey = ((long) System.identityHashCode(source) << 32) 
-                       | System.identityHashCode(target);*/
+        /*Long beanKey = ((long) System.identityHashCode(source.getClass()) << 32) 
+                       | System.identityHashCode(target.getClass());*/
         /*String beanKey = new StringBuilder(source.getClass().getName()).append(':')
                                      .append(target.getClass().getName()).toString();*/
         ObjectArrayWrapper<Class<?>> beanKey = ObjectArrayWrapper.create(

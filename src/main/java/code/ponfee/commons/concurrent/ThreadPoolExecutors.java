@@ -25,6 +25,9 @@ import code.ponfee.commons.math.Numbers;
 /**
  * Thread pool executor utility
  * 
+ * https://blog.csdn.net/Holmofy/article/details/73237153
+ * https://blog.csdn.net/holmofy/article/details/77411854
+ * 
  * @author Ponfee
  */
 public final class ThreadPoolExecutors {
@@ -43,7 +46,10 @@ public final class ThreadPoolExecutors {
         new DelegatedScheduledExecutorService("discard-policy-sched", DISCARD_POLICY);
 
     public static final ExecutorService CALLER_RUN_EXECUTOR =
-        new DelegatedExecutorService("caller-run-exec", CALLER_RUN);
+        new DelegatedExecutorService("caller-run-exec", 0, CALLER_RUN);
+
+    public static final ExecutorService INFINITY_QUEUE_EXECUTOR =
+        new DelegatedExecutorService("infinity-queue-exec", Integer.MAX_VALUE, DISCARD_POLICY);
 
     public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime) {
         return create(corePoolSize, maximumPoolSize, keepAliveTime, 0, null, null);
@@ -101,6 +107,7 @@ public final class ThreadPoolExecutors {
             corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.SECONDS, 
             workQueue, threadFactory, rejectedHandler
         );
+        // prestartAllCoreThreads, prestartCoreThread
         executor.allowCoreThreadTimeOut(true); // 设置允许核心线程超时关闭
 
         return executor;
@@ -116,6 +123,7 @@ public final class ThreadPoolExecutors {
 
         private static ScheduledExecutorService newScheduledExecutorService(
                       String threadName, RejectedExecutionHandler handler) {
+            // maximumPoolSize=Integer.MAX_VALUE, DelayedWorkQueue, keepAliveTime=0
             ScheduledThreadPoolExecutor delegate = new ScheduledThreadPoolExecutor(
                 1, new NamedThreadFactory(threadName), handler
             );
@@ -153,22 +161,28 @@ public final class ThreadPoolExecutors {
 
     private static class DelegatedExecutorService extends AbstractDelegatedExecutorService {
 
-        DelegatedExecutorService(String threadName, RejectedExecutionHandler handler) {
-            super(newExecutorService(threadName, handler));
+        DelegatedExecutorService(String threadName, int queueCapacity,
+                                 RejectedExecutionHandler handler) {
+            super(newExecutorService(threadName, queueCapacity, handler));
         }
 
-        static ExecutorService newExecutorService(String threadName, 
+        static ExecutorService newExecutorService(String threadName, int queueCapacity,
                                                   RejectedExecutionHandler handler) {
-            int corePoolSize = Runtime.getRuntime().availableProcessors();
-            if (corePoolSize < 0) {
-                corePoolSize = 1;
+            int corePoolSize = Math.max(Runtime.getRuntime().availableProcessors(), 1);
+            int maximumPoolSize = Math.min(corePoolSize << 2, MAX_CAP);
+            corePoolSize = Math.min(corePoolSize << 1, maximumPoolSize);
+
+            BlockingQueue<Runnable> workQueue;
+            if (queueCapacity > 0) {
+                workQueue = new LinkedBlockingQueue<>(queueCapacity);
+            } else {
+                workQueue = new SynchronousQueue<>();
             }
-            int maximumPoolSize = corePoolSize << 2;
 
             // create ThreadPoolExecutor instance
             ThreadPoolExecutor delegate = new ThreadPoolExecutor(
                 corePoolSize, maximumPoolSize, 120, TimeUnit.SECONDS, 
-                new SynchronousQueue<>(), new NamedThreadFactory(threadName), handler
+                workQueue, new NamedThreadFactory(threadName), handler
             );
             delegate.allowCoreThreadTimeOut(true); // 设置允许核心线程超时关闭
             Runtime.getRuntime().addShutdownHook(new Thread(delegate::shutdownNow));
