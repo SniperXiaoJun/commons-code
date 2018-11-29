@@ -5,7 +5,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.util.Assert;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -38,7 +37,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
      * @return
      */
     public static Object getBean(String name) {
-        assertContextInjected();
+        //assertContextInjected();
         BeansException ex = null;
         for (ApplicationContext c : HOLDER) {
             try {
@@ -59,7 +58,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
      * @return
      */
     public static <T> T getBean(Class<T> clazz) {
-        assertContextInjected();
+        //assertContextInjected();
         BeansException ex = null;
         for (ApplicationContext c : HOLDER) {
             try {
@@ -80,7 +79,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
      * @return
      */
     public static <T> T getBean(String name, Class<T> clazz) {
-        assertContextInjected();
+        //assertContextInjected();
         BeansException ex = null;
         for (ApplicationContext c : HOLDER) {
             try {
@@ -101,7 +100,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
      * @return
      */
     public static boolean containsBean(String name) {
-        assertContextInjected();
+        //assertContextInjected();
         for (ApplicationContext c : HOLDER) {
             if (c.containsBean(name)) {
                 return true;
@@ -116,7 +115,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
      * @return
      */
     public static boolean isSingleton(String name) {
-        assertContextInjected();
+        //assertContextInjected();
         NoSuchBeanDefinitionException ex = null;
         for (ApplicationContext c : HOLDER) {
             try {
@@ -136,7 +135,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
      * @return
      */
     public static Class<?> getType(String name) {
-        assertContextInjected();
+        //assertContextInjected();
         NoSuchBeanDefinitionException ex = null;
         for (ApplicationContext c : HOLDER) {
             try {
@@ -156,7 +155,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
      * @return
      */
     public static String[] getAliases(String name) {
-        assertContextInjected();
+        //assertContextInjected();
         for (ApplicationContext c : HOLDER) {
             String[] aliases = c.getAliases(name);
             if (aliases != null) {
@@ -185,7 +184,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
     /**
      * 检查ApplicationContext不为空.
      */
-    private static void assertContextInjected() {
-        Assert.state(HOLDER.size() > 0, "must be defined SpringContextHolder within spring config file.");
-    }
+    //private static void assertContextInjected() {
+    //    Assert.state(HOLDER.size() > 0, "must be defined SpringContextHolder within spring config file.");
+    //}
 }

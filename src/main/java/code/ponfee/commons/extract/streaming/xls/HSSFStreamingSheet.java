@@ -96,8 +96,8 @@ public class HSSFStreamingSheet implements Sheet {
         return end && rows.isEmpty();
     }
 
-    boolean putRow(Row row) {
-        return this.rows.offer(row);
+    void putRow(Row row) throws InterruptedException {
+        this.rows.put(row);
     }
 
     private static class RowsIterator implements Iterator<Row> {
@@ -110,19 +110,21 @@ public class HSSFStreamingSheet implements Sheet {
 
         @Override
         public boolean hasNext() {
-            try {
-                while (!sheet.isEnd()) {
-                    if (   (currentRow == null)
-                        && ((currentRow = sheet.rows.poll()) != null)
-                    ) {
-                        return true;
-                    }
-                    Thread.sleep(HSSFStreamingWorkbook.AWAIT_MILLIS);
+            while (!sheet.isEnd()) {
+                if (   (currentRow == null)
+                    && ((currentRow = sheet.rows.poll()) != null)
+                ) {
+                    return true;
                 }
-                return false;
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+
+                try {
+                    // to sleep for prevent endless loop
+                    Thread.sleep(HSSFStreamingWorkbook.AWAIT_MILLIS);
+                } catch (InterruptedException ignored) {
+                    ignored.printStackTrace();
+                }
             }
+            return false;
         }
 
         @Override

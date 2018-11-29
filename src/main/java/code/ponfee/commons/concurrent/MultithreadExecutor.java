@@ -8,7 +8,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -200,13 +199,8 @@ public class MultithreadExecutor {
                                 Consumer<T> accept, int sleepTimeMillis) {
         try {
             while (count > 0) {
-                Future<T> future = service.poll();
-                if (future != null) {
-                    count--;
-                    accept.accept(future.get());
-                } else {
-                    Thread.sleep(sleepTimeMillis);
-                }
+                accept.accept(service.take().get());
+                count--;
             }
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);

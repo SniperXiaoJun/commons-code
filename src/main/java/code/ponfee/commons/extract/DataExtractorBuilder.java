@@ -34,7 +34,7 @@ public class DataExtractorBuilder {
 
     private int startRow = 0; // excel start row: start with 0
     private int sheetIndex = 0; // excel work book sheet index: start with 0
-    private boolean streaming = true; // excel streaming read
+    private boolean streaming = true; // excel whether streaming read, default true
 
     private CSVFormat csvFormat; // csv format
     private Charset charset; // csv data source charset

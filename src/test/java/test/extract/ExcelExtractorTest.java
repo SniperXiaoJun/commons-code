@@ -14,7 +14,7 @@ import code.ponfee.commons.extract.DataExtractorBuilder;
 
 /**
  * 性能：Path > File > Input
- * @author 01367825
+ * @author Ponfee
  */
 public class ExcelExtractorTest {
 

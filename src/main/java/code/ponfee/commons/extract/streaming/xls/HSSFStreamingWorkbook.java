@@ -210,9 +210,9 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
                 }
             } else if (record instanceof BoundSheetRecord) { // the workbook all of sheet
                 BoundSheetRecord bsr = (BoundSheetRecord) record;
-                boolean discard = isDiscard(sheets.size(),  bsr.getSheetname());
+                int sstIdx = sheets.size();
                 sheets.add(new HSSFStreamingSheet(
-                    sheets.size(), bsr.getSheetname(), discard, rowCacheSize
+                    sstIdx, bsr.getSheetname(), isDiscard(sstIdx,  bsr.getSheetname()), rowCacheSize
                 ));
             } else if (record instanceof SSTRecord) { // store a array of unique strings used in Excel.
                 sstrec = (SSTRecord) record;
@@ -247,9 +247,7 @@ public class HSSFStreamingWorkbook implements Workbook, AutoCloseable {
                 return;
             }
             try {
-                while (!this.currentSheet.putRow(row)) {
-                    Thread.sleep(AWAIT_MILLIS);
-                }
+                this.currentSheet.putRow(row);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
