@@ -1,6 +1,7 @@
 package code.ponfee.commons.concurrent;
 
-import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_EXECUTOR;
+import static code.ponfee.commons.concurrent.ThreadPoolExecutors.INFINITY_QUEUE_EXECUTOR;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,32 +43,20 @@ public class MultithreadExecutor {
         Stopwatch watch = Stopwatch.createStarted();
         AtomicBoolean flag = new AtomicBoolean(true);
 
-        /*CompletionService<Void> service = new ExecutorCompletionService<>(CALLER_RUN_EXECUTOR);
-        IntStream.range(0, times).mapToObj(
-            x -> service.submit(() -> {
+        CompletableFuture<?>[] futures = IntStream.range(
+            0, times
+        ).mapToObj(
+            x -> CompletableFuture.runAsync(() -> {
                 while (flag.get() && !Thread.interrupted()) {
                     command.run();
                 }
-            }, null)
-        );*/
-        Thread[] threads = new Thread[times];
-        for (int i = 0; i < times; i++) {
-            threads[i] = new Thread(() -> {
-                while (flag.get() && !Thread.interrupted()) {
-                    command.run();
-                }
-            });
-        }
-        for (Thread thread : threads) {
-            thread.start();
-        }
+            }, INFINITY_QUEUE_EXECUTOR) // CALLER_RUN_EXECUTOR：caller run was dead loop
+       ).toArray(CompletableFuture[]::new);
+
         try {
             Thread.sleep(execSeconds * 1000); // main thread sleep
             flag.set(false);
-            for (Thread thread : threads) {
-                thread.join();
-            }
-            //joinDiscard(service, times, 7);
+            CompletableFuture.allOf(futures).join();
         } catch (InterruptedException e) {
             flag.set(false);
             throw new RuntimeException(e);
@@ -78,7 +67,7 @@ public class MultithreadExecutor {
 
     // -----------------------------------------------------------------execAsync
     public static void runAsync(Runnable command, int times) {
-        runAsync(command, times, CALLER_RUN_EXECUTOR);
+        runAsync(command, times, INFINITY_QUEUE_EXECUTOR);
     }
 
     /**
@@ -101,7 +90,7 @@ public class MultithreadExecutor {
 
     // -----------------------------------------------------------------callAsync
     public static <U> List<U> callAsync(Supplier<U> supplier, int times) {
-        return callAsync(supplier, times, CALLER_RUN_EXECUTOR);
+        return callAsync(supplier, times, INFINITY_QUEUE_EXECUTOR);
     }
 
     public static <U> List<U> callAsync(Supplier<U> supplier, 
@@ -123,7 +112,7 @@ public class MultithreadExecutor {
 
     // -----------------------------------------------------------------runAsync
     public static <T> void runAsync(Collection<T> coll, Consumer<T> action) {
-        runAsync(coll, action, CALLER_RUN_EXECUTOR);
+        runAsync(coll, action, INFINITY_QUEUE_EXECUTOR);
     }
 
     /**
@@ -154,7 +143,7 @@ public class MultithreadExecutor {
     // -----------------------------------------------------------------callAsync
     public static <T, U> List<U> callAsync(Collection<T> coll, 
                                            Function<T, U> mapper) {
-        return callAsync(coll, mapper, CALLER_RUN_EXECUTOR);
+        return callAsync(coll, mapper, INFINITY_QUEUE_EXECUTOR);
     }
 
     /**

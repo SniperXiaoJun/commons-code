@@ -1,9 +1,9 @@
 package code.ponfee.commons.jedis;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
+import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 import code.ponfee.commons.math.Numbers;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ShardedJedis;
@@ -21,7 +21,7 @@ public abstract class JedisOperations {
     //static final int FUTURE_TIMEOUT = 1500; // future task timeout milliseconds
     static final int BATCH_MULTIPLE = 1; // the multiple jedis server number to use batch
 
-    static final ExecutorService EXECUTOR = ForkJoinPool.commonPool();
+    static final ExecutorService EXECUTOR = ThreadPoolExecutors.INFINITY_QUEUE_EXECUTOR;
 
     final JedisClient jedisClient;
 

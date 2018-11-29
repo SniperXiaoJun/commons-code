@@ -3,7 +3,6 @@ package code.ponfee.commons.extract.streaming;
 import java.io.File;
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -11,6 +10,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import com.monitorjbl.xlsx.StreamingReader;
 
+import code.ponfee.commons.concurrent.ThreadPoolExecutors;
 import code.ponfee.commons.extract.ExcelExtractor;
 import code.ponfee.commons.extract.streaming.xls.HSSFStreamingReader;
 
@@ -80,7 +80,7 @@ public class StreamingExcelExtractor<T> extends ExcelExtractor<T> {
             case XLS:
                 HSSFStreamingReader reader = HSSFStreamingReader.create(200, sheetIndex);
                 if (executor == null) {
-                    executor = ForkJoinPool.commonPool();
+                    executor = ThreadPoolExecutors.INFINITY_QUEUE_EXECUTOR;
                 }
                 if (dataSource instanceof File) {
                     return reader.open((File) dataSource, executor);

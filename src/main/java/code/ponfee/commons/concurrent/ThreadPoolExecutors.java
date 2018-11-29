@@ -59,7 +59,7 @@ public final class ThreadPoolExecutors {
         new DelegatedExecutorService("caller-run-exec", 0, CALLER_RUN);
 
     public static final ExecutorService INFINITY_QUEUE_EXECUTOR =
-        new DelegatedExecutorService("infinity-queue-exec", Integer.MAX_VALUE, DISCARD_POLICY);
+        new DelegatedExecutorService("infinity-queue-exec", Integer.MAX_VALUE, BLOCK_PRODUCER);
 
     public static ThreadPoolExecutor create(int corePoolSize, int maximumPoolSize, long keepAliveTime) {
         return create(corePoolSize, maximumPoolSize, keepAliveTime, 0, null, null);
@@ -137,6 +137,8 @@ public final class ThreadPoolExecutors {
             ScheduledThreadPoolExecutor delegate = new ScheduledThreadPoolExecutor(
                 1, new NamedThreadFactory(threadName), handler
             );
+
+            // allowCoreThreadTimeOut(true); // Error: Core threads must have nonzero keep alive times
             Runtime.getRuntime().addShutdownHook(new Thread(delegate::shutdownNow));
             return delegate;
         }
@@ -179,8 +181,8 @@ public final class ThreadPoolExecutors {
         static ExecutorService newExecutorService(String threadName, int queueCapacity,
                                                   RejectedExecutionHandler handler) {
             int corePoolSize = Math.max(Runtime.getRuntime().availableProcessors(), 1);
-            int maximumPoolSize = Math.min(corePoolSize << 2, MAX_CAP);
-            corePoolSize = Math.min(corePoolSize << 1, maximumPoolSize);
+            int maximumPoolSize = Math.min(corePoolSize << 3, MAX_CAP);
+            corePoolSize = Math.min(corePoolSize << 2, maximumPoolSize);
 
             BlockingQueue<Runnable> workQueue;
             if (queueCapacity > 0) {
