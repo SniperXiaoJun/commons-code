@@ -1,7 +1,7 @@
 package code.ponfee.commons.cache;
 
 
-import static code.ponfee.commons.concurrent.ThreadPoolExecutors.CALLER_RUN_SCHEDULER;
+import static code.ponfee.commons.concurrent.ThreadPoolExecutors.DISCARD_POLICY_SCHEDULER;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,7 +52,7 @@ public class Cache<T> {
             if (scheduler != null) {
                 this.scheduler = scheduler;
             } else {
-                scheduler = CALLER_RUN_SCHEDULER;
+                scheduler = DISCARD_POLICY_SCHEDULER;
             }
 
             // 定时清理

@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -43,9 +44,7 @@ public class MultithreadExecutor {
         Stopwatch watch = Stopwatch.createStarted();
         AtomicBoolean flag = new AtomicBoolean(true);
 
-        CompletableFuture<?>[] futures = IntStream.range(
-            0, times
-        ).mapToObj(
+        CompletableFuture<?>[] futures = IntStream.range(0, times).mapToObj(
             x -> CompletableFuture.runAsync(() -> {
                 while (flag.get() && !Thread.interrupted()) {
                     command.run();
@@ -126,17 +125,15 @@ public class MultithreadExecutor {
                                     Consumer<T> action, 
                                     Executor executor) {
         Stopwatch watch = Stopwatch.createStarted();
-        /*coll.stream().map(
-            x -> CompletableFuture.runAsync(() -> action.accept(x), executor)
+        coll.stream().map(
+            x -> CompletableFuture.runAsync(
+                () -> action.accept(x), executor
+            )
         ).collect(
             Collectors.toList()
-        ).stream().forEach(
+        ).forEach(
             CompletableFuture::join
-        );*/
-        CompletableFuture<?>[] array = coll.stream().map(
-          x -> CompletableFuture.runAsync(() -> action.accept(x), executor)
-        ).toArray(CompletableFuture[]::new);
-        CompletableFuture.allOf(array).join();
+        );
         logger.info("multi thread run async duration: {}", watch.stop());
     }
 
@@ -188,8 +185,9 @@ public class MultithreadExecutor {
                                 Consumer<T> accept, int sleepTimeMillis) {
         try {
             while (count > 0) {
-                accept.accept(service.take().get());
+                Future<T> future = service.take();
                 count--;
+                accept.accept(future.get());
             }
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);

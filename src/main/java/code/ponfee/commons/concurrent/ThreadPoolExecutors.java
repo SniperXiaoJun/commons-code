@@ -49,12 +49,17 @@ public final class ThreadPoolExecutors {
         }
     };
 
+    // ----------------------------------------------------------scheduler
     public static final ScheduledExecutorService CALLER_RUN_SCHEDULER =
         new DelegatedScheduledExecutorService("caller-run-sched", CALLER_RUN);
 
     public static final ScheduledExecutorService DISCARD_POLICY_SCHEDULER =
         new DelegatedScheduledExecutorService("discard-policy-sched", DISCARD_POLICY);
 
+    public static final ScheduledExecutorService BLOCK_PRODUCER_SCHEDULER =
+        new DelegatedScheduledExecutorService("discard-policy-sched", BLOCK_PRODUCER);
+
+    // ----------------------------------------------------------executor
     public static final ExecutorService CALLER_RUN_EXECUTOR =
         new DelegatedExecutorService("caller-run-exec", 0, CALLER_RUN);
 
@@ -131,8 +136,8 @@ public final class ThreadPoolExecutors {
             super(newScheduledExecutorService(threadName, handler));
         }
 
-        private static ScheduledExecutorService newScheduledExecutorService(
-                      String threadName, RejectedExecutionHandler handler) {
+        static ScheduledExecutorService newScheduledExecutorService(
+            String threadName, RejectedExecutionHandler handler) {
             // maximumPoolSize=Integer.MAX_VALUE, DelayedWorkQueue, keepAliveTime=0
             ScheduledThreadPoolExecutor delegate = new ScheduledThreadPoolExecutor(
                 1, new NamedThreadFactory(threadName), handler
